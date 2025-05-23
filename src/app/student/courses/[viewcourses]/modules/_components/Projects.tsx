@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import { api } from '@/utils/axios.config'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import { Input } from '@/components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -19,12 +16,18 @@ import { Check, Link, Github } from 'lucide-react'
 import googleDriveLogo from '../../../../../../../public/google-drive.png'
 import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 type Props = {
     projectId: number
     moduleId: number
     bootcampId: number
 }
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const FormSchema = z.object({
     link: z
         .string()
@@ -41,6 +44,9 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
     const [content, setContent] = useState<any>('')
     const [deadlineDate, setDeadlineDate] = useState<string>('')
     const [submittedDate, setSubmittedDate] = useState<string>('')
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     const [icon, setIcon] = useState<JSX.Element>(
         <Link className="mr-2 h-4 w-4" />
@@ -51,12 +57,6 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
             link: '',
         },
         mode: 'onChange',
-    })
-
-    const editor: any = useEditor({
-        extensions,
-        content: '<h1>No Content Added Yet</h1>',
-        editable: false,
     })
 
     const fetchProjectDetails = useCallback(async () => {
@@ -71,19 +71,24 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
                 res?.data?.data?.projectData[0]?.projectTrackingData[0]
                     ?.projectLink
             )
-            editor.commands.setContent(
-                res?.data?.data?.projectData[0]?.instruction?.description[0]
-            )
+            const projectDetail =
+                res?.data?.data?.projectData[0]?.instruction?.description
             setStatus(res?.data?.data?.status)
             setDeadlineDate(res?.data?.data?.projectData[0]?.deadline)
             setSubmittedDate(
                 res?.data?.data?.projectData[0]?.projectTrackingData[0]
                     ?.updatedAt
             )
+            if (typeof projectDetail === 'string') {
+                setInitialContent(JSON.parse(projectDetail))
+            } else {
+                const jsonData = { doc: projectDetail[0] }
+                setInitialContent(jsonData)
+            }
         } catch (error: any) {
             console.error(error.message)
         }
-    }, [moduleId, projectId, editor])
+    }, [moduleId, projectId])
 
     useEffect(() => {
         fetchProjectDetails()
@@ -200,7 +205,13 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
                     {' '}
                     Project Description
                 </h1>
-                {editor && <TiptapEditor editor={editor} />}
+                <div className="mt-2 text-start">
+                    <RemirrorTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                        preview={true}
+                    />
+                </div>
             </div>
             <Form {...form}>
                 <form

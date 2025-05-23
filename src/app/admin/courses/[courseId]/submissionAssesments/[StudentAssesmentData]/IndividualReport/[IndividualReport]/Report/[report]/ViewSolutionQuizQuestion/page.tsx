@@ -8,6 +8,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { addClassToCodeTags } from '@/utils/admin'
+import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 type SubmissionData = {
     id: number
@@ -185,7 +186,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                         <p className="font-semibold">
                                             Q{index + 1}.
                                         </p>
-                                        <div
+                                        {/* <div
                                             className="font-semibold"
                                             dangerouslySetInnerHTML={{
                                                 __html: addClassToCodeTags(
@@ -193,7 +194,16 @@ const Page = ({ params }: { params: paramsType }) => {
                                                     codeBlockClass
                                                 ),
                                             }}
-                                        />
+                                        /> */}
+                                        <div className="text-left">
+                                            <RemirrorForm
+                                                description={
+                                                    quizDetail.question
+                                                }
+                                                preview={true}
+                                                bigScreen={true}
+                                            />
+                                        </div>
                                     </div>
 
                                     {/* Options */}

@@ -12,6 +12,7 @@ import { AlertDialogHeader } from '@/components/ui/alert-dialog'
 import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
 import { addClassToCodeTags } from '@/utils/admin'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 type Props = {
     quizQuestionId: number
@@ -155,18 +156,9 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                             <span className="font-bold flex">
                                                 <h1>Q.</h1>
                                             </span>
-                                            <div
-                                                className={` text-wrap ${
-                                                    variant.question.includes(
-                                                        'pre'
-                                                    ) && 'overflow-scroll'
-                                                } `}
-                                                dangerouslySetInnerHTML={{
-                                                    __html: addClassToCodeTags(
-                                                        variant.question,
-                                                        codeBlockClass
-                                                    ),
-                                                }}
+                                            <RemirrorForm
+                                                description={variant.question}
+                                                preview={true}
                                             />
                                             {/* {variant.question} */}
                                         </div>

@@ -25,10 +25,6 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
 import {
@@ -43,6 +39,7 @@ import {
 } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 interface ContentDetail {
     title: string
     description: string | null
@@ -57,6 +54,11 @@ interface Content {
     topicId: number
     order: number
     contentDetails: ContentDetail[]
+}
+
+type EditorDoc = {
+    type: string
+    content: any[]
 }
 
 interface AssignmentProps {
@@ -81,17 +83,15 @@ const AddAssignent = ({
         }),
     })
 
-    const editor = useEditor({
-        extensions,
-        content,
-    })
-
     const router = useRouter()
     const [title, setTitle] = useState('')
     const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -119,8 +119,12 @@ const AddAssignent = ({
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
-            contentDetails &&
-                editor?.commands.setContent(contentDetails.content)
+            if (typeof contentDetails.content[0] === 'string') {
+                setInitialContent(JSON.parse(contentDetails.content[0]))
+            } else {
+                const jsonData = { doc: contentDetails.content[0] }
+                setInitialContent(jsonData)
+            }
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         }
@@ -142,11 +146,13 @@ const AddAssignent = ({
         }
         const deadlineDate = convertToISO(data.startDate)
         try {
-            const articleContent = [editor?.getJSON()]
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
             const requestBody = {
                 title: data.title,
                 completionDate: deadlineDate,
-                articleContent,
+                articleContent: initialContentString,
             }
 
             await api.put(
@@ -176,7 +182,7 @@ const AddAssignent = ({
     // async
     useEffect(() => {
         getAssignmentContent()
-    }, [content, editor])
+    }, [content])
 
     function previewAssignment() {
         if (content?.contentDetails[0]?.content?.length > 0) {
@@ -335,8 +341,10 @@ const AddAssignent = ({
                     </Form>
                 </div>
                 <div className="text-left mt-6">
-                    <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} />
+                    <RemirrorTextEditor
+                        initialContent={initialContent}
+                        setInitialContent={setInitialContent}
+                    />
                 </div>
             </>
         </div>

@@ -14,18 +14,20 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Pencil } from 'lucide-react'
-// import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import UploadArticle from './UploadPdf'
+import { Toast } from '@/components/ui/toast'
+import Link from 'next/link'
+
 interface ContentDetail {
     title: string
     description: string | null
@@ -42,13 +44,18 @@ interface Content {
     contentDetails: ContentDetail[]
 }
 
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const AddArticle = ({
     content,
     courseId,
     articleUpdateOnPreview,
     setArticleUpdateOnPreview,
 }: {
-    content: Content
+    content: any
     courseId: any
     articleUpdateOnPreview: any
     setArticleUpdateOnPreview: any
@@ -57,20 +64,20 @@ const AddArticle = ({
     const router = useRouter()
     // state
     const [title, setTitle] = useState('')
-    const [isSaved, setIsSaved] = useState(false)
-    const [lastSavedContent, setLastSavedContent] = useState<string>('')
-
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const [defaultValue, setDefaultValue] = useState('editor')
+    const [file, setFile] = useState<any>(null)
+    const [ispdfUploaded, setIsPdfUploaded] = useState(false)
+    const [pdfLink, setpdfLink] = useState<any>()
+
     const { setArticlePreviewContent } = getArticlePreviewStore()
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     // misc
     const formSchema = z.object({
         title: z.string(),
-    })
-
-    const editor = useEditor({
-        extensions,
-        content,
     })
 
     const form = useForm({
@@ -86,13 +93,26 @@ const AddArticle = ({
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
-            // setArticleUpdateOnPreview(!articleUpdateOnPreview)
+            const contentDetails = response?.data?.contentDetails?.[0]
+
+            const link = contentDetails?.links?.[0]
+            if (link) {
+                setpdfLink(link)
+                setIsPdfUploaded(true) // ✅ set true only if link exists
+            } else {
+                setpdfLink(null)
+                setIsPdfUploaded(false) // optional, to reset if link was removed
+            }
+
             setTitle(response.data.title)
-            // editor?.commands.setContent(response.data.contentDetails[0].content)
-            const contentHTML = response.data.contentDetails[0].content
-            editor?.commands.setContent(contentHTML)
-            setLastSavedContent(contentHTML)
-            setIsSaved(true)
+
+            const data = contentDetails?.content
+            if (typeof data?.[0] === 'string') {
+                setInitialContent(JSON.parse(data))
+            } else {
+                const jsonData = { doc: data?.[0] }
+                setInitialContent(jsonData)
+            }
         } catch (error) {
             console.error('Error fetching article content:', error)
         }
@@ -100,19 +120,18 @@ const AddArticle = ({
 
     const editArticleContent = async () => {
         try {
-            const contentHTML = editor?.getHTML() || ''
-            const articleContent = [editor?.getJSON()]
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
             const data = {
                 title,
-                articleContent,
+                articleContent: initialContentString,
             }
 
             await api.put(
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 data
             )
-            setLastSavedContent(contentHTML)
-            setIsSaved(true)
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             toast({
@@ -133,56 +152,64 @@ const AddArticle = ({
         }
     }
 
-    // async
     useEffect(() => {
         getArticleContent()
-    }, [content, editor])
-
-    // Reset saved state if user edits content
-    useEffect(() => {
-        if (!editor) return
-    
-        const handleUpdate = () => {
-            const currentContent = editor.getHTML()
-            if (currentContent !== lastSavedContent) {
-                setIsSaved(false)
-            }
-        }
-    
-        editor.on('update', handleUpdate)
-    
-        return () => {
-            //this prevents TypeScript error on cleanup
-            editor?.off('update', handleUpdate)
-        }
-    }, [editor, lastSavedContent])
-    
+    }, [content])
 
     function previewArticle() {
-        const currentText = editor?.getText().trim()
-
-        if (!currentText || currentText.length === 0) {
-            return toast({
-                title: 'Cannot Preview',
-                description: 'Nothing to preview. Please add content and save.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
-            })
+        if (content) {
+            setArticlePreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
+            )
         }
+    }
 
-        if (!isSaved) {
-            return toast({
-                title: 'Unsaved Changes',
-                description: 'Please save your changes before previewing.',
-                className:
-                    'border border-yellow-500 text-yellow-600 text-left w-[90%] capitalize',
-            })
+    const onFileUpload = async () => {
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                return toast({
+                    title: 'Invalid file type',
+                    description: 'Only PDF files are allowed.',
+                })
+            }
+
+            // build the FormData, with the *exact* field name your backend expects*
+            const formData = new FormData()
+            formData.append('pdf', file, file.name)
+
+            try {
+                await api.post(
+                    `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
+                    formData, // ← pass FormData directly
+                    {
+                        // OPTIONAL: axios will set the correct Content-Type boundary for you
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    }
+                )
+
+                toast({
+                    title: 'Success',
+                    description: 'PDF uploaded successfully!',
+                    className:
+                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
+                setTimeout(() => {
+                    setIsPdfUploaded(true)
+                    setpdfLink('')
+                    getArticleContent()
+                }, 1000) //
+            } catch (err: any) {
+                console.error(err)
+                toast({
+                    title: 'Upload failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+            }
         }
-
-        setArticlePreviewContent(content)
-        router.push(
-            `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
-        )
     }
 
     return (
@@ -224,23 +251,54 @@ const AddArticle = ({
 
                                             <div className="flex justify-end mt-5">
                                                 <div className="flex items-center justify-between mr-2">
-                                                    <div
-                                                        id="previewArticle"
-                                                        onClick={previewArticle}
-                                                        className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                                    >
-                                                        <Eye size={18} />
-                                                        <h6 className="ml-1 text-sm">
-                                                            Preview
-                                                        </h6>
-                                                    </div>
+                                                    {defaultValue ===
+                                                        'editor' && (
+                                                        <div
+                                                            id="previewArticle"
+                                                            onClick={
+                                                                previewArticle
+                                                            }
+                                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                        >
+                                                            <Eye size={18} />
+                                                            <h6 className="ml-1 text-sm">
+                                                                Preview
+                                                            </h6>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <Button
-                                                    type="submit"
-                                                    form="myForm"
-                                                >
-                                                    Save
-                                                </Button>
+                                                {defaultValue === 'editor' ? (
+                                                    <Button
+                                                        type="submit"
+                                                        form="myForm"
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                ) : (
+                                                    <div>
+                                                        {/* {pdfLink && (
+                                                            <Button type="button">
+                                                                <Link
+                                                                    href={
+                                                                        pdfLink
+                                                                    }
+                                                                    target="_blank"
+                                                                >
+                                                                    View PDF
+                                                                </Link>
+                                                            </Button>
+                                                        )} */}
+                                                        <Button
+                                                            type="button"
+                                                            onClick={
+                                                                onFileUpload
+                                                            }
+                                                            disabled={!file}
+                                                        >
+                                                            Upload PDF
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </FormControl>
@@ -251,9 +309,56 @@ const AddArticle = ({
                     </form>
                 </Form>
 
-                <div className="text-left mt-5">
-                    <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} />
+                <div className="">
+                    <RadioGroup
+                        className="flex items-center gap-x-6 "
+                        onValueChange={(value) => setDefaultValue(value)}
+                        defaultValue="editor"
+                    >
+                        <div className="flex   gap-x-2">
+                            <RadioGroupItem
+                                value="editor"
+                                id="r1"
+                                className="mt-1"
+                            />
+                            <Label
+                                htmlFor="r1"
+                                className="font-light text-md text-black"
+                            >
+                                Editor
+                            </Label>
+                        </div>
+                        <div className="flex gap-x-2">
+                            <RadioGroupItem
+                                value="pdf"
+                                id="r2"
+                                className="mt-1"
+                            />
+                            <Label
+                                className="font-light text-md text-black"
+                                htmlFor="r2"
+                            >
+                                Upload PDF
+                            </Label>
+                        </div>
+                    </RadioGroup>
+                    {defaultValue === 'editor' && (
+                        <div className="mt-2 text-start">
+                            <RemirrorTextEditor
+                                initialContent={initialContent}
+                                setInitialContent={setInitialContent}
+                            />
+                        </div>
+                    )}
+                    {defaultValue === 'pdf' && (
+                        <UploadArticle
+                            file={file}
+                            setFile={setFile}
+                            className=""
+                            isPdfUploaded={ispdfUploaded}
+                            pdfLink={pdfLink}
+                        />
+                    )}
                 </div>
             </div>
         </div>
