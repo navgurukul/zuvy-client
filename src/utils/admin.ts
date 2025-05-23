@@ -410,6 +410,49 @@ export async function filteredCodingQuestions(
     }
 }
 
+export const fetchStudentAssessments = async (
+    assessmentId: string,
+    offset: number,
+    limit: any,
+    searchStudent: string = '',
+    setTotalPages: (totalPages: number) => void,
+    setLastPage: (lastPage: number) => void,
+) => {
+    // Build query params
+    const params = new URLSearchParams({
+        offset: offset.toString(),
+        limit: limit.toString(),
+    })
+    if (searchStudent) params.set('searchStudent', searchStudent)
+
+    const endpoint = `/admin/assessment/students/assessment_id${assessmentId}?${params.toString()}`
+    const res = await api.get(endpoint)
+    const {
+        submitedOutsourseAssessments,
+        ModuleAssessment,
+        passPercentage,
+    } = res.data
+
+    // Update global pagination
+    const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
+    setTotalPages(updatedTotalPages)
+    setLastPage(updatedTotalPages)
+
+    // Map and return data
+    const assessments = submitedOutsourseAssessments.map((a: any) => ({
+        ...a,
+        bootcampId: res.data.bootcampId,
+        newId: res.data.id,
+        title: ModuleAssessment.title,
+    }))
+
+    return {
+        assessments,
+        moduleAssessment: ModuleAssessment,
+        passPercentage,
+    }
+}
+
 export async function filteredQuizQuestions(
     setStoreQuizData: (newValue: any[]) => void,
     offset?: number,

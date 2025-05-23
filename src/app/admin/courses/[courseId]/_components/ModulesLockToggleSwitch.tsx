@@ -1,0 +1,72 @@
+import React, { useState, useEffect } from 'react'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
+
+interface ToggleSwitchProps {
+    bootcampId: number
+}
+
+const ModulesLockToggleSwitch: React.FC<ToggleSwitchProps> = ({ bootcampId }) => {
+    const [isModuleLocked, setIsModuleLocked] = useState<boolean>(false)
+    const [bootcampType, setBootcampType] = useState<any>(null)
+
+    useEffect(() => {
+        fetchModuleLockStatus()
+    }, [])
+
+    const fetchModuleLockStatus = async () => {
+        try {
+            const response = await api.get(
+                `/bootcamp/bootcampSetting/${bootcampId}`
+            )
+            const settings = response.data.bootcampSetting[0]
+            setIsModuleLocked(settings.isModuleLocked)
+            setBootcampType(settings.type)
+        } catch (error) {
+            console.error('Error fetching module lock status:', error)
+        }
+    }
+
+    const handleToggle = async () => {
+        const newState = !isModuleLocked
+        setIsModuleLocked(newState)
+
+        try {
+            await api.put(`/bootcamp/bootcampSetting/${bootcampId}`, {
+                type: bootcampType,
+                isModuleLocked: newState,
+            })
+            toast({
+                title: 'Success',
+                description: `Modules ${newState ? 'locked' : 'unlocked'} successfully`,
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Error updating module lock settings. Please try again.',
+                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
+    }
+
+    return (
+        <div className='flex flex-col justify-left items-start'>
+            <div
+                className={`relative w-[38px] h-6 rounded-full bg-gray-300 p-1 cursor-pointer ${
+                    isModuleLocked ? 'bg-primary' : ''
+                }`}
+                onClick={handleToggle}
+            >
+                <div
+                    className={`absolute ml-0.5 left-0 w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${
+                        isModuleLocked ? 'translate-x-full' : ''
+                    }`}
+                />
+            </div>
+            <p>{isModuleLocked ? 'Unlock all modules' : 'Lock all modules'}</p>
+        </div>
+    )
+}
+
+export default ModulesLockToggleSwitch
