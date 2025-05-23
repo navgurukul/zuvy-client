@@ -79,12 +79,15 @@ function Article({
             <div className="mt-24 text-left">
                 <h1 className="font-bold text-lg my-5">{content?.title}</h1>
                 {viewPdf ? (
-                    <div className="flex items-center h-full justify-center">
-                        <Button>
-                            <Link href={pdfLink} target="_blank">
-                                View PDF
-                            </Link>
-                        </Button>
+                    <div className="flex items-start   h-[38rem] flex-col gap-2 justify-start">
+                        <h1 className="font-medium text-black">
+                            Here is your learning material :-
+                        </h1>
+                        <iframe
+                            src={pdfLink}
+                            className="h-screen
+                         w-[67rem]"
+                        />
                     </div>
                 ) : (
                     <div>
