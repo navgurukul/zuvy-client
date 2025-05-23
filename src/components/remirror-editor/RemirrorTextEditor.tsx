@@ -178,9 +178,6 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
         }
     }, [initialContent, manager])
 
-    console.log('preview', preview)
-    console.log('initialContent in editor', initialContent)
-
     return (
         <ThemeProvider
             theme={{
@@ -197,6 +194,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                 <Remirror
                     manager={manager}
                     initialContent={state}
+                    editable={!preview}
                     onChange={handleEditorChange}
                     placeholder="Start typing..."
                 >

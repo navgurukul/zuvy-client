@@ -31,6 +31,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { cn, difficultyColor } from '@/lib/utils'
+import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 const QuizQuestions = ({
     onBack,
@@ -264,15 +265,12 @@ const QuizQuestions = ({
                                         <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
                                             <FormLabel>
                                                 <div className=" flex space-x-2 text-lg font-semibold text-left">
-                                                    {/* <span>{index + 1}. </span> */}
-                                                    <span
-                                                        className="text-gray-800"
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: addClassToCodeTags(
-                                                                question.question,
-                                                                codeBlockClass
-                                                            ),
-                                                        }}
+                                                    <RemirrorForm
+                                                        description={
+                                                            question.question
+                                                        }
+                                                        preview={true}
+                                                        student={true}
                                                     />
                                                 </div>
                                             </FormLabel>

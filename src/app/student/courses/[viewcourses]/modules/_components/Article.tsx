@@ -74,8 +74,6 @@ function Article({
         setIsCompleted(status === 'Completed')
     }, [status])
 
-    console.log(pdfLink)
-
     return (
         <ScrollArea className="h-full">
             <div className="mt-24 text-left">

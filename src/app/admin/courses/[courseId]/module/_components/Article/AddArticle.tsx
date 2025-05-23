@@ -343,10 +343,12 @@ const AddArticle = ({
                         </div>
                     </RadioGroup>
                     {defaultValue === 'editor' && (
-                        <RemirrorTextEditor
-                            initialContent={initialContent}
-                            setInitialContent={setInitialContent}
-                        />
+                        <div className="mt-2 text-start">
+                            <RemirrorTextEditor
+                                initialContent={initialContent}
+                                setInitialContent={setInitialContent}
+                            />
+                        </div>
                     )}
                     {defaultValue === 'pdf' && (
                         <UploadArticle

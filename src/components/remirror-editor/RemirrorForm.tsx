@@ -31,12 +31,14 @@ interface RemirrorFormProps {
     description: any
     onChange?: (html: string) => void
     preview?: boolean
+    bigScreen?: boolean
 }
 
 export const RemirrorForm: React.FC<RemirrorFormProps> = ({
     description,
     onChange,
     preview,
+    bigScreen,
 }) => {
     const { manager, state } = useRemirror({
         extensions: () => [
@@ -90,6 +92,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                 <Remirror
                     manager={manager}
                     initialContent={state}
+                    editable={!preview}
                     onChange={(parameter) => {
                         // Get HTML from the editor state
                         const htmlContent = parameter.helpers.getHTML()
@@ -97,7 +100,15 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     }}
                 >
                     {/* <div className="w-[44rem]"> */}
-                    <div className={`${preview ? 'w-[25rem]' : 'w-[44rem]'}`}>
+                    <div
+                        className={`${
+                            bigScreen
+                                ? 'w-[37rem]'
+                                : preview
+                                ? 'w-[25rem]'
+                                : 'w-[44rem]'
+                        }`}
+                    >
                         {!preview && (
                             <div className="bg-white pb-2 border-b mb-2">
                                 <Toolbar />

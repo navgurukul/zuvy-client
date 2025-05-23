@@ -228,9 +228,6 @@ function CodingChallenge({
         )
     }
 
-
-    console.log(content.codingQuestionDetails)
-
     return (
         <>
             <div className="px-5">

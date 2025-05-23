@@ -170,12 +170,16 @@ function Page({
 
             if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].submitedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
+                res.data.submitedOutsourseAssessments[0].submitedAt &&
+                res?.data?.submitedOutsourseAssessments[0].reattemptApproved ===
+                    false
             ) {
                 router.push(startPageUrl)
             } else if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].startedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
+                res.data.submitedOutsourseAssessments[0].startedAt &&
+                res?.data?.submitedOutsourseAssessments[0].reattemptApproved ===
+                    false
             ) {
                 getAssessmentData()
             }
@@ -637,10 +641,10 @@ function Page({
                                                 </AlertDialogCancel>
                                                 <AlertDialogAction
                                                     className="bg-red-500"
-                                                    onClick={
-                                                        ()=>{handleFullScreenRequest;
-                                                            getAssessmentData(true)}
-                                                    }
+                                                    onClick={() => {
+                                                        handleFullScreenRequest
+                                                        getAssessmentData(true)
+                                                    }}
                                                 >
                                                     Proceed
                                                 </AlertDialogAction>
@@ -851,7 +855,15 @@ function Page({
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button disabled={disableSubmit || assessmentData?.totalMcqQuestions > 0 && assessmentData?.IsQuizzSubmission === false}>
+                                    <Button
+                                        disabled={
+                                            disableSubmit ||
+                                            (assessmentData?.totalMcqQuestions >
+                                                0 &&
+                                                assessmentData?.IsQuizzSubmission ===
+                                                    false)
+                                        }
+                                    >
                                         Submit Assessment
                                     </Button>
                                 </AlertDialogTrigger>
