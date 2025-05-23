@@ -74,6 +74,12 @@ function Article({
         setIsCompleted(status === 'Completed')
     }, [status])
 
+    const action =
+        initialContent &&
+        (initialContent?.doc.content?.length > 1 ||
+            initialContent?.doc.content[0].content[0].text !==
+                'No content has been added yet')
+
     return (
         <ScrollArea className="h-full">
             <div className="mt-24 text-left">
@@ -101,21 +107,7 @@ function Article({
                         {!isCompleted && (
                             <div className="my-10 text-end">
                                 <Button
-                                    disabled={
-                                        !content?.articleContent ||
-                                        !content.articleContent.some(
-                                            (doc: any) =>
-                                                doc?.content?.some(
-                                                    (paragraph: any) =>
-                                                        paragraph.content &&
-                                                        paragraph.content.some(
-                                                            (item: any) =>
-                                                                item.type ===
-                                                                'text'
-                                                        )
-                                                )
-                                        )
-                                    }
+                                    disabled={!action}
                                     onClick={completeChapter}
                                 >
                                     Mark as Done

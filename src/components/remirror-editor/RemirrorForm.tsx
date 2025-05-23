@@ -99,7 +99,6 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                         onChange && onChange(htmlContent)
                     }}
                 >
-                    {/* <div className="w-[44rem]"> */}
                     <div
                         className={`${
                             bigScreen
@@ -115,7 +114,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                             </div>
                         )}
                         <ScrollArea
-                            className="h-96 pr-8"
+                            className="h-96"
                             type="hover"
                             style={{
                                 scrollbarWidth: 'none', // Firefox

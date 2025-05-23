@@ -11,6 +11,7 @@ import { ellipsis } from '@/lib/utils'
 import { addClassToCodeTags } from '@/utils/admin'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import Image from 'next/image'
+import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 type Props = {
     moduleId: string
@@ -169,11 +170,6 @@ function Quiz(props: Props) {
                                 {questions?.map((question, index) => {
                                     const additionalClass =
                                         'bg-gray-300 text-start '
-                                    const processedHtml = addClassToCodeTags(
-                                        question.question,
-                                        additionalClass
-                                    )
-
                                     const isCompleted =
                                         question.status === 'Completed'
                                     const isPending =
@@ -189,11 +185,12 @@ function Quiz(props: Props) {
                                                     {'Q'}
                                                     {index + 1}.
                                                 </h1>
-                                                <span
-                                                    className="mb-1.5"
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: processedHtml,
-                                                    }}
+                                                <RemirrorForm
+                                                    description={
+                                                        question.question
+                                                    }
+                                                    preview={true}
+                                                    bigScreen={true}
                                                 />
                                             </div>
                                             <div className="flex flex-col items-start">

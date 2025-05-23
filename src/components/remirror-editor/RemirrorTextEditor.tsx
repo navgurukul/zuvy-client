@@ -205,7 +205,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                     )}
 
                     <ScrollArea
-                        className="h-96 pr-8 "
+                        className="h-96"
                         type="hover"
                         style={{
                             scrollbarWidth: 'none', // Firefox
