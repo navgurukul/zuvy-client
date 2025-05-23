@@ -7,7 +7,7 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { ArrowBigDownDash } from 'lucide-react'
 
-const DownloadReport = ({ userInfo }: any) => {
+const DownloadReport = ({ userInfo, submitedAt }: any) => {
     const { userId, id, title } = userInfo
 
     const formatDate = (dateString: string) => {
@@ -185,7 +185,7 @@ const DownloadReport = ({ userInfo }: any) => {
         <div className="flex items-center space-x-2">
             <button
                 onClick={handleDownload}
-                className="max-w-[500px] text-secondary font-medium flex items-center"
+                className={ submitedAt ? `max-w-[500px] text-secondary font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
             >
                 <ArrowBigDownDash className="mr-2" />
                 Download Report
