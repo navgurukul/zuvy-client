@@ -103,19 +103,21 @@ function Quiz(props: any) {
         saveQuizQuestionHandler(requestBody)
         setIsChapterUpdated(!isChapterUpdated)
     }
-    
+
     const getAllSavedQuizQuestion = useCallback(async () => {
         if (!props.chapterId || props.chapterId === 0) return
-    
+
         try {
-            const res = await api.get(`/Content/chapterDetailsById/${props.chapterId}`)
+            const res = await api.get(
+                `/Content/chapterDetailsById/${props.chapterId}`
+            )
             setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
         } catch (error) {
-            console.error("Failed to fetch chapter details", error)
+            console.error('Failed to fetch chapter details', error)
         }
     }, [props.chapterId])
-    
+
     useEffect(() => {
         getAllTags()
         if (props.chapterId && props.chapterId !== 0) {
@@ -141,8 +143,6 @@ function Quiz(props: any) {
             })
         }
     }
-
-    console.log(props.content)
 
     return (
         <div>

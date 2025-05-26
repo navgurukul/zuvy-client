@@ -160,10 +160,10 @@ export default function RootLayout({
             ) : (
                 <div className={`h-screen ${isMobile ? '' : ''} `}>
                     <div>{!isAssessmentRoute && <StudentNavbar />}</div>
-                    <div className={` ${isChapterRoute ? 'px-2' : 'pt-20'} `}>
+                    <div className={` ${isChapterRoute ? 'px-0 md:px-2 lg:px-2' : 'pt-20'} `}>
                         <div className="relative">
                             {children}
-                            <div className="absolute bottom-0 w-full left-0">
+                            <div className="absolute bottom-0 w-full left-0 bg-[#DCE7E3]">
                                 {isMobile && isChapterPage && (
                                     <div className=" ">
                                         <Popover

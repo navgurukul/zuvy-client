@@ -5,13 +5,10 @@ import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
-import extensions from '@/app/_components/editor/TiptapExtensions'
-
-import { useEditor } from '@tiptap/react'
 import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 type Props = {}
 
@@ -19,6 +16,7 @@ const Page = ({ params }: any) => {
     const [individualStudentData, setIndividualStudentData] = useState<any>({})
     const [bootcampData, setBootcampData] = useState<any>({})
     const [assignmentTitle, setAssignmentTItle] = useState<string>('')
+    const [initialContent, setInitialContent] = useState()
 
     const [url, setUrl] = useState<string>('')
     const crumbs = [
@@ -48,11 +46,7 @@ const Page = ({ params }: any) => {
             isLast: true,
         },
     ]
-    const editor: any = useEditor({
-        extensions,
-        content: '<h1>No Content Added Yet</h1>',
-        editable: false,
-    })
+
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
@@ -73,14 +67,9 @@ const Page = ({ params }: any) => {
                         data.chapterTrackingDetails?.[0]
                     const articleContent = data.articleContent?.[0]
 
-                    if (
-                        chapterTrackingDetails &&
-                        articleContent &&
-                        editor &&
-                        editor.commands
-                    ) {
+                    if (chapterTrackingDetails && articleContent) {
                         setIndividualStudentData(chapterTrackingDetails)
-                        editor.commands.setContent(articleContent)
+                        setInitialContent(JSON.parse(articleContent))
 
                         const projectUrl =
                             chapterTrackingDetails.user?.studentAssignmentStatus
@@ -111,7 +100,7 @@ const Page = ({ params }: any) => {
         params.assignmentData,
         params.individualStatus,
         getBootcampHandler,
-        editor,
+        initialContent,
     ])
 
     const dateString = individualStudentData?.completedAt
@@ -221,8 +210,12 @@ const Page = ({ params }: any) => {
                             <h1 className="text-left my-2 font-semibold">
                                 Assignment Description:
                             </h1>
-                            <div className="w-2/3 pb-5">
-                                {editor && <TiptapEditor editor={editor} />}
+                            <div className="mt-2 text-start">
+                                <RemirrorTextEditor
+                                    initialContent={initialContent}
+                                    setInitialContent={setInitialContent}
+                                    preview={true}
+                                />
                             </div>
                         </div>
                     </div>

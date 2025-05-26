@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { addClassToCodeTags } from '@/utils/admin'
 import { cn, difficultyColor } from '@/lib/utils'
 import useWindowSize from '@/hooks/useHeightWidth'
+import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 // Define the type for the quiz result
 
@@ -103,16 +104,11 @@ const QuizResults = ({
                                 </h2>
                             </div>
                         </div>
-                        <div className="flex items-start gap-1 text-left">
-                            {/* <span className="font-semibold">{index + 1}.</span> */}
-                            <p
-                                className="text-gray-800 mb-4 font-bold text-lg"
-                                dangerouslySetInnerHTML={{
-                                    __html: addClassToCodeTags(
-                                        result.question,
-                                        codeBlockClass
-                                    ),
-                                }}
+                        <div className="mb-4 text-left">
+                            <RemirrorForm
+                                description={result.question}
+                                preview={true}
+                                bigScreen={true}
                             />
                         </div>
                         <div className="space-y-4">

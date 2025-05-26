@@ -102,9 +102,6 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         ),
         cell: ({ row }) => {
             const question = row.original
-
-            console.log('question', question)
-
             return (
                 <div className="mr-5 flex justify-end">
                     <Dialog>
