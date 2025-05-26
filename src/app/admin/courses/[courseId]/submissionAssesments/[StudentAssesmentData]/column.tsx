@@ -167,7 +167,7 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <div className="flex ">
                     <span className="font-semibold">
-                        {Math.floor(percentage)}%
+                    {percentage ? `${percentage.toFixed(2)}%` : '0.00%'}
                     </span>
                 </div>
             )
