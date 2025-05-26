@@ -22,14 +22,45 @@ import {
     OrderedListExtension,
     ListItemExtension,
 } from 'remirror/extensions'
+import { PlainExtension, CommandFunction } from 'remirror'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Toolbar } from './Toolbar'
 import './remirror-editor.css'
+import { TextSelection } from 'prosemirror-state'
 
 interface RemirrorTextEditorProps {
     initialContent: any
     setInitialContent: (content: any) => void
     preview?: boolean
+}
+
+// ✅ Custom Extension to Exit Code Block
+class ExitCodeBlockExtension extends PlainExtension {
+    get name() {
+        return 'exitCodeBlock' as const
+    }
+
+    createKeymap() {
+        const exitCodeBlock: CommandFunction = ({ state, dispatch }) => {
+            const { $from } = state.selection
+            const isInCodeBlock = $from.parent.type.name === 'codeBlock'
+
+            if (!isInCodeBlock) return false
+
+            const paragraph = state.schema.nodes.paragraph.create()
+            let tr = state.tr.insert($from.after(), paragraph)
+            tr = tr.setSelection(
+                TextSelection.near(tr.doc.resolve($from.after() + 1))
+            )
+
+            dispatch?.(tr.scrollIntoView())
+            return true
+        }
+
+        return {
+            'Shift-Enter': exitCodeBlock,
+        }
+    }
 }
 
 // Create a simple default content if needed
@@ -57,17 +88,12 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     setInitialContent,
     preview,
 }) => {
-    // Track if we're in the middle of editing to prevent feedback loops
     const isEditingRef = useRef<boolean>(false)
-
-    // Reference to compare content changes
     const contentRef = useRef<string>('')
 
-    // Use default content if initialContent is undefined or invalid
     const editorContent =
         initialContent?.doc || initialContent || createDefaultContent(preview)
 
-    // Setup the Remirror manager with needed extensions
     const { manager, state } = useRemirror({
         extensions: () => [
             new BoldExtension({}),
@@ -91,6 +117,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
             new BulletListExtension({}),
             new OrderedListExtension(),
             new ListItemExtension({}),
+            new ExitCodeBlockExtension(), 
         ],
         // Use fallback content if initialContent is potentially invalid
         content: editorContent,
