@@ -33,6 +33,7 @@ export const Toolbar = () => {
         toggleBlockquote,
         toggleBulletList,
         toggleOrderedList,
+        focus,
     } = useCommands()
     const active = useActive()
 
@@ -76,6 +77,12 @@ export const Toolbar = () => {
 
         // Insert the image into the editor
         insertImage({ src: imageUrl, alt: file.name })
+
+        // Focus the editor after inserting the image
+        // Use setTimeout to ensure the image insertion is complete
+        setTimeout(() => {
+            focus()
+        }, 100)
 
         // Reset the file input
         if (fileInputRef.current) {
