@@ -234,7 +234,7 @@ const QuizQuestions = ({
                         (question: any, index: number) => (
                             <div
                                 key={question.id}
-                                className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-4 shadow-sm"
+                                className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-2 md:p-4 lg:p-4 shadow-sm"
                             >
                                 <div className="flex justify-between">
                                     <p className="font-semibold">
@@ -264,7 +264,7 @@ const QuizQuestions = ({
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
                                             <FormLabel>
-                                                <div className=" flex space-x-2 text-lg font-semibold text-left">
+                                                <div className="flex space-x-2 text-lg font-semibold text-left">
                                                     <RemirrorForm
                                                         description={
                                                             question.question
