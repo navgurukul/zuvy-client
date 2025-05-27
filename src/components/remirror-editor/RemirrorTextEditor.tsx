@@ -57,12 +57,17 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     setInitialContent,
     preview,
 }) => {
+    // Track if we're in the middle of editing to prevent feedback loops
     const isEditingRef = useRef<boolean>(false)
+
+    // Reference to compare content changes
     const contentRef = useRef<string>('')
 
+    // Use default content if initialContent is undefined or invalid
     const editorContent =
         initialContent?.doc || initialContent || createDefaultContent(preview)
 
+    // Setup the Remirror manager with needed extensions
     const { manager, state } = useRemirror({
         extensions: () => [
             new BoldExtension({}),
