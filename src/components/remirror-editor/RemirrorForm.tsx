@@ -106,7 +106,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
 
     return (
         <div className="remirror-theme">
-            <div className="p-1 border rounded">
+            <div className="p-1 md:p-1 lg:p-1 border rounded">
                 <Remirror
                     manager={manager}
                     initialContent={state}
@@ -118,7 +118,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     }}
                 >
                     <div
-                        className={`${
+                        className={`w-full sm:${
                             bigScreen
                                 ? 'w-[37rem]'
                                 : preview

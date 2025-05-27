@@ -69,7 +69,7 @@ const QuizResults = ({
                 {quizResults?.mcqs.map((result: any, index: number) => (
                     <div
                         key={result.quizId}
-                        className=" p-6 bg-white rounded-xl w-full max-w-2xl mx-auto"
+                        className="md:p-6 lg:p-6 bg-white rounded-xl w-full max-w-2xl mx-auto"
                     >
                         {/* <div className="flex justify-end"> */}
                         <div className="flex justify-between">
