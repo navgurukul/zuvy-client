@@ -111,6 +111,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     manager={manager}
                     initialContent={state}
                     editable={!preview}
+                    placeholder="Start typing..."
                     onChange={(parameter) => {
                         // Get HTML from the editor state
                         const htmlContent = parameter.helpers.getHTML()

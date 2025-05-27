@@ -33,8 +33,21 @@ interface RemirrorTextEditorProps {
     preview?: boolean
 }
 
+// Create empty content structure
+const createEmptyContent = () => {
+    return {
+        type: 'doc',
+        content: [
+            {
+                type: 'paragraph',
+                content: [],
+            },
+        ],
+    }
+}
+
 // Create a simple default content if needed
-const createDefaultContent = (preview: boolean | undefined) => {
+const createPreviewDefaultContent = () => {
     return {
         type: 'doc',
         content: [
@@ -43,9 +56,7 @@ const createDefaultContent = (preview: boolean | undefined) => {
                 content: [
                     {
                         type: 'text',
-                        text: preview
-                            ? 'No content has been added yet'
-                            : 'Start typing here...',
+                        text: 'No content has been added yet',
                     },
                 ],
             },
@@ -81,8 +92,20 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     const contentRef = useRef<string>('')
 
     // Use default content if initialContent is undefined or invalid
-    const editorContent =
-        initialContent?.doc || initialContent || createDefaultContent(preview)
+    const getEditorContent = () => {
+        if (initialContent?.doc || initialContent) {
+            return initialContent?.doc || initialContent
+        }
+
+        // If no initial content
+        if (preview) {
+            return createPreviewDefaultContent()
+        } else {
+            return createEmptyContent()
+        }
+    }
+
+    const editorContent = getEditorContent()
 
     // Setup the Remirror manager with needed extensions
     const { manager, state } = useRemirror({
@@ -116,7 +139,9 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
         onError: (error) => {
             console.warn('Content validation error:', error)
             // Return default content on error
-            return createDefaultContent(preview)
+            return preview
+                ? createPreviewDefaultContent()
+                : createEmptyContent()
         },
     })
 
@@ -169,7 +194,8 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
         try {
             // Try to update the content carefully
             const safeContent =
-                initialContent.doc || createDefaultContent(preview)
+                initialContent.doc ||
+                (preview ? createPreviewDefaultContent() : createEmptyContent())
             const currentContentString = JSON.stringify(safeContent)
 
             // Only update if content has actually changed
