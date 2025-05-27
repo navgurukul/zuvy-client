@@ -118,12 +118,12 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     }}
                 >
                     <div
-                        className={`w-full sm:${
+                        className={`${
                             bigScreen
-                                ? 'w-[37rem]'
+                                ? 'lg:w-[37rem] sm:w-[37rem]'
                                 : preview
-                                ? 'w-[25rem]'
-                                : 'w-[44rem]'
+                                ? 'lg:w-[25rem] sm:w-[25rem]'
+                                : 'lg:w-[44rem] sm:w-[44rem]'
                         }`}
                     >
                         {!preview && (

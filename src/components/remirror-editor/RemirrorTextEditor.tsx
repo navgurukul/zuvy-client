@@ -6,6 +6,7 @@ import {
     Remirror,
     EditorComponent,
     ThemeProvider,
+    useActive,
 } from '@remirror/react'
 import {
     BoldExtension,
@@ -50,6 +51,22 @@ const createDefaultContent = (preview: boolean | undefined) => {
             },
         ],
     }
+}
+
+const CodeBlockHelper = () => {
+    const active = useActive()
+
+    if (!active.codeBlock()) {
+        return null
+    }
+
+    return (
+        <div className="absolute bottom-2 left-2 right-2 z-10 bg-blue-100 border border-blue-300 rounded px-3 py-2 shadow-sm">
+            <p className="text-xs text-blue-700 font-medium m-0">
+                💡 Press Ctrl+Enter to exit code block and add a new line below.
+            </p>
+        </div>
+    )
 }
 
 export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
@@ -218,6 +235,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                         >
                             <EditorComponent />
                         </div>
+                        {!preview && <CodeBlockHelper />}
                     </ScrollArea>
                 </Remirror>
             </div>
