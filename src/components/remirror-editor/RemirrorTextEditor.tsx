@@ -226,14 +226,16 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
             theme={{
                 color: {
                     primary: '#3b82f6', // Tailwind's blue-500
-                    border: '#d1d5db', // Tailwind's gray-300
+                    // border: '#d1d5db', // Tailwind's gray-300
+                    border: 'none',
                     background: '#f9fafb', // Tailwind's gray-50
-                    active: { border: '#2563eb', primary: '#1d4ed8' }, // blue-600, blue-700
+                    // active: { border: '#2563eb', primary: '#1d4ed8' }, // blue-600, blue-700
+                    active: { border: 'transparent', primary: '#1d4ed8' },
                 },
                 fontFamily: { default: 'Inter, sans-serif' },
             }}
         >
-            <div className="p-1 border rounded shadow">
+            <div className="border rounded shadow">
                 <Remirror
                     manager={manager}
                     initialContent={state}
@@ -242,23 +244,20 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                     placeholder="Start typing..."
                 >
                     {!preview && (
-                        <div className="bg-white pb-2 border-b mb-2">
+                        <div className="bg-white">
                             <Toolbar />
                         </div>
                     )}
 
                     <ScrollArea
-                        className="h-96"
+                        className="h-[28rem]"
                         type="hover"
                         style={{
                             scrollbarWidth: 'none', // Firefox
                             msOverflowStyle: 'none', // IE and Edge
                         }}
                     >
-                        <div
-                            className="remirror-editor-wrapper p-4 min-h-[250px]"
-                            data-gramm="false"
-                        >
+                        <div className="px-1 h-full pb-1" data-gramm="false">
                             <EditorComponent />
                         </div>
                         {!preview && <CodeBlockHelper />}

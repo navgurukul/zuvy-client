@@ -91,7 +91,7 @@ export const Toolbar = () => {
     }
 
     return (
-        <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+        <div className="sticky top-0 z-10 bg-white border-b p-2 flex flex-wrap gap-2">
             {/* Text formatting */}
             <button
                 onClick={() => toggleBold()}
