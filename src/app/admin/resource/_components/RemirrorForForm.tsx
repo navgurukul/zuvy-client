@@ -8,7 +8,7 @@ import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 type Props = {}
 
-const TipTapForForm = ({
+const RemirrorForForm = ({
     description,
     onChange,
 }: {
@@ -23,21 +23,7 @@ const TipTapForForm = ({
         },
     })
 
-    return (
-        <RemirrorForm description={description} onChange={onChange} />
-        // <div className="w-screen">
-        //     <div className="text-left">
-        //         {/* <div className="w-1/2">
-        //             <TiptapToolbarforForm editor={editor} />
-        //         </div> */}
-        //         {/* <div className="outline-1 outline">
-        //             <TiptapEditor editor={editor} />
-        //         </div> */}
-        //         <RemirrorForm description={description} onChange={onChange} />
-        //     </div>
-        // </div>
-    )
+    return <RemirrorForm description={description} onChange={onChange} />
 }
 
-export default TipTapForForm
-
+export default RemirrorForForm

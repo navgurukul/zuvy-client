@@ -182,28 +182,12 @@ const Page = ({ params }: { params: paramsType }) => {
                                     className="flex flex-col items-start gap-y-4 mb-6"
                                 >
                                     {/* Question */}
-                                    <div className="flex flex-row gap-x-2 my-3">
-                                        <p className="font-semibold">
-                                            Q{index + 1}.
-                                        </p>
-                                        {/* <div
-                                            className="font-semibold"
-                                            dangerouslySetInnerHTML={{
-                                                __html: addClassToCodeTags(
-                                                    quizDetail.question,
-                                                    codeBlockClass
-                                                ),
-                                            }}
-                                        /> */}
-                                        <div className="text-left">
-                                            <RemirrorForm
-                                                description={
-                                                    quizDetail.question
-                                                }
-                                                preview={true}
-                                                bigScreen={true}
-                                            />
-                                        </div>
+                                    <div className="text-left">
+                                        <RemirrorForm
+                                            description={quizDetail.question}
+                                            preview={true}
+                                            bigScreen={true}
+                                        />
                                     </div>
 
                                     {/* Options */}

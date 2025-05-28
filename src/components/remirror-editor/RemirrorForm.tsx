@@ -106,7 +106,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
 
     return (
         <div className="remirror-theme">
-            <div className="p-1 md:p-1 lg:p-1 border rounded">
+            <div className="border rounded">
                 <Remirror
                     manager={manager}
                     initialContent={state}
@@ -121,14 +121,14 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     <div
                         className={`${
                             bigScreen
-                                ? 'lg:w-[37rem] sm:w-[37rem]'
+                                ? 'lg:w-[39rem] sm:w-[37rem]'
                                 : preview
-                                ? 'lg:w-[25rem] sm:w-[25rem]'
+                                ? 'lg:w-[28rem] sm:w-[25rem]'
                                 : 'lg:w-[44rem] sm:w-[44rem]'
                         }`}
                     >
                         {!preview && (
-                            <div className="bg-white pb-2 border-b mb-2">
+                            <div className="bg-white">
                                 <Toolbar />
                             </div>
                         )}
@@ -141,7 +141,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                             }}
                         >
                             <div
-                                className="remirror-editor-wrapper p-4 min-h-[250px]"
+                                className="px-2 min-h-[250px]"
                                 data-gramm="false"
                             >
                                 <EditorComponent />

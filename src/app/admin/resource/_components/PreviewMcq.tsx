@@ -147,10 +147,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                     className="w-full mt-0"
                                 >
                                     <div className="mb-4 p-2">
-                                        <div className="text-left flex gap-2 mb-2">
-                                            <span className="font-bold flex">
-                                                <h1>Q.</h1>
-                                            </span>
+                                        <div className="text-left mb-2">
                                             <RemirrorForm
                                                 description={variant.question}
                                                 preview={true}

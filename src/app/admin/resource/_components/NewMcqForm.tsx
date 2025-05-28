@@ -24,10 +24,10 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { useState } from 'react'
-import TipTapForForm from './TipTapForForm'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
+import RemirrorForForm from './RemirrorForForm'
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),
@@ -317,7 +317,7 @@ export default function NewMcqForm({
                                             Question Text
                                         </FormLabel>
                                         <FormControl>
-                                            <TipTapForForm
+                                            <RemirrorForForm
                                                 description={field.value}
                                                 onChange={field.onChange}
                                             />
