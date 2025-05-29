@@ -33,6 +33,7 @@ export const Toolbar = () => {
         toggleBlockquote,
         toggleBulletList,
         toggleOrderedList,
+        focus,
     } = useCommands()
     const active = useActive()
 
@@ -77,6 +78,12 @@ export const Toolbar = () => {
         // Insert the image into the editor
         insertImage({ src: imageUrl, alt: file.name })
 
+        // Focus the editor after inserting the image
+        // Use setTimeout to ensure the image insertion is complete
+        setTimeout(() => {
+            focus()
+        }, 100)
+
         // Reset the file input
         if (fileInputRef.current) {
             fileInputRef.current.value = ''
@@ -84,7 +91,7 @@ export const Toolbar = () => {
     }
 
     return (
-        <div className="sticky top-0 z-10 bg-white border-b mb-2 p-2 flex flex-wrap gap-2">
+        <div className="sticky top-0 z-10 bg-white border-b p-2 flex flex-wrap gap-2">
             {/* Text formatting */}
             <button
                 onClick={() => toggleBold()}

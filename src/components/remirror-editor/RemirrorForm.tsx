@@ -23,6 +23,7 @@ import {
     EditorComponent,
     ThemeProvider,
     useHelpers,
+    useActive,
 } from '@remirror/react'
 import { Toolbar } from './Toolbar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -86,13 +87,31 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
         return null
     }
 
+    const CodeBlockHelper = () => {
+        const active = useActive()
+
+        if (!active.codeBlock()) {
+            return null
+        }
+
+        return (
+            <div className="absolute bottom-2 left-2 right-2 z-10 bg-blue-100 border border-blue-300 rounded px-3 py-2 shadow-sm">
+                <p className="text-xs text-blue-700 font-medium m-0">
+                    💡 Press Ctrl+Enter to exit code block and add a new line
+                    below.
+                </p>
+            </div>
+        )
+    }
+
     return (
         <div className="remirror-theme">
-            <div className="p-1 border rounded">
+            <div className="border rounded">
                 <Remirror
                     manager={manager}
                     initialContent={state}
                     editable={!preview}
+                    placeholder="Start typing..."
                     onChange={(parameter) => {
                         // Get HTML from the editor state
                         const htmlContent = parameter.helpers.getHTML()
@@ -102,14 +121,14 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     <div
                         className={`${
                             bigScreen
-                                ? 'w-[37rem]'
+                                ? 'lg:w-[39rem] sm:w-[37rem]'
                                 : preview
-                                ? 'w-[25rem]'
-                                : 'w-[44rem]'
+                                ? 'lg:w-[28rem] sm:w-[25rem]'
+                                : 'lg:w-[44rem] sm:w-[44rem]'
                         }`}
                     >
                         {!preview && (
-                            <div className="bg-white pb-2 border-b mb-2">
+                            <div className="bg-white">
                                 <Toolbar />
                             </div>
                         )}
@@ -122,12 +141,13 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                             }}
                         >
                             <div
-                                className="remirror-editor-wrapper p-4 min-h-[250px]"
+                                className="px-2 min-h-[250px]"
                                 data-gramm="false"
                             >
                                 <EditorComponent />
                                 <EditorChangeHandler />
                             </div>
+                            {!preview && <CodeBlockHelper />}
                         </ScrollArea>
                     </div>
                 </Remirror>

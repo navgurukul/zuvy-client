@@ -32,7 +32,12 @@ const PreviewArticle = ({ params }: { params: any }) => {
                 content: [
                     {
                         type: 'paragraph',
-                        attrs: { textAlign: 'left' },
+                        content: [
+                            {
+                                type: 'text',
+                                text: 'No content has been added yet',
+                            },
+                        ],
                     },
                 ],
             }

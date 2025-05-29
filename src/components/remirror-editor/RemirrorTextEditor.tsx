@@ -6,6 +6,7 @@ import {
     Remirror,
     EditorComponent,
     ThemeProvider,
+    useActive,
 } from '@remirror/react'
 import {
     BoldExtension,
@@ -32,8 +33,21 @@ interface RemirrorTextEditorProps {
     preview?: boolean
 }
 
+// Create empty content structure
+const createEmptyContent = () => {
+    return {
+        type: 'doc',
+        content: [
+            {
+                type: 'paragraph',
+                content: [],
+            },
+        ],
+    }
+}
+
 // Create a simple default content if needed
-const createDefaultContent = (preview: boolean | undefined) => {
+const createPreviewDefaultContent = () => {
     return {
         type: 'doc',
         content: [
@@ -42,14 +56,28 @@ const createDefaultContent = (preview: boolean | undefined) => {
                 content: [
                     {
                         type: 'text',
-                        text: preview
-                            ? 'No content has been added yet'
-                            : 'Start typing here...',
+                        text: 'No content has been added yet',
                     },
                 ],
             },
         ],
     }
+}
+
+const CodeBlockHelper = () => {
+    const active = useActive()
+
+    if (!active.codeBlock()) {
+        return null
+    }
+
+    return (
+        <div className="absolute bottom-2 left-2 right-2 z-10 bg-blue-100 border border-blue-300 rounded px-3 py-2 shadow-sm">
+            <p className="text-xs text-blue-700 font-medium m-0">
+                💡 Press Ctrl+Enter to exit code block and add a new line below.
+            </p>
+        </div>
+    )
 }
 
 export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
@@ -64,8 +92,20 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     const contentRef = useRef<string>('')
 
     // Use default content if initialContent is undefined or invalid
-    const editorContent =
-        initialContent?.doc || initialContent || createDefaultContent(preview)
+    const getEditorContent = () => {
+        if (initialContent?.doc || initialContent) {
+            return initialContent?.doc || initialContent
+        }
+
+        // If no initial content
+        if (preview) {
+            return createPreviewDefaultContent()
+        } else {
+            return createEmptyContent()
+        }
+    }
+
+    const editorContent = getEditorContent()
 
     // Setup the Remirror manager with needed extensions
     const { manager, state } = useRemirror({
@@ -99,7 +139,9 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
         onError: (error) => {
             console.warn('Content validation error:', error)
             // Return default content on error
-            return createDefaultContent(preview)
+            return preview
+                ? createPreviewDefaultContent()
+                : createEmptyContent()
         },
     })
 
@@ -152,7 +194,8 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
         try {
             // Try to update the content carefully
             const safeContent =
-                initialContent.doc || createDefaultContent(preview)
+                initialContent.doc ||
+                (preview ? createPreviewDefaultContent() : createEmptyContent())
             const currentContentString = JSON.stringify(safeContent)
 
             // Only update if content has actually changed
@@ -183,14 +226,16 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
             theme={{
                 color: {
                     primary: '#3b82f6', // Tailwind's blue-500
-                    border: '#d1d5db', // Tailwind's gray-300
+                    // border: '#d1d5db', // Tailwind's gray-300
+                    border: 'none',
                     background: '#f9fafb', // Tailwind's gray-50
-                    active: { border: '#2563eb', primary: '#1d4ed8' }, // blue-600, blue-700
+                    // active: { border: '#2563eb', primary: '#1d4ed8' }, // blue-600, blue-700
+                    active: { border: 'transparent', primary: '#1d4ed8' },
                 },
                 fontFamily: { default: 'Inter, sans-serif' },
             }}
         >
-            <div className="p-1 border rounded shadow">
+            <div className="border rounded shadow">
                 <Remirror
                     manager={manager}
                     initialContent={state}
@@ -199,25 +244,23 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                     placeholder="Start typing..."
                 >
                     {!preview && (
-                        <div className="bg-white pb-2 border-b mb-2">
+                        <div className="bg-white">
                             <Toolbar />
                         </div>
                     )}
 
                     <ScrollArea
-                        className="h-96"
+                        className="h-[28rem]"
                         type="hover"
                         style={{
                             scrollbarWidth: 'none', // Firefox
                             msOverflowStyle: 'none', // IE and Edge
                         }}
                     >
-                        <div
-                            className="remirror-editor-wrapper p-4 min-h-[250px]"
-                            data-gramm="false"
-                        >
+                        <div className="px-1 h-full pb-1" data-gramm="false">
                             <EditorComponent />
                         </div>
+                        {!preview && <CodeBlockHelper />}
                     </ScrollArea>
                 </Remirror>
             </div>
