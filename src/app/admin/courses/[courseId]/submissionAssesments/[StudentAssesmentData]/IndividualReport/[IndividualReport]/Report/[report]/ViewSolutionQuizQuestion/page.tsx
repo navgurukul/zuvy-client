@@ -7,7 +7,6 @@ import { paramsType } from '../ViewSolutionOpenEnded/page'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import { addClassToCodeTags } from '@/utils/admin'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 type SubmissionData = {

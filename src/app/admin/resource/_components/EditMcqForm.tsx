@@ -34,7 +34,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
-import RemirrorForForm from './RemirrorForForm'
+import RemirrorForForm from '@/app/admin/resource/_components/RemirrorForForm'
 
 type Props = {}
 

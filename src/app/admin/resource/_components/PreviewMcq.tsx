@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import {
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog'
+import { DialogHeader } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import useGetMCQs from '@/hooks/useGetMcq'
 import DOMPurify from 'dompurify'
-import { AlertDialogHeader } from '@/components/ui/alert-dialog'
-import { AlertDialogTitle } from '@radix-ui/react-alert-dialog'
-import { addClassToCodeTags } from '@/utils/admin'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 

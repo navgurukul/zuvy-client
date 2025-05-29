@@ -18,7 +18,6 @@ import {
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
-import { addClassToCodeTags } from '@/utils/admin'
 import {
     AlertDialog,
     AlertDialogAction,

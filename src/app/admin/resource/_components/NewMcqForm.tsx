@@ -27,7 +27,7 @@ import { useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
-import RemirrorForForm from './RemirrorForForm'
+import RemirrorForForm from '@/app/admin/resource/_components/RemirrorForForm'
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),

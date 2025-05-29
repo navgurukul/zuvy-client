@@ -4,7 +4,6 @@ import { api } from '@/utils/axios.config'
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, Check, X, Circle } from 'lucide-react' // Import Circle icon
 import { useRouter } from 'next/navigation'
-import { addClassToCodeTags } from '@/utils/admin'
 import { cn, difficultyColor } from '@/lib/utils'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
@@ -76,15 +75,6 @@ const QuizResults = ({
                             <span className="font-semibold">
                                 Question {index + 1}.
                             </span>
-                            {/* <p
-                                className="text-gray-800 mb-4 font-bold text-lg"
-                                dangerouslySetInnerHTML={{
-                                    __html: addClassToCodeTags(
-                                        result.question,
-                                        codeBlockClass
-                                    ),
-                                }}
-                            /> */}
                             <div className="flex items-center justify-between gap-2">
                                 <div
                                     className={cn(
