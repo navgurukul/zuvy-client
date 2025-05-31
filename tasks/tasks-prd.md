@@ -1,0 +1,158 @@
+## Relevant Files
+
+- `src/app/layout.tsx` - Root layout, potentially for implementing the Global Header.
+- `src/app/student/page.tsx` - Main page component for the Student Dashboard.
+- `src/components/global/Header.tsx` - New component for the Global Header (PRD Section 3.1).
+- `src/components/global/Header.test.tsx` - Unit tests for `Header.tsx`.
+- `src/app/student/_components/CourseInformationBanner.tsx` - Component for the Course Information Banner (PRD Section 4.2).
+- `src/app/student/_components/CourseInformationBanner.test.tsx` - Unit tests for `CourseInformationBanner.tsx`.
+- `src/app/student/_components/WhatsNextSection.tsx` - Component for the "What's Next" section (PRD Section 4.3).
+- `src/app/student/_components/WhatsNextSection.test.tsx` - Unit tests for `WhatsNextSection.tsx`.
+- `src/app/student/_components/CourseModulesSection.tsx` - Component for the Course Modules section on the dashboard (PRD Section 4.4).
+- `src/app/student/_components/CourseModulesSection.test.tsx` - Unit tests for `CourseModulesSection.tsx`.
+- `src/app/student/_components/AttendanceSection.tsx` - Component for the Attendance section (PRD Section 4.5).
+- `src/app/student/_components/AttendanceSection.test.tsx` - Unit tests for `AttendanceSection.tsx`.
+- `src/app/course/[courseId]/module/[moduleId]/page.tsx` - Page for the Course Module Details (PRD Section 5).
+- `src/app/course/[courseId]/module/[moduleId]/page.test.tsx` - Unit tests for the module details page.
+- `src/app/course/[courseId]/module/[moduleId]/_components/ModuleNavigationSidebar.tsx` - Component for the left navigation pane on the module details page (PRD Section 5).
+- `src/app/course/[courseId]/module/[moduleId]/_components/ModuleNavigationSidebar.test.tsx` - Unit tests for `ModuleNavigationSidebar.tsx`.
+- `src/app/course/[courseId]/module/[moduleId]/_components/ItemContentView.tsx` - Component for the right content pane on the module details page (PRD Section 5).
+- `src/app/course/[courseId]/module/[moduleId]/_components/ItemContentView.test.tsx` - Unit tests for `ItemContentView.tsx`.
+- `src/lib/utils/courseData.ts` - Utility functions for fetching/managing course, module, and lesson data.
+- `src/lib/utils/courseData.test.ts` - Unit tests for `courseData.ts`.
+- `src/lib/utils/attendanceLogic.ts` - Utility functions for calculating attendance streaks and status (may need updates).
+- `src/lib/utils/attendanceLogic.test.ts` - Unit tests for `attendanceLogic.ts`.
+- `src/app/globals.css` - Global styles, including "Academia Futura - Sapphire Blue" theme variables.
+- `tailwind.config.ts` - Tailwind CSS configuration.
+
+### Notes
+
+- Unit tests should typically be placed alongside the code files they are testing (e.g., `MyComponent.tsx` and `MyComponent.test.tsx` in the same directory).
+- Use `npx jest [optional/path/to/test/file]` to run tests. Running without a path executes all tests found by the Jest configuration.
+
+## Tasks
+
+- [x] 1.0 Structure Student Dashboard Layout (PRD Section 4.1)
+  - [x] 1.1 Update `src/app/student/page.tsx` to use a centered 12-column grid layout.
+  - [x] 1.2 Define the main dashboard structure:
+    - [x] 1.2.1 Top: Area for Course Information Banner (spanning full width).
+    - [x] 1.2.2 Main Content Area (Below Banner): Divided into two columns.
+  - [x] 1.3 Configure Left Column (approx. 2/3 of width) to house "What's Next" Section and Course Modules Section.
+  - [x] 1.4 Configure Right Column (approx. 1/3 of width) to house Attendance Section.
+  - [x] 1.5 Ensure no persistent sidebar is present on this primary dashboard view.
+
+- [x] 2.0 Implement Course Information Banner (PRD Section 4.2)
+  - [x] 2.1 Create the `CourseInformationBanner.tsx` component in `src/app/student/_components/`.
+  - [x] 2.2 Design the banner to span the full width of the 12-column centered grid at the top of the dashboard.
+  - [x] 2.3 Implement left-aligned content:
+    - [x] 2.3.1 Display Course Name.
+    - [x] 2.3.2 Display Course Start and End Date.
+    - [x] 2.3.3 Display Total Progress Bar (small visual indicator of overall course completion).
+  - [x] 2.4 Implement right-aligned content:
+    - [x] 2.4.1 Display Instructor Avatar.
+    - [x] 2.4.2 Display Instructor Name.
+  - [x] 2.5 Style the banner prominently, using a `Card` or similar container if appropriate, adhering to "Academia Futura" typography and color schemes.
+  - [x] 2.6 Integrate `CourseInformationBanner.tsx` into `src/app/student/page.tsx` at the top.
+
+- [x] 3.0 Implement "What's Next" Section (PRD Section 4.3)
+  - [x] 3.1 Create `WhatsNextSection.tsx` in `src/app/student/_components/`.
+  - [x] 3.2 Position this section in the left column of the main content area, below the Course Information Banner.
+  - [x] 3.3 Display a single, consolidated list of the next five upcoming items (e.g., live classes, assignments, assessments/quizzes) ordered by their due date/time.
+  - [x] 3.4 For each item in the list, display:
+    - [x] 3.4.1 Icon: Distinct lucide-react icon representing the item type.
+    - [x] 3.4.2 Title/Name: The name of the class, assignment, or assessment.
+    - [x] 3.4.3 Tag: A brief tag indicating the type and status (e.g., "Live Class Today").
+    - [x] 3.4.4 Brief Info: Key details (class topic, deadline, short description).
+    - [x] 3.4.5 Link/Action: Direct link to join/view/start the item.
+  - [x] 3.5 Implement visual separators between items in the list.
+  - [x] 3.6 Style the section itself as a `Card` component.
+  - [x] 3.7 Ensure list items are clearly delineated and icons match the "Academia Futura" theme.
+  - [x] 3.8 Integrate `WhatsNextSection.tsx` into `src/app/student/page.tsx`.
+
+- [x] 4.0 Implement Course Modules Section (Dashboard View) (PRD Section 4.4)
+  - [x] 4.1 Update or verify `CourseModulesSection.tsx` in `src/app/student/_components/`.
+  - [x] 4.2 Position this section in the left column, below the "What's Next" section.
+  - [x] 4.3 Present modules as a series of cards.
+  - [x] 4.4 Implement logic for module progression: linear unlocking, visual indication for locked modules (greyed out, lock icon).
+  - [x] 4.5 For each module card, implement the general structure:
+    - [x] 4.5.1 Display Module Name.
+    - [x] 4.5.2 Display Module Progress Bar (small, below module name).
+    - [x] 4.5.3 Implement Expand/Collapse Icon (e.g., chevron down/up) to toggle topic display.
+  - [x] 4.6 Implement Collapsed View (Default for non-current/completed): Module Name, Progress Bar, "Expand More" icon.
+  - [x] 4.7 Implement Expanded View (Default for current; on user expand):
+    - [x] 4.7.1 Displays Module Name, Progress Bar, "Expand Less" icon.
+    - [x] 4.7.2 List of Topics/Lessons: Each with a circle icon (changes to checkmark on completion) and topic title.
+    - [x] 4.7.3 Call to Action (CTA) Button at card bottom: "Start Learning", "Resume Learning", or "Revise Concepts" based on module status.
+  - [x] 4.8 Ensure the current module is expanded by default.
+  - [x] 4.9 Clicking a module's name or CTA navigates to the "Course Module Details Page" for that module.
+  - [x] 4.10 Style module cards, topic lists, progress bars, CTAs, and icons (lucide-react for status and expand/collapse) per "Academia Futura".
+  - [x] 4.11 Adhere to overall section spacing (`space-y-6` or `mb-6`) and inter-module card spacing (e.g., `space-y-4`).
+  - [x] 4.12 Integrate `CourseModulesSection.tsx` into `src/app/student/page.tsx`.
+
+- [x] 5.0 Implement Attendance Section (PRD Section 4.5)
+  - [x] 5.1 Create/Update `AttendanceSection.tsx` in `src/app/student/_components/`.
+  - [x] 5.2 Position this section in the right column of the main content area.
+  - [x] 5.3 Implement Streak Counter:
+    - [x] 5.3.1 Display current attendance streak (number of consecutively attended classes).
+    - [x] 5.3.2 Accompany with a visual indicator (e.g., fire icon from lucide-react).
+    - [x] 5.3.3 Streak resets to 0 if a student misses a class (implement in `attendanceLogic.ts` and use here).
+  - [x] 5.4 Implement Motivational Message: Short message encouraging attendance or noting a broken streak.
+  - [x] 5.5 Implement Last 3 Classes Status:
+    - [x] 5.5.1 Display attendance status for the last 3 chronological classes.
+    - [x] 5.5.2 Each class shows: Icon (attended/missed), Class Topic/Name (abbreviated if needed), Date of the class.
+  - [x] 5.6 Implement Summary: Text indicating classes attended out of the last 3 (e.g., "2/3 classes attended").
+  - [x] 5.7 Style the section as a `Card` component with `p-6` padding.
+  - [x] 5.8 Make streak counter prominent (large font, distinct color).
+  - [x] 5.9 Style motivational message (Alert, Callout, or simple text).
+  - [x] 5.10 Display last 3 classes horizontally (using Flexbox) with clear visual separation.
+  - [x] 5.11 Use lucide-react icons for attended (e.g., checkmark) and missed (e.g., exclamation/cross), colored appropriately, with ARIA labels.
+  - [x] 5.12 Integrate `AttendanceSection.tsx` into `src/app/student/page.tsx`.
+
+- [x] 6.0 Develop Course Module Details Page (PRD Section 5)
+  - [x] 6.1 Create the page file at a suitable dynamic route, e.g., `src/app/course/[courseId]/module/[moduleId]/page.tsx`.
+  - [x] 6.2 Implement the Page Header:
+    - [x] 6.2.1 Breadcrumbs (e.g., "Course Dashboard > [Course Name] > [Module Name]").
+    - [x] 6.2.2 Large Module Title (using `font-heading`).
+    - [x] 6.2.3 Brief module description or learning objectives.
+  - [x] 6.3 Implement a two-pane responsive layout (full screen width):
+    - [x] 6.3.1 Left Pane (Module Navigation Sidebar - approx. 1/3 width).
+    - [x] 6.3.2 Right Pane (Item Content View - approx. 2/3 width).
+  - [x] 6.4 Develop Left Pane (`ModuleNavigationSidebar.tsx` in `_components`):
+    - [x] 6.4.1 Display hierarchical list of the selected module's topics and learning items (Live Classes, Videos, etc.).
+    - [x] 6.4.2 Allow item selection to update content in the Right Pane.
+    - [x] 6.4.3 Clearly highlight the currently selected item.
+    - [x] 6.4.4 Visually indicate completed topics/items (e.g., checkmarks).
+    - [x] 6.4.5 Style with clear list structure (Accordion or nested list), "Academia Futura" sidebar styles, `font-sans` for titles.
+  - [x] 6.5 Develop Right Pane (`ItemContentView.tsx` in `_components`):
+    - [x] 6.5.1 Display dynamic Item Header: Large item title (`font-heading`), brief description.
+    - [x] 6.5.2 Implement Content Blocks in `Card` components for item types:
+        - [x] 6.5.2.1 Live Class: Card title, name, date/time, duration, instructor, "Join Class" button (primary style, dynamic text for urgency) / "Completed" status + embedded recording, lucide-react icons.
+        - [x] 6.5.2.2 Video (Pre-recorded): Card title, video title, embedded video player.
+        - [x] 6.5.2.3 Article/Reading Material: Card title, article title, content displayed or link/button.
+        - [x] 6.5.2.4 Assessment (Quiz/Exam): Card title, name, status, instructions, time limit, "Start/Review/View Results" button (primary/secondary).
+        - [x] 6.5.2.5 Assignment: Card title, name, description, due date, status, "View/Submit/Feedback" button.
+  - [x] 6.6 Implement overall page navigation:
+    - [x] 6.6.1 Clear "Back to Dashboard" link/button.
+    - [x] 6.6.2 Consider "Previous Item" / "Next Item" buttons in Right Pane.
+  - [x] 6.7 Style Right Pane & Content Blocks: Each block as a `Card` with `p-6`, `space-y-6` or `mb-6` between cards, "Academia Futura" buttons (`h-14`, `px-4`), lucide-react icons, page background `oklch(var(--background))`.
+  - [x] 6.8 Ensure responsiveness: Left pane collapses to a drawer menu on smaller screens.
+
+- [x] 7.0 Address General Styling, Responsiveness, and Non-Functional Requirements (PRD Sections 6 & 7)
+  - [x] 7.1 Final review of `src/app/student/page.tsx` structure against PRD 4.1.
+  - [x] 7.2 Ensure "Academia Futura - Sapphire Blue" styles from `globals.css` and `tailwind.config.ts` are consistently applied. Update any existing components using "secondary color" for emphasis to use "primary color" (PRD 6.5).
+  - [x] 7.3 Conduct thorough responsive testing of all new/updated pages and components (desktop, tablet, mobile).
+  - [x] 7.4 Verify consistent application of spacing rules (PRD 6.2: `1.5rem` section margins, `p-6` card padding, `0.5rem-1rem` item gaps).
+  - [x] 7.5 Check all interactive elements for "Academia Futura" styling (button `h-14, px-4`, hover/focus states).
+  - [x] 7.6 Confirm all icons are from `lucide-react` and align with the "Academia Futura" aesthetic.
+  - [x] 7.7 Test Dark Mode compatibility for all components, ensuring readability and visual appeal.
+  - [x] 7.8 Perform basic performance check (e.g., Lighthouse score in browser dev tools).
+  - [x] 7.9 Perform accessibility check (WCAG 2.1 AA): keyboard navigation, focus indicators, ARIA attributes for dynamic content.
+
+- [x] 8.0 Implement Global Header & Navigation Updates (PRD Section 3)
+  - [x] 8.1 Remove the existing burger icon in the header and the associated pop-out sidebar.
+  - [x] 8.2 Implement Zuvy Logo on the left side of the header.
+  - [x] 8.3 Implement User Account Icon on the right side of the header (for profile, settings, logout).
+  - [x] 8.4 Apply glassmorphism effect to the header background.
+  - [x] 8.5 Ensure the header is fixed or sticky at the top of the viewport as appropriate.
+  - [x] 8.6 Verify header height, padding, and overall styling are consistent with "Academia Futura - Sapphire Blue" guidelines.
+  - [x] 8.7 Confirm that upon successful login, the student is directed to the Student Course Dashboard (Section 4) as their default landing page.

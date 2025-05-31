@@ -1,0 +1,141 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Product Requirements Document: Student Course Dashboard
+## 1. Overview
+This document outlines the requirements for a redesigned student course dashboard. The primary goal is to provide students with a clear, intuitive, and informative interface to track their learning progress, upcoming activities, and overall engagement with their course. The dashboard will leverage `shadcn/ui` components and adhere to the "Academia Futura - Sapphire Blue" design guidelines to ensure a clean, trustworthy, and intellectually stimulating user experience.
+## 2. Design System and UI/UX Principles
+*   **UI Framework:** `shadcn/ui`
+*   **Visual Style:** "Academia Futura - Sapphire Blue" (as defined in `CursorRules/Academic Futura - Sapphire Blue.md`).
+*   **Core Principles:**
+    *   **Clarity:** Information should be presented in an easily scannable and understandable format.
+    *   **Efficiency:** Students should be able to find relevant information quickly.
+    *   **Engagement:** The interface should be visually appealing and encourage interaction.
+    *   **Consistency:** Adhere to the "Academia Futura" design language for all components and layouts.
+## 3. Student Dashboard (Primary View)
+The main student dashboard serves as the central hub for students to get an overview of their academic activities and access their course.
+### 3.1. Course Modules Section
+*   **Purpose:** To display the current module and its items for the enrolled course, and provide a link to the full curriculum page.
+*   **Content:**
+    *   Display the title of the current/active module.
+    *   List the items/lessons within the current module.
+    *   A clear "View Full Curriculum" or "Go to Curriculum" link/button.
+        *   This button navigates the user to the "Full Curriculum Page" (detailed in section 3.5) for the course.
+        *   The button should be styled as a primary or secondary action button according to "Academia Futura" guidelines.
+*   **Styling:**
+    *   Module and item display should be clean and easy to read.
+    *   The "View Full Curriculum" link/button should be prominent.
+    *   Overall section spacing should follow `space-y-6` or `mb-6`.
+### 3.2. Course Information Banner (Overall Dashboard Banner - Optional)
+*   **Purpose:** To provide a quick overview of general academic standing or important global announcements.
+*   **Content:**
+    *   Student Name
+    *   Overall Academic Progress (in percentage based on the items completed in the modules) - if applicable.
+    *   Important Alerts or University-wide announcements.
+*   **Styling:**
+    *   Prominently displayed at the top of the main dashboard if implemented.
+    *   Utilize `Card` or a similar container component.
+    *   Adhere to "Academia Futura" typography and color schemes.
+### 3.3. Upcoming Section
+*   **Purpose:** To highlight time-sensitive items and upcoming deadlines for the enrolled course.
+*   **Content:** This section will be tabbed or segmented into:
+    *   **Live Classes:**
+        *   Display next 3 scheduled live sessions
+        *   Information: Class topic, date, time, duration, and a link to join (if applicable).
+        *   Utilize `Calendar` or list-based components.
+    *   **Assignments:**
+        *   Display upto 3 upcoming assignments with due dates.
+        *   Information: Assignment title, due date, status (e.g., Not Started, In Progress, Submitted, Graded), and a link to the assignment details.
+        *   Consider using `Table` or `Card` list for display.
+    *   **Assessments/Quizzes:**
+        *   Display upcoming quizzes or exams with their scheduled dates/times.
+        *   Information: Assessment title, date, time, duration, and a link to the assessment.
+*   **Styling:**
+    *   Use `Tabs` component from `shadcn/ui`.
+### 3.4. Attendance
+*   **Purpose:** To visually track and incentivize consistent class attendance for the enrolled course.
+*   **Content:**
+    *   **Streak Counter:**
+        *   Display the current attendance streak (number of consecutively attended classes).
+        *   Accompanied by a visual indicator (e.g., fire icon from `lucide-react`).
+        *   Streak resets to 0 if a student misses a class.
+    *   **Motivational Message:**
+        *   A short message encouraging continued attendance (e.g., "Streak ongoing! Keep up the great momentum.", or a message if the streak is broken).
+    *   **Last 3 Classes Status:**
+        *   Display the attendance status for the last 3 chronological classes.
+        *   Each class should show:
+            *   An icon indicating attended (e.g., checkmark) or missed (e.g., exclamation mark/cross).
+            *   Class Topic/Name (abbreviated if necessary).
+            *   Date of the class.
+    *   **Summary:**
+        *   Text indicating the number of classes attended out of the last 3 (e.g., "2/3 classes attended").
+*   **Styling:**
+    *   The section should be a `Card` component with appropriate padding (e.g., `p-6`).
+    *   Streak counter should be prominent (large font, distinct color).
+    *   Motivational message can be a `Alert` or `Callout` style component or simple text.
+    *   Last 3 classes should be displayed horizontally, possibly using Flexbox, with clear visual separation.
+    *   Icons should be from `lucide-react` and colored appropriately (e.g., green for attended, red for missed).
+*   **Accessibility:** Adhere to WCAG 2.1 AA accessibility standards, ensuring icons have proper ARIA labels.
+### 3.5. Full Curriculum Page (Accessed via link from Course Modules Section)
+*   **Purpose:** To provide an in-depth view of the course's structure and content, allowing students to navigate lessons and access learning materials. This page is accessed by clicking the "View Full Curriculum" button from the "Course Modules Section" (3.1) on the Student Dashboard.
+*   **Layout:** Typically a two-pane responsive layout:
+    *   **Left Pane (Course Syllabus/Structure):**
+        *   **Content:** Displays a hierarchical list of course modules and the lessons within each module (e.g., "Module 1: Core Web Technologies" -> "HTML Fundamentals", "CSS Fundamentals").
+        *   **Navigation:** Allows students to select a lesson to view its details in the right pane.
+        *   **Progress Indication:** Visually indicates completed lessons/modules (e.g., checkmarks, different styling for completed items). The image shows checkmarks next to "HTML Fundamentals" and "CSS Fundamentals".
+        *   **Styling:**
+            *   Uses a clear, navigable list structure. Could utilize `Accordion` for modules to expand/collapse lessons, or a nested list.
+            *   Selected lesson should be clearly highlighted.
+            *   Uses `font-sans` for lesson titles.
+            *   Adheres to "Academia Futura" spacing and sidebar styling if applicable (e.g., `sidebar` background color, `sidebar-foreground`).
+    *   **Right Pane (Lesson Detail View):**
+        *   **Content:** Displays the content and activities related to the currently selected lesson from the left pane.
+        *   **Lesson Header:**
+            *   Large lesson title (e.g., "JavaScript Fundamentals") using `font-heading`.
+            *   Brief lesson description or learning objectives (e.g., "Variables, data types, operators, conditional statements, loops.") using `font-sans`.
+        *   **Content Blocks (organized in `Card` components or similar):**
+            *   **Live Class:**
+                *   Title: "Live Class"
+                *   Lesson Topic (e.g., "JavaScript Fundamentals")
+                *   Schedule Information (e.g., "Scheduled for Apr 22, 2025") with an icon (e.g., calendar or clock).
+                *   Action Button: "Join Class" (`Button` component, primary style).
+            *   **Recording:**
+                *   Title: "Recording"
+                *   Status Message (e.g., "Recording will be available after the live class").
+            *   **Learning Materials:**
+                *   Title: "Learning Materials"
+                *   List of materials (e.g., "MDN JavaScript Basics", "Eloquent JavaScript (Chapters 1-2)", "JS Data Types Explained", "Control Flow Visualizations"). Each item can be a link.
+                *   Action: "Open" link or button for each material. The image shows "Open" as text links.
+            *   **Assessment:**
+                *   Title: "Assessment"
+                *   Status/Quiz Name (e.g., "Quiz not yet taken").
+                *   Action Button: "Start Quiz" (`Button` component, primary or secondary style).
+        *   **Styling:**
+            *   Each content block (Live Class, Recording, etc.) should be a distinct `Card` with `p-6` padding.
+            *   Spacing between cards: `space-y-6` or `mb-6`.
+            *   Buttons should follow "Academia Futura" guidelines (`h-14`, `px-4`).
+            *   Icons (e.g., for Live Class schedule, Recording, Learning Materials, Assessment) should be from `lucide-react` and match the theme.
+*   **Overall Styling:**
+    *   The page title (e.g., "Course Explorer") should be prominent at the top.
+    *   The general page background should use `oklch(var(--background))`.
+    *   Ensure responsiveness for both panes. The left pane might collapse into a drawer menu on smaller screens.
+## 4. General Layout and Component Styling Notes
+*   **Responsiveness:** The dashboard must be fully responsive and adapt to various screen sizes (desktop, tablet, mobile).
+*   **Spacing:**
+    *   Default margin between distinct dashboard sections (Course Banner, Upcoming, Curriculum, Attendance): `1.5rem` (`space-y-6` or `mb-6`).
+    *   Internal padding for `Card` components: `1.5rem` (`p-6`).
+    *   Spacing for grouped items (e.g., within the "Upcoming" section lists): `0.5rem` to `1rem` (`gap-2`, `gap-4`).
+*   **Interactivity:**
+    *   Buttons and interactive elements should follow the `3.5rem` height (`h-14`) and `1rem` horizontal padding (`px-4`) guidelines where applicable.
+    *   Use subtle hover and focus states as defined by `shadcn/ui` and customized by "Academia Futura" (e.g., `--ring` variable).
+*   **Icons:** Utilize `lucide-react` icons as per `shadcn/ui` standard practice, ensuring they align with the "Academia Futura" aesthetic (elegant, clear).
+*   **Dark Mode:** Ensure all components and sections are fully compatible with the dark mode defined in "Academia Futura," maintaining readability and visual appeal.
+## 5. Non-functional Requirements
+*   **Performance:** The dashboard should load quickly and feel responsive.
+*   **Accessibility:** Adhere to WCAG 2.1 AA accessibility standards.
+## 6. Future Considerations (Optional)
+*   Gamification elements (badges, points).
+*   Personalized learning path recommendations.
+*   Direct messaging with instructors.

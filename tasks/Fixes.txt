@@ -1,0 +1,12 @@
+Some changes:
+
+1. Course modules details page is not linked. Link it in a way that I can see it when clicking the CTA in the course module card
+2. Many of the components have the bg-secondary class applied with secondary color. It should be renamed to bg-primary and primary color can be applied to them especially the buttons
+3. Add new variables in the global theme file for success (similar to destructive one) in both light and dark theme which would be an appropriate share of green. This green should be applied to components that show success like the progress bar, checkboxes for the completed items
+4. The heading and body font are not getting applied for some reason. Check if there are properly setup in the codebase. Headings should be in "Outfit" and body in "Manrope"
+5. Remove the "View All" button from "What's Next" section . Fix the background height for the icons. It is stretching to he height of the item. 
+6. Course Modules section: Remove "View Full Curriculum" and reduce the wdth of the CTA at the bottom to hug its contents and aligned to the right. Also, reduce the width of the progress bar to about 1/3rd of the card width
+7. In attendance section, instead of the column style layout for recent classes, use the full width of the attendance section and show one recent class in a row so that the name is properly visible
+8. Attendance section: Align the streak icon and number properly. Remove the "class streak text". Move the "Impressive streak..." text below the streak icon and number
+8. Reduce the space at the top between the header and the welcome message to about half of the current spacing
+9. Use the background color from card colors from the academia futura theme. That seems to have changes and instead of off white/cream, I see a slightly bluish background and white color cards

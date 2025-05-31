@@ -1,6 +1,5 @@
 'use client'
 
-import StudentNavbar from '@/app/_components/navbar'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useParams, usePathname, useRouter } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
@@ -159,7 +158,6 @@ export default function RootLayout({
                 <UnauthorizedUser rolesList={rolesList} path={'Student'} />
             ) : (
                 <div className={`h-screen ${isMobile ? '' : ''} `}>
-                    <div>{!isAssessmentRoute && <StudentNavbar />}</div>
                     <div className={` ${isChapterRoute ? 'px-0 md:px-2 lg:px-2' : 'pt-20'} `}>
                         <div className="relative">
                             {children}

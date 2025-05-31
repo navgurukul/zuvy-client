@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import { PluginAPI } from 'tailwindcss/types/config'
+import { fontFamily } from 'tailwindcss/defaultTheme'
 
 const config = {
     darkMode: ['class'],
@@ -19,32 +20,39 @@ const config = {
             },
         },
         extend: {
+            fontFamily: {
+                sans: ['var(--font-sans)'],
+                heading: ['var(--font-heading)'],
+            },
             colors: {
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
                 ring: 'hsl(var(--ring))',
                 background: 'hsl(var(--background))',
-                foreground: '#4A4A4A',
+                foreground: 'hsl(var(--foreground))',
                 primary: {
-                    DEFAULT: '#2f433a',
-                    // foreground: "hsl(var(--primary-foreground))",
-                    foreground: '#96BFAF',
+                    DEFAULT: 'hsl(var(--primary))',
+                    foreground: 'hsl(var(--primary-foreground))',
                 },
                 secondary: {
-                    DEFAULT: '#518672',
-                    foreground: '#4A4A4A',
+                    DEFAULT: 'hsl(var(--secondary))',
+                    foreground: 'hsl(var(--secondary-foreground))',
                 },
                 destructive: {
                     DEFAULT: 'hsl(var(--destructive))',
                     foreground: 'hsl(var(--destructive-foreground))',
+                },
+                success: {
+                    DEFAULT: 'hsl(var(--success))',
+                    foreground: 'hsl(var(--success-foreground))',
                 },
                 muted: {
                     DEFAULT: 'hsl(var(--muted))',
                     foreground: 'hsl(var(--muted-foreground))',
                 },
                 accent: {
-                    DEFAULT: '#082f49',
-                    foreground: '#93c5fd',
+                    DEFAULT: 'hsl(var(--accent))',
+                    foreground: 'hsl(var(--accent-foreground))',
                 },
                 popover: {
                     DEFAULT: 'hsl(var(--popover))',
@@ -54,16 +62,59 @@ const config = {
                     DEFAULT: 'hsl(var(--card))',
                     foreground: 'hsl(var(--card-foreground))',
                 },
-                yellow: {
-                    DEFAULT: '#FEE8B0',
-                    foreground: '#eab308',
-                    dark: '#f59e0b',
+                chart: {
+                    1: 'oklch(var(--chart-1))',
+                    2: 'oklch(var(--chart-2))',
+                    3: 'oklch(var(--chart-3))',
+                    4: 'oklch(var(--chart-4))',
+                    5: 'oklch(var(--chart-5))',
+                },
+                sidebar: {
+                    DEFAULT: 'oklch(var(--sidebar))',
+                    foreground: 'oklch(var(--sidebar-foreground))',
+                    primary: {
+                        DEFAULT: 'oklch(var(--sidebar-primary))',
+                        foreground: 'oklch(var(--sidebar-primary-foreground))',
+                    },
+                    accent: {
+                        DEFAULT: 'oklch(var(--sidebar-accent))',
+                        foreground: 'oklch(var(--sidebar-accent-foreground))',
+                    },
+                    border: 'oklch(var(--sidebar-border))',
+                    ring: 'oklch(var(--sidebar-ring))',
                 },
             },
             borderRadius: {
                 lg: 'var(--radius)',
                 md: 'calc(var(--radius) - 2px)',
                 sm: 'calc(var(--radius) - 4px)',
+            },
+            spacing: {
+                '0': '0',
+                '1': '0.25rem',
+                '2': '0.5rem',
+                '3': '0.75rem',
+                '4': '1rem',     // 16px
+                '5': '1.25rem',
+                '6': '1.5rem',   // 24px
+                '7': '1.75rem',
+                '8': '2rem',
+                '9': '2.25rem',
+                '10': '2.5rem',
+                '11': '2.75rem',
+                '12': '3rem',
+                '14': '3.5rem',  // 56px
+                '16': '4rem',
+                '20': '5rem',
+                '24': '6rem',
+            },
+            boxShadow: {
+                'sm': '0 1px 2px 0 oklch(0 0 0 / 0.02)',
+                'DEFAULT': '0 1px 3px 0 oklch(0 0 0 / 0.04), 0 1px 2px -1px oklch(0 0 0 / 0.03)',
+                'md': '0 2px 4px -1px oklch(0 0 0 / 0.05), 0 1px 2px -1px oklch(0 0 0 / 0.04)',
+                'lg': '0 3px 6px -1px oklch(0 0 0 / 0.06), 0 2px 4px -1px oklch(0 0 0 / 0.05)',
+                'xl': '0 5px 10px -2px oklch(0 0 0 / 0.07), 0 3px 6px -2px oklch(0 0 0 / 0.06)',
+                'inner': 'inset 0 1px 2px 0 oklch(0 0 0 / 0.02)',
             },
             keyframes: {
                 'accordion-down': {
