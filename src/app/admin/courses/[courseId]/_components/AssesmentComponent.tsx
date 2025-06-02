@@ -63,48 +63,48 @@ const AssesmentComponent = (props: Props) => {
                         ) : (
                             // Dropdown only (when not disabled)
                             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-  <div
-    onMouseEnter={() => setIsOpen(true)}
-    onMouseLeave={() => setIsOpen(false)}
-    className="relative"
-  >
-    <DropdownMenuTrigger asChild>
-      <button
-        className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
-        aria-label="Download full report"
-      >
-        <ArrowDownToLine size={20} />
-      </button>
-    </DropdownMenuTrigger>
+                                <div
+                                    onMouseEnter={() => setIsOpen(true)}
+                                    onMouseLeave={() => setIsOpen(false)}
+                                    className="relative"
+                                >
+                                    <DropdownMenuTrigger asChild>
+                                        <button
+                                            className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                            aria-label="Download full report"
+                                        >
+                                            <ArrowDownToLine size={20} />
+                                        </button>
+                                    </DropdownMenuTrigger>
 
-    <DropdownMenuContent
-      className="w-38 rounded-md shadow-md border border-gray-300"
-      align="end"
-      sideOffset={8}
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
-      <DropdownMenuItem
-        className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
-        onClick={() => {
-          props.onDownloadPdf()
-          setIsOpen(false)
-        }}
-      >
-        Download PDF
-      </DropdownMenuItem>
-      <DropdownMenuItem
-        className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
-        onClick={() => {
-          props.onDownloadCsv()
-          setIsOpen(false)
-        }}
-      >
-        Download CSV
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </div>
-</DropdownMenu>
+                                    <DropdownMenuContent
+                                        className="w-38 rounded-md shadow-md border border-gray-300"
+                                        align="end"
+                                        sideOffset={8}
+                                        onMouseEnter={() => setIsOpen(true)}
+                                        onMouseLeave={() => setIsOpen(false)}
+                                    >
+                                        <DropdownMenuItem
+                                            className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
+                                            onClick={() => {
+                                                props.onDownloadPdf()
+                                                setIsOpen(false)
+                                            }}
+                                        >
+                                            Download PDF
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
+                                            onClick={() => {
+                                                props.onDownloadCsv()
+                                                setIsOpen(false)
+                                            }}
+                                        >
+                                            Download CSV
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </div>
+                            </DropdownMenu>
                         )}
                     </div>
 
