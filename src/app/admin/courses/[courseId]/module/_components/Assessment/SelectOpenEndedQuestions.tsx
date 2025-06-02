@@ -2,6 +2,13 @@ import React from 'react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
+import {
+    Dialog,
+    DialogContent,
+    DialogOverlay,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
 
 const SelectOpenEndedQuestions = ({
     setSelectedQuestions,
@@ -20,7 +27,10 @@ const SelectOpenEndedQuestions = ({
                 const tag = tags?.find((tag: any) => tag.id === question.tagId)
 
                 return (
-                    <div key={question.id} className="p-5 rounded-sm border-b border-gray-200 mb-4">
+                    <div
+                        key={question.id}
+                        className="p-5 rounded-sm border-b border-gray-200 mb-4"
+                    >
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <div className="flex items-center justify-between w-full">
@@ -36,8 +46,12 @@ const SelectOpenEndedQuestions = ({
                                         <span
                                             className={cn(
                                                 `text-[12px] rounded-full px-2`,
-                                                difficultyColor(question.difficulty),
-                                                difficultyBgColor(question.difficulty)
+                                                difficultyColor(
+                                                    question.difficulty
+                                                ),
+                                                difficultyBgColor(
+                                                    question.difficulty
+                                                )
                                             )}
                                         >
                                             {question.difficulty}
@@ -47,12 +61,19 @@ const SelectOpenEndedQuestions = ({
                                 <p className="text-gray-600 mt-1 text-left">
                                     {ellipsis(question.question, 60)}
                                 </p>
-                                <Link
-                                    href=""
-                                    className="font-semibold text-sm mt-2 text-secondary text-left block"
-                                >
-                                    View Full Description
-                                </Link>
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
+                                            View Full Description
+                                        </p>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <PreviewOpenEnded
+                                            question={question}
+                                            tag={tag}
+                                        />
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                             <X
                                 onClick={() =>

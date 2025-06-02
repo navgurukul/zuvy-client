@@ -5,22 +5,13 @@ import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion'
-import { useEditor } from '@tiptap/react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-
-type Props = {}
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 const Page = ({ params }: any) => {
     const [indiviDualStudentData, setIndividualStudentData] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
     const [submittedDate, setSubmittedDate] = useState<string>('')
+    const [initialContent, setInitialContent] = useState()
 
     const crumbs = [
         {
@@ -50,12 +41,6 @@ const Page = ({ params }: any) => {
         },
     ]
 
-    const editor: any = useEditor({
-        extensions,
-        content: '<h1>No Content Added Yet</h1>',
-        editable: false,
-    })
-
     const getIndividualStudentData = useCallback(async () => {
         await api
             .get(
@@ -63,23 +48,18 @@ const Page = ({ params }: any) => {
             )
             .then((res) => {
                 setIndividualStudentData(res?.data)
-                if (editor && editor.commands) {
-                    editor.commands.setContent(
-                        res?.data?.projectSubmissionDetails?.instruction
-                            ?.description[0]
-                    )
+                const projectDetail =
+                    res?.data?.projectSubmissionDetails?.instruction
+                        ?.description
+                if (projectDetail) {
+                    setInitialContent(JSON.parse(projectDetail))
                 }
                 setSubmittedDate(
                     res?.data.projectSubmissionDetails?.projectTrackingData[0]
                         ?.updatedAt
                 )
             })
-    }, [
-        params.individualReport,
-        params.courseId,
-        params.StudentsProjects,
-        editor,
-    ])
+    }, [params.individualReport, params.courseId, params.StudentsProjects])
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
@@ -147,7 +127,8 @@ const Page = ({ params }: any) => {
                                         {
                                             indiviDualStudentData
                                                 ?.projectSubmissionDetails
-                                                ?.projectTrackingData[0].userDetails.name
+                                                ?.projectTrackingData[0]
+                                                .userDetails.name
                                         }
                                     </h1>
                                     <h3 className="text-left font-semibold">
@@ -159,7 +140,6 @@ const Page = ({ params }: any) => {
                                 </div>
                             </div>
                         </div>
-
                     </div>
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
                         <div className="p-4 bg-white rounded shadow">
@@ -176,7 +156,13 @@ const Page = ({ params }: any) => {
                                     Problem Description:
                                 </h3>
 
-                                {editor && <TiptapEditor editor={editor} />}
+                                <div className="mt-2 text-start">
+                                    <RemirrorTextEditor
+                                        initialContent={initialContent}
+                                        setInitialContent={setInitialContent}
+                                        preview={true}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="p-4 flex flex-col gap-y-1 bg-white rounded shadow">
@@ -196,8 +182,6 @@ const Page = ({ params }: any) => {
                                     }
                                 </h2>
                             </Link>
-
-
                         </div>
                     </div>
                 </MaxWidthWrapper>

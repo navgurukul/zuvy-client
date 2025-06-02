@@ -13,7 +13,9 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import useDebounce from '@/hooks/useDebounce'
-import { getIsReattemptApproved } from '@/store/store'
+import { getIsReattemptApproved, getOffset, getPosition } from '@/store/store'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import { fetchStudentAssessments } from '@/utils/admin'
 
 type Props = {}
 
@@ -21,10 +23,16 @@ const Page = ({ params }: any) => {
     const [assesmentData, setAssessmentData] = useState<any>()
     const [searchStudentAssessment, setSearchStudentAssessment] =
         useState<any>('')
-    
-    const {isReattemptApproved} = getIsReattemptApproved()
 
-    const debouncedSearch = useDebounce(searchStudentAssessment, 400)
+    const { isReattemptApproved } = getIsReattemptApproved()
+    const { position, setPosition } = getPosition()
+    const { offset, setOffset } = getOffset()
+    const [totalPages, setTotalPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalStudents, setTotalStudents] = useState(0)
+
+    const debouncedSearch = useDebounce(searchStudentAssessment, 500)
 
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
@@ -61,37 +69,32 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
-    const getStudentAssesmentDataHandler = useCallback(async () => {
-        try {
-            const endpoint = debouncedSearch
-                ? `/admin/assessment/students/assessment_id${params.StudentAssesmentData}?searchStudent=${debouncedSearch}`
-                : `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
+    const getStudentAssesmentDataHandler = useCallback(
+        async (offset: number) => {
+            if (offset >= 0) {
+                const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
+                    params.StudentAssesmentData,
+                    offset,
+                    position,
+                    debouncedSearch,
+                    setTotalPages,
+                    setLastPage
+                )
+                setDataTableAssessments(assessments)
+                setAssessmentData(moduleAssessment)
+                setPassPercentage(passPercentage)
+                setTotalStudents(moduleAssessment?.totalStudents)
+            }
 
-            const res = await api.get(endpoint)
-            const data = res.data
-
-            setAssessmentData(data.ModuleAssessment)
-            setPassPercentage(data.passPercentage)
-
-            const updatedAssessments = data?.submitedOutsourseAssessments.map(
-                (assessment: any) => ({
-                    ...assessment,
-                    bootcampId: data.bootcampId,
-                    newId: data.id,
-                    title: data.ModuleAssessment.title,
-                })
-            )
-            setDataTableAssessments(updatedAssessments)
-        } catch (error) {
-            console.error('API Error:', error)
-        }
-    }, [params.StudentAssesmentData, debouncedSearch])
+        },
+        [params.StudentAssesmentData, position, debouncedSearch]
+    )
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 await Promise.all([
-                    getStudentAssesmentDataHandler(),
+                    // getStudentAssesmentDataHandler(offset),
                     getBootcampHandler(),
                 ])
             } catch (error) {
@@ -100,7 +103,17 @@ const Page = ({ params }: any) => {
         }
 
         fetchData()
-    }, [isReattemptApproved, getStudentAssesmentDataHandler, getBootcampHandler])
+    }, [isReattemptApproved, getBootcampHandler])
+
+    useEffect(() => {
+        getStudentAssesmentDataHandler(offset)
+    }, [offset, getStudentAssesmentDataHandler,
+        position,
+        setLastPage,
+        setTotalPages,
+        debouncedSearch])
+
+
 
     return (
         <>
@@ -162,6 +175,17 @@ const Page = ({ params }: any) => {
                         </div>
                     </div>
                     <DataTable data={dataTableAssesment} columns={columns} />
+                    <DataTablePagination
+                        totalStudents={totalStudents}
+                        position={position}
+                        setPosition={setPosition}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        fetchStudentData={getStudentAssesmentDataHandler}
+                        setOffset={setOffset}
+                    />
                 </div>
             </MaxWidthWrapper>
         </>

@@ -5,40 +5,50 @@ import { getArticlePreviewStore } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { useEditor } from '@tiptap/react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import { Button } from '@/components/ui/button'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+
+type EditorDoc = {
+    type: string
+    content: any[]
+}
 
 const PreviewArticle = ({ params }: { params: any }) => {
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
     const { articlePreviewContent, setArticlePreviewContent } =
         getArticlePreviewStore()
-
-    const editor = useEditor({
-        extensions,
-        content: '', // Initialize with empty content
-        editable: false,
-    })
 
     useEffect(() => {
         fetchPreviewData(params, setArticlePreviewContent)
     }, [params.chapterId, fetchPreviewData])
 
     useEffect(() => {
-        if (editor && articlePreviewContent?.contentDetails) {
+        if (articlePreviewContent?.contentDetails) {
             const contentDetails = articlePreviewContent.contentDetails
             const firstContent = contentDetails?.[0]?.content?.[0] ?? {
                 type: 'doc',
                 content: [
                     {
                         type: 'paragraph',
-                        attrs: { textAlign: 'left' },
+                        content: [
+                            {
+                                type: 'text',
+                                text: 'No content has been added yet',
+                            },
+                        ],
                     },
                 ],
             }
-            editor.commands.setContent(firstContent)
+            if (typeof firstContent === 'string') {
+                setInitialContent(JSON.parse(firstContent))
+            } else {
+                const jsonData = { doc: firstContent }
+                setInitialContent(jsonData)
+            }
         }
-    }, [articlePreviewContent, editor])
+    }, [articlePreviewContent])
 
     return (
         <>
@@ -72,7 +82,13 @@ const PreviewArticle = ({ params }: { params: any }) => {
                         </h1>
                     </div>
 
-                    <TiptapEditor editor={editor} />
+                    <div className="mt-2 text-start">
+                        <RemirrorTextEditor
+                            initialContent={initialContent}
+                            setInitialContent={setInitialContent}
+                            preview={true}
+                        />
+                    </div>
                     <div className="mt-2 text-end">
                         <Button disabled>Mark as Done </Button>
                     </div>

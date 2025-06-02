@@ -1,0 +1,182 @@
+/* CSS to hide Grammarly-specific elements */
+.gr_-_button,
+grammarly-shadow-root,
+grammarly-ghost,
+grammarly-desktop-integration,
+div[data-grammarly-part='button'],
+span[data-grammarly-part='highlight'] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Add specific styles to make headings more visible */
+.ProseMirror h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin-top: 0.67em;
+    margin-bottom: 0.67em;
+}
+.ProseMirror h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-top: 0.83em;
+    margin-bottom: 0.83em;
+}
+.ProseMirror h3 {
+    font-size: 1.17em;
+    font-weight: bold;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.ProseMirror h4 {
+    font-size: 1em;
+    font-weight: bold;
+    margin-top: 1.33em;
+    margin-bottom: 1.33em;
+}
+.ProseMirror h5 {
+    font-size: 0.83em;
+    font-weight: bold;
+    margin-top: 1.67em;
+    margin-bottom: 1.67em;
+}
+.ProseMirror h6 {
+    font-size: 0.67em;
+    font-weight: bold;
+    margin-top: 2.33em;
+    margin-bottom: 2.33em;
+}
+
+pre code {
+    font-size: 14px !important;
+    padding: 1px 5px;
+    border: none;
+    padding: 0;
+}
+
+code {
+    white-space: pre-wrap;
+    font-size: 12px;
+    box-sizing: border-box;
+    color: rgb(255, 136, 0);
+    border: 1px solid #cfcbcb;
+    border-radius: 3px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+/* Basic editor container styles */
+.remirror-editor {
+    position: relative;
+    border-radius: 0.375rem;
+    min-height: 26.1rem !important;
+    width: 100%;
+}
+
+/* Lists styling - essential for list visibility */
+.remirror-editor ul {
+    list-style-type: disc;
+    padding-left: 2em;
+    margin: 1em 0;
+}
+
+.remirror-editor ol {
+    list-style-type: decimal;
+    padding-left: 2em;
+    margin: 1em 0;
+}
+
+/* List items styling */
+.remirror-editor li {
+    position: relative;
+    margin-bottom: 0.25em;
+}
+
+/* Nested lists styling */
+.remirror-editor ul ul,
+.remirror-editor ol ol,
+.remirror-editor ul ol,
+.remirror-editor ol ul {
+    margin-top: 0.25em;
+    margin-bottom: 0;
+}
+
+/* Different list markers for nested unordered lists */
+.remirror-editor ul ul {
+    list-style-type: circle;
+}
+
+.remirror-editor ul ul ul {
+    list-style-type: square;
+}
+
+/* Better visualization for ordered lists */
+.remirror-editor ol {
+    counter-reset: item;
+}
+
+/* Support for list spines if enabled */
+.remirror-editor .spine {
+    position: absolute;
+    left: -1.5em;
+    top: 0.5em;
+    bottom: -0.5em;
+    width: 2px;
+    background-color: #cbd1da;
+}
+
+/* For editable mode */
+.remirror-editor-wrapper .ProseMirror:focus {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.remirror-editor-wrapper .ProseMirror {
+    border: none !important;
+}
+
+/* For preview mode (when editable=false) */
+.remirror-editor-wrapper .ProseMirror[contenteditable='false'] {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Target all possible states */
+.remirror-editor-wrapper .ProseMirror,
+.remirror-editor-wrapper .ProseMirror:focus,
+.remirror-editor-wrapper .ProseMirror[contenteditable='false'],
+.remirror-editor-wrapper .ProseMirror[contenteditable='true'] {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Also target the wrapper itself */
+.remirror-editor-wrapper {
+    border: none !important;
+}
+
+/* Remove any focus rings from the entire editor area */
+.remirror-theme .ProseMirror {
+    border: none !important;
+    outline: none !important;
+}
+
+.remirror-theme .ProseMirror:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Additional helpful styles for other elements */
+.remirror-editor blockquote {
+    border-left: 4px solid #e2e8f0;
+    padding-left: 1em;
+    margin-left: 0;
+    margin-right: 0;
+    font-style: italic;
+}
