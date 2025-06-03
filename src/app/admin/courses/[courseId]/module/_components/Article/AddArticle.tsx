@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import '@/app/_components/editor/Tiptap.css'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Pencil } from 'lucide-react'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
@@ -25,8 +24,12 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import UploadArticle from './UploadPdf'
-import { Toast } from '@/components/ui/toast'
-import Link from 'next/link'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface ContentDetail {
     title: string
@@ -62,14 +65,17 @@ const AddArticle = ({
 }) => {
     const heightClass = useResponsiveHeight()
     const router = useRouter()
+    const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
     // state
     const [title, setTitle] = useState('')
+    const [pdfTitle, setIsPdfTitle] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [defaultValue, setDefaultValue] = useState('editor')
     const [file, setFile] = useState<any>(null)
     const [ispdfUploaded, setIsPdfUploaded] = useState(false)
     const [pdfLink, setpdfLink] = useState<any>()
-
+    const [loading, setIsLoading] = useState(false)
+    const [deleteLoading, setIsDeleteLoading] = useState(false)
     const { setArticlePreviewContent } = getArticlePreviewStore()
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
@@ -98,13 +104,16 @@ const AddArticle = ({
             const link = contentDetails?.links?.[0]
             if (link) {
                 setpdfLink(link)
+                setDefaultValue('pdf')
                 setIsPdfUploaded(true) // ✅ set true only if link exists
             } else {
                 setpdfLink(null)
+                setDefaultValue('editor')
                 setIsPdfUploaded(false) // optional, to reset if link was removed
             }
 
             setTitle(response.data.title)
+            setIsPdfTitle(response.data.title)
 
             const data = contentDetails?.content
             if (typeof data?.[0] === 'string') {
@@ -164,6 +173,22 @@ const AddArticle = ({
             )
         }
     }
+    function previewPdf() {
+        if (ispdfUploaded) {
+            setArticlePreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
+            )
+        } else {
+            return toast({
+                title: 'Failed',
+                description: 'No PDF uploaded. Please upload one to preview.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                variant: 'destructive',
+            })
+        }
+    }
 
     const onFileUpload = async () => {
         if (file) {
@@ -177,8 +202,10 @@ const AddArticle = ({
             // build the FormData, with the *exact* field name your backend expects*
             const formData = new FormData()
             formData.append('pdf', file, file.name)
+            formData.append('title', pdfTitle)
 
             try {
+                setIsLoading(true)
                 await api.post(
                     `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
                     formData, // ← pass FormData directly
@@ -187,20 +214,22 @@ const AddArticle = ({
                         headers: { 'Content-Type': 'multipart/form-data' },
                     }
                 )
+                setIsChapterUpdated(!isChapterUpdated)
+                setIsdisabledUploadButton(false)
 
-                toast({
-                    title: 'Success',
-                    description: 'PDF uploaded successfully!',
-                    className:
-                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                })
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
                     getArticleContent()
+                    setIsLoading(false)
+                    toast({
+                        title: 'Success',
+                        description: 'PDF uploaded successfully!',
+                        className:
+                            'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
                 }, 1000) //
             } catch (err: any) {
-                console.error(err)
                 toast({
                     title: 'Upload failed',
                     description:
@@ -210,6 +239,36 @@ const AddArticle = ({
                 })
             }
         }
+    }
+
+    async function onDeletePdfhandler() {
+        setIsDeleteLoading(true)
+        await api
+            .put(
+                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                { title: title, links: null }
+            )
+            .then((res) => {
+                toast({
+                    title: 'Success',
+                    description: 'PDF Deleted Successfully',
+                    className:
+                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
+                setIsPdfUploaded(false)
+                setIsDeleteLoading(false)
+                setpdfLink(null)
+            })
+            .catch((err: any) => {
+                toast({
+                    title: 'Delete PDF failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+                setIsDeleteLoading(false)
+            })
     }
 
     return (
@@ -229,16 +288,33 @@ const AddArticle = ({
                                     <FormControl>
                                         <div className="flex justify-between items-center">
                                             <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                <Input
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        setTitle(e.target.value)
-                                                        field.onChange(e)
-                                                    }}
-                                                    placeholder="Untitled Article"
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                    autoFocus
-                                                />
+                                                {defaultValue === 'editor' ? (
+                                                    <Input
+                                                        {...field}
+                                                        onChange={(e) => {
+                                                            setTitle(
+                                                                e.target.value
+                                                            )
+                                                            field.onChange(e)
+                                                        }}
+                                                        placeholder="Untitled Article"
+                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        autoFocus
+                                                    />
+                                                ) : (
+                                                    <Input
+                                                        {...field}
+                                                        onChange={(e) => {
+                                                            setIsPdfTitle(
+                                                                e.target.value
+                                                            )
+                                                            field.onChange(e)
+                                                        }}
+                                                        placeholder="Untitled PDF"
+                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        autoFocus
+                                                    />
+                                                )}
                                                 {!title && ( // Show pencil icon only when the title is empty
                                                     <Pencil
                                                         fill="true"
@@ -252,17 +328,28 @@ const AddArticle = ({
                                             <div className="flex justify-end mt-5">
                                                 <div className="flex items-center justify-between mr-2">
                                                     {defaultValue ===
-                                                        'editor' && (
+                                                    'editor' ? (
                                                         <div
                                                             id="previewArticle"
                                                             onClick={
                                                                 previewArticle
                                                             }
-                                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                            className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
                                                         >
                                                             <Eye size={18} />
                                                             <h6 className="ml-1 text-sm">
-                                                                Preview
+                                                                Preview Article
+                                                            </h6>
+                                                        </div>
+                                                    ) : (
+                                                        <div
+                                                            id="previewArticle"
+                                                            onClick={previewPdf}
+                                                            className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                        >
+                                                            <Eye size={18} />
+                                                            <h6 className="ml-1 text-sm">
+                                                                Preview PDF
                                                             </h6>
                                                         </div>
                                                     )}
@@ -293,7 +380,9 @@ const AddArticle = ({
                                                             onClick={
                                                                 onFileUpload
                                                             }
-                                                            disabled={!file}
+                                                            disabled={
+                                                                !disabledUploadButton
+                                                            }
                                                         >
                                                             Upload PDF
                                                         </Button>
@@ -311,36 +400,50 @@ const AddArticle = ({
 
                 <div className="">
                     <RadioGroup
-                        className="flex items-center gap-x-6 "
+                        className="flex items-center gap-x-6"
                         onValueChange={(value) => setDefaultValue(value)}
-                        defaultValue="editor"
+                        value={defaultValue}
                     >
-                        <div className="flex   gap-x-2">
-                            <RadioGroupItem
-                                value="editor"
-                                id="r1"
-                                className="mt-1"
-                            />
-                            <Label
-                                htmlFor="r1"
-                                className="font-light text-md text-black"
-                            >
-                                Editor
-                            </Label>
-                        </div>
-                        <div className="flex gap-x-2">
-                            <RadioGroupItem
-                                value="pdf"
-                                id="r2"
-                                className="mt-1"
-                            />
-                            <Label
-                                className="font-light text-md text-black"
-                                htmlFor="r2"
-                            >
-                                Upload PDF
-                            </Label>
-                        </div>
+                        <TooltipProvider>
+                            <div className="flex gap-x-2">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <RadioGroupItem
+                                            value="editor"
+                                            disabled={!!pdfLink}
+                                            id="r1"
+                                            className="mt-1"
+                                        />
+                                    </TooltipTrigger>
+                                    {pdfLink && (
+                                        <TooltipContent side="top">
+                                            Editor is disabled because you have
+                                            uploaded a PDF
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                                <Label
+                                    htmlFor="r1"
+                                    className="font-light text-md text-black"
+                                >
+                                    Editor
+                                </Label>
+                            </div>
+
+                            <div className="flex gap-x-2">
+                                <RadioGroupItem
+                                    value="pdf"
+                                    id="r2"
+                                    className="mt-1"
+                                />
+                                <Label
+                                    htmlFor="r2"
+                                    className="font-light text-md text-black"
+                                >
+                                    Upload PDF
+                                </Label>
+                            </div>
+                        </TooltipProvider>
                     </RadioGroup>
                     {defaultValue === 'editor' && (
                         <div className="mt-2 text-start">
@@ -352,11 +455,15 @@ const AddArticle = ({
                     )}
                     {defaultValue === 'pdf' && (
                         <UploadArticle
+                            loading={loading}
                             file={file}
                             setFile={setFile}
                             className=""
                             isPdfUploaded={ispdfUploaded}
                             pdfLink={pdfLink}
+                            setIsPdfUploaded={setIsPdfUploaded}
+                            onDeletePdfhandler={onDeletePdfhandler}
+                            setDisableButton={setIsdisabledUploadButton}
                         />
                     )}
                 </div>

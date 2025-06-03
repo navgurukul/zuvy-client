@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import Link from 'next/link'
+import useWindowSize from '@/hooks/useHeightWidth'
+import { getCleanFileName } from '@/utils/admin'
 
 type EditorDoc = {
     type: string
@@ -22,6 +24,10 @@ function Article({
 
     const [isCompleted, setIsCompleted] = useState<boolean>(false)
     const [pdfLink, setPdfLink] = useState('')
+    const { width } = useWindowSize()
+    const [fileName, setFileName] = useState('')
+    const isMobile = width < 768
+
     const [viewPdf, setViewPdf] = useState(false)
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
@@ -49,6 +55,8 @@ function Article({
         if (content?.links && content.links.length > 0) {
             setPdfLink(content.links[0])
             setViewPdf(true)
+            const fileName = getCleanFileName(content.links[0])
+            setFileName(fileName)
         } else {
             setPdfLink('')
             setViewPdf(false)
@@ -82,18 +90,29 @@ function Article({
 
     return (
         <ScrollArea className="h-full">
-            <div className="mt-24 text-left">
+            <div className={`${viewPdf && isMobile ? '' : 'mt-24'} text-left`}>
                 <h1 className="font-bold text-lg my-5">{content?.title}</h1>
                 {viewPdf ? (
                     <div className="flex items-start   h-[38rem] flex-col gap-2 justify-start">
                         <h1 className="font-medium text-black">
                             Here is your learning material :-
                         </h1>
-                        <iframe
-                            src={pdfLink}
-                            className="h-screen
-                         w-[67rem]"
-                        />
+                        {isMobile ? (
+                            <Link
+                                target="_blank"
+                                href={pdfLink}
+                                download="coding_material.pdf"
+                                className="text-blue-400"
+                            >
+                                View Learning Material:- {fileName}
+                            </Link>
+                        ) : (
+                            <iframe
+                                src={pdfLink}
+                                className="h-[90%]
+                         w-[98%]"
+                            />
+                        )}
                     </div>
                 ) : (
                     <div>
