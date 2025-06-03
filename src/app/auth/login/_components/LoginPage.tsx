@@ -200,11 +200,10 @@ import {
     CredentialResponse,
 } from '@react-oauth/google'
 import { jwtDecode } from 'jwt-decode'
-
+import { api, apiMeraki } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
-import { apiMeraki } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
 
 type Props = {}
@@ -269,22 +268,30 @@ function LoginPage({}: Props) {
             }
 
             // Send the Google data to your backend
-            const resp = await apiMeraki.post(
-                '/auth/google-signin',
-                googleData,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }
-            )
+            // const response = await apiMeraki.post(
+            //     '/auth/google-signin',
+            //     googleData,
+            //     {
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //         },
+            //     }
+            // )
+            const response = await api.post(`/auth/google`, googleData, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+
+            console.log('response', response)
 
             // Handle your backend response
-            if (resp.data.token) {
-                const userToken = resp.data.token
+            if (response.data.token) {
+                const userToken = response.data.token
                 localStorage.setItem('token', userToken)
 
                 // Get user data
+                // Change the API
                 const userResp = await apiMeraki.get(`/users/me`, {
                     headers: {
                         accept: 'application/json',
@@ -329,7 +336,7 @@ function LoginPage({}: Props) {
         } catch (err: any) {
             console.error('Google login error:', err)
             toast({
-                title: 'Login Failed',
+                title: 'Error while logging in Zuvy. Please try again!',
                 description:
                     err.response?.data?.message ||
                     'An error occurred during login.',
