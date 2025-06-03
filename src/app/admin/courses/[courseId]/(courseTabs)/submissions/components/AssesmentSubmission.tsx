@@ -14,6 +14,8 @@ type Props = {}
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
     const [assesments, setAssesments] = useState<any>()
     const debouncedSearch = useDebounce(searchTerm, 300)
+    const [showPopup, setShowPopup] = useState(false);
+    const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
 
     const getAssessments = useCallback(async () => {
         try {
@@ -36,10 +38,20 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         getAssessments()
     }, [getAssessments])
 
-    const handleDownloadPdf = async (assessment: any) => {
-        if (!assessment) return 
+    const handleDownloadClick = (assessment: any) => {
+        setSelectedAssessment(assessment); 
+        setShowPopup(true); 
+    };
 
-        const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
+    const handlePopupClose = () => {
+        setShowPopup(false); 
+        setSelectedAssessment(null); 
+    };
+
+    const handleDownloadPdf = async () => {
+        if (!selectedAssessment) return
+
+        const apiUrl = `/admin/assessment/students/assessment_id${selectedAssessment.id}`
 
         try {
             const response = await api.get(apiUrl)
@@ -68,7 +80,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
             doc.setFontSize(12)
             doc.setFont('helvetica', 'normal')
-            doc.text(`Assessment Name: ${assessment.title}`, 10, 20)
+            doc.text(`Assessment Name: ${selectedAssessment.title}`, 10, 20)
             doc.text(
                 `Qualifying Criteria: ${response?.data.passPercentage}%`,
                 10,
@@ -89,31 +101,31 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 { header: 'Email', dataKey: 'email' },
                 { header: 'Qualified', dataKey: 'qualified' },
                 { header: 'Percentage', dataKey: 'percentage' },
-                ...(assessment.totalCodingQuestions > 0
+                ...(selectedAssessment.totalCodingQuestions > 0
                     ? [{ header: 'Coding Score', dataKey: 'codingScore' }]
                     : []),
-                ...(assessment.totalMcqQuestions > 0
+                ...(selectedAssessment.totalMcqQuestions > 0
                     ? [{ header: 'MCQ Score', dataKey: 'mcqScore' }]
                     : []),
                 { header: 'Tab Changed', dataKey: 'tabChange' },
                 { header: 'Copy Pasted', dataKey: 'copyPaste' },
             ]
 
-            const rows = assessments.map((student: any) => ({
-                name: student.name || 'N/A',
-                email: student.email || 'N/A',
-                qualified: student.isPassed ? 'Yes' : 'No',
-                percentage: `${(student.percentage || 0).toFixed(2)}%`,
+            const rows = assessments.map((assessment: any) => ({
+                name: assessment.name || 'N/A',
+                email: assessment.email || 'N/A',
+                qualified: assessment.isPassed ? 'Yes' : 'No',
+                percentage: `${(assessment.percentage || 0).toFixed(2)}%`,
                 codingScore:
-                    assessment.totalCodingQuestions > 0
-                        ? (student.codingScore || 0).toFixed(2)
+                    selectedAssessment.totalCodingQuestions > 0
+                        ? (assessment.codingScore || 0).toFixed(2)
                         : undefined,
                 mcqScore:
-                    assessment.totalMcqQuestions > 0
-                        ? (student.mcqScore || 0).toFixed(2)
+                    selectedAssessment.totalMcqQuestions > 0
+                        ? (assessment.mcqScore || 0).toFixed(2)
                         : undefined,
-                tabChange: student.tabChange || 0,
-                copyPaste: student.copyPaste || 0,
+                tabChange: assessment.tabChange || 0,
+                copyPaste: assessment.copyPaste || 0,
             }))
 
             autoTable(doc, {
@@ -148,7 +160,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 doc.text(pageText, pageWidth - 30, pageHeight - 10)
             }
 
-            doc.save(`${assessment.title}-Report.pdf`)
+            doc.save(`${selectedAssessment.title}-Report.pdf`)
         } catch (error) {
             toast({
                 title: 'Error',
@@ -156,13 +168,13 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 className: 'text-start capitalize border border-destructive',
             })
         }
-        
+        setShowPopup(false);
     }
 
-    const handleDownloadCsv = async (assessment: any) => {
-        if (!assessment) return 
+    const handleDownloadCsv = async () => {
+        if (!selectedAssessment) return
 
-        const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
+        const apiUrl = `/admin/assessment/students/assessment_id${selectedAssessment.id}`
 
         try {
             const response = await api.get(apiUrl)
@@ -182,25 +194,29 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 'Email',
                 'Qualified',
                 'Percentage',
-                ...(assessment.totalCodingQuestions > 0 ? ['Coding Score'] : []),
-                ...(assessment.totalMcqQuestions > 0 ? ['MCQ Score'] : []),
+                ...(selectedAssessment.totalCodingQuestions > 0
+                    ? ['Coding Score']
+                    : []),
+                ...(selectedAssessment.totalMcqQuestions > 0
+                    ? ['MCQ Score']
+                    : []),
                 'Tab Changed',
                 'Copy Pasted',
             ]
 
-            const rows = assessments.map((student: any) => [
-                student.name || 'N/A',
-                student.email || 'N/A',
-                student.isPassed ? 'Yes' : 'No',
-                `${(student.percentage || 0).toFixed(2)}%`,
-                ...(assessment.totalCodingQuestions > 0
-                    ? [(student.codingScore || 0).toFixed(2)]
+            const rows = assessments.map((assessment: any) => [
+                assessment.name || 'N/A',
+                assessment.email || 'N/A',
+                assessment.isPassed ? 'Yes' : 'No',
+                `${(assessment.percentage || 0).toFixed(2)}%`,
+                ...(selectedAssessment.totalCodingQuestions > 0
+                    ? [(assessment.codingScore || 0).toFixed(2)]
                     : []),
-                ...(assessment.totalMcqQuestions > 0
-                    ? [(student.mcqScore || 0).toFixed(2)]
+                ...(selectedAssessment.totalMcqQuestions > 0
+                    ? [(assessment.mcqScore || 0).toFixed(2)]
                     : []),
-                student.tabChange || 0,
-                student.copyPaste || 0,
+                assessment.tabChange || 0,
+                assessment.copyPaste || 0,
             ])
 
             const csvContent = [
@@ -212,7 +228,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             const url = URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', `${assessment.title}-Report.csv`)
+            link.setAttribute('download', `${selectedAssessment.title}-Report.csv`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
@@ -222,7 +238,8 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 description: 'Failed to download CSV. Please try again later.',
                 className: 'text-start capitalize border border-destructive',
             })
-        }     
+        }
+        setShowPopup(false);
     }
 
     return (
@@ -239,38 +256,35 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                     <div className="grid md:grid-cols-3 gap-3">
                                         {assesments[key].map(
                                             (assessment: any) => (
-                                                <div className="relative">
-                                                    <AssesmentComponent
-                                                        key={assessment.id}
-                                                        id={assessment.id}
-                                                        title={assessment.title}
-                                                        codingChallenges={
-                                                            assessment.totalCodingQuestions
-                                                        }
-                                                        mcq={
-                                                            assessment.totalMcqQuestions
-                                                        }
-                                                        openEnded={
-                                                            assessment.totalOpenEndedQuestions
-                                                        }
-                                                        totalSubmissions={
-                                                            assesments.totalStudents
-                                                        }
-                                                        studentsSubmitted={
-                                                            assessment.totalSubmitedAssessments
-                                                        }
-                                                        bootcampId={courseId}
-                                                        qualifiedStudents={
-                                                            assessment.qualifiedStudents
-                                                        }
-                                                        onDownloadPdf={() =>
-                                                            handleDownloadPdf(assessment)
-                                                        }
-                                                        onDownloadCsv={() =>
-                                                            handleDownloadCsv(assessment)
-                                                        }
-                                                    />
-                                                </div>
+                                                <AssesmentComponent
+                                                    key={assessment.id}
+                                                    id={assessment.id}
+                                                    title={assessment.title}
+                                                    codingChallenges={
+                                                        assessment.totalCodingQuestions
+                                                    }
+                                                    mcq={
+                                                        assessment.totalMcqQuestions
+                                                    }
+                                                    openEnded={
+                                                        assessment.totalOpenEndedQuestions
+                                                    }
+                                                    totalSubmissions={
+                                                        assesments.totalStudents
+                                                    }
+                                                    studentsSubmitted={
+                                                        assessment.totalSubmitedAssessments
+                                                    }
+                                                    bootcampId={courseId}
+                                                    qualifiedStudents={
+                                                        assessment.qualifiedStudents
+                                                    }
+                                                    onDownloadClick={() =>
+                                                        handleDownloadClick(
+                                                            assessment
+                                                        )
+                                                    }
+                                                />
                                             )
                                         )}
                                     </div>
@@ -301,6 +315,38 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                         width={400}
                         height={400}
                     />
+                </div>
+            )}
+
+            {/* Popup Modal */}
+            {showPopup && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-6 rounded shadow-lg text-center w-[90%] max-w-md relative">
+                        <button
+                            onClick={handlePopupClose}
+                            className="absolute text-2xl top-2 right-2 text-gray-500 hover:text-gray-700"
+                            aria-label="Close"
+                        >
+                            x
+                        </button>
+                        <h2 className="text-lg font-semibold mb-4">
+                            Download full report
+                        </h2>
+                        <div className="flex justify-center gap-4 mt-10">
+                            <button
+                                onClick={handleDownloadPdf}
+                                className="px-4 py-2 bg-secondary text-white rounded-md"
+                            >
+                                Download PDF
+                            </button>
+                            <button
+                                onClick={handleDownloadCsv}
+                                className="px-4 py-2 bg-secondary text-white rounded-md"
+                            >
+                                Download CSV
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
