@@ -51,7 +51,23 @@ export function handleDelete(
             })
         })
 }
+export function getCleanFileName(url: string) {
+    // Decode the URL to handle encoded characters
+    const decodedURL = decodeURIComponent(url)
 
+    // Extract the full file name from the URL
+    const fullFileName = decodedURL.substring(decodedURL.lastIndexOf('/') + 1)
+
+    // Remove the prefix before the first underscore (_) — assuming it's a timestamp
+    const parts = fullFileName.split('_')
+    parts.shift() // remove the first part (timestamp)
+
+    // Join the remaining parts back
+    const cleanFileName = parts.join('_')
+
+    return cleanFileName
+}
+  
 export function deleteOpenEndedQuestion(
     deleteOpenEndedQuestionId: any,
     setOpenEndedQuestions: any,

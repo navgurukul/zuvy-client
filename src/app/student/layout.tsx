@@ -28,7 +28,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Check, Menu } from 'lucide-react'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { ellipsis } from '@/lib/utils'
@@ -160,7 +160,11 @@ export default function RootLayout({
             ) : (
                 <div className={`h-screen ${isMobile ? '' : ''} `}>
                     <div>{!isAssessmentRoute && <StudentNavbar />}</div>
-                    <div className={` ${isChapterRoute ? 'px-0 md:px-2 lg:px-2' : 'pt-20'} `}>
+                    <div
+                        className={` ${
+                            isChapterRoute ? 'px-0 md:px-2 lg:px-2' : 'pt-20'
+                        } `}
+                    >
                         <div className="relative">
                             {children}
                             <div className="absolute bottom-0 w-full left-0 bg-[#DCE7E3]">
@@ -244,7 +248,7 @@ export default function RootLayout({
                                                     />
                                                 </Label>
                                                 <ScrollArea className="h-full w-full">
-                                                    <div className="w-full">
+                                                    <div className="w-full h-52">
                                                         {moduleData.moduleName.map(
                                                             (
                                                                 chapter: any,

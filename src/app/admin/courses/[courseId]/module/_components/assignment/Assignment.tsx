@@ -40,6 +40,10 @@ import {
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import UploadArticle from '../Article/UploadPdf'
+
 interface ContentDetail {
     title: string
     description: string | null
@@ -89,6 +93,12 @@ const AddAssignent = ({
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
+    const [defaultValue, setDefaultValue] = useState('editor')
+    const [file, setFile] = useState<any>(null)
+    const [ispdfUploaded, setIsPdfUploaded] = useState(false)
+    const [pdfLink, setpdfLink] = useState<any>()
+    const [loading, setIsLoading] = useState(false)
+
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
     >()
@@ -115,6 +125,7 @@ const AddAssignent = ({
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
+
             setDeadline(response.data.completionDate)
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
@@ -199,6 +210,53 @@ const AddAssignent = ({
             })
         }
     }
+    const onFileUpload = async () => {
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                return toast({
+                    title: 'Invalid file type',
+                    description: 'Only PDF files are allowed.',
+                })
+            }
+
+            // build the FormData, with the *exact* field name your backend expects*
+            const formData = new FormData()
+            formData.append('pdf', file, file.name)
+
+            try {
+                await api.post(
+                    `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
+                    formData, // ← pass FormData directly
+                    {
+                        // OPTIONAL: axios will set the correct Content-Type boundary for you
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    }
+                )
+
+                toast({
+                    title: 'Success',
+                    description: 'PDF uploaded successfully!',
+                    className:
+                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
+
+                setTimeout(() => {
+                    setIsPdfUploaded(true)
+                    setpdfLink('')
+                    getAssignmentContent()
+                }, 1000) //
+            } catch (err: any) {
+                console.error(err)
+                toast({
+                    title: 'Upload failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+            }
+        }
+    }
 
     return (
         <div className="px-5">
@@ -252,14 +310,27 @@ const AddAssignent = ({
                                                             Preview
                                                         </h6>
                                                     </div>
-                                                    <div className="mt-5">
+                                                    {defaultValue ===
+                                                    'editor' ? (
                                                         <Button
                                                             type="submit"
                                                             form="myForm"
                                                         >
                                                             Save
                                                         </Button>
-                                                    </div>
+                                                    ) : (
+                                                        <div>
+                                                            <Button
+                                                                type="button"
+                                                                onClick={
+                                                                    onFileUpload
+                                                                }
+                                                                disabled={!file}
+                                                            >
+                                                                Upload PDF
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </FormControl>
@@ -340,11 +411,60 @@ const AddAssignent = ({
                         </form>
                     </Form>
                 </div>
-                <div className="text-left mt-6">
-                    <RemirrorTextEditor
-                        initialContent={initialContent}
-                        setInitialContent={setInitialContent}
-                    />
+                <div className="">
+                    <RadioGroup
+                        className="flex items-center gap-x-6 mt-4"
+                        onValueChange={(value) => setDefaultValue(value)}
+                        defaultValue="editor"
+                    >
+                        <div className="flex   gap-x-2">
+                            <RadioGroupItem
+                                value="editor"
+                                id="r1"
+                                className="mt-1"
+                            />
+                            <Label
+                                htmlFor="r1"
+                                className="font-light text-md text-black"
+                            >
+                                Editor
+                            </Label>
+                        </div>
+                        <div className="flex gap-x-2">
+                            <RadioGroupItem
+                                value="pdf"
+                                id="r2"
+                                className="mt-1"
+                            />
+                            <Label
+                                className="font-light text-md text-black"
+                                htmlFor="r2"
+                            >
+                                Upload PDF
+                            </Label>
+                        </div>
+                    </RadioGroup>
+                    {defaultValue === 'editor' && (
+                        <div className="mt-2 text-start">
+                            <RemirrorTextEditor
+                                initialContent={initialContent}
+                                setInitialContent={setInitialContent}
+                            />
+                        </div>
+                    )}
+                    {defaultValue === 'pdf' && (
+                        <UploadArticle
+                            loading={loading}
+                            file={file}
+                            setFile={setFile}
+                            className=""
+                            isPdfUploaded={ispdfUploaded}
+                            pdfLink={pdfLink}
+                            setDisableButton={() => false}
+                            setIsPdfUploaded={() => false}
+                            onDeletePdfhandler={() => console.log('e')}
+                        />
+                    )}
                 </div>
             </>
         </div>
