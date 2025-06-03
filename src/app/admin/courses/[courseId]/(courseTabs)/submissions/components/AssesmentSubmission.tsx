@@ -9,13 +9,9 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 // import assesmentNotfound from @/public
 
-type Props = {}
-
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
     const [assesments, setAssesments] = useState<any>()
     const debouncedSearch = useDebounce(searchTerm, 300)
-    const [showPopup, setShowPopup] = useState(false);
-    const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
 
     const getAssessments = useCallback(async () => {
         try {
@@ -38,20 +34,10 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         getAssessments()
     }, [getAssessments])
 
-    const handleDownloadClick = (assessment: any) => {
-        setSelectedAssessment(assessment); 
-        setShowPopup(true); 
-    };
+    const handleDownloadPdf = async (assessment: any) => {
+        if (!assessment) return
 
-    const handlePopupClose = () => {
-        setShowPopup(false); 
-        setSelectedAssessment(null); 
-    };
-
-    const handleDownloadPdf = async () => {
-        if (!selectedAssessment) return
-
-        const apiUrl = `/admin/assessment/students/assessment_id${selectedAssessment.id}`
+        const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
 
         try {
             const response = await api.get(apiUrl)
@@ -64,7 +50,8 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 toast({
                     title: 'Error',
                     description: 'No data available to generate PDF.',
-                    className: 'text-start capitalize border border-destructive',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
                 return
             }
@@ -80,7 +67,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
             doc.setFontSize(12)
             doc.setFont('helvetica', 'normal')
-            doc.text(`Assessment Name: ${selectedAssessment.title}`, 10, 20)
+            doc.text(`Assessment Name: ${assessment.title}`, 10, 20)
             doc.text(
                 `Qualifying Criteria: ${response?.data.passPercentage}%`,
                 10,
@@ -90,42 +77,38 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 doc.text(`Total Coding Score: ${requiredCodingScore}`, 10, 32)
             requiredMcqScore &&
                 doc.text(`Total MCQ Score: ${requiredMcqScore}`, 10, 38)
-            doc.text(
-                `No of Students Attempted: ${assessments.length}`,
-                10,
-                44
-            )
+            doc.text(`No of Students Attempted: ${assessments.length}`, 10, 44)
 
             const columns = [
                 { header: 'Name', dataKey: 'name' },
                 { header: 'Email', dataKey: 'email' },
                 { header: 'Qualified', dataKey: 'qualified' },
                 { header: 'Percentage', dataKey: 'percentage' },
-                ...(selectedAssessment.totalCodingQuestions > 0
+                ...(assessment.totalCodingQuestions > 0
                     ? [{ header: 'Coding Score', dataKey: 'codingScore' }]
                     : []),
-                ...(selectedAssessment.totalMcqQuestions > 0
+                ...(assessment.totalMcqQuestions > 0
                     ? [{ header: 'MCQ Score', dataKey: 'mcqScore' }]
                     : []),
                 { header: 'Tab Changed', dataKey: 'tabChange' },
                 { header: 'Copy Pasted', dataKey: 'copyPaste' },
             ]
 
-            const rows = assessments.map((assessment: any) => ({
-                name: assessment.name || 'N/A',
-                email: assessment.email || 'N/A',
-                qualified: assessment.isPassed ? 'Yes' : 'No',
-                percentage: `${(assessment.percentage || 0).toFixed(2)}%`,
+            const rows = assessments.map((student: any) => ({
+                name: student.name || 'N/A',
+                email: student.email || 'N/A',
+                qualified: student.isPassed ? 'Yes' : 'No',
+                percentage: `${(student.percentage || 0).toFixed(2)}%`,
                 codingScore:
-                    selectedAssessment.totalCodingQuestions > 0
-                        ? (assessment.codingScore || 0).toFixed(2)
+                    assessment.totalCodingQuestions > 0
+                        ? (student.codingScore || 0).toFixed(2)
                         : undefined,
                 mcqScore:
-                    selectedAssessment.totalMcqQuestions > 0
-                        ? (assessment.mcqScore || 0).toFixed(2)
+                    assessment.totalMcqQuestions > 0
+                        ? (student.mcqScore || 0).toFixed(2)
                         : undefined,
-                tabChange: assessment.tabChange || 0,
-                copyPaste: assessment.copyPaste || 0,
+                tabChange: student.tabChange || 0,
+                copyPaste: student.copyPaste || 0,
             }))
 
             autoTable(doc, {
@@ -160,7 +143,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 doc.text(pageText, pageWidth - 30, pageHeight - 10)
             }
 
-            doc.save(`${selectedAssessment.title}-Report.pdf`)
+            doc.save(`${assessment.title}-Report.pdf`)
         } catch (error) {
             toast({
                 title: 'Error',
@@ -168,13 +151,12 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 className: 'text-start capitalize border border-destructive',
             })
         }
-        setShowPopup(false);
     }
 
-    const handleDownloadCsv = async () => {
-        if (!selectedAssessment) return
+    const handleDownloadCsv = async (assessment: any) => {
+        if (!assessment) return
 
-        const apiUrl = `/admin/assessment/students/assessment_id${selectedAssessment.id}`
+        const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
 
         try {
             const response = await api.get(apiUrl)
@@ -184,7 +166,8 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 toast({
                     title: 'Error',
                     description: 'No data available to generate CSV.',
-                    className: 'text-start capitalize border border-destructive',
+                    className:
+                        'text-start capitalize border border-destructive',
                 })
                 return
             }
@@ -194,29 +177,27 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 'Email',
                 'Qualified',
                 'Percentage',
-                ...(selectedAssessment.totalCodingQuestions > 0
+                ...(assessment.totalCodingQuestions > 0
                     ? ['Coding Score']
                     : []),
-                ...(selectedAssessment.totalMcqQuestions > 0
-                    ? ['MCQ Score']
-                    : []),
+                ...(assessment.totalMcqQuestions > 0 ? ['MCQ Score'] : []),
                 'Tab Changed',
                 'Copy Pasted',
             ]
 
-            const rows = assessments.map((assessment: any) => [
-                assessment.name || 'N/A',
-                assessment.email || 'N/A',
-                assessment.isPassed ? 'Yes' : 'No',
-                `${(assessment.percentage || 0).toFixed(2)}%`,
-                ...(selectedAssessment.totalCodingQuestions > 0
-                    ? [(assessment.codingScore || 0).toFixed(2)]
+            const rows = assessments.map((student: any) => [
+                student.name || 'N/A',
+                student.email || 'N/A',
+                student.isPassed ? 'Yes' : 'No',
+                `${(student.percentage || 0).toFixed(2)}%`,
+                ...(assessment.totalCodingQuestions > 0
+                    ? [(student.codingScore || 0).toFixed(2)]
                     : []),
-                ...(selectedAssessment.totalMcqQuestions > 0
-                    ? [(assessment.mcqScore || 0).toFixed(2)]
+                ...(assessment.totalMcqQuestions > 0
+                    ? [(student.mcqScore || 0).toFixed(2)]
                     : []),
-                assessment.tabChange || 0,
-                assessment.copyPaste || 0,
+                student.tabChange || 0,
+                student.copyPaste || 0,
             ])
 
             const csvContent = [
@@ -224,11 +205,13 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 ...rows.map((row) => row.join(',')),
             ].join('\n')
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+            const blob = new Blob([csvContent], {
+                type: 'text/csv;charset=utf-8;',
+            })
             const url = URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.setAttribute('download', `${selectedAssessment.title}-Report.csv`)
+            link.setAttribute('download', `${assessment.title}-Report.csv`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
@@ -239,7 +222,6 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 className: 'text-start capitalize border border-destructive',
             })
         }
-        setShowPopup(false);
     }
 
     return (
@@ -279,8 +261,18 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                                     qualifiedStudents={
                                                         assessment.qualifiedStudents
                                                     }
-                                                    onDownloadClick={() =>
-                                                        handleDownloadClick(
+                                                    // onDownloadClick={() =>
+                                                    //     handleDownloadClick(
+                                                    //         assessment
+                                                    //     )
+                                                    // }
+                                                    onDownloadPdf={() =>
+                                                        handleDownloadPdf(
+                                                            assessment
+                                                        )
+                                                    }
+                                                    onDownloadCsv={() =>
+                                                        handleDownloadCsv(
                                                             assessment
                                                         )
                                                     }
@@ -319,7 +311,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             )}
 
             {/* Popup Modal */}
-            {showPopup && (
+            {/* {showPopup && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white p-6 rounded shadow-lg text-center w-[90%] max-w-md relative">
                         <button
@@ -348,7 +340,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
         </div>
     )
 }
