@@ -1,23 +1,20 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getProjectPreviewStore } from '@/store/store'
 import { fetchProjectDetails } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
-import { useEditor } from '@tiptap/react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import { Button } from '@/components/ui/button'
-import { Link } from 'lucide-react'
-import { Input } from '@/components/ui/input'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 const ProjectPreview = () => {
     const router = useRouter()
     const { courseId, moduleId, projectID } = useParams()
     const { projectPreviewContent, setProjectPreviewContent } =
         getProjectPreviewStore()
+    const [initialContent, setInitialContent] = useState()
 
     const goBack = () => {
         router.push(
@@ -45,25 +42,15 @@ const ProjectPreview = () => {
     }
     const formattedDate = date.toLocaleDateString('en-US', options)
 
-    const editor = useEditor({
-        extensions,
-        content: '', // Initialize with empty content
-        editable: false,
-    })
-
     useEffect(() => {
         fetchProjectDetails(setProjectPreviewContent, projectID, courseId)
     }, [fetchProjectDetails, projectID, courseId])
 
     useEffect(() => {
-        if (
-            editor &&
-            projectPreviewContent?.project[0].instruction.description[0]
-                .content[0].content
-        ) {
+        if (projectPreviewContent?.project[0]?.instruction?.description) {
             const contentDetails =
                 projectPreviewContent?.project[0].instruction.description
-            const firstContent = contentDetails?.[0]?.content?.[0].content ?? {
+            const firstContent = contentDetails ?? {
                 type: 'doc',
                 content: [
                     {
@@ -72,9 +59,9 @@ const ProjectPreview = () => {
                     },
                 ],
             }
-            editor.commands.setContent(firstContent)
+            setInitialContent(JSON.parse(firstContent))
         }
-    }, [projectPreviewContent, editor])
+    }, [projectPreviewContent])
 
     return (
         <>
@@ -109,7 +96,13 @@ const ProjectPreview = () => {
                             </h1>
                         </div>
 
-                        <TiptapEditor editor={editor} />
+                        <div className="mt-2 text-start">
+                            <RemirrorTextEditor
+                                initialContent={initialContent}
+                                setInitialContent={setInitialContent}
+                                preview={true}
+                            />
+                        </div>
                         <div className="mt-2 text-end">
                             <Button disabled>Mark as Done</Button>
                         </div>
