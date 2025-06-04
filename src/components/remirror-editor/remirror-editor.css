@@ -180,3 +180,52 @@ code {
     margin-right: 0;
     font-style: italic;
 }
+
+/* Specific styles for RemirrorForm bigScreen mode */
+.remirror-form-bigscreen {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.remirror-form-bigscreen-content {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure these styles don't affect RemirrorTextEditor */
+.remirror-form-bigscreen .ProseMirror {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
+    max-height: none !important;
+}
+
+.remirror-form-bigscreen .remirror-editor-wrapper {
+    border: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
+    max-height: none !important;
+}
+
+/* Remove any default spacing from Remirror components in bigScreen mode */
+.remirror-form-bigscreen .remirror-theme {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.remirror-form-bigscreen .remirror-theme > div {
+    padding: 0 !important;
+    margin: 0 !important;
+}
