@@ -185,9 +185,9 @@ function CodingChallenge({
             ) : (
                 <div>
                     <div>
-                        <h1 className="text-center font-semibold text-2xl">
+                        {/* <h1 className="text-center font-semibold text-2xl">
                             There are no question added yet
-                        </h1>
+                        </h1> */}
                         <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
                             <div>
                                 <Image
