@@ -206,8 +206,6 @@ code {
     overflow: visible !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-height: auto !important;
-    max-height: none !important;
 }
 
 .remirror-form-bigscreen .remirror-editor-wrapper {
@@ -215,8 +213,6 @@ code {
     overflow: visible !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-height: auto !important;
-    max-height: none !important;
 }
 
 /* Remove any default spacing from Remirror components in bigScreen mode */
@@ -228,4 +224,30 @@ code {
 .remirror-form-bigscreen .remirror-theme > div {
     padding: 0 !important;
     margin: 0 !important;
+}
+
+/* BigScreen mode - height should be auto */
+.remirror-form-bigscreen .ProseMirror {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+}
+
+.remirror-form-bigscreen-content .ProseMirror {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+}
+
+/* Preview mode - minimum height only (not for bigScreen) */
+.remirror-theme
+    .ProseMirror[contenteditable='false']:not(
+        .remirror-form-bigscreen .ProseMirror
+    ) {
+    min-height: 20px !important;
+}
+
+/* Alternative: Target by scroll area height for preview (not bigScreen) */
+.h-26 .ProseMirror:not(.remirror-form-bigscreen .ProseMirror) {
+    min-height: 20px !important;
 }
