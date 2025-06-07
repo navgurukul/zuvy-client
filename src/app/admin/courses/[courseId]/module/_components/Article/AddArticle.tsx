@@ -80,6 +80,7 @@ const AddArticle = ({
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
     >()
+    const [isEditorSaved, setIsEditorSaved] = useState(false) // <-- Add this state
 
     // misc
     const formSchema = z.object({
@@ -105,11 +106,20 @@ const AddArticle = ({
             if (link) {
                 setpdfLink(link)
                 setDefaultValue('pdf')
-                setIsPdfUploaded(true) // ✅ set true only if link exists
+                setIsPdfUploaded(true)
+                setIsEditorSaved(false) // <-- PDF hai to editor saved false
             } else {
                 setpdfLink(null)
                 setDefaultValue('editor')
-                setIsPdfUploaded(false) // optional, to reset if link was removed
+                setIsPdfUploaded(false)
+                // --- Check if editor me content hai ---
+                const data = contentDetails?.content
+                let hasEditorContent = false
+                if (data && data.length > 0) {
+                    // Agar content array me kuch hai, to editor saved true
+                    hasEditorContent = true
+                }
+                setIsEditorSaved(hasEditorContent)
             }
 
             setTitle(response.data.title)
@@ -143,6 +153,7 @@ const AddArticle = ({
             )
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
+            setIsEditorSaved(true) // <-- Set true on save
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
@@ -164,6 +175,32 @@ const AddArticle = ({
     useEffect(() => {
         getArticleContent()
     }, [content])
+
+    // Reset isEditorSaved if PDF is uploaded or deleted
+    useEffect(() => {
+        if (ispdfUploaded) setIsEditorSaved(false)
+    }, [ispdfUploaded])
+
+    // Add this useEffect after your other useEffects
+    useEffect(() => {
+        // Only check when editor is visible
+        if (defaultValue === 'editor') {
+            // Check if initialContent is empty
+            if (
+                !initialContent ||
+                !initialContent.doc ||
+                !initialContent.doc.content ||
+                initialContent.doc.content.length === 0 ||
+                (
+                    initialContent.doc.content.length === 1 &&
+                    initialContent.doc.content[0].type === 'paragraph' &&
+                    !initialContent.doc.content[0].content
+                )
+            ) {
+                setIsEditorSaved(false)
+            }
+        }
+    }, [initialContent, defaultValue])
 
     function previewArticle() {
         if (content) {
@@ -417,8 +454,7 @@ const AddArticle = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            Editor is disabled because you have
-                                            uploaded a PDF
+                                            Editor is disabled because you have uploaded a PDF
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
@@ -431,11 +467,21 @@ const AddArticle = ({
                             </div>
 
                             <div className="flex gap-x-2">
-                                <RadioGroupItem
-                                    value="pdf"
-                                    id="r2"
-                                    className="mt-1"
-                                />
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <RadioGroupItem
+                                            value="pdf"
+                                            id="r2"
+                                            className="mt-1"
+                                            disabled={isEditorSaved}
+                                        />
+                                    </TooltipTrigger>
+                                    {isEditorSaved && (
+                                        <TooltipContent side="top">
+                                            PDF upload is disabled because you have saved article
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
                                 <Label
                                     htmlFor="r2"
                                     className="font-light text-md text-black"
