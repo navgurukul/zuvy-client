@@ -454,7 +454,7 @@ const AddArticle = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            Editor is disabled because you have uploaded a PDF
+                                            You’ve uploaded a PDF, so the editor is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
@@ -478,7 +478,7 @@ const AddArticle = ({
                                     </TooltipTrigger>
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
-                                            PDF upload is disabled because you have saved article
+                                            You’ve already saved the assignment, so PDF upload is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>

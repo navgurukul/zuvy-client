@@ -104,6 +104,7 @@ const AddAssignent = ({
     const [ispdfUploaded, setIsPdfUploaded] = useState(false)
     const [pdfLink, setpdfLink] = useState<any>()
     const [loading, setIsLoading] = useState(false)
+    const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
 
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
@@ -287,6 +288,7 @@ const AddAssignent = ({
                     className:
                         'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
+                setIsdisabledUploadButton(false)
 
                 setTimeout(() => {
                     setIsPdfUploaded(true)
@@ -438,7 +440,7 @@ const AddAssignent = ({
                                                                 onClick={
                                                                     onFileUpload
                                                                 }
-                                                                disabled={!file}
+                                                                disabled={!disabledUploadButton}
                                                             >
                                                                 Upload PDF
                                                             </Button>
@@ -543,7 +545,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            Editor is disabled because you have uploaded a PDF
+                                            You’ve uploaded a PDF, so the editor is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
@@ -567,7 +569,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
-                                            PDF upload is disabled because you have saved assignment
+                                            You’ve already saved the assignment, so PDF upload is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
@@ -596,9 +598,9 @@ const AddAssignent = ({
                             className=""
                             isPdfUploaded={ispdfUploaded}
                             pdfLink={pdfLink}
-                            setDisableButton={() => {}}
                             setIsPdfUploaded={setIsPdfUploaded}
                             onDeletePdfhandler={onDeletePdfhandler}
+                            setDisableButton={setIsdisabledUploadButton}
                         />
                     )}
                 </div>
