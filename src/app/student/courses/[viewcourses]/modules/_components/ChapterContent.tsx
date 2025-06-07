@@ -75,6 +75,8 @@ function ChapterContent() {
         if (chapters?.length > 0) {
             // fetchChapterContent(chapters[0]?.id)
             fetchChapterContent(chapter_id)
+        }else{
+            setLoading(false)
         }
     }, [chapters])
 
@@ -209,17 +211,29 @@ function ChapterContent() {
             return (
                 <>
                     {/* <h1>Hello students...!!</h1> */}
-                    {loading ? (
-                        <div className="my-5 flex justify-center items-center">
-                            <div className="absolute h-screen">
-                                <div className="relative top-[70%]">
-                                    <Spinner className="text-secondary" />
-                                </div>
-                            </div>
+                    {chapters?.length == 0 &&   (
+                        // <div className="my-5 flex justify-center items-center">
+                        //     <div className="absolute h-screen">
+                        //         <div className="relative top-[70%]">
+                        //             <Spinner className="text-secondary" />
+                        //         </div>
+                        //     </div>
+                        // </div>
+
+                        <div className="flex items-center justify-center h-full lg:h-screen w-full overflow-hidden">
+                        <div className="flex flex-col items-center justify-center">
+                          <img
+                            src="/images/no-chapters.svg"
+                            alt="No Chapters"
+                            className="w-[250px] h-[250px] lg:w-[450px] lg:h-[400px] object-contain opacity-90 lg:translate-x-[-220px] translate-x-[-26px] lg:translate-y-[-30px] translate-y-[70px] mb-8 lg:mb-1"
+                          />
+                         <p className="text-sm lg:text-lg text-center lg:translate-x-[-230px] translate-x-[-28px] lg:translate-y-[-60px]">
+                           Chapters are not created yet!
+                         </p>
                         </div>
-                    ) : (
-                        <h1>Create New Chapter</h1>
-                    )}
+                       </div>
+                    ) 
+                    }
                 </>
             )
         }
