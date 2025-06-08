@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Link } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 type EditorDoc = {
@@ -17,6 +17,8 @@ type EditorDoc = {
 
 const PreviewAssignment = ({ params }: { params: any }) => {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const isPdfPreview = searchParams.get('pdf') === 'true'
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()
     const [initialContent, setInitialContent] = useState<
@@ -76,6 +78,10 @@ const PreviewAssignment = ({ params }: { params: any }) => {
         }
     }, [assignmentPreviewContent])
 
+    // Get PDF link if available
+    const pdfLink =
+        assignmentPreviewContent?.contentDetails?.[0]?.links?.[0] || null
+
     const goBack = () => {
         router.push(
             `/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`
@@ -83,14 +89,14 @@ const PreviewAssignment = ({ params }: { params: any }) => {
     }
 
     return (
-        <>
+        <div className="">
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
                 <h1 className="text-center text-[#FFFFFF]">
                     You are in the Admin Preview Mode.
                 </h1>
             </div>
 
-            <div className="flex mt-20 px-8 gap-8">
+            <div className="flex mt-14 px-8 gap-8">
                 {/* Left Section: Go Back Button */}
                 <div className="w-1/4 flex flex-col">
                     <Button variant={'ghost'} onClick={goBack}>
@@ -102,9 +108,9 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                 </div>
 
                 {/* Right Section: Editor */}
-                <div className="pt-20">
+                <div className="pt-12 w-[395%]">
                     <div className="flex justify-between">
-                        <div className="flex flex-col items-start mb-3 gap-y-6">
+                        <div className="flex flex-col items-start mb-3">
                             <h1 className="text-2xl font-semibold text-left">
                                 {assignmentPreviewContent?.title
                                     ? assignmentPreviewContent.title
@@ -119,13 +125,26 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                         </div>
                     </div>
 
-                    <div className="mt-2 text-start">
-                        <RemirrorTextEditor
-                            initialContent={initialContent}
-                            setInitialContent={setInitialContent}
-                            preview={true}
-                        />
-                    </div>
+                    {/* PDF Preview */}
+                    {isPdfPreview && pdfLink ? (
+                        <div className="mt-2 text-start">
+                            <iframe
+                                src={pdfLink}
+                                width="100%"
+                                height="800"
+                                title="PDF Preview"
+                                className="border rounded"
+                            />
+                        </div>
+                    ) : (
+                        <div className="mt-2 text-start">
+                            <RemirrorTextEditor
+                                initialContent={initialContent}
+                                setInitialContent={setInitialContent}
+                                preview={true}
+                            />
+                        </div>
+                    )}
                     <div className="mt-2">
                         <div className="flex items-center">
                             <Link className="mr-2 h-4 w-4" />
@@ -137,7 +156,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 
