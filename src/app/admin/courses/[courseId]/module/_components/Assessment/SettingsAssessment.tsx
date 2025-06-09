@@ -34,6 +34,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { proctoringOptions } from '@/utils/admin'
+import PublishAssessmentDialog from '../PublishDialog'
 
 type SettingsAssessmentProps = {
     selectedCodingQuesIds: any
@@ -492,6 +493,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                             <h1 className="text-lg font-bold">
                                 Manage Settings
                             </h1>
+
+                            {/* <Button>
+                                <PublishAssessmentDialog/>
+                            </Button> */}
                             {/* Section 6: Submit button */}
                             {
                                 codingMax === 0 && mcqMax === 0 ? (

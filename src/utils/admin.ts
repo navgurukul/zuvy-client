@@ -51,7 +51,23 @@ export function handleDelete(
             })
         })
 }
+export function getCleanFileName(url: string) {
+    // Decode the URL to handle encoded characters
+    const decodedURL = decodeURIComponent(url)
 
+    // Extract the full file name from the URL
+    const fullFileName = decodedURL.substring(decodedURL.lastIndexOf('/') + 1)
+
+    // Remove the prefix before the first underscore (_) — assuming it's a timestamp
+    const parts = fullFileName.split('_')
+    parts.shift() // remove the first part (timestamp)
+
+    // Join the remaining parts back
+    const cleanFileName = parts.join('_')
+
+    return cleanFileName
+}
+  
 export function deleteOpenEndedQuestion(
     deleteOpenEndedQuestionId: any,
     setOpenEndedQuestions: any,
@@ -407,6 +423,49 @@ export async function filteredCodingQuestions(
         setLastPage(response.data.totalPages)
     } catch (error) {
         console.error('Error:', error)
+    }
+}
+
+export const fetchStudentAssessments = async (
+    assessmentId: string,
+    offset: number,
+    limit: any,
+    searchStudent: string = '',
+    setTotalPages: (totalPages: number) => void,
+    setLastPage: (lastPage: number) => void,
+) => {
+    // Build query params
+    const params = new URLSearchParams({
+        offset: offset.toString(),
+        limit: limit.toString(),
+    })
+    if (searchStudent) params.set('searchStudent', searchStudent)
+
+    const endpoint = `/admin/assessment/students/assessment_id${assessmentId}?${params.toString()}`
+    const res = await api.get(endpoint)
+    const {
+        submitedOutsourseAssessments,
+        ModuleAssessment,
+        passPercentage,
+    } = res.data
+
+    // Update global pagination
+    const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
+    setTotalPages(updatedTotalPages)
+    setLastPage(updatedTotalPages)
+
+    // Map and return data
+    const assessments = submitedOutsourseAssessments.map((a: any) => ({
+        ...a,
+        bootcampId: res.data.bootcampId,
+        newId: res.data.id,
+        title: ModuleAssessment.title,
+    }))
+
+    return {
+        assessments,
+        moduleAssessment: ModuleAssessment,
+        passPercentage,
     }
 }
 

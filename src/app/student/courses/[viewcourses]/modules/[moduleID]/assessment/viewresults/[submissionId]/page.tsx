@@ -43,7 +43,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         } catch (error: any) {
             setShowErrorMessage(
                 error?.response?.data?.message ||
-                    'An error occurred while fetching results.'
+                'An error occurred while fetching results.'
             )
         }
     }
@@ -189,7 +189,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                             }
                                         </div>
                                         <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
-                                        {` ${Math.trunc(Number(weightageCodingQuestions))} Marks`}
+                                            {` ${Math.trunc(Number(weightageCodingQuestions))} Marks`}
 
                                         </h2>
                                     </div>
@@ -198,11 +198,10 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 <div className="text-xl mt-2 text-start">
                                     Status:{' '}
                                     <span
-                                        className={`ml-2 ${
-                                            codingQuestion.status === 'Accepted'
-                                                ? 'text-green-400'
-                                                : 'text-destructive'
-                                        }`}
+                                        className={`ml-2 ${codingQuestion.status === 'Accepted'
+                                            ? 'text-green-400'
+                                            : 'text-destructive'
+                                            }`}
                                     >
                                         {codingQuestion.status}
                                     </span>
@@ -210,14 +209,8 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 <p className="text-xl mt-2 text-start">
                                     Score:{' '}
                                     {codingQuestion.status === 'Accepted'
-                                        ? ` ${Math.trunc(
-                                              Number(weightageCodingQuestions)
-                                          )} / ${Math.trunc(
-                                              Number(weightageCodingQuestions)
-                                          )}`
-                                        : `0 / ${Math.trunc(
-                                              Number(weightageCodingQuestions)
-                                          )}`}
+                                        ? ` ${Number(weightageCodingQuestions).toFixed(2)} / ${Number(weightageCodingQuestions).toFixed(2)}`
+                                        : `0 / ${Number(weightageCodingQuestions).toFixed(2)}`}
                                 </p>
                                 <div
                                     onClick={() =>
@@ -275,8 +268,12 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                         </div>
 
                         <p className="text-xl mt-2 text-start">
-                            Score: {Math.trunc(viewResultsData.mcqScore)}/
-                            {weightageMcqQuestions}
+                            Score: {Number(viewResultsData.mcqScore) % 1 === 0
+                                ? Number(viewResultsData.mcqScore)
+                                : Number(viewResultsData.mcqScore).toFixed(2)
+                            }/{weightageMcqQuestions}
+
+
                         </p>
 
                         <div
@@ -347,15 +344,19 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                 <div className="flex flex-col gap-4 text-left w-full max-w-2xl">
                     <div className="">{timeTaken}</div>
                     <div
-                        className={`${
-                            isPassed
-                                ? 'bg-green-100 border-green-500'
-                                : 'bg-red-100 border-red-500'
-                        } h-[100px] flex justify-between mt-2 max-w-lg p-5 rounded-lg border`}
+                        className={`${isPassed
+                            ? 'bg-green-100 border-green-500'
+                            : 'bg-red-100 border-red-500'
+                            } h-[100px] flex justify-between mt-2 max-w-lg p-5 rounded-lg border`}
                     >
                         <div>
                             <p className="text-lg font-semibold">
-                                Your Score: {Math.trunc(percentage || 0)}/100
+                                Your Score: {percentage
+                                    ? percentage % 1 === 0
+                                        ? percentage
+                                        : percentage.toFixed(2)
+                                    : 0}/100
+
                             </p>
                             <p>
                                 {isPassed

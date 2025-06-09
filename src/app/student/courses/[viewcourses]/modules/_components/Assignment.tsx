@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import { api } from '@/utils/axios.config'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
 import { Input } from '@/components/ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -20,6 +17,7 @@ import googleDriveLogo from '../../../../../../../public/google-drive.png'
 import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 type Props = {
     projectId: number
@@ -28,6 +26,11 @@ type Props = {
     completeChapter: () => void
     content: any
 }
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
 const FormSchema = z.object({
     link: z
         .string()
@@ -55,11 +58,22 @@ const Assignments = ({
     const [projectData, setProjectData] = useState<any>([])
     const [deadlineDate, setDeadlineDate] = useState<string>('')
     const [submittedDate, setSubmittedDate] = useState<string>('')
+    const [isDisabled, setIsDisabled] = useState(true)
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >(
+        content?.articleContent === null
+            ? undefined
+            : typeof content?.articleContent[0] === 'string'
+            ? JSON.parse(content?.articleContent[0])
+            : { doc: content?.articleContent[0] }
+    )
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
     const [icon, setIcon] = useState<JSX.Element>(
         <Link className="mr-2 h-4 w-4" />
     )
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -89,19 +103,34 @@ const Assignments = ({
         }
     }, [content.id])
 
-    const editor = useEditor({
-        extensions,
-        content: '<h1>No Content Added Yet</h1>',
-        editable: false,
-    })
-
     useEffect(() => {
-        if (editor && content?.articleContent?.[0]) {
-            editor.commands.setContent(content.articleContent[0])
-        } else if (editor) {
-            editor.commands.setContent('<h1>No Content Added Yet</h1>')
+        if (content?.articleContent?.[0]) {
+            if (typeof content.articleContent[0] === 'string') {
+                setInitialContent(JSON.parse(content.articleContent[0]))
+                setIsDisabled(false)
+            } else {
+                const jsonData = { doc: content.articleContent[0] }
+                setInitialContent(jsonData)
+                setIsDisabled(false)
+            }
+        } else {
+            setIsDisabled(true)
         }
-    }, [editor, content])
+        //  else if (editor) {
+        //     // const noContent = {
+        //     //     type: 'doc',
+        //     //     content: [
+        //     //         {
+        //     //             type: 'paragraph',
+        //     //             content: [
+        //     //                  { type: 'text', text: 'No Content Added Yet' },
+        //     //             ],
+        //     //         },
+        //     //     ],
+        //     // }
+        //     // setInitialContent(noContent)
+        // }
+    }, [content])
 
     useEffect(() => {
         getProjectData()
@@ -182,8 +211,8 @@ const Assignments = ({
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
     return (
-        <ScrollArea className="h-screen">
-            <div className="flex flex-col mt-20 relative">
+        <ScrollArea className="h-[calc(100vh-110px)] lg:h-screen md:h-screen">
+            <div className="flex flex-col sm:mt-20 mt-5 relative mr-4 md:mr-0 lg:mr-0">
                 <h1 className="text-left text-xl font-semibold flex flex-col ">
                     <span className="flex items-center gap-x-2 ">
                         {content?.title}{' '}
@@ -207,7 +236,7 @@ const Assignments = ({
                     </span>
                     {!content.articleContent ||
                     !content.articleContent.some((doc: any) =>
-                        doc.content.some(
+                        doc?.content?.some(
                             (paragraph: any) =>
                                 paragraph.content &&
                                 paragraph.content.some(
@@ -237,7 +266,13 @@ const Assignments = ({
                         {' '}
                         Assignment Description
                     </h1>
-                    {editor && <TiptapEditor editor={editor} />}
+                    <div className="mt-2 text-start">
+                        <RemirrorTextEditor
+                            initialContent={initialContent}
+                            setInitialContent={setInitialContent}
+                            preview={true}
+                        />
+                    </div>
                 </div>
                 <Form {...form}>
                     <form
@@ -265,17 +300,8 @@ const Assignments = ({
                             )}
                         />
 
-                        {!content.articleContent ||
-                        !content.articleContent.some((doc: any) =>
-                            doc.content.some(
-                                (paragraph: any) =>
-                                    paragraph.content &&
-                                    paragraph.content.some(
-                                        (item: any) => item.type === 'text'
-                                    )
-                            )
-                        ) ? (
-                            <div className="flex justify-end absolute top-0 right-0">
+                        {isDisabled ? (
+                            <div className="flex justify-end absolute sm:top-0 sm:right-0">
                                 <Button
                                     className="w-full mr-3"
                                     type="submit"
@@ -285,8 +311,8 @@ const Assignments = ({
                                 </Button>
                             </div>
                         ) : (
-                            <div className="flex justify-end absolute top-0 right-0">
-                                <Button className="w-full mr-3" type="submit">
+                            <div className="flex justify-end sm:justify-end relative sm:absolute sm:top-0 sm:right-0 sm:mt-0 mb-2">
+                                <Button className=" mr-3 mb-20" type="submit">
                                     Submit
                                 </Button>
                             </div>

@@ -25,10 +25,6 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useEditor } from '@tiptap/react'
-import TiptapEditor from '@/app/_components/editor/TiptapEditor'
-import TiptapToolbar from '@/app/_components/editor/TiptapToolbar'
-import extensions from '@/app/_components/editor/TiptapExtensions'
 import '@/app/_components/editor/Tiptap.css'
 import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
 import {
@@ -43,6 +39,17 @@ import {
 } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import UploadArticle from '../Article/UploadPdf'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+
 interface ContentDetail {
     title: string
     description: string | null
@@ -57,6 +64,11 @@ interface Content {
     topicId: number
     order: number
     contentDetails: ContentDetail[]
+}
+
+type EditorDoc = {
+    type: string
+    content: any[]
 }
 
 interface AssignmentProps {
@@ -81,17 +93,22 @@ const AddAssignent = ({
         }),
     })
 
-    const editor = useEditor({
-        extensions,
-        content,
-    })
-
     const router = useRouter()
     const [title, setTitle] = useState('')
     const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setAssignmentPreviewContent } = getAssignmentPreviewStore()
+    const [defaultValue, setDefaultValue] = useState('editor')
+    const [file, setFile] = useState<any>(null)
+    const [ispdfUploaded, setIsPdfUploaded] = useState(false)
+    const [pdfLink, setpdfLink] = useState<any>()
+    const [loading, setIsLoading] = useState(false)
+    const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
+
+    const [initialContent, setInitialContent] = useState<
+        { doc: EditorDoc } | undefined
+    >()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -115,17 +132,67 @@ const AddAssignent = ({
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
+
             setDeadline(response.data.completionDate)
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
-            contentDetails &&
-                editor?.commands.setContent(contentDetails.content)
+            if (contentDetails.links && contentDetails.links[0]) {
+                setpdfLink(contentDetails.links[0])
+                setIsPdfUploaded(true)
+                setDefaultValue('pdf')
+                setIsEditorSaved(false) // PDF hai to editor saved false
+            } else {
+                setpdfLink(null)
+                setIsPdfUploaded(false)
+                setDefaultValue('editor')
+                // --- Check if editor me content hai ---
+                const data = contentDetails.content
+                let hasEditorContent = false
+                if (data && data.length > 0) {
+                    // Agar content array me kuch hai, to editor saved true
+                    hasEditorContent = true
+                }
+                setIsEditorSaved(hasEditorContent)
+            }
+            if (typeof contentDetails.content[0] === 'string') {
+                setInitialContent(JSON.parse(contentDetails.content[0]))
+            } else {
+                const jsonData = { doc: contentDetails.content[0] }
+                setInitialContent(jsonData)
+            }
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         }
     }
 
+    const [isEditorSaved, setIsEditorSaved] = useState(false)
+
+    // Jab bhi initialContent change ho, editor empty hai ya nahi check karo
+    useEffect(() => {
+        if (defaultValue === 'editor') {
+            if (
+                !initialContent ||
+                !initialContent.doc ||
+                !initialContent.doc.content ||
+                initialContent.doc.content.length === 0 ||
+                (
+                    initialContent.doc.content.length === 1 &&
+                    initialContent.doc.content[0].type === 'paragraph' &&
+                    !initialContent.doc.content[0].content
+                )
+            ) {
+                setIsEditorSaved(false)
+            }
+        }
+    }, [initialContent, defaultValue])
+
+    // async
+    useEffect(() => {
+        getAssignmentContent()
+    }, [content])
+
+    // Jab assignment save ho, isEditorSaved true karo
     const editAssignmentContent = async (data: any) => {
         function convertToISO(dateString: string): string {
             const date = new Date(dateString)
@@ -142,11 +209,13 @@ const AddAssignent = ({
         }
         const deadlineDate = convertToISO(data.startDate)
         try {
-            const articleContent = [editor?.getJSON()]
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
             const requestBody = {
                 title: data.title,
                 completionDate: deadlineDate,
-                articleContent,
+                articleContent: initialContentString,
             }
 
             await api.put(
@@ -155,6 +224,7 @@ const AddAssignent = ({
             )
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
+            setIsEditorSaved(true) // <-- Add this line
             toast({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
@@ -173,12 +243,7 @@ const AddAssignent = ({
         }
     }
 
-    // async
-    useEffect(() => {
-        getAssignmentContent()
-    }, [content, editor])
-
-    function previewAssignment() {
+    const previewAssignment = () => {
         if (content?.contentDetails[0]?.content?.length > 0) {
             setAssignmentPreviewContent(content)
             router.push(
@@ -192,6 +257,104 @@ const AddAssignent = ({
                     'border border-red-500 text-red-500 text-left w-[90%] capitalize',
             })
         }
+    }
+
+    const onFileUpload = async () => {
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                return toast({
+                    title: 'Invalid file type',
+                    description: 'Only PDF files are allowed.',
+                })
+            }
+
+            // build the FormData, with the *exact* field name your backend expects*
+            const formData = new FormData()
+            formData.append('pdf', file, file.name)
+
+            try {
+                await api.post(
+                    `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
+                    formData, // ← pass FormData directly
+                    {
+                        // OPTIONAL: axios will set the correct Content-Type boundary for you
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    }
+                )
+
+                toast({
+                    title: 'Success',
+                    description: 'PDF uploaded successfully!',
+                    className:
+                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
+                setIsdisabledUploadButton(false)
+
+                setTimeout(() => {
+                    setIsPdfUploaded(true)
+                    setpdfLink('')
+                    getAssignmentContent()
+                }, 1000) //
+            } catch (err: any) {
+                console.error(err)
+                toast({
+                    title: 'Upload failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+            }
+        }
+    }
+
+    // Add previewPdf function for PDF preview navigation
+    function previewPdf() {
+    if (ispdfUploaded) {
+        setAssignmentPreviewContent(content)
+        router.push(
+            `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
+        )
+    } else {
+        toast({
+            title: 'Failed',
+            description: 'No PDF uploaded. Please upload one to preview.',
+            className:
+                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            variant: 'destructive',
+        })
+    }
+}
+
+    const onDeletePdfhandler = async () => {
+        setIsLoading(true)
+        await api
+            .put(
+                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                { title: title, links: null }
+            )
+            .then((res) => {
+                toast({
+                    title: 'Success',
+                    description: 'PDF Deleted Successfully',
+                    className:
+                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                })
+                setIsPdfUploaded(false)
+                setpdfLink(null)
+                setDefaultValue('editor')
+                setIsEditorSaved(false) // <-- Add this line
+            })
+            .catch((err: any) => {
+                toast({
+                    title: 'Delete PDF failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+            })
+        setIsLoading(false)
     }
 
     return (
@@ -233,27 +396,56 @@ const AddAssignent = ({
                                                         />
                                                     )}
                                                 </div>
-                                                <div className="flex items-center justify-between">
-                                                    <div
-                                                        id="previewAssignment"
-                                                        onClick={
-                                                            previewAssignment
-                                                        }
-                                                        className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer  mt-5 mr-2"
-                                                    >
-                                                        <Eye size={18} />
-                                                        <h6 className="ml-1 text-sm">
-                                                            Preview
-                                                        </h6>
+                                                <div className="flex justify-end mt-5">
+                                                    <div className="flex items-center justify-between mr-2">
+                                                        {defaultValue === 'editor' ? (
+                                                            <div
+                                                                id="previewAssignment"
+                                                                onClick={previewAssignment}
+                                                                className="flex hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                            >
+                                                                <Eye size={18} />
+                                                                <h6 className="ml-1 text-sm">
+                                                                    Preview Assignment
+                                                                </h6>
+                                                            </div>
+                                                        ) : (
+                                                            <div
+                                                                id="previewAssignment"
+                                                                onClick={previewPdf}
+                                                                className={`flex hover:bg-gray-300 rounded-md p-1 cursor-pointer ${
+                                                                    !ispdfUploaded
+                                                                        ? 'opacity-50 pointer-events-none'
+                                                                        : ''
+                                                                }`}
+                                                            >
+                                                                <Eye size={18} />
+                                                                <h6 className="ml-1 text-sm">
+                                                                    Preview PDF
+                                                                </h6>
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    <div className="mt-5">
+                                                    {defaultValue === 'editor' ? (
                                                         <Button
                                                             type="submit"
                                                             form="myForm"
                                                         >
                                                             Save
                                                         </Button>
-                                                    </div>
+                                                    ) : (
+                                                        <div>
+                                                            <Button
+                                                                type="button"
+                                                                onClick={
+                                                                    onFileUpload
+                                                                }
+                                                                disabled={!disabledUploadButton}
+                                                            >
+                                                                Upload PDF
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </FormControl>
@@ -334,9 +526,83 @@ const AddAssignent = ({
                         </form>
                     </Form>
                 </div>
-                <div className="text-left mt-6">
-                    <TiptapToolbar editor={editor} />
-                    <TiptapEditor editor={editor} />
+                <div className="">
+                    <RadioGroup
+                        className="flex items-center gap-x-6 mt-4"
+                        onValueChange={(value) => setDefaultValue(value)}
+                        value={defaultValue}
+                    >
+                        <TooltipProvider>
+                            <div className="flex gap-x-2">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <RadioGroupItem
+                                            value="editor"
+                                            disabled={!!pdfLink}
+                                            id="r1"
+                                            className="mt-1"
+                                        />
+                                    </TooltipTrigger>
+                                    {pdfLink && (
+                                        <TooltipContent side="top">
+                                            You’ve uploaded a PDF, so the editor is now disabled
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                                <Label
+                                    htmlFor="r1"
+                                    className="font-light text-md text-black"
+                                >
+                                    Editor
+                                </Label>
+                            </div>
+
+                            <div className="flex gap-x-2">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <RadioGroupItem
+                                            value="pdf"
+                                            id="r2"
+                                            className="mt-1"
+                                            disabled={isEditorSaved}
+                                        />
+                                    </TooltipTrigger>
+                                    {isEditorSaved && (
+                                        <TooltipContent side="top">
+                                            You’ve already saved the assignment, so PDF upload is now disabled
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                                <Label
+                                    htmlFor="r2"
+                                    className="font-light text-md text-black"
+                                >
+                                    Upload PDF
+                                </Label>
+                            </div>
+                        </TooltipProvider>
+                    </RadioGroup>
+                    {defaultValue === 'editor' && !pdfLink && ( // <-- PDF link nahi hai tabhi editor dikhao
+                        <div className="mt-2 text-start">
+                            <RemirrorTextEditor
+                                initialContent={initialContent}
+                                setInitialContent={setInitialContent}
+                            />
+                        </div>
+                    )}
+                    {defaultValue === 'pdf' && (
+                        <UploadArticle
+                            loading={loading}
+                            file={file}
+                            setFile={setFile}
+                            className=""
+                            isPdfUploaded={ispdfUploaded}
+                            pdfLink={pdfLink}
+                            setIsPdfUploaded={setIsPdfUploaded}
+                            onDeletePdfhandler={onDeletePdfhandler}
+                            setDisableButton={setIsdisabledUploadButton}
+                        />
+                    )}
                 </div>
             </>
         </div>

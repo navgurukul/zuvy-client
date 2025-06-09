@@ -1,5 +1,4 @@
 'use client'
-import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
@@ -8,8 +7,8 @@ import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { DownloadIcon, FileText } from 'lucide-react'
 import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
-import DownloadReport from './_components/DownloadReport'
-import ApproveReattempt from './ApproveReattempt'
+import DownloadReport from '@/app/admin/courses/[courseId]/submissionAssesments/[StudentAssesmentData]/_components/DownloadReport'
+import ApproveReattempt from '@/app/admin/courses/[courseId]/submissionAssesments/[StudentAssesmentData]/ApproveReattempt'
 
 export const columns: ColumnDef<Task>[] = [
     // {
@@ -55,7 +54,7 @@ export const columns: ColumnDef<Task>[] = [
             const name = row.original.name
 
             return (
-                <div className="flex space-x-2">
+                <div className="flex ">
                     <span className="max-w-[500px] truncate font-medium capitalize">
                         {name}
                     </span>
@@ -74,7 +73,7 @@ export const columns: ColumnDef<Task>[] = [
             const email = row.original.email
 
             return (
-                <div className="flex space-x-2">
+                <div className="flex ">
                     <span className="max-w-[500px] truncate font-medium">
                         {email}
                     </span>
@@ -100,7 +99,7 @@ export const columns: ColumnDef<Task>[] = [
             }
 
             return (
-                <div className="flex space-x-2">
+                <div className="flex">
                     <span className="max-w-[500px] truncate font-medium">
                         {timeTaken}
                     </span>
@@ -124,7 +123,7 @@ export const columns: ColumnDef<Task>[] = [
             }
 
             return (
-                <div className="flex space-x-2">
+                <div className="flex ">
                     <span className="max-w-[500px] truncate font-medium">
                         {submissionDate}
                     </span>
@@ -142,28 +141,15 @@ export const columns: ColumnDef<Task>[] = [
             // const isChecked = row.original.isChecked
             const isQualified = row.original.isPassed
             return (
-                <div className="flex space-x-2">
+                <div className="flex ">
                     <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
                         {isQualified ? (
                             <div className="bg-secondary h-3 w-3 rounded-full" />
                         ) : (
                             <div className="bg-red-600 h-3 w-3 rounded-full " />
                         )}
-                        {isQualified ? ' Passed' : 'Failed'}
+                        {row?.original?.reattemptCount === 0 ? 'N/A' : isQualified ? ' Passed' : 'Failed'}
                     </div>
-                </div>
-            )
-        },
-    },
-    {
-        accessorKey: 'Approve Re-attempt',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Actions" />
-        ),
-        cell: ({ row }) => {
-            return (
-                <div className="flex space-x-2 w-10" key={row.original.email}>
-                   <ApproveReattempt data={row.original}/>
                 </div>
             )
         },
@@ -179,23 +165,53 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const percentage = row.original.percentage
             return (
-                <div className="flex space-x-2">
+                <div className="flex ">
                     <span className="font-semibold">
-                        {Math.floor(percentage)}%
+                    {percentage ? `${percentage.toFixed(2)}%` : '0.00%'}
                     </span>
                 </div>
             )
         },
     },
     {
+        accessorKey: 'No. of Attempts',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="No. of Attempts" />
+        ),
+        cell: ({ row }) => {
+            return (
+                <div className="flex  w-10" key={row.original.email}>
+                    <span className="max-w-[500px] truncate font-medium">
+                        {row?.original?.reattemptCount}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: 'Approve Re-attempt',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Actions" />
+        ),
+        cell: ({ row }) => {
+            return (
+                <div className="flex  w-10" key={row.original.email}>
+                   <ApproveReattempt data={row.original}/>
+                </div>
+            )
+        },
+    },
+ 
+    {
         id: 'actions',
         cell: ({ row }) => {
             const { bootcampId, newId, userId, id } = row.original
+            const submitedAt = row.original.submitedAt
             return (
-                <div className="flex space-x-2">
+                <div className="flex ">
                     <Link
-                        href={`/admin/courses/${bootcampId}/submissionAssesments/${newId}/IndividualReport/${userId}/Report/${id}`}
-                        className="max-w-[500px] text-secondary font-medium flex items-center"
+                        href={submitedAt ? `/admin/courses/${bootcampId}/submissionAssesments/${newId}/IndividualReport/${userId}/Report/${id}` : '#'}
+                        className={submitedAt ? `max-w-[500px] text-secondary font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
                     >
                         <FileText size={16} />
                         <p className="text-[15px]"> View Report</p>
@@ -207,9 +223,12 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: 'actions',
         cell: ({ row }) => {
+            const submitedAt = row.original.submitedAt
   
             return (
-               <DownloadReport userInfo={row.original} />
+                <>
+               <DownloadReport userInfo={row.original} submitedAt={submitedAt}/>
+                </>
             )
         },
     },

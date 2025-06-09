@@ -28,10 +28,12 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Check, Menu } from 'lucide-react'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ellipsis } from '@/lib/utils'
+import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 
 export default function RootLayout({
     children,
@@ -40,13 +42,14 @@ export default function RootLayout({
 }) {
     // Get the current path
     const router = useRouter()
-    const [isCourseEnrolled, setIsCourseEnrolled] = useState(false)
 
     const pathname = usePathname()
     const { width } = useWindowSize()
     const { moduleData } = getModuleDataNew()
     const [open, setOpen] = useState(false)
     const segments = pathname.split('/')
+    const [studentData, setStudentData] = useState([])
+    const [isEnrolled, setIsEnrolled] = useState(false)
 
     let couseId = segments[3]
     let moduleId = segments[5]
@@ -58,6 +61,8 @@ export default function RootLayout({
         pathname?.includes('/student/courses') &&
         pathname?.includes('/modules') &&
         pathname?.includes('/assessment')
+    const isCourseRoute =
+        pathname?.includes('/student/courses') && pathname?.includes('/batch')
 
     const isChapterPage =
         pathname?.includes('/student/courses') &&
@@ -116,6 +121,34 @@ export default function RootLayout({
         if (width <= 430) return 'mt-[34rem]'
         return 'mt-[24rem]'
     }
+
+    useEffect(() => {
+        async function getStudentsData() {
+            const res = await api.get('/student')
+            setStudentData(res.data)
+        }
+        getStudentsData()
+    }, [])
+
+    if (studentData.length === 0) return
+
+    const isCourseEnrolled = studentData.some(
+        (courses: any) => courses.id == couseId
+    )
+
+    if (isChapterPage || isChapterRoute) {
+        if (!isCourseEnrolled) {
+            toast({
+                title: 'Failed',
+                description: 'You were not enrolled in thar course.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                variant: 'destructive',
+            })
+            router.push('/student/courses')
+        }
+    }
+
     return (
         <div className="h-screen ">
             {user.email.length == 0 ? (
@@ -127,10 +160,14 @@ export default function RootLayout({
             ) : (
                 <div className={`h-screen ${isMobile ? '' : ''} `}>
                     <div>{!isAssessmentRoute && <StudentNavbar />}</div>
-                    <div className={` ${isChapterRoute ? 'px-2' : 'pt-20'} `}>
+                    <div
+                        className={` ${
+                            isChapterRoute ? 'px-0 md:px-2 lg:px-2' : 'pt-20'
+                        } `}
+                    >
                         <div className="relative">
                             {children}
-                            <div className="absolute bottom-0 w-full left-0">
+                            <div className="absolute bottom-0 w-full left-0 bg-[#DCE7E3]">
                                 {isMobile && isChapterPage && (
                                     <div className=" ">
                                         <Popover
@@ -210,8 +247,8 @@ export default function RootLayout({
                                                         }
                                                     />
                                                 </Label>
-                                                <ScrollArea className="h-72 w-full">
-                                                    <div className="w-full">
+                                                <ScrollArea className="h-full w-full">
+                                                    <div className="w-full h-52">
                                                         {moduleData.moduleName.map(
                                                             (
                                                                 chapter: any,

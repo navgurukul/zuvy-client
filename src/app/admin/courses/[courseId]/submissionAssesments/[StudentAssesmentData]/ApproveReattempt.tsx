@@ -28,9 +28,12 @@ const ApproveReattempt = ({ data }: { data: any }) => {
                 setButtonDisabled(true)
                 const res = await api.post(`admin/assessment/approve-reattempt?assessmentSubmissionId=${data?.id}`)
 
-                // Only if API succeeds:
                 setReattemptApproved(true)
-                setIsReattemptApproved(true)
+                
+                setTimeout(()=>{
+                    setIsReattemptApproved(true)
+                }, 2000)
+                
                 setApiSuccess(true)
             }
         } catch (error) {

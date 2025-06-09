@@ -84,17 +84,17 @@ export default function Page({
 
                 setChapterContent(response.data)
 
-                setTimeout(() => {
+                
                     setLoading(false) // Set loading to false after the delay
-                }, 100)
+                
 
                 setActiveChapter(chapterId)
                 setKey((prevKey: any) => prevKey + 1)
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
-                setTimeout(() => {
+                
                     setLoading(false) // Set loading to false after the delay
-                }, 100)
+                
             }
         },
         [moduleData, courseId, moduleId]
@@ -110,7 +110,7 @@ export default function Page({
             setActiveChapterTitle('')
             setTimeout(() => {
                 setLoading(false) // Set loading to false after the delay
-            }, 100)
+            }, 1000)
         }
     }, [
         chapterData,
@@ -234,7 +234,17 @@ export default function Page({
                             </div>
                         </div>
                     ) : (
-                        <h1>Create New Chapter</h1>
+                        // <h1>Create New Chapter</h1>
+                       <div className="flex flex-col items-center justify-center min-h-[80vh] relative">
+                            <div className="absolute left-1/2 -translate-x-1/2 md:left-[380px] md:translate-x-0">
+                            <img 
+                             src="/images/undraw.svg" 
+                             alt="Create Chapter"
+                             className="lg:w-[280px] lg:h-[280px] md:w-[320px] md:h-[320px] object-contain mb-3 opacity-80"
+                            />
+                           <p className="absolute text-lg text-center lg:left-[45px]">Create New Chapter</p>
+                        </div>
+                    </div>
                     )}
                 </>
             )
