@@ -108,10 +108,9 @@ export default function EditCodingQuestionForm() {
             }
             case 'int': {
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Input",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -119,10 +118,9 @@ export default function EditCodingQuestionForm() {
             }
             case 'float': {
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Input",
                         description: "Please enter a valid float value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -130,10 +128,9 @@ export default function EditCodingQuestionForm() {
             }
             case 'bool': {
                 if (value && !/^(true|false)$/.test(value) && !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)) {
-                    toast({
+                    toast.error({
                         title: "Invalid Boolean Input",
                         description: "Please enter either 'true' or 'false'",
-                        className: "fixed bottom-4 right-4 text-start border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -147,18 +144,16 @@ export default function EditCodingQuestionForm() {
         switch (type) {
             case 'int': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one integer as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Output",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -166,15 +161,14 @@ export default function EditCodingQuestionForm() {
             }
             case 'float': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one float number as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Output",
                         description: "Please enter a valid float value",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
@@ -185,7 +179,7 @@ export default function EditCodingQuestionForm() {
             }
             case 'str': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one string as output",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
@@ -235,7 +229,7 @@ export default function EditCodingQuestionForm() {
 
         const availableTypes = getAvailableInputTypes(0); // Get all input types
         if (availableTypes.length === 0) {
-            toast({
+            toast.error({
                 title: "Cannot Add Input",
                 description: "All input types have been used in this test case.",
                 className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
@@ -482,20 +476,16 @@ export default function EditCodingQuestionForm() {
                 data
             )
 
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Question Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsCodingEditDialogOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -652,7 +642,7 @@ export default function EditCodingQuestionForm() {
                             processedOutput = JSON.parse(testCase.output.value);
                         }
                         catch (e) {
-                            toast({
+                            toast.error({
                                 title: "Invalid Output Format",
                                 description: "Please enter a valid array format",
                             })

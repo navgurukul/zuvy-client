@@ -51,11 +51,9 @@ const Page = ({ params }: any) => {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching bootcamps:',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -101,11 +99,9 @@ const Page = ({ params }: any) => {
                 setChapterDetails(res.data.trackingData)
             })
             .catch((err) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Error fetching Chapter details:',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }, [params.StudentAssesmentData, moduleId])

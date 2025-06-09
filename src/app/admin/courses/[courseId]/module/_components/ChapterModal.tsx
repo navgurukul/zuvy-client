@@ -49,23 +49,19 @@ function ChapterModal({
                 router.push(
                     `/admin/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
                 )
-                toast({
+                toast.success({
                     title: res?.data?.module[0]?.title,
                     description: res?.data?.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((error) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: error?.response?.data?.message[0],
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
         fetchChapters()
-      
+
     }
 
     // const createAssessment = async () => {

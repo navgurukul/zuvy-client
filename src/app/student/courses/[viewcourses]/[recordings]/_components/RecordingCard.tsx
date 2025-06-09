@@ -88,21 +88,15 @@ function RecordingCard({
                 classData.s3link === 'not found' ||
                 !classData.s3link.startsWith('https')
             ) {
-                toast({
+                toast.error({
                     title: 'Recording not yet updated',
-                    variant: 'default',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
                 window.open(classData.s3link, '_blank')
             }
         } else {
-            toast({
+            toast.error({
                 title: 'Recording not yet updated',
-                variant: 'default',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -137,11 +131,8 @@ function RecordingCard({
                 'Error fetching or processing attendance data:',
                 error
             )
-            toast({
+            toast.error({
                 title: 'Error fetching attendance data',
-                variant: 'default',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

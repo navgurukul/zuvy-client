@@ -68,21 +68,17 @@ const CurricullumCard = ({
         const response = await api
             .delete(`Content/deleteModule/${courseId}?moduleId=${moduleId}`)
             .then((response) => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'Module Deleted Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 fetchCourseModules()
             })
             .catch((error) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         'There was an error while deleting. Please try again.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }

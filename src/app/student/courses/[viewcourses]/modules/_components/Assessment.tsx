@@ -139,18 +139,15 @@ const Assessment = ({
                 `/student/assessment/request-reattempt?assessmentSubmissionId=${submissionId}&userId=${assessmentShortInfo?.submitedOutsourseAssessments?.[0]?.userId}`
             )
             setReattemptRequested(true)
-            toast({
+            toast.success({
                 title: 'Re-attempt Requested',
                 description: 'Your request for a re-attempt has been sent.',
-                className: 'text-left capitalize',
             })
         } catch (error) {
             console.error('Error requesting re-attempt:', error)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to request re-attempt. Please try again.',
-                className: 'text-left capitalize',
-                variant: 'destructive',
             })
         }
     }
@@ -233,11 +230,9 @@ const Assessment = ({
                     setAssessmentOutSourceId,
                     setSubmissionId
                 )
-                toast({
+                toast.info({
                     title: 'Assessment Tab Closed',
                     description: 'You closed the assessment before submitting.',
-                    className: 'text-left capitalize',
-                    variant: 'destructive',
                 })
             }
         }

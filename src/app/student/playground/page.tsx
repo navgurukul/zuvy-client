@@ -75,12 +75,10 @@ const CodingPlayground = () => {
                 setQuestions(response.data.data)
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error:',
                 description:
                     'An error occurred while fetching coding questions',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             // console.error('Error fetching courses:', error)
         }

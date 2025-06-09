@@ -40,11 +40,9 @@ export const EditModal: React.FC<AlertDialogProps> = ({
             await api
                 .patch(`/bootcamp/updateUserDetails/${userId}`, studentData)
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     setIsStudent(0)
                     fetchStudentsHandler({
@@ -61,12 +59,10 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                     setIsOpen(false)
                 })
         } catch (error: any) {
-            toast({
+            toast.success({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             setIsOpen(false)
         }

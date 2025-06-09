@@ -19,10 +19,9 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
             const res = await api.get(url)
             setVideoData(res.data)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching assessments:',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [courseId, debouncedSearch])

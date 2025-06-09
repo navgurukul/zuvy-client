@@ -77,19 +77,15 @@ function EditOpenEndedQuestionForm({
                 data
             )
             setIsOpenEndDialogOpen(false)
-            toast({
+            toast.success({
                 title: 'Success',
                 description: response.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

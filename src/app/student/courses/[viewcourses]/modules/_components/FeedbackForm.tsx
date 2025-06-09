@@ -69,11 +69,9 @@ const FeedbackForm = (props: Props) => {
                 setStatus('Completed')
             }
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'An error occured while fetching the questions',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             console.error('Error fetching quiz questions:', error)
         }
@@ -136,18 +134,15 @@ const FeedbackForm = (props: Props) => {
                 transformedData
             )
             props.completeChapter()
-            toast({
+            toast.success({
                 title: res.data.status,
                 description: 'Form has been submitted successfully!',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+               
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching form questions:',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

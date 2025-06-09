@@ -110,7 +110,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     setQuizQuiestionDetails(res.data.data)
                 })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed To fetch',
             })

@@ -89,11 +89,9 @@ const AddStudentsModal = ({
                     : `/bootcamp/students/${id}`
                 await api.post(endpoint, requestBody).then((response) => {
                     batch && fetchBatchesData()
-                    toast({
+                    toast.success({
                         title: response.data.status,
                         description: response.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchStudentsHandler({
                         courseId,
@@ -110,11 +108,9 @@ const AddStudentsModal = ({
                     setStudentData({ name: '', email: '' })
                 })
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: 'Error Adding Students',
                     description: error?.response.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         }

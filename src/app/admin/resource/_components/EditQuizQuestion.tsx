@@ -147,20 +147,16 @@ const EditQuizQuestion = ({
     const handleEditQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
             await api.post('/Content/editquiz', requestBody).then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -171,11 +167,9 @@ const EditQuizQuestion = ({
         )
 
         if (emptyOptions) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Options cannot be empty',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }

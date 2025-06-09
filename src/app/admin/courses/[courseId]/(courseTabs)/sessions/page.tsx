@@ -184,7 +184,7 @@ function Page({ params }: any) {
 
     const onClickHandler = () => {
         if (bootcampData.length === 0) {
-            toast({
+            toast.info({
                 title: 'Caution',
                 description:
                     'There are no batches currently please create them and assign students to them first',
@@ -193,7 +193,7 @@ function Page({ params }: any) {
         }
 
         if (students === 0) {
-            toast({
+            toast.info({
                 title: 'Caution',
                 description:
                     'There are no batches currently please create them and assign students to them first',

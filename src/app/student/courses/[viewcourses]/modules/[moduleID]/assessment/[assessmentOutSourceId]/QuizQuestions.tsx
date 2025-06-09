@@ -95,12 +95,9 @@ const QuizQuestions = ({
             setIsDialogOpen(true)
         } else {
             // Show toast notification for missing answers
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Please answer all questions before submitting.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }
@@ -136,11 +133,9 @@ const QuizQuestions = ({
 
                 getAssessmentData()
 
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'Quiz Submitted Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
 
                 getSeperateQuizQuestions()
@@ -153,13 +148,10 @@ const QuizQuestions = ({
             // Make the API call with the properly structured data
         } catch (error: any) {
             setIsDisabled(false)
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }

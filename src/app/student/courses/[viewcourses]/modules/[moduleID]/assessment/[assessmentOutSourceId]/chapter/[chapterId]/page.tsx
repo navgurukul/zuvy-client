@@ -142,11 +142,9 @@ function Page({
 
             // Show toast when remaining time is 5 minutes (300 seconds)
             if (newRemainingTime === 300) {
-                toast({
+                toast.warning({
                     title: 'WARNING',
                     description: 'Hurry up, less than 5 minutes remaining now!',
-                    className:
-                        'fixed inset-0 w-1/4 h-1/5 m-auto text-start capitalize border border-destructive bg-red-600 text-white',
                 })
             }
 
@@ -329,11 +327,10 @@ function Page({
             type === 'open-ended' &&
             seperateOpenEndedQuestions[0]?.submissionsData.length > 0
         ) {
-            toast({
+            toast.info({
                 title: 'Open Ended Questions Already Submitted',
                 description:
                     'You have already submitted the open ended questions',
-                className: 'text-left capitalize',
             })
         } else {
             requestFullScreen(document.documentElement)
@@ -413,10 +410,9 @@ function Page({
         const navType = navEntries[0]?.type
 
         if (navType === 'reload') {
-            toast({
+            toast.info({
                 title: 'Page Reloaded',
                 description: 'The page has been reloaded.',
-                className: 'text-left capitalize',
             })
         }
 
@@ -534,11 +530,10 @@ function Page({
                         typeOfsubmission: 'studentSubmit',
                     }
                 )
-                toast({
+                toast.success({
                     title: 'Assessment Submitted',
                     description:
                         'Your assessment has been submitted successfully',
-                    className: 'text-left capitalize',
                 })
 
                 completeChapter()

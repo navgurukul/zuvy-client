@@ -127,7 +127,7 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
                 transFormedBody
             )
             .then(() => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'Project Link Submitted SuccesFully',
                 })

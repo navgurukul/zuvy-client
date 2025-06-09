@@ -248,24 +248,18 @@ const Mcqs = (props: Props) => {
             await api
                 .post(`/Content/createTag`, { tagName: newTopic })
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: `${newTopic} Topic has created`,
                         description: res.data.message,
-                        variant: 'default',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     getAllTags()
                     setNewTopic('')
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Network error',
                 description:
                     'Unable to create session. Please try again later.',
-                variant: 'destructive',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

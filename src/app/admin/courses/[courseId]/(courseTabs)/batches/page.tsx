@@ -126,7 +126,7 @@ const Page = ({ params }: { params: any }) => {
             )
 
             if (matchedBatchData) {
-                toast({
+                toast.error({
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
                     className:
@@ -139,21 +139,16 @@ const Page = ({ params }: { params: any }) => {
                     fetchStudentData(params.courseId, setStoreStudentData)
                     fetchCourseDetails(params.courseId)
                 }
-                toast({
+                toast.success({
                     title: res.data.status,
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
             console.error('Error creating batch:', error)
         }
@@ -245,12 +240,10 @@ const Page = ({ params }: { params: any }) => {
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
                                     onError={(e) =>
-                                        toast({
+                                        toast.error({
                                             title: 'Failed',
                                             description:
                                                 'Entered Corect values',
-                                            className:
-                                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                                         })
                                     }
                                     className="space-y-8"

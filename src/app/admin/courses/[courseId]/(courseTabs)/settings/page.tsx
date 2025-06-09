@@ -47,39 +47,31 @@ const Page = ({ params }: { params: any }) => {
         await api
             .put(`/bootcamp/bootcampSetting/${params.courseId}`, convertedData)
             .then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status,
                     description: `Bootcamp type updated to ${type}`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((error) => {
-                toast({
+                toast.error({
                     title: error.data.status,
                     description: error.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
     const handleDelete = async () => {
         try {
             await api.delete(`/bootcamp/${courseData?.id}`).then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status,
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             router.push('/admin/courses')
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: error.data.status,
                 description: error.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
         setDeleteModalOpen(false)

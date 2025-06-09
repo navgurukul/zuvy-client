@@ -225,20 +225,15 @@ const AddAssignent = ({
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true) // <-- Add this line
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }
@@ -250,11 +245,9 @@ const AddAssignent = ({
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
             )
         } else {
-            return toast({
+            return toast.error({
                 title: 'Cannot Preview',
                 description: 'Nothing to Preview please save some content',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
             })
         }
     }
@@ -262,7 +255,7 @@ const AddAssignent = ({
     const onFileUpload = async () => {
         if (file) {
             if (file.type !== 'application/pdf') {
-                return toast({
+                return toast.error({
                     title: 'Invalid file type',
                     description: 'Only PDF files are allowed.',
                 })
@@ -282,11 +275,9 @@ const AddAssignent = ({
                     }
                 )
 
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'PDF uploaded successfully!',
-                    className:
-                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 setIsdisabledUploadButton(false)
 
@@ -297,7 +288,7 @@ const AddAssignent = ({
                 }, 1000) //
             } catch (err: any) {
                 console.error(err)
-                toast({
+                toast.error({
                     title: 'Upload failed',
                     description:
                         err.response?.data?.message ||
@@ -316,12 +307,9 @@ const AddAssignent = ({
             `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
         )
     } else {
-        toast({
+        toast.error({
             title: 'Failed',
             description: 'No PDF uploaded. Please upload one to preview.',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            variant: 'destructive',
         })
     }
 }
@@ -334,11 +322,9 @@ const AddAssignent = ({
                 { title: title, links: null }
             )
             .then((res) => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'PDF Deleted Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 setIsPdfUploaded(false)
                 setpdfLink(null)
@@ -346,7 +332,7 @@ const AddAssignent = ({
                 setIsEditorSaved(false) // <-- Add this line
             })
             .catch((err: any) => {
-                toast({
+                toast.error({
                     title: 'Delete PDF failed',
                     description:
                         err.response?.data?.message ||

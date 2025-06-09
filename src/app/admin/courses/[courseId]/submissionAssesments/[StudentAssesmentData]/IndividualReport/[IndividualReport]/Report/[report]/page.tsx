@@ -215,7 +215,7 @@ const Page = ({ params }: { params: any }) => {
                     })
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error in fetching the data',
             })

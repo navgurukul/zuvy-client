@@ -3,8 +3,12 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import Link from 'next/link'
+<<<<<<< Updated upstream
 import useWindowSize from '@/hooks/useHeightWidth'
 import { getCleanFileName } from '@/utils/admin'
+=======
+import { toast } from '@/components/ui/use-toast'
+>>>>>>> Stashed changes
 
 type EditorDoc = {
     type: string
@@ -82,6 +86,13 @@ function Article({
         setIsCompleted(status === 'Completed')
     }, [status])
 
+    const handleCompleteChapter = () => {
+        completeChapter();
+        toast.success({
+            title: "Chapter Completed!",
+            description: "You've successfully marked this chapter as done.",
+        });
+    };
     const action =
         initialContent &&
         (initialContent?.doc.content?.length > 1 ||
@@ -127,7 +138,7 @@ function Article({
                             <div className="my-10 text-end">
                                 <Button
                                     disabled={!action}
-                                    onClick={completeChapter}
+                                    onClick={handleCompleteChapter}
                                 >
                                     Mark as Done
                                 </Button>

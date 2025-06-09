@@ -6,11 +6,14 @@ export const Logout = () => {
     // delete the cookie by setting it to a date in the past:-
     document.cookie =
         'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-    toast({
+    
+    toast.success({
         title: 'Logout Successful',
         description: 'Goodbye, See you soon!',
-        className:
-            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
     })
-    window.location.pathname = '/'
+    
+    // Add delay before redirect to let toast show
+    setTimeout(() => {
+        window.location.pathname = '/'
+    }, 1500) 
 }

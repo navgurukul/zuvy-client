@@ -54,11 +54,9 @@ function LoginPage({}: Props) {
                 setUser(resp.data.user)
 
                 if (resp.data.user) {
-                    toast({
+                    toast.success({
                         title: 'Login Successful',
                         description: 'Welcome to Zuvy Dashboard',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                 }
 
@@ -92,12 +90,10 @@ function LoginPage({}: Props) {
                     return router.push(`/${resp.data.user.rolesList[0]}`)
                 }
             } catch (err: any) {
-                toast({
+                toast.error({
                     title: 'Failed',
                     description:
                         err.response?.data?.message || 'An error occurred.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         }
@@ -189,3 +185,4 @@ function LoginPage({}: Props) {
 }
 
 export default LoginPage
+

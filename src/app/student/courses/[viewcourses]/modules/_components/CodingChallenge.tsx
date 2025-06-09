@@ -50,12 +50,10 @@ function CodingChallenge({
             if (codingQuestions.length == 0) {
                 console.error('No questions Added by the instructor yet')
             } else {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         'An error occured while fetching the coding questions',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
             console.error('Error fetching quiz questions:', error)

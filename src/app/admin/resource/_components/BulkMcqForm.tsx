@@ -26,19 +26,15 @@ const BulkUploadMcq = ({ setIsMcqModalOpen }: Props) => {
         e.preventDefault()
         try {
             await api.post(`/Content/quiz`, mcqData)
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsMcqModalOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

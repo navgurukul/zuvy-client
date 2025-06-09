@@ -95,6 +95,35 @@ const AddArticle = ({
         mode: 'onChange',
     })
 
+    // Check if content is empty
+    const isContentEmpty = () => {
+        if (!initialContent || !initialContent.doc || !initialContent.doc.content) {
+            return true
+        }
+
+        const content = initialContent.doc.content
+        
+        if (!Array.isArray(content) || content.length === 0) {
+            return true
+        }
+
+        const hasContent = content.some(item => {
+            if (item.type === 'paragraph' && item.content) {
+                return item.content.some((textNode: any) => 
+                    textNode.text && textNode.text.trim().length > 0
+                )
+            }
+            if (item.type === 'heading' && item.content) {
+                return item.content.some((textNode: any) => 
+                    textNode.text && textNode.text.trim().length > 0
+                )
+            }
+            return item.content && item.content.length > 0
+        })
+
+        return !hasContent
+    }
+
     const getArticleContent = async () => {
         try {
             const response = await api.get(
@@ -154,20 +183,15 @@ const AddArticle = ({
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true) // <-- Set true on save
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }
@@ -203,6 +227,14 @@ const AddArticle = ({
     }, [initialContent, defaultValue])
 
     function previewArticle() {
+        if (isContentEmpty()) {
+            toast.error({
+                title: 'No Content Available',
+                description: 'Please add some content before previewing the article.',
+            })
+            return
+        }
+
         if (content) {
             setArticlePreviewContent(content)
             router.push(
@@ -220,9 +252,6 @@ const AddArticle = ({
             return toast({
                 title: 'Failed',
                 description: 'No PDF uploaded. Please upload one to preview.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }
@@ -230,7 +259,7 @@ const AddArticle = ({
     const onFileUpload = async () => {
         if (file) {
             if (file.type !== 'application/pdf') {
-                return toast({
+                return toast.error({
                     title: 'Invalid file type',
                     description: 'Only PDF files are allowed.',
                 })
@@ -254,20 +283,23 @@ const AddArticle = ({
                 setIsChapterUpdated(!isChapterUpdated)
                 setIsdisabledUploadButton(false)
 
+                // toast.success({
+                //     title: 'Success',
+                //     description: 'PDF uploaded successfully!',
+                // })
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
                     getArticleContent()
                     setIsLoading(false)
-                    toast({
+                    toast.success({
                         title: 'Success',
                         description: 'PDF uploaded successfully!',
-                        className:
-                            'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                 }, 1000) //
             } catch (err: any) {
-                toast({
+                console.error(err)
+                toast.error({
                     title: 'Upload failed',
                     description:
                         err.response?.data?.message ||
@@ -286,18 +318,17 @@ const AddArticle = ({
                 { title: title, links: null }
             )
             .then((res) => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'PDF Deleted Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+
                 })
                 setIsPdfUploaded(false)
                 setIsDeleteLoading(false)
                 setpdfLink(null)
             })
             .catch((err: any) => {
-                toast({
+                toast.success({
                     title: 'Delete PDF failed',
                     description:
                         err.response?.data?.message ||
@@ -400,18 +431,6 @@ const AddArticle = ({
                                                     </Button>
                                                 ) : (
                                                     <div>
-                                                        {/* {pdfLink && (
-                                                            <Button type="button">
-                                                                <Link
-                                                                    href={
-                                                                        pdfLink
-                                                                    }
-                                                                    target="_blank"
-                                                                >
-                                                                    View PDF
-                                                                </Link>
-                                                            </Button>
-                                                        )} */}
                                                         <Button
                                                             type="button"
                                                             onClick={

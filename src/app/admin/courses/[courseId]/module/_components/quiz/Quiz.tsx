@@ -46,8 +46,10 @@ function Quiz(props: any) {
             ...uniqueData,
         ])
     }
+
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
+
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
@@ -60,10 +62,11 @@ function Quiz(props: any) {
             const tagArr = [
                 { id: -1, tagName: 'All Topics' },
                 ...transformedData,
-            ]
+            ];
             setTags(tagArr)
         }
     }
+
     const removeQuestionById = (questionId: number) => {
         setAddQuestion((prevQuestions: any) =>
             prevQuestions.filter((question: any) => question?.id !== questionId)
@@ -78,18 +81,14 @@ function Quiz(props: any) {
                 `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
                 requestBody
             )
-            toast({
+            toast.success({
                 title: 'Success',
                 description: response?.data?.message || 'Saved successfully!',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'An error occurred while saving the chapter.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -111,7 +110,7 @@ function Quiz(props: any) {
             const res = await api.get(
                 `/Content/chapterDetailsById/${props.chapterId}`
             )
-            setAddQuestion(res.data.quizQuestionDetails)
+            setAddQuestion(res.data.quizQuestionDetails || [])
             setQuizTitle(res.data.title)
         } catch (error) {
             console.error('Failed to fetch chapter details', error)
@@ -126,22 +125,19 @@ function Quiz(props: any) {
     }, [props.chapterId, getAllSavedQuizQuestion])
 
     function previewQuiz() {
-        if (addQuestion.length > 0) {
-            setQuizPreviewContent({
-                ...props.content,
-                quizQuestionDetails: addQuestion,
-            })
-            router.push(
-                `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
-            )
-        } else {
-            return toast({
-                title: 'No Question saved yet',
-                description: 'Please add at least one question to preview.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+        if (!addQuestion || addQuestion.length === 0) {
+            return toast.error({
+                title: 'No questions added yet',
+                description: 'Please add at least one question to preview the quiz.',
             })
         }
+        setQuizPreviewContent({
+            ...props.content,
+            quizQuestionDetails: addQuestion,
+        })
+        router.push(
+            `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+        )
     }
 
     return (
@@ -176,6 +172,7 @@ function Quiz(props: any) {
                                     id="previewQuiz"
                                     onClick={previewQuiz}
                                     className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
+
                                 >
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
@@ -197,7 +194,7 @@ function Quiz(props: any) {
 
                 <div className="flex">
                     <QuizLibrary
-                        addQuestion={addQuestion}
+                        addQuestion={addQuestion || []}
                         handleAddQuestion={handleAddQuestion}
                         tags={tags}
                     />
@@ -214,7 +211,7 @@ function Quiz(props: any) {
                                     </h2>
                                 </div>
                                 <div className="text-left w-full">
-                                    {addQuestion?.length === 0 && (
+                                    {(!addQuestion || addQuestion.length === 0) && (
                                         <h1 className="text-left italic">
                                             No Selected Questions
                                         </h1>

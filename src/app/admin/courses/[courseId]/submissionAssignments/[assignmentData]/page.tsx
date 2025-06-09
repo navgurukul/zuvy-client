@@ -72,7 +72,7 @@ const Page = ({ params }: { params: any }) => {
                     setAssignmentTitle(res?.data?.data?.chapterName)
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error Fetching Assignment Data',
             })
