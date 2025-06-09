@@ -18,7 +18,6 @@ import {
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
-import { addClassToCodeTags } from '@/utils/admin'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -31,6 +30,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { cn, difficultyColor } from '@/lib/utils'
+import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 const QuizQuestions = ({
     onBack,
@@ -233,7 +233,7 @@ const QuizQuestions = ({
                         (question: any, index: number) => (
                             <div
                                 key={question.id}
-                                className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-4 shadow-sm"
+                                className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-2 md:p-4 lg:p-4 shadow-sm"
                             >
                                 <div className="flex justify-between">
                                     <p className="font-semibold">
@@ -263,16 +263,13 @@ const QuizQuestions = ({
                                     render={({ field }) => (
                                         <FormItem className="flex flex-col items-start mb-10 w-full max-w-2xl">
                                             <FormLabel>
-                                                <div className=" flex space-x-2 text-lg font-semibold text-left">
-                                                    {/* <span>{index + 1}. </span> */}
-                                                    <span
-                                                        className="text-gray-800"
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: addClassToCodeTags(
-                                                                question.question,
-                                                                codeBlockClass
-                                                            ),
-                                                        }}
+                                                <div className="flex space-x-2 text-lg font-semibold text-left">
+                                                    <RemirrorForm
+                                                        description={
+                                                            question.question
+                                                        }
+                                                        preview={true}
+                                                        bigScreen={true}
                                                     />
                                                 </div>
                                             </FormLabel>

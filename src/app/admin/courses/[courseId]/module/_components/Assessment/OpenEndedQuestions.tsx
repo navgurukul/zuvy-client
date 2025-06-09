@@ -80,7 +80,6 @@ const OpenEndedQuestions = ({
                                             View Full Description
                                         </p>
                                     </DialogTrigger>
-                                    {/* <DialogOverlay /> */}
                                     <DialogContent>
                                         <PreviewOpenEnded
                                             question={question}

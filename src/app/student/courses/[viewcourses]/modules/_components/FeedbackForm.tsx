@@ -154,9 +154,9 @@ const FeedbackForm = (props: Props) => {
 
     return (
         <>
-           <ScrollArea className='h-screen'>
-           <div className="flex justify-center mt-24">
-                <div className="flex flex-col gap-5 text-left w-1/2">
+           <ScrollArea className='h-[calc(100vh-110px)] lg:h-screen md:h-screen'>
+           <div className="flex justify-center mt-6 md:mt-24 lg:mt-24 mr-3 md:mr-0 lg:mr-0">
+                <div className="flex flex-col gap-5 text-left w-full md:w-1/2 lg:w-1/2">
                     <h1 className="text-xl font-bold text-secondary-foreground">
                         {props.content.title}
                     </h1>
@@ -454,7 +454,7 @@ const FeedbackForm = (props: Props) => {
                                                             <FormControl>
                                                                 <Textarea
                                                                     {...field}
-                                                                    className="w-full h-[170px] px-3 py-2 border rounded-md" //w-[550px]
+                                                                    className="w-11/12 md:w-full lg:w-full h-[170px] px-3 py-2 border mx-auto mb-4 rounded-md" //w-[550px]
                                                                     placeholder="Type your answer..."
                                                                     value={
                                                                         field.value as string
@@ -479,7 +479,7 @@ const FeedbackForm = (props: Props) => {
                                     )}
 
                                     {item.typeId === 4 && (
-                                        <div className="mt-6">
+                                        <div className="mt-6 mb-20 lg:mb-0 md:mb-0">
                                             <div className="flex flex-row gap-x-2 font-semibold">
                                                 <p>{index + 1}.</p>
                                                 <p>{item.question}</p>
@@ -617,7 +617,7 @@ const FeedbackForm = (props: Props) => {
                                 </div>
                             ))}
                             {status !== 'Completed' && (
-                                <Button type="submit" className="mt-7">
+                                <Button type="submit" className="mt-0 md:mt-7 lg:mt-7 mb-24 lg:mb-0 md:mb-0">
                                     Submit Responses
                                 </Button>
                             )}
@@ -625,7 +625,7 @@ const FeedbackForm = (props: Props) => {
                     </Form>
                 </div>
             </div>
-           </ScrollArea>
+           </ScrollArea> 
         </>
     )
 }
