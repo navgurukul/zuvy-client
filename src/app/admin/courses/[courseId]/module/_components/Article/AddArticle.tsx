@@ -95,35 +95,6 @@ const AddArticle = ({
         mode: 'onChange',
     })
 
-    // Check if content is empty
-    const isContentEmpty = () => {
-        if (!initialContent || !initialContent.doc || !initialContent.doc.content) {
-            return true
-        }
-
-        const content = initialContent.doc.content
-        
-        if (!Array.isArray(content) || content.length === 0) {
-            return true
-        }
-
-        const hasContent = content.some(item => {
-            if (item.type === 'paragraph' && item.content) {
-                return item.content.some((textNode: any) => 
-                    textNode.text && textNode.text.trim().length > 0
-                )
-            }
-            if (item.type === 'heading' && item.content) {
-                return item.content.some((textNode: any) => 
-                    textNode.text && textNode.text.trim().length > 0
-                )
-            }
-            return item.content && item.content.length > 0
-        })
-
-        return !hasContent
-    }
-
     const getArticleContent = async () => {
         try {
             const response = await api.get(
@@ -227,14 +198,6 @@ const AddArticle = ({
     }, [initialContent, defaultValue])
 
     function previewArticle() {
-        if (isContentEmpty()) {
-            toast.error({
-                title: 'No Content Available',
-                description: 'Please add some content before previewing the article.',
-            })
-            return
-        }
-
         if (content) {
             setArticlePreviewContent(content)
             router.push(
@@ -249,7 +212,7 @@ const AddArticle = ({
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
             )
         } else {
-            return toast({
+            return toast.error({
                 title: 'Failed',
                 description: 'No PDF uploaded. Please upload one to preview.',
             })
@@ -283,10 +246,6 @@ const AddArticle = ({
                 setIsChapterUpdated(!isChapterUpdated)
                 setIsdisabledUploadButton(false)
 
-                // toast.success({
-                //     title: 'Success',
-                //     description: 'PDF uploaded successfully!',
-                // })
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
@@ -298,7 +257,6 @@ const AddArticle = ({
                     })
                 }, 1000) //
             } catch (err: any) {
-                console.error(err)
                 toast.error({
                     title: 'Upload failed',
                     description:
@@ -321,14 +279,13 @@ const AddArticle = ({
                 toast.success({
                     title: 'Success',
                     description: 'PDF Deleted Successfully',
-
                 })
                 setIsPdfUploaded(false)
                 setIsDeleteLoading(false)
                 setpdfLink(null)
             })
             .catch((err: any) => {
-                toast.success({
+                toast.error({
                     title: 'Delete PDF failed',
                     description:
                         err.response?.data?.message ||
@@ -431,6 +388,18 @@ const AddArticle = ({
                                                     </Button>
                                                 ) : (
                                                     <div>
+                                                        {/* {pdfLink && (
+                                                            <Button type="button">
+                                                                <Link
+                                                                    href={
+                                                                        pdfLink
+                                                                    }
+                                                                    target="_blank"
+                                                                >
+                                                                    View PDF
+                                                                </Link>
+                                                            </Button>
+                                                        )} */}
                                                         <Button
                                                             type="button"
                                                             onClick={
