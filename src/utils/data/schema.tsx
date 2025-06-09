@@ -13,7 +13,7 @@ export const taskSchema = z.object({
     batchName: z.string(),
     attendance: z.number(),
     status: z.string(),
-    noOfAttempts: z.number(),
+    reattemptCount: z.number().optional(),
     isChecked: z.boolean(),
     userEmail: z.string(),
     projectId: z.number(),

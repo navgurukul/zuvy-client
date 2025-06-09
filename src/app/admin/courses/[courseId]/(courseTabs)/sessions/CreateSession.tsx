@@ -117,6 +117,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     // const { batchValueData } = setStoreBatchValue()
+    const [isCalendarOpen, setCalendarOpen] = useState(false);
 
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
@@ -341,7 +342,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                             *
                                                         </span>{' '}
                                                     </FormLabel>
-                                                    <Dialog>
+                                                    <Dialog open={isCalendarOpen} onOpenChange={setCalendarOpen}>
                                                         <DialogTrigger asChild>
                                                             <FormControl>
                                                                 <Button
@@ -363,7 +364,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 </Button>
                                                             </FormControl>
                                                         </DialogTrigger>
-                                                        <DialogClose>
+                                                    
                                                             <DialogContent className="w-auto p-4">
                                                                 <Calendar
                                                                     mode="single"
@@ -379,7 +380,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                         ) {
                                                                             field.onChange(
                                                                                 date
-                                                                            )
+                                                                            );
+                                                                            setCalendarOpen(false);
                                                                         } else {
                                                                             field.onChange(
                                                                                 new Date()
@@ -398,7 +400,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                     initialFocus
                                                                 />
                                                             </DialogContent>
-                                                        </DialogClose>
+                                                  
                                                     </Dialog>
                                                     <FormMessage />
                                                 </FormItem>

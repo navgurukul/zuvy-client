@@ -69,31 +69,33 @@ const Navbar = () => {
                         </Link>
                     </div>
                     <div className="md:hidden">
-                        <Sheet>
+                        <Link href="/profile">
+                            <Avatar>
+                                <AvatarImage
+                                    src={studentData?.profile_picture}
+                                />
+                                <AvatarFallback>
+                                    {
+                                        <Image
+                                            src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                            alt="user_profile_pic"
+                                            width={30}
+                                            height={30}
+                                        />
+                                    }
+                                </AvatarFallback>
+                            </Avatar>
+                        </Link>
+                        {/* <Sheet>
                             <SheetTrigger>
-                                <Avatar>
-                                    <AvatarImage
-                                        src={studentData?.profile_picture}
-                                    />
-                                    <AvatarFallback>
-                                        {
-                                            <Image
-                                                src="https://avatar.iran.liara.run/public/boy?username=Ash"
-                                                alt="user_profile_pic"
-                                                width={30}
-                                                height={30}
-                                            />
-                                        }
-                                    </AvatarFallback>
-                                </Avatar>
-                            </SheetTrigger>
-                            <SheetContent
+                            </SheetTrigger> */}
+                        {/* <SheetContent
                                 side="right"
                                 className="w-[280px] sm:w-[540px]"
                             >
                                 <MobileNavbarRoutes />
-                            </SheetContent>
-                        </Sheet>
+                            </SheetContent> */}
+                        {/* </Sheet> */}
                     </div>
                 </div>
             </div>

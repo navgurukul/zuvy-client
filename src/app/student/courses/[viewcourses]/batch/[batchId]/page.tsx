@@ -370,7 +370,7 @@ function Page({
                 </div>
 
                 <div className="gap-y-3 flex flex-col">
-                    <div className="flex flex-start">
+                    {/* <div className="flex flex-start">
                         <h1 className="text-lg p-1 font-semibold">
                             Instructor
                         </h1>
@@ -410,7 +410,7 @@ function Page({
                                 </p>
                             </div>
                         )}
-                    </div>
+                    </div> */}
                     <div className="flex flex-col flex-start mt-5">
                         <div className="w-full">
                             {lateAssignments && (

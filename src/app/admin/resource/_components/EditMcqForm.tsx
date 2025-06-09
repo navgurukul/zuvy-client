@@ -23,7 +23,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { useState } from 'react'
-import TipTapForForm from './TipTapForForm'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
@@ -35,6 +34,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
+import RemirrorForForm from '@/app/admin/resource/_components/RemirrorForForm'
 
 type Props = {}
 
@@ -463,7 +463,7 @@ const EditMcqForm = ({
                                             Question Text
                                         </FormLabel>
                                         <FormControl>
-                                            <TipTapForForm
+                                            <RemirrorForForm
                                                 description={field.value}
                                                 onChange={field.onChange}
                                             />

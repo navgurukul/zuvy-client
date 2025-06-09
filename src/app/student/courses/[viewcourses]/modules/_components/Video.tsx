@@ -2,6 +2,7 @@ import YouTubePlayer from '@/app/_components/videoPlayer'
 import { Button } from '@/components/ui/button'
 import { getEmbedLink } from '@/utils/admin'
 import React from 'react'
+import useWindowSize from '@/hooks/useHeightWidth'
 
 function Video({
     content,
@@ -10,6 +11,8 @@ function Video({
     content: any
     completeChapter: () => void
 }) {
+    const { width } = useWindowSize()
+    const isMobile = width < 768
     const modifiedLink: any = content.links ? (
         getEmbedLink(content?.links[0])
     ) : (
@@ -17,19 +20,21 @@ function Video({
     )
 
     return (
-        <div className="w-full max-w-full sm:max-w-[740px] md:max-w-[900px] lg:max-w-[900px] mx-auto h-auto aspect-w-16 aspect-h-9 rounded-[16px] mt-20">
-            <p className="text-start mb-4 text-xl font-semibold">
+        <div className="w-auto md:max-w-[900px] lg:max-w-[900px] h-auto aspect-w-16 aspect-h-9 rounded-[16px] mt-20 sm:mx-auto mr-4">
+            <p key={content?.description} className={`text-start mb-4 ${isMobile ? 'text-base' : 'text-xl'} font-semibold`}>
                 {content?.description}
             </p>
+
             {content.links?.map((link: string) => {
                 const isGdriveVideo = link.includes('drive') ? (
                     <iframe
                         key={link}
-                        className="w-full rounded-lg h-[70vh] border-4 border-transparent hover:border-secondary transition-all duration-300"
+                        className={`w-full rounded-lg ${isMobile ? 'h-[30vh]' : 'h-[70vh]'} border-4 border-transparent hover:border-secondary transition-all duration-300`}
                         src={modifiedLink}
                         frameBorder="0"
                         allowFullScreen
                     ></iframe>
+
                 ) : (
                     <YouTubePlayer
                         url={link}

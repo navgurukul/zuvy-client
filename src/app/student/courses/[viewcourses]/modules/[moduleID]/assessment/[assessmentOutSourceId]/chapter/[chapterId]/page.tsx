@@ -170,12 +170,16 @@ function Page({
 
             if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].submitedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
+                res.data.submitedOutsourseAssessments[0].submitedAt &&
+                res?.data?.submitedOutsourseAssessments[0].reattemptApproved ===
+                    false
             ) {
                 router.push(startPageUrl)
             } else if (
                 res.data.submitedOutsourseAssessments.length > 0 &&
-                res.data.submitedOutsourseAssessments[0].startedAt && res?.data?.submitedOutsourseAssessments[0].reattemptApproved === false
+                res.data.submitedOutsourseAssessments[0].startedAt &&
+                res?.data?.submitedOutsourseAssessments[0].reattemptApproved ===
+                    false
             ) {
                 getAssessmentData()
             }
@@ -403,30 +407,31 @@ function Page({
     }, [])
 
     useEffect(() => {
+        const navEntries = performance.getEntriesByType(
+            'navigation'
+        ) as PerformanceNavigationTiming[]
+        const navType = navEntries[0]?.type
 
-        const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
-        const navType = navEntries[0]?.type;
-      
-        if (navType === "reload") {
-          toast({
-            title: "Page Reloaded",
-            description: "The page has been reloaded.",
-            className: "text-left capitalize",
-          })
+        if (navType === 'reload') {
+            toast({
+                title: 'Page Reloaded',
+                description: 'The page has been reloaded.',
+                className: 'text-left capitalize',
+            })
         }
 
         const handleTabClose = () => {
-          const channel = new BroadcastChannel('assessment_channel');
-          channel.postMessage('assessment_tab_closed');
-          channel.close();
-        };
-    
-        window.addEventListener('beforeunload', handleTabClose);
-    
+            const channel = new BroadcastChannel('assessment_channel')
+            channel.postMessage('assessment_tab_closed')
+            channel.close()
+        }
+
+        window.addEventListener('beforeunload', handleTabClose)
+
         return () => {
-          window.removeEventListener('beforeunload', handleTabClose);
-        };
-      }, []);
+            window.removeEventListener('beforeunload', handleTabClose)
+        }
+    }, [])
 
     if (isSolving && isFullScreen) {
         if (
@@ -576,9 +581,6 @@ function Page({
         setIsFullScreen(true)
     }
 
-
-    
-
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -639,10 +641,10 @@ function Page({
                                                 </AlertDialogCancel>
                                                 <AlertDialogAction
                                                     className="bg-red-500"
-                                                    onClick={
-                                                        ()=>{handleFullScreenRequest;
-                                                            getAssessmentData(true)}
-                                                    }
+                                                    onClick={() => {
+                                                        handleFullScreenRequest
+                                                        getAssessmentData(true)
+                                                    }}
                                                 >
                                                     Proceed
                                                 </AlertDialogAction>
@@ -853,7 +855,15 @@ function Page({
 
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button disabled={disableSubmit || assessmentData?.totalMcqQuestions > 0 && assessmentData?.IsQuizzSubmission === false}>
+                                    <Button
+                                        disabled={
+                                            disableSubmit ||
+                                            (assessmentData?.totalMcqQuestions >
+                                                0 &&
+                                                assessmentData?.IsQuizzSubmission ===
+                                                    false)
+                                        }
+                                    >
                                         Submit Assessment
                                     </Button>
                                 </AlertDialogTrigger>
