@@ -19,7 +19,7 @@ let headers: AxiosRequestConfig['headers'] = {
 // }
 
 const api = axios.create({
-    baseURL: 'https://stage.api.zuvy.org',
+    baseURL: mainUrl,
     headers,
 })
 

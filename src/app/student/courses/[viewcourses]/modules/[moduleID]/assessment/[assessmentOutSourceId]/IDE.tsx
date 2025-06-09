@@ -633,7 +633,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                                 Your
                                                                                 Output:{' '}
                                                                             </span>
-                                                                            {`${testCase?.stdOut}`}
+                                                                            {`${testCase?.stdout}`}
                                                                         </p>
 
                                                                         <p>
@@ -719,7 +719,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                             Your
                                                                             Output:
                                                                         </span>
-                                                                        {`${testCase?.stdOut}`}
+                                                                        {`${testCase?.stdout}`}
                                                                     </p>
 
                                                                     <p>
