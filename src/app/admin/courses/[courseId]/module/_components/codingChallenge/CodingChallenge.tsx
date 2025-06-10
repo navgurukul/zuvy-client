@@ -314,7 +314,6 @@ function CodingChallenge({
                                 id="previewCodingChallenge"
                                 onClick={previewCodingChallenge}
                                 className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
-
                             >
                                 <Eye size={18} />
                                 <h6 className="ml-1 text-sm">Preview</h6>

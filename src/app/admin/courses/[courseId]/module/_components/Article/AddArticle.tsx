@@ -156,9 +156,11 @@ const AddArticle = ({
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
 
-            toast.success({
+            toast({
                 title: 'Auto-saved',
                 description: 'Article content auto-saved successfully',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
             console.error('Auto-save failed:', error)
@@ -354,6 +356,10 @@ const AddArticle = ({
                 setIsChapterUpdated(!isChapterUpdated)
                 setIsdisabledUploadButton(false)
 
+                // toast.success({
+                //     title: 'Success',
+                //     description: 'PDF uploaded successfully!',
+                // })
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
@@ -365,6 +371,7 @@ const AddArticle = ({
                     })
                 }, 1000) //
             } catch (err: any) {
+                console.error(err)
                 toast.error({
                     title: 'Upload failed',
                     description:
@@ -387,13 +394,14 @@ const AddArticle = ({
                 toast.success({
                     title: 'Success',
                     description: 'PDF Deleted Successfully',
+
                 })
                 setIsPdfUploaded(false)
                 setIsDeleteLoading(false)
                 setpdfLink(null)
             })
             .catch((err: any) => {
-                toast.error({
+                toast.success({
                     title: 'Delete PDF failed',
                     description:
                         err.response?.data?.message ||
@@ -496,18 +504,6 @@ const AddArticle = ({
                                                     </Button>
                                                 ) : (
                                                     <div>
-                                                        {/* {pdfLink && (
-                                                            <Button type="button">
-                                                                <Link
-                                                                    href={
-                                                                        pdfLink
-                                                                    }
-                                                                    target="_blank"
-                                                                >
-                                                                    View PDF
-                                                                </Link>
-                                                            </Button>
-                                                        )} */}
                                                         <Button
                                                             type="button"
                                                             onClick={
