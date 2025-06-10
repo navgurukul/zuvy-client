@@ -3,12 +3,9 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import Link from 'next/link'
-<<<<<<< Updated upstream
 import useWindowSize from '@/hooks/useHeightWidth'
 import { getCleanFileName } from '@/utils/admin'
-=======
 import { toast } from '@/components/ui/use-toast'
->>>>>>> Stashed changes
 
 type EditorDoc = {
     type: string
