@@ -234,11 +234,13 @@ const IDE: React.FC<IDEProps> = ({
                 }
             } else if (allTestCasesPassed && action === 'run') {
                 toast.success({
-                    title: `Test Cases Passed`,
+                    title: 'Success',
+                    description:'Test Cases Passed'
                 })
             } else {
                 toast({
-                    title: 'Test Cases Failed',
+                    title: 'Failed',
+                    description:'Test Cases Failed'
                 })
             }
 

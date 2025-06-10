@@ -190,6 +190,7 @@ function Page({ params }: { params: any }) {
             setCroppedImage(croppedCanvas.toDataURL())
             setIsCropping(false)
             toast.success({
+                title:'Success',
                 description:
                     'Image cropped successfully. You can now upload it.',
             })

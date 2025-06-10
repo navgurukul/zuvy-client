@@ -66,7 +66,7 @@ const AddArticle = ({
     const heightClass = useResponsiveHeight()
     const router = useRouter()
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
-    // state
+    //   state
     const [title, setTitle] = useState('')
     const [pdfTitle, setIsPdfTitle] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
@@ -79,10 +79,10 @@ const AddArticle = ({
     const { setArticlePreviewContent } = getArticlePreviewStore()
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
-    >()
-    const [isEditorSaved, setIsEditorSaved] = useState(false) // <-- Add this state
+        >()
+    const [isEditorSaved, setIsEditorSaved] = useState(false)
+    const [isContentEmpty, setIsContentEmpty] = useState(true)
 
-    // misc
     const formSchema = z.object({
         title: z.string(),
     })
@@ -95,31 +95,47 @@ const AddArticle = ({
         mode: 'onChange',
     })
 
+    const checkIfContentEmpty = (content: { doc: EditorDoc } | undefined): boolean => {
+        if (!content || !content.doc || !content.doc.content) return true;
+        if (content.doc.content.length === 0) return true;
+        if (
+            content.doc.content.length === 1 &&
+            content.doc.content[0].type === 'paragraph' &&
+            (!content.doc.content[0].content || content.doc.content[0].content.length === 0)
+        ) {
+            return true;
+        }
+        return false;
+    };
+
     const getArticleContent = async () => {
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
+
             )
             const contentDetails = response?.data?.contentDetails?.[0]
-
             const link = contentDetails?.links?.[0]
+
             if (link) {
                 setpdfLink(link)
                 setDefaultValue('pdf')
                 setIsPdfUploaded(true)
                 setIsEditorSaved(false) // <-- PDF hai to editor saved false
+                setIsContentEmpty(false)
             } else {
                 setpdfLink(null)
                 setDefaultValue('editor')
                 setIsPdfUploaded(false)
                 // --- Check if editor me content hai ---
                 const data = contentDetails?.content
-                let hasEditorContent = false
-                if (data && data.length > 0) {
-                    // Agar content array me kuch hai, to editor saved true
-                    hasEditorContent = true
-                }
+                const hasEditorContent = data && data.length > 0
                 setIsEditorSaved(hasEditorContent)
+
+                const isEmpty = checkIfContentEmpty(
+                    typeof data?.[0] === 'string' ? JSON.parse(data) : { doc: data?.[0] }
+                );
+                setIsContentEmpty(isEmpty)
             }
 
             setTitle(response.data.title)
@@ -127,15 +143,18 @@ const AddArticle = ({
 
             const data = contentDetails?.content
             if (typeof data?.[0] === 'string') {
-                setInitialContent(JSON.parse(data))
+                const parsedContent = JSON.parse(data)
+                setInitialContent(parsedContent);
+                setIsContentEmpty(checkIfContentEmpty(parsedContent))
             } else {
                 const jsonData = { doc: data?.[0] }
                 setInitialContent(jsonData)
+                setIsContentEmpty(checkIfContentEmpty(jsonData))
             }
         } catch (error) {
             console.error('Error fetching article content:', error)
         }
-    }
+    };
 
     const editArticleContent = async () => {
         try {
@@ -151,150 +170,162 @@ const AddArticle = ({
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 data
             )
+
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
-            setIsEditorSaved(true) // <-- Set true on save
+            setIsEditorSaved(true)
+            setIsContentEmpty(checkIfContentEmpty(initialContent))
+
             toast.success({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
-            })
+            });
         } catch (error: any) {
+            setIsEditorSaved(false) // Set to false if save fails
             toast.error({
                 title: 'Failed',
-                description:
-                    error.response?.data?.message || 'An error occurred.',
-            })
+                description: error.response?.data?.message || 'An error occurred.',
+            });
         }
-    }
+    };
 
     useEffect(() => {
         getArticleContent()
-    }, [content])
+    }, [content]);
 
-    // Reset isEditorSaved if PDF is uploaded or deleted
     useEffect(() => {
-        if (ispdfUploaded) setIsEditorSaved(false)
+        if (ispdfUploaded) {
+            setIsEditorSaved(false)
+            setIsContentEmpty(false)
+        }
     }, [ispdfUploaded])
-
     // Add this useEffect after your other useEffects
     useEffect(() => {
-        // Only check when editor is visible
-        if (defaultValue === 'editor') {
-            // Check if initialContent is empty
-            if (
-                !initialContent ||
-                !initialContent.doc ||
-                !initialContent.doc.content ||
-                initialContent.doc.content.length === 0 ||
-                (
-                    initialContent.doc.content.length === 1 &&
-                    initialContent.doc.content[0].type === 'paragraph' &&
-                    !initialContent.doc.content[0].content
-                )
-            ) {
-                setIsEditorSaved(false)
-            }
+        if (defaultValue === 'editor' && initialContent) {
+            setIsContentEmpty(checkIfContentEmpty(initialContent))
         }
-    }, [initialContent, defaultValue])
+    }, [initialContent, defaultValue]);
 
-    function previewArticle() {
-        if (content) {
-            setArticlePreviewContent(content)
+    const previewArticle = () => {
+        // First check if content is empty
+        if (isContentEmpty) {
+            toast.error({
+                title: 'Cannot preview',
+                description: 'Please write some content first',
+            });
+            return;
+        }
+
+        // Then check if content has been saved
+        if (!isEditorSaved) {
+            toast.error({
+                title: 'Cannot preview',
+                description: 'Please save your content first before previewing',
+            });
+            return;
+        }
+
+        // Only proceed if both conditions pass
+        if (content && !isContentEmpty && isEditorSaved) {
+            setArticlePreviewContent(content);
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
             )
         }
     }
-    function previewPdf() {
+
+    const previewPdf = () => {
         if (ispdfUploaded) {
-            setArticlePreviewContent(content)
+            setArticlePreviewContent(content);
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
             )
         } else {
-            return toast.error({
+            toast.error({
                 title: 'Failed',
                 description: 'No PDF uploaded. Please upload one to preview.',
             })
         }
-    }
+    };
 
     const onFileUpload = async () => {
-        if (file) {
-            if (file.type !== 'application/pdf') {
-                return toast.error({
-                    title: 'Invalid file type',
-                    description: 'Only PDF files are allowed.',
-                })
-            }
+        if (!file) return
 
-            // build the FormData, with the *exact* field name your backend expects*
-            const formData = new FormData()
-            formData.append('pdf', file, file.name)
-            formData.append('title', pdfTitle)
-
-            try {
-                setIsLoading(true)
-                await api.post(
-                    `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
-                    formData, // ← pass FormData directly
-                    {
-                        // OPTIONAL: axios will set the correct Content-Type boundary for you
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                    }
-                )
-                setIsChapterUpdated(!isChapterUpdated)
-                setIsdisabledUploadButton(false)
-
-                setTimeout(() => {
-                    setIsPdfUploaded(true)
-                    setpdfLink('')
-                    getArticleContent()
-                    setIsLoading(false)
-                    toast.success({
-                        title: 'Success',
-                        description: 'PDF uploaded successfully!',
-                    })
-                }, 1000) //
-            } catch (err: any) {
-                toast.error({
-                    title: 'Upload failed',
-                    description:
-                        err.response?.data?.message ||
-                        err.message ||
-                        'An error occurred.',
-                })
-            }
+        if (file.type !== 'application/pdf') {
+            return toast.error({
+                title: 'Invalid file type',
+                description: 'Only PDF files are allowed.',
+            })
         }
-    }
+        // build the FormData, with the *exact* field name your backend expects*
 
-    async function onDeletePdfhandler() {
-        setIsDeleteLoading(true)
-        await api
-            .put(
+        const formData = new FormData()
+        formData.append('pdf', file, file.name)
+        formData.append('title', pdfTitle);
+
+        try {
+            setIsLoading(true)
+            await api.post(
+                `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
+                formData,  // ← pass FormData directly
+                {
+
+                    // OPTIONAL: axios will set the correct Content-Type boundary for you
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                }
+            )
+
+            setIsChapterUpdated(!isChapterUpdated)
+            setIsdisabledUploadButton(false)
+            setIsPdfUploaded(true)
+            setpdfLink('')
+            setIsLoading(false)
+
+            setTimeout(() => {
+                getArticleContent()
+                toast.success({
+                    title: 'Success',
+                    description: 'PDF uploaded successfully!',
+                })
+            }, 1000)
+        } catch (err: any) {
+            toast.error({
+                title: 'Upload failed',
+                description:
+                    err.response?.data?.message ||
+                    err.message ||
+                    'An error occurred.',
+            })
+            setIsLoading(false)
+        }
+    };
+
+    const onDeletePdfhandler = async () => {
+        setIsDeleteLoading(true);
+        try {
+            await api.put(
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 { title: title, links: null }
             )
-            .then((res) => {
-                toast.success({
-                    title: 'Success',
-                    description: 'PDF Deleted Successfully',
-                })
-                setIsPdfUploaded(false)
-                setIsDeleteLoading(false)
-                setpdfLink(null)
+            toast.success({
+                title: 'Success',
+                description: 'PDF Deleted Successfully',
             })
-            .catch((err: any) => {
-                toast.error({
-                    title: 'Delete PDF failed',
-                    description:
-                        err.response?.data?.message ||
-                        err.message ||
-                        'An error occurred.',
-                })
-                setIsDeleteLoading(false)
+            setIsPdfUploaded(false)
+            setIsDeleteLoading(false)
+            setpdfLink(null)
+        } catch (err: any) {
+            toast.error({
+                title: 'Delete PDF failed',
+                description:
+                    err.response?.data?.message ||
+                    err.message ||
+                    'An error occurred.',
             })
-    }
+        } finally {
+            setIsDeleteLoading(false);
+        }
+    };
 
     return (
         <div className="px-5">
@@ -305,6 +336,7 @@ const AddArticle = ({
                         onSubmit={form.handleSubmit(editArticleContent)}
                         className=""
                     >
+
                         <FormField
                             control={form.control}
                             name="title"
@@ -353,7 +385,7 @@ const AddArticle = ({
                                             <div className="flex justify-end mt-5">
                                                 <div className="flex items-center justify-between mr-2">
                                                     {defaultValue ===
-                                                    'editor' ? (
+                                                        'editor' ? (
                                                         <div
                                                             id="previewArticle"
                                                             onClick={
@@ -380,9 +412,9 @@ const AddArticle = ({
                                                     )}
                                                 </div>
                                                 {defaultValue === 'editor' ? (
-                                                    <Button
-                                                        type="submit"
-                                                        form="myForm"
+                                                    <Button 
+                                                    type="submit" 
+                                                    form="myForm"
                                                     >
                                                         Save
                                                     </Button>
@@ -400,17 +432,17 @@ const AddArticle = ({
                                                                 </Link>
                                                             </Button>
                                                         )} */}
-                                                        <Button
-                                                            type="button"
-                                                            onClick={
-                                                                onFileUpload
-                                                            }
-                                                            disabled={
-                                                                !disabledUploadButton
-                                                            }
-                                                        >
-                                                            Upload PDF
-                                                        </Button>
+                                                    <Button
+                                                        type="button"
+                                                        onClick={
+                                                            onFileUpload
+                                                        }
+                                                        disabled={
+                                                            !disabledUploadButton
+                                                        }
+                                                    >
+                                                        Upload PDF
+                                                    </Button>
                                                     </div>
                                                 )}
                                             </div>
@@ -442,13 +474,13 @@ const AddArticle = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            You’ve uploaded a PDF, so the editor is now disabled
+                                            You've uploaded a PDF, so the editor is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
-                                <Label
-                                    htmlFor="r1"
-                                    className="font-light text-md text-black"
+                                <Label 
+                                htmlFor="r1" 
+                                className="font-light text-md text-black"
                                 >
                                     Editor
                                 </Label>
@@ -467,26 +499,32 @@ const AddArticle = ({
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
                                             You’ve already saved the assignment, so PDF upload is now disabled
-                                        </TooltipContent>
+                                            </TooltipContent>
                                     )}
                                 </Tooltip>
-                                <Label
-                                    htmlFor="r2"
-                                    className="font-light text-md text-black"
+                                <Label 
+                                htmlFor="r2" 
+                                className="font-light text-md text-black"
                                 >
                                     Upload PDF
                                 </Label>
                             </div>
                         </TooltipProvider>
                     </RadioGroup>
+
                     {defaultValue === 'editor' && (
                         <div className="mt-2 text-start">
                             <RemirrorTextEditor
                                 initialContent={initialContent}
-                                setInitialContent={setInitialContent}
+                                setInitialContent={(content) => {
+                                    setInitialContent(content)
+                                    setIsEditorSaved(false) // Mark as unsaved when content changes
+                                    setIsContentEmpty(checkIfContentEmpty(content))
+                                }}
                             />
                         </div>
                     )}
+
                     {defaultValue === 'pdf' && (
                         <UploadArticle
                             loading={loading}

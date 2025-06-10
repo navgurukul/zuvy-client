@@ -270,7 +270,7 @@ const EditMcqForm = ({
                     })
                 await refetch()
             } catch (error: any) {
-                toast.success({
+                toast.error({
                     title: 'Error',
                     description: error?.data?.message || 'An error occurred',
                     className:

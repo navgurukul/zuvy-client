@@ -59,7 +59,7 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                     setIsOpen(false)
                 })
         } catch (error: any) {
-            toast.success({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
