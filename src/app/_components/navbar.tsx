@@ -15,7 +15,7 @@ const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const { user, setUser } = getUser()
     const rolesList =
-        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+        user && (user.roles.length === 0 ? 'student' : user.roles[0])
 
     return (
         <nav className="bg-muted fixed top-0 left-0 right-0 z-40">

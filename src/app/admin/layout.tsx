@@ -20,7 +20,7 @@ export default function RootLayout({
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     const { user, setUser } = getUser()
     const rolesList =
-        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+        user && (user.roles.length === 0 ? 'student' : user.roles[0])
 
     const isAssessmentRouteClasses = (route: string) => {
         const adminRoutes = /admin.*courses.*module.*chapters/
@@ -38,15 +38,18 @@ export default function RootLayout({
                     <Spinner className="text-secondary" />
                 </div>
             ) : user &&
-              (user.rolesList.length === 0 ||
-                  (user.rolesList.length > 0 &&
-                      user.rolesList[0] !== 'admin')) ? (
-                <UnauthorizedUser rolesList={rolesList} path={'Admin'} />
+              (user.roles.length === 0 ||
+                  (user.roles.length > 0 && user.roles[0] !== 'admin')) ? (
+                <UnauthorizedUser roles={rolesList} path={'Admin'} />
             ) : (
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
-                    <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen`}>
+                    <div
+                        className={`${
+                            adminAssessmentPreviewRoute ? '' : 'pt-16'
+                        } h-screen`}
+                    >
                         <MaxWidthWrapper>{children}</MaxWidthWrapper>
                     </div>
                 </div>

@@ -33,6 +33,8 @@
 //         const urlParams = new URLSearchParams(window.location.search)
 //         const tokenVal = urlParams.get('token')
 //         const loggedOutToken = urlParams.get('loggedOutToken')
+//         console.log('tokenVal', tokenVal)
+//         console.log('token', tokenVal && reverseJwtBody(tokenVal))
 
 //         let redirectedUrl = localStorage.getItem('redirectedUrl')
 //         if (window.location.href.includes('route')) {
@@ -50,6 +52,8 @@
 //                         Authorization: token,
 //                     },
 //                 })
+
+//                 console.log('response', resp)
 
 //                 setUser(resp.data.user)
 
@@ -190,7 +194,9 @@
 
 // export default LoginPage
 
+// // *********************************** With google login ***********************************
 'use client'
+
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
@@ -228,13 +234,6 @@ function LoginPage({}: Props) {
     const { user, setUser } = getUser()
     const router = useRouter()
 
-    // Your existing JWT reverse function (keep if needed for your backend)
-    function reverseJwtBody(jwt: string): string {
-        const [header, body, signature] = jwt.split('.')
-        const reversedBody = body.split('').reverse().join('')
-        return [header, reversedBody, signature].join('.')
-    }
-
     // Handle successful Google Sign-In
     const handleGoogleSuccess = async (
         credentialResponse: CredentialResponse
@@ -252,55 +251,39 @@ function LoginPage({}: Props) {
 
         setLoading(true)
         try {
+            console.log('credentialResponse', credentialResponse)
             // Decode the Google JWT token to get user info
             const decoded: DecodedGoogleToken = jwtDecode(
                 credentialResponse.credential
             )
 
+            console.log(
+                'credentialResponse.credential',
+                credentialResponse.credential
+            )
             const googleData = {
-                id: decoded.sub,
-                name: decoded.name,
-                imageUrl: decoded.picture,
                 email: decoded.email,
-                idToken: credentialResponse.credential,
-                given_name: decoded.given_name,
-                family_name: decoded.family_name,
+                googleIdToken: credentialResponse.credential,
             }
 
-            // Send the Google data to your backend
-            // const response = await apiMeraki.post(
-            //     '/auth/google-signin',
-            //     googleData,
-            //     {
-            //         headers: {
-            //             'Content-Type': 'application/json',
-            //         },
-            //     }
-            // )
-            const response = await api.post(`/auth/google`, googleData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
+            console.log('googleData', googleData)
+            const response = await api.post(`/auth/login`, googleData)
 
             console.log('response', response)
 
             // Handle your backend response
-            if (response.data.token) {
-                const userToken = response.data.token
-                localStorage.setItem('token', userToken)
+            if (response.data.access_token) {
+                // localStorage.setItem('token', userToken)
+                localStorage.setItem('access_token', response.data.access_token)
+                // localStorage.setItem('token', response.data.access_token)
 
-                // Get user data
-                // Change the API
-                const userResp = await apiMeraki.get(`/users/me`, {
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: userToken,
-                    },
-                })
+                console.log(
+                    'response.data.access_token',
+                    response.data.access_token
+                )
 
-                setUser(userResp.data.user)
-                localStorage.setItem('AUTH', JSON.stringify(userResp.data.user))
+                setUser(response.data.user)
+                localStorage.setItem('AUTH', JSON.stringify(response.data.user))
 
                 toast({
                     title: 'Login Successful',
@@ -312,14 +295,14 @@ function LoginPage({}: Props) {
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
-                if (!userResp.data.user.rolesList[0]) {
+                if (!response.data.user.roles[0]) {
                     setCookie(
                         'secure_typeuser',
                         JSON.stringify(btoa('student'))
                     )
                     router.push(redirectedUrl || '/student')
                 } else {
-                    const userRole = userResp.data.user.rolesList[0]
+                    const userRole = response.data.user.roles[0]
                     setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
                     if (redirectedUrl) {
@@ -433,7 +416,7 @@ function LoginPage({}: Props) {
                                 />
 
                                 {/* Alternative: Filled theme button */}
-                                <div className="text-sm text-gray-500">
+                                {/* <div className="text-sm text-gray-500">
                                     or try different style
                                 </div>
 
@@ -446,7 +429,7 @@ function LoginPage({}: Props) {
                                     shape="rectangular"
                                     width="280"
                                     logo_alignment="left"
-                                />
+                                /> */}
                             </div>
                         </div>
                     </div>
