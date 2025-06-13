@@ -313,6 +313,14 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         getAllTagsWithoutFilter(setTags)
     }, [])
 
+    useEffect(() => {
+        if (content?.ModuleAssessment?.title) {
+            setChapterTitle(content.ModuleAssessment.title)
+        } else if (activeChapterTitle) {
+            setChapterTitle(activeChapterTitle)
+        }
+    }, [content?.ModuleAssessment?.title, activeChapterTitle])
+
     return (
         <div className="w-full pb-2 px-5">
             {questionType !== 'settings' && (
