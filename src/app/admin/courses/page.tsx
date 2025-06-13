@@ -146,9 +146,12 @@ const Courses: React.FC = () => {
 
     useEffect(() => {
         const getToken = async () => {
-            const response = await apiMeraki.get('/users/calendar/tokens')
+            // const response = await apiMeraki.get('/users/calendar/tokens')
+            const response = await api.get(`/classes/check-calendar-access`)
 
-            if (!response.data.success) {
+            console.log('response', response)
+
+            if (response.data.status === 'not success') {
                 setHasAccess(false)
             } else {
                 setHasAccess(true)

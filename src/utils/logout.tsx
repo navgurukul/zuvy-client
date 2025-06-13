@@ -9,11 +9,11 @@ export const Logout = async () => {
     const access_token = localStorage.getItem('access_token')
 
     // Clear localStorage first
-    // localStorage.clear()
+    localStorage.clear()
 
-    // // Delete the cookie
-    // document.cookie =
-    //     'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+    // Delete the cookie
+    document.cookie =
+        'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
 
     try {
         const response = await axios.post(
