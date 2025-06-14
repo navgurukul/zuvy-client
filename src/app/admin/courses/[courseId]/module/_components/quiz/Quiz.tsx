@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
@@ -33,6 +33,8 @@ function Quiz(props: any) {
     const [inputValue, setInputValue] = useState(props.activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setQuizPreviewContent } = getQuizPreviewStore()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const hasLoaded = useRef(false)
 
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
@@ -119,10 +121,17 @@ function Quiz(props: any) {
     }, [props.chapterId])
 
     useEffect(() => {
-        getAllTags()
-        if (props.chapterId && props.chapterId !== 0) {
-            getAllSavedQuizQuestion()
+        if (hasLoaded.current) return
+        hasLoaded.current = true
+        const fetchData = async () => {
+            setIsDataLoading(true)
+            await getAllTags()
+            if (props.chapterId && props.chapterId !== 0) {
+                await getAllSavedQuizQuestion()
+            }
+            setIsDataLoading(false)
         }
+        fetchData()
     }, [props.chapterId, getAllSavedQuizQuestion])
 
     function previewQuiz() {
@@ -144,6 +153,16 @@ function Quiz(props: any) {
         }
     }
 
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Quiz details...</div>
+                </div>
+            </div>
+        )
+    }
+    
     return (
         <div>
             <div className="px-5">
