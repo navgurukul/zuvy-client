@@ -329,15 +329,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         }
         loadTags()
     }, [])
-    if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">Loading Assessment  details...</div>
-                </div>
-            </div>
-        )
-    }
+   
 
     useEffect(() => {
         if (content?.ModuleAssessment?.title) {
@@ -347,6 +339,15 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         }
     }, [content?.ModuleAssessment?.title, activeChapterTitle])
 
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Assessment  details...</div>
+                </div>
+            </div>
+        )
+    }
     return (
         <div className="w-full pb-2 px-5">
             {questionType !== 'settings' && (
