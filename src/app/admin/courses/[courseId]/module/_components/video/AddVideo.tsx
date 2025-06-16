@@ -140,6 +140,8 @@ const AddVideo = ({
     const [videoTitle, setVideoTitle] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setVideoPreviewContent } = getVideoPreviewStore()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const hasLoaded = useRef(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -192,6 +194,10 @@ const AddVideo = ({
     }
 
     useEffect(() => {
+        if (hasLoaded.current) return
+        hasLoaded.current = true
+        setIsDataLoading(true)
+
         if (content?.contentDetails?.[0]?.links?.[0]) {
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
@@ -202,6 +208,7 @@ const AddVideo = ({
             setShowVideoBox(false)
         }
         setVideoTitle(content?.contentDetails?.[0]?.title ?? '')
+        setIsDataLoading(false)
     }, [content?.contentDetails, form])
 
     const handleClose = async () => {
@@ -266,9 +273,18 @@ const AddVideo = ({
                     'border border-red-500 text-red-500 text-left w-[90%] capitalize',
             })
         }
-    } 
+    }
 
-
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Quiz details...</div>
+                </div>
+            </div>
+        )
+    }
+    
     return (
         <ScrollArea
             type="hover"

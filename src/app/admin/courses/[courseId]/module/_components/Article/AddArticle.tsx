@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { api } from '@/utils/axios.config'
@@ -66,9 +66,9 @@ const AddArticle = ({
     const heightClass = useResponsiveHeight()
     const router = useRouter()
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
-    // state
+    // state - FIXED: Use single title state for both modes
     const [title, setTitle] = useState('')
-    const [pdfTitle, setIsPdfTitle] = useState('')
+    const [isDataLoading, setIsDataLoading] = useState(true) // Add loading state
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [defaultValue, setDefaultValue] = useState('editor')
     const [file, setFile] = useState<any>(null)
@@ -81,6 +81,10 @@ const AddArticle = ({
         { doc: EditorDoc } | undefined
     >()
     const [isEditorSaved, setIsEditorSaved] = useState(false) // <-- Add this state
+    const hasFetched = useRef(false)
+    const [hasEditorContent, setHasEditorContent] = useState(false)
+    const [previousContentHash, setPreviousContentHash] = useState('')
+    const [isSaving, setIsSaving] = useState(false)
 
     // misc
     const formSchema = z.object({
@@ -95,8 +99,79 @@ const AddArticle = ({
         mode: 'onChange',
     })
 
+    // NEW: Function to check if editor content is empty
+    const isEditorContentEmpty = (content: any) => {
+        if (!content || !content.doc || !content.doc.content) return true
+
+        const docContent = content.doc.content
+        if (docContent.length === 0) return true
+
+        // Check if only empty paragraphs
+        if (docContent.length === 1 &&
+            docContent[0].type === 'paragraph' &&
+            (!docContent[0].content || docContent[0].content.length === 0)) {
+            return true
+        }
+
+        // Check if all content is empty
+        const hasRealContent = docContent.some((item: any) => {
+            if (item.type === 'paragraph' && item.content) {
+                return item.content.some((textItem: any) =>
+                    textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0
+                )
+            }
+            return item.type !== 'paragraph' // Non-paragraph content is considered real content
+        })
+
+        return !hasRealContent
+    }
+
+    // NEW: Function to generate content hash for comparison
+    const generateContentHash = (content: any) => {
+        return JSON.stringify(content)
+    }
+
+    // NEW: Auto-save function
+    const autoSave = async () => {
+        if (isSaving) return // Prevent multiple simultaneous saves
+
+        try {
+            setIsSaving(true)
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
+            const data = {
+                title,
+                articleContent: initialContentString,
+            }
+
+            await api.put(
+                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                data
+            )
+            setArticleUpdateOnPreview(!articleUpdateOnPreview)
+            setIsChapterUpdated(!isChapterUpdated)
+            setIsEditorSaved(!isEditorContentEmpty(initialContent))
+
+            // Update previous content hash
+            setPreviousContentHash(generateContentHash(initialContent))
+
+            toast({
+                title: 'Auto-saved',
+                description: 'Article content auto-saved successfully',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+        } catch (error: any) {
+            console.error('Auto-save failed:', error)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
     const getArticleContent = async () => {
         try {
+            setIsDataLoading(true) 
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
             )
@@ -122,23 +197,34 @@ const AddArticle = ({
                 setIsEditorSaved(hasEditorContent)
             }
 
-            setTitle(response.data.title)
-            setIsPdfTitle(response.data.title)
+            // FIXED: Set title with fallback and ensure it's not empty
+            const fetchedTitle = response.data.title || response.data.name || ''
+            setTitle(fetchedTitle)
 
             const data = contentDetails?.content
+            let parsedContent
             if (typeof data?.[0] === 'string') {
-                setInitialContent(JSON.parse(data))
+                parsedContent = JSON.parse(data)
             } else {
-                const jsonData = { doc: data?.[0] }
-                setInitialContent(jsonData)
+                parsedContent = { doc: data?.[0] }
             }
+
+            setInitialContent(parsedContent)
+
+            // NEW: Set initial content states
+            setHasEditorContent(!isEditorContentEmpty(parsedContent))
+            setPreviousContentHash(generateContentHash(parsedContent))
+
         } catch (error) {
             console.error('Error fetching article content:', error)
+        } finally {
+            setIsDataLoading(false) // End loading
         }
     }
 
     const editArticleContent = async () => {
         try {
+            setIsSaving(true)
             const initialContentString = initialContent
                 ? [JSON.stringify(initialContent)]
                 : ''
@@ -153,7 +239,11 @@ const AddArticle = ({
             )
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
-            setIsEditorSaved(true) // <-- Set true on save
+            setIsEditorSaved(!isEditorContentEmpty(initialContent))
+
+            // Update previous content hash
+            setPreviousContentHash(generateContentHash(initialContent))
+
             toast({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
@@ -169,12 +259,18 @@ const AddArticle = ({
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 variant: 'destructive',
             })
+        } finally {
+            setIsSaving(false)
         }
     }
 
     useEffect(() => {
-        getArticleContent()
-    }, [content])
+        if (content?.id && !hasFetched.current) {
+            hasFetched.current = true
+            getArticleContent()
+        }
+
+    }, [content?.id]) // More specific dependency
 
     // Reset isEditorSaved if PDF is uploaded or deleted
     useEffect(() => {
@@ -184,23 +280,19 @@ const AddArticle = ({
     // Add this useEffect after your other useEffects
     useEffect(() => {
         // Only check when editor is visible
-        if (defaultValue === 'editor') {
-            // Check if initialContent is empty
-            if (
-                !initialContent ||
-                !initialContent.doc ||
-                !initialContent.doc.content ||
-                initialContent.doc.content.length === 0 ||
-                (
-                    initialContent.doc.content.length === 1 &&
-                    initialContent.doc.content[0].type === 'paragraph' &&
-                    !initialContent.doc.content[0].content
-                )
-            ) {
-                setIsEditorSaved(false)
+        if (defaultValue === 'editor' && initialContent) {
+            const isEmpty = isEditorContentEmpty(initialContent)
+            const currentHash = generateContentHash(initialContent)
+
+            setHasEditorContent(!isEmpty)
+
+            // Auto-save logic: if content becomes empty and it was previously saved
+            if (isEmpty && isEditorSaved && previousContentHash !== currentHash) {
+                autoSave()
             }
         }
-    }, [initialContent, defaultValue])
+    }, [initialContent, defaultValue, isEditorSaved, previousContentHash])
+
 
     function previewArticle() {
         if (content) {
@@ -239,7 +331,8 @@ const AddArticle = ({
             // build the FormData, with the *exact* field name your backend expects*
             const formData = new FormData()
             formData.append('pdf', file, file.name)
-            formData.append('title', pdfTitle)
+            // FIXED: Use the same title state
+            formData.append('title', title)
 
             try {
                 setIsLoading(true)
@@ -308,6 +401,16 @@ const AddArticle = ({
             })
     }
 
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Chapter details...</div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="px-5">
             <div className="w-full ">
@@ -325,34 +428,23 @@ const AddArticle = ({
                                     <FormControl>
                                         <div className="flex justify-between items-center">
                                             <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                {defaultValue === 'editor' ? (
-                                                    <Input
-                                                        {...field}
-                                                        onChange={(e) => {
-                                                            setTitle(
-                                                                e.target.value
-                                                            )
-                                                            field.onChange(e)
-                                                        }}
-                                                        placeholder="Untitled Article"
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                        autoFocus
-                                                    />
-                                                ) : (
-                                                    <Input
-                                                        {...field}
-                                                        onChange={(e) => {
-                                                            setIsPdfTitle(
-                                                                e.target.value
-                                                            )
-                                                            field.onChange(e)
-                                                        }}
-                                                        placeholder="Untitled PDF"
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                        autoFocus
-                                                    />
-                                                )}
-                                                {!title && ( // Show pencil icon only when the title is empty
+                                                <Input
+                                                    {...field}
+                                                    value={title} // Explicitly set value
+                                                    onChange={(e) => {
+                                                        // FIXED: Always update the same title state
+                                                        setTitle(e.target.value)
+                                                        field.onChange(e)
+                                                    }}
+                                                    placeholder={
+                                                        defaultValue === 'editor'
+                                                            ? "Untitled Article"
+                                                            : "Untitled PDF"
+                                                    }
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                {!title && (
                                                     <Pencil
                                                         fill="true"
                                                         fillOpacity={0.4}
@@ -365,7 +457,7 @@ const AddArticle = ({
                                             <div className="flex justify-end mt-5">
                                                 <div className="flex items-center justify-between mr-2">
                                                     {defaultValue ===
-                                                    'editor' ? (
+                                                        'editor' ? (
                                                         <div
                                                             id="previewArticle"
                                                             onClick={
@@ -395,8 +487,9 @@ const AddArticle = ({
                                                     <Button
                                                         type="submit"
                                                         form="myForm"
+                                                        disabled={!hasEditorContent || isSaving}
                                                     >
-                                                        Save
+                                                        {isSaving ? 'Saving...' : 'Save'}
                                                     </Button>
                                                 ) : (
                                                     <div>
@@ -454,7 +547,7 @@ const AddArticle = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            You’ve uploaded a PDF, so the editor is now disabled
+                                            You have uploaded a PDF, so the editor is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
@@ -478,7 +571,7 @@ const AddArticle = ({
                                     </TooltipTrigger>
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
-                                            You’ve already saved the assignment, so PDF upload is now disabled
+                                            You have already saved the assignment, so PDF upload is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
