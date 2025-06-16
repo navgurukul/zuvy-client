@@ -1,7 +1,7 @@
 'use client'
 
 import { PlusCircle, Pencil } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import CodingTopics from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
@@ -108,6 +108,8 @@ function CodingChallenge({
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const hasLoaded = useRef(false)
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
 
@@ -218,17 +220,26 @@ function CodingChallenge({
     ])
 
     async function getAllTags() {
-        const response = await api.get('Content/allTags')
-        if (response) {
-            const tagArr = [
-                { tagName: 'All Topics', id: -1 },
-                ...response.data.allTags,
-            ]
-            setTags(tagArr)
+        try {
+            setIsDataLoading(true)
+            const response = await api.get('Content/allTags')
+            if (response) {
+                const tagArr = [
+                    { tagName: 'All Topics', id: -1 },
+                    ...response.data.allTags,
+                ]
+                setTags(tagArr)
+            }
+        } catch (error) {
+            console.error('Error fetching tags:', error)
+        } finally {
+            setIsDataLoading(false)
         }
     }
 
     useEffect(() => {
+        if (hasLoaded.current) return
+        hasLoaded.current = true
         getAllTags()
     }, [])
 
@@ -262,7 +273,16 @@ function CodingChallenge({
             `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
         )
     }
-
+    
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Coding Problem details...</div>
+                </div>
+            </div>
+        )
+    }
     return (
         <>
             <div className="px-5">

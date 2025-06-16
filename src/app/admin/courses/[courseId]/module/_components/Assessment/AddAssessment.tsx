@@ -1,7 +1,7 @@
 'use client'
 
 import { EditIcon, Eye, Pencil, Settings } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import {
     filterQuestions,
@@ -44,6 +44,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     topicId,
     activeChapterTitle,
 }) => {
+    const [isDataLoading, setIsDataLoading] = useState(true) 
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
 
@@ -110,6 +111,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         useState<Object>({})
     const [selectQuizDifficultyCount, setSelectQuizDifficultyCount] =
         useState<Object>({})
+    const hasLoaded = useRef(false)
 
     const handleCodingButtonClick = () => {
         setQuestionType('coding')
@@ -302,15 +304,48 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     useEffect(() => {
         if (chapterData.id && topicId > 0) {
+            setIsDataLoading(true) 
             fetchChapterContent(chapterData.id, topicId)
             setChapterTitle(content.ModuleAssessment?.title)
+            setChapterTitle(activeChapterTitle) // Always sync with the chapter title
+            setIsDataLoading(false)
         }
-    }, [chapterData.id, topicId])
+    }, [chapterData.id, topicId, activeChapterTitle])
 
     useEffect(() => {
-        getAllTagsWithoutFilter(setTags)
+        if (hasLoaded.current) return
+        hasLoaded.current = true
+        const loadTags = async () => {
+            setIsDataLoading(true) // Start loading
+            try {
+                await getAllTagsWithoutFilter(setTags)
+            } catch (error) {
+                console.error('Error loading tags:', error)
+            } finally {
+                setIsDataLoading(false) // End loading
+            }
+        }
+        loadTags()
     }, [])
+   
 
+    useEffect(() => {
+        if (content?.ModuleAssessment?.title) {
+            setChapterTitle(content.ModuleAssessment.title)
+        } else if (activeChapterTitle) {
+            setChapterTitle(activeChapterTitle)
+        }
+    }, [content?.ModuleAssessment?.title, activeChapterTitle])
+
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Assessment  details...</div>
+                </div>
+            </div>
+        )
+    }
     return (
         <div className="w-full pb-2 px-5">
             {questionType !== 'settings' && (
@@ -367,7 +402,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             questionType === 'coding'
                                 ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
                                 : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                        }`}
+                            }`}
                         onClick={handleCodingButtonClick}
                     >
                         Coding Problems ({selectedCodingQuestions.length})
@@ -377,7 +412,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             questionType === 'mcq'
                                 ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
                                 : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                        }`}
+                            }`}
                         onClick={handleMCQButtonClick}
                     >
                         MCQs ({selectedQuizQuestions.length})
@@ -387,7 +422,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             questionType === 'open-ended'
                                 ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
                                 : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                        }`}
+                            }`}
                         onClick={handleOpenEndedButtonClick}
                     >
                         Open-Ended Questions (
@@ -415,10 +450,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             {questionType === 'coding'
                                 ? 'Coding Problem Library'
                                 : questionType === 'mcq'
-                                ? 'MCQ Library'
-                                : questionType === 'open-ended'
-                                ? 'Open-Ended Question Library'
-                                : ''}
+                                    ? 'MCQ Library'
+                                    : questionType === 'open-ended'
+                                        ? 'Open-Ended Question Library'
+                                        : ''}
                         </h3>
                         <h1 className="text-left font-bold mb-5 mr-3">
                             Selected Questions
@@ -434,7 +469,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         questionType == 'settings'
                             ? 'grid grid-cols-1'
                             : 'grid grid-cols-[1fr_2px_1fr]'
-                    } h-screen `}
+                        } h-screen `}
                 >
                     <>
                         <div className="h-full ">
@@ -495,6 +530,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                             fetchChapterContent
                                         }
                                         chapterTitle={chapterTitle}
+                                        activeChapterTitle={activeChapterTitle}
                                         saveSettings={saveSettings}
                                         setSaveSettings={setSaveSettings}
                                         setQuestionType={setQuestionType}
@@ -524,8 +560,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 <ScrollBar orientation="vertical" className="" />
 
                                 {selectedCodingQuesIds.length > 0 ||
-                                selectedQuizQuesIds.length > 0 ||
-                                selectedOpenEndedQuesIds.length > 0 ? (
+                                    selectedQuizQuesIds.length > 0 ||
+                                    selectedOpenEndedQuesIds.length > 0 ? (
                                     <SelectedQuestions
                                         selectedCodingQuestions={
                                             selectedCodingQuestions

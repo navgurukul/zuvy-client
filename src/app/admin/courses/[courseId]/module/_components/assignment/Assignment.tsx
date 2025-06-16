@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { api } from '@/utils/axios.config'
@@ -109,6 +109,11 @@ const AddAssignent = ({
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
     >()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const [hasEditorContent, setHasEditorContent] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+    const [previousContentHash, setPreviousContentHash] = useState('')
+    const hasLoaded = useRef(false)
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -127,7 +132,75 @@ const AddAssignent = ({
         mode: 'onChange',
     })
 
+    const isEditorContentEmpty = (content: any) => {
+        if (!content || !content.doc || !content.doc.content) return true
+
+        const docContent = content.doc.content
+        if (docContent.length === 0) return true
+
+        // Check if only empty paragraphs
+        if (docContent.length === 1 &&
+            docContent[0].type === 'paragraph' &&
+            (!docContent[0].content || docContent[0].content.length === 0)) {
+            return true
+        }
+
+        // Check if all content is empty
+        const hasRealContent = docContent.some((item: any) => {
+            if (item.type === 'paragraph' && item.content) {
+                return item.content.some((textItem: any) =>
+                    textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0
+                )
+            }
+            return item.type !== 'paragraph' // Non-paragraph content is considered real content
+        })
+
+        return !hasRealContent
+    }
+
+    // NEW: Function to generate content hash for comparison
+    const generateContentHash = (content: any) => {
+        return JSON.stringify(content)
+    }
+
+    // NEW: Auto-save function
+    const autoSave = async () => {
+        if (isSaving) return // Prevent multiple simultaneous saves
+
+        try {
+            setIsSaving(true)
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
+            const requestBody = {
+                title: titles,
+                completionDate: deadline,
+                articleContent: initialContentString,
+            }
+
+            await api.put(
+                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                requestBody
+            )
+            setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
+            setIsChapterUpdated(!isChapterUpdated)
+            setIsEditorSaved(!isEditorContentEmpty(initialContent))
+
+            // Update previous content hash
+            setPreviousContentHash(generateContentHash(initialContent))
+
+            toast.success({
+                title: 'Auto-saved',
+                description: 'Assignment content auto-saved successfully',
+            })
+        } catch (error: any) {
+            console.error('Auto-save failed:', error)
+        } finally {
+            setIsSaving(false)
+        }
+    }
     const getAssignmentContent = async () => {
+        setIsDataLoading(true) 
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}`
@@ -163,6 +236,8 @@ const AddAssignent = ({
             }
         } catch (error) {
             console.error('Error fetching assignment content:', error)
+        } finally {
+            setIsDataLoading(false)
         }
     }
 
@@ -189,6 +264,8 @@ const AddAssignent = ({
 
     // async
     useEffect(() => {
+        if (hasLoaded.current) return
+        hasLoaded.current = true
         getAssignmentContent()
     }, [content])
 
@@ -225,6 +302,9 @@ const AddAssignent = ({
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true) // <-- Add this line
+
+            setPreviousContentHash(generateContentHash(initialContent))
+
             toast.success({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
@@ -234,23 +314,49 @@ const AddAssignent = ({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
+
             })
         }
     }
 
+    useEffect(() => {
+        if (defaultValue === 'editor' && initialContent) {
+            const isEmpty = isEditorContentEmpty(initialContent)
+            const currentHash = generateContentHash(initialContent)
+
+            setHasEditorContent(!isEmpty)
+
+            // Auto-save logic: if content becomes empty and it was previously saved
+            if (isEmpty && isEditorSaved && previousContentHash !== currentHash) {
+                autoSave()
+            }
+        }
+    }, [initialContent, defaultValue, isEditorSaved, previousContentHash])
+
     const previewAssignment = () => {
-        if (content?.contentDetails[0]?.content?.length > 0) {
+        if (defaultValue === 'editor') {
+            const isEmpty = isEditorContentEmpty(initialContent)
+    
+            if (isEmpty) {
+                return toast.error({
+                    title: 'Cannot Preview',
+                    description: 'Editor content is empty. Please add some content.',
+                })
+            }
+    
+            if (!isEditorSaved) {
+                return toast.error({
+                    title: 'Unsaved Changes',
+                    description: 'Please save your content before previewing.',
+                })
+            }
             setAssignmentPreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
             )
-        } else {
-            return toast.error({
-                title: 'Cannot Preview',
-                description: 'Nothing to Preview please save some content',
-            })
         }
     }
+    
 
     const onFileUpload = async () => {
         if (file) {
@@ -288,7 +394,7 @@ const AddAssignent = ({
                 }, 1000) //
             } catch (err: any) {
                 console.error(err)
-                toast.error({
+                toast.success({
                     title: 'Upload failed',
                     description:
                         err.response?.data?.message ||
@@ -301,18 +407,18 @@ const AddAssignent = ({
 
     // Add previewPdf function for PDF preview navigation
     function previewPdf() {
-    if (ispdfUploaded) {
-        setAssignmentPreviewContent(content)
-        router.push(
-            `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
-        )
-    } else {
-        toast.error({
-            title: 'Failed',
-            description: 'No PDF uploaded. Please upload one to preview.',
-        })
+        if (ispdfUploaded) {
+            setAssignmentPreviewContent(content)
+            router.push(
+                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
+            )
+        } else {
+            toast.error({
+                title: 'Failed',
+                description: 'No PDF uploaded. Please upload one to preview.',
+            })
+        }
     }
-}
 
     const onDeletePdfhandler = async () => {
         setIsLoading(true)
@@ -324,7 +430,7 @@ const AddAssignent = ({
             .then((res) => {
                 toast.success({
                     title: 'Success',
-                    description: 'PDF Deleted Successfully',
+                    description: 'PDF Deleted Successfully'
                 })
                 setIsPdfUploaded(false)
                 setpdfLink(null)
@@ -342,7 +448,15 @@ const AddAssignent = ({
             })
         setIsLoading(false)
     }
-
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading assignment details...</div>
+                </div>
+            </div>
+        )
+    }
     return (
         <div className="px-5">
             <>
@@ -401,9 +515,9 @@ const AddAssignent = ({
                                                                 onClick={previewPdf}
                                                                 className={`flex hover:bg-gray-300 rounded-md p-1 cursor-pointer ${
                                                                     !ispdfUploaded
-                                                                        ? 'opacity-50 pointer-events-none'
-                                                                        : ''
-                                                                }`}
+                                                                    ? 'opacity-50 pointer-events-none'
+                                                                    : ''
+                                                                    }`}
                                                             >
                                                                 <Eye size={18} />
                                                                 <h6 className="ml-1 text-sm">
@@ -416,8 +530,9 @@ const AddAssignent = ({
                                                         <Button
                                                             type="submit"
                                                             form="myForm"
+                                                            disabled={!hasEditorContent || isSaving}
                                                         >
-                                                            Save
+                                                            {isSaving ? 'Saving...' : 'Save'}
                                                         </Button>
                                                     ) : (
                                                         <div>
@@ -471,13 +586,13 @@ const AddAssignent = ({
                                                             className={`w-1/6  text-left font-normal ${
                                                                 !field.value &&
                                                                 'text-muted-foreground'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {dateValue
                                                                 ? format(
-                                                                      dateValue,
-                                                                      'EEEE, MMMM d, yyyy'
-                                                                  )
+                                                                    dateValue,
+                                                                    'EEEE, MMMM d, yyyy'
+                                                                )
                                                                 : 'Pick a date'}
                                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                         </Button>

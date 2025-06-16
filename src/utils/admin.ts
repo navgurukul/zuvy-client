@@ -438,7 +438,8 @@ export const fetchStudentAssessments = async (
     } = res.data
 
     // Update global pagination
-    const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
+    // const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
+    const updatedTotalPages = Math.ceil(res?.data?.ModuleAssessment?.totalStudents / limit)
     setTotalPages(updatedTotalPages)
     setLastPage(updatedTotalPages)
 

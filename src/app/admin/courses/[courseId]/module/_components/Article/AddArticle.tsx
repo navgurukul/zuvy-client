@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { api } from '@/utils/axios.config'
@@ -66,9 +66,9 @@ const AddArticle = ({
     const heightClass = useResponsiveHeight()
     const router = useRouter()
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
-    //   state
+    // state - FIXED: Use single title state for both modes
     const [title, setTitle] = useState('')
-    const [pdfTitle, setIsPdfTitle] = useState('')
+    const [isDataLoading, setIsDataLoading] = useState(true) // Add loading state
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [defaultValue, setDefaultValue] = useState('editor')
     const [file, setFile] = useState<any>(null)
@@ -79,10 +79,14 @@ const AddArticle = ({
     const { setArticlePreviewContent } = getArticlePreviewStore()
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
-        >()
-    const [isEditorSaved, setIsEditorSaved] = useState(false)
-    const [isContentEmpty, setIsContentEmpty] = useState(true)
+    >()
+    const [isEditorSaved, setIsEditorSaved] = useState(false) // <-- Add this state
+    const hasFetched = useRef(false)
+    const [hasEditorContent, setHasEditorContent] = useState(false)
+    const [previousContentHash, setPreviousContentHash] = useState('')
+    const [isSaving, setIsSaving] = useState(false)
 
+    // misc
     const formSchema = z.object({
         title: z.string(),
     })
@@ -95,69 +99,44 @@ const AddArticle = ({
         mode: 'onChange',
     })
 
-    const checkIfContentEmpty = (content: { doc: EditorDoc } | undefined): boolean => {
-        if (!content || !content.doc || !content.doc.content) return true;
-        if (content.doc.content.length === 0) return true;
-        if (
-            content.doc.content.length === 1 &&
-            content.doc.content[0].type === 'paragraph' &&
-            (!content.doc.content[0].content || content.doc.content[0].content.length === 0)
-        ) {
-            return true;
+    // NEW: Function to check if editor content is empty
+    const isEditorContentEmpty = (content: any) => {
+        if (!content || !content.doc || !content.doc.content) return true
+
+        const docContent = content.doc.content
+        if (docContent.length === 0) return true
+
+        // Check if only empty paragraphs
+        if (docContent.length === 1 &&
+            docContent[0].type === 'paragraph' &&
+            (!docContent[0].content || docContent[0].content.length === 0)) {
+            return true
         }
-        return false;
-    };
 
-    const getArticleContent = async () => {
-        try {
-            const response = await api.get(
-                `/Content/chapterDetailsById/${content.id}`
-
-            )
-            const contentDetails = response?.data?.contentDetails?.[0]
-            const link = contentDetails?.links?.[0]
-
-            if (link) {
-                setpdfLink(link)
-                setDefaultValue('pdf')
-                setIsPdfUploaded(true)
-                setIsEditorSaved(false) // <-- PDF hai to editor saved false
-                setIsContentEmpty(false)
-            } else {
-                setpdfLink(null)
-                setDefaultValue('editor')
-                setIsPdfUploaded(false)
-                // --- Check if editor me content hai ---
-                const data = contentDetails?.content
-                const hasEditorContent = data && data.length > 0
-                setIsEditorSaved(hasEditorContent)
-
-                const isEmpty = checkIfContentEmpty(
-                    typeof data?.[0] === 'string' ? JSON.parse(data) : { doc: data?.[0] }
-                );
-                setIsContentEmpty(isEmpty)
+        // Check if all content is empty
+        const hasRealContent = docContent.some((item: any) => {
+            if (item.type === 'paragraph' && item.content) {
+                return item.content.some((textItem: any) =>
+                    textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0
+                )
             }
+            return item.type !== 'paragraph' // Non-paragraph content is considered real content
+        })
 
-            setTitle(response.data.title)
-            setIsPdfTitle(response.data.title)
+        return !hasRealContent
+    }
 
-            const data = contentDetails?.content
-            if (typeof data?.[0] === 'string') {
-                const parsedContent = JSON.parse(data)
-                setInitialContent(parsedContent);
-                setIsContentEmpty(checkIfContentEmpty(parsedContent))
-            } else {
-                const jsonData = { doc: data?.[0] }
-                setInitialContent(jsonData)
-                setIsContentEmpty(checkIfContentEmpty(jsonData))
-            }
-        } catch (error) {
-            console.error('Error fetching article content:', error)
-        }
-    };
+    // NEW: Function to generate content hash for comparison
+    const generateContentHash = (content: any) => {
+        return JSON.stringify(content)
+    }
 
-    const editArticleContent = async () => {
+    // NEW: Auto-save function
+    const autoSave = async () => {
+        if (isSaving) return // Prevent multiple simultaneous saves
+
         try {
+            setIsSaving(true)
             const initialContentString = initialContent
                 ? [JSON.stringify(initialContent)]
                 : ''
@@ -170,162 +149,276 @@ const AddArticle = ({
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 data
             )
-
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
-            setIsEditorSaved(true)
-            setIsContentEmpty(checkIfContentEmpty(initialContent))
+            setIsEditorSaved(!isEditorContentEmpty(initialContent))
+
+            // Update previous content hash
+            setPreviousContentHash(generateContentHash(initialContent))
+
+            toast({
+                title: 'Auto-saved',
+                description: 'Article content auto-saved successfully',
+            })
+        } catch (error: any) {
+            console.error('Auto-save failed:', error)
+        } finally {
+            setIsSaving(false)
+        }
+    }
+
+    const getArticleContent = async () => {
+        try {
+            setIsDataLoading(true) 
+            const response = await api.get(
+                `/Content/chapterDetailsById/${content.id}`
+            )
+            const contentDetails = response?.data?.contentDetails?.[0]
+
+            const link = contentDetails?.links?.[0]
+            if (link) {
+                setpdfLink(link)
+                setDefaultValue('pdf')
+                setIsPdfUploaded(true)
+                setIsEditorSaved(false) // <-- PDF hai to editor saved false
+            } else {
+                setpdfLink(null)
+                setDefaultValue('editor')
+                setIsPdfUploaded(false)
+                // --- Check if editor me content hai ---
+                const data = contentDetails?.content
+                let hasEditorContent = false
+                if (data && data.length > 0) {
+                    // Agar content array me kuch hai, to editor saved true
+                    hasEditorContent = true
+                }
+                setIsEditorSaved(hasEditorContent)
+            }
+
+            // FIXED: Set title with fallback and ensure it's not empty
+            const fetchedTitle = response.data.title || response.data.name || ''
+            setTitle(fetchedTitle)
+
+            const data = contentDetails?.content
+            let parsedContent
+            if (typeof data?.[0] === 'string') {
+                parsedContent = JSON.parse(data)
+            } else {
+                parsedContent = { doc: data?.[0] }
+            }
+
+            setInitialContent(parsedContent)
+
+            // NEW: Set initial content states
+            setHasEditorContent(!isEditorContentEmpty(parsedContent))
+            setPreviousContentHash(generateContentHash(parsedContent))
+
+        } catch (error) {
+            console.error('Error fetching article content:', error)
+        } finally {
+            setIsDataLoading(false) // End loading
+        }
+    }
+
+    const editArticleContent = async () => {
+        try {
+            setIsSaving(true)
+            const initialContentString = initialContent
+                ? [JSON.stringify(initialContent)]
+                : ''
+            const data = {
+                title,
+                articleContent: initialContentString,
+            }
+
+            await api.put(
+                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                data
+            )
+            setArticleUpdateOnPreview(!articleUpdateOnPreview)
+            setIsChapterUpdated(!isChapterUpdated)
+            setIsEditorSaved(!isEditorContentEmpty(initialContent))
+            setIsEditorSaved(true) // Set to true after successful save
+
+            // Update previous content hash
+            setPreviousContentHash(generateContentHash(initialContent))
 
             toast.success({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
-            });
+            })
         } catch (error: any) {
-            setIsEditorSaved(false) // Set to false if save fails
             toast.error({
                 title: 'Failed',
-                description: error.response?.data?.message || 'An error occurred.',
-            });
+                description:
+                    error.response?.data?.message || 'An error occurred.',
+            })
+        } finally {
+            setIsSaving(false)
         }
-    };
+    }
 
     useEffect(() => {
-        getArticleContent()
-    }, [content]);
-
-    useEffect(() => {
-        if (ispdfUploaded) {
-            setIsEditorSaved(false)
-            setIsContentEmpty(false)
+        if (content?.id && !hasFetched.current) {
+            hasFetched.current = true
+            getArticleContent()
         }
+
+    }, [content?.id]) // More specific dependency
+
+    // Reset isEditorSaved if PDF is uploaded or deleted
+    useEffect(() => {
+        if (ispdfUploaded) setIsEditorSaved(false)
     }, [ispdfUploaded])
+
     // Add this useEffect after your other useEffects
     useEffect(() => {
+        // Only check when editor is visible
         if (defaultValue === 'editor' && initialContent) {
-            setIsContentEmpty(checkIfContentEmpty(initialContent))
-        }
-    }, [initialContent, defaultValue]);
+            const isEmpty = isEditorContentEmpty(initialContent)
+            const currentHash = generateContentHash(initialContent)
 
-    const previewArticle = () => {
-        // First check if content is empty
-        if (isContentEmpty) {
-            toast.error({
-                title: 'Cannot preview',
-                description: 'Please write some content first',
-            });
-            return;
-        }
+            setHasEditorContent(!isEmpty)
 
-        // Then check if content has been saved
-        if (!isEditorSaved) {
-            toast.error({
-                title: 'Cannot preview',
-                description: 'Please save your content first before previewing',
-            });
-            return;
+            // Auto-save logic: if content becomes empty and it was previously saved
+            if (isEmpty && isEditorSaved && previousContentHash !== currentHash) {
+                autoSave()
+            }
         }
+    }, [initialContent, defaultValue, isEditorSaved, previousContentHash])
 
-        // Only proceed if both conditions pass
-        if (content && !isContentEmpty && isEditorSaved) {
-            setArticlePreviewContent(content);
+
+    function previewArticle() {
+        if (defaultValue === 'editor') {
+            const isEmpty = isEditorContentEmpty(initialContent)
+    
+            if (isEmpty) {
+                return toast.error({
+                    title: 'Cannot Preview',
+                    description: 'Editor content is empty. Please add some content.',
+                })
+            }
+    
+            if (!isEditorSaved) {
+                return toast.error({
+                    title: 'Unsaved Changes',
+                    description: 'Please save your content before previewing.',
+                })
+            }
+            setArticlePreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
             )
         }
     }
 
-    const previewPdf = () => {
+    function previewPdf() {
         if (ispdfUploaded) {
-            setArticlePreviewContent(content);
+            setArticlePreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
             )
         } else {
-            toast.error({
+            return toast.error({
                 title: 'Failed',
                 description: 'No PDF uploaded. Please upload one to preview.',
             })
         }
-    };
+    }
 
     const onFileUpload = async () => {
-        if (!file) return
-
-        if (file.type !== 'application/pdf') {
-            return toast.error({
-                title: 'Invalid file type',
-                description: 'Only PDF files are allowed.',
-            })
-        }
-        // build the FormData, with the *exact* field name your backend expects*
-
-        const formData = new FormData()
-        formData.append('pdf', file, file.name)
-        formData.append('title', pdfTitle);
-
-        try {
-            setIsLoading(true)
-            await api.post(
-                `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
-                formData,  // ← pass FormData directly
-                {
-
-                    // OPTIONAL: axios will set the correct Content-Type boundary for you
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                }
-            )
-
-            setIsChapterUpdated(!isChapterUpdated)
-            setIsdisabledUploadButton(false)
-            setIsPdfUploaded(true)
-            setpdfLink('')
-            setIsLoading(false)
-
-            setTimeout(() => {
-                getArticleContent()
-                toast.success({
-                    title: 'Success',
-                    description: 'PDF uploaded successfully!',
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                return toast.error({
+                    title: 'Invalid file type',
+                    description: 'Only PDF files are allowed.',
                 })
-            }, 1000)
-        } catch (err: any) {
-            toast.error({
-                title: 'Upload failed',
-                description:
-                    err.response?.data?.message ||
-                    err.message ||
-                    'An error occurred.',
-            })
-            setIsLoading(false)
-        }
-    };
+            }
 
-    const onDeletePdfhandler = async () => {
-        setIsDeleteLoading(true);
-        try {
-            await api.put(
+            // build the FormData, with the *exact* field name your backend expects*
+            const formData = new FormData()
+            formData.append('pdf', file, file.name)
+            // FIXED: Use the same title state
+            formData.append('title', title)
+
+            try {
+                setIsLoading(true)
+                await api.post(
+                    `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
+                    formData, // ← pass FormData directly
+                    {
+                        // OPTIONAL: axios will set the correct Content-Type boundary for you
+                        headers: { 'Content-Type': 'multipart/form-data' },
+                    }
+                )
+                setIsChapterUpdated(!isChapterUpdated)
+                setIsdisabledUploadButton(false)
+
+                // toast.success({
+                //     title: 'Success',
+                //     description: 'PDF uploaded successfully!',
+                // })
+                setTimeout(() => {
+                    setIsPdfUploaded(true)
+                    setpdfLink('')
+                    getArticleContent()
+                    setIsLoading(false)
+                    toast.success({
+                        title: 'Success',
+                        description: 'PDF uploaded successfully!',
+                    })
+                }, 1000) //
+            } catch (err: any) {
+                console.error(err)
+                toast.error({
+                    title: 'Upload failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+            }
+        }
+    }
+
+    async function onDeletePdfhandler() {
+        setIsDeleteLoading(true)
+        await api
+            .put(
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                 { title: title, links: null }
             )
-            toast.success({
-                title: 'Success',
-                description: 'PDF Deleted Successfully',
+            .then((res) => {
+                toast.success({
+                    title: 'Success',
+                    description: 'PDF Deleted Successfully',
+
+                })
+                setIsPdfUploaded(false)
+                setIsDeleteLoading(false)
+                setpdfLink(null)
             })
-            setIsPdfUploaded(false)
-            setIsDeleteLoading(false)
-            setpdfLink(null)
-        } catch (err: any) {
-            toast.error({
-                title: 'Delete PDF failed',
-                description:
-                    err.response?.data?.message ||
-                    err.message ||
-                    'An error occurred.',
+            .catch((err: any) => {
+                toast.success({
+                    title: 'Delete PDF failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+                setIsDeleteLoading(false)
             })
-        } finally {
-            setIsDeleteLoading(false);
-        }
-    };
+    }
+
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Chapter details...</div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="px-5">
@@ -336,7 +429,6 @@ const AddArticle = ({
                         onSubmit={form.handleSubmit(editArticleContent)}
                         className=""
                     >
-
                         <FormField
                             control={form.control}
                             name="title"
@@ -345,34 +437,23 @@ const AddArticle = ({
                                     <FormControl>
                                         <div className="flex justify-between items-center">
                                             <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                {defaultValue === 'editor' ? (
-                                                    <Input
-                                                        {...field}
-                                                        onChange={(e) => {
-                                                            setTitle(
-                                                                e.target.value
-                                                            )
-                                                            field.onChange(e)
-                                                        }}
-                                                        placeholder="Untitled Article"
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                        autoFocus
-                                                    />
-                                                ) : (
-                                                    <Input
-                                                        {...field}
-                                                        onChange={(e) => {
-                                                            setIsPdfTitle(
-                                                                e.target.value
-                                                            )
-                                                            field.onChange(e)
-                                                        }}
-                                                        placeholder="Untitled PDF"
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                        autoFocus
-                                                    />
-                                                )}
-                                                {!title && ( // Show pencil icon only when the title is empty
+                                                <Input
+                                                    {...field}
+                                                    value={title} // Explicitly set value
+                                                    onChange={(e) => {
+                                                        // FIXED: Always update the same title state
+                                                        setTitle(e.target.value)
+                                                        field.onChange(e)
+                                                    }}
+                                                    placeholder={
+                                                        defaultValue === 'editor'
+                                                            ? "Untitled Article"
+                                                            : "Untitled PDF"
+                                                    }
+                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    autoFocus
+                                                />
+                                                {!title && (
                                                     <Pencil
                                                         fill="true"
                                                         fillOpacity={0.4}
@@ -412,37 +493,26 @@ const AddArticle = ({
                                                     )}
                                                 </div>
                                                 {defaultValue === 'editor' ? (
-                                                    <Button 
-                                                    type="submit" 
-                                                    form="myForm"
+                                                    <Button
+                                                        type="submit"
+                                                        form="myForm"
+                                                        disabled={!hasEditorContent || isSaving}
                                                     >
-                                                        Save
+                                                        {isSaving ? 'Saving...' : 'Save'}
                                                     </Button>
                                                 ) : (
                                                     <div>
-                                                        {/* {pdfLink && (
-                                                            <Button type="button">
-                                                                <Link
-                                                                    href={
-                                                                        pdfLink
-                                                                    }
-                                                                    target="_blank"
-                                                                >
-                                                                    View PDF
-                                                                </Link>
-                                                            </Button>
-                                                        )} */}
-                                                    <Button
-                                                        type="button"
-                                                        onClick={
-                                                            onFileUpload
-                                                        }
-                                                        disabled={
-                                                            !disabledUploadButton
-                                                        }
-                                                    >
-                                                        Upload PDF
-                                                    </Button>
+                                                        <Button
+                                                            type="button"
+                                                            onClick={
+                                                                onFileUpload
+                                                            }
+                                                            disabled={
+                                                                !disabledUploadButton
+                                                            }
+                                                        >
+                                                            Upload PDF
+                                                        </Button>
                                                     </div>
                                                 )}
                                             </div>
@@ -478,9 +548,9 @@ const AddArticle = ({
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
-                                <Label 
-                                htmlFor="r1" 
-                                className="font-light text-md text-black"
+                                <Label
+                                    htmlFor="r1"
+                                    className="font-light text-md text-black"
                                 >
                                     Editor
                                 </Label>
@@ -498,33 +568,27 @@ const AddArticle = ({
                                     </TooltipTrigger>
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
-                                            You’ve already saved the assignment, so PDF upload is now disabled
-                                            </TooltipContent>
+                                            You have already saved the assignment, so PDF upload is now disabled
+                                        </TooltipContent>
                                     )}
                                 </Tooltip>
-                                <Label 
-                                htmlFor="r2" 
-                                className="font-light text-md text-black"
+                                <Label
+                                    htmlFor="r2"
+                                    className="font-light text-md text-black"
                                 >
                                     Upload PDF
                                 </Label>
                             </div>
                         </TooltipProvider>
                     </RadioGroup>
-
                     {defaultValue === 'editor' && (
                         <div className="mt-2 text-start">
                             <RemirrorTextEditor
                                 initialContent={initialContent}
-                                setInitialContent={(content) => {
-                                    setInitialContent(content)
-                                    setIsEditorSaved(false) // Mark as unsaved when content changes
-                                    setIsContentEmpty(checkIfContentEmpty(content))
-                                }}
+                                setInitialContent={setInitialContent}
                             />
                         </div>
                     )}
-
                     {defaultValue === 'pdf' && (
                         <UploadArticle
                             loading={loading}

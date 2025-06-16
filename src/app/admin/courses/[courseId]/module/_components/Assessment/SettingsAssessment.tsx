@@ -53,6 +53,7 @@ type SettingsAssessmentProps = {
     topicId: number
     isNewQuestionAdded: boolean
     setIsNewQuestionAdded: (value: boolean) => void
+    activeChapterTitle:string
 }
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -72,6 +73,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     topicId,
     isNewQuestionAdded,
     setIsNewQuestionAdded,
+    activeChapterTitle,
 }) => {
     const { chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
@@ -479,7 +481,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     <ChevronLeft className="w-4 h-4 mr-2 box-border" />
                     <span className="font-semibold">
                         Back to{' '}
-                        {content?.ModuleAssessment?.title || 'Assessment'}
+                        {/* {content?.ModuleAssessment?.title || 'Assessment'} */}
+                        {chapterTitle || activeChapterTitle}
                     </span>
                 </div>
 

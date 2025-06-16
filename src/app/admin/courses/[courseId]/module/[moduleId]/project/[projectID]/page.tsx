@@ -65,6 +65,10 @@ export default function Project() {
     )
     const [title, setTitle] = useState('')
     const [projectData, setProjectData] = useState<ProjectData>()
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+    const [lastSavedContent, setLastSavedContent] = useState<string>('')
+    const [lastSavedTitle, setLastSavedTitle] = useState('')
+    const [hasUserSavedBefore, setHasUserSavedBefore] = useState(false)
 
     const crumbs = [
         {
@@ -110,9 +114,14 @@ export default function Project() {
                 `Content/project/${projectID}?bootcampId=${courseId}`
             )
             setProjectData(response.data)
-            setTitle(response.data.project[0].title)
+            const projectTitle = response.data.project[0].title
+            setTitle(projectTitle)
+            setLastSavedTitle(projectTitle)
+            
             const content = response.data.project[0].instruction.description
-            setInitialContent(JSON.parse(content))
+            const parsedContent = JSON.parse(content)
+            setInitialContent(parsedContent)
+            setLastSavedContent(JSON.stringify(parsedContent))
 
             // //             if (typeof projectDetail === 'string') {
             // //     setInitialContent(JSON.parse(projectDetail))
@@ -130,6 +139,15 @@ export default function Project() {
             fetchProjectDetails()
         }
     }, [projectID])
+
+    // Check for unsaved changes
+    useEffect(() => {
+        const currentContent = initialContent ? JSON.stringify(initialContent) : ''
+        const titleChanged = title !== lastSavedTitle
+        const contentChanged = currentContent !== lastSavedContent
+        
+        setHasUnsavedChanges(titleChanged || contentChanged)
+    }, [title, initialContent, lastSavedTitle, lastSavedContent])
 
     async function editProject(data: any) {
         function convertToISO(dateString: string): string {
@@ -157,6 +175,12 @@ export default function Project() {
                 isLock: projectData?.project[0].isLock,
                 deadline: deadlineDate,
             })
+         
+            // Update last saved states
+            setLastSavedTitle(title)
+            setLastSavedContent(initialContentString)
+            setHasUnsavedChanges(false)
+            setHasUserSavedBefore(true)
             toast({
                 title: 'Success',
                 description: 'Project Edited Successfully',
@@ -175,7 +199,52 @@ export default function Project() {
         }
     }
 
+    // Function to check if content is empty
+    const isContentEmpty = () => {
+        if (!initialContent) return true
+        
+        // Check if content has any actual content
+        // Type assertion to access the doc property safely
+        const content = initialContent as any
+        if (content.doc && content.doc.content) {
+            // If content array is empty or contains only empty paragraphs
+            const hasContent = content.doc.content.some((node: any) => {
+                if (node.type === 'paragraph' && node.content) {
+                    return node.content.some((textNode: any) => 
+                        textNode.text && textNode.text.trim().length > 0
+                    )
+                }
+                return node.type !== 'paragraph' // Non-paragraph content is considered as content
+            })
+            return !hasContent
+        }
+        
+        return true
+    }
+
     function previewProject() {
+        // Check if content is empty
+        if (isContentEmpty()) {
+            toast({
+                title: 'Content Required',
+                description: 'Please add some content before previewing the project.',
+                className:
+                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
+
+        // Check if there are unsaved changes
+        if (hasUnsavedChanges) {
+            toast({
+                title: 'Save Required',
+                description: 'Please save your changes before previewing the project.',
+                className:
+                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+            })
+            return
+        }
+
         if (projectData) {
             setProjectPreviewContent(projectData)
             router.push(
@@ -183,6 +252,46 @@ export default function Project() {
             )
         }
     }
+    useEffect(() => {
+        const contentIsEmpty = isContentEmpty()
+        const currentContentString = initialContent
+            ? JSON.stringify(initialContent)
+            : ''
+    
+        // Only run auto-save logic if user has saved before
+        if (
+            hasUserSavedBefore && 
+            lastSavedContent !== '' &&
+            contentIsEmpty &&
+            hasUnsavedChanges
+        ) {
+            const autoSave = async () => {
+                try {
+                    await api.patch(`/Content/updateProjects/${projectID}`, {
+                        title: lastSavedTitle,
+                        instruction: { description: currentContentString },
+                        isLock: projectData?.project[0].isLock,
+                        deadline: projectData?.project[0].deadline,
+                    })
+    
+                    setLastSavedContent(currentContentString)
+                    setHasUnsavedChanges(false)
+    
+                    toast({
+                        title: 'Auto-saved',
+                        description:
+                            'Content was cleared and auto-saved successfully.',
+                        className:
+                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    })
+                } catch (err) {
+                    console.error('Auto-save failed:', err)
+                }
+            }
+    
+            autoSave()
+        }
+    }, [initialContent])
 
     return (
         <>
@@ -300,7 +409,10 @@ export default function Project() {
                     />
                 </div>
                 <div className="flex justify-end mt-5">
-                    <Button type="submit" form="myForm">
+                    <Button type="submit" form="myForm"
+                    disabled={isContentEmpty()}
+                    className={isContentEmpty() ? 'opacity-50 cursor-not-allowed' : ''}
+                    >
                         Save
                     </Button>
                 </div>

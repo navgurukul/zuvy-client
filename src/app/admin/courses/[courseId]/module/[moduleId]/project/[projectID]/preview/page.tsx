@@ -26,21 +26,22 @@ const ProjectPreview = () => {
     const date = new Date(timestamp)
 
     const options: any = {
+        timeZone: 'UTC',
         year: 'numeric',
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'UTC',
-        timeZoneName: 'short',
+        // second: '2-digit',
+        hour12: true,   
+        // timeZoneName: 'short',
     }
     const options2: any = {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     }
-    const formattedDate = date.toLocaleDateString('en-US', options)
+    const formattedDate = date.toLocaleString('en-US', options)
 
     useEffect(() => {
         fetchProjectDetails(setProjectPreviewContent, projectID, courseId)
@@ -71,9 +72,8 @@ const ProjectPreview = () => {
                 </h1>
             </div>
 
-            <div className="flex mt-20 px-8 gap-8">
-                {/* Left Section: Go Back Button */}
-                <div className="w-1/4 flex flex-col">
+            <div className="min-h-screen bg-gray-50 pt-12">
+                <div className="fixed top-16 left-4 z-40">
                     <Button variant={'ghost'} onClick={goBack}>
                         <ArrowLeft size={20} />
                         <p className="ml-1 text-sm font-medium text-gray-800">
@@ -83,28 +83,32 @@ const ProjectPreview = () => {
                 </div>
 
                 {/* Right Section: Editor */}
-                <div className="pt-20">
-                    <div>
-                        <div className="flex  flex-col items-start">
-                            <h1 className="text-2xl font-semibold text-left">
+                <div className="flex justify-center items-start min-h-screen pt-16 px-4">
+                    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                        <div className="mb-8 text-center">
+                            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
                                 {projectPreviewContent?.project[0]
                                     ? projectPreviewContent?.project[0].title
                                     : 'No Title yet'}
                             </h1>
-                            <h1 className="font-semibold">
+                            <p className="text-lg font-semibold text-gray-600">
                                 Deadline: {formattedDate}
-                            </h1>
+                            </p>
                         </div>
 
-                        <div className="mt-2 text-start">
-                            <RemirrorTextEditor
-                                initialContent={initialContent}
-                                setInitialContent={setInitialContent}
-                                preview={true}
-                            />
+                        <div className="w-full mb-8 text-start">
+                            {/* <div className="min-h-[600px] border border-red-200 rounded-lg p-4 bg-white"> */}
+                                <RemirrorTextEditor
+                                    initialContent={initialContent}
+                                    setInitialContent={setInitialContent}
+                                    preview={true}
+                                />
+                            {/* </div> */}
                         </div>
-                        <div className="mt-2 text-end">
-                            <Button disabled>Mark as Done</Button>
+                        <div className="flex justify-center">
+                            <Button disabled className="px-8 py-2">
+                                Mark as Done
+                            </Button>
                         </div>
                     </div>
                 </div>
