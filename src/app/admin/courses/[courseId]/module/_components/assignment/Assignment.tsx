@@ -697,7 +697,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            You've uploaded a PDF, so the editor is now disabled
+                                            You have uploaded a PDF, so the editor is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
