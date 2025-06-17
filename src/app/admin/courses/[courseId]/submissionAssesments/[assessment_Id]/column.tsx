@@ -7,8 +7,8 @@ import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { DownloadIcon, FileText } from 'lucide-react'
 import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
-import DownloadReport from '@/app/admin/courses/[courseId]/submissionAssesments/[StudentAssesmentData]/_components/DownloadReport'
-import ApproveReattempt from '@/app/admin/courses/[courseId]/submissionAssesments/[StudentAssesmentData]/ApproveReattempt'
+import DownloadReport from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
+import ApproveReattempt from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 
 export const columns: ColumnDef<Task>[] = [
     // {
@@ -205,12 +205,12 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: 'actions',
         cell: ({ row }) => {
-            const { bootcampId, newId, userId, id } = row.original
+            const { bootcampId, assessment_Id, userId, id } = row.original
             const submitedAt = row.original.submitedAt
             return (
                 <div className="flex ">
                     <Link
-                        href={submitedAt ? `/admin/courses/${bootcampId}/submissionAssesments/${newId}/IndividualReport/${userId}/Report/${id}` : '#'}
+                        href={submitedAt ? `/admin/courses/${bootcampId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}` : '#'}
                         className={submitedAt ? `max-w-[500px] text-secondary font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
                     >
                         <FileText size={16} />
