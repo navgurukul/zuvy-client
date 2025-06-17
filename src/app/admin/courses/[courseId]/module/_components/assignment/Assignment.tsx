@@ -721,7 +721,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
-                                            You've already saved the assignment, so PDF upload is now disabled
+                                            You have already saved the assignment, so PDF upload is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
