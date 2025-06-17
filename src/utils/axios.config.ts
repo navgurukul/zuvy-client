@@ -1,6 +1,12 @@
 'use client'
 
 import axios, { AxiosRequestConfig } from 'axios'
+import { createRoot } from 'react-dom/client'
+// import { SessionExpiredModal } from '../components/SessionExpiredModal'
+import { toast } from '@/components/ui/use-toast'
+// import { useSessionModal } from '@/store/store'
+// // import { store as sessionModalStore } from '@/store/store'
+// import { sessionModalStore } from '@/store/store'
 
 const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 // const mainUrl = "http://zuvy.navgurukul.org/"
@@ -98,12 +104,16 @@ api.interceptors.response.use(
             try {
                 console.log('Four')
                 const refresh_token = localStorage.getItem('refresh_token')
-                const response = await axios.post('/auth/refresh', {
+                const response = await axios.post(`${mainUrl}/auth/refresh`, {
                     refresh_token,
                 })
 
                 const newAccessToken = response.data.access_token
                 localStorage.setItem('access_token', newAccessToken)
+                localStorage.setItem(
+                    'refresh_token',
+                    response?.data?.refresh_token
+                )
 
                 api.defaults.headers.common[
                     'Authorization'
@@ -113,16 +123,18 @@ api.interceptors.response.use(
             } catch (err) {
                 console.log('Five')
                 processQueue(err, null)
-                // Optionally: logout user
-                // localStorage.clear()
-                // window.location.href = '/'
+                localStorage.clear()
+                document.cookie =
+                    'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+                localStorage.setItem('logout', true.toString())
                 return Promise.reject(err)
             } finally {
-                console.log('Six')
                 isRefreshing = false
             }
         }
 
+        // Suppress default error toast by returning a handled error object
+        // return Promise.reject({ ...error, __handled: true })
         return Promise.reject(error)
     }
 )
