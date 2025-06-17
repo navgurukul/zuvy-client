@@ -74,7 +74,6 @@ function Quiz(props: any) {
 
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
-
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
@@ -87,11 +86,10 @@ function Quiz(props: any) {
             const tagArr = [
                 { id: -1, tagName: 'All Topics' },
                 ...transformedData,
-            ];
+            ]
             setTags(tagArr)
         }
     }
-
     const removeQuestionById = (questionId: number) => {
         setAddQuestion((prevQuestions: any) =>
             prevQuestions.filter((question: any) => question?.id !== questionId)
@@ -138,7 +136,7 @@ function Quiz(props: any) {
             const res = await api.get(
                 `/Content/chapterDetailsById/${props.chapterId}`
             )
-            setAddQuestion(res.data.quizQuestionDetails || [])
+            setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
             setSavedQuestions(res.data.quizQuestionDetails)
             setIsSaved(true)
@@ -230,7 +228,6 @@ function Quiz(props: any) {
                                     id="previewQuiz"
                                     onClick={previewQuiz}
                                     className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
-
                                 >
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
@@ -252,7 +249,7 @@ function Quiz(props: any) {
 
                 <div className="flex">
                     <QuizLibrary
-                        addQuestion={addQuestion || []}
+                        addQuestion={addQuestion}
                         handleAddQuestion={handleAddQuestion}
                         tags={tags}
                     />
@@ -269,7 +266,7 @@ function Quiz(props: any) {
                                     </h2>
                                 </div>
                                 <div className="text-left w-full">
-                                    {(!addQuestion || addQuestion.length === 0) && (
+                                    {addQuestion?.length === 0 && (
                                         <h1 className="text-left italic">
                                             No Selected Questions
                                         </h1>
