@@ -31,7 +31,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                 setAssignmentData(res.data.data.trackingData)
                 setTotalStudents(res.data.data.totalStudents)
             } catch (error) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Error while fetching assignment data',
                 })

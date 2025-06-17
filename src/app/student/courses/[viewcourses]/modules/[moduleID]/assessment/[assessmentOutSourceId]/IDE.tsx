@@ -233,16 +233,14 @@ const IDE: React.FC<IDEProps> = ({
                     setModalType('error')
                 }
             } else if (allTestCasesPassed && action === 'run') {
-                toast({
-                    title: `Test Cases Passed`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                toast.success({
+                    title: 'Success',
+                    description:'Test Cases Passed'
                 })
             } else {
                 toast({
-                    title: 'Test Cases Failed',
-                    className:
-                        'text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                    title: 'Failed',
+                    description:'Test Cases Failed'
                 })
             }
 
@@ -263,12 +261,10 @@ const IDE: React.FC<IDEProps> = ({
         } catch (error: any) {
             setLoading(false)
             setCodeResult(error.response?.data?.data)
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'Network connection lost.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||

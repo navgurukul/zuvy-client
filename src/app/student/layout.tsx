@@ -138,12 +138,9 @@ export default function RootLayout({
 
     if (isChapterPage || isChapterRoute) {
         if (!isCourseEnrolled) {
-            toast({
+            toast.error({
                 title: 'Failed',
-                description: 'You were not enrolled in thar course.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
+                description: 'You were not enrolled in thar course.'
             })
             router.push('/student/courses')
         }

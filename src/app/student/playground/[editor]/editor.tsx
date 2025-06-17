@@ -198,30 +198,25 @@ const IDE: React.FC<IDEProps> = ({
             setResult(testCases[0].stdOut)
 
             if (allTestCasesPassed) {
-                toast({
+                toast.success({
                     title: `Test Cases Passed${
                         action === 'submit' ? ', Solution submitted' : ''
-                    }`,
-                    className: 'text-start capitalize border border-secondary',
+                        }`,
                 })
             } else {
-                toast({
+                toast.error({
                     title: 'Test Cases Failed',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
             setCodeError('')
             setLoading(false)
         } catch (error: any) {
-            setLoading(false)
-            setCodeResult(error.response?.data?.data)
-            toast({
+                setLoading(false)
+                setCodeResult(error.response?.data?.data)
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'Network connection lost.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr ||

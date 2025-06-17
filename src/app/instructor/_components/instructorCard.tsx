@@ -34,11 +34,9 @@ const InstructorCard: React.FC<Props> = ({
             .writeText(link)
             .then(() => {
                 // alert('Link copied to clipboard!') // Optional: Show a confirmation
-                toast({
+                toast.info({
                     title: 'Copied!',
                     description: 'Link copied to clipboard!',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((err) => {

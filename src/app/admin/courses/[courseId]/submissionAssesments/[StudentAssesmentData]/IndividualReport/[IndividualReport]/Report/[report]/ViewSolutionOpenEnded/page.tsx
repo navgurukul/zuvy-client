@@ -114,7 +114,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     setOpenEndedQuestionsDetails(res.data)
                 })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Unable to Fetch Data',
             })

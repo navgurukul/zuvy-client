@@ -181,20 +181,15 @@ export default function Project() {
             setLastSavedContent(initialContentString)
             setHasUnsavedChanges(false)
             setHasUserSavedBefore(true)
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Project Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }
@@ -225,22 +220,18 @@ export default function Project() {
     function previewProject() {
         // Check if content is empty
         if (isContentEmpty()) {
-            toast({
+            toast.error({
                 title: 'Content Required',
                 description: 'Please add some content before previewing the project.',
-                className:
-                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
 
         // Check if there are unsaved changes
         if (hasUnsavedChanges) {
-            toast({
+            toast.error({
                 title: 'Save Required',
                 description: 'Please save your changes before previewing the project.',
-                className:
-                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -277,12 +268,10 @@ export default function Project() {
                     setLastSavedContent(currentContentString)
                     setHasUnsavedChanges(false)
     
-                    toast({
+                    toast.success({
                         title: 'Auto-saved',
                         description:
                             'Content was cleared and auto-saved successfully.',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                 } catch (err) {
                     console.error('Auto-save failed:', err)

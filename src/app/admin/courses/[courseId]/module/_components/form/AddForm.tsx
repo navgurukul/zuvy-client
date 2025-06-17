@@ -268,20 +268,16 @@ const AddForm: React.FC<AddFormProps> = ({
                 `Content/createAndEditForm/${content.id}`,
                 payload
             )
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Form Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsChapterUpdated(!isChapterUpdated)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

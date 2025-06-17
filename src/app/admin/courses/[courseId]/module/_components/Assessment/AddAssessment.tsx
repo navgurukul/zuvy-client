@@ -168,11 +168,9 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
         } else {
-            toast({
+            toast.error({
                 title: 'No questions to preview',
                 description: 'Please save the assessment first to preview.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%]',
             })
         }
     }
@@ -332,9 +330,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
    
 
     useEffect(() => {
-        if (content?.ModuleAssessment?.title) {
-            setChapterTitle(content.ModuleAssessment.title)
-        } else if (activeChapterTitle) {
+        // if (content?.ModuleAssessment?.title) {
+        //     setChapterTitle(content.ModuleAssessment.title)
+        // } 
+        if (activeChapterTitle) {
             setChapterTitle(activeChapterTitle)
         }
     }, [content?.ModuleAssessment?.title, activeChapterTitle])

@@ -161,19 +161,15 @@ const NewMcqProblemForm = ({
             setIsMcqModalOpen(false)
             setMcqType('')
             handleClear()
-            toast({
+            toast.success({
                 title: res.data.status || 'Success',
                 description: res.data.message || 'Quiz Question Created',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -186,11 +182,9 @@ const NewMcqProblemForm = ({
         )
 
         if (emptyOptions) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Options cannot be empty',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -346,12 +340,10 @@ const NewMcqProblemForm = ({
                     !questionId ||
                     correctAnswer === null
                 ) {
-                    toast({
+                    toast.error({
                         title: 'Error',
                         description:
                             'Failed to parse the MCQ correctly. Please try generating again.',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                     setLoadingAI(false)
                     return
@@ -372,12 +364,10 @@ const NewMcqProblemForm = ({
                 ) {
                     newSelectedOption = correctAnswer
                 } else {
-                    toast({
+                    toast.warning({
                         title: 'Warning',
                         description:
                             'Correct Answer could not be determined. Defaulting to the first option.',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
                     })
                 }
 
@@ -425,29 +415,23 @@ const NewMcqProblemForm = ({
                     closeModal()
                 }
 
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'MCQ generated successfully using AI.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
                 console.warn('Unexpected response structure:', responseData)
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         "Failed to generate MCQ. I'm sorry, I couldn't understand the response from the API.",
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         } catch (error: any) {
             console.error('Error generating MCQ:', error)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to generate MCQ. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
         setLoadingAI(false)
@@ -483,11 +467,9 @@ const NewMcqProblemForm = ({
                 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'
 
             if (difficulties.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Please select at least one difficulty level.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -495,11 +477,9 @@ const NewMcqProblemForm = ({
             }
 
             if (topicIds.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Please select at least one topic.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -507,11 +487,9 @@ const NewMcqProblemForm = ({
             }
 
             if (totalNumbersOfQuestions < 1) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Please enter a valid number of questions.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -730,12 +708,10 @@ const NewMcqProblemForm = ({
             }
 
             if (generatedQuestions.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         'Failed to generate unique MCQs. Please try again.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -743,18 +719,14 @@ const NewMcqProblemForm = ({
             }
 
             if (generatedQuestions.length < totalNumbersOfQuestions) {
-                toast({
+                toast.warning({
                     title: 'Warning',
                     description: `Only ${generatedQuestions.length} unique MCQs were generated.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
-                toast({
+                toast.error({
                     title: 'Success',
                     description: `${generatedQuestions.length} MCQs generated and saved successfully.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             }
 
@@ -784,11 +756,9 @@ const NewMcqProblemForm = ({
             }
         } catch (error: any) {
             console.error('Error generating bulk MCQs:', error)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to generate bulk MCQs. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
         setBulkLoading(false)

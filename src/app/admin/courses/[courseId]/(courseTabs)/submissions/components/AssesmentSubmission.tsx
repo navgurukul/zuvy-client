@@ -22,10 +22,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             const res = await api.get(url)
             setAssesments(res.data)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching assessments:',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [courseId, debouncedSearch])
@@ -47,11 +46,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             const requiredMcqScore = assessments[0]?.requiredMCQScore || null
 
             if (!Array.isArray(assessments) || assessments.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'No data available to generate PDF.',
-                    className:
-                        'text-start capitalize border border-destructive',
                 })
                 return
             }
@@ -145,10 +142,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
             doc.save(`${assessment.title}-Report.pdf`)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to download PDF. Please try again later.',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -163,11 +159,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             const assessments = response.data.submitedOutsourseAssessments
 
             if (!Array.isArray(assessments) || assessments.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'No data available to generate CSV.',
-                    className:
-                        'text-start capitalize border border-destructive',
                 })
                 return
             }
@@ -216,10 +210,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             link.click()
             document.body.removeChild(link)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to download CSV. Please try again later.',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }

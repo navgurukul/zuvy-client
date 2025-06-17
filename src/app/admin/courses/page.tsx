@@ -109,31 +109,25 @@ const Courses: React.FC = () => {
             (courseName) => courseName.name.toLowerCase() === repeatedCourseName
         )
         if (matchedCourseName) {
-            toast({
+            toast.error({
                 title: 'Cannot Create A New Course',
                 description: 'Course Name Already Exists',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } else {
             try {
                 const response = await api
                     .post('/bootcamp', { name: newCourseName })
                     .then((response) => {
-                        toast({
+                        toast.success({
                             title: response.data.status,
                             description: response.data.message,
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                         })
                     })
                 getBootcamp(offset)
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: error.data.status,
                     description: error.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         }

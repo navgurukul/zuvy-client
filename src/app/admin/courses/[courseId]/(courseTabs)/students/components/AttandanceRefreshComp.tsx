@@ -21,7 +21,7 @@ const AttandanceRefreshComp = ({ attendanceData }: Props) => {
             await api
                 .post(`/classes/analytics/reload`, requestBody)
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: 'Success',
                         description: res.data.message,
                     })

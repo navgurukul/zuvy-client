@@ -53,11 +53,9 @@ const Dropzone = ({
             setIsPdfUploaded(false)
             setDisableButton(true)
         } else {
-            return toast({
+            return toast.error({
                 title: 'Error',
                 description: 'Only PDF files can be uploaded',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [])

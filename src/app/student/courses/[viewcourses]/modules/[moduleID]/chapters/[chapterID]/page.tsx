@@ -28,11 +28,9 @@ function Page({ params }: any) {
             (mod: any) => mod.id.toString() === moduleId
         )
         if (module && moduleIds.isLock) {
-            toast({
+            toast.error({
                 title: 'Cannot go there Yet',
                 description: 'Please complete all the modules to reach here',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%]',
             })
             router.push(`/student/courses`)
         }

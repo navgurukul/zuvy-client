@@ -85,6 +85,10 @@ const AddArticle = ({
     const [hasEditorContent, setHasEditorContent] = useState(false)
     const [previousContentHash, setPreviousContentHash] = useState('')
     const [isSaving, setIsSaving] = useState(false)
+    
+    const [hasUserSaved, setHasUserSaved] = useState(false)
+    const [wasContentNonEmptyWhenSaved, setWasContentNonEmptyWhenSaved] = useState(false)
+    const [isInitialLoad, setIsInitialLoad] = useState(true)
 
     // misc
     const formSchema = z.object({
@@ -131,7 +135,7 @@ const AddArticle = ({
         return JSON.stringify(content)
     }
 
-    // NEW: Auto-save function
+    // IMPROVED: Auto-save function with better conditions
     const autoSave = async () => {
         if (isSaving) return // Prevent multiple simultaneous saves
 
@@ -156,12 +160,13 @@ const AddArticle = ({
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
 
-            toast({
-                title: 'Auto-saved',
-                description: 'Article content auto-saved successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            })
+            // Only show toast for actual auto-save (not initial load or manual save)
+            if (!isInitialLoad && hasUserSaved && wasContentNonEmptyWhenSaved) {
+                toast.success({
+                    title: 'Auto-saved',
+                    description: 'Content removed and auto-saved successfully',
+                })
+            }
         } catch (error: any) {
             console.error('Auto-save failed:', error)
         } finally {
@@ -191,8 +196,10 @@ const AddArticle = ({
                 const data = contentDetails?.content
                 let hasEditorContent = false
                 if (data && data.length > 0) {
-                    // Agar content array me kuch hai, to editor saved true
                     hasEditorContent = true
+                    // If content exists on load, consider it as previously saved
+                    setHasUserSaved(true)
+                    setWasContentNonEmptyWhenSaved(true)
                 }
                 setIsEditorSaved(hasEditorContent)
             }
@@ -218,7 +225,9 @@ const AddArticle = ({
         } catch (error) {
             console.error('Error fetching article content:', error)
         } finally {
-            setIsDataLoading(false) // End loading
+            setIsDataLoading(false)
+            // Mark initial load as complete after a short delay
+            setTimeout(() => setIsInitialLoad(false), 1000)
         }
     }
 
@@ -240,24 +249,24 @@ const AddArticle = ({
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(!isEditorContentEmpty(initialContent))
+            setIsEditorSaved(true)
+
+            // IMPORTANT: Mark that user has manually saved and track if content was non-empty
+            setHasUserSaved(true)
+            setWasContentNonEmptyWhenSaved(!isEditorContentEmpty(initialContent))
 
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
 
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         } finally {
             setIsSaving(false)
@@ -269,7 +278,6 @@ const AddArticle = ({
             hasFetched.current = true
             getArticleContent()
         }
-
     }, [content?.id]) // More specific dependency
 
     // Reset isEditorSaved if PDF is uploaded or deleted
@@ -279,29 +287,48 @@ const AddArticle = ({
 
     // Add this useEffect after your other useEffects
     useEffect(() => {
-        // Only check when editor is visible
-        if (defaultValue === 'editor' && initialContent) {
-            const isEmpty = isEditorContentEmpty(initialContent)
-            const currentHash = generateContentHash(initialContent)
+        // Skip if it's initial load or editor is not visible
+        if (isInitialLoad || defaultValue !== 'editor' || !initialContent) return
 
-            setHasEditorContent(!isEmpty)
+        const isEmpty = isEditorContentEmpty(initialContent)
+        const currentHash = generateContentHash(initialContent)
 
-            // Auto-save logic: if content becomes empty and it was previously saved
-            if (isEmpty && isEditorSaved && previousContentHash !== currentHash) {
-                autoSave()
-            }
+        setHasEditorContent(!isEmpty)
+        if (hasUserSaved && 
+            wasContentNonEmptyWhenSaved && 
+            isEmpty && 
+            isEditorSaved && 
+            previousContentHash !== currentHash && 
+            currentHash !== generateContentHash(undefined)) {
+            
+            autoSave()
         }
-    }, [initialContent, defaultValue, isEditorSaved, previousContentHash])
-
+    }, [initialContent, defaultValue, isEditorSaved, previousContentHash, hasUserSaved, wasContentNonEmptyWhenSaved, isInitialLoad])
 
     function previewArticle() {
-        if (content) {
+        if (defaultValue === 'editor') {
+            const isEmpty = isEditorContentEmpty(initialContent)
+    
+            if (isEmpty) {
+                return toast.error({
+                    title: 'Cannot Preview',
+                    description: 'Editor content is empty. Please add some content.',
+                })
+            }
+    
+            if (!isEditorSaved) {
+                return toast.error({
+                    title: 'Unsaved Changes',
+                    description: 'Please save your content before previewing.',
+                })
+            }
             setArticlePreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
             )
         }
     }
+
     function previewPdf() {
         if (ispdfUploaded) {
             setArticlePreviewContent(content)
@@ -309,12 +336,9 @@ const AddArticle = ({
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
             )
         } else {
-            return toast({
+            return toast.error({
                 title: 'Failed',
                 description: 'No PDF uploaded. Please upload one to preview.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }
@@ -322,7 +346,7 @@ const AddArticle = ({
     const onFileUpload = async () => {
         if (file) {
             if (file.type !== 'application/pdf') {
-                return toast({
+                return toast.error({
                     title: 'Invalid file type',
                     description: 'Only PDF files are allowed.',
                 })
@@ -347,20 +371,23 @@ const AddArticle = ({
                 setIsChapterUpdated(!isChapterUpdated)
                 setIsdisabledUploadButton(false)
 
+                 // toast.success({
+                //     title: 'Success',
+                //     description: 'PDF uploaded successfully!',
+                // })
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
                     getArticleContent()
                     setIsLoading(false)
-                    toast({
+                    toast.success({
                         title: 'Success',
                         description: 'PDF uploaded successfully!',
-                        className:
-                            'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                 }, 1000) //
             } catch (err: any) {
-                toast({
+                console.error(err)
+                toast.error({
                     title: 'Upload failed',
                     description:
                         err.response?.data?.message ||
@@ -379,18 +406,17 @@ const AddArticle = ({
                 { title: title, links: null }
             )
             .then((res) => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'PDF Deleted Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+
                 })
                 setIsPdfUploaded(false)
                 setIsDeleteLoading(false)
                 setpdfLink(null)
             })
             .catch((err: any) => {
-                toast({
+                toast.error({
                     title: 'Delete PDF failed',
                     description:
                         err.response?.data?.message ||
@@ -493,18 +519,6 @@ const AddArticle = ({
                                                     </Button>
                                                 ) : (
                                                     <div>
-                                                        {/* {pdfLink && (
-                                                            <Button type="button">
-                                                                <Link
-                                                                    href={
-                                                                        pdfLink
-                                                                    }
-                                                                    target="_blank"
-                                                                >
-                                                                    View PDF
-                                                                </Link>
-                                                            </Button>
-                                                        )} */}
                                                         <Button
                                                             type="button"
                                                             onClick={

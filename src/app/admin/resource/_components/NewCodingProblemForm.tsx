@@ -167,10 +167,9 @@ export default function NewCodingProblemForm({
             }
             case 'int': {
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Input",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -178,10 +177,9 @@ export default function NewCodingProblemForm({
             }
             case 'float': {
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Input",
                         description: "Please enter a valid float value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -189,10 +187,9 @@ export default function NewCodingProblemForm({
             }
             case 'bool': {
                 if (value && !/^(true|false)$/.test(value) && !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)) {
-                    toast({
+                    toast.error({
                         title: "Invalid Boolean Input",
                         description: "Please enter either 'true' or 'false'",
-                        className: "fixed bottom-4 right-4 text-start border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -385,18 +382,16 @@ export default function NewCodingProblemForm({
         switch (type) {
             case 'int': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one integer as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Output",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -404,18 +399,16 @@ export default function NewCodingProblemForm({
             }
             case 'float': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one float value as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Output",
                         description: "Please enter a valid float value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -559,10 +552,9 @@ export default function NewCodingProblemForm({
 
         // Final check to ensure all test cases are valid
         if (formattedData.testCases.length !== testCases.length) {
-            toast({
+            toast.error({
                 title: 'Invalid Test Cases',
                 description: 'Some test cases contain invalid data. Please correct them before submitting.',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             });
             return;
         }
@@ -581,17 +573,15 @@ export default function NewCodingProblemForm({
         try {
             const response = await api.post(`codingPlatform/create-question`, data)
 
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error?.response?.data?.message || 'An error occurred',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

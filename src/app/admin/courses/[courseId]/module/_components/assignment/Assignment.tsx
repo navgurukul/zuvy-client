@@ -75,7 +75,7 @@ interface AssignmentProps {
     content: Content
     courseId: any
     assignmentUpdateOnPreview: boolean
-    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>> // Correct type for setter
+    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const AddAssignent = ({
@@ -114,6 +114,11 @@ const AddAssignent = ({
     const [isSaving, setIsSaving] = useState(false)
     const [previousContentHash, setPreviousContentHash] = useState('')
     const hasLoaded = useRef(false)
+    
+    // NEW: Track user interactions and manual saves
+    const [hasUserManuallySaved, setHasUserManuallySaved] = useState(false)
+    const [isUserInteracting, setIsUserInteracting] = useState(false)
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false)
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -158,12 +163,12 @@ const AddAssignent = ({
         return !hasRealContent
     }
 
-    // NEW: Function to generate content hash for comparison
+    // Function to generate content hash for comparison
     const generateContentHash = (content: any) => {
         return JSON.stringify(content)
     }
 
-    // NEW: Auto-save function
+    // UPDATED: Auto-save function with better conditions
     const autoSave = async () => {
         if (isSaving) return // Prevent multiple simultaneous saves
 
@@ -189,18 +194,20 @@ const AddAssignent = ({
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
 
-            toast({
-                title: 'Auto-saved',
-                description: 'Assignment content auto-saved successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            })
+            // Only show toast if user has interacted and this is a real auto-save scenario
+            if (isUserInteracting && hasUserManuallySaved) {
+                toast.success({
+                    title: 'Auto-saved',
+                    description: 'Assignment content auto-saved successfully',
+                })
+            }
         } catch (error: any) {
             console.error('Auto-save failed:', error)
         } finally {
             setIsSaving(false)
         }
     }
+
     const getAssignmentContent = async () => {
         setIsDataLoading(true) 
         try {
@@ -227,19 +234,28 @@ const AddAssignent = ({
                 if (data && data.length > 0) {
                     // Agar content array me kuch hai, to editor saved true
                     hasEditorContent = true
+                    // If content exists, mark as manually saved (existing content)
+                    setHasUserManuallySaved(true)
                 }
                 setIsEditorSaved(hasEditorContent)
             }
             if (typeof contentDetails.content[0] === 'string') {
-                setInitialContent(JSON.parse(contentDetails.content[0]))
+                const parsedContent = JSON.parse(contentDetails.content[0])
+                setInitialContent(parsedContent)
+                setPreviousContentHash(generateContentHash(parsedContent))
             } else {
                 const jsonData = { doc: contentDetails.content[0] }
                 setInitialContent(jsonData)
+                setPreviousContentHash(generateContentHash(jsonData))
             }
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         } finally {
             setIsDataLoading(false)
+            // Mark initial load as complete after a short delay
+            setTimeout(() => {
+                setInitialLoadComplete(true)
+            }, 1000)
         }
     }
 
@@ -271,7 +287,7 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content])
 
-    // Jab assignment save ho, isEditorSaved true karo
+    // UPDATED: Manual save function - sets the flag for manual save
     const editAssignmentContent = async (data: any) => {
         function convertToISO(dateString: string): string {
             const date = new Date(dateString)
@@ -303,62 +319,97 @@ const AddAssignent = ({
             )
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
-            setIsEditorSaved(true) // <-- Add this line
+            setIsEditorSaved(true)
+            
+            // IMPORTANT: Mark that user has manually saved
+            setHasUserManuallySaved(true)
 
             setPreviousContentHash(generateContentHash(initialContent))
 
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
+
             })
         }
     }
 
+    // UPDATED: Auto-save effect with better conditions
     useEffect(() => {
+        // Don't run auto-save during initial load
+        if (!initialLoadComplete) return
+        
         if (defaultValue === 'editor' && initialContent) {
             const isEmpty = isEditorContentEmpty(initialContent)
             const currentHash = generateContentHash(initialContent)
 
             setHasEditorContent(!isEmpty)
-
-            // Auto-save logic: if content becomes empty and it was previously saved
-            if (isEmpty && isEditorSaved && previousContentHash !== currentHash) {
+            if (isEmpty && 
+                hasUserManuallySaved && 
+                previousContentHash !== currentHash &&
+                isUserInteracting &&
+                previousContentHash !== '' // Ensure previous content existed
+            ) {
                 autoSave()
             }
         }
-    }, [initialContent, defaultValue, isEditorSaved, previousContentHash])
+    }, [initialContent, defaultValue, hasUserManuallySaved, previousContentHash, isUserInteracting, initialLoadComplete])
+
+    // UPDATED: Track user interaction with editor
+    useEffect(() => {
+        const handleUserInteraction = () => {
+            if (initialLoadComplete) {
+                setIsUserInteracting(true)
+            }
+        }
+
+        // Add event listeners for user interaction
+        document.addEventListener('keydown', handleUserInteraction)
+        document.addEventListener('click', handleUserInteraction)
+        document.addEventListener('input', handleUserInteraction)
+
+        return () => {
+            document.removeEventListener('keydown', handleUserInteraction)
+            document.removeEventListener('click', handleUserInteraction)
+            document.removeEventListener('input', handleUserInteraction)
+        }
+    }, [initialLoadComplete])
 
     const previewAssignment = () => {
-        if (content?.contentDetails[0]?.content?.length > 0) {
+        if (defaultValue === 'editor') {
+            const isEmpty = isEditorContentEmpty(initialContent)
+    
+            if (isEmpty) {
+                return toast.error({
+                    title: 'Cannot Preview',
+                    description: 'Editor content is empty. Please add some content.',
+                })
+            }
+    
+            if (!isEditorSaved) {
+                return toast.error({
+                    title: 'Unsaved Changes',
+                    description: 'Please save your content before previewing.',
+                })
+            }
             setAssignmentPreviewContent(content)
             router.push(
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
             )
-        } else {
-            return toast({
-                title: 'Cannot Preview',
-                description: 'Nothing to Preview please save some content',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
-            })
         }
     }
+    
 
     const onFileUpload = async () => {
         if (file) {
             if (file.type !== 'application/pdf') {
-                return toast({
+                return toast.error({
                     title: 'Invalid file type',
                     description: 'Only PDF files are allowed.',
                 })
@@ -378,11 +429,9 @@ const AddAssignent = ({
                     }
                 )
 
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'PDF uploaded successfully!',
-                    className:
-                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 setIsdisabledUploadButton(false)
 
@@ -393,7 +442,7 @@ const AddAssignent = ({
                 }, 1000) //
             } catch (err: any) {
                 console.error(err)
-                toast({
+                toast.success({
                     title: 'Upload failed',
                     description:
                         err.response?.data?.message ||
@@ -412,12 +461,9 @@ const AddAssignent = ({
                 `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
             )
         } else {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description: 'No PDF uploaded. Please upload one to preview.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         }
     }
@@ -430,19 +476,19 @@ const AddAssignent = ({
                 { title: title, links: null }
             )
             .then((res) => {
-                toast({
+                toast.success({
                     title: 'Success',
-                    description: 'PDF Deleted Successfully',
-                    className:
-                        'fixed bottom-4 right-4 text-start text-black capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+                    description: 'PDF Deleted Successfully'
                 })
                 setIsPdfUploaded(false)
                 setpdfLink(null)
                 setDefaultValue('editor')
-                setIsEditorSaved(false) // <-- Add this line
+                setIsEditorSaved(false)
+                // Reset manual save flag when switching to editor
+                setHasUserManuallySaved(false)
             })
             .catch((err: any) => {
-                toast({
+                toast.error({
                     title: 'Delete PDF failed',
                     description:
                         err.response?.data?.message ||
@@ -452,6 +498,7 @@ const AddAssignent = ({
             })
         setIsLoading(false)
     }
+    
     if (isDataLoading) {
         return (
             <div className="px-5">
@@ -650,7 +697,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            You’ve uploaded a PDF, so the editor is now disabled
+                                            You have uploaded a PDF, so the editor is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
@@ -674,7 +721,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
-                                            You’ve already saved the assignment, so PDF upload is now disabled
+                                            You have already saved the assignment, so PDF upload is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>

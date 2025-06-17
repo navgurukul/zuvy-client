@@ -88,7 +88,7 @@ function CodingChallenge({
     const debouncedSearch = useDebounce(searchTerm, 1000)
     const { tags, setTags } = getCodingQuestionTags()
     const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(
-        content.codingQuestionDetails
+        content?.codingQuestionDetails || []
     )
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
     const [selectedTag, setSelectedTag] = useState<Tag>({
@@ -111,6 +111,12 @@ function CodingChallenge({
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
 
+    const [isSaved, setIsSaved] = useState<boolean>(true)
+
+    const [savedQuestions, setSavedQuestions] = useState<Question[]>(
+        content.codingQuestionDetails || []
+    )
+
     const handleSaveClick = () => {
         handleSaveChapter(
             moduleId,
@@ -125,7 +131,29 @@ function CodingChallenge({
                 }
         )
         setIsChapterUpdated(!isChapterUpdated)
+        // Mark as saved and update saved questions
+        setIsSaved(true)
+        setSavedQuestions([...selectedQuestions])
     }
+
+    // Function to check if current selection matches saved questions
+    const checkIfSaved = () => {
+        if (!selectedQuestions || !savedQuestions) {
+            return true
+        }
+        if (selectedQuestions.length !== savedQuestions.length) {
+            return false
+        }
+
+        // Check if all selected questions are in saved questions
+        return selectedQuestions.every(selectedQ =>
+            savedQuestions.some(savedQ => savedQ.id === selectedQ.id)
+        )
+    }
+
+    useEffect(() => {
+        setIsSaved(checkIfSaved())
+    }, [selectedQuestions, savedQuestions])
 
     useEffect(() => {
         async function getAllCodingQuestions() {
@@ -216,17 +244,24 @@ function CodingChallenge({
     }, [])
 
     useEffect(() => {
-        setSelectedQuestions(content.codingQuestionDetails)
+        setSelectedQuestions(content?.codingQuestionDetails || [])
+        setSavedQuestions(content?.codingQuestionDetails || [])
         setChapterTitle(activeChapterTitle)
+        setIsSaved(true)
     }, [content])
 
     function previewCodingChallenge() {
-        if (selectedQuestions.length === 0) {
-            return toast({
+        if (!selectedQuestions || selectedQuestions.length === 0) {
+            return toast.error({
                 title: 'Cannot Preview',
                 description: 'Nothing to Preview please save coding question.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
+        }
+        // Check if question is selected but not saved
+        if (!isSaved) {
+            return toast.error({
+                title: 'Cannot Preview',
+                description: 'Please save the selected question before previewing.',
             })
         }
         const updatedContent = {

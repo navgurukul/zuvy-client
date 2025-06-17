@@ -36,6 +36,9 @@ function Quiz(props: any) {
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
 
+    const [isSaved, setIsSaved] = useState<boolean>(true)
+    const [savedQuestions, setSavedQuestions] = useState<quizData[]>([])
+
     const handleAddQuestion = (data: any) => {
         const uniqueData = data.filter((question: quizData) => {
             return !addQuestion.some(
@@ -48,6 +51,27 @@ function Quiz(props: any) {
             ...uniqueData,
         ])
     }
+    const checkIfSaved = () => {
+
+        if (!addQuestion || !savedQuestions) {
+            return true
+        }
+
+        if (addQuestion.length !== savedQuestions.length) {
+            return false
+        }
+
+        // Check if all selected questions are in saved questions
+        return addQuestion.every(selectedQ =>
+            savedQuestions.some(savedQ => savedQ.id === selectedQ.id)
+        )
+    }
+
+    // Update isSaved state when addQuestion changes
+    useEffect(() => {
+        setIsSaved(checkIfSaved())
+    }, [addQuestion, savedQuestions])
+
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     async function getAllTags() {
@@ -80,18 +104,14 @@ function Quiz(props: any) {
                 `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
                 requestBody
             )
-            toast({
+            toast.success({
                 title: 'Success',
                 description: response?.data?.message || 'Saved successfully!',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'An error occurred while saving the chapter.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -104,6 +124,9 @@ function Quiz(props: any) {
         }
         saveQuizQuestionHandler(requestBody)
         setIsChapterUpdated(!isChapterUpdated)
+
+        setIsSaved(true)
+        setSavedQuestions([...addQuestion])
     }
 
     const getAllSavedQuizQuestion = useCallback(async () => {
@@ -115,6 +138,8 @@ function Quiz(props: any) {
             )
             setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
+            setSavedQuestions(res.data.quizQuestionDetails)
+            setIsSaved(true)
         } catch (error) {
             console.error('Failed to fetch chapter details', error)
         }
@@ -135,22 +160,30 @@ function Quiz(props: any) {
     }, [props.chapterId, getAllSavedQuizQuestion])
 
     function previewQuiz() {
-        if (addQuestion.length > 0) {
-            setQuizPreviewContent({
-                ...props.content,
-                quizQuestionDetails: addQuestion,
-            })
-            router.push(
-                `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
-            )
-        } else {
-            return toast({
-                title: 'No Question saved yet',
-                description: 'Please add at least one question to preview.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+
+        if (addQuestion.length === 0) {
+            return toast.error({
+                title: 'Cannot Preview',
+                description: 'Please select at least one question to preview.',
             })
         }
+
+        // Check if questions are selected but not saved
+        if (!isSaved) {
+            return toast.error({
+                title: 'Cannot Preview',
+                description: 'Please save the selected questions before previewing.',
+            })
+        }
+
+        // If questions are selected and saved, proceed with preview
+        setQuizPreviewContent({
+            ...props.content,
+            quizQuestionDetails: addQuestion,
+        })
+        router.push(
+            `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+        )
     }
 
     if (isDataLoading) {

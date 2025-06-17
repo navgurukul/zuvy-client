@@ -173,22 +173,18 @@ const AddVideo = ({
                     convertedObj
                 )
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     setShowVideoBox(true)
                     fetchChapterContent(content.id, content.topicId)
                     setIsChapterUpdated(!isChapterUpdated)
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: "Couldn't Update the Chapter Module",
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -234,11 +230,9 @@ const AddVideo = ({
             !form.watch('videoTitle') ||
             form.watch('videoTitle').trim().length === 0
         ) {
-            toast({
+            toast.info({
                 title: 'No Title',
                 description: 'Please provide a title for the video to preview.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -246,11 +240,9 @@ const AddVideo = ({
         // Check if links are empty or invalid
         const links = form.watch('links').trim()
         if (!links || !isLinkValid(links)) {
-            toast({
+            toast.info({
                 title: 'Invalid Link',
                 description: 'Please provide a valid video link to preview.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -266,11 +258,9 @@ const AddVideo = ({
             )
         }
         else {
-            toast({
+            toast.info({
                 title: 'No Video Uploaded',
                 description: 'Please Save the chapter to preview.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
             })
         }
     }

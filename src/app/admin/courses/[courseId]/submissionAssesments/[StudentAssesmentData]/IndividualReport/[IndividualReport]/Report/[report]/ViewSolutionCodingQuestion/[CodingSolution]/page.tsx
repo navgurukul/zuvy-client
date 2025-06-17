@@ -93,7 +93,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     setTestCases(res?.data?.data.TestCasesSubmission)
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error in fetching',
             })

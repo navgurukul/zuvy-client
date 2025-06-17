@@ -91,11 +91,10 @@ const BatchesInfo = ({
             isLast: false,
         },
         {
-            crumb: `${
-                studentData?.length > 0
+            crumb: `${studentData?.length > 0
                     ? studentData[0].batchName
                     : instructorsInfo.name
-            }`,
+                }`,
             isLast: true,
         },
     ]
@@ -199,18 +198,14 @@ const BatchesInfo = ({
     const batchDeleteHandler = async () => {
         try {
             await api.delete(`/batch/${params.batchId}`)
-            toast({
+            toast.success({
                 title: 'Batch Deleted Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setDeleteModalOpen(false)
             router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Batch not Deleted',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -226,11 +221,9 @@ const BatchesInfo = ({
             await api
                 .patch(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     const fetchBatchesInfo = async () => {
                         try {
@@ -240,17 +233,15 @@ const BatchesInfo = ({
                             setStudentData(response.data.modifiedStudentInfo)
 
                             //   }
-                        } catch (error) {}
+                        } catch (error) { }
                     }
                     fetchBatchesInfo()
                     fetchInstructorInfo(params.batchId)
                 })
             //   }
         } catch (error) {
-            toast({
+            toast.error({
                 title: "Batches Didn't Update Succesfully",
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

@@ -155,7 +155,7 @@ const Assignments = ({
                 transFormedBody
             )
             .then(() => {
-                toast({
+                toast.error({
                     title: 'Success',
                     description: 'Assignment Link Submitted SuccesFully',
                 })

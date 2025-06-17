@@ -297,24 +297,18 @@ const CodingProblems = () => {
             await api
                 .post(`/Content/createTag`, { tagName: newTopic })
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: `${newTopic} Topic has created`,
                         description: res.data.message,
-                        variant: 'default',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     getAllTags()
                     setNewTopic('')
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Network error',
                 description:
                     'Unable to create session. Please try again later.',
-                variant: 'destructive',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -427,8 +421,8 @@ const CodingProblems = () => {
                     ) : (
                         <>
                             {!isCodingDialogOpen &&
-                            !isCodingEditDialogOpen &&
-                            codingQuestions.length === 0 ? (
+                                !isCodingEditDialogOpen &&
+                                codingQuestions.length === 0 ? (
                                 <>
                                     <h1 className="text-left font-semibold text-2xl">
                                         Resource Library - Coding Problems
@@ -494,19 +488,19 @@ const CodingProblems = () => {
                             )}
                         </>
                     )}
-                 {!isCodingDialogOpen && (
+                    {!isCodingDialogOpen && (
                         <DataTablePagination
-                        totalStudents={totalCodingQuestion}
-                        position={position}
-                        setPosition={setPosition}
-                        pages={totalPages}
-                        lastPage={lastPage}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
-                        fetchStudentData={fetchCodingQuestions}
-                        setOffset={setOffset}
-                    />
-                 )}
+                            totalStudents={totalCodingQuestion}
+                            position={position}
+                            setPosition={setPosition}
+                            pages={totalPages}
+                            lastPage={lastPage}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
+                            fetchStudentData={fetchCodingQuestions}
+                            setOffset={setOffset}
+                        />
+                    )}
                 </div>
             )}
         </>

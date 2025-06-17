@@ -125,12 +125,9 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             )
 
             if (response.status === 200) {
-                toast({
+                toast.success({
                     title: 'Session Updated',
                     description: 'Session updated successfully',
-                    variant: 'default',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 props.getClasses() // Refresh the class list
                 props.onClose()
