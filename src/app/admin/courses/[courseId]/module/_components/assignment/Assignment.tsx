@@ -75,7 +75,7 @@ interface AssignmentProps {
     content: Content
     courseId: any
     assignmentUpdateOnPreview: boolean
-    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>> // Correct type for setter
+    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const AddAssignent = ({
@@ -114,6 +114,11 @@ const AddAssignent = ({
     const [isSaving, setIsSaving] = useState(false)
     const [previousContentHash, setPreviousContentHash] = useState('')
     const hasLoaded = useRef(false)
+    
+    // NEW: Track user interactions and manual saves
+    const [hasUserManuallySaved, setHasUserManuallySaved] = useState(false)
+    const [isUserInteracting, setIsUserInteracting] = useState(false)
+    const [initialLoadComplete, setInitialLoadComplete] = useState(false)
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -158,12 +163,12 @@ const AddAssignent = ({
         return !hasRealContent
     }
 
-    // NEW: Function to generate content hash for comparison
+    // Function to generate content hash for comparison
     const generateContentHash = (content: any) => {
         return JSON.stringify(content)
     }
 
-    // NEW: Auto-save function
+    // UPDATED: Auto-save function with better conditions
     const autoSave = async () => {
         if (isSaving) return // Prevent multiple simultaneous saves
 
@@ -189,16 +194,20 @@ const AddAssignent = ({
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
 
-            toast.success({
-                title: 'Auto-saved',
-                description: 'Assignment content auto-saved successfully',
-            })
+            // Only show toast if user has interacted and this is a real auto-save scenario
+            if (isUserInteracting && hasUserManuallySaved) {
+                toast.success({
+                    title: 'Auto-saved',
+                    description: 'Assignment content auto-saved successfully',
+                })
+            }
         } catch (error: any) {
             console.error('Auto-save failed:', error)
         } finally {
             setIsSaving(false)
         }
     }
+
     const getAssignmentContent = async () => {
         setIsDataLoading(true) 
         try {
@@ -225,19 +234,28 @@ const AddAssignent = ({
                 if (data && data.length > 0) {
                     // Agar content array me kuch hai, to editor saved true
                     hasEditorContent = true
+                    // If content exists, mark as manually saved (existing content)
+                    setHasUserManuallySaved(true)
                 }
                 setIsEditorSaved(hasEditorContent)
             }
             if (typeof contentDetails.content[0] === 'string') {
-                setInitialContent(JSON.parse(contentDetails.content[0]))
+                const parsedContent = JSON.parse(contentDetails.content[0])
+                setInitialContent(parsedContent)
+                setPreviousContentHash(generateContentHash(parsedContent))
             } else {
                 const jsonData = { doc: contentDetails.content[0] }
                 setInitialContent(jsonData)
+                setPreviousContentHash(generateContentHash(jsonData))
             }
         } catch (error) {
             console.error('Error fetching assignment content:', error)
         } finally {
             setIsDataLoading(false)
+            // Mark initial load as complete after a short delay
+            setTimeout(() => {
+                setInitialLoadComplete(true)
+            }, 1000)
         }
     }
 
@@ -269,7 +287,7 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content])
 
-    // Jab assignment save ho, isEditorSaved true karo
+    // UPDATED: Manual save function - sets the flag for manual save
     const editAssignmentContent = async (data: any) => {
         function convertToISO(dateString: string): string {
             const date = new Date(dateString)
@@ -301,7 +319,10 @@ const AddAssignent = ({
             )
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
-            setIsEditorSaved(true) // <-- Add this line
+            setIsEditorSaved(true)
+            
+            // IMPORTANT: Mark that user has manually saved
+            setHasUserManuallySaved(true)
 
             setPreviousContentHash(generateContentHash(initialContent))
 
@@ -319,19 +340,46 @@ const AddAssignent = ({
         }
     }
 
+    // UPDATED: Auto-save effect with better conditions
     useEffect(() => {
+        // Don't run auto-save during initial load
+        if (!initialLoadComplete) return
+        
         if (defaultValue === 'editor' && initialContent) {
             const isEmpty = isEditorContentEmpty(initialContent)
             const currentHash = generateContentHash(initialContent)
 
             setHasEditorContent(!isEmpty)
-
-            // Auto-save logic: if content becomes empty and it was previously saved
-            if (isEmpty && isEditorSaved && previousContentHash !== currentHash) {
+            if (isEmpty && 
+                hasUserManuallySaved && 
+                previousContentHash !== currentHash &&
+                isUserInteracting &&
+                previousContentHash !== '' // Ensure previous content existed
+            ) {
                 autoSave()
             }
         }
-    }, [initialContent, defaultValue, isEditorSaved, previousContentHash])
+    }, [initialContent, defaultValue, hasUserManuallySaved, previousContentHash, isUserInteracting, initialLoadComplete])
+
+    // UPDATED: Track user interaction with editor
+    useEffect(() => {
+        const handleUserInteraction = () => {
+            if (initialLoadComplete) {
+                setIsUserInteracting(true)
+            }
+        }
+
+        // Add event listeners for user interaction
+        document.addEventListener('keydown', handleUserInteraction)
+        document.addEventListener('click', handleUserInteraction)
+        document.addEventListener('input', handleUserInteraction)
+
+        return () => {
+            document.removeEventListener('keydown', handleUserInteraction)
+            document.removeEventListener('click', handleUserInteraction)
+            document.removeEventListener('input', handleUserInteraction)
+        }
+    }, [initialLoadComplete])
 
     const previewAssignment = () => {
         if (defaultValue === 'editor') {
@@ -435,7 +483,9 @@ const AddAssignent = ({
                 setIsPdfUploaded(false)
                 setpdfLink(null)
                 setDefaultValue('editor')
-                setIsEditorSaved(false) // <-- Add this line
+                setIsEditorSaved(false)
+                // Reset manual save flag when switching to editor
+                setHasUserManuallySaved(false)
             })
             .catch((err: any) => {
                 toast.error({
@@ -448,6 +498,7 @@ const AddAssignent = ({
             })
         setIsLoading(false)
     }
+    
     if (isDataLoading) {
         return (
             <div className="px-5">
@@ -646,7 +697,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {pdfLink && (
                                         <TooltipContent side="top">
-                                            You’ve uploaded a PDF, so the editor is now disabled
+                                            You've uploaded a PDF, so the editor is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
@@ -670,7 +721,7 @@ const AddAssignent = ({
                                     </TooltipTrigger>
                                     {isEditorSaved && (
                                         <TooltipContent side="top">
-                                            You’ve already saved the assignment, so PDF upload is now disabled
+                                            You've already saved the assignment, so PDF upload is now disabled
                                         </TooltipContent>
                                     )}
                                 </Tooltip>
