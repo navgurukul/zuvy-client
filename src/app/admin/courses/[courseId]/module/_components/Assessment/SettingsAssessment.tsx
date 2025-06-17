@@ -358,11 +358,9 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     fetchChapterContent(chapterID, topicId)
                     setIsChapterUpdated(!isChapterUpdated)
                 })
-            toast({
+            toast.success({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
             console.error(error)

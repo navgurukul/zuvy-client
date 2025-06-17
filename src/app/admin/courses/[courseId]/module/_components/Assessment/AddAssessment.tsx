@@ -330,9 +330,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
    
 
     useEffect(() => {
-        if (content?.ModuleAssessment?.title) {
-            setChapterTitle(content.ModuleAssessment.title)
-        } else if (activeChapterTitle) {
+        // if (content?.ModuleAssessment?.title) {
+        //     setChapterTitle(content.ModuleAssessment.title)
+        // } 
+        if (activeChapterTitle) {
             setChapterTitle(activeChapterTitle)
         }
     }, [content?.ModuleAssessment?.title, activeChapterTitle])

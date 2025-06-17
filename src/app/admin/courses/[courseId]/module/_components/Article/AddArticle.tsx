@@ -156,7 +156,7 @@ const AddArticle = ({
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
 
-            toast({
+            toast.success({
                 title: 'Auto-saved',
                 description: 'Article content auto-saved successfully',
             })

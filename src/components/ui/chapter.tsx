@@ -174,22 +174,18 @@ function Chapter() {
                 `/Content/editChapterOfModule/${moduleId}?chapterId=${movedItem.chapterId}`,
                 { newOrder: movedItem.order }
             )
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Content Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             if (response.data) {
                 setChapterData(newOrderChapters)
             }
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
