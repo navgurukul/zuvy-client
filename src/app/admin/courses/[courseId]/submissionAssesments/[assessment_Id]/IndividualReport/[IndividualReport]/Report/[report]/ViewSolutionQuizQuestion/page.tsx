@@ -69,12 +69,12 @@ const Page = ({ params }: { params: paramsType }) => {
         },
         {
             crumb: assesmentData?.title,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
             isLast: false,
         },
         {
             crumb: proctoringData?.user?.name,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
         {
@@ -94,17 +94,17 @@ const Page = ({ params }: { params: paramsType }) => {
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
-                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
+                `/admin/assessment/students/assessment_id${params.assessment_Id}`
             )
             .then((res) => {
                 setAssesmentData(res.data.ModuleAssessment)
             })
-    }, [params.StudentAssesmentData])
+    }, [params.assessment_Id])
     const fetchQuizQuestionDetails = useCallback(async () => {
         try {
             await api
                 .get(
-                    `/Content/assessmentDetailsOfQuiz/${params.StudentAssesmentData}?studentId=${params.IndividualReport}`
+                    `/Content/assessmentDetailsOfQuiz/${params.assessment_Id}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
                     setQuizQuiestionDetails(res.data.data)
@@ -117,7 +117,7 @@ const Page = ({ params }: { params: paramsType }) => {
         } finally {
             setLoading(false)
         }
-    }, [params.IndividualReport, params.StudentAssesmentData])
+    }, [params.IndividualReport, params.assessment_Id])
 
     useEffect(() => {
         fetchProctoringData(params.report, params.IndividualReport)
