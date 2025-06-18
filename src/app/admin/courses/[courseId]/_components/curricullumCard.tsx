@@ -7,6 +7,7 @@ import {
     GripVertical,
     PencilLine,
     Trash2,
+    Pencil,
 } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
@@ -110,10 +111,15 @@ const CurricullumCard = ({
                                 handleDeleteModal()
                             }}
                         />
-                        <GripVertical
+                        <Pencil
                             onClick={(e) => {
                                 e.stopPropagation()
                                 editHandle(moduleId)
+                            }}
+                        />
+                        <GripVertical
+                            onClick={(e) => {
+                                e.stopPropagation()
                             }}
                         />
                     </div>
