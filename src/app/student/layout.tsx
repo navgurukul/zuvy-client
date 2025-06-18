@@ -125,26 +125,26 @@ export default function RootLayout({
     useEffect(() => {
         async function getStudentsData() {
             const res = await api.get('/student')
-            setStudentData(res.data)
+            setStudentData(res.data.inProgressBootcamps)
         }
         getStudentsData()
     }, [])
 
     if (studentData.length === 0) return
 
-    const isCourseEnrolled = studentData.some(
-        (courses: any) => courses.id == couseId
-    )
+    // const isCourseEnrolled = studentData.some(
+    //     (courses: any) => courses.id == couseId
+    // )
 
-    if (isChapterPage || isChapterRoute) {
-        if (!isCourseEnrolled) {
-            toast.error({
-                title: 'Failed',
-                description: 'You were not enrolled in thar course.'
-            })
-            router.push('/student/courses')
-        }
-    }
+    // if (isChapterPage || isChapterRoute) {
+    //     if (!isCourseEnrolled) {
+    //         toast.error({
+    //             title: 'Failed',
+    //             description: 'You were not enrolled in thar course.'
+    //         })
+    //         router.push('/student/courses')
+    //     }
+    // }
 
     return (
         <div className="h-screen ">

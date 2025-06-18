@@ -52,7 +52,7 @@ const Page: React.FC<pageProps> = () => {
         const getEnrolledCourses = async () => {
             try {
                 const response = await api.get(`/student`)
-                setEnrolledCourse(response.data)
+                setEnrolledCourse(response.data.inProgressBootcamps)
                 setFlag(false)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)
