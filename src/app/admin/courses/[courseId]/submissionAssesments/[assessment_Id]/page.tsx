@@ -19,7 +19,12 @@ import { fetchStudentAssessments } from '@/utils/admin'
 
 type Props = {}
 
-const Page = ({ params }: any) => {
+interface PageParams {
+    courseId: string;
+    assessment_Id: string;
+}
+
+const Page = ({ params }: { params: PageParams }) => {
     const [assesmentData, setAssessmentData] = useState<any>()
     const [searchStudentAssessment, setSearchStudentAssessment] =
         useState<any>('')
@@ -73,7 +78,8 @@ const Page = ({ params }: any) => {
         async (offset: number) => {
             if (offset >= 0) {
                 const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
-                    params.StudentAssesmentData,
+                    params?.assessment_Id,
+                    params?.courseId,
                     offset,
                     position,
                     debouncedSearch,
@@ -87,7 +93,7 @@ const Page = ({ params }: any) => {
             }
 
         },
-        [params.StudentAssesmentData, position, debouncedSearch]
+        [params.assessment_Id, position, debouncedSearch]
     )
 
     useEffect(() => {
