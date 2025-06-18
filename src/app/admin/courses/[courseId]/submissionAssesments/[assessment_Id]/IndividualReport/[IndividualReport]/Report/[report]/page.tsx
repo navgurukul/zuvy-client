@@ -349,7 +349,7 @@ const Page = ({ params }: { params: any }) => {
                     {codingdata ? (
                         <>
 
-                            {/* Coding Submission */}
+                            {/* Coding Submissions */}
                             {codingdata && codingdata.length === 0 ? (
                                 <div className='w-full'>
                                     <h1 className="text-left font-semibold">
