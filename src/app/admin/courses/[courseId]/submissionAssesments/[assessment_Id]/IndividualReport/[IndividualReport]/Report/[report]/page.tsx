@@ -159,7 +159,7 @@ const Page = ({ params }: { params: any }) => {
         },
         {
             crumb: assesmentData?.submitedOutsourseAssessment?.chapterName,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
             isLast: false,
         },
         {

@@ -37,7 +37,7 @@ type AssessmentData = {
 
 export type paramsType = {
     courseId: string
-    assessment_Id: string
+    StudentAssesmentData: string
     IndividualReport: string
     report: string
     CodingSolution: number
@@ -73,12 +73,12 @@ const Page = ({ params }: { params: paramsType }) => {
         },
         {
             crumb: assesmentData?.title,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
             isLast: false,
         },
         {
             crumb: proctoringData?.user?.name,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
         {
@@ -98,17 +98,17 @@ const Page = ({ params }: { params: paramsType }) => {
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
-                `/admin/assessment/students/assessment_id${params.assessment_Id}`
+                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
             )
             .then((res) => {
                 setAssesmentData(res.data.ModuleAssessment)
             })
-    }, [params.assessment_Id])
+    }, [params.StudentAssesmentData])
     const fetchOpenEndedQuestionsDetails = useCallback(async () => {
         try {
             await api
                 .get(
-                    `/Content/assessmentDetailsOfOpenEnded/${params.assessment_Id}?studentId=${params.IndividualReport}`
+                    `/Content/assessmentDetailsOfOpenEnded/${params.StudentAssesmentData}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
                     setOpenEndedQuestionsDetails(res.data)
@@ -121,7 +121,7 @@ const Page = ({ params }: { params: paramsType }) => {
         } finally {
             setLoading(false)
         }
-    }, [params.assessment_Id, params.IndividualReport])
+    }, [params.StudentAssesmentData, params.IndividualReport])
 
     useEffect(() => {
         fetchOpenEndedQuestionsDetails()

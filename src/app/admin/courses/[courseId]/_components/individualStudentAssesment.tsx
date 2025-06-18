@@ -24,24 +24,24 @@ const IndividualStudentAssesment = ({
     openEndedScore,
     totalOpenEndedScore,
 }: any) => {
-    const { courseId, assessment_Id, IndividualReport, report } = params
+    const { courseId, StudentAssesmentData, IndividualReport, report } = params
     const color = getAssesmentBackgroundColorClass(25, 5)
     const renderQuestion = () => {
         switch (type) {
             case 'openEndedSubmission':
                 return {
                     title: 'Open Ended Question',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
                 }
             case 'quizSubmission':
                 return {
                     title: 'Quiz assessment',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
                 }
             case 'codingSubmission':
                 return {
                     title: 'Coding Questions',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
+                    link: `/admin/courses/${courseId}/submissionAssesments/${StudentAssesmentData}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
                 }
             default:
                 return {
