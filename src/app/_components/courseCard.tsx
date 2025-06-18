@@ -50,6 +50,9 @@ function CourseCard({
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
     const timeAllotedInDays = Math.ceil(timeAlloted / 86400)
 
+    console.log('viewcourses', viewcourses)
+    console.log('typeId', typeId)
+
     const getChapterId = useCallback(async () => {
         try {
             const response = await api.get(

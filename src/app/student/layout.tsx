@@ -44,6 +44,7 @@ export default function RootLayout({
     const router = useRouter()
 
     const pathname = usePathname()
+    console.log('pathname', pathname)
     const { width } = useWindowSize()
     const { moduleData } = getModuleDataNew()
     const [open, setOpen] = useState(false)
@@ -125,26 +126,28 @@ export default function RootLayout({
     useEffect(() => {
         async function getStudentsData() {
             const res = await api.get('/student')
-            setStudentData(res.data)
+            setStudentData(res.data.inProgressBootcamps)
         }
         getStudentsData()
     }, [])
-
+    
+    console.log('studentData', studentData)
     if (studentData.length === 0) return
 
-    const isCourseEnrolled = studentData.some(
-        (courses: any) => courses.id == couseId
-    )
+    // const isCourseEnrolled = studentData.some(
+    //     (courses: any) => courses.id == couseId
+    // )
 
-    if (isChapterPage || isChapterRoute) {
-        if (!isCourseEnrolled) {
-            toast.error({
-                title: 'Failed',
-                description: 'You were not enrolled in thar course.'
-            })
-            router.push('/student/courses')
-        }
-    }
+    // if (isChapterPage || isChapterRoute) {
+    //     // if (!isCourseEnrolled) {
+    //     if (studentData.length > 0) {
+    //         toast.error({
+    //             title: 'Failed',
+    //             description: 'You were not enrolled in thar course.'
+    //         })
+    //         router.push('/student/courses')
+    //     }
+    // }
 
     return (
         <div className="h-screen ">
