@@ -29,8 +29,6 @@ export const taskSchema = z.object({
     startedAt: z.string(),
     submitedAt: z.string(),
     completedAt: z.string(),
-    assessment_Id: z.string(),
-    title: z.string().optional(),
 })
 
 export const testCaseSchema = z.object({

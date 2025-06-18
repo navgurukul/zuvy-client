@@ -2,7 +2,7 @@
 import { api } from '@/utils/axios.config'
 import { useSearchParams } from 'next/navigation'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import TestCaseResults from '../../../submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/[CodingSolution]/TestCases'
+import TestCaseResults from '../../../submissionAssesments/[StudentAssesmentData]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/[CodingSolution]/TestCases'
 import Editor from '@monaco-editor/react'
 import { b64DecodeUnicode } from '@/utils/base64'
 import { cn, difficultyColor } from '@/lib/utils'
