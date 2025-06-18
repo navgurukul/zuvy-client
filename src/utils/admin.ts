@@ -67,7 +67,7 @@ export function getCleanFileName(url: string) {
 
     return cleanFileName
 }
-  
+
 export function deleteOpenEndedQuestion(
     deleteOpenEndedQuestionId: any,
     setOpenEndedQuestions: any,
@@ -427,12 +427,13 @@ export async function filteredCodingQuestions(
 }
 
 export const fetchStudentAssessments = async (
-    assessmentId: string,
+    assessment_Id: string,
+    courseId: string,
     offset: number,
     limit: any,
     searchStudent: string = '',
     setTotalPages: (totalPages: number) => void,
-    setLastPage: (lastPage: number) => void,
+    setLastPage: (lastPage: number) => void
 ) => {
     // Build query params
     const params = new URLSearchParams({
@@ -441,13 +442,10 @@ export const fetchStudentAssessments = async (
     })
     if (searchStudent) params.set('searchStudent', searchStudent)
 
-    const endpoint = `/admin/assessment/students/assessment_id${assessmentId}?${params.toString()}`
+    const endpoint = `/admin/assessment/students/assessment_id${assessment_Id}?${params.toString()}`
     const res = await api.get(endpoint)
-    const {
-        submitedOutsourseAssessments,
-        ModuleAssessment,
-        passPercentage,
-    } = res.data
+    const { submitedOutsourseAssessments, ModuleAssessment, passPercentage } =
+        res.data
 
     // Update global pagination
     const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
@@ -457,8 +455,8 @@ export const fetchStudentAssessments = async (
     // Map and return data
     const assessments = submitedOutsourseAssessments.map((a: any) => ({
         ...a,
-        bootcampId: res.data.bootcampId,
-        newId: res.data.id,
+        bootcampId: parseInt(courseId, 10),
+        assessment_Id: assessment_Id,
         title: ModuleAssessment.title,
     }))
 
