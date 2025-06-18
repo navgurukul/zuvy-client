@@ -415,8 +415,7 @@ export async function filteredCodingQuestions(
 }
 
 export const fetchStudentAssessments = async (
-    assessment_Id: string,
-    courseId: string,
+    assessmentId: string,
     offset: number,
     limit: any,
     searchStudent: string = '',
@@ -430,7 +429,7 @@ export const fetchStudentAssessments = async (
     })
     if (searchStudent) params.set('searchStudent', searchStudent)
 
-    const endpoint = `/admin/assessment/students/assessment_id${assessment_Id}?${params.toString()}`
+    const endpoint = `/admin/assessment/students/assessment_id${assessmentId}?${params.toString()}`
     const res = await api.get(endpoint)
     const {
         submitedOutsourseAssessments,
@@ -447,8 +446,8 @@ export const fetchStudentAssessments = async (
     // Map and return data
     const assessments = submitedOutsourseAssessments.map((a: any) => ({
         ...a,
-       bootcampId: parseInt(courseId, 10),
-        assessment_Id: assessment_Id,
+        bootcampId: res.data.bootcampId,
+        newId: res.data.id,
         title: ModuleAssessment.title,
     }))
 
