@@ -455,59 +455,43 @@
                              onReorder={handleReorderModules}
                              axis="y"
                          >
-                             {curriculum.map(
-                                 (item: CurriculumItem, index: number) => (
-                                     <div key={item.id} className={`${item.isStarted ? 'cursor-not-allowed' : 'cursor-grab'}`}>
-                                         <Reorder.Item
-                                             value={item}
-                                             key={item.id}
-                                             dragListener={!item.isStarted && !isReordering}
-                                             dragControls={dragControls}
-                                             className={`${item.isStarted ? 'opacity-90' : ''}`}
-                                         >
-                                             <div
-                                                 className={`${item.typeId === 2
-                                                         ? 'bg-yellow/50'
-                                                         : 'bg-muted'
-                                                     } my-3 p-3 flex rounded-xl relative group`}
-                                             >
-                                                 <CurricullumCard
-                                                     editHandle={editHandle}
-                                                     moduleId={item.id}
-                                                     courseId={
-                                                         courseData?.id ?? 0
-                                                     }
-                                                     order={item.order}
-                                                     name={item.name}
-                                                     description={
-                                                         item.description
-                                                     }
-                                                     index={index}
-                                                     quizCount={item.quizCount}
-                                                     assignmentCount={
-                                                         item.assignmentCount
-                                                     }
-                                                     timeAlloted={
-                                                         item.timeAlloted
-                                                     }
-                                                     codingProblemsCount={
-                                                         item.codingProblemsCount
-                                                     }
-                                                     articlesCount={
-                                                         item.articlesCount
-                                                     }
-                                                     typeId={item?.typeId}
-                                                     fetchCourseModules={
-                                                         fetchCourseModules
-                                                     }
-                                                     projectId={item.projectId}
-                                                     chapterId={item.ChapterId}
-                                                 />
-                                             </div>
-                                         </Reorder.Item>
-                                     </div>
-                                 )
-                             )}
+                             {curriculum.map((item, index) => (
+                                <CurricullumCard
+                                    key={item.id}
+                                    value={item}
+                                    isStarted={item.isStarted}
+                                    editHandle={editHandle}
+                                    moduleId={item.id}
+                                    courseId={
+                                        courseData?.id ?? 0
+                                    }
+                                    order={item.order}
+                                    name={item.name}
+                                    description={
+                                        item.description
+                                    }
+                                    index={index}
+                                    quizCount={item.quizCount}
+                                    assignmentCount={
+                                        item.assignmentCount
+                                    }
+                                    timeAlloted={
+                                        item.timeAlloted
+                                    }
+                                    codingProblemsCount={
+                                        item.codingProblemsCount
+                                    }
+                                    articlesCount={
+                                        item.articlesCount
+                                    }
+                                    typeId={item?.typeId}
+                                    fetchCourseModules={
+                                        fetchCourseModules
+                                    }
+                                    projectId={item.projectId}
+                                    chapterId={item.ChapterId}
+                                />
+                            ))}
                          </Reorder.Group>
                      ) : (
                          <div className="w-full flex flex-col gap-y-5 items-center justify-center">
