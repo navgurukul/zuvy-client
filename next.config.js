@@ -17,6 +17,10 @@ const nextConfig = {
                 // Optional: Define a pathname pattern if needed
             },
             {
+                hostname: 'zuvydevbucket.s3.ap-south-1.amazonaws.com',
+                // Optional: Define a pathname pattern if needed
+            },
+            {
                 hostname: 'example.com',
                 // Optional: Define a pathname pattern if needed
             },
