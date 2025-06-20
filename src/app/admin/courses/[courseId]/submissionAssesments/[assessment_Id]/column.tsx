@@ -9,6 +9,7 @@ import { DownloadIcon, FileText } from 'lucide-react'
 import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
 import ApproveReattempt from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 
 export const columns: ColumnDef<Task>[] = [
     // {
@@ -54,11 +55,32 @@ export const columns: ColumnDef<Task>[] = [
             const name = row.original.name
 
             return (
-                <div className="flex ">
-                    <span className="max-w-[500px] truncate font-medium capitalize">
-                        {name}
-                    </span>
-                </div>
+                // <div className="flex ">
+                //     <span className="max-w-[500px] truncate font-medium capitalize">
+                //         {name}
+                //     </span>
+                // </div>
+                
+                <TooltipProvider>
+                   <Tooltip>
+                     <TooltipTrigger asChild>
+                        <div className='flex'>
+                        <span
+                          className="truncate max-w-[500px] cursor-pointer font-medium capitalize"
+                          title=""
+                        >
+                          {/* Only show first 20 characters */}
+                          {name.length > 20 ? name.substring(0, 20) + '...' : name}
+                        </span>
+                        </div>
+                     </TooltipTrigger>
+                       {name.length > 20 && (
+                    <TooltipContent>
+                       <p>{name}</p>
+                    </TooltipContent>
+                    )}
+                 </Tooltip>
+               </TooltipProvider>
             )
         },
         enableSorting: false,
@@ -73,11 +95,31 @@ export const columns: ColumnDef<Task>[] = [
             const email = row.original.email
 
             return (
-                <div className="flex ">
-                    <span className="max-w-[500px] truncate font-medium">
-                        {email}
+                // <div className="flex ">
+                //     <span className="max-w-[500px] truncate font-medium">
+                //         {email}
+                //     </span>
+                // </div>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                    <div className="flex ">
+                     <span
+                      className="truncate max-w-[500px] cursor-pointer font-medium"
+                      title=""
+                     >
+                     {email.length > 25 ? email.substring(0, 25) + '...' : email}
                     </span>
-                </div>
+                    </div>
+                  </TooltipTrigger>
+                   {email.length > 25 && (
+                   <TooltipContent>
+                     <p>{email}</p>
+                   </TooltipContent>
+                  )}
+                  </Tooltip>
+                </TooltipProvider>
             )
         },
     },
@@ -100,37 +142,74 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium ml-5">
                         {timeTaken}
                     </span>
                 </div>
             )
         },
     },
+
     {
-        accessorKey: 'submission date',
+        accessorKey: 'startedAt',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Submission Date" />
+           <DataTableColumnHeader column={column} title="Started At" />
         ),
         cell: ({ row }) => {
-            const submitedAt = row.original.submitedAt
-            let submissionDate;
-
-            if(!submitedAt){
-                 submissionDate = 'N/A';
-            }else{
-                 submissionDate = getSubmissionDate(submitedAt);
-            }
-
-            return (
-                <div className="flex ">
-                    <span className="max-w-[500px] truncate font-medium">
-                        {submissionDate}
+           const startedAt = row.original.startedAt;
+           return (
+                <div className="flex">
+                     <span className="max-w-[500px] truncate font-medium ml-4">
+                       {startedAt ? new Date(startedAt).toLocaleString() : 'N/A'}
                     </span>
                 </div>
-            )
+            );
         },
     },
+
+
+    {
+       accessorKey: 'submitedAt',
+       header: ({ column }) => (
+         <DataTableColumnHeader column={column} title="Submitted At" />
+       ),
+       cell: ({ row }) => {
+           const submitedAt = row.original.submitedAt;
+           return (
+                 <div className="flex">
+                    <span className="max-w-[500px] truncate font-medium ml-5">
+                     {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'}
+                    </span>
+                </div>
+            );
+        },
+    },
+
+    
+    // {
+    //     accessorKey: 'submission date',
+    //     header: ({ column }) => (
+    //         <DataTableColumnHeader column={column} title="Submission Date" />
+    //     ),
+    //     cell: ({ row }) => {
+    //         const submitedAt = row.original.submitedAt
+    //         let submissionDate;
+
+    //         if(!submitedAt){
+    //              submissionDate = 'N/A';
+    //         }else{
+    //              submissionDate = getSubmissionDate(submitedAt);
+    //         }
+
+    //         return (
+    //             <div className="flex ">
+    //                 <span className="max-w-[500px] truncate font-medium">
+    //                     {submissionDate}
+    //                 </span>
+    //             </div>
+    //         )
+    //     },
+    // },
 
     {
         accessorKey: 'isPassed',
@@ -142,7 +221,7 @@ export const columns: ColumnDef<Task>[] = [
             const isQualified = row.original.isPassed
             return (
                 <div className="flex ">
-                    <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
+                    <div className="max-w-[500px] truncate flex items-center gap-x-2 ml-1 font-medium">
                         {isQualified ? (
                             <div className="bg-secondary h-3 w-3 rounded-full" />
                         ) : (
@@ -159,14 +238,14 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader
                 column={column}
-                title="% Obtained"
+                title="Percentage"
             />
         ),
         cell: ({ row }) => {
             const percentage = row.original.percentage
             return (
                 <div className="flex ">
-                    <span className="font-semibold">
+                    <span className="font-semibold ml-4">
                     {percentage ? `${percentage.toFixed(2)}%` : '0.00%'}
                     </span>
                 </div>
@@ -176,12 +255,12 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'No. of Attempts',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="No. of Attempts" />
+            <DataTableColumnHeader column={column} title="Attempts" />
         ),
         cell: ({ row }) => {
             return (
                 <div className="flex  w-10" key={row.original.email}>
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="max-w-[500px] truncate font-medium ml-4">
                         {row?.original?.reattemptCount}
                     </span>
                 </div>
