@@ -17,6 +17,7 @@ import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
+import { Reorder, useDragControls } from 'framer-motion'
 
 
 function ChapterItem({
@@ -31,6 +32,7 @@ function ChapterItem({
     activeChapterRef,
     isChapterClickedRef,
     chapterData,
+    isLastItem,
 }: {
     title: string
     topicId: number
@@ -43,12 +45,15 @@ function ChapterItem({
     activeChapterRef: any
     isChapterClickedRef: any
     chapterData: any
+    isLastItem?: boolean
 }) {
     // states and variables
     const { courseId } = useParams()
     const router = useRouter()
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const { setTopicId } = getTopicId()
+    const dragControls = useDragControls()
+    const [isDragging, setIsDragging] = useState(false)
 
     // functions
     const setTopicIcon = () => {
@@ -121,43 +126,64 @@ function ChapterItem({
 
 
     return (
-        <div ref={chapterId === activeChapter ? activeChapterRef : null}>
-            <div
-                className={cn(
-                    'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center',
-                    setActiveChapterItem()
-                )}
-                onClick={() => {
-                    handleClick()
-                }}
-            >
-                <div className="flex gap-2 capitalize">
-                    <p>{setTopicIcon()} </p>
-                    <p>{title}</p>
+        <Reorder.Item
+            value={chapterData.find((c: any) => c.chapterId === chapterId)}
+            id={isLastItem ? 'last-chapter' : `chapter-${chapterId}`}
+            dragListener={false}
+            dragControls={dragControls}
+        >
+            <div ref={chapterId === activeChapter ? activeChapterRef : null}>
+                <div
+                    className={cn(
+                        'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center select-none',
+                        setActiveChapterItem()
+                    )}
+                    onClick={() => {
+                        handleClick()
+                    }}
+                >
+                    <div className="flex gap-2 capitalize">
+                        <p>{setTopicIcon()} </p>
+                        <p>{title}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteModal()
+                            }}
+                            className="hover:text-destructive cursor-pointer"
+                            size={15}
+                        />
+                        <GripVertical
+                            style={{
+                                cursor: isDragging ? 'grabbing' : 'grab',
+                            }}
+                            onPointerDown={(e) => {
+                                e.stopPropagation()
+                                setIsDragging(true)
+                                dragControls.start(e)
+                            }}
+                            onPointerUp={() => setIsDragging(false)}
+                            onPointerLeave={() => setIsDragging(false)}
+                            onClick={(e) => e.stopPropagation()}
+                            size={15}
+                        />
+                    </div>
                 </div>
-                <div className="flex">
-                    <Trash2
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteModal()
-                        }}
-                        className="hover:text-destructive cursor-pointer"
-                        size={15}
-                    />
-                </div>
+                <DeleteConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setDeleteModalOpen(false)}
+                    onConfirm={() => {
+                        handleDeleteChapter()
+                        setDeleteModalOpen(false)
+                    }}
+                    modalText={DELETE_CHAPTER_CONFIRMATION}
+                    buttonText="Delete Chapter"
+                    input={false}
+                />
             </div>
-            <DeleteConfirmationModal
-                isOpen={isDeleteModalOpen}
-                onClose={() => setDeleteModalOpen(false)}
-                onConfirm={() => {
-                    handleDeleteChapter()
-                    setDeleteModalOpen(false)
-                }}
-                modalText={DELETE_CHAPTER_CONFIRMATION}
-                buttonText="Delete Chapter"
-                input={false}
-            />
-        </div>
+        </Reorder.Item>
     )
 }
 
