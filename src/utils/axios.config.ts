@@ -7,6 +7,9 @@ import { toast } from '@/components/ui/use-toast'
 // import { useSessionModal } from '@/store/store'
 // // import { store as sessionModalStore } from '@/store/store'
 // import { sessionModalStore } from '@/store/store'
+import { useSessionModalStore } from '@/store/store'
+
+const sessionModalStore = useSessionModalStore.getState()
 
 const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 // const mainUrl = "http://zuvy.navgurukul.org/"
@@ -123,10 +126,15 @@ api.interceptors.response.use(
             } catch (err) {
                 console.log('Five')
                 processQueue(err, null)
-                localStorage.clear()
-                document.cookie =
-                    'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+                // localStorage.clear()
+                // document.cookie =
+                //     'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+                const logout = localStorage.getItem('logout')
+
                 localStorage.setItem('logout', true.toString())
+                sessionModalStore.setShowModal(true)
+
+                // !logout && window.location.reload()
                 return Promise.reject(err)
             } finally {
                 isRefreshing = false

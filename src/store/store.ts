@@ -914,19 +914,16 @@ export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
 }))
 
 // ------------------------- Session expire ---------------------------
-interface SessionModalState {
-    isOpen: boolean
-    openModal: () => void
-    closeModal: () => void
+
+type SessionStore = {
+    showModal: boolean
+    setShowModal: (value: boolean) => void
 }
 
-export const sessionModalStore = create<SessionModalState>((set) => ({
-    isOpen: false,
-    openModal: () => set({ isOpen: true }),
-    closeModal: () => set({ isOpen: false }),
+export const useSessionModalStore = create<SessionStore>((set) => ({
+    showModal: false,
+    setShowModal: (value) => set({ showModal: value }),
 }))
-
-// export const useSessionModal = create(sessionModalStore)
 
 // ------------------------- User ------------------------
 interface User {
