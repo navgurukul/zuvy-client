@@ -70,11 +70,9 @@ const Page = ({ params }: { params: any }) => {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching bootcamps:',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.courseId])
@@ -91,11 +89,9 @@ const Page = ({ params }: { params: any }) => {
                 setIndividualFormData(res.data.trackedData)
             })
             .catch((err) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Error fetching Form details:',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
 
@@ -105,11 +101,9 @@ const Page = ({ params }: { params: any }) => {
                 setChapterDetails(res.data.trackingData)
             })
             .catch((err) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Error fetching Chapter details:',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }, [params.report])
@@ -127,11 +121,9 @@ const Page = ({ params }: { params: any }) => {
                     setUser(student)
                 })
         } catch (err) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching Student details:',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [params.report, params.IndividualReport])

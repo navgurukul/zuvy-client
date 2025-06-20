@@ -47,12 +47,12 @@ const Page = ({ params }: { params: paramsType }) => {
         },
         {
             crumb: 'Assessment',
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
             isLast: false,
         },
         {
             crumb: proctoringData?.user?.name,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
         {
@@ -93,7 +93,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     setTestCases(res?.data?.data.TestCasesSubmission)
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error in fetching',
             })

@@ -28,7 +28,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Check, Menu } from 'lucide-react'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { ellipsis } from '@/lib/utils'
@@ -125,29 +125,26 @@ export default function RootLayout({
     useEffect(() => {
         async function getStudentsData() {
             const res = await api.get('/student')
-            setStudentData(res.data)
+            setStudentData(res.data.inProgressBootcamps)
         }
         getStudentsData()
     }, [])
 
     if (studentData.length === 0) return
 
-    const isCourseEnrolled = studentData.some(
-        (courses: any) => courses.id == couseId
-    )
+    // const isCourseEnrolled = studentData.some(
+    //     (courses: any) => courses.id == couseId
+    // )
 
-    if (isChapterPage || isChapterRoute) {
-        if (!isCourseEnrolled) {
-            toast({
-                title: 'Failed',
-                description: 'You were not enrolled in thar course.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
-            })
-            router.push('/student/courses')
-        }
-    }
+    // if (isChapterPage || isChapterRoute) {
+    //     if (!isCourseEnrolled) {
+    //         toast.error({
+    //             title: 'Failed',
+    //             description: 'You were not enrolled in thar course.'
+    //         })
+    //         router.push('/student/courses')
+    //     }
+    // }
 
     return (
         <div className="h-screen ">
@@ -160,7 +157,11 @@ export default function RootLayout({
             ) : (
                 <div className={`h-screen ${isMobile ? '' : ''} `}>
                     <div>{!isAssessmentRoute && <StudentNavbar />}</div>
-                    <div className={` ${isChapterRoute ? 'px-0 md:px-2 lg:px-2' : 'pt-20'} `}>
+                    <div
+                        className={` ${
+                            isChapterRoute ? 'px-0 md:px-2 lg:px-2' : 'pt-20'
+                        } `}
+                    >
                         <div className="relative">
                             {children}
                             <div className="absolute bottom-0 w-full left-0 bg-[#DCE7E3]">
@@ -244,7 +245,7 @@ export default function RootLayout({
                                                     />
                                                 </Label>
                                                 <ScrollArea className="h-full w-full">
-                                                    <div className="w-full">
+                                                    <div className="w-full h-52">
                                                         {moduleData.moduleName.map(
                                                             (
                                                                 chapter: any,

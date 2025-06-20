@@ -1,7 +1,7 @@
 'use client'
 
 import { PlusCircle, Pencil } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import CodingTopics from '@/app/admin/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
@@ -88,7 +88,7 @@ function CodingChallenge({
     const debouncedSearch = useDebounce(searchTerm, 1000)
     const { tags, setTags } = getCodingQuestionTags()
     const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(
-        content.codingQuestionDetails
+        content?.codingQuestionDetails || []
     )
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
     const [selectedTag, setSelectedTag] = useState<Tag>({
@@ -108,6 +108,14 @@ function CodingChallenge({
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const hasLoaded = useRef(false)
+
+    const [isSaved, setIsSaved] = useState<boolean>(true)
+
+    const [savedQuestions, setSavedQuestions] = useState<Question[]>(
+        content.codingQuestionDetails || []
+    )
 
     const handleSaveClick = () => {
         handleSaveChapter(
@@ -115,15 +123,37 @@ function CodingChallenge({
             content.id,
             chapterTitle
                 ? {
-                      title: chapterTitle,
-                      codingQuestions: selectedQuestions[0]?.id,
-                  }
+                    title: chapterTitle,
+                    codingQuestions: selectedQuestions[0]?.id,
+                }
                 : {
-                      codingQuestions: selectedQuestions[0]?.id,
-                  }
+                    codingQuestions: selectedQuestions[0]?.id,
+                }
         )
         setIsChapterUpdated(!isChapterUpdated)
+        // Mark as saved and update saved questions
+        setIsSaved(true)
+        setSavedQuestions([...selectedQuestions])
     }
+
+    // Function to check if current selection matches saved questions
+    const checkIfSaved = () => {
+        if (!selectedQuestions || !savedQuestions) {
+            return true
+        }
+        if (selectedQuestions.length !== savedQuestions.length) {
+            return false
+        }
+
+        // Check if all selected questions are in saved questions
+        return selectedQuestions.every(selectedQ =>
+            savedQuestions.some(savedQ => savedQ.id === selectedQ.id)
+        )
+    }
+
+    useEffect(() => {
+        setIsSaved(checkIfSaved())
+    }, [selectedQuestions, savedQuestions])
 
     useEffect(() => {
         async function getAllCodingQuestions() {
@@ -190,32 +220,48 @@ function CodingChallenge({
     ])
 
     async function getAllTags() {
-        const response = await api.get('Content/allTags')
-        if (response) {
-            const tagArr = [
-                { tagName: 'All Topics', id: -1 },
-                ...response.data.allTags,
-            ]
-            setTags(tagArr)
+        try {
+            setIsDataLoading(true)
+            const response = await api.get('Content/allTags')
+            if (response) {
+                const tagArr = [
+                    { tagName: 'All Topics', id: -1 },
+                    ...response.data.allTags,
+                ]
+                setTags(tagArr)
+            }
+        } catch (error) {
+            console.error('Error fetching tags:', error)
+        } finally {
+            setIsDataLoading(false)
         }
     }
 
     useEffect(() => {
+        if (hasLoaded.current) return
+        hasLoaded.current = true
         getAllTags()
     }, [])
 
     useEffect(() => {
-        setSelectedQuestions(content.codingQuestionDetails)
+        setSelectedQuestions(content?.codingQuestionDetails || [])
+        setSavedQuestions(content?.codingQuestionDetails || [])
         setChapterTitle(activeChapterTitle)
+        setIsSaved(true)
     }, [content])
 
     function previewCodingChallenge() {
-        if (selectedQuestions.length === 0) {
-            return toast({
+        if (!selectedQuestions || selectedQuestions.length === 0) {
+            return toast.error({
                 title: 'Cannot Preview',
                 description: 'Nothing to Preview please save coding question.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+            })
+        }
+        // Check if question is selected but not saved
+        if (!isSaved) {
+            return toast.error({
+                title: 'Cannot Preview',
+                description: 'Please save the selected question before previewing.',
             })
         }
         const updatedContent = {
@@ -227,7 +273,16 @@ function CodingChallenge({
             `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
         )
     }
-
+    
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Coding Problem details...</div>
+                </div>
+            </div>
+        )
+    }
     return (
         <>
             <div className="px-5">

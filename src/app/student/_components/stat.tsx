@@ -161,151 +161,152 @@ export function Stat({ className, ...props }: CardProps) {
                         </CardContent>
                     </Card>
                 ) : (
-                    <Card
-                        className={cn(
-                            'lg:h-[500px] lg:w-[380px] text-start bg-popover-foreground text-white',
-                            className
-                        )}
-                        {...props}
-                    >
-                        <CardHeader>
-                            <CardTitle className="flex justify-between items-center">
-                                Leaderboard
-                                <ChevronRight />
-                            </CardTitle>
-                        </CardHeader>
+                    <div></div>
+                    // <Card
+                    //     className={cn(
+                    //         'lg:h-[500px] lg:w-[380px] text-start bg-popover-foreground text-white',
+                    //         className
+                    //     )}
+                    //     {...props}
+                    // >
+                    //     <CardHeader>
+                    //         <CardTitle className="flex justify-between items-center">
+                    //             Leaderboard
+                    //             <ChevronRight />
+                    //         </CardTitle>
+                    //     </CardHeader>
 
-                        <CardContent>
-                            {enrolledCourse?.length > 1 ? (
-                                <Select
-                                    onValueChange={(e) => {
-                                        handleCourseChange(e)
-                                    }}
-                                >
-                                    <SelectTrigger className="w-full border-4 shadow-none bg-popover-foreground my-3 rounded-lg">
-                                        <SelectValue
-                                            placeholder={
-                                                selectedCourse?.name ||
-                                                'Select a course'
-                                            }
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectLabel>Courses</SelectLabel>
-                                            {enrolledCourse?.map(
-                                                (course: any) => (
-                                                    <SelectItem
-                                                        key={course.id}
-                                                        value={course.id.toString()}
-                                                        className="text-md text-start font-semibold"
-                                                    >
-                                                        <h1 className="text-md text-start font-semibold">
-                                                            {course.name}
-                                                        </h1>
-                                                    </SelectItem>
-                                                )
-                                            )}
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                            ) : (
-                                <p className="text-sm text-start p-3 w-[300px]">
-                                    {selectedCourse?.name}
-                                </p>
-                            )}
-                            <div className="mt-10 grid justify-items-center grid-cols-3 gap-4">
-                                <div className="text-center mt-7 grid justify-items-center content-start">
-                                    <Avatar>
-                                        <AvatarImage src="https://github.com/shadcn.png" />
-                                        <AvatarFallback>
-                                            {
-                                                <Image
-                                                    src="https://avatar.iran.liara.run/public/boy?username=Ash"
-                                                    alt="avatar"
-                                                    width={40}
-                                                    height={40}
-                                                />
-                                            }
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <p className="text-md font-bold mt-2">
-                                        {students[1].userInfo.name}
-                                    </p>
-                                    <p className="text-4xl font-bold text-white">
-                                        2
-                                    </p>
-                                </div>
-                                <div className=" text-center grid justify-items-center content-start relative">
-                                    <Crown
-                                        color="gold"
-                                        className="absolute -top-6 left-5 -rotate-12 "
-                                    />
-                                    <Avatar className="w-16 h-16">
-                                        <AvatarImage src="https://github.com/shadcn.png" />
-                                        <AvatarFallback>
-                                            {
-                                                <Image
-                                                    src="https://avatar.iran.liara.run/public/boy?username=Ash"
-                                                    alt="avatar"
-                                                    width={40}
-                                                    height={40}
-                                                />
-                                            }
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <p className="text-md font-bold mt-2">
-                                        {students[0].userInfo.name}
-                                    </p>
-                                    <p className="text-8xl font-bold text-white">
-                                        1
-                                    </p>
-                                </div>
-                                <div className="text-center mt-7 grid justify-items-center content-start">
-                                    <Avatar>
-                                        <AvatarImage src="https://github.com/shadcn.png" />
-                                        <AvatarFallback>
-                                            {
-                                                <Image
-                                                    src="https://avatar.iran.liara.run/public/boy?username=Ash"
-                                                    alt="avatar"
-                                                    width={40}
-                                                    height={40}
-                                                />
-                                            }
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <p className="text-md font-bold mt-2">
-                                        {students[2].userInfo.name}
-                                    </p>
-                                    <p className="text-4xl font-bold text-white">
-                                        3
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="mt-12 text-center">
-                                <div className="inline-flex justify-between items-center py-2 px-2 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700">
-                                    {/* <a
-                                    href="/"
-                                    className="inline-flex justify-between items-center py-2 px-2 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
-                                    role="alert"
-                                    aria-label="Whatsapp us"
-                                > */}
-                                    <button>
-                                        <span className="text-xs font-bold bg-secondary rounded-full text-white px-4 py-1.5 mr-3">
-                                            {ownRank}
-                                        </span>
-                                    </button>
-                                    <span className="text-sm font-medium  mr-2">
-                                        Your rank
-                                    </span>
-                                    {/* Use ChevronUp when it is functional */}
-                                    {/* <ChevronUp color="#518672" /> */}
-                                    {/* </a> */}
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    //     <CardContent>
+                    //         {enrolledCourse?.length > 1 ? (
+                    //             <Select
+                    //                 onValueChange={(e) => {
+                    //                     handleCourseChange(e)
+                    //                 }}
+                    //             >
+                    //                 <SelectTrigger className="w-full border-4 shadow-none bg-popover-foreground my-3 rounded-lg">
+                    //                     <SelectValue
+                    //                         placeholder={
+                    //                             selectedCourse?.name ||
+                    //                             'Select a course'
+                    //                         }
+                    //                     />
+                    //                 </SelectTrigger>
+                    //                 <SelectContent>
+                    //                     <SelectGroup>
+                    //                         <SelectLabel>Courses</SelectLabel>
+                    //                         {enrolledCourse?.map(
+                    //                             (course: any) => (
+                    //                                 <SelectItem
+                    //                                     key={course.id}
+                    //                                     value={course.id.toString()}
+                    //                                     className="text-md text-start font-semibold"
+                    //                                 >
+                    //                                     <h1 className="text-md text-start font-semibold">
+                    //                                         {course.name}
+                    //                                     </h1>
+                    //                                 </SelectItem>
+                    //                             )
+                    //                         )}
+                    //                     </SelectGroup>
+                    //                 </SelectContent>
+                    //             </Select>
+                    //         ) : (
+                    //             <p className="text-sm text-start p-3 w-[300px]">
+                    //                 {selectedCourse?.name}
+                    //             </p>
+                    //         )}
+                    //         {/* <div className="mt-10 grid justify-items-center grid-cols-3 gap-4">
+                    //             <div className="text-center mt-7 grid justify-items-center content-start">
+                    //                 <Avatar>
+                    //                     <AvatarImage src="https://github.com/shadcn.png" />
+                    //                     <AvatarFallback>
+                    //                         {
+                    //                             <Image
+                    //                                 src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                    //                                 alt="avatar"
+                    //                                 width={40}
+                    //                                 height={40}
+                    //                             />
+                    //                         }
+                    //                     </AvatarFallback>
+                    //                 </Avatar>
+                    //                 <p className="text-md font-bold mt-2">
+                    //                     {students[1].userInfo.name}
+                    //                 </p>
+                    //                 <p className="text-4xl font-bold text-white">
+                    //                     2
+                    //                 </p>
+                    //             </div>
+                    //             <div className=" text-center grid justify-items-center content-start relative">
+                    //                 <Crown
+                    //                     color="gold"
+                    //                     className="absolute -top-6 left-5 -rotate-12 "
+                    //                 />
+                    //                 <Avatar className="w-16 h-16">
+                    //                     <AvatarImage src="https://github.com/shadcn.png" />
+                    //                     <AvatarFallback>
+                    //                         {
+                    //                             <Image
+                    //                                 src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                    //                                 alt="avatar"
+                    //                                 width={40}
+                    //                                 height={40}
+                    //                             />
+                    //                         }
+                    //                     </AvatarFallback>
+                    //                 </Avatar>
+                    //                 <p className="text-md font-bold mt-2">
+                    //                     {students[0].userInfo.name}
+                    //                 </p>
+                    //                 <p className="text-8xl font-bold text-white">
+                    //                     1
+                    //                 </p>
+                    //             </div>
+                    //             <div className="text-center mt-7 grid justify-items-center content-start">
+                    //                 <Avatar>
+                    //                     <AvatarImage src="https://github.com/shadcn.png" />
+                    //                     <AvatarFallback>
+                    //                         {
+                    //                             <Image
+                    //                                 src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                    //                                 alt="avatar"
+                    //                                 width={40}
+                    //                                 height={40}
+                    //                             />
+                    //                         }
+                    //                     </AvatarFallback>
+                    //                 </Avatar>
+                    //                 <p className="text-md font-bold mt-2">
+                    //                     {students[2].userInfo.name}
+                    //                 </p>
+                    //                 <p className="text-4xl font-bold text-white">
+                    //                     3
+                    //                 </p>
+                    //             </div>
+                    //         </div> */}
+                    //         <div className="mt-12 text-center">
+                    //             <div className="inline-flex justify-between items-center py-2 px-2 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700">
+                    //                 {/* <a
+                    //                 href="/"
+                    //                 className="inline-flex justify-between items-center py-2 px-2 pr-4 text-sm text-gray-700 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
+                    //                 role="alert"
+                    //                 aria-label="Whatsapp us"
+                    //             > */}
+                    //                 <button>
+                    //                     <span className="text-xs font-bold bg-secondary rounded-full text-white px-4 py-1.5 mr-3">
+                    //                         {ownRank}
+                    //                     </span>
+                    //                 </button>
+                    //                 <span className="text-sm font-medium  mr-2">
+                    //                     Your rank
+                    //                 </span>
+                    //                 {/* Use ChevronUp when it is functional */}
+                    //                 {/* <ChevronUp color="#518672" /> */}
+                    //                 {/* </a> */}
+                    //             </div>
+                    //         </div>
+                    //     </CardContent>
+                    // </Card>
                 ))}
         </>
     )

@@ -55,11 +55,9 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
             let url = `/student/{userId}/${bootcampId}?`
             url += 'userId=' + userId.join('&userId=')
             await api.delete(url).then((res) => {
-                toast({
+                toast.success({
                     title: 'User Deleted Successfully!',
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 fetchStudentData && fetchStudentData()
                 fetchStudentsHandler({
@@ -73,16 +71,14 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
                     setTotalStudents,
                     setCurrentPage,
                 })
-                setSelectedRows([])
+                // setSelectedRows([])
                 setIsRowUnSelected(!isRowUnSelected)
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

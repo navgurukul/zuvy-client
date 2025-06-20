@@ -13,6 +13,7 @@ const sessionModalStore = useSessionModalStore.getState()
 
 const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 // const mainUrl = "http://zuvy.navgurukul.org/"
+// const mainUrl = "https://main-api.zuvy.org"
 const apiURL = process.env.NEXT_PUBLIC_API_URL
 const localUrl = process.env.NEXT_PUBLIC_LOCAL_URL
 

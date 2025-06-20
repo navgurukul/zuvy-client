@@ -106,7 +106,11 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
 
     return (
         <div className="remirror-theme">
-            <div className="border rounded">
+            <div
+                className={`${
+                    bigScreen ? 'remirror-form-bigscreen' : 'border rounded'
+                }`}
+            >
                 <Remirror
                     manager={manager}
                     initialContent={state}
@@ -132,23 +136,41 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                                 <Toolbar />
                             </div>
                         )}
-                        <ScrollArea
-                            className="h-96"
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
-                            <div
-                                className="px-2 min-h-[250px]"
-                                data-gramm="false"
-                            >
-                                <EditorComponent />
-                                <EditorChangeHandler />
+                        {bigScreen ? (
+                            <div className="min-h-auto remirror-form-bigscreen-content">
+                                <div className="px-2" data-gramm="false">
+                                    <EditorComponent />
+                                    <EditorChangeHandler />
+                                </div>
+                                {!preview && <CodeBlockHelper />}
                             </div>
-                            {!preview && <CodeBlockHelper />}
-                        </ScrollArea>
+                        ) : description.length < 300 && preview ? (
+                            <div className="min-h-auto remirror-form-bigscreen-content">
+                                <div className="px-2 pb-2" data-gramm="false">
+                                    <EditorComponent />
+                                    <EditorChangeHandler />
+                                </div>
+                                {!preview && <CodeBlockHelper />}
+                            </div>
+                        ) : (
+                            <ScrollArea
+                                className="h-96"
+                                type="hover"
+                                style={{
+                                    scrollbarWidth: 'none', // Firefox
+                                    msOverflowStyle: 'none', // IE and Edge
+                                }}
+                            >
+                                <div
+                                    className="px-2 min-h-[250px]"
+                                    data-gramm="false"
+                                >
+                                    <EditorComponent />
+                                    <EditorChangeHandler />
+                                </div>
+                                {!preview && <CodeBlockHelper />}
+                            </ScrollArea>
+                        )}
                     </div>
                 </Remirror>
             </div>

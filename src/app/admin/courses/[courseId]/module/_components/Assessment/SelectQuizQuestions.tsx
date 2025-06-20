@@ -31,7 +31,7 @@ const SelectQuizQuestions = ({
     setSelectedQuestions: any
     selectedQuestions: any
     tags: any
-    type:string
+    type: string
     setIsNewQuestionAdded: any
 }) => {
 
@@ -40,10 +40,10 @@ const SelectQuizQuestions = ({
         selectedQuestions: { id: number }[], // Adjust type as needed
         setSelectedQuestions: React.Dispatch<React.SetStateAction<{ id: number }[]>>, // Adjust type as needed
         setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-      ) => {
+    ) => {
         setSelectedQuestions(selectedQuestions.filter((q) => q.id !== question.id));
         setIsNewQuestionAdded(true);
-      };
+    };
 
     return (
         <>
@@ -51,74 +51,71 @@ const SelectQuizQuestions = ({
                 {selectedQuestions.map((question: any) => {
                     // Find the tag name corresponding to the question's tagId
                     const tag = tags?.find((tag: any) => tag.id === question.tagId)
+                    const isQuizVariantExists = question.quizVariants.length > 0
 
                     return (
                         <React.Fragment key={question.id}>
+
                             <div className="p-5 rounded-sm border-b border-gray-200 mb-4">
                                 <div className="flex justify-between items-start w-full">
                                     <div className="w-full">
                                         <div className="flex items-center gap-2">
-                                        <h2 className="font-bold">
-                                        {question?.quizVariants?.map(
-                                            (ques: any) => {
-                                                return (
-                                                    <span
-                                                        key={ques}
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: ellipsis(
-                                                                ques.question,
-                                                                40
-                                                            ),
-                                                        }}
-                                                    ></span>
-                                                )
-                                            }
-                                        )}
-                                        {/* {ellipsis(question.question, 35)} */}
-                                    </h2>
-                                           
+                                            <h2 className="font-bold">
+                                                {isQuizVariantExists ? <span
+                                                    key={question}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: ellipsis(
+                                                            question?.quizVariants[0].question,
+                                                            40
+                                                        ),
+                                                    }}
+                                                ></span> : ''}
+
+                                                {/* {ellipsis(question.question, 35)} */}
+                                            </h2>
+
                                         </div>
-                                        
+
                                         <Dialog>
-                                    <DialogTrigger asChild>
-                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
-                                            View Full Description
-                                        </p>
-                                    </DialogTrigger>
-                                    <DialogOverlay />
-                                    <DialogContent>
-                                        <PreviewMCQ
-                                            quizQuestionId={question.id}
-                                            tags={tags}
-                                            assesmentSide={true}
-                                        />
-                                    </DialogContent>
-                                </Dialog>{' '}
+                                            <DialogTrigger asChild>
+                                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
+                                                    View Full Description
+                                                </p>
+                                            </DialogTrigger>
+                                            <DialogOverlay />
+                                            <DialogContent>
+                                                <PreviewMCQ
+                                                    quizQuestionId={question.id}
+                                                    tags={tags}
+                                                    assesmentSide={true}
+                                                />
+                                            </DialogContent>
+                                        </Dialog>{' '}
                                     </div>
                                     <div className="flex items-center gap-1">
-                                    {tag && (
-                                                <span className="text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] px-[8px]">
-                                                    {tag?.tagName}
-                                                </span>
-                                            )}
-                                            <span
-                                                className={cn(
-                                                    `text-[12px] rounded-[100px] px-[8px]`,
-                                                    difficultyColor(question.difficulty), // Text color
-                                                    difficultyBgColor(question.difficulty) // Background color
-                                                )}
-                                            >
-                                                {question.difficulty}
+                                        {tag && (
+                                            <span className="text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] px-[8px]">
+                                                {tag?.tagName}
                                             </span>
+                                        )}
+                                        <span
+                                            className={cn(
+                                                `text-[12px] rounded-[100px] px-[8px]`,
+                                                difficultyColor(question.difficulty), // Text color
+                                                difficultyBgColor(question.difficulty) // Background color
+                                            )}
+                                        >
+                                            {question.difficulty}
+                                        </span>
                                         <X
-                                         onClick={() => {
-                                            handleQuestionRemoval(
-                                              question,
-                                              selectedQuestions,
-                                              setSelectedQuestions,
-                                              setIsNewQuestionAdded
-                                            );
-                                          }}
+                                            onClick={() => {
+                                                handleQuestionRemoval(
+                                                    question,
+                                                    selectedQuestions,
+                                                    setSelectedQuestions,
+                                                    setIsNewQuestionAdded
+                                                );
+                                            }}
                                             className="text-[#A3A3A3] cursor-pointer ml-4"
                                             size={20}
                                         />

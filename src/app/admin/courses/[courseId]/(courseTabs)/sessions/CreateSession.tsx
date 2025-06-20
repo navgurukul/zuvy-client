@@ -117,6 +117,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     // const { batchValueData } = setStoreBatchValue()
+    const [isCalendarOpen, setCalendarOpen] = useState(false);
 
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
@@ -244,25 +245,19 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
 
         try {
             await api.post(`/classes`, transformedData).then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status,
                     description: res.data.message,
-                    variant: 'default',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
 
                 props.getClasses()
                 toggleForm()
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Network error',
                 description:
-                    'Unable to create session. Please try again later.',
-                variant: 'destructive',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                    'Unable to create session. Please try again later.'
             })
         } finally {
             setIsOpen(false)
@@ -341,7 +336,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                             *
                                                         </span>{' '}
                                                     </FormLabel>
-                                                    <Dialog>
+                                                    <Dialog open={isCalendarOpen} onOpenChange={setCalendarOpen}>
                                                         <DialogTrigger asChild>
                                                             <FormControl>
                                                                 <Button
@@ -363,7 +358,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 </Button>
                                                             </FormControl>
                                                         </DialogTrigger>
-                                                        <DialogClose>
+                                                    
                                                             <DialogContent className="w-auto p-4">
                                                                 <Calendar
                                                                     mode="single"
@@ -379,7 +374,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                         ) {
                                                                             field.onChange(
                                                                                 date
-                                                                            )
+                                                                            );
+                                                                            setCalendarOpen(false);
                                                                         } else {
                                                                             field.onChange(
                                                                                 new Date()
@@ -398,7 +394,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                     initialFocus
                                                                 />
                                                             </DialogContent>
-                                                        </DialogClose>
+                                                  
                                                     </Dialog>
                                                     <FormMessage />
                                                 </FormItem>

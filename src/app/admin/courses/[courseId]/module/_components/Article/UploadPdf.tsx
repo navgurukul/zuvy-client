@@ -2,8 +2,21 @@
 
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Upload, X } from 'lucide-react'
+import { Trash, Trash2, Upload, X } from 'lucide-react'
 import Link from 'next/link'
+import { Spinner } from '@/components/ui/spinner'
+
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/use-toast'
 
 type Props = {
     className?: string
@@ -11,6 +24,10 @@ type Props = {
     setFile: any
     isPdfUploaded: boolean
     pdfLink: any
+    loading: boolean
+    setIsPdfUploaded: any
+    onDeletePdfhandler: () => void
+    setDisableButton: any
 }
 
 const Dropzone = ({
@@ -19,8 +36,13 @@ const Dropzone = ({
     setFile,
     isPdfUploaded,
     pdfLink,
+    loading,
+    setIsPdfUploaded,
+    onDeletePdfhandler,
+    setDisableButton,
 }: Props) => {
     const [previewPdfLink, setPreviewPdfLink] = useState<string | null>(null)
+    const [open, setIsOpen] = useState(false)
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         const pdfFile = acceptedFiles[0]
@@ -28,6 +50,13 @@ const Dropzone = ({
             setFile(pdfFile)
             const tempUrl = URL.createObjectURL(pdfFile)
             setPreviewPdfLink(tempUrl)
+            setIsPdfUploaded(false)
+            setDisableButton(true)
+        } else {
+            return toast.error({
+                title: 'Error',
+                description: 'Only PDF files can be uploaded',
+            })
         }
     }, [])
 
@@ -42,6 +71,10 @@ const Dropzone = ({
         onDrop,
     })
 
+    function onConfirm() {
+        onDeletePdfhandler()
+        removeFile()
+    }
     return (
         <>
             <div
@@ -81,7 +114,7 @@ const Dropzone = ({
                                     <span className="text-black">
                                         PDF is uploaded
                                     </span>
-                                    <span>
+                                    <span className="flex space-x-2 ">
                                         <Link
                                             href={pdfLink}
                                             target="_blank"
@@ -89,6 +122,36 @@ const Dropzone = ({
                                         >
                                             View PDF
                                         </Link>
+                                        <Dialog>
+                                            <DialogTrigger>
+                                                <Trash2 className="text-red-500 w-4 cursor-pointer " />
+                                            </DialogTrigger>
+
+                                            <DialogContent className="sm:max-w-md">
+                                                <DialogHeader>
+                                                    <DialogTitle>
+                                                        Are you absolutely sure?
+                                                    </DialogTitle>
+                                                    <DialogDescription>
+                                                        This action cannot be
+                                                        undone. This will
+                                                        permanently delete the
+                                                        PDF .
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <DialogFooter className="flex justify-end gap-2">
+                                                    <Button variant="outline">
+                                                        Cancel
+                                                    </Button>
+                                                    <Button
+                                                        variant="destructive"
+                                                        onClick={onConfirm}
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
                                     </span>
                                 </div>
                             </div>
@@ -99,11 +162,16 @@ const Dropzone = ({
                                         <div className="flex flex-col items-center space-x-2">
                                             <div className="flex items-center justify-start w-full gap-x-2 ml-3">
                                                 <h3 className=" font-semibold">
-                                                    Upload Status
+                                                    Upload Status{' '}
                                                 </h3>
                                                 <div className="w-2 h-2 rounded-full bg-green-500 " />
+                                                <span>
+                                                    {loading && (
+                                                        <Spinner className="w-4" />
+                                                    )}
+                                                </span>
                                             </div>
-                                            <span className="text-black space-x-3 ">
+                                            <span className="text-black ">
                                                 {previewPdfLink && (
                                                     <div>
                                                         <Link
@@ -121,7 +189,7 @@ const Dropzone = ({
                                                 <span>
                                                     PDF is ready to upload
                                                 </span>
-                                                <span className="italic text-gray-500 mx-1 text-sm">
+                                                <span className="italic text-gray-500 text-sm">
                                                     (Click on Upload PDF)
                                                 </span>
                                             </span>

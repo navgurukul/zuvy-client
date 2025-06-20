@@ -174,22 +174,18 @@ function Chapter() {
                 `/Content/editChapterOfModule/${moduleId}?chapterId=${movedItem.chapterId}`,
                 { newOrder: movedItem.order }
             )
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Content Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             if (response.data) {
                 setChapterData(newOrderChapters)
             }
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -252,36 +248,26 @@ function Chapter() {
                         }}
                     >
                         {chapterData &&
-                            chapterData?.map((item: any, index: any) => {
+                            chapterData.map((item: any, index: any) => {
                                 const isLastItem =
                                     index === chapterData.length - 1
+
                                 return (
-                                    <Reorder.Item
-                                        value={item}
+                                    <ChapterItem
                                         key={item.chapterId}
-                                        id={
-                                            isLastItem
-                                                ? 'last-chapter'
-                                                : `chapter-${item.chapterId}`
-                                        }
-                                    >
-                                        <ChapterItem
-                                            key={item.chapterId}
-                                            chapterId={item.chapterId}
-                                            title={item.chapterTitle}
-                                            topicId={item.topicId}
-                                            topicName={item.topicName}
-                                            fetchChapters={fetchChapters}
-                                            setActiveChapter={setActiveChapter}
-                                            activeChapter={activeChapter}
-                                            moduleId={moduleID}
-                                            isChapterClickedRef={
-                                                isChapterClickedRef
-                                            }
-                                            activeChapterRef={activeChapterRef}
-                                            chapterData={chapterData}
-                                        />
-                                    </Reorder.Item>
+                                        chapterId={item.chapterId}
+                                        title={item.chapterTitle}
+                                        topicId={item.topicId}
+                                        topicName={item.topicName}
+                                        fetchChapters={fetchChapters}
+                                        setActiveChapter={setActiveChapter}
+                                        activeChapter={activeChapter}
+                                        moduleId={moduleID}
+                                        isChapterClickedRef={isChapterClickedRef}
+                                        activeChapterRef={activeChapterRef}
+                                        chapterData={chapterData}
+                                        isLastItem={isLastItem}
+                                    />
                                 )
                             })}
                     </Reorder.Group>

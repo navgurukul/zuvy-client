@@ -26,11 +26,9 @@ export function handleDelete(
         },
     })
         .then((res) => {
-            toast({
+            toast.success({
                 title: 'Success',
                 description: res.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             // getAllCodingQuestions(setCodingQuestions)
             filteredCodingQuestions(
@@ -42,14 +40,28 @@ export function handleDelete(
             )
         })
         .catch((error) => {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         })
+}
+export function getCleanFileName(url: string) {
+    // Decode the URL to handle encoded characters
+    const decodedURL = decodeURIComponent(url)
+
+    // Extract the full file name from the URL
+    const fullFileName = decodedURL.substring(decodedURL.lastIndexOf('/') + 1)
+
+    // Remove the prefix before the first underscore (_) — assuming it's a timestamp
+    const parts = fullFileName.split('_')
+    parts.shift() // remove the first part (timestamp)
+
+    // Join the remaining parts back
+    const cleanFileName = parts.join('_')
+
+    return cleanFileName
 }
 
 export function deleteOpenEndedQuestion(
@@ -70,11 +82,9 @@ export function deleteOpenEndedQuestion(
         },
     })
         .then((res) => {
-            toast({
+            toast.success({
                 title: 'Success',
                 description: res.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             filteredOpenEndedQuestions(
                 setOpenEndedQuestions,
@@ -85,12 +95,10 @@ export function deleteOpenEndedQuestion(
             )
         })
         .catch((error) => {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         })
 }
@@ -158,11 +166,9 @@ export function handleQuizDelete(
         },
     })
         .then((res) => {
-            toast({
+            toast.success({
                 title: 'Success',
                 description: res.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             // getAllQUizQuestions(getAllQUizQuestions,offset,position,difficulty,selectedOptions)
             filteredQuizQuestions(
@@ -174,12 +180,10 @@ export function handleQuizDelete(
             )
         })
         .catch((error) => {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         })
 }
@@ -411,12 +415,13 @@ export async function filteredCodingQuestions(
 }
 
 export const fetchStudentAssessments = async (
-    assessmentId: string,
+    assessment_Id: string,
+    courseId: string,
     offset: number,
     limit: any,
     searchStudent: string = '',
     setTotalPages: (totalPages: number) => void,
-    setLastPage: (lastPage: number) => void,
+    setLastPage: (lastPage: number) => void
 ) => {
     // Build query params
     const params = new URLSearchParams({
@@ -425,24 +430,24 @@ export const fetchStudentAssessments = async (
     })
     if (searchStudent) params.set('searchStudent', searchStudent)
 
-    const endpoint = `/admin/assessment/students/assessment_id${assessmentId}?${params.toString()}`
+    const endpoint = `/admin/assessment/students/assessment_id${assessment_Id}?${params.toString()}`
     const res = await api.get(endpoint)
-    const {
-        submitedOutsourseAssessments,
-        ModuleAssessment,
-        passPercentage,
-    } = res.data
+    const { submitedOutsourseAssessments, ModuleAssessment, passPercentage } =
+        res.data
 
     // Update global pagination
-    const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
+    // const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
+    const updatedTotalPages = Math.ceil(
+        res?.data?.ModuleAssessment?.totalStudents / limit
+    )
     setTotalPages(updatedTotalPages)
     setLastPage(updatedTotalPages)
 
     // Map and return data
     const assessments = submitedOutsourseAssessments.map((a: any) => ({
         ...a,
-        bootcampId: res.data.bootcampId,
-        newId: res.data.id,
+        bootcampId: parseInt(courseId, 10),
+        assessment_Id: assessment_Id,
         title: ModuleAssessment.title,
     }))
 
@@ -691,11 +696,9 @@ export const fetchStudentsHandler = async ({
         setTotalStudents(res.data.totalStudentsCount)
         setCurrentPage(res.data.currentPage)
     } catch (error) {
-        toast({
+        toast.error({
             title: 'Error',
             description: 'Failed to fetch the data',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
         })
     } finally {
         setLoading(false)
@@ -857,11 +860,9 @@ export async function handleSaveChapter(
         reqBody
     )
     if (response) {
-        toast({
+        toast.success({
             title: 'Success',
             description: 'Chapter edited successfully',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
         })
     }
 }
@@ -936,13 +937,11 @@ export function showSyntaxErrors(testCases: any) {
                 try {
                     JSON.parse(input.value)
                 } catch (e) {
-                    toast({
+                    toast.error({
                         title: `Invalid JSON Format`,
                         description: `Test case ${index + 1}, input ${
                             inputIndex + 1
                         } has invalid JSON format.`,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                     hasErrors = true
                 }
@@ -951,13 +950,11 @@ export function showSyntaxErrors(testCases: any) {
                 !Number.isInteger(Number(input.value)) &&
                 input.value !== ''
             ) {
-                toast({
+                toast.error({
                     title: `Invalid Integer Input`,
                     description: `Test case ${index + 1}, input ${
                         inputIndex + 1
                     } must be a valid integer.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             } else if (
@@ -965,13 +962,11 @@ export function showSyntaxErrors(testCases: any) {
                 isNaN(Number(input.value)) &&
                 input.value !== ''
             ) {
-                toast({
+                toast.error({
                     title: `Invalid Float Input`,
                     description: `Test case ${index + 1}, input ${
                         inputIndex + 1
                     } must be a valid float.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             } else if (
@@ -979,13 +974,11 @@ export function showSyntaxErrors(testCases: any) {
                 !/^(true|false)$/i.test(input.value) &&
                 input.value !== ''
             ) {
-                toast({
+                toast.error({
                     title: `Invalid Boolean Input`,
                     description: `Test case ${index + 1}, input ${
                         inputIndex + 1
                     } must be either 'true' or 'false'.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             } else if (
@@ -995,24 +988,20 @@ export function showSyntaxErrors(testCases: any) {
                 try {
                     const parsed = JSON.parse(input.value)
                     if (!Array.isArray(parsed)) {
-                        toast({
+                        toast.error({
                             title: `Invalid Array Format`,
                             description: `Test case ${index + 1}, input ${
                                 inputIndex + 1
                             } must be a valid array.`,
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                         })
                         hasErrors = true
                     }
                 } catch (e) {
-                    toast({
+                    toast.error({
                         title: `Invalid Array Format`,
                         description: `Test case ${index + 1}, input ${
                             inputIndex + 1
                         } has invalid array format.`,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                     hasErrors = true
                 }
@@ -1027,13 +1016,11 @@ export function showSyntaxErrors(testCases: any) {
             try {
                 JSON.parse(testCase.output.value)
             } catch (e) {
-                toast({
+                toast.error({
                     title: `Invalid JSON Format`,
                     description: `Test case ${
                         index + 1
                     } output has invalid JSON format.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             }
@@ -1042,23 +1029,19 @@ export function showSyntaxErrors(testCases: any) {
             testCase.output.value !== ''
         ) {
             if (testCase.output.value.includes(' ')) {
-                toast({
+                toast.error({
                     title: 'Invalid Output Format',
                     description: `Test case ${
                         index + 1
                     } output can only have one integer value.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             } else if (!Number.isInteger(Number(testCase.output.value))) {
-                toast({
+                toast.error({
                     title: `Invalid Integer Output`,
                     description: `Test case ${
                         index + 1
                     } output must be a valid integer.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             }
@@ -1067,23 +1050,19 @@ export function showSyntaxErrors(testCases: any) {
             testCase.output.value !== ''
         ) {
             if (testCase.output.value.includes(' ')) {
-                toast({
+                toast.error({
                     title: 'Invalid Output Format',
                     description: `Test case ${
                         index + 1
                     } output can only have one float value.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             } else if (isNaN(Number(testCase.output.value))) {
-                toast({
+                toast.error({
                     title: `Invalid Float Output`,
                     description: `Test case ${
                         index + 1
                     } output must be a valid float.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             }
@@ -1092,13 +1071,11 @@ export function showSyntaxErrors(testCases: any) {
             !/^(true|false)$/i.test(testCase.output.value) &&
             testCase.output.value !== ''
         ) {
-            toast({
+            toast.error({
                 title: `Invalid Boolean Output`,
                 description: `Test case ${
                     index + 1
                 } output must be either 'true' or 'false'.`,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             hasErrors = true
         } else if (
@@ -1109,24 +1086,20 @@ export function showSyntaxErrors(testCases: any) {
             try {
                 const parsed = JSON.parse(testCase.output.value)
                 if (!Array.isArray(parsed)) {
-                    toast({
+                    toast.error({
                         title: `Invalid Array Format`,
                         description: `Test case ${
                             index + 1
                         } output must be a valid array.`,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                     hasErrors = true
                 }
             } catch (e) {
-                toast({
+                toast.error({
                     title: `Invalid Array Format`,
                     description: `Test case ${
                         index + 1
                     } output has invalid array format.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 hasErrors = true
             }
@@ -1135,21 +1108,17 @@ export function showSyntaxErrors(testCases: any) {
 
     // Optional: Enforce minimum and maximum number of test cases
     if (testCases.length < 1) {
-        toast({
+        toast.error({
             title: 'Insufficient Test Cases',
             description:
                 'Please add at least 3 test cases to ensure comprehensive testing.',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
         })
         hasErrors = true
     } else if (testCases.length > 20) {
-        toast({
+        toast.error({
             title: 'Too Many Test Cases',
             description:
                 'Please limit the number of test cases to 20 or fewer.',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
         })
         hasErrors = true
     }

@@ -58,6 +58,7 @@ const Assignments = ({
     const [projectData, setProjectData] = useState<any>([])
     const [deadlineDate, setDeadlineDate] = useState<string>('')
     const [submittedDate, setSubmittedDate] = useState<string>('')
+    const [isDisabled, setIsDisabled] = useState(true)
     const [initialContent, setInitialContent] = useState<
         { doc: EditorDoc } | undefined
     >(
@@ -106,10 +107,14 @@ const Assignments = ({
         if (content?.articleContent?.[0]) {
             if (typeof content.articleContent[0] === 'string') {
                 setInitialContent(JSON.parse(content.articleContent[0]))
+                setIsDisabled(false)
             } else {
                 const jsonData = { doc: content.articleContent[0] }
                 setInitialContent(jsonData)
+                setIsDisabled(false)
             }
+        } else {
+            setIsDisabled(true)
         }
         //  else if (editor) {
         //     // const noContent = {
@@ -150,7 +155,7 @@ const Assignments = ({
                 transFormedBody
             )
             .then(() => {
-                toast({
+                toast.error({
                     title: 'Success',
                     description: 'Assignment Link Submitted SuccesFully',
                 })
@@ -206,7 +211,7 @@ const Assignments = ({
     const AssignmentStatus = getSubmissionStatus(submittedDate, deadlineDate)
 
     return (
-        <ScrollArea className='h-[calc(100vh-110px)] lg:h-screen md:h-screen'>
+        <ScrollArea className="h-[calc(100vh-110px)] lg:h-screen md:h-screen">
             <div className="flex flex-col sm:mt-20 mt-5 relative mr-4 md:mr-0 lg:mr-0">
                 <h1 className="text-left text-xl font-semibold flex flex-col ">
                     <span className="flex items-center gap-x-2 ">
@@ -295,16 +300,7 @@ const Assignments = ({
                             )}
                         />
 
-                        {!content.articleContent ||
-                        !content.articleContent.some((doc: any) =>
-                            doc?.content?.some(
-                                (paragraph: any) =>
-                                    paragraph.content &&
-                                    paragraph.content.some(
-                                        (item: any) => item.type === 'text'
-                                    )
-                            )
-                        ) ? (
+                        {isDisabled ? (
                             <div className="flex justify-end absolute sm:top-0 sm:right-0">
                                 <Button
                                     className="w-full mr-3"

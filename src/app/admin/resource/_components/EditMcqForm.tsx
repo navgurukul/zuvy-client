@@ -150,22 +150,18 @@ const EditMcqForm = ({
             data: reqBody,
         })
             .then((res) => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 setDeleteModalOpen(false)
                 refetch()
             })
             .catch((error) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         error.response?.data?.message || 'An error occurred',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
@@ -228,22 +224,18 @@ const EditMcqForm = ({
                 await api
                     .post(`/Content/quiz/add/variants`, reqBody)
                     .then((res) => {
-                        toast({
+                        toast.success({
                             title: 'Success',
                             description: res.data.message,
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                         })
                     })
 
                 setIsVariantAdded(false)
                 await refetch()
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: error?.data?.message || 'An error occurred',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         } else {
@@ -269,7 +261,7 @@ const EditMcqForm = ({
                 await api
                     .post(`/Content/editquiz`, transformedObj)
                     .then((res) => {
-                        toast({
+                        toast.success({
                             title: 'Success',
                             description: res?.data.message,
                             className:
@@ -278,7 +270,7 @@ const EditMcqForm = ({
                     })
                 await refetch()
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: error?.data?.message || 'An error occurred',
                     className:

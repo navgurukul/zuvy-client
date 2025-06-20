@@ -49,11 +49,9 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
             data: transformedBody,
         })
             .then((res) => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 table.toggleAllPageRowsSelected(false)
 
@@ -61,12 +59,10 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
                 getAllUpdatedQuiz()
             })
             .catch((error) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         error.response?.data?.message || 'An error occurred',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 if (
                     error.response?.data?.message.includes('Quizzes with IDs')

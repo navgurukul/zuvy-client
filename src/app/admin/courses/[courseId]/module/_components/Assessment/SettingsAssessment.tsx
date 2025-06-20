@@ -53,6 +53,7 @@ type SettingsAssessmentProps = {
     topicId: number
     isNewQuestionAdded: boolean
     setIsNewQuestionAdded: (value: boolean) => void
+    activeChapterTitle:string
 }
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
@@ -72,6 +73,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     topicId,
     isNewQuestionAdded,
     setIsNewQuestionAdded,
+    activeChapterTitle,
 }) => {
     const { chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
@@ -356,11 +358,9 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     fetchChapterContent(chapterID, topicId)
                     setIsChapterUpdated(!isChapterUpdated)
                 })
-            toast({
+            toast.success({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
             console.error(error)
@@ -479,7 +479,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     <ChevronLeft className="w-4 h-4 mr-2 box-border" />
                     <span className="font-semibold">
                         Back to{' '}
-                        {content?.ModuleAssessment?.title || 'Assessment'}
+                        {/* {content?.ModuleAssessment?.title || 'Assessment'} */}
+                        {chapterTitle || activeChapterTitle}
                     </span>
                 </div>
 

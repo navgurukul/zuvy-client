@@ -59,12 +59,10 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
             setBatchId([transformedData[0]])
             setBatches(transformedData)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error fetching Batches:',
                 description:
                     'There is an error fetching batches: contact Admin.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [])
@@ -92,12 +90,10 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 } else if (error instanceof Error) {
                     errorMessage = error.message
                 }
-                toast({
+                toast.error({
                     title: 'Error fetching Classes:',
                     description: errorMessage,
                     // 'There is an error fetching classes: contact Admin.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         },
@@ -134,11 +130,9 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                     errorMessage = error.message
                 }
 
-                toast({
+                toast.error({
                     title: 'Error:',
                     description: errorMessage,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         },

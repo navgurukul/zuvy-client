@@ -71,11 +71,9 @@ function Quiz(props: Props) {
                     `/tracking/updateChapterStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`
                 )
                 .then(() => {
-                    toast({
+                    toast.success({
                         title: 'Success',
                         description: 'Chapter Status Updated',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     props.fetchChapters()
                 })
@@ -99,11 +97,10 @@ function Quiz(props: Props) {
             submitQuiz: mappedAnswers,
         }
         if (transformedBody.submitQuiz.length === 0) {
-            return toast({
+            return toast.error({
                 title: 'Cannot Submit',
                 description: 'Select alleast one question',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
+    
             })
         } else {
             await api
@@ -112,7 +109,7 @@ function Quiz(props: Props) {
                     transformedBody
                 )
                 .then(() => {
-                    toast({
+                    toast.success({
                         title: 'Success',
                         description: 'Submitted Quiz Successfully',
                         className:

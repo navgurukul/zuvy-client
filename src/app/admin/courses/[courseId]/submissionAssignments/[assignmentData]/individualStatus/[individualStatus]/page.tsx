@@ -86,7 +86,7 @@ const Page = ({ params }: any) => {
                     throw new Error('No data found')
                 }
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         error.message || 'Error fetching Student Details',

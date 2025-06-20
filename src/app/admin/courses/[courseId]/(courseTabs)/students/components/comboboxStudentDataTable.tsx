@@ -66,22 +66,18 @@ export function ComboboxStudent({
                     `/batch/reassign/student_id=${userId}/new_batch_id=${selectedValue}?bootcamp_id=${bootcampId}`
                 )
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     setDisplayBatchName(label)
                 })
         } catch (error: any) {
             if (error.response.data.message === 'Batch is full')
                 setBatchisFull(true)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error.response.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } finally {
         }
@@ -103,22 +99,18 @@ export function ComboboxStudent({
                     students: selected,
                 })
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchStudentData && fetchStudentData()
                 })
         } catch (error: any) {
             if (error.response.data.message === 'Batch is full')
                 setBatchisFull(true)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error.response.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

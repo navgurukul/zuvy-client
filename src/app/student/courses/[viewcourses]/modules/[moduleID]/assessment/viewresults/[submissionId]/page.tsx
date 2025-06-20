@@ -76,10 +76,9 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                 `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/codingresults/${codingOutsourseId}/show/${params.submissionId}/question/${questionId}`
             )
         } else {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'No Coding Submission Found',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }

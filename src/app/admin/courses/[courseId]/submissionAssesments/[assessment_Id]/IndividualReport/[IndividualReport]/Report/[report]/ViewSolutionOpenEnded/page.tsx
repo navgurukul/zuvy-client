@@ -37,7 +37,7 @@ type AssessmentData = {
 
 export type paramsType = {
     courseId: string
-    StudentAssesmentData: string
+    assessment_Id: string
     IndividualReport: string
     report: string
     CodingSolution: number
@@ -73,12 +73,12 @@ const Page = ({ params }: { params: paramsType }) => {
         },
         {
             crumb: assesmentData?.title,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
             isLast: false,
         },
         {
             crumb: proctoringData?.user?.name,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
         {
@@ -98,30 +98,30 @@ const Page = ({ params }: { params: paramsType }) => {
     const getStudentAssesmentDataHandler = useCallback(async () => {
         await api
             .get(
-                `/admin/assessment/students/assessment_id${params.StudentAssesmentData}`
+                `/admin/assessment/students/assessment_id${params.assessment_Id}`
             )
             .then((res) => {
                 setAssesmentData(res.data.ModuleAssessment)
             })
-    }, [params.StudentAssesmentData])
+    }, [params.assessment_Id])
     const fetchOpenEndedQuestionsDetails = useCallback(async () => {
         try {
             await api
                 .get(
-                    `/Content/assessmentDetailsOfOpenEnded/${params.StudentAssesmentData}?studentId=${params.IndividualReport}`
+                    `/Content/assessmentDetailsOfOpenEnded/${params.assessment_Id}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {
                     setOpenEndedQuestionsDetails(res.data)
                 })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Unable to Fetch Data',
             })
         } finally {
             setLoading(false)
         }
-    }, [params.StudentAssesmentData, params.IndividualReport])
+    }, [params.assessment_Id, params.IndividualReport])
 
     useEffect(() => {
         fetchOpenEndedQuestionsDetails()

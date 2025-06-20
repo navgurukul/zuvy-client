@@ -159,7 +159,7 @@ const Page = ({ params }: { params: any }) => {
         },
         {
             crumb: assesmentData?.submitedOutsourseAssessment?.chapterName,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.StudentAssesmentData}`,
+            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
             isLast: false,
         },
         {
@@ -215,7 +215,7 @@ const Page = ({ params }: { params: any }) => {
                     })
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error in fetching the data',
             })

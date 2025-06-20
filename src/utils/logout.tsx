@@ -5,35 +5,30 @@ import axios from 'axios'
 
 export const Logout = async () => {
     console.log('Heeyyyyy')
+    const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 
     const access_token = localStorage.getItem('access_token')
 
-    // Clear localStorage first
-    localStorage.clear()
-
-    // Delete the cookie
-    document.cookie =
-        'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-
     try {
+        console.log('access_token', access_token)
         const response = await axios.post(
-            `/auth/logout`,
-            {},
+            `${mainUrl}/auth/logout`,
+            {}, // empty body
             {
                 headers: {
-                    accept: 'application/json',
                     Authorization: `Bearer ${access_token}`,
+                    Accept: 'application/json', // optional but matches Swagger
                 },
             }
         )
 
+        // const response = await api.post(`/auth/logout`)
+
         console.log('response', response)
 
-        toast({
+        toast.success({
             title: 'Logout Successful',
             description: 'Goodbye, See you soon!',
-            className:
-                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
         })
 
         // Clear localStorage first
@@ -42,9 +37,8 @@ export const Logout = async () => {
         // Delete the cookie
         document.cookie =
             'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
+        window.location.pathname = '/'
     } catch (error) {
         console.error('Logout error:', error)
     }
-
-    window.location.pathname = '/'
 }
