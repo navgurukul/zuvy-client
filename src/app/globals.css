@@ -89,3 +89,9 @@
     flex: 1;
     padding: 20px;
 }
+
+.remirror-editor {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}

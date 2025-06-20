@@ -162,7 +162,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                                 }}
                             >
                                 <div
-                                    className="px-2 min-h-[250px]"
+                                    className="px-2 min-h-[250px] break-words whitespace-pre-wrap"
                                     data-gramm="false"
                                 >
                                     <EditorComponent />
