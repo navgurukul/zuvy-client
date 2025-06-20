@@ -84,13 +84,10 @@ const processQueue = (error: unknown, access_token = null) => {
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
-        console.log('One')
         const originalRequest = error.config
 
         if (error.response?.status === 401 && !originalRequest._retry) {
-            console.log('Two')
             if (isRefreshing) {
-                console.log('Three')
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject })
                 })
@@ -105,7 +102,6 @@ api.interceptors.response.use(
             isRefreshing = true
 
             try {
-                console.log('Four')
                 const refresh_token = localStorage.getItem('refresh_token')
                 const response = await axios.post(`${mainUrl}/auth/refresh`, {
                     refresh_token,
@@ -124,17 +120,13 @@ api.interceptors.response.use(
                 processQueue(null, newAccessToken)
                 return api(originalRequest)
             } catch (err) {
-                console.log('Five')
                 processQueue(err, null)
                 // localStorage.clear()
                 // document.cookie =
                 //     'secure_typeuser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-                const logout = localStorage.getItem('logout')
 
-                localStorage.setItem('logout', true.toString())
                 sessionModalStore.setShowModal(true)
 
-                // !logout && window.location.reload()
                 return Promise.reject(err)
             } finally {
                 isRefreshing = false

@@ -8,11 +8,7 @@ import { Toaster } from '@/components/ui/toaster'
 import '@remirror/styles/all.css'
 import '@/app/globals.css'
 import AnalyticsScripts from '@/app/_components/AnalyticsScripts'
-import { Inter } from 'next/font/google'
-import Script from 'next/script'
 import SessionModalWrapper from '@/components/SessionModalWrapper'
-
-const inter = Inter({ subsets: ['latin'] })
 
 const karla = Karla({ subsets: ['latin'] })
 
@@ -34,24 +30,16 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className="light">
-            <head>
-                {/* Load Google Identity Services */}
-                <Script
-                    src="https://accounts.google.com/gsi/client"
-                    strategy="beforeInteractive"
-                />
-            </head>
             <body
                 className={cn(
                     'min-h-screen text-center antialiased',
-                    inter.className
+                    karla.className
                 )}
             >
                 {/* <Navbar /> */}
                 {children}
                 <Toaster />
                 <AnalyticsScripts />
-                {/* <SessionExpiredModal /> */}
                 <SessionModalWrapper />
             </body>
         </html>
