@@ -110,7 +110,7 @@ const BatchesInfo = ({
                 const capEnrollmentValue = parseInt(capEnrollment)
                 return (
                     !isNaN(capEnrollmentValue) &&
-                    capEnrollmentValue >= studentsData.length
+                    capEnrollmentValue >= studentsData.length   && capEnrollmentValue<= 100000
                 )
             },
             {
@@ -587,13 +587,20 @@ const BatchesInfo = ({
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                Cap Enrollment
+                                                                Cap Enrollment ujala
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input
                                                                     placeholder="Cap Enrollment"
                                                                     type="name"
                                                                     {...field}
+                                                                    onChange={(e) => {
+                                                                        // Prevent entering more than 6 digits
+                                                                        const value = e.target.value;
+                                                                        if (value.length <= 6) {
+                                                                            field.onChange(e);
+                                                                        }
+                                                                    }}
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
