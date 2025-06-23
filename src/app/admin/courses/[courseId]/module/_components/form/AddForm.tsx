@@ -72,6 +72,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setFormPreviewContent } = getFormPreviewStore()
     const [titles, setTitles] = useState(content?.title || '')
+    const [isSaved, setIsSaved] = useState(false)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -273,6 +274,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 description: 'Form Edited Successfully',
             })
             setIsChapterUpdated(!isChapterUpdated)
+            setIsSaved(true)
         } catch (error: any) {
             toast.error({
                 title: 'Failed',
@@ -283,6 +285,15 @@ const AddForm: React.FC<AddFormProps> = ({
     }
 
     function previewForm() {
+
+        if (!isSaved) {
+        toast({
+            variant: 'destructive',
+            title: 'Please save the form first',
+            description: 'Preview is only available after saving the form.',
+        })
+        return
+    }
         if (content) {
             setFormPreviewContent(content)
             router.push(
@@ -290,7 +301,7 @@ const AddForm: React.FC<AddFormProps> = ({
             )
         }
     }
-
+    
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
             <ScrollBar className="h-dvh " orientation="vertical" />

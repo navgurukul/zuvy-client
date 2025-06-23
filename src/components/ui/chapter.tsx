@@ -248,36 +248,26 @@ function Chapter() {
                         }}
                     >
                         {chapterData &&
-                            chapterData?.map((item: any, index: any) => {
+                            chapterData.map((item: any, index: any) => {
                                 const isLastItem =
                                     index === chapterData.length - 1
+
                                 return (
-                                    <Reorder.Item
-                                        value={item}
+                                    <ChapterItem
                                         key={item.chapterId}
-                                        id={
-                                            isLastItem
-                                                ? 'last-chapter'
-                                                : `chapter-${item.chapterId}`
-                                        }
-                                    >
-                                        <ChapterItem
-                                            key={item.chapterId}
-                                            chapterId={item.chapterId}
-                                            title={item.chapterTitle}
-                                            topicId={item.topicId}
-                                            topicName={item.topicName}
-                                            fetchChapters={fetchChapters}
-                                            setActiveChapter={setActiveChapter}
-                                            activeChapter={activeChapter}
-                                            moduleId={moduleID}
-                                            isChapterClickedRef={
-                                                isChapterClickedRef
-                                            }
-                                            activeChapterRef={activeChapterRef}
-                                            chapterData={chapterData}
-                                        />
-                                    </Reorder.Item>
+                                        chapterId={item.chapterId}
+                                        title={item.chapterTitle}
+                                        topicId={item.topicId}
+                                        topicName={item.topicName}
+                                        fetchChapters={fetchChapters}
+                                        setActiveChapter={setActiveChapter}
+                                        activeChapter={activeChapter}
+                                        moduleId={moduleID}
+                                        isChapterClickedRef={isChapterClickedRef}
+                                        activeChapterRef={activeChapterRef}
+                                        chapterData={chapterData}
+                                        isLastItem={isLastItem}
+                                    />
                                 )
                             })}
                     </Reorder.Group>

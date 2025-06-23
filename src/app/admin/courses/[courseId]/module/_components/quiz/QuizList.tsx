@@ -1,6 +1,6 @@
 import { Separator } from '@/components/ui/separator'
 import { PlusCircle } from 'lucide-react'
-import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
+import { cn, difficultyBgColor, difficultyColor, ellipsis, stripHtmlTags } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -50,15 +50,12 @@ function QuizList({
                                         {question.quizVariants.map(
                                             (ques: any) => {
                                                 return (
-                                                    <span
+                                                   <span
                                                     className='text-base'
                                                         key={ques}
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: ellipsis(
-                                                                ques.question,
-                                                                30
-                                                            ),
-                                                        }}
+                                                         dangerouslySetInnerHTML={{
+                                                     __html: ellipsis(stripHtmlTags(ques.question), 40),
+                                                     }}
                                                     />
                                                 )
                                             }

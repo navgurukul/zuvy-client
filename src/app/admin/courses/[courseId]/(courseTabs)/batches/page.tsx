@@ -43,6 +43,12 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { useStudentData } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/useStudentData'
 import { columns } from './columns'
 // import { DataTable } from './dataTable'
+import {
+Tooltip,
+TooltipContent,
+TooltipProvider,
+TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export type StudentData = {
     id: any
@@ -489,9 +495,22 @@ const Page = ({ params }: { params: any }) => {
                                     >
                                         <div className="bg-white rounded-lg border p-4">
                                             <div className="px-1 py-4 flex flex-col items-start">
-                                                <CardTitle className="font-semibold capitalize">
-                                                    {batch.name}
-                                                </CardTitle>
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <CardTitle className="font-semibold capitalize cursor-pointer">
+                                                                {batch.name.length > 25
+                                                                    ? batch.name.substring(0, 25) + '...'
+                                                                    : batch.name}
+                                                            </CardTitle>
+                                                        </TooltipTrigger>
+                                                        {batch.name.length > 25 && (
+                                                            <TooltipContent>
+                                                                {batch.name}
+                                                            </TooltipContent>
+                                                        )}
+                                                    </Tooltip>
+                                                </TooltipProvider>
                                                 <CardDescription className="capitalize">
                                                     {batch.students_enrolled}{' '}
                                                     <span>Learners</span>

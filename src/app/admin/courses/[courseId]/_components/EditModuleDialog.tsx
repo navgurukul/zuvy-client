@@ -171,6 +171,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                             handleTimeAllotedChange(e)
                                                         }}
                                                         name="months"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -195,6 +199,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                             handleTimeAllotedChange(e)
                                                         }}
                                                         name="weeks"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -219,6 +227,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                             handleTimeAllotedChange(e)
                                                         }}
                                                         name="days"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
