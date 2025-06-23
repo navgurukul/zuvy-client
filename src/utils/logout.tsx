@@ -1,28 +1,27 @@
-import { deleteCookie } from './deleteCookie' // adjust the path as needed
 import { toast } from '@/components/ui/use-toast'
-import { api, apiMeraki } from '@/utils/axios.config'
-import axios from 'axios'
+import { api } from '@/utils/axios.config'
+// import axios from 'axios'
 
 export const Logout = async () => {
-    console.log('Heeyyyyy')
-    const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
+    // console.log('Heeyyyyy')
+    // const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 
     const access_token = localStorage.getItem('access_token')
 
     try {
-        console.log('access_token', access_token)
-        const response = await axios.post(
-            `${mainUrl}/auth/logout`,
-            {}, // empty body
-            {
-                headers: {
-                    Authorization: `Bearer ${access_token}`,
-                    Accept: 'application/json', // optional but matches Swagger
-                },
-            }
-        )
+        // console.log('access_token', access_token)
+        // const response = await axios.post(
+        //     `${mainUrl}/auth/logout`,
+        //     {}, // empty body
+        //     {
+        //         headers: {
+        //             Authorization: `Bearer ${access_token}`,
+        //             Accept: 'application/json', // optional but matches Swagger
+        //         },
+        //     }
+        // )
 
-        // const response = await api.post(`/auth/logout`)
+        const response = await api.post(`/auth/logout`, {})
 
         console.log('response', response)
 

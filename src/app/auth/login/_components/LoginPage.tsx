@@ -86,11 +86,9 @@ function LoginPage({}: Props) {
                 setUser(response.data.user)
                 localStorage.setItem('AUTH', JSON.stringify(response.data.user))
 
-                toast({
+                toast.success({
                     title: 'Login Successful',
                     description: 'Welcome to Zuvy Dashboard',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
 
                 // Handle redirects based on user role
@@ -215,7 +213,7 @@ function LoginPage({}: Props) {
                                         </p>
                                     </div>
                                 </div>
-                                <div className="bg-[#518672] text-white rounded-xl p-4 text-center h-64 flex flex-col justify-center">
+                                <div className="bg-[#518672] text-white rounded-xl p-4 text-center h-72 flex flex-col justify-center">
                                     <h2 className="text-xl font-bold">2000+</h2>
                                     <p>Learners across 18 Indian states</p>
                                 </div>

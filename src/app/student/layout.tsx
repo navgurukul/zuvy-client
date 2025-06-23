@@ -130,7 +130,7 @@ export default function RootLayout({
         getStudentsData()
     }, [])
 
-    if (studentData.length === 0) return
+    if (studentData?.length === 0) return
 
     // const isCourseEnrolled = studentData.some(
     //     (courses: any) => courses.id == couseId
