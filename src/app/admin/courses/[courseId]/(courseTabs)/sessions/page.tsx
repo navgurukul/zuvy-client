@@ -54,6 +54,7 @@ function Page({ params }: any) {
     const [search, setSearch] = useState<string>('')
     const [loading, setLoading] = useState(true)
     const [checkopenSessionForm, setOpenSessionForm] = useState(true)
+    const [modulesData, setModulesData] = useState<any>([])
     const debouncedSearch = useDebounce(search, 1000)
 
     const handleComboboxChange = (value: string) => {
@@ -173,6 +174,10 @@ function Page({ params }: any) {
                 })
         }
     }, [params.courseId])
+    const getAllModulesDetails = async () => {
+        const response = await api.get(`/content/allModules/${params.courseId}`)
+        setModulesData(response.data);
+    }
 
     useEffect(() => {
         getHandleAllClasses(offset)
@@ -180,6 +185,7 @@ function Page({ params }: any) {
 
     useEffect(() => {
         getHandleAllBootcampBatches()
+        getAllModulesDetails()
     }, [getHandleAllBootcampBatches])
 
     const onClickHandler = () => {
@@ -241,6 +247,7 @@ function Page({ params }: any) {
                                 students={students}
                                 checkopenSessionForm={checkopenSessionForm}
                                 onClick={onClickHandler}
+                                modulesData={modulesData}
                             />
                         }
                     </div>
@@ -266,8 +273,8 @@ function Page({ params }: any) {
                         </div>
                     ) : (
                         <div>
-                            {classes.length > 0 && (
-                                activeTab === classes[0].status ? (
+                            {classes.length > 0 &&
+                                (activeTab === classes[0].status ? (
                                     <>
                                         <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
                                             {classes.map(
@@ -276,36 +283,38 @@ function Page({ params }: any) {
                                                     classData.status ? (
                                                         activeTab ===
                                                         'completed' ? (
-                                                           <div  key={classData}>
-                                                             <RecordingCard
-                                                                classData={
-                                                                    classData
-                                                                }
-                                                               
-                                                                isAdmin
-                                                            />
-                                                           </div>
+                                                            <div
+                                                                key={classData}
+                                                            >
+                                                                <RecordingCard
+                                                                    classData={
+                                                                        classData
+                                                                    }
+                                                                    isAdmin
+                                                                />
+                                                            </div>
                                                         ) : (
-                                                          <div key={classData}>
-                                                              <ClassCard
-                                                                classData={
-                                                                    classData
-                                                                }
-                                                    
-                                                                classType={
-                                                                    activeTab
-                                                                }
-                                                                getClasses={
-                                                                    getHandleAllClasses
-                                                                }
-                                                                activeTab={
-                                                                    activeTab
-                                                                }
-                                                                studentSide={
-                                                                    false
-                                                                }
-                                                            />
-                                                          </div>
+                                                            <div
+                                                                key={classData}
+                                                            >
+                                                                <ClassCard
+                                                                    classData={
+                                                                        classData
+                                                                    }
+                                                                    classType={
+                                                                        activeTab
+                                                                    }
+                                                                    getClasses={
+                                                                        getHandleAllClasses
+                                                                    }
+                                                                    activeTab={
+                                                                        activeTab
+                                                                    }
+                                                                    studentSide={
+                                                                        false
+                                                                    }
+                                                                />
+                                                            </div>
                                                         )
                                                     ) : (
                                                         <div key={classData}>
@@ -332,9 +341,8 @@ function Page({ params }: any) {
                                     <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
                                         <ClassCardSkeleton />
                                     </div>
-                                )
-                            )}
-                            {classes.length === 0 &&  (
+                                ))}
+                            {classes.length === 0 && (
                                 <div className="w- flex mb-10 items-center flex-col gap-y-3 justify-center text-center mt-2">
                                     <Image
                                         src={
@@ -358,6 +366,8 @@ function Page({ params }: any) {
                                         checkopenSessionForm={
                                             checkopenSessionForm
                                         }
+                                        modulesData={modulesData}
+
                                     />
                                 </div>
                             )}

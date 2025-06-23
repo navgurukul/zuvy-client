@@ -6,19 +6,26 @@ import {
     Video,
     BookOpenCheck,
     Newspaper,
+    Play,
 } from 'lucide-react'
-
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
+    Dialog,
     DialogClose,
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from '@/components/ui/dialog'
 
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
+import { useState } from 'react'
+import CreateSessionDialog from './createLiveClass'
+import ExistingLiveClass from './existingLiveClass'
 
 function ChapterModal({
     fetchChapters,
@@ -35,6 +42,7 @@ function ChapterModal({
 }) {
     const { setTopicId } = getTopicId()
     const router = useRouter()
+    const [classType , setClassType] = useState('createLiveClass');
     const createChapter = async (topicId: number) => {
         setTopicId(topicId)
         await api
@@ -61,20 +69,10 @@ function ChapterModal({
                 })
             })
         fetchChapters()
-
     }
 
-    // const createAssessment = async () => {
-    //     await api
-    //         .post(`/content/createAssessment/${params.moduleId}`)
-    //         .then((res) => {
-    //             toast({
-    //                 title: res.data.message,
-    //                 description: res.data[0].title,
-    //             })
-    //         })
-    //     fetchChapters()
-    // }
+    
+    
     return (
         <DialogContent className="max-w-max">
             <DialogHeader>
@@ -144,6 +142,38 @@ function ChapterModal({
                             <span>Form</span>
                         </div>
                     </DialogClose>
+                    <Dialog>
+                        <div
+                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                            // onClick={() => createChapter(8)}
+                        >
+                            <DialogTrigger className="flex">
+                                <Play className="mr-2 h-6 w-6" />
+                                <span>Live Classes</span>
+                            </DialogTrigger>
+                            <DialogContent className='' >
+                                <RadioGroup value={classType} className='flex flex-row items-center' onValueChange={(e: any)=> setClassType(e)} defaultValue="createLiveClass">
+                                    <div className="flex  space-x-2">
+                                        <RadioGroupItem
+                                            value="createLiveClass"
+                                            id="r1"
+                                        />
+                                        <Label htmlFor="r1">Create Live Class</Label>
+                                    </div>
+                                    <div className="flex space-x-2 ">
+                                        <RadioGroupItem
+                                            value="existingLiveClass"
+                                            id="r2"
+                                        />
+                                        <Label htmlFor="r2">Select from Existing Classes</Label>
+                                    </div>
+                                </RadioGroup>
+                                {classType === 'createLiveClass' && <div className='' ><CreateSessionDialog fetchingChapters={()=>fetchChapters()}  /></div>}
+                                {classType === 'existingLiveClass' && <div className='overflow-auto'><ExistingLiveClass fetchingChapters={()=>fetchChapters()} /></div>}
+                            </DialogContent>
+                            {/* <Newspaper  /> */}
+                        </div>
+                    </Dialog>
                 </div>
             </DialogHeader>
         </DialogContent>

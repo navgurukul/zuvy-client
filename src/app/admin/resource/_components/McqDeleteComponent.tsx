@@ -18,6 +18,7 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
     const selectedRows = logSelectedRows()
     const { offset } = getOffset()
     const { position } = getPosition()
+    
 
     const deleteMcqHalderinBulk = async () => {
         const selectedQuestionIds = selectedRows.map((selectedRow) => {
