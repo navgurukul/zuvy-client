@@ -27,7 +27,9 @@ interface CourseData {
     id: number
     name: string
     bootcampTopic: string
+    description: string
     coverImage: string
+    collaborator: string
     duration: string
     language: string
     startTime: string
@@ -77,7 +79,9 @@ export const getCourseData = create<StoreCourseData>((set) => ({
         id: 0,
         name: '',
         bootcampTopic: '',
+        description:'',
         coverImage: '',
+        collaborator:'',
         duration: '',
         language: 'string',
         startTime: '',

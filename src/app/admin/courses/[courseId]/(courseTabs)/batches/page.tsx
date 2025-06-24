@@ -83,11 +83,11 @@ const Page = ({ params }: { params: any }) => {
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const parsedValue = parseInt(capEnrollment)
-                return !isNaN(parsedValue) && parsedValue > 0
+                return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
             },
             {
                 message:
-                    'Cap Enrollment must be a POSITIVE INTEGER (or a POSITIVE WHOLE NUMBER or should be greater than 0)',
+                    'Cap Enrollment must be a positive number between 1 and 100,000',
             }
         ),
         assignLearners: z.string(),
@@ -135,8 +135,6 @@ const Page = ({ params }: { params: any }) => {
                 toast.error({
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
                 const res = await api.post(`/batch`, convertedData)
@@ -149,6 +147,7 @@ const Page = ({ params }: { params: any }) => {
                     title: res.data.status,
                     description: res.data.message,
                 })
+                return true
             }
         } catch (error: any) {
             toast.error({
@@ -157,6 +156,7 @@ const Page = ({ params }: { params: any }) => {
                     error.response?.data?.message || 'An error occurred.',
             })
             console.error('Error creating batch:', error)
+            return false
         }
     }
 
@@ -347,9 +347,16 @@ const Page = ({ params }: { params: any }) => {
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
-                                                                placeholder="Cap Enrollment"
+                                                                placeholder="Cap Enrollment (max: 100,000)"
                                                                 type="name"
                                                                 {...field}
+                                                                onChange={(e) => {
+                                                                    // Prevent entering more than 6 digits
+                                                                    const value = e.target.value;
+                                                                    if (value.length <= 6) {
+                                                                        field.onChange(e);
+                                                                    }
+                                                                }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage />

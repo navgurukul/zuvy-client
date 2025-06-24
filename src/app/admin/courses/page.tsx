@@ -33,7 +33,11 @@ interface Course {
     id: number
     students_in_bootcamp: number
 }
-
+interface CourseData {
+    name: string
+    description?: string
+    collaborator?: string
+}
 const Courses: React.FC = () => {
     // misc
     const router = useRouter()
@@ -55,6 +59,7 @@ const Courses: React.FC = () => {
     const [offset, setOffset] = useState<number>(OFFSET)
     const [loading, setLoading] = useState(true)
     const [newCourseName, setNewCourseName] = useState<string>('')
+    const [newCourseDescription, setNewCourseDescription] = useState<string>('')
     const [hasAccess, setHasAccess] = useState<boolean>(true)
 
     // func
@@ -99,7 +104,13 @@ const Courses: React.FC = () => {
         setNewCourseName(event.target.value)
     }
 
-    const handleCreateCourse = async () => {
+    const handleNewCourseDescriptionChange = (
+        event: React.ChangeEvent<HTMLTextAreaElement>
+    ) => {
+        setNewCourseDescription(event.target.value)
+    }
+
+    const handleCreateCourse = async (courseData: CourseData) => {
         const repeatedCourseName = newCourseName
             .replace(/\s+/g, ' ')
             .toLowerCase()
@@ -115,19 +126,20 @@ const Courses: React.FC = () => {
             })
         } else {
             try {
-                const response = await api
-                    .post('/bootcamp', { name: newCourseName })
-                    .then((response) => {
-                        toast.success({
-                            title: response.data.status,
-                            description: response.data.message,
-                        })
-                    })
+                const response = await api.post('/bootcamp', courseData)
+                
+                toast.success({
+                    title: response.data.status,
+                    description: response.data.message,
+                })
+                // Reset form after successful creation
+                setNewCourseName('')
+                setNewCourseDescription('')
                 getBootcamp(offset)
             } catch (error: any) {
                 toast.error({
-                    title: error.data.status,
-                    description: error.data.message,
+                    title: error?.data?.status || 'Error',
+                    description: error?.data?.message || 'Failed to create course',
                 })
             }
         }
@@ -208,8 +220,12 @@ const Courses: React.FC = () => {
                                 <DialogOverlay />
                                 <NewCourseDialog
                                     newCourseName={newCourseName}
+                                    newCourseDescription={newCourseDescription}
                                     handleNewCourseNameChange={
                                         handleNewCourseNameChange
+                                    }
+                                    handleNewCourseDescriptionChange={
+                                        handleNewCourseDescriptionChange
                                     }
                                     handleCreateCourse={handleCreateCourse}
                                 />
@@ -262,8 +278,14 @@ const Courses: React.FC = () => {
                                                         newCourseName={
                                                             newCourseName
                                                         }
+                                                        newCourseDescription={
+                                                            newCourseDescription
+                                                        }
                                                         handleNewCourseNameChange={
                                                             handleNewCourseNameChange
+                                                        }
+                                                        handleNewCourseDescriptionChange={
+                                                            handleNewCourseDescriptionChange
                                                         }
                                                         handleCreateCourse={
                                                             handleCreateCourse
@@ -404,3 +426,4 @@ const Courses: React.FC = () => {
 }
 
 export default Courses
+
