@@ -69,8 +69,7 @@ export default function RootLayout({
         pathname?.includes('/modules/') &&
         pathname?.includes('/chapters/')
     const { user, setUser } = getUser()
-    const rolesList =
-        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+    const rolesList = user && user.rolesList.length > 0 && user.rolesList[0]
 
     const isChapterRoute =
         /\/(chapters|viewresults|quizresults|codingresults|openendedresults|assessment)/.test(
@@ -152,7 +151,8 @@ export default function RootLayout({
                 <div className="flex items-center justify-center h-[680px]">
                     <Spinner className="text-secondary" />
                 </div>
-            ) : user && user.rolesList.length !== 0 ? (
+            ) : user.rolesList.length === 0 ||
+              (user.rolesList.length > 0 && user.rolesList[0] !== 'student') ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Student'} />
             ) : (
                 <div className={`h-screen ${isMobile ? '' : ''} `}>

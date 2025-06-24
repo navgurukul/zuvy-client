@@ -94,25 +94,19 @@ function LoginPage({}: Props) {
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
-                if (!response.data.user.rolesList[0]) {
-                    setCookie(
-                        'secure_typeuser',
-                        JSON.stringify(btoa('student'))
-                    )
-                    router.push(redirectedUrl || '/student')
-                } else {
-                    const userRole = response.data.user.rolesList[0]
-                    setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
+                const userRole = response.data.user.rolesList[0]
+                setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
-                    if (redirectedUrl) {
-                        router.push(redirectedUrl)
-                    } else if (userRole === 'admin') {
-                        router.push('/admin/courses')
-                    } else if (userRole === 'instructor') {
-                        router.push('/instructor')
-                    } else {
-                        router.push(`/${userRole}`)
-                    }
+                if (redirectedUrl) {
+                    router.push(redirectedUrl)
+                } else if (userRole === 'student') {
+                    router.push('/student')
+                } else if (userRole === 'admin') {
+                    router.push('/admin/courses')
+                } else if (userRole === 'instructor') {
+                    router.push('/instructor')
+                } else {
+                    router.push(`/${userRole}`)
                 }
             }
         } catch (err: any) {
