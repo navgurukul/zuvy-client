@@ -37,6 +37,7 @@ interface DataTableProps<TData, TValue> {
     mcqSide?: boolean
     assignStudents?: string
     adminMcqSide?: boolean
+    customTopBar?: React.ReactNode
 }
 
 type StudentData = {
@@ -57,6 +58,7 @@ export function DataTable<TData, TValue>({
     mcqSide,
     assignStudents,
     adminMcqSide,
+    customTopBar,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
@@ -113,7 +115,14 @@ export function DataTable<TData, TValue>({
                 </div>
             )}
         
-            {!assignStudents && <DataTableToolbar table={table} />}
+            {!assignStudents && (
+                <div className="flex items-center justify-between mb-2">
+                    <div>{customTopBar}</div>
+                    <div className="ml-auto">
+                        <DataTableToolbar table={table} />
+                    </div>
+                </div>
+            )}
             <div className="rounded-md border">
                 <Table>
                     <TableHeader className={assignStudents && 'hidden'}>

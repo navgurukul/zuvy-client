@@ -9,6 +9,14 @@ import { getIsRowSelected } from '@/store/store'
 import { Table } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogClose,
+} from "@/components/ui/dialog"
 
 type CreateSessionDialogProps = {
     fetchingChapters: () => void;
@@ -19,6 +27,7 @@ const ExistingLiveClass = ({fetchingChapters}: CreateSessionDialogProps) => {
 
     const [position, setPosition] = useState(POSITION)
     const [selectedRows, setSelectedRows] = useState<any[]>([])
+    const [open, setOpen] = useState(false)
 
     const param = useParams()
     const [pages, setPages] = useState(0)
@@ -64,20 +73,43 @@ const ExistingLiveClass = ({fetchingChapters}: CreateSessionDialogProps) => {
       })
     }
 
+    async function handleCreateChapters() {
+        await addLiveClassesAsaChapter()
+        setOpen(false)
+    }
+
     return (
         <div className="h-full">
             <div className="h-[32rem]">
-                {selectedRows.length > 0 && (
-                    <div className='flex ' >
-                        <Button onClick={addLiveClassesAsaChapter} className="">Create Chapters</Button>
-                    </div>
-                )}
-
-                <DataTable
-                    setSelectedRows={setSelectedRows}
-                    data={classes}
-                    columns={existingClassColumns}
-                />
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DataTable
+                        setSelectedRows={setSelectedRows}
+                        data={classes}
+                        columns={existingClassColumns}
+                        customTopBar={
+                            selectedRows.length > 0 && (
+                                <Button onClick={() => setOpen(true)}>
+                                    Create Chapters
+                                </Button>
+                            )
+                        }
+                    />
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>
+                                Are you sure you want to create chapters from selected classes?
+                            </DialogTitle>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button onClick={handleCreateChapters}>
+                                OK
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
                 <DataTablePagination
                     totalStudents={classes?.length}
                     position={position}

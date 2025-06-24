@@ -16,21 +16,34 @@ export const existingClassColumns: ColumnDef<any>[] = [
       {
             id: 'select',
             header: ({ table }) => {
+                // Check if all enabled rows are selected
+                const allEnabledRowsSelected = table.getRowModel().rows
+                    .filter(row => row.original.moduleId === null)
+                    .every(row => row.getIsSelected());
+
+                // Check if some enabled rows are selected
+                const someEnabledRowsSelected = table.getRowModel().rows
+                    .filter(row => row.original.moduleId === null)
+                    .some(row => row.getIsSelected());
+
                 return (
                     <Checkbox
-                        checked={
-                            table.getIsAllPageRowsSelected() ||
-                            (table.getIsSomePageRowsSelected() && 'indeterminate')
-                        }
-                        onCheckedChange={(value) =>
-                            table.toggleAllPageRowsSelected(!!value)
-                        }
+                        checked={allEnabledRowsSelected || (someEnabledRowsSelected && 'indeterminate')}
+                        onCheckedChange={(value) => {
+                            table.getRowModel().rows.forEach(row => {
+                                if (row.original.moduleId === null) {
+                                    row.toggleSelected(!!value);
+                                }
+                            });
+                        }}
                         aria-label="Select all"
                     />
                 )
             },
     
             cell: ({ table, row }) => {
+              const cls = row.original
+              const isDisabled = cls.moduleId !== null
                 return (
                     <CheckboxAndDeleteHandler
                         checked={row.getIsSelected()}
@@ -38,6 +51,8 @@ export const existingClassColumns: ColumnDef<any>[] = [
                             row.toggleSelected(!!value)
                         }}
                         aria-label="Select row"
+                        disabled={isDisabled}
+                        className={isDisabled ? "cursor-not-allowed" : ""}
                     />
                 )
             },
