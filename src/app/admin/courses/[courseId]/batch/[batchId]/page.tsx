@@ -114,7 +114,8 @@ const BatchesInfo = ({
                 )
             },
             {
-                message: `The cap enrollment must be greater than or equal to the number of students inside a batch there are currently ${studentsData?.length} students  .`,
+                message: `Cap enrollment cannot be less than the current number of students (${studentsData?.length}).`,
+
             }
         ),
     })
@@ -587,7 +588,7 @@ const BatchesInfo = ({
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormLabel>
-                                                                Cap Enrollment ujala
+                                                                Cap Enrollment
                                                             </FormLabel>
                                                             <FormControl>
                                                                 <Input

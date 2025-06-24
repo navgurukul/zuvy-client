@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from '@/app/admin/courses/[courseId]/module/_components/video/VideoEmbed'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea,ScrollBar } from '@/components/ui/scroll-area'
 import { ArrowUpRightSquare, X, Pencil } from 'lucide-react'
 import PreviewVideo from '@/app/admin/courses/[courseId]/module/_components/video/PreviewVideo'
 import { getChapterUpdateStatus, getVideoPreviewStore } from '@/store/store'
@@ -276,13 +276,8 @@ const AddVideo = ({
     }
     
     return (
-        <ScrollArea
-            type="hover"
-            style={{
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE and Edge
-            }}
-        >
+        <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
+            <ScrollBar className="h-dvh " orientation="vertical" />
             <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
                 {/* {showPreview ? (
                     <PreviewVideo
