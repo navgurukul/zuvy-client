@@ -7,7 +7,7 @@ import { toast } from '@/components/ui/use-toast'
 // import { useSessionModal } from '@/store/store'
 // // import { store as sessionModalStore } from '@/store/store'
 // import { sessionModalStore } from '@/store/store'
-import { useSessionModalStore } from '@/store/store'
+import { useSessionModalStore } from '@/store/session.store'
 
 const sessionModalStore = useSessionModalStore.getState()
 

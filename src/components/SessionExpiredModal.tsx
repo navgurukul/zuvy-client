@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { useSessionModalStore } from '@/store/store'
+import { useSessionModalStore } from '@/store/session.store'
 
 export function SessionExpiredModal() {
     const { showModal, setShowModal } = useSessionModalStore()

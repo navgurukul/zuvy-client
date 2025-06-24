@@ -1,7 +1,7 @@
 // components/SessionModalWrapper.tsx
 'use client'
 
-import { useSessionModalStore } from '@/store/store'
+import { useSessionModalStore } from '@/store/session.store'
 import { SessionExpiredModal } from '@/components/SessionExpiredModal'
 
 export default function SessionModalWrapper() {
