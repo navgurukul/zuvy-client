@@ -19,8 +19,7 @@ export default function RootLayout({
     const pathname = usePathname()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     const { user, setUser } = getUser()
-    const rolesList =
-        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+    const rolesList = user && user.rolesList.length > 0 && user.rolesList[0]
 
     const isAssessmentRouteClasses = (route: string) => {
         const adminRoutes = /admin.*courses.*module.*chapters/
@@ -46,7 +45,11 @@ export default function RootLayout({
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
-                    <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen`}>
+                    <div
+                        className={`${
+                            adminAssessmentPreviewRoute ? '' : 'pt-16'
+                        } h-screen`}
+                    >
                         <MaxWidthWrapper>{children}</MaxWidthWrapper>
                     </div>
                 </div>
