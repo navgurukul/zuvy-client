@@ -129,15 +129,15 @@ export default function Page({
             switch (topicId) {
                 case 1:
                     return (
-                        <ScrollArea
-                            // className="h-[600px] lg:h-[600px] pr-4"
-                            className={`${heightClass} pr-4`}
-                            type="hover"
-                            style={{
-                                scrollbarWidth: 'none', // Firefox
-                                msOverflowStyle: 'none', // IE and Edge
-                            }}
-                        >
+                        // <ScrollArea
+                        //     // className="h-[600px] lg:h-[600px] pr-4"
+                        //     className={`${heightClass} pr-4`}
+                        //     type="hover"
+                        //     style={{
+                        //         scrollbarWidth: 'none', // Firefox
+                        //         msOverflowStyle: 'none', // IE and Edge
+                        //     }}
+                        // >
                             <AddVideo
                                 key={chapterId}
                                 moduleId={moduleID}
@@ -145,7 +145,7 @@ export default function Page({
                                 content={chapterContent}
                                 fetchChapterContent={fetchChapterContent}
                             />
-                        </ScrollArea>
+                        // </ScrollArea>
                     )
                 case 2:
                     return (

@@ -152,9 +152,9 @@ const Courses: React.FC = () => {
 
     useEffect(() => {
         const getToken = async () => {
-            const response = await apiMeraki.get('/users/calendar/tokens')
+            const response = await api.get(`/classes/check-calendar-access`)
 
-            if (!response.data.success) {
+            if (response.data.status === 'not success') {
                 setHasAccess(false)
             } else {
                 setHasAccess(true)
@@ -359,17 +359,20 @@ const Courses: React.FC = () => {
                                         {courses.map((course, index) => (
                                             <Card
                                                 key={index}
-                                                className={`h-max w-[400px] ${
-                                                    hasAccess
-                                                        ? 'cursor-pointer'
-                                                        : ''
-                                                }`}
-                                                onClick={() =>
-                                                    hasAccess
-                                                        ? handleCardClick(
-                                                              course.id
-                                                          )
-                                                        : null
+                                                className={`h-max w-[400px] cursor-pointer`}
+                                                // className={`h-max w-[400px] cursor-pointer ${
+                                                //     hasAccess
+                                                //         ? 'cursor-pointer'
+                                                //         : ''
+                                                // }`}
+                                                onClick={
+                                                    () =>
+                                                        // hasAccess
+                                                        //     ?
+                                                        handleCardClick(
+                                                            course.id
+                                                        )
+                                                    // : null
                                                 }
                                             >
                                                 <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">

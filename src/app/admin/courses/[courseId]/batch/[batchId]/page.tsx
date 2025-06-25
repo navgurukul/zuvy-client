@@ -110,11 +110,11 @@ const BatchesInfo = ({
                 const capEnrollmentValue = parseInt(capEnrollment)
                 return (
                     !isNaN(capEnrollmentValue) &&
-                    capEnrollmentValue >= studentsData.length
+                    capEnrollmentValue >= studentsData.length   && capEnrollmentValue<= 100000
                 )
             },
             {
-                message: `The cap enrollment must be greater than or equal to the number of students inside a batch there are currently ${studentsData?.length} students  .`,
+                message: `Cap enrollment cannot be less than the current number of students (${studentsData?.length}).`,
             }
         ),
     })
@@ -594,6 +594,13 @@ const BatchesInfo = ({
                                                                     placeholder="Cap Enrollment"
                                                                     type="name"
                                                                     {...field}
+                                                                    onChange={(e) => {
+                                                                        // Prevent entering more than 6 digits
+                                                                        const value = e.target.value;
+                                                                        if (value.length <= 6) {
+                                                                            field.onChange(e);
+                                                                        }
+                                                                    }}
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
