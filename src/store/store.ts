@@ -917,6 +917,18 @@ export const getisPreviewModalOpen = create<isPreviewModalOpen>((set) => ({
     },
 }))
 
+// ------------------------- Session expire ---------------------------
+
+type SessionStore = {
+    showModal: boolean
+    setShowModal: (value: boolean) => void
+}
+
+export const useSessionModalStore = create<SessionStore>((set) => ({
+    showModal: false,
+    setShowModal: (value) => set({ showModal: value }),
+}))
+
 // ------------------------- User ------------------------
 interface User {
     rolesList: any[]
@@ -1018,12 +1030,14 @@ type isReattemptApprovedType = {
     setIsReattemptApproved: (newValue: boolean) => void
 }
 
-export const getIsReattemptApproved = create<isReattemptApprovedType>((set) => ({
-    isReattemptApproved: false,
-    setIsReattemptApproved: (newValue: boolean) => {
-        set({ isReattemptApproved: newValue })
-    },
-}))
+export const getIsReattemptApproved = create<isReattemptApprovedType>(
+    (set) => ({
+        isReattemptApproved: false,
+        setIsReattemptApproved: (newValue: boolean) => {
+            set({ isReattemptApproved: newValue })
+        },
+    })
+)
 
 interface ModuleData {
     moduleName: string[]
