@@ -9,6 +9,7 @@ import Quiz from './Quiz'
 import Assignment from './Assignment'
 import Assessment from './Assessment'
 import FeedbackForm from './FeedbackForm'
+import LiveClassContent from './LiveClassContent'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { getAssessmentShortInfo } from '@/utils/students'
 import { api } from '@/utils/axios.config'
@@ -202,6 +203,16 @@ function ChapterContent() {
                             bootcampId={+viewcourses}
                             completeChapter={completeChapter}
                             // bootcampId={viewcourses}
+                        />
+                    )
+                case 8:
+                    return (
+                        <LiveClassContent
+                            content={chapterContent}
+                            completeChapter={completeChapter}
+                            chapterId={chapterId}
+                            moduleId={Array.isArray(moduleID) ? Number(moduleID[0]) : Number(moduleID)}
+                            bootcampId={Array.isArray(viewcourses) ? Number(viewcourses[0]) : Number(viewcourses)}
                         />
                     )
                 default:
