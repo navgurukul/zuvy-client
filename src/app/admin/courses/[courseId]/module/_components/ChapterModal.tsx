@@ -33,12 +33,14 @@ function ChapterModal({
     moduleId,
     courseId,
     scrollToBottom,
+    onClose,
 }: {
     fetchChapters: () => void
     newChapterOrder: number
     courseId: any
     moduleId: any
     scrollToBottom: () => void
+    onClose: () => void
 }) {
     const { setTopicId } = getTopicId()
     const router = useRouter()
@@ -52,7 +54,6 @@ function ChapterModal({
                 moduleId: Number(moduleId),
                 bootcampId: Number(courseId),
                 topicId: topicId,
-                // order: newChapterOrder,
             })
             .then((res) => {
                 const data = res?.data?.module[0]
@@ -63,6 +64,7 @@ function ChapterModal({
                     title: res?.data?.module[0]?.title,
                     description: res?.data?.message,
                 })
+                onClose() // <-- Close parent dialog
             })
             .catch((error) => {
                 toast.error({
@@ -76,130 +78,109 @@ function ChapterModal({
     
     
     return (
-        <DialogContent className="max-w-max">
-            <DialogHeader>
-                <DialogTitle className="mb-3">New Chapter</DialogTitle>
+        <Dialog open={true}>
+            <DialogContent>
                 <div className="grid grid-cols-3 p-3 gap-y-6 gap-x-2 ">
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(1)}
-                        >
-                            <Video className="mr-2 h-6 w-6" />
-                            <span>Video</span>
-                        </div>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(2)}
-                        >
-                            <BookOpenText className="mr-2 h-6 w-6" />
-                            <span>Article</span>
-                        </div>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(3)}
-                        >
-                            <SquareCode className="mr-2 h-6 w-6" />
-                            <span>Coding Problem</span>
-                        </div>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(4)}
-                        >
-                            <FileQuestion className="mr-2 h-6 w-6" />
-                            <span>Quiz</span>
-                        </div>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(5)}
-                        >
-                            <PencilLine className="mr-2 h-6 w-6" />
-                            <span>Assignment</span>
-                        </div>
-                    </DialogClose>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => createChapter(1)}
+                    >
+                        <Video className="mr-2 h-6 w-6" />
+                        <span>Video</span>
+                    </div>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => createChapter(2)}
+                    >
+                        <BookOpenText className="mr-2 h-6 w-6" />
+                        <span>Article</span>
+                    </div>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => createChapter(3)}
+                    >
+                        <SquareCode className="mr-2 h-6 w-6" />
+                        <span>Coding Problem</span>
+                    </div>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => createChapter(4)}
+                    >
+                        <FileQuestion className="mr-2 h-6 w-6" />
+                        <span>Quiz</span>
+                    </div>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => createChapter(5)}
+                    >
+                        <PencilLine className="mr-2 h-6 w-6" />
+                        <span>Assignment</span>
+                    </div>
 
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(6)}
-                        >
-                            <BookOpenCheck className="mr-2 h-6 w-6" />
-                            <span>Assessment</span>
-                        </div>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            onClick={() => createChapter(7)}
-                        >
-                            <Newspaper className="mr-2 h-6 w-6" />
-                            <span>Form</span>
-                        </div>
-                    </DialogClose>
-                    <Dialog open={liveDialogOpen} onOpenChange={(open) => {
-                        setLiveDialogOpen(open)
-                        if (!open) setClassType('createLiveClass')
-                    }}>
-                        <div
-                            className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                        >
-                            <DialogTrigger className="flex">
-                                <Play className="mr-2 h-6 w-6" />
-                                <span>Live Classes</span>
-                            </DialogTrigger>
-                            <DialogContent className='' >
-                                <RadioGroup value={classType} className='flex flex-row items-center' onValueChange={(e: any)=> setClassType(e)} defaultValue="createLiveClass">
-                                    <div className="flex  space-x-2">
-                                        <RadioGroupItem
-                                            value="createLiveClass"
-                                            id="r1"
-                                        />
-                                        <Label htmlFor="r1">Create Live Class</Label>
-                                    </div>
-                                    <div className="flex space-x-2 ">
-                                        <RadioGroupItem
-                                            value="existingLiveClass"
-                                            id="r2"
-                                        />
-                                        <Label htmlFor="r2">Select from Existing Classes</Label>
-                                    </div>
-                                </RadioGroup>
-                                {classType === 'createLiveClass' && (
-                                    <div className='' >
-                                        <CreateSessionDialog
-                                            fetchingChapters={()=>fetchChapters()}
-                                            onClose={() => {
-                                                setLiveDialogOpen(false)
-                                                setClassType('createLiveClass')
-                                            }}
-                                        />
-                                    </div>
-                                )}
-                                {classType === 'existingLiveClass' && (
-                                    <div className='overflow-auto'>
-                                        <ExistingLiveClass
-                                            fetchingChapters={() => fetchChapters()}
-                                            onClose={() => {
-                                                setLiveDialogOpen(false)
-                                                setClassType('createLiveClass')
-                                            }}
-                                        />
-                                    </div>
-                                )}
-                            </DialogContent>
-                        </div>
-                    </Dialog>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => createChapter(6)}
+                    >
+                        <BookOpenCheck className="mr-2 h-6 w-6" />
+                        <span>Assessment</span>
+                    </div>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => createChapter(7)}
+                    >
+                        <Newspaper className="mr-2 h-6 w-6" />
+                        <span>Form</span>
+                    </div>
+                    <div
+                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        onClick={() => setLiveDialogOpen(true)}
+                    >
+                        <Play className="mr-2 h-6 w-6" />
+                        <span>Live Classes</span>
+                    </div>
                 </div>
-            </DialogHeader>
-        </DialogContent>
+                {/* Live Classes Dialog as pehle */}
+                <Dialog open={liveDialogOpen} onOpenChange={(open) => {
+                    setLiveDialogOpen(open)
+                    if (!open) setClassType('createLiveClass')
+                }}>
+                    <DialogContent>
+                        <RadioGroup value={classType} className='flex flex-row items-center' onValueChange={setClassType} defaultValue="createLiveClass">
+                            <div className="flex  space-x-2">
+                                <RadioGroupItem value="createLiveClass" id="r1" />
+                                <Label htmlFor="r1">Create Live Class</Label>
+                            </div>
+                            <div className="flex space-x-2 ">
+                                <RadioGroupItem value="existingLiveClass" id="r2" />
+                                <Label htmlFor="r2">Select from Existing Classes</Label>
+                            </div>
+                        </RadioGroup>
+                        {classType === 'createLiveClass' && (
+                            <CreateSessionDialog
+                                fetchingChapters={fetchChapters}
+                                onClose={() => {
+                                    setLiveDialogOpen(false)
+                                    setClassType('createLiveClass')
+                                    onClose() // Close parent dialog
+                            }}
+                            />
+                        )}
+                        {classType === 'existingLiveClass' && (
+                            <div className='overflow-auto'>
+                            <ExistingLiveClass
+                                fetchingChapters={fetchChapters}
+                                onClose={() => {
+                                    setLiveDialogOpen(false)
+                                    setClassType('createLiveClass')
+                                    onClose() // Close parent dialog
+                            }}
+                            />
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
+            </DialogContent>
+        </Dialog>
     )
 }
 

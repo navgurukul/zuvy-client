@@ -128,12 +128,12 @@ const LiveClassContent = ({
                             </span>
                         </div>
 
-                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        {/* <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             <Users className="w-4 h-4 text-primary" />
                             <span className="font-medium">
                                 Created by {session.creator}
                             </span>
-                        </div>
+                        </div> */}
                     </div>
 
                     {/* Meeting Action Section */}
@@ -176,15 +176,6 @@ const LiveClassContent = ({
                         )}
                     </div>
 
-                    {/* Mark as Complete Button */}
-                    <div className="flex justify-end pt-4">
-                        <Button
-                            className="text-white"
-                            onClick={completeChapter}
-                        >
-                            Mark as Complete
-                        </Button>
-                    </div>
                 </CardContent>
             </Card>
         </div>

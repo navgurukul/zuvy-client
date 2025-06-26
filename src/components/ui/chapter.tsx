@@ -73,6 +73,11 @@ function Chapter() {
     const setModuleName = getCurrentModuleName((state) => state.setModuleName)
     const [key, setKey] = useState(0)
     const [open, setOpen] = useState(false)
+
+    const handleAddChapter = () => {
+        setOpen(true)
+    }
+
     const scrollAreaRef = useRef<HTMLDivElement | null>(null)
     const activeChapterRef = useRef<HTMLDivElement | null>(null)
     const [isNewChapterCreated, setIsNewChapterCreated] = useState(false)
@@ -190,10 +195,6 @@ function Chapter() {
         }
     }
 
-    const handleAddChapter = () => {
-        setOpen(true)
-    }
-
     const scrollToBottom = () => {
         const lastChapterElement = document.getElementById('last-chapter')
         if (lastChapterElement) {
@@ -214,7 +215,7 @@ function Chapter() {
             </div>
             <div className="flex flex-col overflow-hidden">
                 <div className="flex">
-                    <Dialog>
+                    <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                             <Button
                                 variant="secondary"
@@ -232,6 +233,7 @@ function Chapter() {
                                 fetchChapters={fetchChapters}
                                 newChapterOrder={chapterData.length}
                                 scrollToBottom={scrollToBottom}
+                                onClose={() => setOpen(false)} // <-- Pass onClose prop
                             />
                         </DialogContent>
                     </Dialog>
