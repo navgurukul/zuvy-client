@@ -120,9 +120,9 @@ const formSchema = z
     })
     type CreateSessionDialogProps = {
         fetchingChapters: () => void;
-        // or whatever the correct type is
+        onClose: () => void; // <-- Add this
       };
-const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapters}) => {
+const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapters, onClose}) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
@@ -284,27 +284,21 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
 
         try {
             const res = await api.post('/classes', transformedData)
-
             toast.success({
                 title: 'Success',
                 description: 'Class Created Successful',
             })
-           
             fetchingChapters()
-
-            // Reset form and close dialog
             form.reset()
-            toggleForm()
+            onClose() // <-- Close modal here
         } catch (error) {
-            // Mock toast error
-        toast.error({
-            title: 'Error',
-            description: 'Class not created',
-        })
+            toast.error({
+                title: 'Error',
+                description: 'Class not created',
+            })
         } finally {
             setIsLoading(false)
         }
-        setIsLoading(false)
     }
 
     // Add these at the component level (inside the function)

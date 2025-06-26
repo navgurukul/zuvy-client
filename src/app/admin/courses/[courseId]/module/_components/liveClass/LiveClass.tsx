@@ -159,7 +159,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
 
                     {/* Meeting Action Section */}
                     <div className="pt-4 border-t border-border">
-                        {session.status === 'completed' && session.s3link ? (
+                        {session.status === 'completed' && session.s3link && session.s3link !== 'not found' ? (
                             // Show recording if meeting is completed and recording is available
                             <div className="space-y-3">
                                 <h4 className="text-sm font-medium text-primary flex items-center gap-2">

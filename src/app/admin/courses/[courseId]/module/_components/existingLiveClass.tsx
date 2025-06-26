@@ -18,17 +18,16 @@ import {
     DialogClose,
 } from "@/components/ui/dialog"
 
-type CreateSessionDialogProps = {
+type ExistingLiveClassProps = {
     fetchingChapters: () => void;
-    // or whatever the correct type is
-  };
-const ExistingLiveClass = ({fetchingChapters}: CreateSessionDialogProps) => {
+    onClose: () => void;
+};
+const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps) => {
 
 
     const [position, setPosition] = useState(POSITION)
     const [selectedRows, setSelectedRows] = useState<any[]>([])
     const [open, setOpen] = useState(false)
-
     const param = useParams()
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
@@ -76,6 +75,7 @@ const ExistingLiveClass = ({fetchingChapters}: CreateSessionDialogProps) => {
     async function handleCreateChapters() {
         await addLiveClassesAsaChapter()
         setOpen(false)
+        onClose() // <-- Close parent modal as well
     }
 
     return (

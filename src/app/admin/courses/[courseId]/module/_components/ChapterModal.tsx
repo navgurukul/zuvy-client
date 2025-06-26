@@ -43,6 +43,8 @@ function ChapterModal({
     const { setTopicId } = getTopicId()
     const router = useRouter()
     const [classType , setClassType] = useState('createLiveClass');
+    const [liveDialogOpen, setLiveDialogOpen] = useState(false); // <-- Add this
+
     const createChapter = async (topicId: number) => {
         setTopicId(topicId)
         await api
@@ -142,10 +144,12 @@ function ChapterModal({
                             <span>Form</span>
                         </div>
                     </DialogClose>
-                    <Dialog>
+                    <Dialog open={liveDialogOpen} onOpenChange={(open) => {
+                        setLiveDialogOpen(open)
+                        if (!open) setClassType('createLiveClass')
+                    }}>
                         <div
                             className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
-                            // onClick={() => createChapter(8)}
                         >
                             <DialogTrigger className="flex">
                                 <Play className="mr-2 h-6 w-6" />
@@ -168,10 +172,29 @@ function ChapterModal({
                                         <Label htmlFor="r2">Select from Existing Classes</Label>
                                     </div>
                                 </RadioGroup>
-                                {classType === 'createLiveClass' && <div className='' ><CreateSessionDialog fetchingChapters={()=>fetchChapters()}  /></div>}
-                                {classType === 'existingLiveClass' && <div className='overflow-auto'><ExistingLiveClass fetchingChapters={()=>fetchChapters()} /></div>}
+                                {classType === 'createLiveClass' && (
+                                    <div className='' >
+                                        <CreateSessionDialog
+                                            fetchingChapters={()=>fetchChapters()}
+                                            onClose={() => {
+                                                setLiveDialogOpen(false)
+                                                setClassType('createLiveClass')
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                                {classType === 'existingLiveClass' && (
+                                    <div className='overflow-auto'>
+                                        <ExistingLiveClass
+                                            fetchingChapters={() => fetchChapters()}
+                                            onClose={() => {
+                                                setLiveDialogOpen(false)
+                                                setClassType('createLiveClass')
+                                            }}
+                                        />
+                                    </div>
+                                )}
                             </DialogContent>
-                            {/* <Newspaper  /> */}
                         </div>
                     </Dialog>
                 </div>
