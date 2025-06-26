@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { AlertOctagon, Timer, TriangleIcon } from 'lucide-react'
 import {
     Tooltip,
@@ -11,7 +12,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import Image from 'next/image'
-import { fetchChapters, getAssessmentShortInfo } from '@/utils/students'
+import { fetchChapters, formatToIST, getAssessmentShortInfo, handleAssessmentStateTransitions } from '@/utils/students'
 import { getModuleDataNew, getStudentChaptersState } from '@/store/store'
 import { toast } from '@/components/ui/use-toast'
 import useWindowSize from '@/hooks/useHeightWidth'
@@ -47,11 +48,17 @@ const Assessment = ({
     setSubmissionId: any
 }) => {
     const router = useRouter()
+    const { viewcourses, moduleID } = useParams()
+    const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
+
+    const [countdown, setCountdown] = useState<string>('')
+    const [showPublishedCard, setShowPublishedCard] = useState(false)
+    const [showActiveCard, setShowActiveCard] = useState(false)
+    const [showClosedCard, setShowClosedCard] = useState(false)
 
     const [testDuration, setTestDuration] = useState<number>(
         assessmentShortInfo?.timeLimit
     )
-    const { viewcourses, moduleID } = useParams()
     const [reattemptDialogOpen, setReattemptDialogOpen] = useState(false)
     const [reattemptRequested, setReattemptRequested] = useState(
         assessmentShortInfo?.submitedOutsourseAssessments?.[0]
@@ -242,19 +249,73 @@ const Assessment = ({
         }
     }, [])
 
+    useEffect(() => {
+        const cleanup = handleAssessmentStateTransitions(
+            assessmentShortInfo,
+            chapterContent,
+            moduleID,
+            viewcourses,
+            setAssessmentShortInfo,
+            setAssessmentOutSourceId,
+            setSubmissionId,
+            pollIntervalRef,
+            setCountdown,
+            setShowPublishedCard,
+            setShowActiveCard,
+            setShowClosedCard
+        )
+        return cleanup
+    }, [
+        assessmentShortInfo,
+        chapterContent,
+        moduleID,
+        viewcourses,
+        setAssessmentShortInfo,
+        setAssessmentOutSourceId,
+        setSubmissionId,
+    ])
+
     return (
         <div className="h-full">
             <div
-                className={`flex flex-col items-center justify-center px-0 ${
-                    isMobile ? 'py-3 mt-3' : 'py-8 mt-20'
-                } md:px-4 `}
+                className={`flex flex-col items-center justify-center px-0 ${isMobile ? 'py-3 mt-3' : 'py-8 mt-20'
+                    } md:px-4 `}
             >
-                <div className="flex flex-col gap-x-4 gap-y-1 text-left w-full max-w-lg">
-                    <div className="flex items-center justify-between gap-4 pr-10">
-                        <h1 className="text-2xl font-bold text-gray-800 text-center">
-                            {assessmentShortInfo?.ModuleAssessment?.title}
-                        </h1>
-                        <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold">
+                <div className="flex flex-col gap-y-4 text-left w-full max-w-lg">
+                    <div className="flex items-start justify-between gap-4 pr-10">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-800 mb-1">
+                                {assessmentShortInfo?.ModuleAssessment?.title}
+                            </h1>
+                            {assessmentShortInfo?.assessmentState && (
+                                <Badge
+                                    variant={
+                                        assessmentShortInfo.assessmentState.toUpperCase() ===
+                                            'ACTIVE'
+                                            ? 'secondary'
+                                            : assessmentShortInfo.assessmentState.toUpperCase() ===
+                                                'PUBLISHED'
+                                                ? 'default'
+                                                : assessmentShortInfo.assessmentState.toUpperCase() ===
+                                                    'DRAFT'
+                                                    ? 'yellow'
+                                                    : assessmentShortInfo.assessmentState.toUpperCase() ===
+                                                        'CLOSED'
+                                                        ? 'default'
+                                                        : 'destructive'
+                                    }
+                                    className="text-sm"
+                                >
+                                    {assessmentShortInfo.assessmentState
+                                        .charAt(0)
+                                        .toUpperCase() +
+                                        assessmentShortInfo.assessmentState
+                                            .slice(1)
+                                            .toLowerCase()}
+                                </Badge>
+                            )}
+                        </div>
+                        <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold whitespace-nowrap">
                             Total Marks:{' '}
                             {assessmentShortInfo?.weightageMcqQuestions +
                                 assessmentShortInfo?.weightageCodingQuestions}
@@ -288,17 +349,17 @@ const Assessment = ({
                             )}
                             {assessmentShortInfo?.totalOpenEndedQuestions >
                                 0 && (
-                                <div>
-                                    <h2 className="text-lg font-semibold text-secondary">
-                                        {
-                                            assessmentShortInfo?.totalOpenEndedQuestions
-                                        }
-                                    </h2>
-                                    <p className="text-sm text-gray-600">
-                                        Open-Ended
-                                    </p>
-                                </div>
-                            )}
+                                    <div>
+                                        <h2 className="text-lg font-semibold text-secondary">
+                                            {
+                                                assessmentShortInfo?.totalOpenEndedQuestions
+                                            }
+                                        </h2>
+                                        <p className="text-sm text-gray-600">
+                                            Open-Ended
+                                        </p>
+                                    </div>
+                                )}
                         </div>
                     ) : null}
 
@@ -314,9 +375,8 @@ const Assessment = ({
                     )}
                     {hasQuestions && (
                         <p
-                            className={`flex items-center gap-x-1 gap-y-2 text-sm text-gray-700 ${
-                                isAssessmentStarted && 'mb-10'
-                            }`}
+                            className={`flex items-center gap-x-1 gap-y-2 text-sm text-gray-700 ${isAssessmentStarted && 'mb-10'
+                                }`}
                         >
                             <Timer size={18} className="text-gray-500" />
                             Test Time:{' '}
@@ -333,95 +393,87 @@ const Assessment = ({
                         </p>
                     )}
 
-                    {((isAssessmentStarted &&
-                        !reattemptRequested &&
-                        !reattemptApproved) ||
-                        (isTimeOver &&
-                            isAssessmentStarted &&
+                    {assessmentShortInfo.assessmentState?.toUpperCase() !== 'CLOSED' &&
+                        assessmentShortInfo.assessmentState?.toUpperCase() !== 'PUBLISHED' &&
+                        ((isAssessmentStarted &&
                             !reattemptRequested &&
-                            !reattemptApproved)) && (
-                        <>
-                            <div className="flex flex-col items-center justify-center  p-5 mb-5 mr-10 sm:mr-0  bg-white border rounded-lg shadow-sm">
-                                <h2 className="mt-4 text-lg text-gray-800 flex items-center gap-x-2">
-                                    <div className="relative w-6 h-6">
-                                        <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-yellow-400"></div>
-                                        <div className="absolute top-[4px] left-1/2 transform -translate-x-1/2 text-black text-xs font-bold">
-                                            !
+                            !reattemptApproved) ||
+                            (isTimeOver &&
+                                isAssessmentStarted &&
+                                !reattemptRequested &&
+                                !reattemptApproved)) && (
+                            <>
+                                <div className="flex flex-col items-center justify-center p-5 bg-white border rounded-lg shadow-sm">
+                                    <h2 className="mt-4 text-lg text-gray-800 flex items-center gap-x-2">
+                                        <div className="relative w-6 h-6">
+                                            <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-yellow-400"></div>
+                                            <div className="absolute top-[4px] left-1/2 transform -translate-x-1/2 text-black text-xs font-bold">
+                                                !
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        {isSubmitedAt
-                                            ? 'You Can Request For Re-Attempt If You Faced Any Issue'
-                                            : 'Your previous assessment attempt was interrupted'}
-                                    </div>
-                                </h2>
-                                <Dialog
-                                    open={reattemptDialogOpen}
-                                    onOpenChange={setReattemptDialogOpen}
-                                >
-                                    <DialogTrigger asChild>
-                                        <Button className="mt-4">
-                                            Request Re-Attempt
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogOverlay />
-                                    <DialogContent className=" ">
-                                        <DialogHeader>
-                                            <DialogTitle className="text-lg font-bold text-gray-800 ">
-                                                Requesting Re-Attempt
-                                            </DialogTitle>
-                                            <DialogDescription className="text-md text-gray-600 ">
-                                                Zuvy team will receive your
-                                                request and take a decision on
-                                                granting a re-attempt
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <div className="flex justify-end mt-4">
-                                            {/* lets close the dialog on clicking cancel button */}
-                                            <Button
-                                                variant="outline"
-                                                className="border border-[#4A4A4A]"
-                                                onClick={() =>
-                                                    setReattemptDialogOpen(
-                                                        false
-                                                    )
-                                                }
-                                            >
-                                                Cancel
-                                            </Button>
-                                            <Button
-                                                className="ml-4"
-                                                onClick={requestReattempt}
-                                            >
-                                                Send Request
-                                            </Button>
+                                        <div>
+                                            {isSubmitedAt
+                                                ? `You Can Request For Re-Attempt before ${formatToIST(assessmentShortInfo.endDatetime)} If You Faced Any Issue`
+                                                : 'Your previous assessment attempt was interrupted'}
                                         </div>
-                                    </DialogContent>
-                                </Dialog>
-                            </div>
-                        </>
-                    )}
-
-                    {/* {!reattemptRequested && !reattemptApproved && isAssessmentStarted &&
-                        chapterContent.status === 'Pending' &&
-                        !isSubmitedAt &&
-                        !isTimeOver && (
-                            <p className="text-md font-semibold text-red-400">
-                                You have not submitted the assessment properly.
-                                You will get the option to apply for Re-Attempt
-                                once the deadline is crossed.
-                            </p>
-                        )
-                    } */}
+                                    </h2>
+                                    <Dialog
+                                        open={reattemptDialogOpen}
+                                        onOpenChange={setReattemptDialogOpen}
+                                    >
+                                        <DialogTrigger asChild>
+                                            <Button className="mt-4">
+                                                Request Re-Attempt
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogOverlay />
+                                        <DialogContent className=" ">
+                                            <DialogHeader>
+                                                <DialogTitle className="text-lg font-bold text-gray-800 ">
+                                                    Requesting Re-Attempt
+                                                </DialogTitle>
+                                                <DialogDescription className="text-md text-gray-600 ">
+                                                    Zuvy team will receive your
+                                                    request and take a decision on
+                                                    granting a re-attempt
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="flex justify-end mt-4">
+                                                {/* lets close the dialog on clicking cancel button */}
+                                                <Button
+                                                    variant="outline"
+                                                    className="border border-[#4A4A4A]"
+                                                    onClick={() =>
+                                                        setReattemptDialogOpen(
+                                                            false
+                                                        )
+                                                    }
+                                                >
+                                                    Cancel
+                                                </Button>
+                                                <Button
+                                                    className="ml-4"
+                                                    onClick={requestReattempt}
+                                                >
+                                                    Send Request
+                                                </Button>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
+                            </>
+                        )}
 
                     {reattemptRequested && !reattemptApproved && (
-                        <div className="flex flex-col items-center justify-center w-full p-5 mb-5 bg-white border rounded-lg shadow-sm">
+                        <div className="flex flex-col items-center justify-center w-full p-5 bg-white border rounded-lg shadow-sm">
                             <h2 className="text-lg font-semibold text-gray-800">
-                                Your re-attempt request has been sent.
+                                Your re-attempt request has been
+                                sent.
                             </h2>
                             <p className="text-sm text-gray-600">
-                                We’ll notify you on email once it is approved.
+                                We’ll notify you on email once it is
+                                approved.
                             </p>
                         </div>
                     )}
@@ -431,16 +483,16 @@ const Assessment = ({
                         !(
                             reattemptApproved &&
                             reattemptRequested &&
-                            assessmentShortInfo?.submitedOutsourseAssessments
+                            assessmentShortInfo
+                                ?.submitedOutsourseAssessments
                                 ?.length > 0
                         ) && (
-                            <div className={`md:mr-0 mr-10 `}>
+                            <div>
                                 <div
-                                    className={`${
-                                        isPassed
-                                            ? 'bg-green-100 border-green-500'
-                                            : 'bg-red-100 border-red-500 '
-                                    } flex justify-between max-w-lg p-5 rounded-lg border`}
+                                    className={`${isPassed
+                                        ? 'bg-green-100 border-green-500'
+                                        : 'bg-red-100 border-red-500 '
+                                        } flex justify-between max-w-lg p-5 rounded-lg border`}
                                 >
                                     <div className="flex gap-3">
                                         <div className="mt-2">
@@ -467,15 +519,14 @@ const Assessment = ({
                                     <div className="">
                                         <Button
                                             variant="ghost"
-                                            className={`${
-                                                isPassed
-                                                    ? 'text-secondary hover:text-secondary'
-                                                    : 'text-red-500 hover:text-red-500'
-                                            }  font-semibold md:text-lg text-sm `}
+                                            className={`${isPassed
+                                                ? 'text-secondary hover:text-secondary'
+                                                : 'text-red-500 hover:text-red-500'
+                                                }  font-semibold md:text-lg text-sm `}
                                             onClick={handleViewResults}
                                             disabled={
                                                 chapterContent.status ===
-                                                    'Pending' && !isSubmitedAt
+                                                'Pending' && !isSubmitedAt
                                             }
                                         >
                                             View Results
@@ -484,58 +535,104 @@ const Assessment = ({
                                 </div>
                             </div>
                         )}
-                </div>
-            </div>
 
-            <div className="mt-8 flex flex-col items-center justify-center">
-                {(!isAssessmentStarted ||
-                    (reattemptRequested && reattemptApproved)) && (
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="">
-                                    <Button
-                                        onClick={handleStartAssessment}
-                                        className=" "
-                                        disabled={
-                                            isDisabled ||
-                                            (isAssessmentStarted &&
-                                                (!reattemptApproved ||
-                                                    !reattemptRequested)) ||
-                                            isStartingAssessment
-                                        }
-                                    >
-                                        {reattemptApproved &&
+                    {assessmentShortInfo?.assessmentState?.toUpperCase() ===
+                        'ACTIVE' &&
+                        (!isAssessmentStarted ||
+                            (reattemptRequested &&
+                                reattemptApproved)) && (
+                            <div
+                                className={`w-full max-w-lg flex flex-col items-center justify-center rounded-lg bg-[#DCE7E3] p-5 text-center transition-all duration-[1500ms] ease-in-out ${showActiveCard
+                                    ? 'scale-100 opacity-100'
+                                    : 'scale-0 opacity-0'
+                                    }`}
+                            >
+                                <div className="text-[#518672] font-medium">
+                                    {assessmentShortInfo?.endDatetime ? (
+                                        <>
+                                            <p>
+                                                The assessment is
+                                                now available to be
+                                                taken until
+                                            </p>
+                                            <p className="font-semibold">
+                                                {formatToIST(
+                                                    assessmentShortInfo.endDatetime
+                                                )}
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <p>
+                                            The assessment is
+                                            available now
+                                        </p>
+                                    )}
+                                </div>
+                                <Button
+                                    onClick={handleStartAssessment}
+                                    className="mt-5 rounded-md bg-[#4A7C7A] px-6 py-2 text-white hover:bg-[#42706e]"
+                                    disabled={
+                                        isDisabled ||
+                                        (isAssessmentStarted &&
+                                            (!reattemptApproved ||
+                                                !reattemptRequested)) ||
+                                        isStartingAssessment
+                                    }
+                                >
+                                    {reattemptApproved &&
                                         reattemptRequested &&
                                         assessmentShortInfo
                                             ?.submitedOutsourseAssessments
                                             ?.length > 0
-                                            ? 'Re-Attempt Assessment'
-                                            : 'Start Assessment'}
-                                    </Button>
-                                </div>
-                            </TooltipTrigger>
-                            {isDisabled && (
-                                <TooltipContent>
-                                    No Questions Available. Assessment will
-                                    appear soon!
-                                </TooltipContent>
-                            )}
-                            {isDeadlineCrossed && (
-                                <TooltipContent>
-                                    You have missed the deadline to start the
-                                    assessment
-                                </TooltipContent>
-                            )}
-                        </Tooltip>
-                    </TooltipProvider>
-                )}
+                                        ? 'Re-Attempt Assessment'
+                                        : 'Begin Assessment'}
+                                </Button>
+                            </div>
+                        )}
 
-                {isDeadlineCrossed && (
-                    <h3 className="text-red-500 text-md mt-4">
-                        Deadline Crossed
-                    </h3>
-                )}
+                    {assessmentShortInfo?.assessmentState?.toUpperCase() ===
+                        'CLOSED' && (
+                            <div
+                                className={`w-full max-w-lg flex justify-center items-center gap-x-2 rounded-lg bg-red-100 px-6 py-3 font-medium text-red-700 text-center transition-all duration-[1500ms] ease-in-out ${showClosedCard
+                                    ? 'scale-100 opacity-100'
+                                    : 'scale-0 opacity-0'
+                                    }`}
+                            >
+                                <AlertOctagon size={20} />
+                                <span>
+                                    Assessment is closed. You cannot
+                                    attempt it anymore.
+                                </span>
+                            </div>
+                        )}
+
+                    {assessmentShortInfo?.assessmentState?.toUpperCase() ===
+                        'PUBLISHED' && (
+                            <div
+                                className={`w-full max-w-lg flex flex-col text-center justify-center items-center gap-y-4 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 p-6 shadow-lg transition-all duration-[1500ms] ease-in-out ${showPublishedCard
+                                    ? 'scale-100 opacity-100'
+                                    : 'scale-0 opacity-0'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-x-3 text-white">
+                                    <Timer
+                                        size={24}
+                                        className="animate-pulse hidden sm:block"
+                                    />
+                                    <h3 className="text-lg sm:text-xl font-bold tracking-wider">
+                                        Assessment Begins In
+                                    </h3>
+                                </div>
+                                <div className="text-3xl sm:text-4xl font-extrabold text-yellow-400 tracking-widest">
+                                    {countdown}
+                                </div>
+                                <p className="text-gray-300 text-xs sm:text-sm mt-2">
+                                    Get ready to showcase your skills!
+                                    The assessment will begin soon.
+                                </p>
+                            </div>
+                        )}
+                </div>
             </div>
         </div>
     )
