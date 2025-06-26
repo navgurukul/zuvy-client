@@ -3,7 +3,6 @@ import { api } from '@/utils/axios.config'
 // import axios from 'axios'
 
 export const Logout = async () => {
-    // console.log('Heeyyyyy')
     // const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
 
     const access_token = localStorage.getItem('access_token')

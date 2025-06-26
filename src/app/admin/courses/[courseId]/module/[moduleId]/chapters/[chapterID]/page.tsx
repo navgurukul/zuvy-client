@@ -84,15 +84,13 @@ export default function Page({
                 }
 
                 setChapterContent(response.data)
-
-                setLoading(false) // Set loading to false after the delay
-
+                setLoading(false)
                 setActiveChapter(chapterId)
                 setKey((prevKey: any) => prevKey + 1)
+                return response.data
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
-
-                setLoading(false) // Set loading to false after the delay
+                setLoading(false)
             }
         },
         [moduleData, courseId, moduleId]
@@ -251,9 +249,7 @@ export default function Page({
                                     alt="Create Chapter"
                                     className="lg:w-[280px] lg:h-[280px] md:w-[320px] md:h-[320px] object-contain mb-3 opacity-80"
                                 />
-                                <p className="absolute text-lg text-center lg:left-[45px]">
-                                    Create New Chapter
-                                </p>
+                                <p className="absolute text-lg text-center lg:left-[45px]">Create New Chapter</p>
                             </div>
                         </div>
                     )}
