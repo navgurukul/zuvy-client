@@ -44,7 +44,7 @@ function LoginPage({}: Props) {
     const [loading, setLoading] = useState(false)
     const { user, setUser } = getUser()
     const router = useRouter()
-    const googleLoginRef = useRef<HTMLElement>(null)
+    const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
 
     // Handle successful Google Sign-In
     const handleGoogleSuccess = async (
@@ -171,8 +171,22 @@ function LoginPage({}: Props) {
         )
     }
 
-    const googlePromptHandler = () => {
-        window.google.accounts.id.prompt()
+    const handleCustomGoogleLogin = () => {
+        const googleLoginButton =
+            googleLoginWrapperRef.current?.querySelector<HTMLDivElement>(
+                'div[role="button"]'
+            )
+        if (googleLoginButton) {
+            googleLoginButton.click()
+        } else {
+            toast({
+                title: 'Login Error',
+                description:
+                    'Could not start Google login. Please try again.',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            })
+        }
     }
 
     return (
@@ -188,7 +202,7 @@ function LoginPage({}: Props) {
                 <>
                     {/* Main Content Grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 items-start h-screen">
-                        <div className="bg-[#EEF3F1] grid grid-cols-1 md:grid-cols-3 gap-4 px-4 max-w-6xl mx-auto px-11">
+                        <div className="bg-[#EEF3F1] grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto px-11">
                             {/* Left Column */}
                             <div className="flex flex-col justify-between gap-4">
                                 <div className="relative rounded-b-xl overflow-hidden shadow-lg w-full h-64">
@@ -304,7 +318,7 @@ function LoginPage({}: Props) {
                                     Start learning today!
                                 </p>
 
-                                <div className="hidden">
+                                <div className="hidden" ref={googleLoginWrapperRef}>
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={handleGoogleError}
@@ -320,7 +334,7 @@ function LoginPage({}: Props) {
                                 <Button
                                     type="button"
                                     aria-label="Login with Google"
-                                    onClick={googlePromptHandler}
+                                    onClick={handleCustomGoogleLogin}
                                     className="bg-[#518672] hover:bg-[#2f433a] p-4 mt-3 h-auto w-[250px] text-white transition-colors duration-200"
                                 >
                                     <span className="text-lg flex items-center space-x-3">
