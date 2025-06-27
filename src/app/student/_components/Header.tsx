@@ -11,6 +11,11 @@ const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Hide header on assessment page for security and focus
+  if (pathname.includes('/studentAssessment')) {
+    return null;
+  }
+
   const toggleTheme = () => {
     setIsDark(!isDark);
     document.documentElement.classList.toggle('dark');
@@ -27,13 +32,8 @@ const Header = () => {
   };
 
   const handleDashboardClick = () => {
-    const enrolledCourses = mockCourses.filter(course => course.status === 'enrolled');
-    
-    if (enrolledCourses.length === 1) {
-      router.push(`/student/course/${enrolledCourses[0].id}`);
-    } else {
-      router.push('/student/dashboard');
-    }
+     router.push(`/student`);
+
   };
 
   const handleSyllabusClick = () => {
@@ -41,7 +41,7 @@ const Header = () => {
     const courseIdMatch = pathname.match(/\/course\/([^\/]+)/);
     if (courseIdMatch) {
       const courseId = courseIdMatch[1];
-      router.push(`/student/course/${courseId}/syllabus`);
+      router.push(`/student/course/${courseId}/courseSyllabus`);
     }
   };
 

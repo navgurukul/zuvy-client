@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,15 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useLazyLoadedStudentData } from '@/store/store'
-import { api } from "@/utils/axios.config";
+import { useLazyLoadedStudentData } from '@/store/store';
 import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
-
-interface InstructorDetails {
-  id: number;
-  name: string;
-  profilePicture: string | null;
-}
+import { useStudentData } from "@/hooks/useStudentData";
 
 interface UpcomingEvent {
   id: number;
@@ -41,42 +35,18 @@ interface Bootcamp {
   batchId: number;
   batchName: string;
   progress: number;
-  instructorDetails: InstructorDetails;
+  instructorDetails: {
+    id: number;
+    name: string;
+    profilePicture: string | null;
+  };
   upcomingEvents: UpcomingEvent[];
-}
-
-interface StudentData {
-  completedBootcamps: Bootcamp[];
-  inProgressBootcamps: Bootcamp[];
-  totalCompleted: number;
-  totalInProgress: number;
-  totalPages: number;
 }
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
-  const [studentData, setStudentData] = useState<StudentData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { studentData, loading, error, refetch } = useStudentData();
   const { studentData: studentProfile } = useLazyLoadedStudentData();
-
-  useEffect(() => {
-    const fetchStudentData = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/student');
-        setStudentData(response.data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching student data:', err);
-        setError('Failed to load student data');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStudentData();
-  }, []);
 
   const filteredBootcamps = filter === 'enrolled' 
     ? studentData?.inProgressBootcamps || []
@@ -127,18 +97,69 @@ const StudentDashboard = () => {
     );
   };
 
-  const formatUpcomingItem = (item: UpcomingEvent) => {
-    const now = new Date();
-    const itemDate = new Date(item.startTime);
-    const diffTime = itemDate.getTime() - now.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
-
-    if (diffHours < 24) {
-      return `${diffHours} hours`;
-    } else {
-      return `${diffDays} days`;
+  const mapEventType = (type: string) => {
+    if (!type) return '';
+    switch (type.toLowerCase()) {
+      case 'class': return 'Live Class';
+      case 'assessment': return 'Assessment';
+      case 'assignment': return 'Assignment';
+      default: return type.charAt(0).toUpperCase() + type.slice(1);
     }
+  };
+
+  const formatUpcomingItem = (item: UpcomingEvent) => {
+    // Use eventDate as the source of truth for the event's timing.
+    if (!item.eventDate) {
+      return "Date not available";
+    }
+
+    // Handle the specific format "2025-06-27 08:26:00+00"
+    let parsableDateString = item.eventDate;
+    
+    // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
+    if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
+      parsableDateString = parsableDateString.replace(' ', 'T');
+      // Add colon to timezone if missing ("+00" becomes "+00:00")
+      if (parsableDateString.match(/[+-]\d{2}$/)) {
+        parsableDateString += ':00';
+      }
+    }
+    
+    const itemDate = new Date(parsableDateString);
+    const now = new Date();
+
+    if (isNaN(itemDate.getTime())) {
+      // If parsing still fails, try a different approach
+      console.error('Failed to parse date:', item.eventDate);
+      return "Invalid date format";
+    }
+
+    const diffTime = itemDate.getTime() - now.getTime();
+
+    if (diffTime <= 0) {
+      // Since we're not using an end date, we provide a generic past-tense status.
+      if (item.type?.toLowerCase() === 'assignment') {
+        return "Past due";
+      }
+      return "Event has started";
+    }
+
+    // Calculate remaining time
+    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+
+    // Return formatted countdown string
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''}${hours > 0 ? ` ${hours} hr${hours > 1 ? 's' : ''}` : ''}`;
+    }
+    if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` ${minutes} min${minutes > 1 ? 's' : ''}` : ''}`;
+    }
+    if (minutes > 0) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+    return "Starting soon";
   };
 
   if (loading) {
@@ -152,7 +173,7 @@ const StudentDashboard = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <p className="text-destructive mb-4">{error}</p>
-              <Button onClick={() => window.location.reload()}>
+              <Button onClick={refetch}>
                 Try Again
               </Button>
             </div>
@@ -191,7 +212,7 @@ const StudentDashboard = () => {
                   : 'hover:bg-primary-light hover:text-foreground'
               }`}
             >
-              Enrolled 
+              Enrolled
             </Button>
             <Button
               variant={filter === 'completed' ? 'default' : 'outline'}
@@ -203,7 +224,7 @@ const StudentDashboard = () => {
                   : 'hover:bg-primary-light hover:text-foreground'
               }`}
             >
-              Completed 
+              Completed
             </Button>
           </div>
         </div>
@@ -286,50 +307,56 @@ const StudentDashboard = () => {
                 {/* Separator and Upcoming Items - Only for enrolled courses */}
                 {filter === 'enrolled' && bootcamp.upcomingEvents.length > 0 && (
                   <>
-                    {/* Separator with margin */}
                     <div className="border-t border-border mt-6 mb-6"></div>
 
                     {/* Upcoming Items */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {bootcamp.upcomingEvents.slice(0, 3).map((item) => (
-                        <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg">
+                    <div className="overflow-x-auto pb-2 -mx-6 px-6">
+                      <div className="flex flex-nowrap gap-4">
+                        {bootcamp.upcomingEvents.map((item) => {
+                          const eventType = mapEventType(item.type);
+                          return (
+                           <div key={item.id} className="flex-shrink-0 w-full sm:w-80 border rounded-lg p-3">
+                            <div className="flex items-start gap-3">
                           <div className="flex-shrink-0 mt-1">
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              item.type === 'Live Class' 
-                                ? 'bg-primary-light' 
-                                : item.type === 'Assessment'
+                                  eventType === 'Live Class' 
+                                    ? 'bg-primary-light' 
+                                    : eventType === 'Assessment'
                                 ? 'bg-warning-light'
                                 : 'bg-info-light'
                             }`}>
-                              {item.type === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
-                              {item.type === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
-                              {item.type === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
+                                  {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
+                                  {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
+                                  {eventType === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
                             </div>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-start justify-between gap-2 mb-1">
                               <h4 className="text-sm font-medium line-clamp-1">
-                                {item.title}
+                                    {item.title}
                               </h4>
                               <Badge 
                                 variant="outline" 
                                 className={`text-xs px-2 py-0.5 whitespace-nowrap ${
-                                  item.type === 'Live Class' 
-                                    ? 'bg-primary-light text-foreground border-primary-light' 
-                                    : item.type === 'Assessment'
+                                      eventType === 'Live Class' 
+                                        ? 'bg-primary-light text-foreground border-primary-light' 
+                                        : eventType === 'Assessment'
                                     ? 'bg-warning-light text-foreground border-warning-light'
                                     : 'bg-info-light text-foreground border-info-light'
                                 }`}
                               >
-                                {item.type}
+                                    {eventType}
                               </Badge>
                             </div>
-                            <p className="text-xs text-left text-muted-foreground mb-2">
-                              {item.type === 'Assignment' ? 'Due' : 'Starts'} in {formatUpcomingItem(item)}
+                                <p className="text-xs text-left text-muted-foreground mb-2">
+                                  {eventType === 'Assignment' ? 'Due' : 'Starts'} in {formatUpcomingItem(item)}
                             </p>
                           </div>
                         </div>
-                      ))}
+                           </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </>
                 )}
@@ -359,4 +386,4 @@ const StudentDashboard = () => {
   );
 };
 
-export default StudentDashboard; 
+export default StudentDashboard;

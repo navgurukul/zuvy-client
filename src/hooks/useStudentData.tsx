@@ -10,8 +10,14 @@ interface InstructorDetails {
 interface UpcomingEvent {
   id: number;
   title: string;
-  dateTime: string;
-  type: 'class' | 'assessment' | 'assignment';
+  startTime: string;
+  endTime: string;
+  status: string;
+  bootcampId: number;
+  bootcampName: string;
+  batchId: number;
+  eventDate: string;
+  type: string;
 }
 
 interface Bootcamp {

@@ -15,53 +15,53 @@ import { useUpcomingEvents, Event as UpcomingEvent } from '@/hooks/useUpcomingEv
 import { useCompletedClasses, CompletedClass } from '@/hooks/useCompletedClasses';
 import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton';
 
-const CourseDashboard = ({courseId}: {courseId: string}) => {
-  
+const CourseDashboard = ({ courseId }: { courseId: string }) => {
+
   const [showAllModules, setShowAllModules] = useState(false);
-  const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
-  const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
-  const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
-  const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
+    const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
+    const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
+    const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
+    const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
 
-  // Show loading skeleton while fetching API data
-  if (progressLoading || modulesLoading || eventsLoading || classesLoading) {
-    return (
-      <CourseDashboardSkeleton />
-    );
-  }
+    // Show loading skeleton while fetching API data
+    if (progressLoading || modulesLoading || eventsLoading || classesLoading) {
+        return (
+            <CourseDashboardSkeleton />
+        );
+    }
 
-  // Show error state if API fails
-  if (progressError || modulesError || eventsError || classesError) {
+    // Show error state if API fails
+    if (progressError || modulesError || eventsError || classesError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-heading font-bold mb-2">Failed to Load Course Data</h1>
-          <p className="text-muted-foreground mb-4">{progressError || modulesError || eventsError || classesError}</p>
-          <Button onClick={() => window.location.reload()}>
-            Try Again
+                    <h1 className="text-2xl font-heading font-bold mb-2">Failed to Load Course Data</h1>
+                    <p className="text-muted-foreground mb-4">{progressError || modulesError || eventsError || classesError}</p>
+                    <Button onClick={() => window.location.reload()}>
+                        Try Again
           </Button>
         </div>
       </div>
     );
   }
 
-  // Use real progress data if available, otherwise fall back to mock data
-  const currentProgress = progressData?.data?.progress || 0;
-  const batchName = progressData?.batchInfo?.batchName || '';
-  const totalStudents = progressData?.batchInfo?.totalEnrolledStudents || 0;
-  const instructorName = progressData?.instructorDetails?.instructorName || '';
-  const instructorAvatar = progressData?.instructorDetails?.instructorProfilePicture || '';
-  const courseName = progressData?.data?.bootcampTracking?.name || '';
-  const courseDescription = progressData?.data?.bootcampTracking?.description || '';
-  const courseCoverImage = progressData?.data?.bootcampTracking?.coverImage || '';
-  const collaborator = progressData?.data?.bootcampTracking?.collaborator || '';
+    // Use real progress data if available, otherwise fall back to mock data
+    const currentProgress = progressData?.data?.progress || 0;
+    const batchName = progressData?.batchInfo?.batchName || '';
+    const totalStudents = progressData?.batchInfo?.totalEnrolledStudents || 0;
+    const instructorName = progressData?.instructorDetails?.instructorName || '';
+    const instructorAvatar = progressData?.instructorDetails?.instructorProfilePicture || '';
+    const courseName = progressData?.data?.bootcampTracking?.name || '';
+    const courseDescription = progressData?.data?.bootcampTracking?.description || '';
+    const courseCoverImage = progressData?.data?.bootcampTracking?.coverImage || '';
+    const collaborator = progressData?.data?.bootcampTracking?.collaborator || '';
 
-  // Use API modules if available, otherwise fall back to mock modules
-  const modulesToDisplay = apiModules || [];
-  const modulesToShow = showAllModules ? modulesToDisplay : modulesToDisplay.slice(0, 7);
+    // Use API modules if available, otherwise fall back to mock modules
+    const modulesToDisplay = apiModules || [];
+    const modulesToShow = showAllModules ? modulesToDisplay : modulesToDisplay.slice(0, 7);
 
-  const formatDate = (date: Date | string) => {
-    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    const formatDate = (date: Date | string) => {
+        const dateObj = typeof date === 'string' ? new Date(date) : date;
     return new Intl.DateTimeFormat('en-US', {
       weekday: 'short',
       month: 'short',
@@ -69,7 +69,7 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
-    }).format(dateObj);
+        }).format(dateObj);
   };
 
   const formatDateRange = () => {
@@ -84,15 +84,15 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
     return `From ${today.toLocaleDateString('en-US', formatOptions)} to ${seventhDay.toLocaleDateString('en-US', formatOptions)}`;
   };
 
-  const getEventType = (type: string): 'class' | 'assessment' | 'assignment' | 'unknown' => {
-    if (type.toLowerCase().includes('class')) return 'class';
-    if (type.toLowerCase().includes('assessment')) return 'assessment';
-    if (type.toLowerCase().includes('assignment')) return 'assignment';
-    return 'unknown';
-  }
+    const getEventType = (type: string): 'class' | 'assessment' | 'assignment' | 'unknown' => {
+        if (type.toLowerCase().includes('class')) return 'class';
+        if (type.toLowerCase().includes('assessment')) return 'assessment';
+        if (type.toLowerCase().includes('assignment')) return 'assignment';
+        return 'unknown';
+    }
 
   const getItemIcon = (type: string) => {
-    switch (getEventType(type)) {
+        switch (getEventType(type)) {
       case 'class': return <Video className="w-5 h-5 text-primary" />;
       case 'assessment': return <BookOpen className="w-5 h-5 text-warning" />;
       case 'assignment': return <FileText className="w-5 h-5 text-info" />;
@@ -101,11 +101,11 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
   };
 
   const getItemIconWithBackground = (type: string) => {
-    switch (getEventType(type)) {
+        switch (getEventType(type)) {
       case 'class':
         return (
-          <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
-            <Video className="w-5 h-5 text-primary" />
+                    <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
+                        <Video className="w-5 h-5 text-primary" />
           </div>
         );
       case 'assessment':
@@ -129,52 +129,52 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
     }
   };
 
-  const getTimeRemaining = (eventDate: string) => {
+    const getTimeRemaining = (eventDate: string) => {
     const now = new Date();
-    const eventTime = new Date(eventDate);
-    const timeDiff = eventTime.getTime() - now.getTime();
+        const eventTime = new Date(eventDate);
+        const timeDiff = eventTime.getTime() - now.getTime();
     
-    if (timeDiff <= 0) return "Event Started";
+        if (timeDiff <= 0) return "Event Started";
     
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
     
-    if (days > 0) {
-      const dayString = `${days} day${days > 1 ? 's' : ''}`;
-      const hourString = hours > 0 ? ` and ${hours} hour${hours > 1 ? 's' : ''}` : '';
-      return `Starts in ${dayString}${hourString}`;
-    }
-    
-    if (hours > 0) {
-      const hourString = `${hours} hour${hours > 1 ? 's' : ''}`;
-      const minuteString = minutes > 0 ? ` and ${minutes} minute${minutes > 1 ? 's' : ''}` : '';
-      return `Starts in ${hourString}${minuteString}`;
-    }
-    
-    if (minutes > 0) {
-      return `Starts in ${minutes} minute${minutes > 1 ? 's' : ''}`;
-    }
+        if (days > 0) {
+            const dayString = `${days} day${days > 1 ? 's' : ''}`;
+            const hourString = hours > 0 ? ` and ${hours} hour${hours > 1 ? 's' : ''}` : '';
+            return `Starts in ${dayString}${hourString}`;
+        }
+
+        if (hours > 0) {
+            const hourString = `${hours} hour${hours > 1 ? 's' : ''}`;
+            const minuteString = minutes > 0 ? ` and ${minutes} minute${minutes > 1 ? 's' : ''}` : '';
+            return `Starts in ${hourString}${minuteString}`;
+        }
+
+        if (minutes > 0) {
+            return `Starts in ${minutes} minute${minutes > 1 ? 's' : ''}`;
+        }
     
     return "Starting soon";
   };
 
-  const canStartEvent = (eventDate: string) => {
-    return new Date(eventDate).getTime() <= new Date().getTime();
-  };
+    const canStartEvent = (eventDate: string) => {
+        return new Date(eventDate).getTime() <= new Date().getTime();
+    };
 
-  const getEventActionText = (type: string) => {
-    switch(getEventType(type)) {
-      case 'class': return 'Join Class';
-      case 'assessment': return 'Start Assessment';
-      case 'assignment': return 'View Assignment';
-      default: return 'View Event';
+    const getEventActionText = (type: string) => {
+        switch (getEventType(type)) {
+            case 'class': return 'Join Class';
+            case 'assessment': return 'Start Assessment';
+            case 'assignment': return 'View Assignment';
+            default: return 'View Event';
+        }
     }
-  }
 
-  const getModuleCTA = (module: any, progress: number) => {
-    if (module.isLock) {
-      return "Module Locked";
+    const getModuleCTA = (module: any, progress: number) => {
+        if (module.isLock) {
+            return "Module Locked";
     } else if (progress === 0) {
       return "Start Learning";
     } else if (progress === 100) {
@@ -184,39 +184,39 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
     }
   };
 
-  const getModuleProgress = (module: any) => {
-    return module.progress || 0;
-  };
+    const getModuleProgress = (module: any) => {
+        return module.progress || 0;
+    };
 
-  const getModuleDescription = (module: any) => {
-    return module.description || "Learn essential concepts and build practical skills.";
-  };
+    const getModuleDescription = (module: any) => {
+        return module.description || "Learn essential concepts and build practical skills.";
+    };
 
-  const formatTimeAlloted = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const days = Math.floor(hours / 24);
-    
-    if (days > 0) {
-      return `${days} day${days > 1 ? 's' : ''}`;
-    } else if (hours > 0) {
-      return `${hours} hour${hours > 1 ? 's' : ''}`;
-    } else {
-      return `${Math.floor(seconds / 60)} minute${Math.floor(seconds / 60) > 1 ? 's' : ''}`;
-    }
-  };
+    const formatTimeAlloted = (seconds: number) => {
+        const hours = Math.floor(seconds / 3600);
+        const days = Math.floor(hours / 24);
 
-  const getContentCount = (module: any) => {
-    const counts = [];
-    if (module.quizCount > 0) counts.push(`${module.quizCount} Quiz${module.quizCount > 1 ? 'zes' : ''}`);
-    if (module.assignmentCount > 0) counts.push(`${module.assignmentCount} Assignment${module.assignmentCount > 1 ? 's' : ''}`);
-    if (module.codingProblemsCount > 0) counts.push(`${module.codingProblemsCount} Coding Problem${module.codingProblemsCount > 1 ? 's' : ''}`);
-    if (module.articlesCount > 0) counts.push(`${module.articlesCount} Article${module.articlesCount > 1 ? 's' : ''}`);
-    if (module.formCount > 0) counts.push(`${module.formCount} Form${module.formCount > 1 ? 's' : ''}`);
-    
-    return counts.join(' • ');
-  };
+        if (days > 0) {
+            return `${days} day${days > 1 ? 's' : ''}`;
+        } else if (hours > 0) {
+            return `${hours} hour${hours > 1 ? 's' : ''}`;
+        } else {
+            return `${Math.floor(seconds / 60)} minute${Math.floor(seconds / 60) > 1 ? 's' : ''}`;
+        }
+    };
 
-  const AttendanceModal = ({ classes }: { classes: CompletedClass[] }) => (
+    const getContentCount = (module: any) => {
+        const counts = [];
+        if (module.quizCount > 0) counts.push(`${module.quizCount} Quiz${module.quizCount > 1 ? 'zes' : ''}`);
+        if (module.assignmentCount > 0) counts.push(`${module.assignmentCount} Assignment${module.assignmentCount > 1 ? 's' : ''}`);
+        if (module.codingProblemsCount > 0) counts.push(`${module.codingProblemsCount} Coding Problem${module.codingProblemsCount > 1 ? 's' : ''}`);
+        if (module.articlesCount > 0) counts.push(`${module.articlesCount} Article${module.articlesCount > 1 ? 's' : ''}`);
+        if (module.formCount > 0) counts.push(`${module.formCount} Form${module.formCount > 1 ? 's' : ''}`);
+
+        return counts.join(' • ');
+    };
+
+    const AttendanceModal = ({ classes }: { classes: CompletedClass[] }) => (
     <>
       {/* Desktop Dialog */}
       <div className="hidden lg:block">
@@ -231,18 +231,18 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
               <DialogTitle className="text-xl">Full Attendance Record</DialogTitle>
             </DialogHeader>
             <div className="space-y-1">
-              {classes.map((classItem, index, array) => (
+                            {classes.map((classItem, index, array) => (
                 <div key={classItem.id}>
                   <div className="flex items-center justify-between py-4">
-                    <div className="flex-1 text-left">
-                      <h4 className="text-lg font-bold">{classItem.title}</h4>
+                                        <div className="flex-1 text-left">
+                                            <h4 className="text-lg font-bold">{classItem.title}</h4>
                       <p className="text-sm text-muted-foreground">
-                        {formatDate(classItem.startTime)}
+                                                {formatDate(classItem.startTime)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
-                        {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
+                                            <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
+                                                {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
                       </Badge>
                     </div>
                   </div>
@@ -267,18 +267,18 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
               <SheetTitle className="text-xl">Full Attendance Record</SheetTitle>
             </SheetHeader>
             <div className="space-y-1 mt-4 overflow-y-auto">
-              {classes.map((classItem, index, array) => (
+                            {classes.map((classItem, index, array) => (
                 <div key={classItem.id}>
                   <div className="flex items-center justify-between py-4">
                     <div className="flex-1">
-                      <h4 className="text-lg font-bold">{classItem.title}</h4>
+                                            <h4 className="text-lg font-bold">{classItem.title}</h4>
                       <p className="text-sm text-muted-foreground">
-                        {formatDate(classItem.startTime)}
+                                                {formatDate(classItem.startTime)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
-                        {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
+                                            <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
+                                                {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
                       </Badge>
                     </div>
                   </div>
@@ -301,70 +301,70 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
             {/* Desktop Layout */}
             <div className="hidden md:flex flex-col md:flex-row items-start gap-6 mb-6">
               <div className="flex-shrink-0">
-                <Image
-                  src={courseCoverImage || '/logo.PNG'}
-                  alt={courseName}
-                  width={128}
-                  height={128}
+                                <Image
+                                    src={courseCoverImage || '/logo.PNG'}
+                                    alt={courseName}
+                                    width={128}
+                                    height={128}
                   className="w-32 h-32 rounded-lg object-cover"
                 />
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-                    <p className="text-base md:text-lg text-muted-foreground mb-4 text-left">{courseDescription}</p>
+                                        <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
+                                        <p className="text-base md:text-lg text-muted-foreground mb-4 text-left">{courseDescription}</p>
                     <div className="flex items-center gap-2 mb-4">
                       <Avatar className="w-8 h-8">
-                        <AvatarImage src={instructorAvatar || '/logo.PNG'} />
-                        <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
+                                                <AvatarImage src={instructorAvatar || '/logo.PNG'} />
+                                                <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
                       </Avatar>
-                      <span className="font-medium">{instructorName}</span>
+                                            <span className="font-medium">{instructorName}</span>
                     </div>
                   </div>
-                  {collaborator && <div className="flex items-center gap-2">
+                                    {collaborator && <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
-                    <Image
-                      src={collaborator}
-                      alt="Collaborator Brand"
-                      width={48}
-                      height={48}
+                                        <Image
+                                            src={collaborator}
+                                            alt="Collaborator Brand"
+                                            width={48}
+                                            height={48}
                       className="h-12"
                     />
-                  </div>}
-                  
+                                    </div>}
+
                 </div>
               </div>
             </div>
 
             {/* Mobile Layout */}
             <div className="md:hidden mb-6">
-              <Image
-                src={courseCoverImage || '/logo.PNG'}
-                alt={courseName}
-                width={400}
-                height={160}
+                            <Image
+                                src={courseCoverImage || '/logo.PNG'}
+                                alt={courseName}
+                                width={400}
+                                height={160}
                 className="w-full h-40 rounded-lg object-cover mb-4"
               />
-              <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-              <p className="text-base text-muted-foreground mb-4 text-left">{courseDescription}</p>
+                            <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
+                            <p className="text-base text-muted-foreground mb-4 text-left">{courseDescription}</p>
               <div className="flex items-center gap-2 mb-4">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={instructorAvatar || '/logo.PNG'} />
-                  <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
+                                    <AvatarImage src={instructorAvatar || '/logo.PNG'} />
+                                    <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
                 </Avatar>
-                <span className="font-medium">{instructorName}</span>
+                                <span className="font-medium">{instructorName}</span>
               </div>
-              {collaborator && <div className="flex items-center gap-2 mb-4">
+                            {collaborator && <div className="flex items-center gap-2 mb-4">
                 <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
-                <Image
-                  src={collaborator}
-                  alt="Collaborator Brand"
-                  width={48}
-                  height={48}
+                                <Image
+                                    src={collaborator}
+                                    alt="Collaborator Brand"
+                                    width={48}
+                                    height={48}
                   className="h-12"
                 />
-              </div>}
+                            </div>}
             </div>
 
             {/* Progress Bar - Updated with primary-light background */}
@@ -372,16 +372,16 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
               <div className="relative bg-primary-light rounded-full h-2 w-full">
                 <div 
                   className="bg-primary h-2 rounded-full transition-all duration-300 relative"
-                  style={{ width: `${currentProgress}%` }}
+                                    style={{ width: `${currentProgress}%` }}
                 >
                   <div 
                     className="absolute top-1/2 transform -translate-y-1/2 bg-white px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
                     style={{ 
-                      right: currentProgress === 100 ? '0' : currentProgress === 0 ? 'auto' : '-12px',
-                      left: currentProgress === 0 ? '0' : 'auto'
+                                            right: currentProgress === 100 ? '0' : currentProgress === 0 ? 'auto' : '-12px',
+                                            left: currentProgress === 0 ? '0' : 'auto'
                     }}
                   >
-                    {currentProgress}%
+                                        {currentProgress}%
                   </div>
                 </div>
               </div>
@@ -395,7 +395,7 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
                 </Badge>
                 <div>
                   <p className="text-sm text-muted-foreground">Batch</p>
-                  <p className="font-medium">{batchName}</p>
+                                    <p className="font-medium">{batchName}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -404,7 +404,7 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
                 </Badge>
                 <div>
                   <p className="text-sm text-muted-foreground">Students</p>
-                  <p className="font-medium">{totalStudents} enrolled</p>
+                                    <p className="font-medium">{totalStudents} enrolled</p>
                 </div>
               </div>
             </div>
@@ -417,39 +417,40 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
             <div className="lg:col-span-2 space-y-8">
               {/* Course Modules Section */}
               <div>
-                <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Modules</h2>
+                                <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Modules</h2>
                 
                 <div className="space-y-4">
-                  {modulesToShow.map((module: any) => {
-                    const moduleProgress = getModuleProgress(module);
-                    const isCurrentModule = moduleProgress > 0 && moduleProgress < 100;
+                                    {modulesToShow.map((module: any) => {
+                                        const moduleProgress = getModuleProgress(module);
+                                        const isCurrentModule = moduleProgress > 0 && moduleProgress < 100;
                     const isCompleted = moduleProgress === 100;
-                    const isLocked = module.isLock;
+                                        const isLocked = module.isLock;
                     
                     return (
-                      <Card key={module.id} className={`shadow-4dp ${isCurrentModule ? 'border-2 border-primary' : ''} ${isLocked ? 'opacity-60' : ''}`}>
+                                            <Link href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
+                                                <Card key={module.id} className={`shadow-4dp ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''}`}>
                         <CardContent className="p-6">
                           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-                            <div className="flex-1 text-left">
+                                                            <div className="flex-1 text-left">
                               {isCurrentModule && (
-                                <Badge className="mb-2 bg-primary-light text-primary border-primary/20 self-start">Current Module</Badge>
+                                                                    <Badge className="mb-2 bg-primary-light text-primary border-primary/20 self-start">Current Module</Badge>
                               )}
                               {isCompleted && (
-                                <Badge className="mb-2 bg-success-light text-success border-success/20 self-start">Completed</Badge>
-                              )}
-                              {isLocked && (
-                                <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
-                                  <Lock className="w-3 h-3" />
-                                  Locked
-                                </Badge>
-                              )}
-                              <h3 className="text-xl font-heading font-semibold mb-2 text-left">
-                                Module {module.order}: {module.name}
+                                                                    <Badge className="mb-2 bg-success-light text-success border-success/20 self-start">Completed</Badge>
+                                                                )}
+                                                                {isLocked && (
+                                                                    <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
+                                                                        <Lock className="w-3 h-3" />
+                                                                        Locked
+                                                                    </Badge>
+                                                                )}
+                                                                <h3 className="text-xl font-heading font-semibold mb-2 text-left">
+                                                                    Module {module.order}: {module.name}
                               </h3>
-                              <p className="text-muted-foreground mb-3 text-sm text-left">
-                                {getModuleDescription(module)}
-                              </p>
-                              {/* <div className="flex flex-wrap gap-2 mb-3">
+                                                                <p className="text-muted-foreground mb-3 text-sm text-left">
+                                                                    {getModuleDescription(module)}
+                                                                </p>
+                                                                {/* <div className="flex flex-wrap gap-2 mb-3">
                                 <Badge variant="outline" className="text-xs">
                                   {formatTimeAlloted(module.timeAlloted)}
                                 </Badge>
@@ -463,18 +464,18 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
 
                             {/* Action Button - Desktop: top right, Mobile: bottom */}
                             <div className="hidden lg:flex flex-shrink-0">
-                              <Button 
-                                className={`px-6 ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
-                                disabled={isLocked}
-                                asChild={!isLocked}
-                              >
-                                {isLocked ? (
-                                  <span>Module Locked</span>
-                                ) : (
-                                  <Link href={`/student/course/${courseId}/module/${module.id}`}>
-                                    {getModuleCTA(module, moduleProgress)}
-                                  </Link>
-                                )}
+                                                                <Button
+                                                                    className={`px-6 ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
+                                                                    disabled={isLocked}
+                                                                    asChild={!isLocked}
+                                                                >
+                                                                    {isLocked ? (
+                                                                        <span>Module Locked</span>
+                                                                    ) : (
+                                                                        <Link href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
+                                                                            {getModuleCTA(module, moduleProgress)}
+                                </Link>
+                                                                    )}
                               </Button>
                             </div>
                           </div>
@@ -483,7 +484,7 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
                           <div className="mb-4 lg:mb-0">
                             <div className="relative bg-primary-light rounded-full h-2 w-full">
                               <div 
-                                className={`h-2 rounded-full transition-all duration-300 relative ${isLocked ? 'bg-muted' : 'bg-primary'}`}
+                                                                    className={`h-2 rounded-full transition-all duration-300 relative ${isLocked ? 'bg-muted' : 'bg-primary'}`}
                                 style={{ width: `${moduleProgress}%` }}
                               >
                                 <div 
@@ -501,31 +502,32 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
 
                           {/* Action Button - Mobile: bottom */}
                           <div className="lg:hidden mt-4">
-                            <Button 
-                              className={`w-full ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
-                              disabled={isLocked}
-                              asChild={!isLocked}
-                            >
-                              {isLocked ? (
-                                <span>Module Locked</span>
-                              ) : (
-                                <Link href={`/student/course/${courseId}/module/${module.id}`}>
-                                  {getModuleCTA(module, moduleProgress)}
-                                </Link>
-                              )}
+                                                            <Button
+                                                                className={`w-full ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
+                                                                disabled={isLocked}
+                                                                asChild={!isLocked}
+                                                            >
+                                                                {isLocked ? (
+                                                                    <span>Module Locked</span>
+                                                                ) : (
+                                                                    <Link href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
+                                                                        {getModuleCTA(module, moduleProgress)}
+                              </Link>
+                                                                )}
                             </Button>
                           </div>
                         </CardContent>
                       </Card>
+                                            </Link>
                     );
                   })}
                   
-                  {modulesToDisplay.length > 7 && !showAllModules && (
+                                    {modulesToDisplay.length > 7 && !showAllModules && (
                     <div className="flex justify-center">
                       <Button 
                         variant="link" 
                         onClick={() => setShowAllModules(true)}
-                        className="text-primary hover:text-primary-dark"
+                                                className="text-primary hover:text-primary-dark"
                       >
                         Show More Modules
                       </Button>
@@ -538,7 +540,7 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
             {/* Right Column - What's Next & Attendance */}
             <div className="space-y-8">
               {/* What's Next Section */}
-              <Card className="shadow-4dp text-left">
+                            <Card className="shadow-4dp text-left">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl">What's Next?</CardTitle>
                   <p className="text-sm text-muted-foreground">
@@ -546,48 +548,48 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
                   </p>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {upcomingEventsData && upcomingEventsData.events.length > 0 ? (
+                                    {upcomingEventsData && upcomingEventsData.events.length > 0 ? (
                     <div className="space-y-4">
-                      {upcomingEventsData.events.map((item: UpcomingEvent, index: number) => {
-                        const eventType = getEventType(item.type);
-                        const isEventReady = canStartEvent(item.eventDate);
+                                            {upcomingEventsData.events.map((item: UpcomingEvent, index: number) => {
+                                                const eventType = getEventType(item.type);
+                                                const isEventReady = canStartEvent(item.eventDate);
 
-                        return (
-                          <div key={item.id}>
-                            <div className="flex items-start gap-4">
-                              <div className="flex-shrink-0 mt-1">
-                                {getItemIconWithBackground(item.type)}
+                                                return (
+                        <div key={item.id}>
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 mt-1">
+                              {getItemIconWithBackground(item.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between gap-4 mb-2">
+                                <h4 className="font-medium text-base">{item.title}</h4>
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between gap-4 mb-2">
-                                  <h4 className="font-medium text-base">{item.title}</h4>
-                                </div>
-                                <div className="flex items-center justify-between mb-3">
-                                  <p className="text-sm font-medium">
-                                    {eventType === 'class' && `Scheduled on ${formatDate(item.eventDate)}`}
-                                    {eventType === 'assessment' && `Starts on ${formatDate(item.eventDate)}`}
-                                    {eventType === 'assignment' && `Due on ${formatDate(item.eventDate)}`}
-                                  </p>
-                                </div>
-                                {/* CTA - Bottom right */}
-                                <div className="flex justify-end">
-                                  <Button 
-                                    size="sm" 
-                                    variant="link"
-                                    disabled={!isEventReady}
-                                    className="text-primary p-0 h-auto"
-                                  >
-                                    {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
-                                  </Button>
-                                </div>
+                              <div className="flex items-center justify-between mb-3">
+                                <p className="text-sm font-medium">
+                                                                        {eventType === 'class' && `Scheduled on ${formatDate(item.eventDate)}`}
+                                                                        {eventType === 'assessment' && `Starts on ${formatDate(item.eventDate)}`}
+                                                                        {eventType === 'assignment' && `Due on ${formatDate(item.eventDate)}`}
+                                </p>
+                              </div>
+                              {/* CTA - Bottom right */}
+                              <div className="flex justify-end">
+                                <Button 
+                                  size="sm" 
+                                  variant="link"
+                                                                        disabled={!isEventReady}
+                                  className="text-primary p-0 h-auto"
+                                >
+                                                                        {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
+                                </Button>
                               </div>
                             </div>
-                            {index < upcomingEventsData.events.length - 1 && (
-                              <div className="border-t border-border mt-4"></div>
-                            )}
                           </div>
-                        )
-                      })}
+                                                        {index < upcomingEventsData.events.length - 1 && (
+                            <div className="border-t border-border mt-4"></div>
+                          )}
+                        </div>
+                                                )
+                                            })}
                     </div>
                   ) : (
                     <div className="text-center py-8">
@@ -599,39 +601,39 @@ const CourseDashboard = ({courseId}: {courseId: string}) => {
               </Card>
 
               {/* Attendance */}
-              <Card className=" text-left shadow-4dp">
+                            <Card className=" text-left shadow-4dp">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-xl">Attendance</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <div className="text-center mb-6">
                     <div className="text-3xl font-bold text-primary mb-2">
-                      {completedClassesData?.attendanceStats?.attendancePercentage || 0}%
+                                            {completedClassesData?.attendanceStats?.attendancePercentage || 0}%
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {completedClassesData?.attendanceStats?.presentCount || 0} of {completedClassesData?.totalClasses || 0} classes attended
+                                            {completedClassesData?.attendanceStats?.presentCount || 0} of {completedClassesData?.totalClasses || 0} classes attended
                     </p>
                   </div>
 
                   <div className="space-y-4 mb-6">
                     <h4 className="font-medium text-sm">Recent Classes</h4>
-                    {(completedClassesData?.classes || []).slice(0, 3).map((classItem: CompletedClass) => (
+                                        {(completedClassesData?.classes || []).slice(0, 3).map((classItem: CompletedClass) => (
                       <div key={classItem.id} className="flex items-center justify-between">
-                        <div className="flex-1 text-left">
-                          <p className="font-medium text-sm">{classItem.title}</p>
+                                                <div className="flex-1 text-left">
+                                                    <p className="font-medium text-sm">{classItem.title}</p>
                           <p className="text-xs text-muted-foreground">
-                            {formatDate(classItem.startTime)}
+                                                        {formatDate(classItem.startTime)}
                           </p>
                         </div>
-                        <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
-                          {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
+                                                <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
+                                                    {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
                         </Badge>
                       </div>
                     ))}
                   </div>
 
                   <div className="flex justify-center">
-                    <AttendanceModal classes={completedClassesData?.classes || []} />
+                                        <AttendanceModal classes={completedClassesData?.classes || []} />
                   </div>
                 </CardContent>
               </Card>
