@@ -79,7 +79,8 @@ function ChapterModal({
     
     return (
         <Dialog open={true}>
-            <DialogContent>
+            <DialogContent className='max-w-max'>
+                <DialogTitle className="mb-3 text-left">New Chapter</DialogTitle>
                 <div className="grid grid-cols-3 p-3 gap-y-6 gap-x-2 ">
                     <div
                         className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
@@ -144,7 +145,7 @@ function ChapterModal({
                     setLiveDialogOpen(open)
                     if (!open) setClassType('createLiveClass')
                 }}>
-                    <DialogContent>
+                    <DialogContent className="max-w-2xl w-full">
                         <RadioGroup value={classType} className='flex flex-row items-center' onValueChange={setClassType} defaultValue="createLiveClass">
                             <div className="flex  space-x-2">
                                 <RadioGroupItem value="createLiveClass" id="r1" />

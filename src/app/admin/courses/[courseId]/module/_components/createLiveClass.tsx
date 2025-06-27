@@ -53,7 +53,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 import { api } from '@/utils/axios.config'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 const formSchema = z
     .object({
@@ -125,6 +125,7 @@ const formSchema = z
 const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapters, onClose}) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
+    const router = useRouter()
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     const [isCalendarOpen, setCalendarOpen] = useState(false)
     const [bootcampData, setBootcampData] = useState<any>([])
@@ -283,14 +284,22 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
         console.log(transformedData)
 
         try {
-            const res = await api.post('/classes', transformedData)
+            await api.post('/classes', transformedData)
+            
+            const chaptersRes = await api.get(`/Content/allChaptersOfModule/${params.moduleId}`)
+            const chapters = chaptersRes?.data?.chapterWithTopic || []
+            
+            const latestChapter = chapters[chapters.length - 1]
+            if (latestChapter) {
+                router.push(`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`)
+            }
             toast.success({
                 title: 'Success',
                 description: 'Class Created Successful',
             })
             fetchingChapters()
             form.reset()
-            onClose() // <-- Close modal here
+            onClose()
         } catch (error) {
             toast.error({
                 title: 'Error',

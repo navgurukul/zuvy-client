@@ -3,7 +3,7 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { api } from '@/utils/axios.config'
 import { OFFSET, POSITION } from '@/utils/constant'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { existingClassColumns } from './existingLiveClassesColumn'
 import { getIsRowSelected } from '@/store/store'
 import { Table } from '@/components/ui/table'
@@ -23,12 +23,11 @@ type ExistingLiveClassProps = {
     onClose: () => void;
 };
 const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps) => {
-
-
     const [position, setPosition] = useState(POSITION)
     const [selectedRows, setSelectedRows] = useState<any[]>([])
     const [open, setOpen] = useState(false)
     const param = useParams()
+    const router = useRouter()
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     const [offset, setOffset] = useState<number>(OFFSET)
@@ -74,8 +73,16 @@ const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps
 
     async function handleCreateChapters() {
         await addLiveClassesAsaChapter()
+        
+        const chaptersRes = await api.get(`/Content/allChaptersOfModule/${param.moduleId}`)
+        const chapters = chaptersRes?.data?.chapterWithTopic || []
+        
+        const latestChapter = chapters[chapters.length - 1]
+        if (latestChapter) {
+            router.push(`/admin/courses/${param.courseId}/module/${param.moduleId}/chapters/${latestChapter.chapterId}`)
+        }
         setOpen(false)
-        onClose() // <-- Close parent modal as well
+        onClose()
     }
 
     return (

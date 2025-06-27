@@ -71,42 +71,54 @@ export const existingClassColumns: ColumnDef<any>[] = [
     enableSorting: false,
     enableHiding: true,
   },
+  // {
+  //   accessorKey: 'startTime',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader className="w-[140px]" column={column} title="Start Time" />
+  //   ),
+  //   cell: ({ row }) => {
+  //     const cls = row.original
+  //     return <div className="w-[140px] text-left truncate">{new Date(cls.startTime).toLocaleString()}</div>
+  //   },
+  //   enableSorting: false,
+  //   enableHiding: true,
+  // },
+  // {
+  //   accessorKey: 'endTime',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader className="w-[140px]" column={column} title="End Time" />
+  //   ),
+  //   cell: ({ row }) => {
+  //     const cls = row.original
+  //     return <div className="w-[140px] text-left truncate">{new Date(cls.endTime).toLocaleString()}</div>
+  //   },
+  //   enableSorting: false,
+  //   enableHiding: true,
+  // },
+  // {
+  //   accessorKey: 'status',
+  //   header: ({ column }) => (
+  //     <DataTableColumnHeader className="w-[100px]" column={column} title="Status" />
+  //   ),
+  //   cell: ({ row }) => {
+  //     const cls = row.original
+  //     return (
+  //       <div className="w-[100px] text-green-600 text-left font-semibold capitalize truncate">
+  //         {cls.status}
+  //       </div>
+  //     )
+  //   },
+  //   enableSorting: false,
+  //   enableHiding: true,
+  // },
   {
-    accessorKey: 'startTime',
+    accessorKey: 'moduleName',
     header: ({ column }) => (
-      <DataTableColumnHeader className="w-[140px]" column={column} title="Start Time" />
+      <DataTableColumnHeader className="w-[140px]" column={column} title="Module Name" />
     ),
     cell: ({ row }) => {
       const cls = row.original
-      return <div className="w-[140px] text-left truncate">{new Date(cls.startTime).toLocaleString()}</div>
-    },
-    enableSorting: false,
-    enableHiding: true,
-  },
-  {
-    accessorKey: 'endTime',
-    header: ({ column }) => (
-      <DataTableColumnHeader className="w-[140px]" column={column} title="End Time" />
-    ),
-    cell: ({ row }) => {
-      const cls = row.original
-      return <div className="w-[140px] text-left truncate">{new Date(cls.endTime).toLocaleString()}</div>
-    },
-    enableSorting: false,
-    enableHiding: true,
-  },
-  {
-    accessorKey: 'status',
-    header: ({ column }) => (
-      <DataTableColumnHeader className="w-[100px]" column={column} title="Status" />
-    ),
-    cell: ({ row }) => {
-      const cls = row.original
-      return (
-        <div className="w-[100px] text-green-600 text-left font-semibold capitalize truncate">
-          {cls.status}
-        </div>
-      )
+      return <div className="w-[140px] text-left truncate">{cls.moduleName}</div>
     },
     enableSorting: false,
     enableHiding: true,
