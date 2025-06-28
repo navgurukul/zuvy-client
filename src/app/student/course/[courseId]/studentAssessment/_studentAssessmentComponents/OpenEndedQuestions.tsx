@@ -1,48 +1,150 @@
-'use client';
+import React, { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ChevronLeft, Timer } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import TimerDisplay from './TimerDisplay'
+import { toast } from '@/components/ui/use-toast'
+import { api } from '@/utils/axios.config'
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form'
+import { useRouter } from 'next/navigation'
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
-import TimerDisplay from './TimerDisplay';
+const OpenEndedQuestions = ({
+    onBack,
+    remainingTime,
+    questions,
+    assessmentSubmitId,
+    getSeperateOpenEndedQuestions,
+    getAssessmentData
+}: {
+    onBack: () => void
+    remainingTime: number
+    questions: any[]
+    assessmentSubmitId: number
+    getSeperateOpenEndedQuestions: () => void
+    getAssessmentData: () => void
+}) => {
+    const router = useRouter()
 
-interface OpenEndedQuestionsProps {
-  onBack: () => void;
-  remainingTime: number;
-  questions: any;
-  assessmentSubmitId: number | null;
-  getOpenEndedQuestions: () => void;
-  getAssessmentData: () => void;
+    const formSchema = z.object({
+        answers: z.array(
+            z.string().nonempty({ message: 'This question is required.' })
+        ),
+    })
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+    })
+
+    useEffect(() => {
+        const defaultValues = {
+            answers: questions.map((question) =>
+                question.submissionsData && question.submissionsData.length > 0
+                    ? question.submissionsData[0].answer
+                    : ''
+            ),
+        }
+        form.reset(defaultValues)
+    }, [questions, form])
+
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
+        const openEndedQuestionSubmissionDto = data.answers.map(
+            (answer, index) => ({
+                questionId: questions[index].id,
+                answer,
+            })
+        )
+
+        try {
+            const response = await api.patch(
+                `/submission/openended/assessmentSubmissionId=${assessmentSubmitId}`,
+                { openEndedQuestionSubmissionDto }
+            )
+
+            getAssessmentData()
+
+            toast.success({
+                title: 'Success',
+                description: 'Open-ended questions submitted successfully',
+            })
+
+            getSeperateOpenEndedQuestions()
+
+            setTimeout(() => {
+                onBack()
+            }, 3000)
+        } catch (error: any) {
+            toast.error({
+                title: 'Error',
+                description:
+                    error?.response?.data?.message || 'An error occurred',
+            })
+        }
+    }
+
+    return (
+        <div className="px-4">
+            <div className="flex items-center justify-between gap-2">
+                <div
+                    className="flex items-center cursor-pointer"
+                    onClick={onBack}
+                >
+                    <ChevronLeft strokeWidth={2} size={24} />
+                    <h1 className="font-extrabold"></h1>
+                </div>
+
+                <div className="font-bold text-xl">
+                    <TimerDisplay remainingTime={remainingTime} />
+                </div>
+                <div></div>
+            </div>
+            <Separator />
+            <Form {...form}>
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="flex flex-col items-center mt-10"
+                >
+                    {questions.map((question, index) => (
+                        <FormField
+                            key={question.id}
+                            control={form.control}
+                            name={`answers.${index}`}
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col items-start mb-10 w-full max-w-md">
+                                    <FormLabel>
+                                        {index + 1}.{' '}
+                                        {question.OpenEndedQuestion.question}
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Type your answer here..."
+                                            className="w-full"
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    ))}
+                    <Button type="submit" className="mt-10">
+                        Submit Answers
+                    </Button>
+                </form>
+            </Form>
+        </div>
+    )
 }
 
-const OpenEndedQuestions: React.FC<OpenEndedQuestionsProps> = ({
-  onBack,
-  remainingTime,
-}) => {
-  return (
-    <div className="h-screen bg-white">
-      {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white border-b p-4 flex justify-between items-center z-10">
-        <Button variant="ghost" onClick={onBack} className="flex items-center gap-2">
-          <ChevronLeft size={20} />
-          Back to Assessment
-        </Button>
-        <TimerDisplay remainingTime={remainingTime} />
-      </div>
-
-      {/* Content */}
-      <div className="pt-20 p-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Open-Ended Questions</h1>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-            <p className="text-green-800">
-              Open-ended questions component is under development. 
-              This will contain text areas for long-form answers using the Remirror editor.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default OpenEndedQuestions; 
+export default OpenEndedQuestions

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams, useParams, useRouter } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,10 @@ interface AssessmentContentProps {
     assessmentId: number | null;
     moduleId: number;
   };
+  onChapterComplete?: () => void;
 }
 
-const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails }) => {
+const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();
   const { courseId: courseIdParam, moduleId: moduleIdParam } = useParams();
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,10 +45,19 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
   const [reattemptDialogOpen, setReattemptDialogOpen] = useState(false);
   const [isStartingAssessment, setIsStartingAssessment] = useState(false);
   const [isTimeOver, setIsTimeOver] = useState(false);
-    // Extract IDs for the hooks
-  const moduleId = chapterDetails.moduleId?.toString() || moduleIdParam?.toString() || null;
-  const bootcampId = courseIdParam?.toString() || null;
-  const chapterId = chapterDetails.id?.toString() || null;
+    // Memoize IDs to prevent unnecessary API calls
+  const moduleId = useMemo(
+    () => chapterDetails.moduleId?.toString() || moduleIdParam?.toString() || null,
+    [chapterDetails.moduleId, moduleIdParam]
+  );
+  const bootcampId = useMemo(
+    () => courseIdParam?.toString() || null,
+    [courseIdParam]
+  );
+  const chapterId = useMemo(
+    () => chapterDetails.id?.toString() || null,
+    [chapterDetails.id]
+  );
   
   const { assessmentDetails, loading, error, refetch } = useAssessmentDetails(
     chapterDetails.assessmentId,
@@ -163,7 +173,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
     try {
       const courseId = courseIdParam?.toString() || bootcampId;
       const currentModuleId = moduleIdParam?.toString() || moduleId;
-      const resultsUrl = `/student/course/${courseId}/modules/${currentModuleId}/assessment/viewresults/${submissionId}`;
+      const resultsUrl = `/student/course/${courseId}/modules/${currentModuleId}/assessmentResult/${submissionId}`;
       router.push(resultsUrl);
     } catch (error) {
       console.error('Failed to view results:', error);
@@ -225,7 +235,9 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
       if (event.data === 'assessment_submitted') {
         refetch();
         refetchChapter();
-
+        if (typeof onChapterComplete === 'function') {
+          onChapterComplete();
+        }
         if (document.fullscreenElement) {
           document.exitFullscreen();
         }
@@ -244,7 +256,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
     return () => {
       channel.close();
     };
-  }, [refetch, refetchChapter]);
+  }, [refetch, refetchChapter, onChapterComplete]);
 
   // Assessment state transitions effect
   useEffect(() => {

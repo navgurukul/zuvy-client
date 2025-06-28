@@ -104,7 +104,7 @@ const ModuleContentRenderer = ({ selectedItemData, getAssessmentData, onChapterC
       case 5:
         return <AssignmentContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       case 6:
-        return <AssessmentContent chapterDetails={chapterDetails} />;
+        return <AssessmentContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       case 7:
         return <FeedbackFormContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       case 8:

@@ -1,404 +1,893 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { toast } from '@/components/ui/use-toast';
-import { api } from '@/utils/axios.config';
-import EnterFullScreenView from './EnterFullScreenView';
-import AssessmentMainView from './AssessmentMainView';
-import QuizQuestions from './QuizQuestions';
-import OpenEndedQuestions from './OpenEndedQuestions';
-import IDE from './IDE';
-import TimerDisplay from './TimerDisplay';
-import ProctoringProvider from './ProctoringProvider';
+import React, { useEffect, useRef, useState } from 'react'
+import {
+    handleFullScreenChange,
+    handleKeyDown,
+    handleRightClick,
+    handleVisibilityChange,
+    requestFullScreen,
+    updateProctoringData,
+    getProctoringData,
+} from '@/utils/students'
+import {
+    ChevronLeft,
+    Clock,
+    Fullscreen,
+    Timer,
+    AlertCircle,
+} from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import QuizQuestions from './QuizQuestions'
+import OpenEndedQuestions from './OpenEndedQuestions'
+import IDE from './IDE'
+import { api } from '@/utils/axios.config'
+import QuestionCard from './QuestionCard'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/components/ui/use-toast'
+import { useParams, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { getAssessmentStore } from '@/store/store'
+import TimerDisplay from './TimerDisplay'
+import { start } from 'repl'
+import { AlertProvider } from './ProctoringAlerts';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+  import PreventBackNavigation from './PreventBackNavigation'
+import WarnOnLeave from './WarnOnLeave'
+import useWindowSize from '@/hooks/useHeightWidth'
 
-interface AssessmentData {
-  id: number;
-  timeLimit: number;
-  deadline: string | null;
-  submission: {
-    id: number;
-    startedAt: string;
-  };
-  canTabChange: boolean;
-  canScreenExit: boolean;
-  canCopyPaste: boolean;
-  canEyeTrack: boolean;
-  codingQuestions: any[];
-  totalMcqQuestions: number;
-  hardMcqQuestions: number;
-  easyMcqQuestions: number;
-  mediumMcqQuestions: number;
-  weightageMcqQuestions: number;
-  IsQuizzSubmission: boolean;
-  easyCodingMark: number;
-  mediumCodingMark: number;
-  hardCodingMark: number;
-  bootcampId: number;
-  moduleId: number;
-  chapterId: number;
-}
+function Page({
+    params,
+}: {
+    params: {
+        assessmentOutSourceId: string
+        moduleID: string
+        viewcourses: string
+        chapterId: string
+    }
+}) {
+    const [isFullScreen, setIsFullScreen] = useState(false)
+    const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
+    const { width } = useWindowSize()
+    const isMobile = width < 768
 
-const AssessmentProvider: React.FC = () => {
-  const router = useRouter();
-  const { courseId } = useParams();
-  const searchParams = useSearchParams();
-  const assessmentId = searchParams.get('assessmentId');
-  const chapterId = searchParams.get('chapterId');
-  const moduleId = searchParams.get('moduleId');
+    const [disableSubmit, setDisableSubmit] = useState(false)
+    const [runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
+    const [runSourceCode, setRunSourceCode] = useState<string>('')
 
-  // Core state
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [assessmentData, setAssessmentData] = useState<AssessmentData | null>(null);
-  const [remainingTime, setRemainingTime] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Assessment flow state
-  const [isSolving, setIsSolving] = useState(false);
-  const [selectedQuesType, setSelectedQuesType] = useState<'quiz' | 'open-ended' | 'coding'>('quiz');
-  const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(null);
-  const [selectedCodingOutsourseId, setSelectedCodingOutsourseId] = useState<any>(null);
-
-  // Question data
-  const [quizQuestions, setQuizQuestions] = useState<any>(null);
-  const [openEndedQuestions, setOpenEndedQuestions] = useState<any>([]);
-
-  // Submission and proctoring
-  const [assessmentSubmitId, setAssessmentSubmitId] = useState<number | null>(null);
-  const [disableSubmit, setDisableSubmit] = useState(false);
-  const [runCodeLanguageId, setRunCodeLanguageId] = useState<number>(0);
-  const [runSourceCode, setRunSourceCode] = useState<string>('');
-
-  // Timer ref
-  const intervalIdRef = useRef<number | null>(null);
-
-  // Check if user has already started or submitted assessment
-  const checkAssessmentStatus = async () => {
-    if (!assessmentId || !moduleId || !courseId || !chapterId) {
-      setError('Missing required parameters');
-      setLoading(false);
-      return;
+    const decodedParams = {
+        assessmentOutSourceId: parseInt(
+            decodeURIComponent(params.assessmentOutSourceId).replace(
+                /\[|\]/g,
+                ''
+            )
+        ),
     }
 
-    try {
-      const res = await api.get(
-        `Content/students/assessmentId=${assessmentId}?moduleId=${moduleId}&bootcampId=${courseId}&chapterId=${chapterId}`
-      );
+    const { setFullScreenExitInstance, fullScreenExitInstance } =
+        getAssessmentStore()
 
-      const submissions = res.data.submitedOutsourseAssessments;
-      
-      if (submissions.length > 0 && submissions[0].submitedAt && !submissions[0].reattemptApproved) {
-        // Already submitted and no re-attempt approved
-        router.push(`/student/course/${courseId}/modules/${moduleId}?chapterId=${chapterId}`);
-        return;
-      }
+    const [selectedQuesType, setSelectedQuesType] = useState<
+        'quiz' | 'open-ended' | 'coding'
+    >('quiz')
 
-      if (submissions.length > 0 && submissions[0].startedAt && !submissions[0].reattemptApproved) {
-        // Already started, continue assessment
-        await getAssessmentData();
-      } else {
-        // New assessment or re-attempt
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('Error checking assessment status:', error);
-      setError('Failed to check assessment status');
-      setLoading(false);
-    }
-  };
+    const router = useRouter()
 
-  // Fetch assessment data and start timer
-  const getAssessmentData = async (isNewStart: boolean = false) => {
-    try {
-      setLoading(true);
-      const res = await api.get(
-        `/Content/startAssessmentForStudent/assessmentOutsourseId=${assessmentId}/newStart=${isNewStart}`
-      );
+    const [isSolving, setIsSolving] = useState(false)
 
-      const data = res.data.data;
-      setAssessmentData(data);
-      setAssessmentSubmitId(data.submission.id);
-      setIsFullScreen(true);
+    const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
+        null
+    )
+    const [remainingTime, setRemainingTime] = useState<number>(0)
+    const [assessmentData, setAssessmentData] = useState<any>(null)
+    const [seperateQuizQuestions, setSeperateQuizQuestions] = useState<any>()
+    const [seperateOpenEndedQuestions, setSeperateOpenEndedQuestions] =
+        useState<any>()
+    let interval: NodeJS.Timeout | null = null
 
-      // Calculate and start timer
-      const startTime = new Date(data.submission.startedAt).getTime();
-      const endTime = startTime + data.timeLimit * 1000;
-      startTimer(endTime);
+    const [assessmentSubmitId, setAssessmentSubmitId] = useState<any>()
+    const [selectedCodingOutsourseId, setSelectedCodingOutsourseId] =
+        useState<any>()
+    const [chapterId, setChapterId] = useState<any>()
 
-      // Fetch question data in parallel
-      await Promise.all([
-        fetchQuizQuestions(),
-        fetchOpenEndedQuestions()
-      ]);
+    // Check if Proctoring is set on by admin for tab switching, copy paste, etc.
+    const [isTabProctorOn, setIsTabProctorOn] = useState(
+        assessmentData?.tabChange
+    )
+    const [isFullScreenProctorOn, setIsFullScreenProctorOn] = useState(
+        assessmentData?.screenRecord
+    )
+    const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(
+        assessmentData?.copyPaste
+    )
+    const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState(null)
+    const [startedAt, setStartedAt] = useState(
+        new Date(assessmentData?.submission?.startedAt).getTime()
+    )
+    const intervalIdRef = useRef<number | null>(null)
+    const pathname = usePathname()
 
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching assessment data:', error);
-      setError('Failed to load assessment');
-      setLoading(false);
-    }
-  };
-
-  // Timer management
-  const startTimer = (endTime: number) => {
-    if (intervalIdRef.current) {
-      clearInterval(intervalIdRef.current);
+    function isCurrentPageSubmitAssessment() {
+        const expected = `/student/course/${params.viewcourses}/studentAssessment`;
+        return pathname === expected || pathname === expected + '/';
     }
 
+    const completeChapter = () => {
+        api.post(
+            `tracking/updateChapterStatus/${params.viewcourses}/${params.moduleID}?chapterId=${chapterId}`
+        )
+    }
+
+    const startTimer = (endTime: number) => {
     intervalIdRef.current = window.setInterval(() => {
-      const currentTime = Date.now();
-      const newRemainingTime = Math.max(Math.floor((endTime - currentTime) / 1000), 0);
-      setRemainingTime(newRemainingTime);
+            const currentTime = Date.now()
+            const newRemainingTime = Math.max(
+                Math.floor((endTime - currentTime) / 1000),
+                0
+            )
+            setRemainingTime(newRemainingTime)
 
-      // 5 minute warning
+            // Show toast when remaining time is 5 minutes (300 seconds)
       if (newRemainingTime === 300) {
-        toast({
+                toast.warning({
           title: 'WARNING',
           description: 'Hurry up, less than 5 minutes remaining now!',
-          variant: 'destructive'
-        });
+                })
       }
 
-      // Auto-submit when time is up
+            // Submit assessment and clear interval when time is up
       if (newRemainingTime === 0) {
-        submitAssessment();
+                submitAssessment()
         if (intervalIdRef.current) {
-          clearInterval(intervalIdRef.current);
-          intervalIdRef.current = null;
+                    clearInterval(intervalIdRef.current)
+                    intervalIdRef.current = null
+                }
+            }
+        }, 1000)
+    }
+
+    async function getAssessmentSubmissionsData() {
+        const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`
+        try {
+            const res = await api.get(
+                `Content/students/assessmentId=${decodedParams.assessmentOutSourceId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
+            )
+
+            if (
+                res.data.submitedOutsourseAssessments.length > 0 &&
+                res.data.submitedOutsourseAssessments[0].submitedAt &&
+                res?.data?.submitedOutsourseAssessments[0].reattemptApproved ===
+                    false
+            ) {
+                router.push(startPageUrl)
+            } else if (
+                res.data.submitedOutsourseAssessments.length > 0 &&
+                res.data.submitedOutsourseAssessments[0].startedAt &&
+                res?.data?.submitedOutsourseAssessments[0].reattemptApproved ===
+                    false
+            ) {
+                getAssessmentData()
+            }
+            // else {
+            //     getAssessmentData()
+            // }
+    } catch (error) {
+            console.error('Error fetching coding submissions data:', error)
+            return null
         }
-      }
-    }, 1000);
-  };
-
-  // Fetch quiz questions
-  const fetchQuizQuestions = async () => {
-    try {
-      const res = await api.get(`/Content/assessmentDetailsOfQuiz/${assessmentId}`);
-      setQuizQuestions(res.data);
-    } catch (error) {
-      console.error('Error fetching quiz questions:', error);
     }
-  };
 
-  // Fetch open-ended questions
-  const fetchOpenEndedQuestions = async () => {
-    try {
-      const res = await api.get(`/Content/assessmentDetailsOfOpenEnded/${assessmentId}`);
-      setOpenEndedQuestions(res.data);
-    } catch (error) {
-      console.error('Error fetching open-ended questions:', error);
-    }
-  };
+    useEffect(() => {
+        // Fetch proctoring data
+        if (assessmentSubmitId) {
+            getProctoringData(assessmentSubmitId)
+        }
+    }, [assessmentSubmitId])
 
-  // Get coding submission data
-  const getCodingSubmissionsData = async (codingOutsourseId: any, questionId: any) => {
+    useEffect(() => {
+        const endTime = startedAt + assessmentData?.timeLimit * 1000
+        // Start the timer
+        startTimer(endTime)
+
+        // Define event handlers for proctoring
+        const visibilityChangeHandler = () =>
+            handleVisibilityChange(
+                submitAssessment,
+                isCurrentPageSubmitAssessment,
+                assessmentSubmitId
+            )
+
+        const fullscreenChangeHandler = () =>
+            handleFullScreenChange(
+                submitAssessment,
+                isCurrentPageSubmitAssessment,
+                setIsFullScreen,
+                assessmentSubmitId
+            )
+
+        // Add event listeners
+        if (isTabProctorOn) {
+            document.addEventListener(
+                'visibilitychange',
+                visibilityChangeHandler
+            )
+        }
+
+        if (isFullScreenProctorOn) {
+            document.addEventListener(
+                'fullscreenchange',
+                fullscreenChangeHandler
+            )
+        }
+
+        // Cleanup on unmount
+        return () => {
+            if (isTabProctorOn) {
+                document.removeEventListener(
+                    'visibilitychange',
+                    visibilityChangeHandler
+                )
+            }
+            if (isFullScreenProctorOn) {
+                document.removeEventListener(
+                    'fullscreenchange',
+                    fullscreenChangeHandler
+                )
+            }
+            if (intervalIdRef.current) {
+                clearInterval(intervalIdRef.current)
+            }
+        }
+    }, [isTabProctorOn, isFullScreenProctorOn])
+
+    // useEffect(() => {
+    //     // Add event listeners for right-click and key presses
+    //     document.addEventListener('contextmenu', handleRightClick)
+    //     document.addEventListener('keydown', handleKeyDown)
+    //     return () => {
+    //         document.removeEventListener('contextmenu', handleRightClick)
+    //         document.removeEventListener('keydown', handleKeyDown)
+    //     }
+    // }, [])
+
+    useEffect(() => {
+        if (remainingTime === 0 && intervalId) {
+            clearInterval(intervalId)
+            submitAssessment()
+        }
+    }, [remainingTime])
+
+    async function getCodingSubmissionsData(
+        codingOutsourseId: any,
+        assessmentSubmissionId: any,
+        questionId: any
+    ) {
     try {
       const res = await api.get(
-        `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmitId}&codingOutsourseId=${codingOutsourseId}`
-      );
-      const action = res?.data?.data?.action;
-      setRunCodeLanguageId(res?.data?.data?.languageId || 0);
-      setRunSourceCode(res?.data?.data?.sourceCode || '');
-      return action;
+                `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
+            )
+            const action = res?.data?.data?.action
+            setRunCodeLanguageId(res?.data?.data?.languageId || 0)
+            setRunSourceCode(res?.data?.data?.sourceCode || null)
+            return action
     } catch (error) {
-      console.error('Error fetching coding submissions data:', error);
-      return null;
+            console.error('Error fetching coding submissions data:', error)
+            return null
+        }
     }
-  };
 
-  // Handle question solving
   const handleSolveChallenge = async (
     type: 'quiz' | 'open-ended' | 'coding',
     id?: number,
     codingQuestionId?: number,
     codingOutsourseId?: number
   ) => {
-    setSelectedQuesType(type);
-    setIsSolving(true);
+        setSelectedQuesType(type)
+        setIsSolving(true)
 
     if (type === 'coding' && id) {
-      const action = await getCodingSubmissionsData(codingOutsourseId, id);
-      if (action !== 'submit') {
-        setSelectedQuestionId(id);
-        setSelectedCodingOutsourseId(codingOutsourseId);
+            const action = await getCodingSubmissionsData(
+                codingOutsourseId,
+                assessmentSubmitId,
+                id
+            )
+
+            if (action === 'submit') {
+                // toast({
+                //     title: 'Coding Question Already Submitted',
+                //     description:
+                //         'You have already submitted this coding question',
+                //     className: 'text-left capitalize',
+                // })
+            } else {
+                setSelectedQuestionId(id)
+                setSelectedCodingOutsourseId(codingOutsourseId)
+                requestFullScreen(document.documentElement)
       }
     } else if (type === 'quiz' && assessmentData?.IsQuizzSubmission) {
-      // Already submitted
-      return;
-    } else if (type === 'open-ended' && openEndedQuestions[0]?.submissionsData?.length > 0) {
-      toast({
+            // toast({
+            //     title: 'Quiz Already Submitted',
+            //     description: 'You have already submitted the quiz',
+            //     className: 'text-left capitalize',
+            // })
+        } else if (
+            type === 'open-ended' &&
+            seperateOpenEndedQuestions[0]?.submissionsData.length > 0
+        ) {
+            toast.info({
         title: 'Open Ended Questions Already Submitted',
-        description: 'You have already submitted the open ended questions',
-      });
-      return;
-    }
-  };
-
-  // Submit assessment
-  const submitAssessment = async () => {
-    if (!assessmentSubmitId) return;
-
-    setDisableSubmit(true);
-    try {
-      await api.patch(
-        `/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`,
-        {
-          typeOfsubmission: 'studentSubmit',
+                description:
+                    'You have already submitted the open ended questions',
+            })
+        } else {
+            requestFullScreen(document.documentElement)
         }
-      );
-
-      toast({
-        title: 'Assessment Submitted',
-        description: 'Your assessment has been submitted successfully',
-      });
-
-      // Complete chapter
-      await api.post(
-        `tracking/updateChapterStatus/${courseId}/${moduleId}?chapterId=${chapterId}`
-      );
-
-      // Navigate back and close window
-      const channel = new BroadcastChannel('assessment_channel');
-      channel.postMessage('assessment_submitted');
-      channel.close();
-
-      setTimeout(() => {
-        router.push(`/student/course/${courseId}/modules/${moduleId}?chapterId=${chapterId}`);
-        window.close();
-      }, 2000);
-    } catch (error) {
-      console.error('Error submitting assessment:', error);
-      setDisableSubmit(false);
     }
-  };
 
-  // Handle going back from question solving
-  const handleBack = () => {
-    setIsSolving(false);
-    setSelectedQuestionId(null);
-    setSelectedCodingOutsourseId(null);
-  };
+    const handleBack = () => {
+        setIsSolving(false)
+        setSelectedQuestionId(null)
+    }
 
-  // Initialize assessment
+    async function getAssessmentData(isNewStart: boolean = false) {
+        try {
+            const res = await api.get(
+                `/Content/startAssessmentForStudent/assessmentOutsourseId=${decodedParams.assessmentOutSourceId}/newStart=${isNewStart}`
+            )
+            setIsFullScreen(true)
+            setAssessmentData(res?.data?.data)
+            setStartedAt(
+                new Date(res?.data?.data.submission?.startedAt).getTime()
+            )
+            setIsTabProctorOn(res?.data.data.canTabChange)
+            setIsFullScreenProctorOn(res?.data.data.canScreenExit)
+            setIsCopyPasteProctorOn(res?.data.data.canCopyPaste)
+            setIsEyeTrackingProctorOn(res?.data.data.canEyeTrack)
+            setAssessmentSubmitId(res?.data.data.submission.id)
+            setChapterId(res?.data.data.chapterId)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async function getSeperateQuizQuestions() {
+        try {
+            const res = await api.get(
+                `/Content/assessmentDetailsOfQuiz/${decodedParams.assessmentOutSourceId}`
+            )
+            setSeperateQuizQuestions(res.data)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+    async function getSeperateOpenEndedQuestions() {
+        try {
+            const res = await api.get(
+                `/Content/assessmentDetailsOfOpenEnded/${decodedParams.assessmentOutSourceId}`
+            )
+            setSeperateOpenEndedQuestions(res.data)
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
   useEffect(() => {
-    checkAssessmentStatus();
-    
-    // Handle tab close
-    const handleTabClose = () => {
-      const channel = new BroadcastChannel('assessment_channel');
-      channel.postMessage('assessment_tab_closed');
-      channel.close();
-    };
+        if (isFullScreen) {
+            getAssessmentData()
+        }
+        getSeperateQuizQuestions()
+        getSeperateOpenEndedQuestions()
+    }, [decodedParams.assessmentOutSourceId, isFullScreen])
 
-    window.addEventListener('beforeunload', handleTabClose);
-    return () => {
-      window.removeEventListener('beforeunload', handleTabClose);
-      if (intervalIdRef.current) {
-        clearInterval(intervalIdRef.current);
-      }
-    };
-  }, []);
+    useEffect(() => {
+        if (assessmentData) {
+            getSeperateQuizQuestions()
+            getSeperateOpenEndedQuestions()
+        }
+    }, [assessmentData])
 
-  // Loading state
-  if (loading) {
+    useEffect(() => {
+        getAssessmentSubmissionsData()
+    }, [])
+
+    useEffect(() => {
+        const navEntries = performance.getEntriesByType(
+            'navigation'
+        ) as PerformanceNavigationTiming[]
+        const navType = navEntries[0]?.type
+
+        if (navType === 'reload') {
+            toast.info({
+                title: 'Page Reloaded',
+                description: 'The page has been reloaded.',
+            })
+        }
+
+        const handleTabClose = () => {
+            const channel = new BroadcastChannel('assessment_channel')
+            channel.postMessage('assessment_tab_closed')
+            channel.close()
+        }
+
+        window.addEventListener('beforeunload', handleTabClose)
+
+        return () => {
+            window.removeEventListener('beforeunload', handleTabClose)
+        }
+    }, [])
+
+    if (isSolving && isFullScreen) {
+        if (
+            selectedQuesType === 'quiz' &&
+            !assessmentData?.IsQuizzSubmission &&
+            assessmentData?.hardMcqQuestions +
+                assessmentData?.easyMcqQuestions +
+                assessmentData?.mediumMcqQuestions >
+                0
+        ) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2">Loading Assessment...</h1>
-          <p className="text-muted-foreground">Please wait while we prepare your assessment</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-2 text-destructive">Error</h1>
-          <p className="text-muted-foreground">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Render appropriate view based on state
-  if (!isFullScreen || !assessmentData) {
-    return (
-      <EnterFullScreenView
-        onEnterFullScreen={() => getAssessmentData(true)}
-        remainingTime={remainingTime}
-      />
-    );
-  }
-
-  if (isSolving) {
-    return (
-      <ProctoringProvider
-        assessmentData={assessmentData}
-        assessmentSubmitId={assessmentSubmitId}
-        onSubmit={submitAssessment}
+                <>
+                    <PreventBackNavigation />
+                    <WarnOnLeave />
+                    <AlertProvider
+                        requestFullScreen={handleFullScreenRequest}
         setIsFullScreen={setIsFullScreen}
       >
-        {selectedQuesType === 'quiz' && !assessmentData.IsQuizzSubmission && (
           <QuizQuestions
             onBack={handleBack}
             weightage={assessmentData}
             remainingTime={remainingTime}
-            questions={quizQuestions}
+                            questions={seperateQuizQuestions}
             assessmentSubmitId={assessmentSubmitId}
-            getQuizQuestions={fetchQuizQuestions}
+                            getSeperateQuizQuestions={getSeperateQuizQuestions}
             getAssessmentData={getAssessmentData}
           />
-        )}
-        
-        {selectedQuesType === 'open-ended' && !(openEndedQuestions[0]?.submissionsData?.length > 0) && (
+                    </AlertProvider>
+                </>
+            )
+        } else if (
+            selectedQuesType === 'open-ended' &&
+            !(seperateOpenEndedQuestions[0]?.submissionsData.length > 0)
+        ) {
+            return (
+                <>
+                    <PreventBackNavigation />
+                    <WarnOnLeave />
+                    <AlertProvider
+                        requestFullScreen={handleFullScreenRequest}
+                        setIsFullScreen={setIsFullScreen}
+                    >
           <OpenEndedQuestions
             onBack={handleBack}
             remainingTime={remainingTime}
-            questions={openEndedQuestions}
+                            questions={seperateOpenEndedQuestions}
             assessmentSubmitId={assessmentSubmitId}
-            getOpenEndedQuestions={fetchOpenEndedQuestions}
+                            getSeperateOpenEndedQuestions={
+                                getSeperateOpenEndedQuestions
+                            }
             getAssessmentData={getAssessmentData}
           />
-        )}
-        
-        {selectedQuesType === 'coding' && selectedQuestionId !== null && (
+                    </AlertProvider>
+                </>
+            )
+        } else if (
+            selectedQuesType === 'coding' &&
+            selectedQuestionId !== null
+        ) {
+            return (
+                <>
+                    <PreventBackNavigation />
+                    <WarnOnLeave />
+                    <AlertProvider
+                        requestFullScreen={handleFullScreenRequest}
+                        setIsFullScreen={setIsFullScreen}
+                    >
           <IDE
             params={{ editor: String(selectedQuestionId) }}
             onBack={handleBack}
             remainingTime={remainingTime}
             assessmentSubmitId={assessmentSubmitId}
-            selectedCodingOutsourseId={selectedCodingOutsourseId}
+                            selectedCodingOutsourseId={
+                                selectedCodingOutsourseId
+                            }
             getAssessmentData={getAssessmentData}
             runCodeLanguageId={runCodeLanguageId}
             runSourceCode={runSourceCode}
           />
-        )}
-      </ProctoringProvider>
-    );
+                    </AlertProvider>
+                </>
+            )
+        }
+    }
+
+    async function submitAssessment() {
+        setDisableSubmit(true)
+        if (assessmentSubmitId) {
+            const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
+                await getProctoringData(assessmentSubmitId)
+
+            try {
+                await api.patch(
+                    `/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`,
+                    {
+                        tabChange: tabChange,
+                        copyPaste: copyPaste,
+                        fullScreenExit: fullScreenExit,
+                        eyeMomentCount: eyeMomentCount,
+                        typeOfsubmission: 'studentSubmit',
+                    }
+                )
+                toast.success({
+                    title: 'Assessment Submitted',
+                    description:
+                        'Your assessment has been submitted successfully',
+                })
+
+                completeChapter()
+
+                router.push(
+                    `/student/courses/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}/chapters/${assessmentData?.chapterId}`
+                )
+                const channel = new BroadcastChannel('assessment_channel')
+                channel.postMessage('assessment_submitted')
+                channel.close()
+                setTimeout(() => window.close(), 2000)
+            } catch (e) {
+                console.error(e)
+            }
+        }
+    }
+
+    async function handleCopyPasteAttempt(event: any) {
+        if (assessmentSubmitId) {
+            if (isCopyPasteProctorOn) {
+                let { tabChange, copyPaste, fullScreenExit, eyeMomentCount } =
+                    await getProctoringData(assessmentSubmitId)
+
+                let storedCopyPaste = copyPaste + 1
+
+                updateProctoringData(
+                    assessmentSubmitId,
+                    tabChange,
+                    storedCopyPaste,
+                    fullScreenExit,
+                    eyeMomentCount
+                )
+            }
+        }
+    }
+
+    function handleFullScreenRequest() {
+        const element = document.documentElement
+        requestFullScreen(element)
+        setIsFullScreen(true)
   }
 
   return (
-    <ProctoringProvider
-      assessmentData={assessmentData}
-      assessmentSubmitId={assessmentSubmitId}
-      onSubmit={submitAssessment}
+        <div
+            onPaste={(e) => handleCopyPasteAttempt(e)}
+            onCopy={(e) => handleCopyPasteAttempt(e)}
+        >
+            <PreventBackNavigation />
+            <WarnOnLeave />
+            <AlertProvider
+                requestFullScreen={handleFullScreenRequest}
       setIsFullScreen={setIsFullScreen}
     >
-      <AssessmentMainView
-        assessmentData={assessmentData}
-        remainingTime={remainingTime}
-        onSolveChallenge={handleSolveChallenge}
-        onSubmitAssessment={submitAssessment}
-        disableSubmit={disableSubmit}
-        quizQuestions={quizQuestions}
-        openEndedQuestions={openEndedQuestions}
-      />
-    </ProctoringProvider>
-  );
-};
+                <div className="h-screen mb-24">
+                    {!isFullScreen && !remainingTime ? (
+                        <div
+                            className={`${
+                                isMobile
+                                    ? 'h-full flex flex-col items-center justify-center'
+                                    : ''
+                            }`}
+                        >
+                            <>
+                                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
+                                    <div className="font-bold text-xl">
+                                        <TimerDisplay
+                                            remainingTime={remainingTime}
+                                        />
+                                    </div>
+                                </div>
 
-export default AssessmentProvider; 
+                                <h4>
+                                    Enter Full Screen to see the Questions.
+                                    Warning: If you exit fullscreen, your test
+                                    will get submitted automatically
+                                </h4>
+                                <div className="flex justify-center mt-10">
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button>Enter Full Screen</Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogDescription>
+                                                    You must stay in full-screen
+                                                    mode during the test.
+                                                    <strong>
+                                                        {' '}
+                                                        No tab switching, window
+                                                        changes, or exiting
+                                                        full-screen.{' '}
+                                                    </strong>
+                                                    The above violations may
+                                                    lead to auto-submission.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>
+                                                    Cancel
+                                                </AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    className="bg-red-500"
+                                                    onClick={() => {
+                                                        handleFullScreenRequest();
+                                                        getAssessmentData(true);
+                                                    }}
+                                                >
+                                                    Proceed
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </div>
+                            </>
+                            {/* )} */}
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
+                                <div className="font-bold text-xl">
+                                    <TimerDisplay
+        remainingTime={remainingTime}
+                                    />
+                                </div>
+                            </div>
+                            {/* <Separator className="my-6" /> */}
+                            <div className="flex justify-center">
+                                <div
+                                    className={`${
+                                        isMobile
+                                            ? 'w-full space-y-4'
+                                            : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                    } `}
+                                >
+                                    <h2 className="font-bold text-left">
+                                        Testing Your Knowledge
+                                    </h2>
+                                    <p className="deadline flex items-center text-left gap-2">
+                                        <Clock size={18} />
+                                        Deadline:{' '}
+                                        {assessmentData?.deadline ||
+                                            'No Deadline For This Assessment'}
+                                    </p>
+                                    <p className="testTime flex items-center text-left gap-2">
+                                        <Timer size={18} />
+                                        Test Time:{' '}
+                                        {Math.floor(
+                                            assessmentData?.timeLimit / 3600
+                                        )}{' '}
+                                        Hours{' '}
+                                        {Math.floor(
+                                            (assessmentData?.timeLimit % 3600) /
+                                                60
+                                        )}{' '}
+                                        Minutes
+                                    </p>
+                                    <p className="description text-left">
+                                        Timer has started. Questions will
+                                        disappear if you exit full screen. All
+                                        the problems i.e. coding challenges,
+                                        MCQs and open-ended questions have to be
+                                        completed all at once
+                                    </p>
+
+                                    <h1 className="font-bold text-left">
+                                        Proctoring Rules
+                                    </h1>
+                                    <p className="text-left">
+                                        To ensure fair assessments, the
+                                        assessments are proctored are proctored
+                                        for the following cases below. Please
+                                        avoid violating the rules:
+                                    </p>
+                                    <ul className="list-disc ml-5 text-left">
+                                        <li>Copy and pasting</li>
+                                        <li>Tab switching</li>
+                                        <li>Assessment screen exit</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            {assessmentData?.codingQuestions?.length > 0 && (
+                                <div className="flex justify-center ">
+                                    <div
+                                        className={`${
+                                            isMobile
+                                                ? 'w-full mt-5'
+                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                        } `}
+                                    >
+                                        <h2 className="font-bold text-left">
+                                            Coding Challenges
+                                        </h2>
+                                        <div className="flex gap-2  mt-2 ">
+                                            <AlertCircle />
+                                            <h2 className="text-left ">
+                                                You may run your code multiple
+                                                times after making changes, but
+                                                you are allowed to submit it
+                                                only once.
+                                            </h2>
+                                        </div>
+                                        {assessmentData?.codingQuestions?.map(
+                                            (question: any) => (
+                                                <QuestionCard
+                                                    isMobile={isMobile}
+                                                    key={
+                                                        question.codingQuestionId
+                                                    }
+                                                    id={
+                                                        question.codingQuestionId
+                                                    }
+                                                    easyCodingMark={
+                                                        assessmentData?.easyCodingMark
+                                                    }
+                                                    mediumCodingMark={
+                                                        assessmentData?.mediumCodingMark
+                                                    }
+                                                    hardCodingMark={
+                                                        assessmentData?.hardCodingMark
+                                                    }
+                                                    title={question.title}
+                                                    description={
+                                                        question.difficulty
+                                                    }
+                                                    // assessmentOutsourseId={question.assessmentOutsourseId}
+                                                    assessmentSubmitId={
+                                                        assessmentSubmitId
+                                                    }
+                                                    codingOutsourseId={
+                                                        question.codingOutsourseId
+                                                    }
+                                                    codingQuestions={true}
+                                                    onSolveChallenge={(
+                                                        id: any
+                                                    ) =>
+                                                        handleSolveChallenge(
+                                                            'coding',
+                                                            id,
+                                                            question.codingQuestionId,
+                                                            question.codingOutsourseId
+                                                        )
+                                                    }
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {assessmentData?.hardMcqQuestions +
+                                assessmentData?.easyMcqQuestions +
+                                assessmentData?.mediumMcqQuestions >
+                                0 && (
+                                <div className="flex justify-center">
+                                    <div
+                                        className={`${
+                                            isMobile
+                                                ? 'w-full'
+                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                        } `}
+                                    >
+                                        <h2 className="font-bold text-left">
+                                            MCQs
+                                        </h2>
+                                        <QuestionCard
+                                            id={1}
+                                            title="Quiz"
+                                            weightage={
+                                                assessmentData?.weightageMcqQuestions
+                                            }
+                                            description={`${
+                                                assessmentData?.hardMcqQuestions +
+                                                    assessmentData?.easyMcqQuestions +
+                                                    assessmentData?.mediumMcqQuestions ||
+                                                0
+                                            } questions`}
+                                            onSolveChallenge={() =>
+                                                handleSolveChallenge('quiz')
+                                            }
+                                            isQuizSubmitted={
+                                                assessmentData?.IsQuizzSubmission
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            {seperateOpenEndedQuestions.length > 0 && (
+                                <div className="flex justify-center">
+                                    <div
+                                        className={`${
+                                            isMobile
+                                                ? 'w-full'
+                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
+                                        } `}
+                                    >
+                                        <h2 className="font-bold">
+                                            Open-Ended Questions
+                                        </h2>
+                                        <QuestionCard
+                                            id={1}
+                                            title="Open-Ended Questions"
+                                            description={`${
+                                                seperateOpenEndedQuestions.length ||
+                                                0
+                                            } questions`}
+                                            onSolveChallenge={() =>
+                                                handleSolveChallenge(
+                                                    'open-ended'
+                                                )
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        disabled={
+                                            disableSubmit ||
+                                            (assessmentData?.totalMcqQuestions >
+                                                0 &&
+                                                assessmentData?.IsQuizzSubmission ===
+                                                    false)
+                                        }
+                                    >
+                                        Submit Assessment
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Are you absolutely sure?
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This
+                                            will submit your whole assessment.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>
+                                            Cancel
+                                        </AlertDialogCancel>
+                                        <AlertDialogAction
+                                            className="bg-red-500"
+                                            onClick={submitAssessment}
+                                        >
+                                            Submit
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </div>
+                    )}
+                </div>
+            </AlertProvider>
+        </div>
+    )
+}
+
+export default Page

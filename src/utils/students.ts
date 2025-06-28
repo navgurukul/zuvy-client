@@ -3,10 +3,10 @@ import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
 import { fetchStudentsHandler } from './admin'
 import { getStoreStudentDataNew } from '@/store/store'
-import { showProctoringAlert } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/ProctoringProvider'
+import { showProctoringAlert } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/ProctoringAlerts'
 
 export const fetchStudentData = async (
-    id: number,
+    id: number, 
     setStoreStudentData: any
 ) => {
     try {
