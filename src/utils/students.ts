@@ -3,7 +3,7 @@ import { api } from './axios.config'
 import { OFFSET, POSITION } from './constant'
 import { fetchStudentsHandler } from './admin'
 import { getStoreStudentDataNew } from '@/store/store'
-import { showProctoringAlert } from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/ProctoringAlerts'
+import { showProctoringAlert } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/ProctoringProvider'
 
 export const fetchStudentData = async (
     id: number,

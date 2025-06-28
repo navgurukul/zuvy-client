@@ -14,6 +14,8 @@ import useChapterCompletion from '@/hooks/useChapterCompletion';
 import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
+import useWindowSize from '@/hooks/useHeightWidth';
 
 const FormSchema = z.object({
   link: z
@@ -43,6 +45,7 @@ interface AssignmentContentProps {
     description: string | null;
     status: string;
     articleContent: string | null;
+    links: string | null;
   };
   onChapterComplete: () => void;
 }
@@ -55,6 +58,11 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   const [initialContent, setInitialContent] = useState<EditorDoc | undefined>();
   const [localIsCompleted, setLocalIsCompleted] = useState(false);
   const [localSubmittedAt, setLocalSubmittedAt] = useState<string | null>(null);
+
+  const { width } = useWindowSize();
+  const isMobile = width < 768;
+  const [resourceLink, setResourceLink] = useState('');
+  const [viewResource, setViewResource] = useState(false);
 
   const { isCompleting, completeChapter } = useChapterCompletion({
     courseId: courseId as string,
@@ -89,6 +97,29 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
       }
     }
   }, [chapterDetails.articleContent]);
+
+  useEffect(() => {
+    if (chapterDetails.links) {
+      let parsedLinks;
+      try {
+        parsedLinks = JSON.parse(chapterDetails.links);
+        if (!Array.isArray(parsedLinks)) parsedLinks = [parsedLinks];
+      } catch (e) {
+        parsedLinks = [chapterDetails.links];
+      }
+
+      if (Array.isArray(parsedLinks) && parsedLinks.length > 0 && parsedLinks[0]) {
+        setResourceLink(parsedLinks[0]);
+        setViewResource(true);
+      } else {
+        setResourceLink('');
+        setViewResource(false);
+      }
+    } else {
+        setResourceLink('');
+        setViewResource(false);
+    }
+  }, [chapterDetails.links]);
 
   // Update local state when assignment data changes
   useEffect(() => {
@@ -185,14 +216,35 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
       
       <div className="mb-8">
         <h2 className="text-lg font-semibold mb-2 text-left">Assignment Description</h2>
-        <div className="text-left bg-muted/30 p-4 rounded-md border h-[300px] overflow-hidden">
-          <div className="h-full">
-            <RemirrorTextEditor 
-              initialContent={initialContent} 
-              setInitialContent={setInitialContent} 
-              preview={true} 
-            />
-          </div>
+        <div className={`text-left bg-muted/30 p-4 rounded-md border ${isMobile && viewResource ? 'h-auto' : 'h-[300px]'}`}>
+          {viewResource ? (
+            isMobile ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <p className="mb-4 text-center">
+                  This assignment includes an external resource.
+                </p>
+                <Button asChild>
+                  <Link href={resourceLink} target="_blank" rel="noopener noreferrer">
+                    View Resource
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <iframe
+                src={resourceLink}
+                className="h-full w-full border-none rounded"
+                title="Assignment Resource"
+              />
+            )
+          ) : (
+            <div className="h-full">
+              <RemirrorTextEditor 
+                initialContent={initialContent} 
+                setInitialContent={setInitialContent} 
+                preview={true} 
+              />
+            </div>
+          )}
         </div>
       </div>
       

@@ -13,6 +13,21 @@ interface ProctoringProviderProps {
   setIsFullScreen: (value: boolean) => void;
 }
 
+interface ProctoringAlertProps {
+  title: string;
+  description: string;
+  violationCount: string;
+}
+
+// Utility function to show proctoring alerts
+export const showProctoringAlert = ({ title, description, violationCount }: ProctoringAlertProps) => {
+  return toast({
+    title: title,
+    description: `${description} (${violationCount})`,
+    variant: 'destructive'
+  });
+};
+
 // Proctoring data storage
 let proctoringData = {
   tabChange: 0,
