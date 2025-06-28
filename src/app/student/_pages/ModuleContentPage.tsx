@@ -502,8 +502,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                     <List className="w-4 h-4 mr-2" />
                     Module Content
                 </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">
+                </SheetTrigger>                <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>Module Content</SheetTitle>
                     </SheetHeader>

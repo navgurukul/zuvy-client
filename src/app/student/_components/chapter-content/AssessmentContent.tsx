@@ -44,10 +44,9 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
   const [reattemptDialogOpen, setReattemptDialogOpen] = useState(false);
   const [isStartingAssessment, setIsStartingAssessment] = useState(false);
   const [isTimeOver, setIsTimeOver] = useState(false);
-  
-  // Extract IDs for the hooks
+    // Extract IDs for the hooks
   const moduleId = chapterDetails.moduleId?.toString() || moduleIdParam?.toString() || null;
-  const bootcampId = "502";
+  const bootcampId = courseIdParam?.toString() || null;
   const chapterId = chapterDetails.id?.toString() || null;
   
   const { assessmentDetails, loading, error, refetch } = useAssessmentDetails(
@@ -142,14 +141,13 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
 
     return stopPollingWithRef;
   };
-
   // Handle assessment start
   const handleStartAssessment = () => {
     setIsStartingAssessment(true);
     refetch();
 
     try {
-      const courseId = "502"; // Extract from params if available
+      const courseId = courseIdParam?.toString() || bootcampId; // Use courseId from params or fallback to bootcampId
       const currentModuleId = moduleIdParam?.toString() || moduleId;
       const chapterId = chapterDetails.id;
       const assessmentId = assessmentDetails?.assessmentId;
@@ -160,11 +158,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
       setIsStartingAssessment(false);
     }
   };
-
   // Handle view results
   const handleViewResults = () => {
     try {
-      const courseId = "502";
+      const courseId = courseIdParam?.toString() || bootcampId;
       const currentModuleId = moduleIdParam?.toString() || moduleId;
       const resultsUrl = `/student/course/${courseId}/modules/${currentModuleId}/assessment/viewresults/${submissionId}`;
       router.push(resultsUrl);
@@ -290,15 +287,13 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
   }
 
   const isDisabled = !hasQuestions;
-
   return (
     <div className="h-full">
-      <div className="flex flex-col items-center justify-center px-4 py-8 mt-8">
-        <div className="flex flex-col gap-y-4 text-left w-full max-w-lg">
+      <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-4 py-4 sm:py-6 lg:py-8 mt-4 sm:mt-6 lg:mt-8">
+        <div className="flex flex-col gap-y-4 text-left w-full max-w-sm sm:max-w-md lg:max-w-lg">
           {/* Header */}
-          <div className="flex items-start justify-between gap-4 pr-10">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800 mb-1">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 lg:pr-10">
+            <div className="min-w-0 flex-1">              <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-1 break-words">
                 {assessmentDetails.ModuleAssessment?.title}
               </h1>
               {assessmentDetails.assessmentState && (
@@ -314,67 +309,61 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
                       ? 'destructive'
                       : 'destructive'
                   }
-                  className="text-sm"
+                  className="text-xs sm:text-sm"
                 >
                   {assessmentDetails.assessmentState.charAt(0).toUpperCase() +
                     assessmentDetails.assessmentState.slice(1).toLowerCase()}
                 </Badge>
-              )}
+              )}            </div>
+            <div className="flex-shrink-0 self-start sm:self-auto mt-2 sm:mt-0">              <h2 className="bg-muted px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded-2xl font-semibold whitespace-nowrap text-muted-foreground">
+                Total Marks:{' '}
+                {assessmentDetails.weightageMcqQuestions + assessmentDetails.weightageCodingQuestions}
+              </h2>
             </div>
-            <h2 className="bg-[#DEDEDE] px-2 py-1 text-sm rounded-2xl font-semibold whitespace-nowrap">
-              Total Marks:{' '}
-              {assessmentDetails.weightageMcqQuestions + assessmentDetails.weightageCodingQuestions}
-            </h2>
-          </div>
-
-          {/* Question breakdown */}
+          </div>          {/* Question breakdown */}
           {hasQuestions && (
-            <div className="flex gap-6">
+            <div className="flex flex-wrap gap-4 sm:gap-6">
               {assessmentDetails.totalCodingQuestions > 0 && (
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base sm:text-lg font-semibold text-secondary">
                     {assessmentDetails.easyCodingQuestions +
                       assessmentDetails.mediumCodingQuestions +
                       assessmentDetails.hardCodingQuestions}
-                  </h2>
-                  <p className="text-sm text-gray-600">Coding Challenges</p>
+                  </h2>                  <p className="text-xs sm:text-sm text-muted-foreground">Coding Challenges</p>
                 </div>
               )}
               {assessmentDetails.totalMcqQuestions > 0 && (
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base sm:text-lg font-semibold text-secondary">
                     {assessmentDetails.easyMcqQuestions +
                       assessmentDetails.mediumMcqQuestions +
                       assessmentDetails.hardMcqQuestions}
                   </h2>
-                  <p className="text-sm text-gray-600">MCQs</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">MCQs</p>
                 </div>
               )}
               {assessmentDetails.totalOpenEndedQuestions > 0 && (
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base sm:text-lg font-semibold text-secondary">
                     {assessmentDetails.totalOpenEndedQuestions}
                   </h2>
-                  <p className="text-sm text-gray-600">Open-Ended</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Open-Ended</p>
                 </div>
               )}
             </div>
-          )}
-
-          {/* No questions message */}
+          )}          {/* No questions message */}
           {!isAssessmentStarted && isDisabled && (
-            <div className="my-2 w-full max-w-2xl mx-auto">
-              <p className="mb-2 font-medium">
+            <div className="my-2 w-full max-w-full sm:max-w-2xl mx-auto">
+              <p className="mb-2 font-medium text-sm sm:text-base text-center sm:text-left">
                 No Questions Available. Assessment will appear soon!
               </p>
             </div>
           )}
 
           {/* Time limit */}
-          {hasQuestions && (
-            <p className={`flex items-center gap-x-1 gap-y-2 text-sm text-gray-700 ${isAssessmentStarted && 'mb-10'}`}>
-              <Timer size={18} className="text-gray-500" />
-              Test Time:{' '}
+          {hasQuestions && (            <p className={`flex items-center justify-center sm:justify-start gap-x-2 text-xs sm:text-sm text-muted-foreground ${isAssessmentStarted && 'mb-6 sm:mb-10'}`}>
+              <Timer size={16} className="text-muted-foreground sm:w-[18px] sm:h-[18px]" />
+              <span>Test Time:</span>
               <span className="font-semibold">
                 {formatTimeLimit(assessmentDetails.timeLimit)}
               </span>
@@ -385,12 +374,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
           {assessmentDetails.assessmentState?.toUpperCase() !== 'CLOSED' &&
             assessmentDetails.assessmentState?.toUpperCase() !== 'PUBLISHED' &&
             ((isAssessmentStarted && !reattemptRequested && !reattemptApproved) ||
-              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (
-              <div className="flex flex-col items-center justify-center p-5 bg-white border rounded-lg shadow-sm">
-                <h2 className="mt-4 text-lg text-gray-800 flex items-center gap-x-2">
+              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (              <div className="flex flex-col items-center justify-center p-5 bg-card border border-border rounded-lg shadow-2dp">
+                <h2 className="mt-4 text-lg text-foreground flex items-center gap-x-2">
                   <div className="relative w-6 h-6">
-                    <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-yellow-400"></div>
-                    <div className="absolute top-[4px] left-1/2 transform -translate-x-1/2 text-black text-xs font-bold">
+                    <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-warning"></div>
+                    <div className="absolute top-[4px] left-1/2 transform -translate-x-1/2 text-warning-foreground text-xs font-bold">
                       !
                     </div>
                   </div>
@@ -404,25 +392,23 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
                   <DialogTrigger asChild>
                     <Button className="mt-4">Request Re-Attempt</Button>
                   </DialogTrigger>
-                  <DialogOverlay />
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="text-lg font-bold text-gray-800">
+                  <DialogOverlay />                  <DialogContent className="mx-4 sm:mx-0 max-w-md sm:max-w-lg">
+                    <DialogHeader>                      <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
                         Requesting Re-Attempt
                       </DialogTitle>
-                      <DialogDescription className="text-md text-gray-600">
+                      <DialogDescription className="text-sm sm:text-md text-muted-foreground">
                         Zuvy team will receive your request and take a decision on granting a re-attempt
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="flex justify-end mt-4">
+                    <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-0 mt-4">
                       <Button
                         variant="outline"
-                        className="border border-[#4A4A4A]"
+                        className="border-border w-full sm:w-auto"
                         onClick={() => setReattemptDialogOpen(false)}
                       >
                         Cancel
                       </Button>
-                      <Button className="ml-4" onClick={requestReattempt}>
+                      <Button className="sm:ml-4 w-full sm:w-auto" onClick={requestReattempt}>
                         Send Request
                       </Button>
                     </div>
@@ -432,12 +418,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
             )}
 
           {/* Re-attempt requested status */}
-          {reattemptRequested && !reattemptApproved && (
-            <div className="flex flex-col items-center justify-center w-full p-5 bg-white border rounded-lg shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-800">
+          {reattemptRequested && !reattemptApproved && (            <div className="flex flex-col items-center justify-center w-full p-5 bg-card border border-border rounded-lg shadow-2dp">
+              <h2 className="text-lg font-semibold text-foreground">
                 Your re-attempt request has been sent.
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 We'll notify you on email once it is approved.
               </p>
             </div>
@@ -447,13 +432,12 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
           {isAssessmentStarted &&
             isSubmitedAt &&
             !(reattemptApproved && reattemptRequested && assessmentDetails.submitedOutsourseAssessments?.length > 0) && (
-              <div>
-                <div
+              <div>                <div
                   className={`${
                     isPassed
-                      ? 'bg-green-100 border-green-500'
-                      : 'bg-red-100 border-red-500'
-                  } flex justify-between max-w-lg p-5 rounded-lg border`}
+                      ? 'bg-success-light border-success'
+                      : 'bg-destructive-light border-destructive'
+                  } flex justify-between max-w-lg p-5 rounded-lg border shadow-4dp`}
                 >
                   <div className="flex gap-3">
                     <div className="mt-2">
@@ -472,11 +456,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
                   </div>
                   <div>
                     <Button
-                      variant="ghost"
-                      className={`${
+                      variant="ghost"                      className={`${
                         isPassed
-                          ? 'text-secondary hover:text-secondary'
-                          : 'text-red-500 hover:text-red-500'
+                          ? 'text-success hover:text-success-dark'
+                          : 'text-destructive hover:text-destructive-dark'
                       } font-semibold md:text-lg text-sm`}
                       onClick={handleViewResults}
                       disabled={chapterDetails.status === 'Pending' && !isSubmitedAt}
@@ -490,13 +473,12 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
 
           {/* Active assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'ACTIVE' &&
-            (!isAssessmentStarted || (reattemptRequested && reattemptApproved)) && (
-              <div
-                className={`w-full max-w-lg flex flex-col items-center justify-center rounded-lg bg-[#DCE7E3] p-5 text-center transition-all duration-[1500ms] ease-in-out ${
+            (!isAssessmentStarted || (reattemptRequested && reattemptApproved)) && (              <div
+                className={`w-full max-w-lg flex flex-col items-center justify-center rounded-lg bg-success-light border border-success p-5 text-center transition-all duration-[1500ms] ease-in-out shadow-8dp ${
                   showActiveCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
                 }`}
               >
-                <div className="text-[#518672] font-medium">
+                <div className="text-success-dark font-medium">
                   {assessmentDetails.endDatetime ? (
                     <>
                       <p>The assessment is now available to be taken until</p>
@@ -505,10 +487,9 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
                   ) : (
                     <p>The assessment is available now</p>
                   )}
-                </div>
-                <Button
+                </div>                <Button
                   onClick={handleStartAssessment}
-                  className="mt-5 rounded-md bg-[#4A7C7A] px-6 py-2 text-white hover:bg-[#42706e]"
+                  className="mt-4 sm:mt-5 rounded-md bg-primary hover:bg-primary-dark px-4 sm:px-6 py-2 text-primary-foreground w-full sm:w-auto text-sm sm:text-base shadow-hover"
                   disabled={
                     isDisabled ||
                     (isAssessmentStarted && (!reattemptApproved || !reattemptRequested)) ||
@@ -520,37 +501,33 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails })
                     : 'Begin Assessment'}
                 </Button>
               </div>
-            )}
-
-          {/* Closed assessment card */}
+            )}          {/* Closed assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'CLOSED' && (
-            <div
-              className={`w-full max-w-lg flex justify-center items-center gap-x-2 rounded-lg bg-red-100 px-6 py-3 font-medium text-red-700 text-center transition-all duration-[1500ms] ease-in-out ${
+            <div              className={`w-full max-w-lg flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all duration-[1500ms] ease-in-out text-sm sm:text-base shadow-error ${
                 showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
-              <AlertOctagon size={20} />
-              <span>Assessment is closed. You cannot attempt it anymore.</span>
+              <AlertOctagon size={18} className="flex-shrink-0 sm:w-5 sm:h-5" />
+              <span className="break-words">Assessment is closed. You cannot attempt it anymore.</span>
             </div>
           )}
 
           {/* Published assessment countdown */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'PUBLISHED' && (
-            <div
-              className={`w-full max-w-lg flex flex-col text-center justify-center items-center gap-y-4 rounded-lg bg-gradient-to-br from-gray-800 to-gray-900 p-6 shadow-lg transition-all duration-[1500ms] ease-in-out ${
+            <div              className={`w-full max-w-lg flex flex-col text-center justify-center items-center gap-y-3 sm:gap-y-4 rounded-lg bg-card-elevated border border-border p-4 sm:p-6 shadow-8dp transition-all duration-[1500ms] ease-in-out ${
                 showPublishedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
-              <div className="flex items-center gap-x-3 text-white">
-                <Timer size={24} className="animate-pulse hidden sm:block" />
-                <h3 className="text-lg sm:text-xl font-bold tracking-wider">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-x-3 text-foreground">
+                <Timer size={20} className="animate-pulse text-accent sm:w-6 sm:h-6" />
+                <h3 className="text-base sm:text-lg lg:text-xl font-bold tracking-wider break-words">
                   Assessment Begins In
                 </h3>
               </div>
-              <div className="text-3xl sm:text-4xl font-extrabold text-yellow-400 tracking-widest">
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-primary tracking-widest break-all">
                 {countdown}
               </div>
-              <p className="text-gray-300 text-xs sm:text-sm mt-2">
+              <p className="text-muted-foreground text-xs sm:text-sm mt-1 sm:mt-2 break-words">
                 Get ready to showcase your skills! The assessment will begin soon.
               </p>
             </div>
