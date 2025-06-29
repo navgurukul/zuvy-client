@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn, difficultyColor } from '@/lib/utils'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, CheckCircle, Play, Award } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { ellipsis } from '@/lib/utils'
 
@@ -95,57 +95,72 @@ const QuestionCard = ({
     }, [codingOutsourseId, assessmentSubmitId, id])
 
     return (
-        <div className="my-5 p-6 bg-white rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
-            <div className="flex justify-between">
-                <h2 className="capitalize">
-                    {isMobile ? ellipsis(title, 30) : title}
-                </h2>
-                <div>
-                    {title !== 'Open-Ended Questions' && (
-                        <h2 className="bg-[#DEDEDE] px-2 py-1 mb-2 text-sm rounded-2xl font-semibold">
-                            {`${
-                                codingQuestions
-                                    ? Math.trunc(
-                                          Number(
-                                              codingQuestionMarks(description)
-                                          )
-                                      )
-                                    : weightage
-                            } Marks`}
-                        </h2>
-                    )}
-                    <h2
-                        className={cn(
-                            `font-semibold text-secondary mb-1`,
-                            difficultyColor(description)
-                        )}
-                    >
-                        {description}
-                    </h2>
-                </div>
-                {/* {tag && <h2>Topic: {tag?.tagName}</h2>} */}
-            </div>
-            <div></div>
-            <div className="text-secondary justify-end flex items-center">
-                {action === 'submit' ? (
-                    <p className="italic opacity-60">Already Submitted</p>
-                ) : (
-                    <div className="text-secondary justify-end flex items-center">
-                        <p
-                            className="cursor-pointer"
-                            onClick={() => onSolveChallenge(id)}
-                        >
-                            {isQuizSubmitted ? (
-                                <p className="italic opacity-60 cursor-default">
-                                    Already Submitted
-                                </p>
-                            ) : (
-                                <p> Solve Challenge</p>
-                            )}
-                        </p>
-                        <ChevronRight className="cursor-pointer" size={18} />
+        <div className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden group text-left">
+            <div className="p-6 flex flex-col h-full min-h-[140px]">
+                {/* Header Section */}
+                <div className="flex-1 mb-4">
+                    <div className="flex items-start justify-between mb-3">
+                        <h3 className="text-lg font-bold text-foreground capitalize pr-4 flex-1">
+                            {isMobile ? ellipsis(title, 30) : title}
+                        </h3>
                     </div>
-                )}
+                    
+                    {/* Tags and Marks Section */}
+                    <div className="flex items-center flex-wrap gap-2 mb-4">
+                        {title !== 'Open-Ended Questions' && (
+                            <div className="flex items-center space-x-2 px-3 py-1.5 bg-primary/10 rounded-full border border-primary/20">
+                                <Award className="w-4 h-4 text-primary" />
+                                <span className="text-sm font-semibold text-primary">
+                                    {`${
+                                        codingQuestions
+                                            ? Math.trunc(
+                                                  Number(
+                                                      codingQuestionMarks(description)
+                                                  )
+                                              )
+                                            : weightage
+                                    } Marks`}
+                                </span>
+                            </div>
+                        )}
+                        <span
+                            className={cn(
+                                'px-3 py-1.5 rounded-full text-xs font-semibold border',
+                                difficultyColor(description)
+                            )}
+                        >
+                            {description}
+                        </span>
+                    </div>
+                </div>
+                
+                {/* Action Button Section - Always at bottom right */}
+                <div className="flex justify-end items-center mt-auto">
+                    {action === 'submit' ? (
+                        <div className="flex items-center space-x-2 text-success bg-success/10 px-4 py-2 rounded-xl border border-success/20">
+                            <CheckCircle className="w-5 h-5" />
+                            <span className="font-semibold">Already Submitted</span>
+                        </div>
+                    ) : (
+                        <>
+                            {isQuizSubmitted ? (
+                                <div className="flex items-center space-x-2 text-success bg-success/10 px-4 py-2 rounded-xl border border-success/20">
+                                    <CheckCircle className="w-5 h-5" />
+                                    <span className="font-semibold">Already Submitted</span>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => onSolveChallenge(id)}
+                                    className="flex items-center space-x-2 bg-primary hover:bg-primary-dark text-primary-foreground px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-4dp hover:shadow-8dp transform hover:scale-105"
+                                >
+                                    <Play className="w-4 h-4" />
+                                    <span>Solve Challenge</span>
+                                    <ChevronRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+                                </button>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     )

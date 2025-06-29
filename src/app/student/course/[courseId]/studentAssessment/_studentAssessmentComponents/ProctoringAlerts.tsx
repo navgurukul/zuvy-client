@@ -30,8 +30,8 @@ const AlertContext = createContext<AlertContextType | null>(null);
 
 // Custom Alert Icon Component
 const AlertIcon = () => (
-  <div className="w-8 h-8 rounded-full bg-red-500 border-4 border-black flex items-center justify-center relative">
-    <span className="text-white text-xl font-bold">!</span>
+  <div className="w-8 h-8 rounded-full bg-destructive border-4 border-border flex items-center justify-center relative shadow-4dp">
+    <span className="text-destructive-foreground text-xl font-bold">!</span>
   </div>
 );
 
@@ -70,23 +70,22 @@ export const AlertProvider = ({
   return (
     <AlertContext.Provider value={{ showAlert, hideAlert }}>
       {children}
-      {alertContent && (
-        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-          <AlertDialogContent className="max-w-md rounded-lg p-0 overflow-hidden">
+      {alertContent && (        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+          <AlertDialogContent className="max-w-md rounded-lg p-0 overflow-hidden bg-background border-border shadow-4dp">
             <div className="flex flex-col items-center px-6 pt-8 pb-6 gap-4">
               <AlertIcon />
 
-              <AlertDialogTitle className="text-gray-800 text-xl font-semibold m-0">
+              <AlertDialogTitle className="text-foreground text-xl font-semibold m-0">
                 {alertContent.title}
               </AlertDialogTitle>
 
               {alertContent.violationCount && (
-                <div className="bg-red-50 text-red-500 py-1 px-4 rounded-full text-sm">
+                <div className="bg-destructive/10 text-destructive border border-destructive/20 py-1 px-4 rounded-full text-sm">
                   Violation Count: {alertContent.violationCount}
                 </div>
               )}
 
-              <AlertDialogDescription className="text-center text-gray-600 m-0 max-w-sm">
+              <AlertDialogDescription className="text-center text-muted-foreground m-0 max-w-sm">
                 {alertContent.description}
               </AlertDialogDescription>
             </div>
@@ -95,7 +94,7 @@ export const AlertProvider = ({
               <div className="flex-grow flex justify-center">
                 <Button
                   onClick={hideAlert}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-8 py-2 rounded-md text-sm"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 py-2 rounded-md text-sm shadow-2dp"
                 >
                   Return to Assessment
                 </Button>

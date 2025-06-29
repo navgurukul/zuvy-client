@@ -31,6 +31,7 @@ import { getAssessmentStore } from '@/store/store'
 import TimerDisplay from './TimerDisplay'
 import { start } from 'repl'
 import { AlertProvider } from './ProctoringAlerts';
+import { formatToIST } from '@/lib/utils'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -584,304 +585,298 @@ function Page({
                 requestFullScreen={handleFullScreenRequest}
       setIsFullScreen={setIsFullScreen}
     >
-                <div className="h-screen mb-24">
-                    {!isFullScreen && !remainingTime ? (
-                        <div
-                            className={`${
-                                isMobile
-                                    ? 'h-full flex flex-col items-center justify-center'
-                                    : ''
-                            }`}
-                        >
-                            <>
-                                <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
-                                    <div className="font-bold text-xl">
-                                        <TimerDisplay
-                                            remainingTime={remainingTime}
-                                        />
+                <div className="h-screen mb-24">                    {!isFullScreen && !remainingTime ? (
+                        <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
+                            <div className="fixed top-6 right-6 z-50">
+                                <TimerDisplay
+                                    remainingTime={remainingTime}
+                                />
+                            </div>
+
+                            <div className="max-w-2xl w-full">
+                                <div className="bg-card border border-border rounded-2xl shadow-16dp overflow-hidden">
+                                    <div className="bg-card-elevated border-b border-border p-8 text-center">
+                                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
+                                            <Fullscreen className="w-8 h-8 text-primary" />
+                                        </div>
+                                        <h2 className="text-2xl font-bold text-foreground mb-3">Assessment Ready</h2>
+                                        <p className="text-muted-foreground">
+                                            Enter full-screen mode to begin your assessment
+                                        </p>
+                                    </div>
+                                    
+                                    <div className="p-8">
+                                        <div className="bg-warning-light border border-warning/20 rounded-xl p-6 mb-6">
+                                            <div className="flex items-start space-x-3">
+                                                <AlertCircle className="w-6 h-6 text-warning mt-0.5 flex-shrink-0" />
+                                                <div>
+                                                    <h4 className="font-semibold text-warning-dark mb-2">Important Notice</h4>
+                                                    <p className="text-sm text-warning-dark">
+                                                        You must stay in full-screen mode during the test. 
+                                                        <strong> No tab switching, window changes, or exiting full-screen.</strong>
+                                                        {' '}These violations may lead to auto-submission.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="text-center">
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <button className="bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-3 rounded-xl font-medium transition-all duration-200 shadow-8dp hover:shadow-16dp">
+                                                        Enter Full Screen
+                                                    </button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent className="bg-card border-border shadow-32dp">
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogDescription className="text-foreground text-base">
+                                                            You must stay in full-screen mode during the test.
+                                                            <strong className="text-primary">
+                                                                {' '}No tab switching, window changes, or exiting full-screen.{' '}
+                                                            </strong>
+                                                            The above violations may lead to auto-submission.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel className="bg-muted hover:bg-muted-dark text-foreground border-border">
+                                                            Cancel
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            className="bg-primary hover:bg-primary-dark text-primary-foreground"
+                                                            onClick={() => {
+                                                                handleFullScreenRequest();
+                                                                getAssessmentData(true);
+                                                            }}
+                                                        >
+                                                            Proceed
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                        </div>                    ) : (
+                        <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
+                            <div className="fixed top-6 right-6 z-50">
+                                <TimerDisplay
+                                    remainingTime={remainingTime}
+                                />
+                            </div>
+                            
+                            <div className="max-w-4xl mx-auto p-6 pt-20">
+                                {/* Assessment Info Section */}
+                                <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
+                                    <div className="bg-card-elevated border-b border-border p-6">
+                                        <div className="flex items-center space-x-3 mb-4">
+                                            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                                                <Timer className="w-5 h-5 text-primary" />
+                                            </div>
+                                            <h2 className="text-2xl font-bold text-foreground">Testing Your Knowledge</h2>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">                                            <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                                                <Clock className="w-5 h-5 text-accent flex-shrink-0" />
+                                                <div>
+                                                    <p className="text-sm text-muted-foreground font-medium">Deadline</p>
+                                                    <p className="text-foreground font-semibold">
+                                                        {assessmentData?.endDatetime 
+                                                            ? formatToIST(assessmentData.endDatetime)
+                                                            : 'No Deadline For This Assessment'
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
+                                                <Timer className="w-5 h-5 text-secondary flex-shrink-0" />
+                                                <div>
+                                                    <p className="text-sm text-muted-foreground font-medium">Test Time</p>
+                                                    <p className="text-foreground font-semibold">
+                                                        {Math.floor(assessmentData?.timeLimit / 3600)} Hours{' '}
+                                                        {Math.floor((assessmentData?.timeLimit % 3600) / 60)} Minutes
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="p-6">
+                                        <div className="bg-info-light border border-info/20 rounded-xl p-4 mb-6">
+                                            <div className="flex items-start space-x-3">
+                                                <AlertCircle className="w-5 h-5 text-info mt-0.5 flex-shrink-0" />
+                                                <p className="text-sm text-info-dark">
+                                                    Timer has started. Questions will disappear if you exit full screen. 
+                                                    All problems (coding challenges, MCQs, and open-ended questions) must be completed in one session.
+                                                </p>
+                                            </div>
+                                        </div>
 
-                                <h4>
-                                    Enter Full Screen to see the Questions.
-                                    Warning: If you exit fullscreen, your test
-                                    will get submitted automatically
-                                </h4>
-                                <div className="flex justify-center mt-10">
+                                        <div className="bg-warning-light border border-warning/20 rounded-xl p-4">
+                                            <h3 className="font-bold text-warning-dark mb-3 flex items-center space-x-2">
+                                                <AlertCircle className="w-5 h-5" />
+                                                <span>Proctoring Rules</span>
+                                            </h3>
+                                            <p className="text-sm text-warning-dark mb-3">
+                                                To ensure fair assessments, the following activities are monitored. Please avoid violating the rules:
+                                            </p>
+                                            <ul className="list-disc list-inside space-y-1 text-sm text-warning-dark ml-4">
+                                                <li>Copy and pasting</li>
+                                                <li>Tab switching</li>
+                                                <li>Assessment screen exit</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>                                {/* Coding Challenges Section */}
+                                {assessmentData?.codingQuestions?.length > 0 && (
+                                    <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
+                                        <div className="bg-card-elevated border-b border-border p-6">
+                                            <div className="flex items-center space-x-3 mb-4">
+                                                <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                                                    <AlertCircle className="w-5 h-5 text-accent" />
+                                                </div>
+                                                <h2 className="text-2xl font-bold text-foreground">Coding Challenges</h2>
+                                            </div>
+                                            
+                                            <div className="bg-info-light border border-info/20 rounded-xl p-4">
+                                                <div className="flex items-start space-x-3">
+                                                    <AlertCircle className="w-5 h-5 text-info mt-0.5 flex-shrink-0" />
+                                                    <p className="text-sm text-info-dark">
+                                                        You may run your code multiple times after making changes, but you are allowed to submit it only once.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="p-6">
+                                            <div className="space-y-4">
+                                                {assessmentData?.codingQuestions?.map((question: any) => (
+                                                    <QuestionCard
+                                                        isMobile={isMobile}
+                                                        key={question.codingQuestionId}
+                                                        id={question.codingQuestionId}
+                                                        easyCodingMark={assessmentData?.easyCodingMark}
+                                                        mediumCodingMark={assessmentData?.mediumCodingMark}
+                                                        hardCodingMark={assessmentData?.hardCodingMark}
+                                                        title={question.title}
+                                                        description={question.difficulty}
+                                                        assessmentSubmitId={assessmentSubmitId}
+                                                        codingOutsourseId={question.codingOutsourseId}
+                                                        codingQuestions={true}
+                                                        onSolveChallenge={(id: any) =>
+                                                            handleSolveChallenge(
+                                                                'coding',
+                                                                id,
+                                                                question.codingQuestionId,
+                                                                question.codingOutsourseId
+                                                            )
+                                                        }
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}                                {/* MCQs Section */}
+                                {assessmentData?.hardMcqQuestions +
+                                    assessmentData?.easyMcqQuestions +
+                                    assessmentData?.mediumMcqQuestions >
+                                    0 && (
+                                    <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
+                                        <div className="bg-card-elevated border-b border-border p-6">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+                                                    <AlertCircle className="w-5 h-5 text-secondary" />
+                                                </div>
+                                                <h2 className="text-2xl font-bold text-foreground">Multiple Choice Questions</h2>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="p-6">
+                                            <QuestionCard
+                                                id={1}
+                                                title="Quiz"
+                                                weightage={assessmentData?.weightageMcqQuestions}
+                                                description={`${
+                                                    assessmentData?.hardMcqQuestions +
+                                                        assessmentData?.easyMcqQuestions +
+                                                        assessmentData?.mediumMcqQuestions || 0
+                                                } questions`}
+                                                onSolveChallenge={() => handleSolveChallenge('quiz')}
+                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Open-ended Questions Section */}
+                                {seperateOpenEndedQuestions.length > 0 && (
+                                    <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
+                                        <div className="bg-card-elevated border-b border-border p-6">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="w-10 h-10 bg-info/10 rounded-lg flex items-center justify-center">
+                                                    <AlertCircle className="w-5 h-5 text-info" />
+                                                </div>
+                                                <h2 className="text-2xl font-bold text-foreground">Open-Ended Questions</h2>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="p-6">
+                                            <QuestionCard
+                                                id={1}
+                                                title="Open-Ended Questions"
+                                                description={`${seperateOpenEndedQuestions.length || 0} questions`}
+                                                onSolveChallenge={() => handleSolveChallenge('open-ended')}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Submit Assessment Button */}
+                                <div className="flex justify-center">
                                     <AlertDialog>
                                         <AlertDialogTrigger asChild>
-                                            <Button>Enter Full Screen</Button>
+                                            <button
+                                                disabled={
+                                                    disableSubmit ||
+                                                    (assessmentData?.totalMcqQuestions > 0 &&
+                                                        assessmentData?.IsQuizzSubmission === false)
+                                                }
+                                                className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp ${
+                                                    disableSubmit ||
+                                                    (assessmentData?.totalMcqQuestions > 0 &&
+                                                        assessmentData?.IsQuizzSubmission === false)
+                                                        ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                                        : 'bg-primary hover:bg-primary-dark text-primary-foreground'
+                                                }`}
+                                            >
+                                                Submit Assessment
+                                            </button>
                                         </AlertDialogTrigger>
-                                        <AlertDialogContent>
+                                        <AlertDialogContent className="bg-card border-border shadow-32dp">
                                             <AlertDialogHeader>
-                                                <AlertDialogDescription>
-                                                    You must stay in full-screen
-                                                    mode during the test.
-                                                    <strong>
-                                                        {' '}
-                                                        No tab switching, window
-                                                        changes, or exiting
-                                                        full-screen.{' '}
-                                                    </strong>
-                                                    The above violations may
-                                                    lead to auto-submission.
+                                                <AlertDialogTitle className="text-foreground">
+                                                    Are you absolutely sure?
+                                                </AlertDialogTitle>
+                                                <AlertDialogDescription className="text-muted-foreground">
+                                                    This action cannot be undone. This will submit your whole assessment.
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>
+                                                <AlertDialogCancel className="bg-muted hover:bg-muted-dark text-foreground border-border">
                                                     Cancel
                                                 </AlertDialogCancel>
                                                 <AlertDialogAction
-                                                    className="bg-red-500"
-                                                    onClick={() => {
-                                                        handleFullScreenRequest();
-                                                        getAssessmentData(true);
-                                                    }}
+                                                    className="bg-destructive hover:bg-destructive-dark text-destructive-foreground"
+                                                    onClick={submitAssessment}
                                                 >
-                                                    Proceed
+                                                    Submit
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
                                 </div>
-                            </>
-                            {/* )} */}
-                        </div>
-                    ) : (
-                        <div>
-                            <div className="fixed top-4 right-4 bg-white p-2 rounded-md shadow-md font-bold text-xl">
-                                <div className="font-bold text-xl">
-                                    <TimerDisplay
-        remainingTime={remainingTime}
-                                    />
-                                </div>
                             </div>
-                            {/* <Separator className="my-6" /> */}
-                            <div className="flex justify-center">
-                                <div
-                                    className={`${
-                                        isMobile
-                                            ? 'w-full space-y-4'
-                                            : 'flex flex-col gap-5 w-1/2 text-left mt-10'
-                                    } `}
-                                >
-                                    <h2 className="font-bold text-left">
-                                        Testing Your Knowledge
-                                    </h2>
-                                    <p className="deadline flex items-center text-left gap-2">
-                                        <Clock size={18} />
-                                        Deadline:{' '}
-                                        {assessmentData?.deadline ||
-                                            'No Deadline For This Assessment'}
-                                    </p>
-                                    <p className="testTime flex items-center text-left gap-2">
-                                        <Timer size={18} />
-                                        Test Time:{' '}
-                                        {Math.floor(
-                                            assessmentData?.timeLimit / 3600
-                                        )}{' '}
-                                        Hours{' '}
-                                        {Math.floor(
-                                            (assessmentData?.timeLimit % 3600) /
-                                                60
-                                        )}{' '}
-                                        Minutes
-                                    </p>
-                                    <p className="description text-left">
-                                        Timer has started. Questions will
-                                        disappear if you exit full screen. All
-                                        the problems i.e. coding challenges,
-                                        MCQs and open-ended questions have to be
-                                        completed all at once
-                                    </p>
-
-                                    <h1 className="font-bold text-left">
-                                        Proctoring Rules
-                                    </h1>
-                                    <p className="text-left">
-                                        To ensure fair assessments, the
-                                        assessments are proctored are proctored
-                                        for the following cases below. Please
-                                        avoid violating the rules:
-                                    </p>
-                                    <ul className="list-disc ml-5 text-left">
-                                        <li>Copy and pasting</li>
-                                        <li>Tab switching</li>
-                                        <li>Assessment screen exit</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            {assessmentData?.codingQuestions?.length > 0 && (
-                                <div className="flex justify-center ">
-                                    <div
-                                        className={`${
-                                            isMobile
-                                                ? 'w-full mt-5'
-                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
-                                        } `}
-                                    >
-                                        <h2 className="font-bold text-left">
-                                            Coding Challenges
-                                        </h2>
-                                        <div className="flex gap-2  mt-2 ">
-                                            <AlertCircle />
-                                            <h2 className="text-left ">
-                                                You may run your code multiple
-                                                times after making changes, but
-                                                you are allowed to submit it
-                                                only once.
-                                            </h2>
-                                        </div>
-                                        {assessmentData?.codingQuestions?.map(
-                                            (question: any) => (
-                                                <QuestionCard
-                                                    isMobile={isMobile}
-                                                    key={
-                                                        question.codingQuestionId
-                                                    }
-                                                    id={
-                                                        question.codingQuestionId
-                                                    }
-                                                    easyCodingMark={
-                                                        assessmentData?.easyCodingMark
-                                                    }
-                                                    mediumCodingMark={
-                                                        assessmentData?.mediumCodingMark
-                                                    }
-                                                    hardCodingMark={
-                                                        assessmentData?.hardCodingMark
-                                                    }
-                                                    title={question.title}
-                                                    description={
-                                                        question.difficulty
-                                                    }
-                                                    // assessmentOutsourseId={question.assessmentOutsourseId}
-                                                    assessmentSubmitId={
-                                                        assessmentSubmitId
-                                                    }
-                                                    codingOutsourseId={
-                                                        question.codingOutsourseId
-                                                    }
-                                                    codingQuestions={true}
-                                                    onSolveChallenge={(
-                                                        id: any
-                                                    ) =>
-                                                        handleSolveChallenge(
-                                                            'coding',
-                                                            id,
-                                                            question.codingQuestionId,
-                                                            question.codingOutsourseId
-                                                        )
-                                                    }
-                                                />
-                                            )
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                            {assessmentData?.hardMcqQuestions +
-                                assessmentData?.easyMcqQuestions +
-                                assessmentData?.mediumMcqQuestions >
-                                0 && (
-                                <div className="flex justify-center">
-                                    <div
-                                        className={`${
-                                            isMobile
-                                                ? 'w-full'
-                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
-                                        } `}
-                                    >
-                                        <h2 className="font-bold text-left">
-                                            MCQs
-                                        </h2>
-                                        <QuestionCard
-                                            id={1}
-                                            title="Quiz"
-                                            weightage={
-                                                assessmentData?.weightageMcqQuestions
-                                            }
-                                            description={`${
-                                                assessmentData?.hardMcqQuestions +
-                                                    assessmentData?.easyMcqQuestions +
-                                                    assessmentData?.mediumMcqQuestions ||
-                                                0
-                                            } questions`}
-                                            onSolveChallenge={() =>
-                                                handleSolveChallenge('quiz')
-                                            }
-                                            isQuizSubmitted={
-                                                assessmentData?.IsQuizzSubmission
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                            {seperateOpenEndedQuestions.length > 0 && (
-                                <div className="flex justify-center">
-                                    <div
-                                        className={`${
-                                            isMobile
-                                                ? 'w-full'
-                                                : 'flex flex-col gap-5 w-1/2 text-left mt-10'
-                                        } `}
-                                    >
-                                        <h2 className="font-bold">
-                                            Open-Ended Questions
-                                        </h2>
-                                        <QuestionCard
-                                            id={1}
-                                            title="Open-Ended Questions"
-                                            description={`${
-                                                seperateOpenEndedQuestions.length ||
-                                                0
-                                            } questions`}
-                                            onSolveChallenge={() =>
-                                                handleSolveChallenge(
-                                                    'open-ended'
-                                                )
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            )}
-
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button
-                                        disabled={
-                                            disableSubmit ||
-                                            (assessmentData?.totalMcqQuestions >
-                                                0 &&
-                                                assessmentData?.IsQuizzSubmission ===
-                                                    false)
-                                        }
-                                    >
-                                        Submit Assessment
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>
-                                            Are you absolutely sure?
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This
-                                            will submit your whole assessment.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>
-                                            Cancel
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                            className="bg-red-500"
-                                            onClick={submitAssessment}
-                                        >
-                                            Submit
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
                         </div>
                     )}
                 </div>

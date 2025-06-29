@@ -51,7 +51,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
     ) => {
         if (codingOutsourseId) {
             navigateTo(
-                `/student/course/${params.viewcourses}/modules/${params.moduleID}/assessmentResult/${params.submissionId}/codingResult/?codingOutsourseId=${codingOutsourseId}&questionId=${questionId}`
+                `/student/course/${params.courseId}/modules/${params.moduleId}/assessmentResult/${params.submissionId}/codingResult/?codingOutsourseId=${codingOutsourseId}&questionId=${questionId}`
             )
         } else {
             toast.error({
@@ -426,7 +426,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             <Button
                                 onClick={() =>
                                     navigateTo(
-                                        `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/${assessmentOutsourseId}/quizresults`
+                                        `/student/course/${params.courseId}/modules/${params.moduleId}/assessmentResult/${assessmentOutsourseId}/quizResult`
                                     )
                                 }
                                 className="bg-primary hover:bg-primary-dark text-primary-foreground"
@@ -497,7 +497,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                             <Button
                                 onClick={() =>
                                     navigateTo(
-                                        `/student/courses/${params.viewcourses}/modules/${params.moduleID}/assessment/${assessmentOutsourseId}/openendedresults`
+                                        `/student/course/${params.courseId}/modules/${params.moduleId}/assessment/${assessmentOutsourseId}/openendedresults`
                                     )
                                 }
                                 className="bg-primary hover:bg-primary-dark text-primary-foreground"
