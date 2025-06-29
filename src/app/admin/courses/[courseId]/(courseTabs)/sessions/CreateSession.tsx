@@ -45,7 +45,13 @@ import {
     CommandInput,
     CommandItem,
 } from '@/components/ui/command'
-import { cn } from '@/lib/utils'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { cn, ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { setStoreBatchValue } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
@@ -787,16 +793,31 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                             'text-muted-foreground'
                                                                     )}
                                                                 >
-                                                                    {field.value
-                                                                        ? props.modulesData.find(
-                                                                              (
-                                                                                  modules: any
-                                                                              ) =>
-                                                                                  modules.id ===
-                                                                                  field.value
-                                                                          )
-                                                                              ?.description
-                                                                        : 'Select Modules...'}
+                                                                    {field.value ? (
+                                                                        <TooltipProvider>
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <span className="truncate">
+                                                                                        {ellipsis(
+                                                                                            props.modulesData.find(
+                                                                                                (modules: any) =>
+                                                                                                    modules.id === field.value
+                                                                                            )?.description || '',
+                                                                                            30
+                                                                                        )}
+                                                                                    </span>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent>
+                                                                                    {props.modulesData.find(
+                                                                                        (modules: any) =>
+                                                                                            modules.id === field.value
+                                                                                    )?.description || ''}
+                                                                                </TooltipContent>
+                                                                            </Tooltip>
+                                                                        </TooltipProvider>
+                                                                    ) : (
+                                                                        'Select Modules...'
+                                                                    )}
                                                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                                 </Button>
                                                             </FormControl>
@@ -843,9 +864,18 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                                             : 'opacity-0'
                                                                                     )}
                                                                                 />
-                                                                                {
-                                                                                    modules.description
-                                                                                }
+                                                                                <TooltipProvider>
+                                                                                    <Tooltip>
+                                                                                        <TooltipTrigger asChild>
+                                                                                            <span className="truncate">
+                                                                                                {ellipsis(modules.description, 40)}
+                                                                                            </span>
+                                                                                        </TooltipTrigger>
+                                                                                        <TooltipContent>
+                                                                                            {modules.description}
+                                                                                        </TooltipContent>
+                                                                                    </Tooltip>
+                                                                                </TooltipProvider>
                                                                             </CommandItem>
                                                                         )
                                                                     )}

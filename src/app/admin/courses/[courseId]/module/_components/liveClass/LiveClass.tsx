@@ -183,7 +183,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
                                 onClick={() =>
                                     window.open(session.hangoutLink, '_blank')
                                 }
-                                disabled={session.status === 'completed' && !session.s3link}
+                                disabled={session.status === 'completed' && (!session.s3link || session.s3link === 'not found')}
                             >
                                 <Video className="w-4 h-4 mr-2 text-white" />
                                 <span className='text-white'>
