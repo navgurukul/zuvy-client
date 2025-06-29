@@ -257,7 +257,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
 
         return (
             <div className="mb-8">
-                <SectionHeading  title="Coding Challenges" />
+                <SectionHeading title="Coding Challenges" />
                 {attemptedCodingQuestions === 0 ? (
                     <div className="bg-card border border-border rounded-lg p-8 shadow-4dp">
                         <div className="flex flex-col items-start text-left">
@@ -285,7 +285,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 codingQuestion.questionDetail.difficulty
                             )
                             const isAccepted = codingQuestion.status === 'Accepted'
-                            
+
                             return (
                                 <div
                                     key={codingQuestion.id}
@@ -483,7 +483,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                                 {openEndedCount} questions
                             </span>
                         </div>
-                        
+
                         <div className="mb-4 text-left">
                             <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium text-muted-foreground">Attempted:</span>
@@ -516,19 +516,18 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         <div className="min-h-screen bg-background">
             <div className="text-left">
 
-                        <Button
-                            variant="ghost"
-                            onClick={() => router.back()}
-                            className="mb-4 text-primary  hover:text-primary-dark"
-                        >
-                            <ChevronLeft className="w-4 h-4 mr-2" />
-                            Back to Assessment
-                        </Button>
+                <div
+                    onClick={() => router.back()}
+                    className="inline-flex text-left w-full m-3 items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
+                >
+                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                    <span className="font-medium">Back to Assessment</span>
+                </div>
             </div>
             <div className="max-w-4xl mx-auto p-6">
                 {/* Header */}
                 <div className="mb-6 text-left">
-                    
+
                     <h1 className="text-3xl font-bold text-left text-foreground mb-2">Assessment Results</h1>
                     {timeTaken && (
                         <p className=" text-left text-muted-foreground">{timeTaken}</p>

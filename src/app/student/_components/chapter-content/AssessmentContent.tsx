@@ -281,7 +281,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
         <div className="text-center py-12">
           <h1 className="text-2xl font-heading font-bold mb-2 text-destructive">Error Loading Assessment</h1>
           <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={refetch} variant="outline">Try Again</Button>
+          <Button onClick={refetch} variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">Try Again</Button>
         </div>
       </div>
     );
@@ -312,16 +312,20 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 <Badge
                   variant={
                     assessmentDetails.assessmentState.toUpperCase() === 'ACTIVE'
-                      ? 'secondary'
-                      : assessmentDetails.assessmentState.toUpperCase() === 'PUBLISHED'
                       ? 'default'
+                      : assessmentDetails.assessmentState.toUpperCase() === 'PUBLISHED'
+                      ? 'outline'
                       : assessmentDetails.assessmentState.toUpperCase() === 'DRAFT'
                       ? 'outline'
                       : assessmentDetails.assessmentState.toUpperCase() === 'CLOSED'
                       ? 'destructive'
                       : 'destructive'
                   }
-                  className="text-xs sm:text-sm"
+                  className={`text-xs sm:text-sm ${
+                    assessmentDetails.assessmentState.toUpperCase() === 'ACTIVE'
+                      ? 'bg-primary text-primary-foreground hover:bg-primary-dark'
+                      : ''
+                  }`}
                 >
                   {assessmentDetails.assessmentState.charAt(0).toUpperCase() +
                     assessmentDetails.assessmentState.slice(1).toLowerCase()}
@@ -337,7 +341,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             <div className="flex flex-wrap gap-4 sm:gap-6">
               {assessmentDetails.totalCodingQuestions > 0 && (
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-base sm:text-lg font-semibold text-secondary">
+                  <h2 className="text-base sm:text-lg font-semibold text-primary">
                     {assessmentDetails.easyCodingQuestions +
                       assessmentDetails.mediumCodingQuestions +
                       assessmentDetails.hardCodingQuestions}
@@ -346,7 +350,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               )}
               {assessmentDetails.totalMcqQuestions > 0 && (
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-base sm:text-lg font-semibold text-secondary">
+                  <h2 className="text-base sm:text-lg font-semibold text-primary">
                     {assessmentDetails.easyMcqQuestions +
                       assessmentDetails.mediumMcqQuestions +
                       assessmentDetails.hardMcqQuestions}
@@ -356,7 +360,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               )}
               {assessmentDetails.totalOpenEndedQuestions > 0 && (
                 <div className="min-w-0 flex-1">
-                  <h2 className="text-base sm:text-lg font-semibold text-secondary">
+                  <h2 className="text-base sm:text-lg font-semibold text-primary">
                     {assessmentDetails.totalOpenEndedQuestions}
                   </h2>
                   <p className="text-xs sm:text-sm text-muted-foreground">Open-Ended</p>
@@ -402,7 +406,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 </h2>
                 <Dialog open={reattemptDialogOpen} onOpenChange={setReattemptDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="mt-4">Request Re-Attempt</Button>
+                    <Button className="mt-4 bg-primary hover:bg-primary-dark text-primary-foreground">Request Re-Attempt</Button>
                   </DialogTrigger>
                   <DialogOverlay />                  <DialogContent className="mx-4 sm:mx-0 max-w-md sm:max-w-lg">
                     <DialogHeader>                      <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
@@ -420,7 +424,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                       >
                         Cancel
                       </Button>
-                      <Button className="sm:ml-4 w-full sm:w-auto" onClick={requestReattempt}>
+                      <Button className="sm:ml-4 w-full sm:w-auto bg-primary hover:bg-primary-dark text-primary-foreground" onClick={requestReattempt}>
                         Send Request
                       </Button>
                     </div>
@@ -468,11 +472,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                   </div>
                   <div>
                     <Button
-                      variant="ghost"                      className={`${
-                        isPassed
-                          ? 'text-success hover:text-success-dark'
-                          : 'text-destructive hover:text-destructive-dark'
-                      } font-semibold md:text-lg text-sm`}
+                      variant="ghost"                      className="text-primary hover:text-primary-dark font-semibold md:text-lg text-sm"
                       onClick={handleViewResults}
                       disabled={chapterDetails.status === 'Pending' && !isSubmitedAt}
                     >
@@ -531,7 +531,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               }`}
             >
               <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-x-3 text-foreground">
-                <Timer size={20} className="animate-pulse text-accent sm:w-6 sm:h-6" />
+                <Timer size={20} className="animate-pulse text-primary sm:w-6 sm:h-6" />
                 <h3 className="text-base sm:text-lg lg:text-xl font-bold tracking-wider break-words">
                   Assessment Begins In
                 </h3>

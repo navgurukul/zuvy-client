@@ -176,16 +176,14 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
   };  return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
       {/* Header Section with Back Button */}
+      <div
+                        onClick={() => router.back()}
+                        className="inline-flex text-left w-full  items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
+                    >
+                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                        <span className="font-medium">Back to Results</span>
+                    </div>
       <div className="max-w-7xl mx-auto">
-        <div
-          onClick={() => router.back()}
-          className="group cursor-pointer flex items-center space-x-2 text-primary hover:text-primary/80 mb-8 transition-all duration-300 w-fit"
-        >
-          <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors duration-300">
-            <ChevronLeft size={18} className="text-primary" />
-          </div>
-          <span className="font-medium text-sm">Back to Assessment</span>
-        </div>
 
         {/* Header Card with Status */}
         <div className="bg-card border border-border rounded-2xl p-8 mb-8 shadow-lg">
@@ -196,7 +194,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-foreground mb-2">Coding Submission Result</h1>
-                <p className="text-muted-foreground">Detailed analysis of your solution</p>
+                <p className="text-muted-foreground text-left">Detailed analysis of your solution</p>
               </div>
             </div>
             
@@ -228,10 +226,10 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
                 )}
               </div>
               <div>
-                <h3 className={`text-xl font-bold ${overallSuccess ? 'text-success' : 'text-destructive'}`}>
+                <h3 className={`text-xl font-bold text-left ${overallSuccess ? 'text-success' : 'text-destructive'}`}>
                   {overallSuccess ? '🎉 All Tests Passed!' : '❌ Some Tests Failed'}
                 </h3>
-                <p className="text-muted-foreground mt-1">
+                <p className="text-muted-foreground mt-1 text-left">
                   {overallSuccess 
                     ? 'Congratulations! Your solution works perfectly.' 
                     : 'Review the failed test cases below and try again.'
@@ -253,7 +251,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground">Memory Usage</h3>
-                    <p className="text-sm text-muted-foreground">Peak consumption</p>
+                    <p className="text-sm text-left text-muted-foreground">Peak consumption</p>
                   </div>
                 </div>
                 <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
