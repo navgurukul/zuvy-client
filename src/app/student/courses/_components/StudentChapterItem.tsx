@@ -8,6 +8,7 @@ import {
     StickyNote,
     Video,
     BookOpenCheck,
+    Play,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -54,6 +55,8 @@ function StudentChapterItem({
                 return <PencilLine />
             case 6:
                 return <BookOpenCheck />
+            case 8:
+                return <Play />
             default:
                 return <StickyNote />
         }

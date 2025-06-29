@@ -21,6 +21,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
+import LiveClass from '../../../_components/liveClass/LiveClass'
 
 interface QuizOptions {
     option1: string
@@ -207,6 +208,17 @@ export default function Page({
                     return (
                         <AddForm
                             key={chapterId}
+                            chapterData={currentChapter}
+                            content={chapterContent}
+                            // fetchChapterContent={fetchChapterContent}
+                            moduleId={moduleID}
+                            courseId={courseId}
+                        />
+                    )
+
+                case 8:
+                    return (
+                        <LiveClass
                             chapterData={currentChapter}
                             content={chapterContent}
                             // fetchChapterContent={fetchChapterContent}
