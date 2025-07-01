@@ -22,9 +22,9 @@ type Props = {
 
 const OverviewComponent = (props: any) => {
     return (
-        <div className="my-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10">
-                <div className="flex h-[160px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-full md:w-4/5 lg:w-4/5 bg-white">
+        <div className="my-8 px-4 md:px-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 justify-center">
+                <div className="flex h-[160px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md w-full md:w-5/6 lg:w-5/6 bg-white">
                     <div className="flex flex-col w-full justify-between">
                         <div className="flex items-center p-3 md:p-4 h-[75px] justify-between rounded-md bg-orange-300">
                             <h1 className="text-semibold font-semibold text-gray-800 dark:text-white">
@@ -34,7 +34,7 @@ const OverviewComponent = (props: any) => {
                                 {Math.floor(props.score)}%
                             </h1>
                         </div>
-                        <div className="flex flex-col md:flex-row gap-3 p-3 md:p-4">
+                        <div className="flex flex-col md:flex-row gap-5 p-3 md:p-4">
                             {props.totalCodingChallenges > 0 && (
                                 <div className="flex flex-col">
                                     <h1 className="text-sm md:text-base lg:text-lg font-semibold">

@@ -432,13 +432,14 @@ export const fetchStudentAssessments = async (
 
     const endpoint = `/admin/assessment/students/assessment_id${assessment_Id}?${params.toString()}`
     const res = await api.get(endpoint)
-    const { submitedOutsourseAssessments, ModuleAssessment, passPercentage } =
+    const { submitedOutsourseAssessments, ModuleAssessment} =
         res.data
 
+        const passPercentage = ModuleAssessment?.passPercentage
     // Update global pagination
     // const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
     const updatedTotalPages = Math.ceil(
-        res?.data?.ModuleAssessment?.totalStudents / limit
+        res?.data?.ModuleAssessment?.totalPages / limit
     )
     setTotalPages(updatedTotalPages)
     setLastPage(updatedTotalPages)

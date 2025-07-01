@@ -333,7 +333,7 @@ const Page = ({ params }: { params: any }) => {
                         proctoringData={proctoringData}
                     />
                 ) : (
-                    <div className="flex gap-x-20  ">
+                    <div className="flex gap-x-20 ">
                         <div>
                             <Skeleton className="h-[175px] w-[700px] rounded-xl" />
                             <div className="space-y-2 "></div>
@@ -345,13 +345,13 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-20 mt-4 ">
+                <div className="grid grid-cols-2 gap-10 mt-4 my-8 px-4 md:px-12 ">
                     {codingdata ? (
                         <>
 
                             {/* Coding Submission */}
                             {codingdata && codingdata.length === 0 ? (
-                                <div className='w-full'>
+                                <div className='w-full '>
                                     <h1 className="text-left font-semibold">
                                         Coding Questions
                                     </h1>
@@ -391,7 +391,7 @@ const Page = ({ params }: { params: any }) => {
                                     ?.mediumMcqQuestions ||
                                 assesmentData?.submitedOutsourseAssessment
                                     ?.hardMcqQuestions > 0) && (
-                                    <div className="w-full pl-5">
+                                    <div className="w-full">
                                         <h1 className="text-left font-semibold">
                                             MCQs
                                         </h1>
@@ -399,7 +399,7 @@ const Page = ({ params }: { params: any }) => {
                                             assesmentData?.attemptedMCQQuestions ===
                                             0 ? (
                                             <>
-                                                <p className="text-center py-20 font-semibold w-full h-1/2 shadow-lg transition-transform transform hover:shadow-xl">
+                                                <p className="text-center py-20 font-semibold w-5/6 h-1/2 shadow-lg transition-transform transform hover:shadow-xl">
                                                     This student has not submitted any quiz question.
                                                 </p>
                                             </>
@@ -421,7 +421,7 @@ const Page = ({ params }: { params: any }) => {
                                                 }
                                             />
                                         ) : (
-                                            <p className="text-center py-20 font-semibold h-1/2 w-4/5 shadow-lg  transition-transform transform hover:shadow-xl">
+                                            <p className="text-center py-20 font-semibold h-1/2 w-5/6 shadow-lg  transition-transform transform hover:shadow-xl">
                                                 This student has not submitted any
                                                 quiz question.
                                             </p>

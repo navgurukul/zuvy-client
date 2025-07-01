@@ -113,7 +113,7 @@ const CurricullumCard = (props: Props) => {
             <div
                 className={`${
                     props.typeId === 2 ? 'bg-yellow/50' : 'bg-muted'
-                } my-3 p-3 flex rounded-xl relative group select-none`}
+                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer`}
             >
                 <div className="w-full p-2" onClick={handleModuleRoute}>
                     <div className="flex mb-2 w-full justify-between">
@@ -129,6 +129,7 @@ const CurricullumCard = (props: Props) => {
                                 }}
                             />
                             <Pencil
+                                className="hover:text-green-600 cursor-pointer"
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     editHandle(moduleId)
@@ -224,6 +225,7 @@ const CurricullumCard = (props: Props) => {
                 />
             </div>
         </Reorder.Item>
+
     )
 }
 
