@@ -12,6 +12,8 @@ export interface Event {
   bootcampName: string;
   batchId: number;
   eventDate: string;
+  moduleId: number;
+  chapterId: number;
 }
 
 interface UpcomingEventsData {

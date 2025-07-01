@@ -4,6 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,6 +29,9 @@ interface UpcomingEvent {
   batchId: number;
   eventDate: string;
   type: string;
+  moduleId?: number;
+  chapterId?: number;
+  hangoutLink?: string;
 }
 
 interface Bootcamp {
@@ -48,7 +58,7 @@ const StudentDashboard = () => {
   const { studentData, loading, error, refetch } = useStudentData();
   const { studentData: studentProfile } = useLazyLoadedStudentData();
 
-  const filteredBootcamps = filter === 'enrolled' 
+  const filteredBootcamps = filter === 'enrolled'
     ? studentData?.inProgressBootcamps || []
     : studentData?.completedBootcamps || [];
 
@@ -75,7 +85,7 @@ const StudentDashboard = () => {
         </div>
       );
     }
-    
+
     if (bootcamp.progress === 0) {
       return (
         <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" asChild>
@@ -86,7 +96,7 @@ const StudentDashboard = () => {
         </Button>
       );
     }
-    
+
     return (
       <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" asChild>
         <Link href={`/student/course/${bootcamp.id}`}>
@@ -115,7 +125,7 @@ const StudentDashboard = () => {
 
     // Handle the specific format "2025-06-27 08:26:00+00"
     let parsableDateString = item.eventDate;
-    
+
     // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
     if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
       parsableDateString = parsableDateString.replace(' ', 'T');
@@ -124,7 +134,7 @@ const StudentDashboard = () => {
         parsableDateString += ':00';
       }
     }
-    
+
     const itemDate = new Date(parsableDateString);
     const now = new Date();
 
@@ -173,7 +183,7 @@ const StudentDashboard = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <p className="text-destructive mb-4">{error}</p>
-              <Button onClick={refetch}>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary-dark" onClick={refetch}>
                 Try Again
               </Button>
             </div>
@@ -199,18 +209,17 @@ const StudentDashboard = () => {
         {/* My Courses Section */}
         <div className="mb-6">
           <h2 className="text-2xl font-heading text-left font-semibold mb-6">My Courses</h2>
-          
+
           {/* Filter Chips */}
           <div className="flex gap-3 mb-6">
             <Button
               variant={filter === 'enrolled' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setFilter('enrolled')}
-              className={`rounded-full ${
-                filter === 'enrolled' 
-                  ? 'bg-primary text-primary-foreground hover:bg-primary-dark' 
-                  : 'hover:bg-primary-light hover:text-foreground'
-              }`}
+              className={`rounded-full ${filter === 'enrolled'
+                ? 'bg-primary text-primary-foreground hover:bg-primary-dark'
+                : 'hover:bg-primary-light hover:text-foreground'
+                }`}
             >
               Enrolled
             </Button>
@@ -218,11 +227,11 @@ const StudentDashboard = () => {
               variant={filter === 'completed' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setFilter('completed')}
-              className={`rounded-full ${
-                filter === 'completed' 
-                  ? 'bg-primary text-primary-foreground hover:bg-primary-dark' 
-                  : 'hover:bg-primary-light hover:text-foreground'
-              }`}
+              disabled={!studentData?.completedBootcamps?.length}
+              className={`rounded-full ${filter === 'completed'
+                ? 'bg-primary text-primary-foreground hover:bg-primary-dark'
+                : 'hover:bg-primary-light hover:text-foreground'
+                }`}
             >
               Completed
             </Button>
@@ -245,7 +254,7 @@ const StudentDashboard = () => {
                       className="w-full h-20 md:w-20 md:h-20 rounded-lg object-cover"
                     />
                   </div>
-                  
+
                   {/* Course Info */}
                   <div className="flex-1">
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -273,13 +282,13 @@ const StudentDashboard = () => {
                         {/* Progress Bar */}
                         <div className="mb-4 md:mb-0">
                           <div className="relative bg-primary-light rounded-full h-2 w-full">
-                            <div 
+                            <div
                               className="bg-primary h-2 rounded-full transition-all duration-300 relative"
                               style={{ width: `${bootcamp.progress}%` }}
                             >
-                              <div 
-                                className="absolute top-1/2 transform -translate-y-1/2 bg-white px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
-                                style={{ 
+                              <div
+                                className="absolute top-1/2 transform -translate-y-1/2 bg-background px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap text-foreground"
+                                style={{
                                   right: bootcamp.progress === 100 ? '0' : bootcamp.progress === 0 ? 'auto' : '-12px',
                                   left: bootcamp.progress === 0 ? '0' : 'auto'
                                 }}
@@ -310,54 +319,81 @@ const StudentDashboard = () => {
                     <div className="border-t border-border mt-6 mb-6"></div>
 
                     {/* Upcoming Items */}
-                    <div className="overflow-x-auto pb-2 -mx-6 px-6">
-                      <div className="flex flex-nowrap gap-4">
+                    <Carousel className="w-full group">
+                      <CarouselContent className="-ml-2">
                         {bootcamp.upcomingEvents.map((item) => {
                           const eventType = mapEventType(item.type);
+                          const liveClassStatus = item.status;
                           return (
-                           <div key={item.id} className="flex-shrink-0 w-full sm:w-80 border rounded-lg p-3">
-                            <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 mt-1">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                  eventType === 'Live Class' 
-                                    ? 'bg-primary-light' 
-                                    : eventType === 'Assessment'
-                                ? 'bg-warning-light'
-                                : 'bg-info-light'
-                            }`}>
-                                  {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
-                                  {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
-                                  {eventType === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
-                            </div>
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <h4 className="text-sm font-medium line-clamp-1">
-                                    {item.title}
-                              </h4>
-                              <Badge 
-                                variant="outline" 
-                                className={`text-xs px-2 py-0.5 whitespace-nowrap ${
-                                      eventType === 'Live Class' 
-                                        ? 'bg-primary-light text-foreground border-primary-light' 
+                            <CarouselItem key={item.id} className="pl-2 md:basis-1/3">
+                              <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
+                                <div className="w-full border rounded-lg p-3 h-full">
+                                  <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0 mt-1">
+                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType === 'Live Class'
+                                        ? 'bg-primary-light'
                                         : eventType === 'Assessment'
-                                    ? 'bg-warning-light text-foreground border-warning-light'
-                                    : 'bg-info-light text-foreground border-info-light'
-                                }`}
-                              >
-                                    {eventType}
-                              </Badge>
-                            </div>
-                                <p className="text-xs text-left text-muted-foreground mb-2">
-                                  {eventType === 'Assignment' ? 'Due' : 'Starts'} in {formatUpcomingItem(item)}
-                            </p>
-                          </div>
-                        </div>
-                           </div>
+                                          ? 'bg-warning-light'
+                                          : 'bg-info-light'
+                                        }`}>
+                                        {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
+                                        {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
+                                        {eventType === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
+                                      </div>
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-start justify-between gap-2 mb-1">
+                                        <h4 className="text-sm font-medium line-clamp-1">
+                                          {item.title}
+                                        </h4>
+                                        <div>
+                                          <div className="flex flex-col" >
+
+                                            <Badge
+                                              variant="outline"
+                                              className={` text-xs px-2 py-0.5 whitespace-nowrap ${eventType === 'Live Class'
+                                                ? 'bg-primary-light text-foreground border-primary-light'
+                                                : eventType === 'Assessment'
+                                                  ? 'bg-warning-light text-foreground border-warning-light'
+                                                  : 'bg-info-light text-foreground border-info-light'
+                                                }`}
+                                            >
+                                              {eventType}
+                                              <span>
+                                                {liveClassStatus === 'ongoing' && <div className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
+                                              </span>
+                                              <span>
+                                              </span>
+                                            </Badge>
+                                            <p>
+
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                      </div>
+                                      <p className="text-xs text-left flex justify-between text-muted-foreground mb-2">
+                                        <span>
+
+                                        {eventType === 'Assignment' ? 'Due in' : eventType === 'Live Class' ? '' : 'Due in'}  {formatUpcomingItem(item)}
+                                        </span>
+                                        <span>
+
+                                        {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-[14px] ">Join Class</span>}
+                                        </span>
+
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a>
+                            </CarouselItem>
                           );
                         })}
-                      </div>
-                    </div>
+                      </CarouselContent>
+                      <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </Carousel>
                   </>
                 )}
               </CardContent>
@@ -373,8 +409,8 @@ const StudentDashboard = () => {
                 No {filter} courses found
               </h3>
               <p className="text-muted-foreground">
-                {filter === 'enrolled' 
-                  ? "You haven't enrolled in any courses yet." 
+                {filter === 'enrolled'
+                  ? "You haven't enrolled in any courses yet."
                   : "You haven't completed any courses yet."
                 }
               </p>

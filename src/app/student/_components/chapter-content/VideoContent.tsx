@@ -73,9 +73,9 @@ const VideoContent: React.FC<VideoContentProps> = ({ chapterDetails, onChapterCo
             }`}
           >
             {isCompleted ? 'Watched' : 'Pending'}
-          </Badge>
-        </div>
-
+        </Badge>
+      </div>
+      
         {/* Video Player Section */}
         {videoLinks.length > 0 ? (
           videoLinks.map((link, idx) => {
@@ -103,8 +103,8 @@ const VideoContent: React.FC<VideoContentProps> = ({ chapterDetails, onChapterCo
                       allow="autoplay"
                       allowFullScreen
                       className="w-full h-full border-none"
-                    />
-                  ) : (
+        />
+      ) : (
                     <div className="flex flex-col items-center justify-center w-full h-full text-white">
                       <VideoIcon className="w-16 h-16 mb-2 opacity-60" />
                       <p>Unsupported video format</p>
@@ -122,28 +122,28 @@ const VideoContent: React.FC<VideoContentProps> = ({ chapterDetails, onChapterCo
           })
         ) : (
           <div className="bg-black rounded-2xl aspect-video flex items-center justify-center shadow-8dp border border-border">
-            <div className="text-center text-white">
+          <div className="text-center text-white">
               <Play className="w-16 h-16 mx-auto mb-4 opacity-60" />
               <p className="text-lg font-semibold">No Video Content</p>
               <p className="text-sm opacity-75">Video will appear here when available</p>
-            </div>
           </div>
-        )}
-
+        </div>
+      )}
+      
         {/* Mark as Watched Button */}
         {!isCompleted && videoLinks.length > 0 && (
           <div className="flex justify-end mt-6">
-            <Button
-              onClick={completeChapter}
+          <Button 
+            onClick={completeChapter}
               size="lg"
               disabled={isCompleting}
               className="bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg"
-            >
+          >
               <CheckCircle2 className="w-5 h-5 mr-2" />
               {isCompleting ? 'Marking as Watched...' : 'Mark as Watched'}
-            </Button>
-          </div>
-        )}
+          </Button>
+        </div>
+      )}
       </div>
     </div>
   );

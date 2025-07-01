@@ -537,7 +537,7 @@ function Page({
                 completeChapter()
 
                 router.push(
-                    `/student/courses/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}/chapters/${assessmentData?.chapterId}`
+                    `/student/course/${assessmentData?.bootcampId}/modules/${assessmentData?.moduleId}?chapterId=${assessmentData?.chapterId}`
                 )
                 const channel = new BroadcastChannel('assessment_channel')
                 channel.postMessage('assessment_submitted')

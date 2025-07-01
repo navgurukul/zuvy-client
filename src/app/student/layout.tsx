@@ -8,7 +8,8 @@ export default function StudentLayout({
     children: React.ReactNode
 }) {
     const pathname = usePathname();
-    const hideHeader = pathname.includes('/assessmentResult/');
+    const hideHeader = pathname.includes('/assessmentResult/')  || pathname.includes('/codingChallenge');
+    
     return (
         <div className="h-screen bg-background flex flex-col">
             {!hideHeader && <Header />}

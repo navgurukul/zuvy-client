@@ -14,7 +14,7 @@ import {
   TestTube2,
   Terminal
 } from 'lucide-react'
-import { decodeBase64 } from '@/utils/students'
+  import { decodeBase64 } from '@/utils/students'
 import Editor from '@monaco-editor/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -254,8 +254,8 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
                     <p className="text-sm text-left text-muted-foreground">Peak consumption</p>
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                  {TestCasesSubmission[0].memory}
+                <p className="text-3xl text-left font-bold ml-16 text-blue-600 dark:text-blue-400">
+                  {TestCasesSubmission[0].memory} bytes
                 </p>
               </div>
             )}
@@ -268,11 +268,11 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
                   </div>
                   <div>
                     <h3 className="font-semibold text-foreground">Execution Time</h3>
-                    <p className="text-sm text-muted-foreground">Total runtime</p>
+                    <p className="text-sm text-left  text-muted-foreground">Total runtime</p>
                   </div>
                 </div>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400">
-                  {TestCasesSubmission[0].time}
+                <p className="text-3xl text-left font-bold ml-16 text-green-600 dark:text-green-400">
+                  {TestCasesSubmission[0].time} s
                 </p>
               </div>
             )}
