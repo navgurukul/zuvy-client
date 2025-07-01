@@ -453,14 +453,9 @@ const OpenEndedQuestions = (props: Props) => {
                     )}
                     <DataTablePagination
                         totalStudents={totalOpenEndedQuestion}
-                        position={position}
-                        setPosition={setPosition}
-                        pages={totalPages}
                         lastPage={lastPage}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
+                        pages={totalPages}
                         fetchStudentData={fetchCodingQuestions}
-                        setOffset={setOffset}
                     />
                 </div>
             )}

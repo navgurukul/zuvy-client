@@ -119,14 +119,9 @@ const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps
                 </Dialog>
                 <DataTablePagination
                     totalStudents={classes?.length}
-                    position={position}
-                    setPosition={setPosition}
-                    pages={pages}
                     lastPage={lastPage}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
+                    pages={pages}
                     fetchStudentData={getAllClasses}
-                    setOffset={setOffset}
                 />
             </div>
         </div>

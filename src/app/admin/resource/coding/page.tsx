@@ -491,14 +491,9 @@ const CodingProblems = () => {
                     {!isCodingDialogOpen && (
                         <DataTablePagination
                             totalStudents={totalCodingQuestion}
-                            position={position}
-                            setPosition={setPosition}
-                            pages={totalPages}
                             lastPage={lastPage}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
+                            pages={totalPages}
                             fetchStudentData={fetchCodingQuestions}
-                            setOffset={setOffset}
                         />
                     )}
                 </div>
