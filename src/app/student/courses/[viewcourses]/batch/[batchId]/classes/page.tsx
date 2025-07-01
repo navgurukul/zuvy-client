@@ -114,14 +114,9 @@ function Page({
             {totalStudents && (
                 <DataTablePagination
                     totalStudents={totalStudents}
-                    position={position}
-                    setPosition={setPosition}
-                    pages={pages}
                     lastPage={lastPage}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
+                    pages={pages}
                     fetchStudentData={fetchRecordings}
-                    setOffset={setOffset}
                 />
             )}
         </>

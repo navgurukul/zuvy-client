@@ -406,14 +406,9 @@ const Courses: React.FC = () => {
                                     </div>
                                     <DataTablePagination
                                         totalStudents={totalBootcamps}
-                                        position={position}
-                                        setPosition={setPosition}
-                                        pages={pages}
                                         lastPage={lastPage}
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
+                                        pages={pages}
                                         fetchStudentData={getBootcamp}
-                                        setOffset={setOffset}
                                     />
                                 </div>
                             )}

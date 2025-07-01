@@ -185,14 +185,9 @@ function Page({}: any) {
             {!loading && completedClasses.length > 0 && (
                 <DataTablePagination
                     totalStudents={totalStudents}
-                    position={position}
-                    setPosition={setPosition}
-                    pages={pages}
                     lastPage={lastPage}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
+                    pages={pages}
                     fetchStudentData={fetchRecordings}
-                    setOffset={setOffset}
                 />
             )}
         </div>

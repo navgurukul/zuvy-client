@@ -1,0 +1,486 @@
+'use client'
+
+// External imports
+import React, { useState, useEffect, useCallback } from 'react'
+import { ChevronLeft, Search } from 'lucide-react'
+
+// Internal imports
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import { DataTable } from '@/app/_components/datatable/data-table'
+import { columns } from './column'
+import NewMcqProblemForm from '../_components/NewMcqProblemForm'
+import { api } from '@/utils/axios.config'
+import {
+    getAllQuizData,
+    getCodingQuestionTags,
+    getEditQuizQuestion,
+    getmcqdifficulty,
+    getMcqSearch,
+    getOffset,
+    getPosition,
+    getSelectedMCQOptions,
+} from '@/store/store'
+import useDebounce from '@/hooks/useDebounce'
+import { Spinner } from '@/components/ui/spinner'
+import MultiSelector from '@/components/ui/multi-selector'
+import difficultyOptions from '@/app/utils'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import { OFFSET, POSITION } from '@/utils/constant'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import BulkUploadMcq from '../_components/BulkMcqForm'
+import NewMcqForm from '../_components/NewMcqForm'
+import EditMcqForm from '../_components/EditMcqForm'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import CreatTag from '../_components/creatTag'
+import { toast } from '@/components/ui/use-toast'
+import { filteredQuizQuestions } from '@/utils/admin'
+
+type Props = {}
+export type Tag = {
+    label: string
+    value: string
+    id: number
+    tagName: string
+}
+
+interface Option {
+    label: string
+    value: string
+}
+
+const Mcqs = (props: Props) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const [isMcqModalOpen, setIsMcqModalOpen] = useState<boolean>(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalMCQQuestion, setTotalMCQQuestion] = useState<any>(0)
+    const [totalPages, setTotalPages] = useState(0)
+    const [pages, setPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [search, setSearch] = useState('')
+    const [mcqType, setMcqType] = useState<string>('')
+    const [newTopic, setNewTopic] = useState<string>('')
+    const [options, setOptions] = useState<Option[]>([
+        { value: '-1', label: 'All Topics' },
+    ])
+    const [loading, setLoading] = useState(true)
+
+    // Zustand stores
+    const { position, setPosition } = getPosition()
+    const { offset, setOffset } = getOffset()
+    const { tags, setTags } = getCodingQuestionTags()
+    const { quizData, setStoreQuizData } = getAllQuizData()
+    const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
+        getmcqdifficulty()
+    const { setmcqSearch } = getMcqSearch()
+    const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
+    const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
+
+    const debouncedSearch = useDebounce(search, 500)
+
+    const handleTagOption = (option: Option) => {
+        if (option.value === '-1') {
+            if (selectedOptions.some((item) => item.value === option.value)) {
+                setSelectedOptions(
+                    selectedOptions.filter(
+                        (selected) => selected.value !== option.value
+                    )
+                )
+            } else {
+                setSelectedOptions([option])
+            }
+        } else {
+            if (selectedOptions.some((item) => item.value === '-1')) {
+                setSelectedOptions([option])
+            } else {
+                if (
+                    selectedOptions.some(
+                        (selected) => selected.value === option.value
+                    )
+                ) {
+                    setSelectedOptions(
+                        selectedOptions.filter(
+                            (selected) => selected.value !== option.value
+                        )
+                    )
+                } else {
+                    setSelectedOptions([...selectedOptions, option])
+                }
+            }
+        }
+    }
+
+    const handleDifficulty = (option: Option) => {
+        // When user selects All Difficulty
+        if (option.value === 'None') {
+            // It will check if the user has already selected All Difficulty or not
+            if (difficulty.some((item) => item.value === option.value)) {
+                // If All Difficulty is already selected it will remove
+                const filteredDifficulty = difficulty.filter(
+                    (item) => item.value !== option.value
+                )
+                setDifficulty(filteredDifficulty)
+            } else {
+                // If user selects All Difficulty when it is not already selected,
+                // Rest other difficulties will be removed and only All Difficulty will be added in the array
+                setDifficulty([option])
+            }
+        } else {
+            // When user selects other Difficulties
+            if (difficulty.some((item) => item.value === 'None')) {
+                // When All Difficulty is already selected and user selects other difficulties
+                // then All Difficulty will be removed and new difficulty will be added to the list
+                setDifficulty([option])
+            } else {
+                if (difficulty.some((item) => item.value === option.value)) {
+                    // Removing other difficulty when already selected
+                    const filteredDifficulty = difficulty.filter(
+                        (item) => item.value !== option.value
+                    )
+                    setDifficulty(filteredDifficulty)
+                } else {
+                    // Add other difficulties
+                    const filteredDifficulty = [...difficulty, option]
+                    setDifficulty(filteredDifficulty)
+                }
+            }
+        }
+    }
+
+    const openModal = () => setIsOpen(true)
+    const closeModal = () => setIsOpen(false)
+    const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value)
+    }
+
+    async function getAllTags() {
+        const response = await api.get('Content/allTags')
+        if (response) {
+            const tagArr = [
+                { id: -1, tagName: 'All Topics' },
+                ...response.data.allTags,
+            ]
+            const transformedTags = tagArr.map(
+                (item: { id: any; tagName: any }) => ({
+                    id: item.id,
+                    tagName: item.tagName,
+                })
+            )
+            const transformedData = tagArr.map(
+                (item: { id: any; tagName: any }) => ({
+                    value: item.id.toString(),
+                    label: item.tagName,
+                })
+            )
+
+            setTags(transformedTags)
+            setOptions(transformedData)
+        }
+    }
+
+    useEffect(() => {
+        // Ensure the code runs only on the client side
+        getAllTags()
+        setIsEditModalOpen(false)
+    }, [])
+
+    const fetchCodingQuestions = useCallback(
+        async (offset: number) => {
+            if (offset >= 0) {
+                filteredQuizQuestions(
+                    setStoreQuizData,
+                    offset,
+                    position,
+                    difficulty,
+                    selectedOptions,
+                    setTotalMCQQuestion,
+                    setLastPage,
+                    setTotalPages,
+                    debouncedSearch
+                )
+            }
+        },
+        [
+            setStoreQuizData,
+            offset,
+            position,
+            difficulty,
+            selectedOptions,
+            setTotalMCQQuestion,
+            setLastPage,
+            setTotalPages,
+            debouncedSearch,
+        ]
+    )
+
+    useEffect(() => {
+        fetchCodingQuestions(offset)
+    }, [
+        setStoreQuizData,
+        offset,
+        position,
+        difficulty,
+        selectedOptions,
+        setTotalMCQQuestion,
+        setLastPage,
+        setTotalPages,
+        debouncedSearch,
+    ])
+
+    const handleNewTopicChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setNewTopic(event.target.value)
+    }
+
+    const handleCreateTopic = async () => {
+        try {
+            await api
+                .post(`/Content/createTag`, { tagName: newTopic })
+                .then((res) => {
+                    toast.success({
+                        title: `${newTopic} Topic has created`,
+                        description: res.data.message,
+                    })
+                    getAllTags()
+                    setNewTopic('')
+                })
+        } catch (error) {
+            toast.error({
+                title: 'Network error',
+                description:
+                    'Unable to create session. Please try again later.',
+            })
+        }
+    }
+
+    const selectedTagCount = selectedOptions.length
+    const difficultyCount = difficulty.length
+
+    const renderComponent = () => {
+        switch (mcqType) {
+            case 'bulk':
+                return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
+            case 'oneatatime':
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={filteredQuizQuestions}
+                        />
+                    </div>
+                )
+            case 'AI':
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqProblemForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={filteredQuizQuestions}
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            setMcqType={setMcqType}
+                        />
+                    </div>
+                )
+            default:
+                return (
+                    <div className="flex items-start justify-center w-full">
+                        <NewMcqForm
+                            setIsMcqModalOpen={setIsMcqModalOpen}
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={filteredQuizQuestions}
+                        />
+                    </div>
+                )
+        }
+    }
+
+    return (
+        <>
+            {isEditQuizModalOpen && (
+                <div>
+                    <div
+                        className="flex cursor-pointer p-5 text-secondary"
+                        onClick={() => setIsEditModalOpen(false)}
+                    >
+                        <ChevronLeft />
+                        <h1>MCQ Problems</h1>
+                    </div>
+                    <div className="flex flex-col items-center justify-center">
+                        <h1 className="text-xl mb-4 ml-4 font-semibold text-start w-[590px] justify-start ">
+                            Edit MCQ
+                        </h1>
+                        <EditMcqForm
+                            tags={tags}
+                            closeModal={closeModal}
+                            setStoreQuizData={setStoreQuizData}
+                            getAllQuizQuesiton={filteredQuizQuestions}
+                        />
+                    </div>
+                </div>
+            )}
+            {isMcqModalOpen && (
+                <div className=" ">
+                    <div
+                        className="flex cursor-pointer p-5 text-secondary"
+                        onClick={() =>
+                            setIsMcqModalOpen((prevState) => !prevState)
+                        }
+                    >
+                        <ChevronLeft />
+                        <h1>MCQ Problems</h1>
+                    </div>
+                    <div className="flex flex-col items-center justify-center ">
+                        <div>
+                            <RadioGroup
+                                className="flex flex-col items-center w-full  "
+                                defaultValue="oneatatime"
+                                onValueChange={(value) => setMcqType(value)}
+                            >
+                                <div className="flex w-[630px] flex-col items-start justify-start ml-4 gap-3">
+                                    <h1 className="font-semibold text-3xl mb-4 ">
+                                        New MCQ
+                                    </h1>
+                                    <div className="flex gap-x-6 ">
+                                        <div className="flex  space-x-2">
+                                            <RadioGroupItem
+                                                value="bulk"
+                                                id="r1"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-md"
+                                                htmlFor="r1"
+                                            >
+                                                Bulk
+                                            </Label>
+                                        </div>
+                                        <div className="flex  space-x-2">
+                                            <RadioGroupItem
+                                                value="oneatatime"
+                                                id="r2"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-md"
+                                                htmlFor="r2"
+                                            >
+                                                One At A Time
+                                            </Label>
+                                        </div>
+                                        <div className="flex space-x-2 pr-2">
+                                            <RadioGroupItem
+                                                value="AI"
+                                                id="r2"
+                                                className="text-secondary mt-1"
+                                            />
+                                            <Label
+                                                className="font-semibold text-lg"
+                                                htmlFor="r2"
+                                            >
+                                                Generate with AI
+                                            </Label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </RadioGroup>
+                            {renderComponent()}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {!isMcqModalOpen && !isEditQuizModalOpen && (
+                <MaxWidthWrapper className="h-screen">
+                    <h1 className="text-left font-semibold text-2xl">
+                        Resource Library - MCQs
+                    </h1>
+                    <div className="flex justify-between">
+                        <div className="relative w-full">
+                            <Input
+                                value={search}
+                                onChange={handleSetsearch}
+                                placeholder="Search for Question"
+                                className="w-1/4 p-2 my-6 input-with-icon pl-8"
+                            />
+                            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                <Search className="text-gray-400" size={20} />
+                            </div>
+                        </div>
+                        <div className="flex flex-row items-center gap-2">
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
+                                        <p>Create Topic</p>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogOverlay />
+                                <CreatTag
+                                    newTopic={newTopic}
+                                    handleNewTopicChange={handleNewTopicChange}
+                                    handleCreateTopic={handleCreateTopic}
+                                />
+                            </Dialog>
+                            <Button
+                                onClick={() =>
+                                    setIsMcqModalOpen((prevState) => !prevState)
+                                }
+                                className="mt-5"
+                            >
+                                + Create MCQ
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <div className="w-full lg:w-[250px]">
+                            <MultiSelector
+                                selectedCount={difficultyCount}
+                                options={difficultyOptions}
+                                selectedOptions={difficulty}
+                                handleOptionClick={handleDifficulty}
+                                type={
+                                    difficultyCount > 1
+                                        ? 'Difficulties'
+                                        : 'Difficulty'
+                                }
+                            />
+                        </div>
+                        <div className="w-full lg:w-[250px]">
+                            <MultiSelector
+                                selectedCount={selectedTagCount}
+                                options={options}
+                                selectedOptions={selectedOptions}
+                                handleOptionClick={handleTagOption}
+                                type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
+                            />
+                        </div>
+                    </div>
+
+                    <DataTable
+                        data={quizData}
+                        columns={columns}
+                        mcqSide={true}
+                    />
+                    {totalMCQQuestion > 0 && (
+                        <DataTablePagination
+                            totalStudents={totalMCQQuestion}
+                            lastPage={lastPage}
+                            pages={totalPages}
+                            fetchStudentData={fetchCodingQuestions}
+                        />
+                    )}
+                </MaxWidthWrapper>
+            )}
+        </>
+    )
+}
+
+export default Mcqs 
