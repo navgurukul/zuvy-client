@@ -1,15 +1,52 @@
 'use client';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
+import { 
+  Tooltip, 
+  TooltipContent, 
+  TooltipProvider, 
+  TooltipTrigger 
+} from "@/components/ui/tooltip";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Moon, Sun, LogOut } from "lucide-react";
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { mockCourses } from "@/utils/studentMockData";
+import { Logout } from "@/utils/logout";
+import { useLazyLoadedStudentData } from "@/store/store";
 
 const Header = () => {
   const [isDark, setIsDark] = useState(false);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const { studentData } = useLazyLoadedStudentData();
+
+  // Generate user initials from name
+  const getUserInitials = (name: string | undefined): string => {
+    if (!name) return 'JD'; // fallback
+    
+    const words = name.trim().split(' ');
+    if (words.length >= 2) {
+      // First and last name initials
+      return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+    } else if (words.length === 1) {
+      // Just first name, take first two characters or duplicate first character
+      return words[0].length >= 2 
+        ? (words[0].charAt(0) + words[0].charAt(1)).toUpperCase()
+        : (words[0].charAt(0) + words[0].charAt(0)).toUpperCase();
+    }
+    return 'JD'; // fallback
+  };
 
   // Hide header on assessment page for security and focus
   if (pathname.includes('/studentAssessment')) {
@@ -22,13 +59,7 @@ const Header = () => {
   };
 
   const handleLogoClick = () => {
-    const enrolledCourses = mockCourses.filter(course => course.status === 'enrolled');
-    
-    if (enrolledCourses.length === 1) {
-      router.push(`/student/course/${enrolledCourses[0].id}`);
-    } else {
-      router.push('/student/dashboard');
-    }
+    router.push('/student');
   };
 
   const handleDashboardClick = () => {
@@ -43,6 +74,15 @@ const Header = () => {
       const courseId = courseIdMatch[1];
       router.push(`/student/course/${courseId}/courseSyllabus`);
     }
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutDialog(true);
+  };
+
+  const handleLogout = async () => {
+    setShowLogoutDialog(false);
+    await Logout();
   };
 
   // Check if we're on a course-related page
@@ -83,13 +123,13 @@ const Header = () => {
         )}
       </div>
 
-      {/* Right - Theme Switch and Avatar */}
-      <div className="flex items-center gap-4">
+      {/* Right - Theme Switch, Logout Button and Avatar */}
+      <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleTheme}
-          className="w-9 h-9 p-0"
+          className="w-9 h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           {isDark ? (
             <Sun className="h-4 w-4" />
@@ -98,9 +138,44 @@ const Header = () => {
           )}
         </Button>
         
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogoutClick}
+                className="px-3 py-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Logout</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
+              <AlertDialogDescription>
+                You will be signed out of your account and redirected to the login page.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleLogout} className="bg-primary hover:bg-primary-dark">
+                Logout
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
         <Avatar className="h-8 w-8">
           <AvatarImage src="/placeholder.svg" />
-          <AvatarFallback>JD</AvatarFallback>
+          <AvatarFallback>{getUserInitials(studentData?.name)}</AvatarFallback>
         </Avatar>
       </div>
     </header>

@@ -21,6 +21,7 @@ interface AssignmentDetailsData {
   assignmentTracking: AssignmentTracking[];
   chapterDetails: AssignmentChapterDetails;
   status: 'Completed' | 'Pending';
+  quizDetails?: any[];
 }
 
 interface ApiResponse {
