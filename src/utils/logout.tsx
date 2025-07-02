@@ -22,8 +22,6 @@ export const Logout = async () => {
 
         const response = await api.post(`/auth/logout`, {})
 
-        console.log('response', response)
-
         toast.success({
             title: 'Logout Successful',
             description: 'Goodbye, See you soon!',
