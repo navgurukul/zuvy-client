@@ -10,6 +10,7 @@ import {
     Video,
     GripVertical,
     BookOpenCheck,
+    Play,
 } from 'lucide-react'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useEffect, useState } from 'react'
@@ -70,6 +71,8 @@ function ChapterItem({
                 return <PencilLine />
             case 6:
                 return <BookOpenCheck />
+            case 8: 
+                 return <Play />    
             default:
                 return <StickyNote />
         }

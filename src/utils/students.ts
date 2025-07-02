@@ -334,3 +334,152 @@ export const fetchChapters = async (moduleID:any, setChapters:any) => {
     }
 }
 
+// Auto publish assessment state change function:
+
+export const handleAssessmentStateTransitions = (
+    assessmentShortInfo: any,
+    chapterContent: any,
+    moduleID: string | string[],
+    viewcourses: string | string[],
+    setAssessmentShortInfo: (value: any) => void,
+    setAssessmentOutSourceId: (value: any) => void,
+    setSubmissionId: (value: any) => void,
+    pollIntervalRef: React.MutableRefObject<NodeJS.Timeout | null>,
+    setCountdown: (value: string) => void,
+    setShowPublishedCard: (value: boolean) => void,
+    setShowActiveCard: (value: boolean) => void,
+    setShowClosedCard: (value: boolean) => void
+) => {
+    const state = assessmentShortInfo?.assessmentState?.toUpperCase()
+
+    const startPolling = () => {
+        if (pollIntervalRef.current) {
+            return // Timer is already active
+        }
+
+        // Since the API is reliable, we no longer need to poll.
+        // We'll fetch the data once after a short delay to allow the backend to update.
+        const timerId = setTimeout(() => {
+            getAssessmentShortInfo(
+                chapterContent?.assessmentId,
+                moduleID,
+                viewcourses,
+                chapterContent.id,
+                setAssessmentShortInfo,
+                setAssessmentOutSourceId,
+                setSubmissionId
+            )
+        }, 2000) // 2-second delay
+
+        pollIntervalRef.current = timerId
+    }
+
+    const stopPolling = () => {
+        if (pollIntervalRef.current) {
+            clearTimeout(pollIntervalRef.current)
+            pollIntervalRef.current = null
+        }
+    }
+
+    if (state === 'PUBLISHED' && assessmentShortInfo.startDatetime) {
+        stopPolling()
+        setShowActiveCard(false)
+        setShowClosedCard(false)
+        setShowPublishedCard(true)
+
+        const countdownInterval = setInterval(() => {
+            const now = new Date().getTime()
+            const startTime =
+                new Date(assessmentShortInfo.startDatetime).getTime()
+            const distance = startTime - now
+
+            if (distance < 0) {
+                clearInterval(countdownInterval)
+                setShowPublishedCard(false) // Animate out
+                startPolling() // Fetch the new state once after a delay
+                return
+            }
+
+            const oneSecond = 1000
+            const oneMinute = oneSecond * 60
+            const oneHour = oneMinute * 60
+            const oneDay = oneHour * 24
+
+            const days = Math.floor(distance / oneDay)
+            const hours = Math.floor((distance % oneDay) / oneHour)
+            const minutes = Math.floor((distance % oneHour) / oneMinute)
+            const seconds = Math.floor((distance % oneMinute) / oneSecond)
+            setCountdown(`${days}d ${hours}h ${minutes}m ${seconds}s`)
+        }, 1000)
+
+        return () => clearInterval(countdownInterval)
+    } else if (state === 'ACTIVE') {
+        stopPolling()
+        setShowPublishedCard(false)
+        setShowClosedCard(false)
+        setShowActiveCard(true)
+
+        if (assessmentShortInfo.endDatetime) {
+            const activeInterval = setInterval(() => {
+                const now = new Date().getTime()
+                const endTime =
+                    new Date(assessmentShortInfo.endDatetime).getTime()
+                if (now > endTime) {
+                    clearInterval(activeInterval)
+                    setShowActiveCard(false) // Animate out
+                    startPolling() // Fetch the new state once after a delay
+                }
+            }, 300)
+
+            return () => {
+                clearInterval(activeInterval)
+            }
+        }
+    } else if (state === 'CLOSED') {
+        stopPolling()
+        setShowPublishedCard(false)
+        setShowActiveCard(false)
+        setShowClosedCard(true)
+    } else {
+        // Handle other states like DRAFT
+        setShowPublishedCard(false)
+        setShowActiveCard(false)
+        setShowClosedCard(false)
+    }
+
+    return stopPolling // Cleanup on unmount
+}
+
+// --------------------------------------------
+
+export const formatToIST = (dateString: string | null | undefined) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+
+        const options: Intl.DateTimeFormatOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+            timeZone: 'Asia/Kolkata',
+        };
+
+        const formatter = new Intl.DateTimeFormat('en-IN', options);
+        const parts = formatter.formatToParts(date);
+
+        const getPart = (type: string) =>
+            parts.find(part => part.type === type)?.value || '';
+
+        const day = getPart('day');
+        const month = getPart('month');
+        const year = getPart('year');
+        const hour = getPart('hour');
+        const minute = getPart('minute');
+        const dayPeriod = getPart('dayPeriod');
+
+        return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod}`;
+    };
+
+// --------------------------------------------

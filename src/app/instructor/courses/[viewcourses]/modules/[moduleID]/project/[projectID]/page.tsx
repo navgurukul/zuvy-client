@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect } from 'react'
-import Projects from '@/app/student/courses/[viewcourses]/modules/_components/Projects'
+// import Projects from '@/app/student/courses/[viewcourses]/modules/_components/Projects'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import {
@@ -58,11 +58,11 @@ export default function Project() {
             <div className="mb-5">
                 <BreadcrumbComponent crumbs={crumbs} />
             </div>
-            <Projects
+            {/* <Projects
                 moduleId={+moduleID}
                 projectId={+projectID}
                 bootcampId={+viewcourses}
-            />
+            /> */}
         </>
     )
 }

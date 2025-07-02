@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/table'
 import { getBatchData, getIsRowSelected } from '@/store/store'
 import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
+import AddLiveClasstoChapter from '@/app/admin/courses/[courseId]/module/_components/AddLiveClasstoChapter'
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -35,6 +36,8 @@ interface DataTableProps<TData, TValue> {
     setSelectedRows?: any
     mcqSide?: boolean
     assignStudents?: string
+    adminMcqSide?: boolean
+    customTopBar?: React.ReactNode
 }
 
 type StudentData = {
@@ -54,6 +57,8 @@ export function DataTable<TData, TValue>({
     setSelectedRows,
     mcqSide,
     assignStudents,
+    adminMcqSide,
+    customTopBar,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
@@ -97,7 +102,6 @@ export function DataTable<TData, TValue>({
         table.toggleAllRowsSelected(false)
         setIsRowUnSelected(false) // Reset the state after unselecting
     }, [isRowUnSelected])
-
     return (
         <div className="space-y-4 relative">
             {!assignStudents && (
@@ -110,7 +114,15 @@ export function DataTable<TData, TValue>({
                     )}
                 </div>
             )}
-            {!assignStudents && <DataTableToolbar table={table} />}
+        
+            {!assignStudents && (
+                <div className="flex items-center justify-between mb-2">
+                    <div>{customTopBar}</div>
+                    <div className="ml-auto">
+                        <DataTableToolbar table={table} />
+                    </div>
+                </div>
+            )}
             <div className="rounded-md border">
                 <Table>
                     <TableHeader className={assignStudents && 'hidden'}>

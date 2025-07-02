@@ -45,7 +45,13 @@ import {
     CommandInput,
     CommandItem,
 } from '@/components/ui/command'
-import { cn } from '@/lib/utils'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { cn, ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { setStoreBatchValue } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
@@ -57,6 +63,7 @@ interface CreateSessionProps {
     students: number
     onClick: () => void
     checkopenSessionForm: boolean
+    modulesData: any
 }
 
 const formSchema = z
@@ -83,29 +90,40 @@ const formSchema = z
         totalClasses: z.number().min(1, {
             message: 'Total Classes must be at least 1.',
         }),
+        modulesIds:  z.number().min(1, {
+            message: 'Please select a module',
+        }),
     })
     .refine((data) => data.startTime <= data.endTime, {
         message: 'Start Time cannot be after end Time',
         path: ['endTime'],
     })
-    .refine((data) => {
-        // Check if selected date is today
-        const isToday = new Date(data.startDate).toDateString() === new Date().toDateString();
-        
-        if (isToday) {
-            const now = new Date();
-            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-            
-            // If today, start time should be in the future
-            return data.startTime > currentTime;
+    .refine(
+        (data) => {
+            // Check if selected date is today
+            const isToday =
+                new Date(data.startDate).toDateString() ===
+                new Date().toDateString()
+
+            if (isToday) {
+                const now = new Date()
+                const currentTime = `${String(now.getHours()).padStart(
+                    2,
+                    '0'
+                )}:${String(now.getMinutes()).padStart(2, '0')}`
+
+                // If today, start time should be in the future
+                return data.startTime > currentTime
+            }
+
+            // If not today, any time is valid
+            return true
+        },
+        {
+            message: 'Start time cannot be in the past',
+            path: ['startTime'],
         }
-        
-        // If not today, any time is valid
-        return true;
-    }, {
-        message: 'Start time cannot be in the past',
-        path: ['startTime'],
-    })
+    )
     .refine((data) => data.totalClasses >= data.daysOfWeek.length, {
         message:
             'Total Classes must be at least equal to the number of selected days of week.',
@@ -117,7 +135,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
     const [isOpen, setIsOpen] = useState(false)
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     // const { batchValueData } = setStoreBatchValue()
-    const [isCalendarOpen, setCalendarOpen] = useState(false);
+    const [isCalendarOpen, setCalendarOpen] = useState(false)
 
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
@@ -143,12 +161,14 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             batch: '',
             daysOfWeek: [],
             totalClasses: 0,
+            modulesIds:  props.modulesData?.[0]?.id || '',
         },
         mode: 'onChange',
     })
     useEffect(() => {
         const daysCount = form.watch('daysOfWeek').length
         form.setValue('totalClasses', daysCount)
+        form.setValue('modulesIds', props.modulesData[0]?.id || '')
     }, [form.watch('daysOfWeek')])
 
     const weekDays = useMemo(
@@ -172,6 +192,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         form.setValue('batch', '')
         form.setValue('daysOfWeek', [''])
         form.setValue('totalClasses', 1)
+        form.setValue('modulesIds', 0)
     }, [formIsOpen, form])
     useEffect(() => {
         const selectedDate = form.watch('startDate')
@@ -193,6 +214,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         batch,
         daysOfWeek,
         totalClasses,
+        modulesIds,
     } = form.watch()
     const isSubmitDisabled = !(
         sessionTitle &&
@@ -201,7 +223,8 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
         endTime &&
         batch &&
         (daysOfWeek?.length || 0) > 0 &&
-        totalClasses
+        totalClasses &&
+        modulesIds
     )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -241,7 +264,9 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             timeZone: 'Asia/Kolkata',
             daysOfWeek: daysWeek,
             totalClasses: values.totalClasses,
+            moduleId: values.modulesIds,
         }
+        // console.log(transformedData)
 
         try {
             await api.post(`/classes`, transformedData).then((res) => {
@@ -267,14 +292,19 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
 
     // Add these at the component level (inside the function)
     const isToday = useMemo(() => {
-        const selectedDate = form.watch('startDate');
-        return selectedDate && selectedDate.toDateString() === new Date().toDateString();
-    }, [form.watch('startDate')]);
+        const selectedDate = form.watch('startDate')
+        return (
+            selectedDate &&
+            selectedDate.toDateString() === new Date().toDateString()
+        )
+    }, [form.watch('startDate')])
 
     const currentTimeString = useMemo(() => {
-        const now = new Date();
-        return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    }, []);
+        const now = new Date()
+        return `${String(now.getHours()).padStart(2, '0')}:${String(
+            now.getMinutes()
+        ).padStart(2, '0')}`
+    }, [])
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -336,7 +366,12 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                             *
                                                         </span>{' '}
                                                     </FormLabel>
-                                                    <Dialog open={isCalendarOpen} onOpenChange={setCalendarOpen}>
+                                                    <Dialog
+                                                        open={isCalendarOpen}
+                                                        onOpenChange={
+                                                            setCalendarOpen
+                                                        }
+                                                    >
                                                         <DialogTrigger asChild>
                                                             <FormControl>
                                                                 <Button
@@ -358,43 +393,42 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 </Button>
                                                             </FormControl>
                                                         </DialogTrigger>
-                                                    
-                                                            <DialogContent className="w-auto p-4">
-                                                                <Calendar
-                                                                    mode="single"
-                                                                    selected={
-                                                                        field.value ||
-                                                                        new Date()
-                                                                    }
-                                                                    onSelect={(
-                                                                        date
-                                                                    ) => {
-                                                                        if (
+
+                                                        <DialogContent className="w-auto p-4">
+                                                            <Calendar
+                                                                mode="single"
+                                                                selected={
+                                                                    field.value ||
+                                                                    new Date()
+                                                                }
+                                                                onSelect={(
+                                                                    date
+                                                                ) => {
+                                                                    if (date) {
+                                                                        field.onChange(
                                                                             date
-                                                                        ) {
-                                                                            field.onChange(
-                                                                                date
-                                                                            );
-                                                                            setCalendarOpen(false);
-                                                                        } else {
-                                                                            field.onChange(
-                                                                                new Date()
-                                                                            ) // Handle case where selected date is undefined
-                                                                        }
-                                                                    }}
-                                                                    disabled={(
-                                                                        date: any
-                                                                    ) =>
-                                                                        date <=
-                                                                        addDays(
-                                                                            new Date(),
-                                                                            -1
                                                                         )
-                                                                    } // Disable past dates
-                                                                    initialFocus
-                                                                />
-                                                            </DialogContent>
-                                                  
+                                                                        setCalendarOpen(
+                                                                            false
+                                                                        )
+                                                                    } else {
+                                                                        field.onChange(
+                                                                            new Date()
+                                                                        ) // Handle case where selected date is undefined
+                                                                    }
+                                                                }}
+                                                                disabled={(
+                                                                    date: any
+                                                                ) =>
+                                                                    date <=
+                                                                    addDays(
+                                                                        new Date(),
+                                                                        -1
+                                                                    )
+                                                                } // Disable past dates
+                                                                initialFocus
+                                                            />
+                                                        </DialogContent>
                                                     </Dialog>
                                                     <FormMessage />
                                                 </FormItem>
@@ -417,12 +451,35 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                                                 type="time"
                                                                 {...field}
                                                                 className="w-full"
-                                                                min={isToday ? currentTimeString : undefined}
-                                                                onChange={(e) => {
-                                                                    field.onChange(e.target.value);
+                                                                min={
+                                                                    isToday
+                                                                        ? currentTimeString
+                                                                        : undefined
+                                                                }
+                                                                onChange={(
+                                                                    e
+                                                                ) => {
+                                                                    field.onChange(
+                                                                        e.target
+                                                                            .value
+                                                                    )
                                                                     // When start time changes, validate end time if needed
-                                                                    if (form.getValues('endTime') && e.target.value > form.getValues('endTime')) {
-                                                                        form.setValue('endTime', e.target.value);
+                                                                    if (
+                                                                        form.getValues(
+                                                                            'endTime'
+                                                                        ) &&
+                                                                        e.target
+                                                                            .value >
+                                                                            form.getValues(
+                                                                                'endTime'
+                                                                            )
+                                                                    ) {
+                                                                        form.setValue(
+                                                                            'endTime',
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        )
                                                                     }
                                                                 }}
                                                             />
@@ -678,36 +735,159 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                             )}
                                         />
                                     </div>
-                                    <FormField
-                                        control={form.control}
-                                        name="totalClasses"
-                                        render={({ field }) => (
-                                            <FormItem className="text-left flex flex-col">
-                                                <FormLabel className="p-0 my-2">
-                                                    Total Classes
-                                                    <span className="text-red-500">
-                                                        *
-                                                    </span>
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="Total Classes"
-                                                        type="number"
-                                                        {...field}
-                                                        onChange={(e) =>
-                                                            field.onChange(
-                                                                Number(
-                                                                    e.target
-                                                                        .value
+                                    <div>
+                                        <FormField
+                                            control={form.control}
+                                            name="totalClasses"
+                                            render={({ field }) => (
+                                                <FormItem className="text-left flex flex-col">
+                                                    <FormLabel className="p-0 my-2">
+                                                        Total Classes
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Total Classes"
+                                                            type="number"
+                                                            {...field}
+                                                            onChange={(e) =>
+                                                                field.onChange(
+                                                                    Number(
+                                                                        e.target
+                                                                            .value
+                                                                    )
                                                                 )
-                                                            )
-                                                        }
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                                            }
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="modulesIds"
+                                            render={({ field }) => (
+                                                <FormItem className="text-left">
+                                                    <FormLabel>
+                                                        Modules
+                                                        <span className="text-red-500">
+                                                            *
+                                                        </span>
+                                                    </FormLabel>
+                                                    <Dialog>
+                                                        <DialogTrigger asChild>
+                                                            <FormControl>
+                                                                <Button
+                                                                type='button'
+                                                                    variant="outline"
+                                                                    role="combobox"
+                                                                    aria-expanded={
+                                                                        formIsOpen
+                                                                    }
+                                                                    className={cn(
+                                                                        'w-full justify-between',
+                                                                        !field.value &&
+                                                                            'text-muted-foreground'
+                                                                    )}
+                                                                >
+                                                                    {field.value ? (
+                                                                        <TooltipProvider>
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <span className="truncate">
+                                                                                        {ellipsis(
+                                                                                            props.modulesData.find(
+                                                                                                (modules: any) =>
+                                                                                                    modules.id === field.value
+                                                                                            )?.description || '',
+                                                                                            30
+                                                                                        )}
+                                                                                    </span>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent>
+                                                                                    {props.modulesData.find(
+                                                                                        (modules: any) =>
+                                                                                            modules.id === field.value
+                                                                                    )?.description || ''}
+                                                                                </TooltipContent>
+                                                                            </Tooltip>
+                                                                        </TooltipProvider>
+                                                                    ) : (
+                                                                        'Select Modules...'
+                                                                    )}
+                                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                                </Button>
+                                                            </FormControl>
+                                                        </DialogTrigger>
+                                                        <DialogContent className="w-[300px] p-0">
+                                                            <Command>
+                                                                <CommandInput placeholder="Search modules..." />
+                                                                <CommandEmpty>
+                                                                    No modules
+                                                                    found.
+                                                                </CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {props.modulesData.map(
+                                                                        (
+                                                                            modules: any
+                                                                        ) => (
+                                                                            <CommandItem
+                                                                                value={
+                                                                                    modules.description
+                                                                                }
+                                                                                key={
+                                                                                    modules.id
+                                                                                }
+                                                                                onSelect={(e: any) => {
+                                                                                    form.setValue(
+                                                                                        'modulesIds',
+                                                                                        modules.id
+                                                                                    )
+                                                                                    form.clearErrors(
+                                                                                        'modulesIds'
+                                                                                    )
+                                                                                    // Close dialog after selection
+                                                                                    setFormIsOpen(
+                                                                                        false
+                                                                                    )
+                                                                                }}
+                                                                            >
+                                                                                <Check
+                                                                                    className={cn(
+                                                                                        'mr-2 h-4 w-4',
+                                                                                        modules.id ===
+                                                                                            field.value
+                                                                                            ? 'opacity-100'
+                                                                                            : 'opacity-0'
+                                                                                    )}
+                                                                                />
+                                                                                <TooltipProvider>
+                                                                                    <Tooltip>
+                                                                                        <TooltipTrigger asChild>
+                                                                                            <span className="truncate">
+                                                                                                {ellipsis(modules.description, 40)}
+                                                                                            </span>
+                                                                                        </TooltipTrigger>
+                                                                                        <TooltipContent>
+                                                                                            {modules.description}
+                                                                                        </TooltipContent>
+                                                                                    </Tooltip>
+                                                                                </TooltipProvider>
+                                                                            </CommandItem>
+                                                                        )
+                                                                    )}
+                                                                </CommandGroup>
+                                                            </Command>
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                     <div className="flex justify-end">
                                         <DialogClose asChild>
                                             {isLoading ? (

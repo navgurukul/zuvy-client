@@ -70,7 +70,7 @@ export const columns: ColumnDef<Task>[] = [
                           title=""
                         >
                           {/* Only show first 20 characters */}
-                          {name.length > 20 ? name.substring(0, 20) + '...' : name}
+                          {name.length > 20 ? name.substring(0, 15) + '...' : name}
                         </span>
                         </div>
                      </TooltipTrigger>
@@ -109,7 +109,7 @@ export const columns: ColumnDef<Task>[] = [
                       className="truncate max-w-[500px] cursor-pointer font-medium"
                       title=""
                      >
-                     {email.length > 25 ? email.substring(0, 25) + '...' : email}
+                     {email.length > 25 ? email.substring(0, 18) + '...' : email}
                     </span>
                     </div>
                   </TooltipTrigger>
@@ -142,7 +142,7 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium ml-5">
+                    <span className="max-w-[500px] truncate font-medium">
                         {timeTaken}
                     </span>
                 </div>
@@ -159,8 +159,21 @@ export const columns: ColumnDef<Task>[] = [
            const startedAt = row.original.startedAt;
            return (
                 <div className="flex">
-                     <span className="max-w-[500px] truncate font-medium ml-4">
-                       {startedAt ? new Date(startedAt).toLocaleString() : 'N/A'}
+                     <span className="max-w-[500px] truncate font-medium ">
+                       {/* {startedAt ? new Date(startedAt).toLocaleString() : 'N/A'} */}
+                                {startedAt
+            ? (() => {
+                const date = new Date(startedAt);
+                const year = date.getFullYear().toString().slice(-2); 
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const hour = date.getHours().toString().padStart(2, '0');
+                const minute = date.getMinutes().toString().padStart(2, '0');
+
+                return `${day}/${month}/${year}, ${hour}:${minute}`;
+              })()
+            : 'N/A'}
+                       
                     </span>
                 </div>
             );
@@ -177,8 +190,22 @@ export const columns: ColumnDef<Task>[] = [
            const submitedAt = row.original.submitedAt;
            return (
                  <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium ml-5">
-                     {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'}
+                    <span className="max-w-[500px] truncate font-medium ">
+                     {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
+
+          {submitedAt
+            ? (() => {
+                const date = new Date(submitedAt);
+                const year = date.getFullYear().toString().slice(-2); 
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const hour = date.getHours().toString().padStart(2, '0');
+                const minute = date.getMinutes().toString().padStart(2, '0');
+
+                return `${day}/${month}/${year}, ${hour}:${minute}`;
+              })()
+            : 'N/A'}
+
                     </span>
                 </div>
             );
@@ -261,7 +288,7 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <div className="flex  w-10" key={row.original.email}>
                     <span className="max-w-[500px] truncate font-medium ml-4">
-                        {row?.original?.reattemptCount}
+                        {(row?.original?.reattemptCount ?? 0) + 1}
                     </span>
                 </div>
             )
