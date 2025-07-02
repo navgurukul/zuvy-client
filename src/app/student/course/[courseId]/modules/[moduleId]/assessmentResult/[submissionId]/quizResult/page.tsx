@@ -110,7 +110,7 @@ const QuizResults = ({
                             <Target className="w-8 h-8 text-muted-foreground" />
                         </div>
                         <h2 className="text-2xl font-bold text-foreground mb-3">No Quiz Questions</h2>
-                        <p className="text-muted-foreground">This assessment doesn't contain any quiz questions.</p>
+                        <p className="text-muted-foreground">This assessment doesn&apos;t contain any quiz questions.</p>
                     </div>
                 </div>
             </div>

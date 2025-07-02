@@ -201,7 +201,7 @@ const QuizQuestions = ({
                                     Are you absolutely sure?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground">
-                                    This action is irreversible. If your quiz hasn't been submitted, your selections will be lost.
+                                    This action is irreversible. If your quiz hasn&apos;t been submitted, your selections will be lost.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

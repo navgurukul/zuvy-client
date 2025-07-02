@@ -428,7 +428,7 @@ const IDE: React.FC<IDEProps> = ({
                                     ❌ Test Cases Failed
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground">
-                                    Your solution didn't pass all test cases. You have submitted the question. You can
+                                    Your solution didn&apos;t pass all test cases. You have submitted the question. You can
                                     go back and work on other questions.
                                 </AlertDialogDescription>
                             </>

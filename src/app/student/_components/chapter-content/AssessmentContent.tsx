@@ -432,7 +432,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               Your re-attempt request has been sent.
             </h2>
             <p className="text-sm text-muted-foreground">
-              We'll notify you on email once it is approved.
+              We&apos;ll notify you on email once it is approved.
             </p>
           </div>
           )}
@@ -458,7 +458,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                     <p>
                       {isPassed
                         ? 'Congratulations, you passed!'
-                        : `You needed at least ${passPercentage} percentage to pass`}
+                        : `You needed at least ${passPercentage}% to pass`}
                     </p>
                   </div>
                 </div>

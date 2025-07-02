@@ -125,7 +125,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
               <p className="font-medium">{item.scheduledDateTime?.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Duration</p>
+              <p className="text-sm text-muted-foreground"> Duration</p>
               <p className="font-medium">{item.duration || '45 mins'}</p>
             </div>
           </div>
@@ -198,7 +198,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
               <p className="font-medium">{item.scheduledDateTime?.toLocaleString()}</p>
             </div>
             <div className="text-left">
-              <p className="text-sm text-muted-foreground">Duration</p>
+              <p className="text-sm text-muted-foreground">Your Duration</p>
               <p className="font-medium">{item.duration || '45 mins'}</p>
             </div>
             <div className="text-left">
@@ -223,7 +223,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
                 <div className="text-center text-white">
                   <Play className="w-16 h-16 mx-auto mb-4" />
                   <p>Class Recording</p>
-                  <p className="text-sm opacity-75">{item.duration || '45 mins'}</p>
+                  {/* <p className="text-sm opacity-75">{item.duration || '45 mins'}</p> */}
                 </div>
               </div>
               

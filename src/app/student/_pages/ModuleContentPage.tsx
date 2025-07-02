@@ -47,22 +47,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const searchParams = useSearchParams();
   const chapterId = searchParams.get('chapterId');
   console.log(chapterId);
-  // Add validation for moduleId
-  if (!moduleId) {
-    console.log('ModuleContentPage - moduleId is missing');
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-heading font-bold mb-2">Invalid Module</h1>
-          <p className="text-muted-foreground mb-4">Module ID is missing</p>
-          <Button asChild>
-            <Link href={`/student/course/${courseId}`}>Back to Course</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
+  
+  // Move hooks before conditional return
   const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(moduleId);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -75,6 +61,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Get the module data early for use in effects
   const transformTrackingDataToModule = () => {
     if (!trackingData.length || !moduleDetails.length) return null;
 
@@ -165,6 +152,22 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       }
     }
   }, [chapterId, enhancedModule, expandedTopics]);
+
+  // Add validation for moduleId after hooks
+  if (!moduleId) {
+    console.log('ModuleContentPage - moduleId is missing');
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-heading font-bold mb-2">Invalid Module</h1>
+          <p className="text-muted-foreground mb-4">Module ID is missing</p>
+          <Button asChild>
+            <Link href={`/student/course/${courseId}`}>Back to Course</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const getAllItems = () => {
     if (!enhancedModule) return [];

@@ -392,7 +392,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                     ❌ Test Cases Failed
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground">
-                                    Your solution didn't pass all test cases. Review your code and try again.
+                                    Your solution didn&apos;t pass all test cases. Review your code and try again.
                                 </AlertDialogDescription>
                             </>
                         )}

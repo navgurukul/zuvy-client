@@ -139,7 +139,7 @@ const OpenEndedQuestions = ({
                                     Are you absolutely sure?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground">
-                                    This action is irreversible. If your answers haven't been submitted, your work will be lost.
+                                    This action is irreversible. If your answers haven&apos;t been submitted, your work will be lost.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -257,7 +257,7 @@ const OpenEndedQuestions = ({
                                         Submit Your Answers?
                                     </AlertDialogTitle>
                                     <AlertDialogDescription className="text-muted-foreground">
-                                        This action cannot be undone. Make sure you've reviewed all your answers before submitting.
+                                        This action cannot be undone. Make sure you&apos;ve reviewed all your answers before submitting.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>

@@ -32,6 +32,8 @@ const getEmbedLink = (link: string) => {
 };
 
 const VideoContent: React.FC<VideoContentProps> = ({ chapterDetails, onChapterComplete }) => {
+
+  console.log(chapterDetails);
   const { courseId, moduleId } = useParams();
   const [isCompleted, setIsCompleted] = useState(chapterDetails.status === 'Completed');
 
@@ -79,9 +81,11 @@ const VideoContent: React.FC<VideoContentProps> = ({ chapterDetails, onChapterCo
         {/* Video Player Section */}
         {videoLinks.length > 0 ? (
           videoLinks.map((link, idx) => {
-            const isYouTube = link.includes('youtube.com') || link.includes('youtu.be');
-            const isDrive = link.includes('drive.google.com');
+            
+            const isYouTube = link[0].includes('youtube.com') || link[0].includes('youtu.be');
+            const isDrive = link[0].includes('drive.google.com');
             const embedLink = getEmbedLink(link);
+            console.log(isDrive);
             return (
               <div
                 key={link}
@@ -90,15 +94,15 @@ const VideoContent: React.FC<VideoContentProps> = ({ chapterDetails, onChapterCo
                 <div className="aspect-video bg-black flex items-center justify-center relative">
                   {isYouTube ? (
                     <iframe
-                      src={embedLink}
+                      src={embedLink[0]}
                       title="YouTube Video"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       className="w-full h-full border-none"
                     />
                   ) : isDrive ? (
                     <iframe
-                      src={embedLink}
+                      src={embedLink[0]}
                       title="Google Drive Video"
                       allow="autoplay"
                       allowFullScreen

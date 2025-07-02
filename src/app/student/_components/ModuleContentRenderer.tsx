@@ -94,7 +94,12 @@ const ModuleContentRenderer = ({ selectedItemData, getAssessmentData, onChapterC
   if (chapterDetails) {
     switch (chapterDetails.topicId) {
       case 1:
-        return <VideoContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
+        // VideoContent expects links as string[]
+        const videoChapterDetails = {
+          ...chapterDetails,
+          links: chapterDetails.links ? [chapterDetails.links] : null
+        };
+        return <VideoContent chapterDetails={videoChapterDetails} onChapterComplete={onChapterComplete} />;
       case 2:
         return <ArticleContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       case 3:
@@ -106,7 +111,7 @@ const ModuleContentRenderer = ({ selectedItemData, getAssessmentData, onChapterC
       case 6:
         return <AssessmentContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       case 7:
-        return <FeedbackFormContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
+        return <FeedbackFormContent chapterDetails={chapterDetails} />;
       case 8:
         return <LiveClassContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       default:

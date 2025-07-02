@@ -212,7 +212,7 @@ const CourseSyllabusPage = () => {
                 <img
                   src={syllabusData.coverImage || '/logo.PNG'}
                   alt={syllabusData.bootcampName}
-                  className="w-full md:w-32 h-32 rounded-lg object-cover"
+                  className="w-full md:w-32 h-28 rounded-lg"
                 />
               </div>
               <div className="flex-1">

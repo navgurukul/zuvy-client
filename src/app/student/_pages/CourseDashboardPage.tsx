@@ -591,8 +591,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     const isLocked = module.isLock;
 
                     return (
-                      <Link href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
-                        <Card key={module.id} className={`shadow-4dp ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''}`}>
+                      <Link key={module.id} href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
+                        <Card className={`shadow-4dp ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''}`}>
                           <CardContent className="p-6">
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                               <div className="flex-1 text-left">
@@ -706,7 +706,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               {/* What's Next Section */}
               <Card className="shadow-4dp text-left">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-xl">What's Next?</CardTitle>
+                  <CardTitle className="text-xl">What&apos;s Next?</CardTitle>
                   <p className="text-sm text-muted-foreground">
                     {formatDateRange()}
                   </p>
@@ -719,8 +719,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         const isEventReady = canStartEvent(item.eventDate);
 
                         return (
-                          <a target={item.status === 'ongoing' ? '_blank' : '_self'} href={`${item.status === 'ongoing' ? (item as any).hangoutLink : `/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}`}>
-                            <div key={item.id}>
+                          <a key={item.id} target={item.status === 'ongoing' ? '_blank' : '_self'} href={`${item.status === 'ongoing' ? (item as any).hangoutLink : `/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}`}>
+                            <div>
                               <div className="flex items-start gap-4">
                                 <div className="flex-shrink-0 mt-1">
                                   {getItemIconWithBackground(item.type)}
