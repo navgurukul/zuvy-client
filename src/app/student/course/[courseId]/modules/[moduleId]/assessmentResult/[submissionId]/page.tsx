@@ -223,7 +223,8 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
     // Render Helpers
     const renderCodingChallenges = () => {
         const totalCodingQuestions = viewResultsData.submitedOutsourseAssessment.totalCodingQuestions;
-        const attemptedCodingQuestions = viewResultsData.attemptedCodingQuestions;
+        const attemptedCodingQuestions = viewResultsData.PracticeCode.length ;
+        
 
         // Don't show section if no coding questions exist
         if (!totalCodingQuestions || totalCodingQuestions === 0) {

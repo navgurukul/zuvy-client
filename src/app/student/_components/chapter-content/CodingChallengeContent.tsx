@@ -80,34 +80,66 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
   }, [chapterDetails.status]);
 
   const handleSolveChallenge = (question: CodingQuestion) => {
-    router.push(`/student/course/${params.courseId}/codingChallenge?questionId=${question.id}`);
+    router.push(`/student/course/${params.courseId}/codingChallenge?questionId=${question.id}&chapterId=${chapterDetails.id}&moduleId=${params.moduleId}`);
   };
 
   const CodingQuestionCard = ({ question }: { question: CodingQuestion }) => (
-      <div className="mb-6 bg-card-elevated rounded-xl shadow-8dp border border-border p-6 flex flex-col gap-2">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="font-bold text-lg sm:text-xl text-foreground truncate">{question.title}</div>
-              <div className="flex items-center gap-3">
-                  <span className="text-xs px-2 py-1 rounded bg-primary-light text-primary font-semibold uppercase">{question.difficulty}</span>
-                  {question.tagName && (
-                      <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">{question.tagName}</span>
-                  )}
-              </div>
-          </div>
-          <div className="text-sm text-left text-muted-foreground truncate">{question.description}</div>
-          <div className="flex items-center gap-2 mt-2">
-              <Badge variant="outline" className={question.status === 'Completed' ? 'text-success border-success' : 'text-warning border-warning'}>
-                  {question.status === 'Completed' ? 'Solved' : 'Pending'}
-              </Badge>
-              <Button
-                  size="sm"
-                  className="ml-auto bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover"
-                  onClick={() => handleSolveChallenge(question)}
-              >
-                  {question.status === 'Completed' ? 'View Solution' : 'Solve Challenge'}
-              </Button>
-          </div>
+    <div className=" p-6 mb-6">
+      {/* Header Section */}
+      <div className="flex items-start justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4  flex-1">
+          {question.title}
+        </h3>
+        {/* <Badge 
+          variant="outline" 
+          className={`${
+            question.status === 'Completed' 
+              ? 'bg-green-100 text-green-800 border-green-300' 
+              : 'bg-gray-100 text-gray-600 border-gray-300'
+          } px-3 py-1 text-sm font-medium`}
+        >
+          {question.status === 'Completed' ? 'Solved' : 'Not Attempted'}
+        </Badge> */}
       </div>
+
+      {/* Metadata Section */}
+      <div className="flex flex-col gap-4 mb-4">
+        <div className='w-full flex flex-col' >
+          <span className="text-left font-medium text-muted-foreground">Difficulty</span>
+          <p className="text-sm font-semibold text-foreground text-left mt-1">{question.difficulty}</p>
+        </div>
+        {question.tagName && (
+          <div>
+            <span className="text-sm font-medium text-muted-foreground">Topic</span>
+            <p className="text-sm font-semibold text-foreground text-left mt-1">{question.tagName}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Description */}
+      <p className="text-muted-foreground mb-6 text-left leading-relaxed">
+        {question.description}
+      </p>
+
+      {/* Action Button */}
+      <div className="flex justify-center">
+        {question.status === 'Completed' ? (
+          <Button
+            onClick={() => handleSolveChallenge(question)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium text-sm"
+          >
+            View Solution
+          </Button>
+        ) : (
+          <Button
+            onClick={() => handleSolveChallenge(question)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium text-sm"
+          >
+            Start Practice
+          </Button>
+        )}
+      </div>
+    </div>
   );
   
   if (loading) {
@@ -128,14 +160,14 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">{chapterDetails.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
             {chapterDetails.description && (
-              <p className="text-muted-foreground text-base mb-1">{chapterDetails.description}</p>
+              <p className="text-muted-foreground text-base mb-1 text-left">{chapterDetails.description}</p>
             )}
           </div>
           <Badge
             variant="outline"
-            className={`text-sm px-4 py-2 shadow-2dp ${
+            className={`text-sm px-4 py-2 shadow-2dp text-left ${
               isCompleted ? 'bg-success text-success-foreground border-success' :
               'bg-warning-light text-warning-foreground border-warning'
             }`}
@@ -153,8 +185,8 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
         ) : (
           <div className="flex flex-col items-center justify-center py-16">
             <Code2 className="w-16 h-16 text-muted-foreground mb-4" />
-            <p className="text-lg font-semibold text-muted-foreground">No Coding Challenges Added Yet</p>
-            <p className="text-sm text-muted-foreground">Check back later for new problems from your instructor.</p>
+            <p className="text-lg font-semibold text-muted-foreground text-center">No Coding Challenges Added Yet</p>
+            <p className="text-sm text-muted-foreground text-center">Check back later for new problems from your instructor.</p>
           </div>
         )}
       </div>

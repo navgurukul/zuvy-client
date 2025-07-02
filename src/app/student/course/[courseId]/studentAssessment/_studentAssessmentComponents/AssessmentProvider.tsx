@@ -667,19 +667,22 @@ function Page({
 
                         <div className="max-w-4xl mx-auto p-6 pt-20">
                             {/* Assessment Info Section */}
-                            <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
-                                <div className="bg-card-elevated border-b border-border p-6">
-                                    <div className="flex items-center space-x-3 mb-4">
-                                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                            <div className=" rounded-2xl shadow-16dp mb-8 overflow-hidden">
+                                <div className=" p-6">
+                                    <div className="flex items-center flex-col w-full items-start text-left gap-5 mb-4">
+                                        {/* <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                                             <Timer className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-foreground">Testing Your Knowledge</h2>
+                                        </div> */}
+                                        <h2 className="text-2xl w-full ml-3 text-left font-bold text-foreground">{assessmentData?.ModuleAssessment.title}</h2>
+                                        <p className='text-left text-muted-foreground ml-2 font-medium'>Complete all sections to submit your assessment. Read the instructions carefully before proceeding.
+
+</p>
                                     </div>
 
                                     <div className="flex items-center justify-between gap-4">                                            <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
                                        <div className='flex items-center space-x-3'>
-                                       <Clock className="w-5 h-5 text-accent flex-shrink-0" />
-                                        <div>
+                                       {/* <Clock className="w-5 h-5 text-accent flex-shrink-0" /> */}
+                                        {/* <div>
                                             <p className="text-sm text-left text-muted-foreground font-medium">Deadline</p>
                                             <p className="text-foreground font-semibold">
                                                 {assessmentData?.endDatetime
@@ -687,26 +690,26 @@ function Page({
                                                     : 'No Deadline For This Assessment'
                                                 }
                                             </p>
-                                        </div>
+                                        </div> */}
                                        </div>
                                     </div>
                                         <div>
                                             <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                                                <Timer className="w-5 h-5 text-secondary flex-shrink-0" />
-                                                <div>
+                                                {/* <Timer className="w-5 h-5 text-secondary flex-shrink-0" /> */}
+                                                {/* <div>
                                                     <p className="text-sm text-left text-muted-foreground font-medium">Test Time</p>
                                                     <p className="text-foreground font-semibold">
                                                         {Math.floor(assessmentData?.timeLimit / 3600)} Hours{' '}
                                                         {Math.floor((assessmentData?.timeLimit % 3600) / 60)} Minutes
                                                     </p>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="p-6">
-                                    <div className="bg-info-light border border-info/20 rounded-xl p-4 mb-6">
+                                    {/* <div className=" rounded-xl p-4 mb-6">
                                         <div className="flex items-start space-x-3">
                                             <AlertCircle className="w-5 h-5 text-info mt-0.5 flex-shrink-0" />
                                             <p className="text-sm text-left text-info-dark">
@@ -714,42 +717,40 @@ function Page({
                                                 All problems (coding challenges, MCQs, and open-ended questions) must be completed in one session.
                                             </p>
                                         </div>
-                                    </div>
+                                    </div> */}
 
-                                    <div className="bg-warning-light border border-warning/20 rounded-xl p-4">
-                                        <h3 className="font-bold text-warning-dark mb-3 flex items-center space-x-2">
-                                            <AlertCircle className="w-5 h-5" />
+                                    <div className=" rounded-xl p-4">
+                                        <h5 className="font-bold text-warning-dark mb-3 flex items-center space-x-2">      
                                             <span>Proctoring Rules</span>
-                                        </h3>
-                                        <p className="text-sm text-left text-warning-dark mb-3">
-                                            To ensure fair assessments, the following activities are monitored. Please avoid violating the rules:
-                                        </p>
-                                        <ul className="list-disc text-left list-inside space-y-1 text-sm text-warning-dark ml-4">
-                                            <li>Copy and pasting</li>
-                                            <li>Tab switching</li>
-                                            <li>Assessment screen exit</li>
+                                        </h5>
+                                       
+                                        <ul className="list-disc text-left list-inside space-y-1 text-warning-dark">
+                                            <li>No copy-pasting is allowed during the assessment</li>
+                                            <li>Tab switching or window switching is not permitted</li>
+                                            <li>Assessment screen exit will result in violations</li>
+                                            <li>Maximum 3 violations are allowed before auto-submission</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>                                {/* Coding Challenges Section */}
                             {assessmentData?.codingQuestions?.length > 0 && (
-                                <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
-                                    <div className="bg-card-elevated border-b border-border p-6">
+                                <div className=" mb-8 overflow-hidden">
+                                    <div className=" p-6">
                                         <div className="flex items-center space-x-3 mb-4">
-                                            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
+                                            {/* <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
                                                 <AlertCircle className="w-5 h-5 text-accent" />
-                                            </div>
+                                            </div> */}
                                             <h2 className="text-2xl font-bold text-foreground">Coding Challenges</h2>
                                         </div>
 
-                                        <div className="bg-info-light border border-info/20 rounded-xl p-4">
+                                        {/* <div className="bg-info-light border border-info/20 rounded-xl p-4">
                                             <div className="flex items-start space-x-3">
                                                 <AlertCircle className="w-5 h-5 text-info mt-0.5 flex-shrink-0" />
                                                 <p className="text-sm text-info-dark">
                                                     You may run your code multiple times after making changes, but you are allowed to submit it only once.
                                                 </p>
                                             </div>
-                                        </div>
+                                        </div> */}
                                     </div>
 
                                     <div className="p-6">
@@ -785,12 +786,12 @@ function Page({
                                 assessmentData?.easyMcqQuestions +
                                 assessmentData?.mediumMcqQuestions >
                                 0 && (
-                                    <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
-                                        <div className="bg-card-elevated border-b border-border p-6">
+                                    <div className=" mb-8 overflow-hidden">
+                                        <div className=" p-6">
                                             <div className="flex items-center space-x-3">
-                                                <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
+                                                {/* <div className="w-10 h-10 bg-secondary/10 rounded-lg flex items-center justify-center">
                                                     <AlertCircle className="w-5 h-5 text-secondary" />
-                                                </div>
+                                                </div> */}
                                                 <h2 className="text-2xl font-bold text-foreground">Multiple Choice Questions</h2>
                                             </div>
                                         </div>
@@ -813,8 +814,8 @@ function Page({
 
                             {/* Open-ended Questions Section */}
                             {seperateOpenEndedQuestions.length > 0 && (
-                                <div className="bg-card border border-border rounded-2xl shadow-16dp mb-8 overflow-hidden">
-                                    <div className="bg-card-elevated border-b border-border p-6">
+                                <div className=" mb-8 overflow-hidden">
+                                    <div className=" p-6">
                                         <div className="flex items-center space-x-3">
                                             <div className="w-10 h-10 bg-info/10 rounded-lg flex items-center justify-center">
                                                 <AlertCircle className="w-5 h-5 text-info" />

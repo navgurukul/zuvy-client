@@ -245,13 +245,13 @@ const StudentDashboard = () => {
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Course Image */}
-                  <div className="flex-shrink-0 md:w-20 md:h-20">
+                  <div className="flex-shrink-0 md:w-20  md:h-20">
                     <Image
                       src={bootcamp.coverImage || '/logo.PNG'}
                       alt={bootcamp.name}
-                      width={80}
-                      height={80}
-                      className="w-full h-20 md:w-20 md:h-20 rounded-lg object-cover"
+                      width={100}
+                      height={100}
+                      className="w-[200px] h-[80px]  rounded-lg "
                     />
                   </div>
 
@@ -343,7 +343,7 @@ const StudentDashboard = () => {
                                     </div>
                                     <div className="flex-1">
                                       <div className="flex items-start justify-between gap-2 mb-1">
-                                        <h4 className="text-sm font-medium line-clamp-1">
+                                        <h4 className="text-sm font-medium text-left line-clamp-1">
                                           {item.title}
                                         </h4>
                                         <div>
@@ -372,14 +372,14 @@ const StudentDashboard = () => {
                                         </div>
 
                                       </div>
-                                      <p className="text-xs text-left flex justify-between text-muted-foreground mb-2">
+                                      <p className="text-xs text-left flex justify-between w-full text-muted-foreground mb-2">
                                         <span>
 
                                         {eventType === 'Assignment' ? 'Due in' : eventType === 'Live Class' ? '' : 'Due in'}  {formatUpcomingItem(item)}
                                         </span>
                                         <span>
 
-                                        {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-[14px] ">Join Class</span>}
+                                        {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[16px] mr-8 ">Join</span>}
                                         </span>
 
                                       </p>

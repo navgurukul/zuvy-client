@@ -30,6 +30,8 @@ interface CourseSyllabusData {
   instructorName: string;
   instructorProfilePicture: string | null;
   modules: Module[];
+  coverImage: string;
+  collaboratorImage: string;
 }
 
 interface ApiResponse {

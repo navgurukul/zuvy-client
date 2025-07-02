@@ -8,6 +8,7 @@ export interface CompletedClass {
   endTime: string;
   attendanceStatus: 'present' | 'absent';
   duration: number;
+  s3Link: string;
 }
 
 export interface AttendanceStats {

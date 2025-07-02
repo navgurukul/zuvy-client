@@ -167,18 +167,19 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   }
 
   const getSubmissionStatus = () => {
-    if (!submittedAt) return <span className="text-orange-500">Not Submitted</span>;
+    if (!submittedAt) return 'Not Submitted';
     const deadline = new Date(deadlineDate!);
-    if (isNaN(deadline.getTime())) return <span className="text-gray-500">Processing...</span>;
+    if (isNaN(deadline.getTime())) return 'Processing...';
     const submittedDate = new Date(submittedAt);
-    return submittedDate > deadline ? <span className="text-red-500">Late Submission</span> : <span className="text-green-500">Submitted on Time</span>;
+    return submittedDate > deadline ? 'Late Submission' : 'Submitted on Time';
   };
   
   const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
     });
   };
 
@@ -201,77 +202,99 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   }
 
   return (
-    <div className="h-full p-4">
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold text-left">{chapterDetails.title}</h1>
-        <Badge variant={isCompleted ? "secondary" : "outline"}>
-          {isCompleted ? 'Completed' : 'Pending'}
-        </Badge>
-      </div>
-      
-      <div className="text-sm text-muted-foreground mb-4 text-left space-y-1">
-        <p><strong>Deadline:</strong> {formatDate(deadlineDate)}</p>
-        <p><strong>Status:</strong> {getSubmissionStatus()}</p>
-      </div>
-      
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-2 text-left">Assignment Description</h2>
-        <div className={`text-left bg-muted/30 p-4 rounded-md border ${isMobile && viewResource ? 'h-auto' : 'h-[300px]'}`}>
-          {viewResource ? (
-            isMobile ? (
-              <div className="flex flex-col items-center justify-center h-full">
-                <p className="mb-4 text-center">
-                  This assignment includes an external resource.
-                </p>
-                <Button asChild>
-                  <Link href={resourceLink} target="_blank" rel="noopener noreferrer">
-                    View Resource
-                  </Link>
-                </Button>
-              </div>
+    <div className="min-h-screen bg-background">
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
+        {/* Header Section */}
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-foreground mb-2 text-left">{chapterDetails.title}</h1>
+            <p className="text-muted-foreground text-left">
+              Due: {formatDate(deadlineDate)}
+            </p>
+          </div>
+          <div className="flex flex-col items-end space-y-2">
+            <Badge 
+              variant={isCompleted ? "secondary" : "outline"}
+              className={`${isCompleted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left`}
+            >
+              {getSubmissionStatus()}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Assignment Description */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="prose prose-neutral max-w-none text-left">
+            {viewResource ? (
+              isMobile ? (
+                <div className="flex flex-col items-center justify-center py-8">
+                  <p className="mb-4 text-center text-muted-foreground">
+                    This assignment includes an external resource.
+                  </p>
+                  <Button asChild variant="outline">
+                    <Link href={resourceLink} target="_blank" rel="noopener noreferrer">
+                      View Resource
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <iframe
+                  src={resourceLink}
+                  className="w-full h-[400px] border border-border rounded"
+                  title="Assignment Resource"
+                />
+              )
             ) : (
-              <iframe
-                src={resourceLink}
-                className="h-full w-full border-none rounded"
-                title="Assignment Resource"
+              <div className="min-h-[200px] text-left">
+                <RemirrorTextEditor 
+                  initialContent={initialContent} 
+                  setInitialContent={setInitialContent} 
+                  preview={true} 
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Submission Section */}
+        <div className=" rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-foreground mb-4 text-left">Make a Submission</h2>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input 
+                        placeholder="Paste your assignment link (Google Drive, GitHub, etc.)" 
+                        {...field} 
+                        disabled={isCompleted || isSubmitting || isCompleting}
+                        className="h-12 text-base text-left"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-left" />
+                  </FormItem>
+                )}
               />
-            )
-          ) : (
-            <div className="h-full">
-              <RemirrorTextEditor 
-                initialContent={initialContent} 
-                setInitialContent={setInitialContent} 
-                preview={true} 
-              />
-            </div>
-          )}
+              
+              {!isCompleted && (
+                <div className="flex justify-start">
+                  <Button 
+                    type="submit" 
+                    disabled={isSubmitting || isCompleting || !form.formState.isValid}
+                    className="px-6 py-2 h-12 text-left"
+                  >
+                    {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
+                  </Button>
+                </div>
+              )}
+            </form>
+          </Form>
         </div>
       </div>
-      
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <h2 className="text-lg font-semibold text-left">Submit Your Work</h2>
-          <FormField
-            control={form.control}
-            name="link"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input placeholder="Paste your assignment link (Google Drive, GitHub, etc.)" {...field} disabled={isCompleted || isSubmitting || isCompleting} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {!isCompleted && (
-            <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting || isCompleting || !form.formState.isValid}>
-                {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
-              </Button>
-            </div>
-          )}
-        </form>
-      </Form>
     </div>
   );
 };

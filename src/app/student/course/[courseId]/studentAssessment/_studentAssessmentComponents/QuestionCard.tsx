@@ -95,68 +95,62 @@ const QuestionCard = ({
     }, [codingOutsourseId, assessmentSubmitId, id])
 
     return (
-        <div className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden group text-left">
-            <div className="p-6 flex flex-col h-full min-h-[140px]">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+            <div className="p-6">
                 {/* Header Section */}
-                <div className="flex-1 mb-4">
-                    <div className="flex items-start justify-between mb-3">
-                        <h3 className="text-lg font-bold text-foreground capitalize pr-4 flex-1">
-                            {isMobile ? ellipsis(title, 30) : title}
-                        </h3>
-                    </div>
-                    
-                    {/* Tags and Marks Section */}
-                    <div className="flex items-center flex-wrap gap-2 mb-4">
-                        {title !== 'Open-Ended Questions' && (
-                            <div className="flex items-center space-x-2 px-3 py-1.5 bg-primary/10 rounded-full border border-primary/20">
-                                <Award className="w-4 h-4 text-primary" />
-                                <span className="text-sm font-semibold text-primary">
-                                    {`${
-                                        codingQuestions
-                                            ? Math.trunc(
-                                                  Number(
-                                                      codingQuestionMarks(description)
-                                                  )
-                                              )
-                                            : weightage
-                                    } Marks`}
-                                </span>
-                            </div>
-                        )}
+                <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 flex-1">
+                        {isMobile ? ellipsis(title, 30) : title}
+                    </h3>
+                    <div className="flex items-center gap-3 ml-4">
                         <span
                             className={cn(
-                                'px-3 py-1.5 rounded-full text-xs font-semibold border',
-                                difficultyColor(description)
+                                'px-3 py-1 rounded-full text-sm font-medium border',
+                                description === 'Easy' && 'bg-green-50 text-green-700 border-green-200',
+                                description === 'Medium' && 'bg-orange-50 text-orange-700 border-orange-200',
+                                description === 'Hard' && 'bg-red-50 text-red-700 border-red-200',
+                                !['Easy', 'Medium', 'Hard'].includes(description) && 'bg-gray-50 text-gray-700 border-gray-200'
                             )}
                         >
                             {description}
                         </span>
+                        {title !== 'Open-Ended Questions' && (
+                            <span className="text-sm font-semibold text-gray-900">
+                                {`${
+                                    codingQuestions
+                                        ? Math.trunc(
+                                              Number(
+                                                  codingQuestionMarks(description)
+                                              )
+                                          )
+                                        : weightage
+                                } marks`}
+                            </span>
+                        )}
                     </div>
                 </div>
                 
-                {/* Action Button Section - Always at bottom right */}
-                <div className="flex justify-end items-center mt-auto">
+                {/* Action Button Section */}
+                <div className="flex justify-end items-center mt-6">
                     {action === 'submit' ? (
-                        <div className="flex items-center space-x-2 text-success bg-success/10 px-4 py-2 rounded-xl border border-success/20">
-                            <CheckCircle className="w-5 h-5" />
-                            <span className="font-semibold">Already Submitted</span>
+                        <div className="flex items-center space-x-2 text-green-700 bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="font-medium text-sm">Already Submitted</span>
                         </div>
                     ) : (
                         <>
                             {isQuizSubmitted ? (
-                                <div className="flex items-center space-x-2 text-success bg-success/10 px-4 py-2 rounded-xl border border-success/20">
-                                    <CheckCircle className="w-5 h-5" />
-                                    <span className="font-semibold">Already Submitted</span>
+                                <div className="flex items-center space-x-2 text-green-700 bg-green-50 px-4 py-2 rounded-lg border border-green-200">
+                                    <CheckCircle className="w-4 h-4" />
+                                    <span className="font-medium text-sm">Already Submitted</span>
                                 </div>
                             ) : (
-                                <button
-                                    onClick={() => onSolveChallenge(id)}
-                                    className="flex items-center space-x-2 bg-primary hover:bg-primary-dark text-primary-foreground px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-4dp hover:shadow-8dp transform hover:scale-105"
-                                >
-                                    <Play className="w-4 h-4" />
-                                    <span>Solve Challenge</span>
-                                    <ChevronRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
-                                </button>
+                                // <Button
+                                //     onClick={() => onSolveChallenge(id)}
+                                //     className="flex items-center  space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm"
+                                // >
+                                // </Button>
+                                    <span onClick={() => onSolveChallenge(id)} className="text-primary cursor-pointer text-sm font-medium ">Solve Challenge</span>
                             )}
                         </>
                     )}

@@ -176,7 +176,7 @@ const CourseSyllabusPage = () => {
         {/* Course Information */}
         <Card className="mb-8 shadow-4dp">
           <CardContent className="p-6 md:p-8">
-            <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+            {/* <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex-1 text-left">
@@ -195,7 +195,7 @@ const CourseSyllabusPage = () => {
                           {syllabusData.instructorName?.charAt(0)?.toUpperCase() || 'I'}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="font-medium text-left">{syllabusData.instructorName}</span>
+                      <span className="font-medium capitalize text-left">{syllabusData.instructorName}</span>
                     </div>
                   </div>
                   {syllabusData.collaboratorName && (
@@ -204,6 +204,38 @@ const CourseSyllabusPage = () => {
                       <span className="font-medium">{syllabusData.collaboratorName}</span>
                     </div>
                   )}
+                </div>
+              </div>
+            </div> */}
+             <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+              <div className="flex-shrink-0">
+                <img
+                  src={syllabusData.coverImage || '/logo.PNG'}
+                  alt={syllabusData.bootcampName}
+                  className="w-full md:w-32 h-32 rounded-lg object-cover"
+                />
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div className="flex-1">
+                    <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{syllabusData.bootcampName}</h1>
+                    <p className="text-base md:text-lg text-left text-muted-foreground mb-4">{syllabusData.bootcampDescription}</p>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={syllabusData.instructorProfilePicture} />
+                        <AvatarFallback>{syllabusData.instructorName?.charAt(0)?.toUpperCase() || 'I'}</AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium capitalize">{syllabusData.instructorName}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
+                    <img
+                      src={syllabusData.collaboratorName || '/logo.PNG'}
+                      alt="AFE Brand"
+                      className="h-12"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

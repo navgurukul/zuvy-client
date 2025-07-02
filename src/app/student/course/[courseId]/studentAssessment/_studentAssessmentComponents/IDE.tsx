@@ -37,6 +37,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
+
 interface Input {
     parameterName: string
     parameterType: string
@@ -446,82 +447,111 @@ const IDE: React.FC<IDEProps> = ({
                         <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
                             <div className="h-full bg-card border-r border-border">
                                 <div className="h-full overflow-y-auto scrollbar-hide">
-                                    <div className="p-6 space-y-6">
-                                        {/* Problem Description */}
-                                        <div>
-                                            <div className="prose prose-neutral max-w-none">
-                                                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                                                    {questionDetails.description}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Constraints */}
-                                        {questionDetails.constraints && (
-                                            <div className="bg-info-light border border-info/20 rounded-xl p-4">
-                                                <h3 className="font-bold text-info-dark mb-2 flex items-center space-x-2">
-                                                    <Code className="w-4 h-4" />
-                                                    <span>Constraints</span>
-                                                </h3>
-                                                <p className="text-sm text-info-dark whitespace-pre-wrap">
-                                                    {questionDetails.constraints}
-                                                </p>
-                                            </div>
-                                        )}
-
-                                        {/* Test Cases */}
-                                        <div className="space-y-4">
-                                            <h3 className="font-bold text-foreground flex items-center space-x-2">
-                                                <Play className="w-4 h-4 text-accent" />
-                                                <span>Sample Test Cases</span>
-                                            </h3>
-                                            {testCases?.slice(0, 2).map((testCase: TestCase, index: number) => (
-                                                <div
-                                                    key={index}
-                                                    className="bg-muted/30 border border-border rounded-xl p-4 space-y-3"
-                                                >
-                                                    <h4 className="font-semibold text-foreground">
-                                                        Test Case {index + 1}
-                                                    </h4>
-
-                                                    <div className="space-y-2">
-                                                        {/* Handle both array and object inputs */}
-                                                        {Array.isArray(testCase.inputs)
-                                                            ? testCase.inputs.map((input: Input, idx: number) => (
-                                                                  <div key={idx} className="text-sm">
-                                                                      <span className="font-medium text-muted-foreground">
-                                                                          Input {idx + 1}:
-                                                                      </span>
-                                                                      <code className="ml-2 bg-muted px-2 py-1 rounded text-foreground font-mono">
-                                                                          {formatValue(input.parameterValue, input.parameterType)}
-                                                                      </code>
-                                                                  </div>
-                                                              ))
-                                                            : Object.entries(testCase.inputs).map(([key, value], idx: number) => (
-                                                                  <div key={key} className="text-sm">
-                                                                      <span className="font-medium text-muted-foreground">
-                                                                          {key}:
-                                                                      </span>
-                                                                      <code className="ml-2 bg-muted px-2 py-1 rounded text-foreground font-mono">
-                                                                          {formatValue(value, typeof value === 'number' ? 'int' : 'str')}
-                                                                      </code>
-                                                                  </div>
-                                                              ))}
-
-                                                        <div className="text-sm">
-                                                            <span className="font-medium text-muted-foreground">
-                                                                Expected Output:
-                                                            </span>
-                                                            <code className="ml-2 bg-success/20 text-success px-2 py-1 rounded font-mono">
-                                                                {formatValue(
-                                                                    testCase.expectedOutput.parameterValue,
-                                                                    testCase.expectedOutput.parameterType
-                                                                )}
-                                                            </code>
+                                    <div className="p-6">
+                                        <div className="bg-card border border-border rounded-xl shadow-sm">
+                                            <div className="p-6 space-y-8">
+                                                {/* Problem Description */}
+                                                <div>
+                                                    <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
+                                                        {/* <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center">
+                                                            <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                                        </div> */}
+                                                        <span>Description</span>
+                                                    </h2>
+                                                    <div className="text-left">
+                                                        <div className="text-foreground leading-relaxed whitespace-pre-wrap text-[15px] text-left">
+                                                            {questionDetails.description}
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ))}
+
+                                                {/* Constraints */}
+                                                {questionDetails.constraints && (
+                                                    <div>
+                                                        <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
+                                                            {/* <div className="w-5 h-5 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                                                                <Code className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                                                            </div> */}
+                                                            <span>Constraints</span>
+                                                        </h2>
+                                                        <div className=" rounded-lg p-4">
+                                                            <div className="text-sm  leading-relaxed whitespace-pre-wrap font-mono text-left">
+                                                                {questionDetails.constraints}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Test Cases */}
+                                                <div>
+                                                    <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
+                                                        {/* <div className="w-5 h-5 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center">
+                                                            <Play className="w-3 h-3 text-green-600 dark:text-green-400" />
+                                                        </div> */}
+                                                        <span>Examples</span>
+                                                    </h2>
+                                                    <div className="space-y-6">
+                                                        {testCases?.slice(0, 3).map((testCase: TestCase, index: number) => (
+                                                            <div
+                                                                key={index}
+                                                                className="rounded-lg overflow-hidden"
+                                                            >
+                                                                <div className="bg-muted/30 px-4 py-3">
+                                                                    <h4 className="font-semibold text-foreground text-sm text-left">
+                                                                        Example {index + 1}
+                                                                    </h4>
+                                                                </div>
+                                                                
+                                                                <div className="p-4 space-y-4">
+                                                                    {/* Input Section */}
+                                                                    <div>
+                                                                        <div className="text-sm font-medium text-muted-foreground mb-2 text-left">
+                                                                            Input:
+                                                                        </div>
+                                                                        <div className="bg-gray-50 dark:bg-gray-900 rounded-md p-3">
+                                                                            <pre className="text-sm font-mono text-foreground whitespace-pre-wrap text-left">
+                                                                                {Array.isArray(testCase.inputs)
+                                                                                    ? testCase.inputs.map((input: Input, idx: number) => (
+                                                                                        <div key={idx}>
+                                                                                            {input.parameterName || `param${idx + 1}`} = {formatValue(input.parameterValue, input.parameterType)}
+                                                                                        </div>
+                                                                                    ))
+                                                                                    : Object.entries(testCase.inputs).map(([key, value]) => (
+                                                                                        <div key={key}>
+                                                                                            {key} = {formatValue(value, typeof value === 'number' ? 'int' : 'str')}
+                                                                                        </div>
+                                                                                    ))
+                                                                                }
+                                                                            </pre>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Output Section */}
+                                                                    <div>
+                                                                        <div className="text-sm font-medium text-muted-foreground mb-2 text-left">
+                                                                            Output:
+                                                                        </div>
+                                                                        <div className="bg-gray-50 dark:bg-gray-900 rounded-md p-3">
+                                                                            <pre className="text-sm font-mono text-foreground text-left">
+                                                                                {formatValue(
+                                                                                    testCase.expectedOutput.parameterValue,
+                                                                                    testCase.expectedOutput.parameterType
+                                                                                )}
+                                                                            </pre>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        
+                                                        {testCases && testCases.length > 3 && (
+                                                            <div className="text-left p-4 text-sm text-muted-foreground bg-muted/20 rounded-lg">
+                                                                + {testCases.length - 3} more test case{testCases.length - 3 !== 1 ? 's' : ''} available
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -538,9 +568,9 @@ const IDE: React.FC<IDEProps> = ({
                                         <div className="bg-card-elevated border-b border-border p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
-                                                    <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                                    {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                                         <Code className="w-4 h-4 text-primary" />
-                                                    </div>
+                                                    </div> */}
                                                     <h3 className="font-bold text-foreground">Code Editor</h3>
                                                 </div>
 
@@ -557,7 +587,7 @@ const IDE: React.FC<IDEProps> = ({
                                                             <SelectItem
                                                                 key={lang.id}
                                                                 value={lang.lang}
-                                                                className="hover:bg-muted cursor-pointer"
+                                                                className={`hover:bg-primary ${language === lang.lang ? 'text-white' : ''} focus:bg-primary cursor-pointer data-[highlighted]:bg-primary data-[state=checked]:bg-primary`}
                                                             >
                                                                 {lang.lang}
                                                             </SelectItem>
@@ -570,7 +600,7 @@ const IDE: React.FC<IDEProps> = ({
                                             <Editor
                                                 height="100%"
                                                 language={language}
-                                                theme="vs-dark"
+                                                theme="vs"
                                                 value={currentCode}
                                                 onChange={handleEditorChange}
                                                 defaultValue={language || 'Please Select a language above!'}
@@ -595,126 +625,115 @@ const IDE: React.FC<IDEProps> = ({
 
                                 {/* Output Panel */}
                                 <ResizablePanel defaultSize={35} minSize={20}>
-                                    <div className="h-full bg-card">
+                                    <div className="h-full bg-white dark:bg-gray-950 flex flex-col">
                                         {/* Output Header */}
-                                        <div className="bg-card-elevated border-b border-border p-4">
+                                        <div className="bg-gray-50 dark:bg-gray-900/50 border-b border-border p-3">
                                             <div className="flex items-center space-x-3">
-                                                <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                                                    <div className="w-3 h-3 bg-accent rounded-full animate-pulse"></div>
-                                                </div>
-                                                <h3 className="font-bold text-foreground">Output Console</h3>
+                                                <h3 className="font-semibold text-foreground text-sm">Output</h3>
                                             </div>
-                                        </div>                                        {/* Output Content */}
-                                        <div style={{ height: 'calc(100% - 72px)' }} className="p-4 overflow-y-auto scrollbar-hide bg-gray-900 text-gray-100 font-mono text-sm">
+                                        </div>
+
+                                        {/* Output Content */}
+                                        <div 
+                                            style={{ height: 'calc(100% - 45px)' }} 
+                                            className="p-4 overflow-y-auto font-mono text-sm bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-200"
+                                        >
                                             {/* Loading State */}
                                             {loading && (
-                                                <div className="flex items-center justify-center py-8">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
-                                                        <span className="text-primary font-medium">
-                                                            Executing your code...
-                                                        </span>
-                                                    </div>
+                                                <div className="flex items-center space-x-2 text-gray-500 animate-pulse">
+                                                    <div className="w-2 h-2 bg-primary rounded-full animate-ping"></div>
+                                                    <span>Executing...</span>
                                                 </div>
                                             )}
 
-                                            {/* Error Results */}
+                                            {/* Error Results (Compile/Runtime) */}
                                             {!loading && codeError && codeResult?.map((testCase: any, index: any) => (
-                                                <div
-                                                    key={index}
-                                                    className="mb-4 p-4 bg-destructive/20 border border-destructive/30 rounded-lg"
-                                                >
-                                                    {testCase.status !== 'Accepted' && (
-                                                        <div className="space-y-2">
-                                                            <p className="text-gray-200">
-                                                                <span className="text-warning font-semibold">Output: </span>
-                                                                <span className="font-mono">
-                                                                    {testCase?.stdOut || testCase?.stdout || 'No output'}
-                                                                </span>
-                                                            </p>
-
-                                                            <p className="text-gray-200">
-                                                                <span className="text-warning font-semibold">Compile Output: </span>
-                                                                <span className="font-mono">
-                                                                    {testCase?.compileOutput || 'No compile output'}
-                                                                </span>
-                                                            </p>
-
-                                                            <p className="text-gray-200">
-                                                                <span className="text-destructive font-semibold">Error: </span>
-                                                                <span className="font-mono text-destructive">
-                                                                    {testCase?.stdErr || testCase?.stderr || 'No error'}
-                                                                </span>
-                                                            </p>
-
-                                                            <p className="text-gray-200">
-                                                                <span className="text-warning font-semibold">Status: </span>
-                                                                <span className="font-mono text-destructive">
-                                                                    {testCase.status}
-                                                                </span>
-                                                            </p>
-
-                                                            <p className="text-gray-200">
-                                                                <span className="text-info font-semibold">Input: </span>
-                                                                <br />
-                                                                <span className="font-mono text-info">
-                                                                    {testCase?.stdIn || testCase?.stdin || 'No input'}
-                                                                </span>
-                                                            </p>
-
-                                                            <p className="text-gray-200">
-                                                                <span className="text-success font-semibold">Expected Output: </span>
-                                                                <br />
-                                                                <span className="font-mono text-success">
-                                                                    {testCase?.expectedOutput || 'No expected output'}
-                                                                </span>
-                                                            </p>
+                                                <div key={index} className="mb-4">
+                                                    <div className="flex items-center space-x-2 text-red-500 font-bold">
+                                                        <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
+                                                    </div>
+                                                    <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
+                                                        <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
+                                                            {testCase?.stdIn && (
+                                                                <>
+                                                                    <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
+                                                                    <pre className="whitespace-pre-wrap break-all">{testCase.stdIn}</pre>
+                                                                </>
+                                                            )}
+                                                            {testCase?.expectedOutput && (
+                                                                <>
+                                                                    <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Expected:</span>
+                                                                    <pre className="whitespace-pre-wrap break-all">{testCase.expectedOutput}</pre>
+                                                                </>
+                                                            )}
+                                                            {(testCase?.stdOut || testCase?.stdout) && (
+                                                                <>
+                                                                    <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Output:</span>
+                                                                    <pre className="whitespace-pre-wrap break-all">{testCase?.stdOut || testCase?.stdout}</pre>
+                                                                </>
+                                                            )}
+                                                            {(testCase?.stdErr || testCase?.stderr) && (
+                                                                <>
+                                                                    <span className="font-semibold text-red-500 justify-self-end">Error:</span>
+                                                                    <pre className="text-red-500 whitespace-pre-wrap break-all">{testCase?.stdErr || testCase?.stderr}</pre>
+                                                                </>
+                                                            )}
+                                                            {testCase?.compileOutput && (
+                                                                <>
+                                                                    <span className="font-semibold text-yellow-600 justify-self-end">Compile Msg:</span>
+                                                                    <pre className="text-yellow-600 whitespace-pre-wrap break-all">{testCase.compileOutput}</pre>
+                                                                </>
+                                                            )}
                                                         </div>
-                                                    )}
+                                                    </div>
                                                 </div>
                                             ))}
 
-                                            {/* Success Results */}
+                                            {/* Success/Run Results */}
                                             {!loading && !codeError && codeResult?.map((testCase: any, index: any) => (
-                                                <div
-                                                    key={index}
-                                                    className={`mb-4 p-4 rounded-lg border ${
-                                                        testCase.status === 'Accepted'
-                                                            ? 'bg-success/20 border-success/30'
-                                                            : 'bg-destructive/20 border-destructive/30'
-                                                    }`}
-                                                >
-                                                    {testCase.status !== 'Accepted' ? (
-                                                        <div className="space-y-2">
-                                                            <h4 className="text-lg font-semibold text-gray-200">
-                                                                Test Case {index + 1}
-                                                            </h4>
-                                                            {/* Same error output structure as above */}
-                                                            <p className="text-gray-200">
-                                                                <span className="text-warning font-semibold">Your Output: </span>
-                                                                <span className="font-mono">
-                                                                    {testCase?.stdOut || testCase?.stdout || 'No output'}
-                                                                </span>
-                                                            </p>
-                                                            {/* Additional fields... */}
+                                                <div key={index} className="mb-4">
+                                                    {testCase.status === 'Accepted' ? (
+                                                        <div className="flex items-center space-x-2 text-green-600 font-bold">
+                                                            <span>[✓] Test Case #{index + 1}: Accepted</span>
                                                         </div>
                                                     ) : (
-                                                        <p className="text-success font-semibold flex items-center space-x-2">
-                                                            <CheckCircle className="w-4 h-4" />
-                                                            <span>Test Case {index + 1}: {testCase.status}</span>
-                                                        </p>
+                                                        <div>
+                                                            <div className="flex items-center space-x-2 text-red-500 font-bold">
+                                                                <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
+                                                            </div>
+                                                            <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
+                                                                <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
+                                                                    {testCase?.stdIn && (
+                                                                        <>
+                                                                            <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
+                                                                            <pre className="whitespace-pre-wrap break-all">{testCase.stdIn}</pre>
+                                                                        </>
+                                                                    )}
+                                                                    {testCase?.expectedOutput && (
+                                                                        <>
+                                                                            <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Expected:</span>
+                                                                            <pre className="whitespace-pre-wrap break-all">{testCase.expectedOutput}</pre>
+                                                                        </>
+                                                                    )}
+                                                                    {(testCase?.stdOut || testCase?.stdout) && (
+                                                                        <>
+                                                                            <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Your Output:</span>
+                                                                            <pre className="whitespace-pre-wrap break-all">{testCase?.stdOut || testCase?.stdout}</pre>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     )}
                                                 </div>
                                             ))}
 
                                             {/* Empty State */}
                                             {!loading && !codeResult?.length && (
-                                                <div className="flex items-center justify-center py-8 text-muted-foreground">
-                                                    <div className="text-center">
-                                                        <Code className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                                        <p className="text-lg font-medium">No output yet</p>
-                                                        <p className="text-sm">Click "Run Code" to test your solution</p>
-                                                    </div>
+                                                <div className="flex items-center text-gray-400">
+                                                    <span className="mr-2">&gt;</span>
+                                                    <span>Console output will appear here.</span>
+                                                    <span className="w-2 h-4 bg-primary ml-1 animate-pulse"></span>
                                                 </div>
                                             )}
                                         </div>

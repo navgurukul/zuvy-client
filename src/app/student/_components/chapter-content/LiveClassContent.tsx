@@ -232,7 +232,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
                   <Button
                     onClick={completeChapter}
                     disabled={isCompleting}
-                    className="w-full"
+                    className="w-full bg-primary hover:bg-primary-dark text-white"
                   >
                     {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
                   </Button>
