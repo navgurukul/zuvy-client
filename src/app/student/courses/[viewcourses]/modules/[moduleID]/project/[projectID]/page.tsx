@@ -10,7 +10,7 @@ import {
     getModuleName,
 } from '@/store/store'
 import { api } from '@/utils/axios.config'
-
+import {Params, Crumb, ModuleDetails}from '@/app/student/courses/[viewcourses]/modules/[moduleID]/project/[projectID]/type'
 export default function Project() {
     const { studentData } = useLazyLoadedStudentData()
     const { viewcourses, moduleID, projectID } = useParams()
@@ -37,7 +37,9 @@ export default function Project() {
 
     const getModule = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<{
+        moduleDetails: ModuleDetails[]
+      }>(
                 `tracking/getAllChaptersWithStatus/${moduleID}`
             )
             setModuleName(response.data.moduleDetails[0].name)
@@ -59,10 +61,12 @@ export default function Project() {
                 <BreadcrumbComponent crumbs={crumbs} />
             </div>
             <Projects
-                moduleId={+moduleID}
-                projectId={+projectID}
-                bootcampId={+viewcourses}
+                moduleId={Number(moduleID)}
+                projectId={Number(projectID)}
+                bootcampId={Number(viewcourses)}
             />
         </>
     )
 }
+
+

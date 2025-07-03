@@ -14,24 +14,7 @@ import Loader from './_components/Loader'
 import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { Skeleton } from '@/components/ui/skeleton'
-
-interface EnrolledCourse {
-    name: string
-    coverImage: string
-    id: number
-    progress: number
-    batchId: number
-}
-
-interface ResumeCourse {
-    bootcampName?: string
-    newChapter?: any
-    title?: string
-    moduleName?: string
-    bootcampId?: number
-    moduleId?: number
-    typeId?: number
-}
+import {EnrolledCourse,ResumeCourse,LatestUpdatedCourseRes, StudentDashboardRes } from "@/app/student/courses/type"
 
 type pageProps = {}
 
@@ -44,14 +27,14 @@ const Page: React.FC<pageProps> = () => {
     const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
     const [courseStarted, setCourseStarted] = useState<boolean>(false)
     const [flag, setFlag] = useState<boolean>(true)
-    const [message, setMessage] = useState()
+    const [message, setMessage] = useState <string | undefined>()
     const userID = studentData?.id && studentData?.id
 
     // async
     useEffect(() => {
         const getEnrolledCourses = async () => {
             try {
-                const response = await api.get(`/student`)
+                const response = await api.get<StudentDashboardRes>(`/student`)
                 setEnrolledCourse(response.data.inProgressBootcamps)
                 setFlag(false)
             } catch (error) {
@@ -64,7 +47,7 @@ const Page: React.FC<pageProps> = () => {
     useEffect(() => {
         const getResumeCourse = async () => {
             try {
-                const response = await api.get('tracking/latestUpdatedCourse')
+                const response = await api.get<LatestUpdatedCourseRes>('tracking/latestUpdatedCourse')
                 if (Array.isArray(response.data.data)) {
                     setCourseStarted(false)
                     const message = response.data.message.toLowerCase()
@@ -126,11 +109,16 @@ const Page: React.FC<pageProps> = () => {
                                                                     : 'text-lg text-destructive'
                                                             } mt-2 text-start font-bold`}
                                                         >
-                                                            {resumeCourse
+                                                            {/* {resumeCourse
                                                                 .newChapter
                                                                 ?.title ||
                                                                 resumeCourse.newChapter ||
-                                                                'There is no chapter in the module'}
+                                                                'There is no chapter in the module'} */}
+
+                                                                {resumeCourse?.newChapter?.title ??
+                                                               JSON.stringify(resumeCourse?.newChapter) ??
+                                                           'There is no chapter in the module'}
+
                                                         </h1>
                                                     </div>
                                                     <div className="flex flex-row gap-4">
@@ -182,7 +170,7 @@ const Page: React.FC<pageProps> = () => {
                                                         )}
                                                     {resumeCourse.newChapter
                                                         ?.title &&
-                                                        resumeCourse.typeId ===
+                                                        resumeCourse.typeId===
                                                             2 && (
                                                             <h1 className="text-md mt-2 text-start font-bold">
                                                                 Project:
@@ -197,10 +185,17 @@ const Page: React.FC<pageProps> = () => {
                                                                 : 'text-lg text-destructive'
                                                         } mt-2 text-start font-bold`}
                                                     >
-                                                        {resumeCourse.newChapter
+                                                        {/* {resumeCourse?.newChapter
                                                             ?.title ||
-                                                            resumeCourse.newChapter ||
-                                                            'There is no chapter in the module'}
+                                                            resumeCourse?.newChapter ||
+                                                            'There is no chapter in the module'} */}
+
+
+                                                            {resumeCourse?.newChapter?.title??
+                                                          JSON.stringify(resumeCourse?.newChapter) ??
+                                                         'There is no chapter in the module'}
+
+                                                            
                                                     </h1>
                                                 </div>
                                                 <div className="flex flex-row">

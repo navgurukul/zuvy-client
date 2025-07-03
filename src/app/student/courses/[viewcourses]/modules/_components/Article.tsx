@@ -6,21 +6,18 @@ import Link from 'next/link'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { getCleanFileName } from '@/utils/admin'
 import { toast } from '@/components/ui/use-toast'
+import {ArticleProps,EditorDoc} from "@/app/student/courses/[viewcourses]/modules/_components/type"
 
-type EditorDoc = {
-    type: string
-    content: any[]
-}
+// type EditorDoc = {
+//     type: string
+//     content: any[]
+// }
 
 function Article({
     content,
     completeChapter,
     status,
-}: {
-    content: any
-    completeChapter: () => void
-    status: string
-}) {
+}:ArticleProps) {
     let editorContent
 
     const [isCompleted, setIsCompleted] = useState<boolean>(false)
@@ -30,16 +27,14 @@ function Article({
     const isMobile = width < 768
 
     const [viewPdf, setViewPdf] = useState(false)
-    const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
-    >(
-        content?.articleContent === null
-            ? undefined
-            : typeof content?.articleContent[0] === 'string'
-            ? JSON.parse(content?.articleContent[0])
-            : { doc: content?.articleContent[0] }
-    )
 
+    const [initialContent, setInitialContent] =useState<{ doc: EditorDoc } | undefined>(
+    content?.articleContent === null
+      ? undefined
+      : typeof content.articleContent[0] === 'string'
+          ? (JSON.parse(content.articleContent[0]) as { doc: EditorDoc })
+          : { doc: content.articleContent[0] as EditorDoc }
+  )
     useEffect(() => {
         if (
             content?.articleContent &&
@@ -90,11 +85,18 @@ function Article({
             description: "You've successfully marked this chapter as done.",
         });
     };
-    const action =
-        initialContent &&
-        (initialContent?.doc.content?.length > 1 ||
-            initialContent?.doc.content[0].content[0].text !==
-                'No content has been added yet')
+    // const action =
+    //     initialContent &&
+    //     (initialContent?.doc.content?.length ?? 0) > 1 ||
+    //         initialContent?.doc.content[0].content[0].text !==
+    //             'No content has been added yet'
+
+  const action =
+  !!initialContent && (
+    ((initialContent.doc.content?.length ?? 0) > 1) ||
+    (((initialContent.doc.content?.[0]?.content?.[0]?.text) ?? '') !==
+      'No content has been added yet')
+  )
 
     return (
         <ScrollArea className="h-full">

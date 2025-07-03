@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import {StudentChapterItemProps } from "@/app/student/courses/_components/type";
 
 function StudentChapterItem({
     title,
@@ -22,17 +23,7 @@ function StudentChapterItem({
     viewcourses,
     moduleID,
     activeChapterRef,
-}: {
-    title: string
-    topicId: number
-    chapterId: number
-    activeChapter: number
-    setActiveChapter: any
-    status: string
-    viewcourses: any
-    moduleID: any
-    activeChapterRef: any
-}) {
+}:StudentChapterItemProps) {
     const router = useRouter()
     const pathname = usePathname()
     const path = pathname.split('/')[1]

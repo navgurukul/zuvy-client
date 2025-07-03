@@ -16,45 +16,11 @@ import useDebounce from '@/hooks/useDebounce'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import Recordings from '../courses/[viewcourses]/[recordings]/_components/Recordings'
-// Interfaces:-
-interface Bootcamp {
-    id: number
-    name: string
-    coverImage: string
-    bootcampTopic: string
-    startTime: string
-    duration: string
-    language: string
-    createdAt: string
-    updatedAt: string
-    students_in_bootcamp: number
-    unassigned_students: number
-}
+import {Recording,RecordingsApiResponse, EnrolledCourse, RecordingsProps} from "@/app/student/recordings/type"
 
-interface BootcampData {
-    status: string
-    message: string
-    code: number
-    bootcamp: Bootcamp
-}
-
-interface EnrolledCourse {
-    id: number
-    name: string
-    coverImage: string
-    bootcampTopic: string
-    startTime: string
-    duration: string
-    language: string
-    createdAt: string
-    updatedAt: string
-    progress: number
-}
-
-// Component:-
-function Page({}: any) {
+function Page({}:any) {
     // states:-
-    const [completedClasses, setCompletedClasses] = useState([])
+    const [completedClasses, setCompletedClasses] = useState<Recording[]>([]);
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [search, setSearch] = useState('')
     const [selectedCourse, setSelectedCourse] =
@@ -84,7 +50,7 @@ function Page({}: any) {
                         )}`
                     }
 
-                    const response = await api.get(baseUrl)
+                    const response = await api.get<RecordingsApiResponse>(baseUrl)
                     setCompletedClasses(response.data.classes)
                     setLoading(false)
                     setTotalStudents(response.data.total_items)
@@ -108,7 +74,7 @@ function Page({}: any) {
         }
     }, [userID])
 
-    const handleCourseChange = (selectedCourseId: any) => {
+    const handleCourseChange = (selectedCourseId:string) => {
         const newSelectedCourse: any = enrolledCourse.find(
             (course) => course.id === +selectedCourseId
         )
@@ -181,7 +147,9 @@ function Page({}: any) {
                     completedClasses={completedClasses}
                     loading={loading}
                 />
+               
             </div>
+            
             {!loading && completedClasses.length > 0 && (
                 <DataTablePagination
                     totalStudents={totalStudents}

@@ -13,6 +13,7 @@ import Link from 'next/link'
 import ClassCard from '@/app/admin/courses/[courseId]/_components/classCard'
 import Image from 'next/image'
 import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
+import {ResumeCourse, EnrolledCourse, AttendanceData, Assignment, ClassData} from "@/app/student/_components/type";
 import {
     Select,
     SelectContent,
@@ -23,19 +24,6 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-interface ResumeCourse {
-    bootcampName?: string
-    moduleName?: string
-    bootcampId?: number
-    newChapter?: any
-    moduleId?: number
-    typeId?: number
-}
-
-interface EnrolledCourse {
-    id: number
-    name: string
-}
 
 type ScheduleProps = React.ComponentProps<typeof Card>
 
@@ -43,18 +31,17 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const [courseStarted, setCourseStarted] = useState<boolean>(false)
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
-    const [resumeCourse, setResumeCourse] = useState<ResumeCourse>({})
+    const [resumeCourse, setResumeCourse] = useState <ResumeCourse | null>(null)
     const [nextChapterId, setNextChapterId] = useState([])
-    const [allClasses, setAllClasses] = useState<any[]>([])
-    const [upcomingClasses, setUpcomingClasses] = useState([])
-    const [ongoingClasses, setOngoingClasses] = useState([])
-    const [upcomingAssignments, setUpcomingAssignments] = useState([])
-    const [lateAssignments, setLateAssignments] = useState<any[]>([])
-    const [attendanceData, setAttendanceData] = useState<any[]>([])
-    const [enrolledCourse, setEnrolledCourse] = useState([])
+    const [allClasses, setAllClasses] = useState<ClassData[]>([])
+    const [upcomingClasses, setUpcomingClasses] = useState <ClassData[]>([])
+    const [ongoingClasses, setOngoingClasses] = useState <ClassData[]>([])
+    const [upcomingAssignments, setUpcomingAssignments] = useState<Assignment[]>([])
+    const [lateAssignments, setLateAssignments] = useState<Assignment[]>([])
+    const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([])
+    const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [submissionMessage, setSubmissionMessage] = useState()
-    const [selectedCourse, setSelectedCourse] =
-        useState<EnrolledCourse | null>()
+    const [selectedCourse, setSelectedCourse] = useState<EnrolledCourse | null>()
 
     useEffect(() => {
         const getResumeCourse = async () => {
@@ -101,7 +88,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             const attendance = res?.data?.filter(
-                (course: any) => selectedCourse?.id === course?.bootcampId
+                (course:AttendanceData) => selectedCourse?.id === course?.bootcampId
             )
             setAttendanceData(attendance)
         })
@@ -128,11 +115,11 @@ function Schedule({ className, ...props }: ScheduleProps) {
         if (userID) getEnrolledCourses()
     }, [userID])
 
-    const handleCourseChange = (selectedCourseId: any) => {
-        const newSelectedCourse: any = enrolledCourse.find(
-            (course: any) => course.id === +selectedCourseId
+    const handleCourseChange = (selectedCourseId: string) => {
+        const newSelectedCourse: EnrolledCourse |undefined  = enrolledCourse.find(
+            (course: EnrolledCourse) => course.id === +selectedCourseId
         )
-        setSelectedCourse(newSelectedCourse)
+        setSelectedCourse(newSelectedCourse || null)
     }
 
     useEffect(() => {
@@ -148,6 +135,8 @@ function Schedule({ className, ...props }: ScheduleProps) {
 
         fetchData()
     }, [
+          courseStarted,            
+          selectedCourse?.id,    
         getAttendanceHandler,
         getUpcomingClassesHandler,
         getUpcomingSubmissionHandler,
@@ -162,7 +151,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                     </h1>
                     <div className="w-full flex flex-col items-center lg:flex-row lg:justify-between gap-8">
                         <div className="flex flex-col w-full lg:max-w-[860px]">
-                            {ongoingClasses.map((classData: any, index) => (
+                            {ongoingClasses.map((classData: ClassData, index) => (
                                 <ClassCard
                                     classData={classData}
                                     classType={classData.status}
@@ -172,7 +161,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                     studentSide={true}
                                 />
                             ))}
-                            {upcomingClasses.map((classData: any, index) => (
+                            {upcomingClasses.map((classData: ClassData, index) => (
                                 <ClassCard
                                     classData={classData}
                                     classType={classData.status}
@@ -213,15 +202,15 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                             <div className="flex flex-row justify-between items-center gap-6">
                                                 <div>
                                                     <div className="flex flex-row gap-3">
-                                                        {resumeCourse.newChapter
+                                                        {resumeCourse?.newChapter
                                                             ?.title &&
                                                             resumeCourse.typeId ===
                                                                 1 && (
                                                                 <BookOpenText className="mt-2" />
                                                             )}
-                                                        {resumeCourse.newChapter
+                                                        {resumeCourse?.newChapter
                                                             ?.title &&
-                                                            resumeCourse.typeId ===
+                                                            resumeCourse.typeId===
                                                                 2 && (
                                                                 <h1 className="text-md mt-2 text-start font-bold">
                                                                     Project:
@@ -230,23 +219,22 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                         <h1
                                                             className={`${
                                                                 resumeCourse
-                                                                    .newChapter
+                                                                    ?.newChapter
                                                                     ?.title
                                                                     ? 'text-md'
                                                                     : 'text-lg text-destructive'
                                                             } mt-2 text-start font-bold`}
                                                         >
-                                                            {resumeCourse
-                                                                .newChapter
-                                                                ?.title ||
-                                                                resumeCourse.newChapter ||
-                                                                'There is no chapter in the module'}
+                                                            
+                                                        {resumeCourse?.newChapter?.title ||
+                                                        JSON.stringify(resumeCourse?.newChapter) ||
+                                                        "There is no chapter in the module"}
                                                         </h1>
                                                     </div>
                                                     <div className="flex flex-row gap-4">
                                                         <p className="text-md text-start mt-3 mb-2 ">
                                                             {
-                                                                resumeCourse?.bootcampName
+                                                                resumeCourse?.bootcampId
                                                             }
                                                         </p>
                                                         <span className="w-[5px] h-[5px] bg-gray-500 rounded-full self-center"></span>
@@ -265,9 +253,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                         <Link
                                                             className="gap-3 flex items-center text-secondary"
                                                             href={
-                                                                resumeCourse.typeId === 1
-                                                                    ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
-                                                                    : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
+                                                                resumeCourse?.typeId === 1
+                                                                    ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse?.moduleId}/chapters/${resumeCourse?.newChapter?.id}`
+                                                                    : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse?.moduleId}/project/${resumeCourse?.newChapter?.id}`
                                                             }
                                                         >
                                                             <p>
@@ -290,13 +278,13 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                         <Card className="w-full mb-3 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F]">
                                             <div>
                                                 <div className="flex flex-row gap-3">
-                                                    {resumeCourse.newChapter
+                                                    {resumeCourse?.newChapter
                                                         ?.title &&
                                                         resumeCourse.typeId ===
                                                             1 && (
                                                             <BookOpenText className="mt-2" />
                                                         )}
-                                                    {resumeCourse.newChapter
+                                                    {resumeCourse?.newChapter
                                                         ?.title &&
                                                         resumeCourse.typeId ===
                                                             2 && (
@@ -307,16 +295,16 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                     <h1
                                                         className={`${
                                                             resumeCourse
-                                                                .newChapter
+                                                                ?.newChapter
                                                                 ?.title
                                                                 ? 'text-md'
                                                                 : 'text-lg text-destructive'
                                                         } mt-2 text-start font-bold`}
                                                     >
-                                                        {resumeCourse.newChapter
-                                                            ?.title ||
-                                                            resumeCourse.newChapter ||
-                                                            'There is no chapter in the module'}
+
+                                                         {resumeCourse?.newChapter?.title ||
+                                                        JSON.stringify(resumeCourse?.newChapter) ||
+                                                        "There is no chapter in the module"}
                                                     </h1>
                                                 </div>
                                                 <div className="flex flex-row">
@@ -339,9 +327,9 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                                     <Link
                                                         className="gap-3 flex items-center text-secondary"
                                                         href={
-                                                            resumeCourse.typeId === 1
-                                                                ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/chapters/${resumeCourse.newChapter?.id}`
-                                                                : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse.moduleId}/project/${resumeCourse.newChapter?.id}`
+                                                            resumeCourse?.typeId === 1
+                                                                ? `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse?.moduleId}/chapters/${resumeCourse?.newChapter?.id}`
+                                                                : `/student/courses/${resumeCourse?.bootcampId}/modules/${resumeCourse?.moduleId}/project/${resumeCourse?.newChapter?.id}`
                                                         }                                                    >
                                                         <p>Resume Learning</p>
                                                         <ChevronRight
@@ -372,7 +360,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                     Late Assignments
                                 </h1>
                             )}
-                            {lateAssignments.map((data: any, index) => (
+                            {lateAssignments.map((data: Assignment, index) => (
                                 <SubmissionCard
                                     classData={data}
                                     key={index}
@@ -385,7 +373,7 @@ function Schedule({ className, ...props }: ScheduleProps) {
                                     Upcoming Assignments
                                 </h1>
                             )}
-                            {upcomingAssignments.map((data: any, index) => (
+                            {upcomingAssignments.map((data: Assignment, index) => (
                                 <SubmissionCard
                                     classData={data}
                                     key={index}
@@ -441,5 +429,44 @@ function Schedule({ className, ...props }: ScheduleProps) {
         </div>
     )
 }
-
 export default Schedule
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

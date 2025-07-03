@@ -23,31 +23,8 @@ import {
 } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import {Bootcamp,BootcampType,Course} from "@/app/student/explore/type"
 
-interface Bootcamp {
-    id: number
-    name: string
-    coverImage: string
-    bootcampTopic: string
-    startTime: string
-    duration: string
-    language: string
-    createdAt: string
-    updatedAt: string
-}
-
-interface BootcampType {
-    id: number
-    bootcampId: number
-    type: string
-}
-
-interface Course {
-    zuvy_bootcamps: Bootcamp
-    zuvy_bootcamp_type: BootcampType
-    students_in_bootcamp: number
-    unassigned_students: number
-}
 
 type searchedCourses = Course[]
 type allPublicCourses = Course[]
@@ -117,13 +94,13 @@ const ExploreCourses = () => {
             setCurrentPage(1) // reset to first page when items per page changes
         }
     }
-
     return (
         <>
             <div
                 className={styles.searchContainer}
                 style={{
                     display: 'flex',
+
                     alignItems: 'center',
                     justifyContent: 'center',
                     width: '600px',

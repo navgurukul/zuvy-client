@@ -7,14 +7,14 @@ const WarnOnLeave = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const handleBeforeUnload = (event:any) => {
+    const handleBeforeUnload = (event:BeforeUnloadEvent) => {
       const warningMessage = 'This is a test. Please stay on the page until the test is complete.';
       event.preventDefault();
       event.returnValue = warningMessage;
       return warningMessage;
     };
 
-    const handleRouteChange = (url:any) => {
+    const handleRouteChange = (url:string) => {
       const confirmed = window.confirm('This is a test. Are you sure you want to leave?');
       if (!confirmed) {
         // Prevent navigation by pushing back to the current page

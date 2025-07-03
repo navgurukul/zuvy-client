@@ -1,14 +1,7 @@
 import React from "react";
+import {  SidebarProps } from "@/app/student/courses/_components/type";
 
-type Props = {
-  Chapter1: string;
-  Chapter2: string;
-  article: string;
-  Quiz: string;
-  codingProject: string;
-};
-
-function Sidebar({ ...props }: Props) {
+function Sidebar({ ...props }:SidebarProps) {
   return (
     <aside
       className={`flex h-screen w-64 flex-col overflow-y-auto border-r bg-white px-3 py-5 z-100 `}

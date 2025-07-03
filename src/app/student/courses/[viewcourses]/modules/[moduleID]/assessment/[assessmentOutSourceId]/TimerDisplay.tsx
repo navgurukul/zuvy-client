@@ -1,10 +1,6 @@
 import React from 'react'
 import { Timer } from 'lucide-react'
-
-interface TimerDisplayProps {
-    remainingTime: number
-}
-
+import {TimerDisplayProps }from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
 const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
     const formatTime = (seconds: number) => {
         if (isNaN(seconds)) {

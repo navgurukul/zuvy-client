@@ -29,13 +29,14 @@ import {
 } from '@/components/ui/table'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { toast } from '@/components/ui/use-toast'
+import {Question, Tag} from "@/app/student/playground/type"
 
-interface Question {
-    title: string
-    status: string
-    difficulty: string // URL for the course image
-    id: string
-}
+// interface Question {
+//     title: string
+//     status: string
+//     difficulty: string 
+//     id: string
+// }
 
 const CodingPlayground = () => {
     // misc
@@ -50,7 +51,8 @@ const CodingPlayground = () => {
         id: -1,
     })
     const [selectedDifficulty, setSelectedDifficulty] = useState('All')
-    const [questions, setQuestions] = useState([])
+    const [questions, setQuestions] = useState<Question[]>([])
+
     const { tags, setTags } = getCodingQuestionTags()
 
     // const difficultyColors = {
@@ -95,7 +97,7 @@ const CodingPlayground = () => {
         getAllTags(setTags)
     }, [])
 
-    const handleTopicClick = (tag: any) => {
+    const handleTopicClick = (tag: Tag) => {
         setSelectedTopic(tag)
     }
 
@@ -103,7 +105,7 @@ const CodingPlayground = () => {
         setSelectedTopic({ id: -1, tagName: 'All Topics' })
     }
 
-    const filteredQuestions = questions.filter((question: any) => {
+    const filteredQuestions = questions.filter((question: Question) => {
         return (
             (selectedDifficulty === 'All' ||
                 question.difficulty === selectedDifficulty) &&
@@ -165,7 +167,7 @@ const CodingPlayground = () => {
                             >
                                 All Topics
                             </Button>
-                            {tags.map((tag: any) => (
+                            {tags.map((tag: Tag) => (
                                 <Button
                                     className={`mx-3 rounded-3xl ${
                                         selectedTopic === tag

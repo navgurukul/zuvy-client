@@ -8,6 +8,7 @@ import { api } from '@/utils/axios.config'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ChevronRight, ChevronUp, Crown } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
+import {EnrolledCourse, Student} from "@/app/student/_components/type";
 import {
     Select,
     SelectContent,
@@ -19,6 +20,7 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import Image from 'next/image'
+import { NULL_CHARACTER } from 'remirror'
 
 // import { Switch } from "@/components/ui/switch"
 
@@ -36,22 +38,6 @@ const notifications = [
         description: '2 hours ago',
     },
 ]
-
-interface UserInfo {
-    id: number
-    name: string
-    email: string
-    averageScore: number
-}
-interface Student {
-    attendance: number
-    userInfo: UserInfo
-}
-
-interface EnrolledCourse {
-    id: number
-    name: string
-}
 
 type CardProps = React.ComponentProps<typeof Card>
 
@@ -79,7 +65,7 @@ export function Stat({ className, ...props }: CardProps) {
 
     const rank =
         students.length > 0 &&
-        students.findIndex((item: any) => userID == item.userInfo.id)
+        students.findIndex((item: Student) => userID == item.userInfo.id)
     const ownRank = rank !== false ? rank + 1 : 'N/A'
 
     useEffect(() => {
@@ -95,11 +81,11 @@ export function Stat({ className, ...props }: CardProps) {
         if (userID) getEnrolledCourses()
     }, [userID])
 
-    const handleCourseChange = (selectedCourseId: any) => {
-        const newSelectedCourse: any = enrolledCourse.find(
-            (course: any) => course.id === +selectedCourseId
+    const handleCourseChange = (selectedCourseId: string) => {
+        const newSelectedCourse: EnrolledCourse | undefined  = enrolledCourse.find(
+            (course: EnrolledCourse) => course.id === +selectedCourseId
         )
-        setSelectedCourse(newSelectedCourse)
+        setSelectedCourse(newSelectedCourse || null)
     }
 
     return (
@@ -138,7 +124,7 @@ export function Stat({ className, ...props }: CardProps) {
                                         <SelectGroup>
                                             <SelectLabel>Courses</SelectLabel>
                                             {enrolledCourse?.map(
-                                                (course: any) => (
+                                                (course: EnrolledCourse) => (
                                                     <SelectItem
                                                         key={course.id}
                                                         value={course.id.toString()}

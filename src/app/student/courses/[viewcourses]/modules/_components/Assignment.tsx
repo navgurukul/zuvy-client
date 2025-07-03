@@ -18,18 +18,19 @@ import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import { Props, EditorDoc, AssignmentResponse,AssignmentTracking, Paragraph, ArticleDoc, TextItem} from "@/app/student/courses/[viewcourses]/modules/_components/type"
 
-type Props = {
-    projectId: number
-    moduleId: number
-    bootcampId: number
-    completeChapter: () => void
-    content: any
-}
-type EditorDoc = {
-    type: string
-    content: any[]
-}
+// type Props = {
+//     projectId: number
+//     moduleId: number
+//     bootcampId: number
+//     completeChapter: () => void
+//     content: any
+// }
+// type EditorDoc = {
+//     type: string
+//     content: any[]
+// }
 
 const FormSchema = z.object({
     link: z
@@ -55,7 +56,7 @@ const Assignments = ({
     completeChapter,
     content,
 }: Props) => {
-    const [projectData, setProjectData] = useState<any>([])
+    const [projectData, setProjectData] = useState<AssignmentTracking | null>(null)
     const [deadlineDate, setDeadlineDate] = useState<string>('')
     const [submittedDate, setSubmittedDate] = useState<string>('')
     const [isDisabled, setIsDisabled] = useState(true)
@@ -136,6 +137,7 @@ const Assignments = ({
         getProjectData()
     }, [getProjectData])
     useEffect(() => {
+        if (projectData && projectData.projectUrl)
         form.setValue('link', projectData?.projectUrl)
     }, [form, projectData])
 
@@ -235,12 +237,12 @@ const Assignments = ({
                         )}
                     </span>
                     {!content.articleContent ||
-                    !content.articleContent.some((doc: any) =>
+                    !content.articleContent.some((doc: ArticleDoc) =>
                         doc?.content?.some(
-                            (paragraph: any) =>
+                            (paragraph: Paragraph) =>
                                 paragraph.content &&
                                 paragraph.content.some(
-                                    (item: any) => item.type === 'text'
+                                    (item:TextItem ) => item.type === 'text'
                                 )
                         )
                     ) ? (

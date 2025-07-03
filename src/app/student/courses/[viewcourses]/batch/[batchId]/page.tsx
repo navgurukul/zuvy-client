@@ -21,19 +21,23 @@ import CourseCard from '@/app/_components/courseCard'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import SubmissionCard from '@/app/admin/courses/[courseId]/_components/SubmissionCard'
 import { progress } from 'framer-motion'
-interface CourseProgress {
-    status: string
-    progress: number
-    bootcampTracking: {
-        name: string
-    }
-    code: number
-}
-interface Instructor {
-    instructorId: number
-    instructorName: string
-    instructorPicture: string
-}
+import {
+  CourseProgress,Instructor,ClassItem,SubmissionItem,AttendanceData,BootcampProgressResponse, ClassesListResponse,
+  SmallClassesResponse, UpcomingSubmissionResponse,
+ } from '@/app/student/courses/[viewcourses]/batch/[batchId]/type'
+// interface CourseProgress {
+//     status: string
+//     progress: number
+//     bootcampTracking: {
+//         name: string
+//     }
+//     code: number
+// }
+// interface Instructor {
+//     instructorId: number
+//     instructorName: string
+//     instructorPicture: string
+// }
 
 // Define the initial state type as an array of instructors
 type InstructorDetailsState = Instructor[]
@@ -53,16 +57,16 @@ function Page({
         null
     )
     const { setIsParamBatchId } = getParamBatchId()
-    const [instructorDetails, setInstructorDetails] = useState<any>()
-    const [allClasses, setAllClasses] = useState<any[]>([])
-    const [upcomingClasses, setUpcomingClasses] = useState([])
-    const [ongoingClasses, setOngoingClasses] = useState([])
-    const [upcomingAssignments, setUpcomingAssignments] = useState([])
-    const [lateAssignments, setLateAssignments] = useState([])
+    const [instructorDetails, setInstructorDetails] = useState<Instructor[]>()
+    const [allClasses, setAllClasses] = useState<ClassItem[]>([])
+    const [upcomingClasses, setUpcomingClasses] = useState<ClassItem[]>([])
+    const [ongoingClasses, setOngoingClasses] = useState<ClassItem[]>([])
+    const [upcomingAssignments, setUpcomingAssignments] = useState<SubmissionItem[]>([])
+    const [lateAssignments, setLateAssignments] = useState<SubmissionItem[]>([])
     const [isCourseStarted, setIsCourseStarted] = useState(false)
     const [progres, setProgres] = useState<number>()
 
-    const [attendenceData, setAttendenceData] = useState<any[]>([])
+    const [attendenceData, setAttendenceData] = useState<AttendanceData []>([])
     // const [completedClasses, setCompletedClasses] = useState([])
     const crumbs = [
         { crumb: 'My Courses', href: '/student/courses', isLast: false },
@@ -75,7 +79,7 @@ function Page({
 
     // setIsParamBatchId(params.batchId)
     const getUpcomingClassesHandler = useCallback(async () => {
-        const response = await api.get(
+        const response = await api.get<ClassesListResponse>(
             `/student/Dashboard/classes/?batch_id=${params.batchId}`
         )
         if (Array.isArray(response.data.data)) {
@@ -88,7 +92,7 @@ function Page({
             ]
             setAllClasses(classes)
             await api
-                .get(
+                .get<SmallClassesResponse>(
                     `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=2&offset=0`
                 )
                 .then((res) => {
@@ -104,7 +108,7 @@ function Page({
     }, [])
     const getUpcomingSubmissionHandler = useCallback(async () => {
         await api
-            .get(
+            .get<UpcomingSubmissionResponse>(
                 `/tracking/allupcomingSubmission?bootcampId=${params.viewcourses}`
             )
             .then((res) => {
@@ -150,13 +154,13 @@ function Page({
     useEffect(() => {
         const getCourseProgress = async () => {
             try {
-                const response = await api.get(
+                const response = await api.get<BootcampProgressResponse>(
                     `/tracking/bootcampProgress/${params.viewcourses}`
                 )
                 setCourseProgress(response.data.data)
                 setProgres(response.data.data.progress)
 
-                setInstructorDetails(response.data.instructorDetails)
+                setInstructorDetails(response.data.instructorDetail)
             } catch (error) {
                 console.error('Error getting course progress:', error)
             }
@@ -221,7 +225,7 @@ function Page({
                                 <div className="flex flex-col">
                                     <div className="w-full lg:max-w-[850px]">
                                         {ongoingClasses.map(
-                                            (classData: any, index) => (
+                                            (classData: ClassItem, index) => (
                                                 <ClassCard
                                                     classData={classData}
                                                     classType={classData.status}
@@ -235,7 +239,7 @@ function Page({
                                             )
                                         )}
                                         {upcomingClasses.map(
-                                            (classData: any, index) => (
+                                            (classData: ClassItem, index) => (
                                                 <ClassCard
                                                     classData={classData}
                                                     classType={classData.status}
@@ -290,7 +294,7 @@ function Page({
                                                 </h1>
                                             )}
                                             {upcomingAssignments.map(
-                                                (data: any, index) => (
+                                                (data:SubmissionItem, index) => (
                                                     <SubmissionCard
                                                         classData={data}
                                                         key={index}
@@ -420,7 +424,7 @@ function Page({
                                             Late Assignments
                                         </h1>
                                     )}
-                                    {lateAssignments.map((data: any, index) => (
+                                    {lateAssignments.map((data:SubmissionItem, index) => (
                                         <SubmissionCard
                                             classData={data}
                                             key={index}

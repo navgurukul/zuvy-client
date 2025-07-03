@@ -8,23 +8,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {AlertContextType,AlertProviderProps,AlertProps}from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
 
-type AlertProps = {
-  title: string;
-  description: string;
-  violationCount?: string;
-};
-
-type AlertContextType = {
-  showAlert: (props: AlertProps) => void;
-  hideAlert: () => void;
-};
-
-declare global {
-  interface Window {
-    alertSystem?: AlertContextType;
-  }
-}
 
 const AlertContext = createContext<AlertContextType | null>(null);
 
@@ -35,16 +20,13 @@ const AlertIcon = () => (
   </div>
 );
 
-
-export const AlertProvider = ({ 
-  children, 
+export const AlertProvider: React.FC<AlertProviderProps> = ({
+  children,
   requestFullScreen,
-  setIsFullScreen 
-}: { 
-  children: React.ReactNode;
-  requestFullScreen: (element: Element) => void;
-  setIsFullScreen: (isFullScreen: boolean) => void;
+  setIsFullScreen,
 }) => {
+
+
   const [isOpen, setIsOpen] = useState(false);
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
 

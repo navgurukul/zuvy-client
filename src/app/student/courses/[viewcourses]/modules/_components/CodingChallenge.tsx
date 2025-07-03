@@ -9,38 +9,39 @@ import { requestFullScreen } from '@/utils/students'
 import CodingQuestionCard from './CodingQuestionCard'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import Image from 'next/image'
+import {Tag, CodingQuestion, CodingQuestionResult, ChapterContent, QuizAndAssignmentRes} from "@/app/student/courses/[viewcourses]/modules/_components/type";
 
-export type Tag = {
-    id: number
-    tagName: string
-}
+// export type Tag = {
+//     id: number
+//     tagName: string
+// }
 
 function CodingChallenge({
     content,
     completeChapter,
     fetchChapters,
 }: {
-    content: any
+    content: ChapterContent 
     completeChapter: () => void
     fetchChapters: () => void
 }) {
     const router = useRouter()
     const { viewcourses, moduleID } = useParams()
-    const [codingQuestions, setCodingQuestions] = useState<any[]>([])
-    const [codingQuestionId, setCodingQuestionId] = useState()
+    const [codingQuestions, setCodingQuestions] = useState<CodingQuestion[]>([])
+    const [codingQuestionId, setCodingQuestionId] = useState<number | undefined>()
     const [selectedQuesType, setSelectedQuesType] = useState<
         'quiz' | 'open-ended' | 'coding'
     >('coding')
     const [isSolving, setIsSolving] = useState(false)
-    const [isSuccess, setIsScuccess] = useState(false)
+    const [isSuccess, setIsScuccess] = useState<boolean>(false)
     // const [chapterStatus, setChapterStatus] = useState('Pending')
-    const [codingQuestionResult, setCodingQuestionResult] = useState<any>()
-    const [tagId, setTagId] = useState()
+    const [codingQuestionResult, setCodingQuestionResult] = useState<CodingQuestionResult | null>(null)
+    const [tagId, setTagId] = useState<number | undefined>()
     const [tag, setTag] = useState<Tag>()
 
     const getAllCodingQuestionHandler = useCallback(async () => {
         try {
-            const res = await api.get(
+            const res = await api.get<QuizAndAssignmentRes>(
                 `/tracking/getQuizAndAssignmentWithStatus?chapterId=${content.id}`
             )
             setCodingQuestions(res.data.data.codingProblem)
@@ -85,7 +86,7 @@ function CodingChallenge({
 
     async function getResults() {
         try {
-            const res = await api.get(
+            const res = await api.get<{data:CodingQuestionResult}>(
                 `/codingPlatform/submissions/questionId=${codingQuestionId}`
                 // ?studentId=62586`
             )
@@ -105,7 +106,7 @@ function CodingChallenge({
         const response = await api.get('Content/allTags')
         if (response) {
             const tag = response?.data?.allTags?.find(
-                (item: any) => item.id == tagId
+                (item: Tag) => item.id == tagId
             )
             setTag(tag)
         }
@@ -115,7 +116,7 @@ function CodingChallenge({
         getAllTags()
     }, [tagId])
 
-    function viewCodingSubmission(questionId: any) {
+    function viewCodingSubmission(questionId: number) {
         router.push(
             `/student/courses/${viewcourses}/modules/${moduleID}/codingresult/question/${questionId}`
         )
@@ -130,7 +131,7 @@ function CodingChallenge({
                             {content.title}
                         </h2>
                         <h2 className="font-bold">Coding Challenges</h2>
-                        {isSuccess ? (
+                        {isSuccess  && codingQuestionResult  ? (
                             <CodingQuestionCard
                                 key={codingQuestionResult?.questionDetail.id}
                                 id={codingQuestionResult?.questionDetail.id}
@@ -152,7 +153,7 @@ function CodingChallenge({
                             />
                         ) : (
                             <>
-                                {codingQuestions?.map((question: any) => (
+                                {codingQuestions?.map((question:  CodingQuestion) => (
                                     <CodingQuestionCard
                                         key={question.id}
                                         id={question.id}

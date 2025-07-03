@@ -5,36 +5,7 @@ import { ChevronLeft } from 'lucide-react'
 import { decodeBase64 } from '@/utils/students'
 import Editor from '@monaco-editor/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
-interface TestCase {
-  inputs: Record<string, unknown> | Array<{
-    parameterName: string
-    parameterValue: unknown
-    parameterType: string
-  }>
-  expectedOutput: {
-    parameterValue: unknown
-  }
-}
-
-interface TestCasesSubmission {
-  status: string
-  testCases: TestCase
-  stdout?: string
-  stderr?: string
-  memory?: string
-  time?: string
-}
-
-interface CodingSubmissionData {
-  status?: string
-  action?: string
-  message?: string
-  data?: {
-    sourceCode: string
-    TestCasesSubmission: TestCasesSubmission[]
-  }
-}
+import {TestCase, TestCasesSubmission,CodingSubmissionData} from "@/app/student/courses/[viewcourses]/modules/_components/type"
 
 const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: CodingSubmissionData }) => {
   const router = useRouter()
@@ -169,7 +140,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
               Submission Details
             </h3>
             <ScrollArea className="overflow-auto text-left">
-            {TestCasesSubmission?.map((submission: any, index: any) => (
+            {TestCasesSubmission?.map((submission: TestCasesSubmission, index: number) => (
                 <div
                   key={index}
                   className="mb-4 p-4 bg-gray-50 border-l-2 border-r-2 border-secondary rounded-lg"

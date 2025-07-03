@@ -31,8 +31,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import { cn, difficultyColor } from '@/lib/utils'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import { MCQQuestion,QuizQuestionsProps,QuizSubmissionDto,QuizSubmissionItem }from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
 
-const QuizQuestions = ({
+const QuizQuestions: React.FC<QuizQuestionsProps>=({
     onBack,
     weightage,
     remainingTime,
@@ -40,14 +41,6 @@ const QuizQuestions = ({
     assessmentSubmitId,
     getSeperateQuizQuestions,
     getAssessmentData,
-}: {
-    onBack: () => void
-    weightage?: any
-    remainingTime: number
-    questions: any
-    assessmentSubmitId: number
-    getSeperateQuizQuestions: () => void
-    getAssessmentData: () => void
 }) => {
     const router = useRouter()
     const params = useParams()
@@ -79,7 +72,7 @@ const QuizQuestions = ({
 
     useEffect(() => {
         const defaultValues = {
-            answers: questions?.data?.mcqs?.map((question: any) =>
+            answers: questions?.data?.mcqs?.map((question: MCQQuestion) =>
                 question.submissionsData && question.submissionsData.length > 0
                     ? question.submissionsData[0].chosenOption.toString()
                     : ''
@@ -108,14 +101,14 @@ const QuizQuestions = ({
 
         try {
             // Create submission data array with all answers
-            const quizSubmissionData = data.answers.map(
-                (chosenOption: any, index) => {
+            const quizSubmissionData:QuizSubmissionItem[] = data.answers.map(
+                (chosenOption:string | undefined, index) => {
                     const question = questions.data.mcqs[index]
                     return {
                         questionId: Number(question?.outsourseQuizzesId),
                         variantId: question.variantId,
                         attemptCount: 1,
-                        chosenOption: parseInt(chosenOption),
+                        chosenOption: chosenOption? parseInt(chosenOption,10):NaN,
                     }
                 }
             )
@@ -222,7 +215,7 @@ const QuizQuestions = ({
                     className="flex flex-col items-center gap-6 mt-10"
                 >
                     {questions?.data?.mcqs?.map(
-                        (question: any, index: number) => (
+                        (question: MCQQuestion, index: number) => (
                             <div
                                 key={question.id}
                                 className="w-full max-w-2xl border text-left border-gray-200 rounded-lg p-2 md:p-4 lg:p-4 shadow-sm"

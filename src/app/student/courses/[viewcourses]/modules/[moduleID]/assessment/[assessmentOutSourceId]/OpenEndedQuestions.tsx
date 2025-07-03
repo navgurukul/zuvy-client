@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import TimerDisplay from './TimerDisplay'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
+import {OpenEndedQuestionItem}from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
 import {
     Form,
     FormControl,
@@ -29,7 +30,7 @@ const OpenEndedQuestions = ({
 }: {
     onBack: () => void
     remainingTime: number
-    questions: any[]
+    questions: OpenEndedQuestionItem[]
     assessmentSubmitId: number
     getSeperateOpenEndedQuestions: () => void
     getAssessmentData: () => void

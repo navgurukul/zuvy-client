@@ -1,16 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import {EyeTrackingProctorProps,EyeTrackingResult} from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
 
-interface EyeTrackingProctorProps {
-  assessmentSubmitId: string | number;
-  updateViolationCount: () => void;
-}
-
-interface EyeTrackingResult {
-  direction: string;
-  error?: string;
-}
-
-const EyeTrackingProctor: React.FC<EyeTrackingProctorProps> = ({ assessmentSubmitId, updateViolationCount }) => {
+  const EyeTrackingProctor: React.FC<EyeTrackingProctorProps> = ({ assessmentSubmitId, updateViolationCount }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [lastDirection, setLastDirection] = useState<string>("Looking Center");

@@ -37,34 +37,7 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Spinner } from '@/components/ui/spinner'
-
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
-
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
-interface questionDetails {
-    title: string
-    description: string
-    constraints?: string
-    examples: { input: number[]; output: number }
-}
-
-interface IDEProps {
-    params: { editor: string }
-    remainingTime?: any
-    assessmentSubmitId?: number
-    onBack?: () => void
-    selectedCodingOutsourseId?: any
-}
+import {Input,TestCase,QuestionDetails,IDEProps} from "@/app/student/playground/[editor]/type"
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -74,7 +47,7 @@ const IDE: React.FC<IDEProps> = ({
     selectedCodingOutsourseId,
 }) => {
     const pathname = usePathname()
-    const [questionDetails, setQuestionDetails] = useState<questionDetails>({
+    const [questionDetails, setQuestionDetails] = useState<QuestionDetails>({
         title: '',
         description: '',
         examples: {
@@ -82,15 +55,18 @@ const IDE: React.FC<IDEProps> = ({
             output: 0,
         },
     })
-    const [currentCode, setCurrentCode] = useState('')
-    const [result, setResult] = useState('')
-    const [languageId, setLanguageId] = useState(0)
-    const [codeError, setCodeError] = useState('')
-    const [language, setLanguage] = useState('')
-    const [testCases, setTestCases] = useState<any>([])
-    const [templates, setTemplates] = useState<any>([])
-    const [examples, setExamples] = useState<any>([])
-    const [isSubmitted, setIsSubmitted] = useState(false)
+    const [currentCode, setCurrentCode] = useState<string>('')
+    const [result, setResult] = useState<string>('')
+    const [languageId, setLanguageId] = useState<number>(0)
+    const [codeError, setCodeError] = useState<string>('')
+    const [language, setLanguage] = useState<string>('')
+    const [testCases, setTestCases] = useState<TestCase[]>([])
+    // const [templates, setTemplates] = useState<TemplatesMap>(() =>({}));
+    
+   const [templates, setTemplates] = useState<TemplatesMap>(() => ({}));
+
+    const [examples, setExamples] = useState<any[]>([])
+    const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
     const [loading, setLoading] = useState(false)
     const router = useRouter()
     const { toast } = useToast()
@@ -167,7 +143,7 @@ const IDE: React.FC<IDEProps> = ({
         if (admin) return
 
         try {
-            const response = await api.post(
+            const response = await api.post<{ data: TestCase[] }>(
                 `codingPlatform/practicecode/questionId=${params.editor}?action=${action}`,
                 {
                     languageId: Number(
@@ -186,16 +162,10 @@ const IDE: React.FC<IDEProps> = ({
             }
             setResult(
                 response.data.data[0].stdOut ||
-                    response.data.data[0].stdout ||
+                    response.data.data[0].stdOut ||
                     'No Output Available'
             )
-            setCodeResult(response.data.data)
-            const testCases = response.data.data
-            const allTestCasesPassed = testCases.every(
-                (testCase: any) => testCase.status === 'Accepted'
-            )
-
-            setResult(testCases[0].stdOut)
+c
 
             if (allTestCasesPassed) {
                 toast.success({
@@ -234,7 +204,7 @@ const IDE: React.FC<IDEProps> = ({
                 .get(`codingPlatform/get-coding-question/${params.editor}`)
                 .then((response) => {
                     setQuestionDetails(response?.data?.data)
-                    setTestCases(response?.data?.data?.testCases)
+                    setTestCases(response?.data?.data?.data)
                     setTemplates(response?.data?.data?.templates)
                     setExamples(response?.data[0]?.examples)
                 })
@@ -280,7 +250,7 @@ const IDE: React.FC<IDEProps> = ({
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
-    //
+
     return (
         <div>
             <div className="flex justify-between mb-2">

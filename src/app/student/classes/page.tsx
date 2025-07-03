@@ -7,6 +7,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { OFFSET, CLASS_CARD_POSITION } from '@/utils/constant'
 import useDebounce from '@/hooks/useDebounce'
 import UpcomingClasses from '../courses/[viewcourses]/batch/[batchId]/classes/_components/UpcomingClasses'
+// import {ClassesResponse,ClassItem} from "@/app/student/classes/type";
 
 function Page() {
     const [upcomingClasses, setUpcomingClasses] = useState([])

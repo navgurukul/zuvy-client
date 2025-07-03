@@ -4,29 +4,8 @@ import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { ellipsis } from '@/lib/utils'
+import {QuestionCardProps,AllTagsResponse,Tag,CodingSubmissionResponse}from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
 
-interface QuestionCardProps {
-    id: number
-    title: string
-    weightage?: number
-    easyCodingMark?: number
-    mediumCodingMark?: number
-    hardCodingMark?: number
-    description: string
-    tagId?: number
-    // assessmentOutsourseId?: number
-    assessmentSubmitId?: number
-    codingOutsourseId?: number
-    codingQuestions?: boolean
-    onSolveChallenge: (id: number) => void
-    isQuizSubmitted?: boolean
-    isMobile?: boolean
-}
-
-export type Tag = {
-    id: number
-    tagName: string
-}
 
 const QuestionCard = ({
     id,
@@ -48,10 +27,10 @@ const QuestionCard = ({
     const [action, setAction] = useState<string | null>(null)
 
     async function getAllTags() {
-        const response = await api.get('Content/allTags')
+        const response = await api.get<AllTagsResponse>('Content/allTags')
         if (response) {
             const tag = response?.data?.allTags?.find(
-                (item: any) => item.id == tagId
+                (item: Tag) => item.id == tagId
             )
             setTag(tag)
         }
@@ -72,12 +51,12 @@ const QuestionCard = ({
     }
 
     async function getCodingSubmissionsData(
-        codingOutsourseId: any,
-        assessmentSubmissionId: any,
-        questionId: any
+        codingOutsourseId: number,
+        assessmentSubmissionId: number,
+        questionId: number
     ) {
         try {
-            const res = await api.get(
+            const res = await api.get<CodingSubmissionResponse >(
                 `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
             )
             const action = res.data.data.action

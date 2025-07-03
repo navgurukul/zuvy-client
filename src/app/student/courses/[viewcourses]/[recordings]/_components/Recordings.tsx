@@ -2,12 +2,13 @@
 
 import RecordingCard from './RecordingCard'
 import { Spinner } from '@/components/ui/spinner'
+import {ClassData} from "@/app/student/courses/[viewcourses]/[recordings]/_components/type"
 
 function Recordings({
     completedClasses,
     loading,
 }: {
-    completedClasses: any
+    completedClasses: ClassData[]
     loading: boolean
 }) {
     return (
@@ -19,7 +20,7 @@ function Recordings({
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-x-7 gap-y-6">
                     {completedClasses?.length > 0 ? (
-                        completedClasses.map((classObj: any) => (
+                        completedClasses.map((classObj: ClassData) => (
                             <RecordingCard
                                 classData={classObj}
                                 key={classObj.meetingId}

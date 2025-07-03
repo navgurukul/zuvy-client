@@ -3,17 +3,18 @@ import { Button } from '@/components/ui/button'
 import { getEmbedLink } from '@/utils/admin'
 import React from 'react'
 import useWindowSize from '@/hooks/useHeightWidth'
+import {VideoContent} from "@/app/student/courses/[viewcourses]/modules/_components/type";
 
 function Video({
     content,
     completeChapter,
 }: {
-    content: any
+    content:VideoContent,
     completeChapter: () => void
 }) {
     const { width } = useWindowSize()
     const isMobile = width < 768
-    const modifiedLink: any = content.links ? (
+    const modifiedLink: any= content.links? (
         getEmbedLink(content?.links[0])
     ) : (
         <h1>No Content Yet</h1>

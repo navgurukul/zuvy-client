@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { cn, difficultyColor } from '@/lib/utils'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import {SubmissionData,QuizResult,QuizResultsResponse}from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/quizresults/type'
 
 // Define the type for the quiz result
 
@@ -15,7 +16,7 @@ const QuizResults = ({
 }: {
     params: { assessmentOutSourceId: string }
 }) => {
-    const [quizResults, setQuizResults] = useState<any>()
+    const [quizResults, setQuizResults] = useState<QuizResultsResponse>()
     const { width } = useWindowSize()
     const isMobile = width < 768
     const codeBlockClass =
@@ -25,7 +26,7 @@ const QuizResults = ({
 
     async function getQuizResults() {
         try {
-            const response = await api.get(
+            const response = await api.get<{data: QuizResultsResponse}>(
                 `Content/assessmentDetailsOfQuiz/${params.assessmentOutSourceId}`
             )
             setQuizResults(response?.data?.data)
@@ -65,7 +66,7 @@ const QuizResults = ({
                         <h1 className="font-extrabold">Quiz Results</h1>
                     </div>
                 </div>
-                {quizResults?.mcqs.map((result: any, index: number) => (
+                {quizResults?.mcqs.map((result: QuizResult, index: number) => (
                     <div
                         key={result.quizId}
                         className="md:p-6 lg:p-6 bg-white rounded-xl w-full max-w-2xl mx-auto"
@@ -143,7 +144,7 @@ const QuizResults = ({
                                         >
                                             <div className="flex items-center text-left gap-2">
                                                 {icon}
-                                                <span>{value as any}</span>
+                                                <span>{value}</span>
                                             </div>
                                         </div>
                                     )

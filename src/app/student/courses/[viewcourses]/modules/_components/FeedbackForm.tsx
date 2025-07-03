@@ -27,7 +27,7 @@ import { api } from '@/utils/axios.config'
 import { formatDate } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
+import {Question,FetchFormRes,Props} from "@/app/student/courses/[viewcourses]/modules/_components/type";
 const formSchema = z.object({
     section: z.array(
         z.object({
@@ -43,29 +43,22 @@ const formSchema = z.object({
     ),
 })
 
-type Props = {
-    moduleId: string
-    chapterId: number
-    bootcampId: number
-    content: any
-    completeChapter: () => void
-}
 
 const FeedbackForm = (props: Props) => {
-    const [questions, setQuestions] = useState<any[]>([])
+    const [questions, setQuestions] = useState<Question[]>([])
     const [status, setStatus] = useState('')
     const [submitted, setSubmitted] = useState(false)
 
     const getAllQuizQuestionHandler = useCallback(async () => {
         try {
-            const res = await api.get(
+            const res = await api.get<FetchFormRes>(
                 `/tracking/getAllFormsWithStatus/${props.moduleId}?chapterId=${props.chapterId}`
             )
             if (res.data && res.data.questions) {
                 setQuestions(res.data.questions)
                 setStatus('Not completed')
             } else {
-                setQuestions(res.data.trackedData)
+                setQuestions(res.data.trackedData || [])
                 setStatus('Completed')
             }
         } catch (error) {
@@ -124,7 +117,7 @@ const FeedbackForm = (props: Props) => {
 
         // Here you would typically send this data to your API
         try {
-            const res = await api.post(
+            const res = await api.post<Props>(
                 `/tracking/updateFormStatus/${props.bootcampId}/${props.moduleId}?chapterId=${props.chapterId}`,
                 transformedData
             )
@@ -135,7 +128,7 @@ const FeedbackForm = (props: Props) => {
             )
             props.completeChapter()
             toast.success({
-                title: res.data.status,
+                title: res.data.data,
                 description: 'Form has been submitted successfully!',
                
             })
@@ -186,10 +179,10 @@ const FeedbackForm = (props: Props) => {
                                             {status === 'Completed' ? (
                                                 <div className="space-y-3 text-start mt-2 mb-10">
                                                     <RadioGroup
-                                                        value={
-                                                            item
-                                                                .formTrackingData[0]
-                                                                .chosenOptions[0]
+                                                        value={String
+                                                            (item
+                                                                .formTrackingData?.[0]
+                                                                .chosenOptions?.[0]?? '')
                                                         }
                                                     >
                                                         {Object.keys(
@@ -486,7 +479,7 @@ const FeedbackForm = (props: Props) => {
                                                         {formatDate(
                                                             item
                                                                 .formTrackingData[0]
-                                                                ?.answer
+                                                                ?.answer ?? ''
                                                         )}
                                                     </p>
                                                 </div>

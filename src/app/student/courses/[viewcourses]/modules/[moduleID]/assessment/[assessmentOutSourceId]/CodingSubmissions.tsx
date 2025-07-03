@@ -21,25 +21,30 @@ import { api } from '@/utils/axios.config'
 import { b64DecodeUnicode } from '@/utils/base64'
 import { List } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import {Submission, SubmissionsResponse}from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
+
+
+
+interface Props {
+  questionId:              string
+  assessmentSubmissionId:  number
+  selectedCodingOutsourseId: number
+}
 
 export default function CodingSubmissions({
     questionId,
     assessmentSubmissionId,
     selectedCodingOutsourseId,
-}: {
-    questionId: string
-    assessmentSubmissionId: any
-    selectedCodingOutsourseId: any
-}) {
-    const [submissions, setSubmissions] = useState<any>([])
+}:Props) {
+    const [submissions, setSubmissions] = useState<Submission[]>([])
     const [loading, setLoading] = useState(false)
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
 
     const getSubmissionsByQuestionId = async () => {
         try {
-            setLoading(true) // Start loading
-            const response = await api.get(
+            setLoading(true) 
+            const response = await api.get<SubmissionsResponse>(
                 `codingPlatform/practicecode/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${selectedCodingOutsourseId}`
             )
             setSubmissions(response.data.respond)
@@ -77,7 +82,7 @@ export default function CodingSubmissions({
                 ) : (
                     <Accordion type="single" collapsible className="w-full">
                         {submissions ? (
-                            submissions.map((ele: any) => (
+                            submissions.map((ele:Submission) => (
                                 <AccordionItem
                                     key={ele?.finished_at}
                                     value={ele?.finished_at}

@@ -5,27 +5,7 @@ import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
 // import UpcomingClasses from './_components/UpcomingClasses'
 import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
-
-interface Bootcamp {
-    id: number
-    name: string
-    coverImage: string
-    bootcampTopic: string
-    startTime: string
-    duration: string
-    language: string
-    createdAt: string
-    updatedAt: string
-    students_in_bootcamp: number
-    unassigned_students: number
-}
-
-interface BootcampData {
-    status: string
-    message: string
-    code: number
-    bootcamp: Bootcamp
-}
+import {BootcampData} from "@/app/student/courses/[viewcourses]/[recordings]/type"
 
 function Page({
     params,

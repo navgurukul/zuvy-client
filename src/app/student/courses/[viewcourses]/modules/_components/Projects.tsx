@@ -17,16 +17,17 @@ import googleDriveLogo from '../../../../../../../public/google-drive.png'
 import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import {ProjectApiSuccess, EditorDoc,Props } from "@/app/student/courses/[viewcourses]/modules/_components/type";
 
-type Props = {
-    projectId: number
-    moduleId: number
-    bootcampId: number
-}
-type EditorDoc = {
-    type: string
-    content: any[]
-}
+// type Props = {
+//     projectId: number
+//     moduleId: number
+//     bootcampId: number
+// }
+// type EditorDoc = {
+//     type: string
+//     content: any[]
+// }
 
 const FormSchema = z.object({
     link: z
@@ -38,7 +39,7 @@ const FormSchema = z.object({
 })
 
 const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
-    const [projectData, setProjectData] = useState<any>(null)
+    const [projectData, setProjectData] = useState<ProjectApiSuccess | null>(null)
     const [status, setStatus] = useState<string>('')
     const [title, setTitle] = useState<string>('')
     const [content, setContent] = useState<any>('')
@@ -62,7 +63,7 @@ const Projects = ({ projectId, moduleId, bootcampId }: Props) => {
     const fetchProjectDetails = useCallback(async () => {
         if (projectId === 0 || projectId === null) return
         try {
-            const res = await api.get(
+            const res = await api.get<ProjectApiSuccess>(
                 `/tracking/getProjectDetailsWithStatus/${projectId}/${moduleId}`
             )
             setProjectData(res?.data)

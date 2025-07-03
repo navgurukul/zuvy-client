@@ -6,12 +6,14 @@ import Video from './Video'
 import Article from './Article'
 import CodingChallenge from './CodingChallenge'
 import Quiz from './Quiz'
-import Assignment from './Assignment'
+// import {Assignment} from './Assignment'
+import Assignment  from './Assignment'
 import Assessment from './Assessment'
 import FeedbackForm from './FeedbackForm'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { getAssessmentShortInfo } from '@/utils/students'
 import { api } from '@/utils/axios.config'
+import {Chapter,AssessmentShortInfo} from "@/app/student/courses/[viewcourses]/modules/_components/type"
 import {
     getStudentChapterContentState,
     getStudentChaptersState,
@@ -19,13 +21,14 @@ import {
     getScrollPosition,
 } from '@/store/store'
 
-interface Chapter {
-    id: number
-    title: string
-    topicId: number
-    chapterTrackingDetails: { id: number }[]
-    status: string
-}
+
+// interface Chapter {
+//     id: number
+//     title: string
+//     topicId: number
+//     chapterTrackingDetails: { id: number }[]
+//     status: string
+// }
 
 function ChapterContent() {
     // misc
@@ -42,10 +45,10 @@ function ChapterContent() {
         getStudentChapterContentState()
     const [chapterId, setChapterId] = useState<number>(0)
     const [projectId, setProjectId] = useState<number>(0)
-    const [assessmentShortInfo, setAssessmentShortInfo] = useState<any>({})
-    const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<any>()
-    const [submissionId, setSubmissionId] = useState<any>()
-    const [typeId, setTypeId] = useState<any>(null)
+    const [assessmentShortInfo, setAssessmentShortInfo] = useState<AssessmentShortInfo | null>(null)
+    const [assessmentOutSourceId, setAssessmentOutSourceId] = useState<number| null>(null)
+    const [submissionId, setSubmissionId] = useState<number | null>(null)
+    const [typeId, setTypeId] = useState<number | null>(null)
     const [loading, setLoading] = useState(true)
 
     const fetchChapterContent = useCallback(
@@ -57,7 +60,6 @@ function ChapterContent() {
                 )
           
                 setActiveChapter(chapterId)
-             
                 setChapterId(response.data.trackingData.id)
                 setTopicId(response.data.trackingData.topicId)
                 setChapterContent(response.data.trackingData)
@@ -243,3 +245,50 @@ function ChapterContent() {
 }
 
 export default ChapterContent
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

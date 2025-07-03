@@ -9,28 +9,7 @@ import {
     requestFullScreen,
 } from '@/utils/students'
 import QuestionDescriptionModal from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
-
-interface QuestionCardProps {
-    id: number
-    title: string
-    difficulty: string
-    description: string
-    status: string
-    tagName: any
-    tagId?: number
-    isSuccess?: boolean
-    onSolveChallenge: (id: number) => void
-}
-
-interface questionDetails {
-    id: any
-    title: string
-    description: string
-    difficulty: string
-    constraints?: string
-    testCases?: string
-    examples: { input: number[]; output: number }
-}
+import {CodingQuestion,  questionDetails, QuestionCardProps,CodingProblem} from "@/app/student/courses/[viewcourses]/modules/_components/type";
 
 function CodingQuestionCard({
     id,
@@ -53,7 +32,7 @@ function CodingQuestionCard({
         difficulty: '',
     })
 
-    const handleSolveChallenge = (id: any) => {
+    const handleSolveChallenge = (id: number) => {
         onSolveChallenge(id)
         // requestFullScreen(document.documentElement)
     }
@@ -61,12 +40,12 @@ function CodingQuestionCard({
     const getQuestionDetails = async () => {
         try {
             await api
-                .get(`codingPlatform/get-coding-question/${id}`)
+                .get<{data:questionDetails }>(`codingPlatform/get-coding-question/${id}`)
                 .then((response) => {
                     setQuestionDetails(response?.data.data)
                 })
         } catch (error) {
-            console.error('Error fetching courses:', error)
+            console.error('Error fetching courses:',error)
         }
     }
 
@@ -102,6 +81,7 @@ function CodingQuestionCard({
             <div className={`text-xl mt-2 text-start `}>
                 Status:{' '}
                 <span
+                
                     className={cn(
                         `font-semibold text-secondary my-2`,
                         statusColor(status)

@@ -28,6 +28,7 @@ import { b64DecodeUnicode, b64EncodeUnicode } from '@/utils/base64'
 import TimerDisplay from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/TimerDisplay'
 import CodingSubmissions from './CodingSubmissions'
 import AlertDialogDemo from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/deleteModalNew'
+import {IDEProps,QuestionDetails,Input,TestCase,CodeRunResult}from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/type'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -40,37 +41,8 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
 
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
 
-interface questionDetails {
-    title: string
-    description: string
-    constraints?: string
-    examples: { input: number[]; output: number }
-}
-
-interface IDEProps {
-    params: { editor: string }
-    onBack?: () => void
-    remainingTime?: any
-    assessmentSubmitId?: number
-    selectedCodingOutsourseId?: number
-    getAssessmentData?: any
-    runCodeLanguageId?: number
-    runSourceCode?: string
-}
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -86,7 +58,7 @@ const IDE: React.FC<IDEProps> = ({
     const router = useRouter()
     const { toast } = useToast()
     const { viewcourses, moduleID, chapterID } = useParams()
-    const [questionDetails, setQuestionDetails] = useState<questionDetails>({
+    const [questionDetails, setQuestionDetails] = useState<QuestionDetails>({
         title: '',
         description: '',
         examples: {
@@ -94,18 +66,23 @@ const IDE: React.FC<IDEProps> = ({
             output: 0,
         },
         constraints: '',
+        testCases:  [],                          
+        templates:  {}, 
     })
     const [isDisabled, setIsDisabled] = useState(false)
     const [isSubmitted, setIsSubmitted] = useState(false)
     const [currentCode, setCurrentCode] = useState('')
     const [result, setResult] = useState('')
-    const [codeResult, setCodeResult] = useState<any>([])
+    const [codeResult, setCodeResult] = useState<CodeRunResult[]>([])
     const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
 
-    const [testCases, setTestCases] = useState<any>([])
-    const [templates, setTemplates] = useState<any>([])
-    const [examples, setExamples] = useState<any>([])
+    const [testCases, setTestCases] = useState<TestCase[]>([])
+    const [templates, setTemplates] = useState<Record<string, { template: string }>>({})
+    const [examples, setExamples] = useState<QuestionDetails['examples']>({
+  input: [],
+  output: 0,
+})
     const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [modalType, setModalType] = useState<'success' | 'error'>('success')
@@ -148,12 +125,10 @@ const IDE: React.FC<IDEProps> = ({
         })
         return result
     }
-
     const formatValue = (value: any, type: string): string => {
         if (type === 'jsonType') {
             return JSON.stringify(value, null, 2)
         }
-
         if (Array.isArray(value)) {
             if (type === 'arrayOfNum') {
                 return `[${value.join(', ')}]`
@@ -183,7 +158,7 @@ const IDE: React.FC<IDEProps> = ({
         setLoading(true)
 
         try {
-            const response = await api.post(
+            const response = await api.post<{data:CodeRunResult[]}>(
                 `/codingPlatform/practicecode/questionId=${params.editor}?action=${action}&submissionId=${assessmentSubmitId}&codingOutsourseId=${selectedCodingOutsourseId}`,
                 {
                     languageId: Number(
@@ -203,9 +178,9 @@ const IDE: React.FC<IDEProps> = ({
 
             // Check if all test cases passed
             const allTestCasesPassed = response.data.data.every(
-                (testCase: any) => testCase.status === 'Accepted'
-            )
+                (testCase: CodeRunResult) => testCase.status === 'Accepted'
 
+            )
             if (action === 'submit') {
                 setIsDisabled(true)
                 setIsSubmitted(true)
@@ -248,8 +223,9 @@ const IDE: React.FC<IDEProps> = ({
 
             // Trigger re-render for the output window
             setResult(
-                response.data.data[0].stdOut ||
+                response.data.data[0].stdout ||
                     response.data.data[0].stdout ||
+       
                     'No Output Available'
             )
             setLoading(false)
@@ -273,14 +249,14 @@ const IDE: React.FC<IDEProps> = ({
         }
     }
 
-    function handleEditorChange(value: any) {
-        setCurrentCode(value)
+    function handleEditorChange(value: string | null) {
+        setCurrentCode(value ?? "")
     }
 
     const getQuestionDetails = async () => {
         try {
             await api
-                .get(`codingPlatform/get-coding-question/${params.editor}`)
+                .get<{data: QuestionDetails}>(`codingPlatform/get-coding-question/${params.editor}`)
                 .then((response) => {
                     setQuestionDetails(response?.data.data)
 
@@ -288,7 +264,8 @@ const IDE: React.FC<IDEProps> = ({
 
                     setTemplates(response?.data?.data?.templates)
 
-                    setExamples(response?.data[0].examples)
+                    setExamples(response.data.data.examples)
+
                 })
         } catch (error: any) {
             console.error('Error fetching courses:', error)
@@ -572,9 +549,9 @@ const IDE: React.FC<IDEProps> = ({
                                                     language={language}
                                                     theme="vs-dark"
                                                     value={currentCode}
-                                                    onChange={
-                                                        handleEditorChange
-                                                    }
+                                                    // onChange={
+                                                    //     handleEditorChange
+                                                    // }
                                                     className="p-2"
                                                     defaultValue={
                                                         language ||

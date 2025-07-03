@@ -14,6 +14,7 @@ import {
     getAssessmentShortInfo,
 } from '@/utils/students'
 import useWindowSize from '@/hooks/useHeightWidth'
+import {Chapter,AssessmentShortInfo, ChapterResponse} from "@/app/student/courses/[viewcourses]/modules/_components/type";
 
 import {
     getStudentChapterContentState,
@@ -22,13 +23,6 @@ import {
     getModuleName,
 } from '@/store/store'
 
-interface Chapter {
-    id: number
-    title: string
-    topicId: number
-    chapterTrackingDetails: { id: number }[]
-    status: string
-}
 
 function Chapters({ params }: any) {
     // misc
@@ -194,7 +188,7 @@ function Chapters({ params }: any) {
                             type="hover"
                             ref={scrollAreaRef}
                         >
-                            {chapters?.map((item: any, index: any) => {
+                            {chapters?.map((item: Chapter, index: number)=> {
                                 return (
                                     <StudentChapterItem
                                         key={item.id}
@@ -204,8 +198,8 @@ function Chapters({ params }: any) {
                                         activeChapter={activeChapter}
                                         setActiveChapter={setActiveChapter}
                                         status={item.status}
-                                        viewcourses={viewcourses}
-                                        moduleID={moduleID}
+                                        viewcourses={Number(viewcourses)}
+                                        moduleID={Number(moduleID)}
                                         activeChapterRef={activeChapterRef}
                                     />
                                 )

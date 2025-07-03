@@ -4,33 +4,8 @@ import { api } from '@/utils/axios.config'
 import React, { useEffect, useState } from 'react'
 import { ChevronLeft, Dot } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import {SubmissionData,OpenEndedQuestion,OpenEndedResult} from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/openendedresults/type'
 
-interface SubmissionData {
-    id: number
-    userId: number
-    answer: string
-    questionId: number
-    submitAt: string
-    assessmentSubmissionId: number
-}
-
-interface OpenEndedQuestion {
-    id: number
-    question: string
-    difficulty: string
-}
-
-interface OpenEndedResult {
-    id: number
-    openEndedQuestionId: number
-    assessmentOutsourseId: number
-    bootcampId: number
-    moduleId: number
-    chapterId: number
-    createdAt: string
-    submissionsData: SubmissionData[]
-    OpenEndedQuestion: OpenEndedQuestion
-}
 
 const OpenEndedResults = ({
     params,
@@ -104,5 +79,4 @@ const OpenEndedResults = ({
         </div>
     )
 }
-
 export default OpenEndedResults

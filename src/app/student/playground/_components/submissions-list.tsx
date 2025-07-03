@@ -21,15 +21,16 @@ import { api } from '@/utils/axios.config'
 import { b64DecodeUnicode } from '@/utils/base64'
 import { List } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import {Submission,SubmissionsApiRes} from "@/app/student/playground/_components/type"
 
 export default function SubmissionsList({
     questionId,
     admin,
 }: {
     questionId: string
-    admin: any
+    admin: false
 }) {
-    const [submissions, setSubmissions] = useState<any>([])
+    const [submissions, setSubmissions] = useState<Submission[]>([])
     const [loading, setLoading] = useState(false)
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -37,7 +38,7 @@ export default function SubmissionsList({
     const getSubmissionsByQuestionId = async () => {
         try {
             setLoading(true) // Start loading
-            const response = await api.get(
+            const response = await api.get<SubmissionsApiRes>(
                 `codingPlatform/submissions/${questionId}`
             )
             setSubmissions(response?.data?.data)
@@ -76,7 +77,7 @@ export default function SubmissionsList({
                 ) : (
                     <Accordion type="single" collapsible className="w-full">
                         {submissions ? (
-                            submissions?.map((ele: any) => (
+                            submissions?.map((ele:Submission) => (
                                 <AccordionItem
                                     key={ele?.createdAt}
                                     value={ele?.createdAt}

@@ -34,6 +34,7 @@ import { useEffect, useState } from 'react'
 import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { InProgressBootcamp,Chapter,ModuleData,User} from "@/app/student/type"
 
 export default function RootLayout({
     children,
@@ -48,7 +49,7 @@ export default function RootLayout({
     const { moduleData } = getModuleDataNew()
     const [open, setOpen] = useState(false)
     const segments = pathname.split('/')
-    const [studentData, setStudentData] = useState([])
+    const [studentData, setStudentData] = useState<InProgressBootcamp[]>([])
     const [isEnrolled, setIsEnrolled] = useState(false)
 
     let couseId = segments[3]
@@ -108,7 +109,7 @@ export default function RootLayout({
             ? moduleData.moduleName[currentIndex + 1]
             : null
 
-    const goToChapter = (chapterId: any) => {
+    const goToChapter = (chapterId:Chapter) => {
         router.push(
             `/student/courses/${couseId}/modules/${moduleId}/chapters/${chapterId}`
         )
@@ -123,7 +124,7 @@ export default function RootLayout({
 
     useEffect(() => {
         async function getStudentsData() {
-            const res = await api.get('/student')
+            const res = await api.get<{ inProgressBootcamps: InProgressBootcamp[] }>('/student')
             setStudentData(res.data.inProgressBootcamps)
         }
         getStudentsData()
@@ -243,13 +244,14 @@ export default function RootLayout({
                                                             setOpen(false)
                                                         }
                                                     />
+
                                                 </Label>
                                                 <ScrollArea className="h-full w-full">
                                                     <div className="w-full h-52">
                                                         {moduleData.moduleName.map(
                                                             (
-                                                                chapter: any,
-                                                                index
+                                                                chapter: Chapter,
+                                                                index:number
                                                             ) => {
                                                                 let status =
                                                                     chapter.status

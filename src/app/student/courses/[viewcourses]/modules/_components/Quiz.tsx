@@ -8,17 +8,11 @@ import { toast } from '@/components/ui/use-toast'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import Image from 'next/image'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import {Question,FetchFormRes,Props} from "@/app/student/courses/[viewcourses]/modules/_components/type";
 
-type Props = {
-    moduleId: string
-    chapterId: number
-    content: any
-    bootcampId: number
-    fetchChapters: any
-}
 
 function Quiz(props: Props) {
-    const [questions, setQuestions] = useState<any[]>([])
+    const [questions, setQuestions] = useState<Question[]>([])
     const [data, setData] = useState()
     const [status, setStatus] = useState<boolean>(false)
     const [selectedAnswers, setSelectedAnswers] = useState<{
@@ -43,13 +37,13 @@ function Quiz(props: Props) {
 
     const getAllQuizQuestionHandler = useCallback(async () => {
         try {
-            const res = await api.get(
+            const res = await api.get<FetchFormRes>(
                 `/tracking/getQuizAndAssignmentWithStatus?chapterId=${props.chapterId}`
             )
 
             if (res.data.isSuccess) {
                 const updatedQuestions = res.data.data.quizDetails.map(
-                    (item: any) => ({
+                    (item: Question) => ({
                         ...item,
                         status: res?.data.data.status,
                     })

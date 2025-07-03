@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { getAttendanceColorClass, cn } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { useLazyLoadedStudentData } from '@/store/store'
+import {EnrolledCourse, AttendanceData} from "@/app/student/_components/type";
 import {
     Select,
     SelectContent,
@@ -17,24 +18,19 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-
-interface EnrolledCourse {
-    id: number
-    name: string
-}
-
 function Attendance() {
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
-    const [attendanceData, setAttendanceData] = useState<any[]>([])
-    const [enrolledCourse, setEnrolledCourse] = useState([])
+    const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([])
+    const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
     const [selectedCourse, setSelectedCourse] =
-        useState<EnrolledCourse | null>()
+        useState<EnrolledCourse | null>(null)
+
 
     const getAttendanceHandler = useCallback(async () => {
         await api.get(`/student/Dashboard/attendance`).then((res) => {
             const attendance = res.data.filter(
-                (course: any) => selectedCourse?.id === course?.bootcampId
+                (course: AttendanceData) => selectedCourse?.id === course?.bootcampId
             )
             setAttendanceData(attendance)
         })
@@ -53,11 +49,11 @@ function Attendance() {
         if (userID) getEnrolledCourses()
     }, [userID])
 
-    const handleCourseChange = (selectedCourseId: any) => {
-        const newSelectedCourse: any = enrolledCourse.find(
-            (course: any) => course.id === +selectedCourseId
+    const handleCourseChange = (selectedCourseId: string) => {
+        const newSelectedCourse: EnrolledCourse |undefined = enrolledCourse.find(
+            (course: EnrolledCourse) => course.id === +selectedCourseId
         )
-        setSelectedCourse(newSelectedCourse)
+        setSelectedCourse(newSelectedCourse || null)
     }
 
     useEffect(() => {
@@ -90,7 +86,7 @@ function Attendance() {
                                         handleCourseChange(e)
                                     }}
                                 >
-                                    <SelectTrigger className="w-full border-0 shadow-none focus:ring-0 focus:border-0 focus:outline-none bg-gray-100 mb-3 focus:!border-none focus:!outline-none">
+                                    <SelectTrigger className="w-full border-0 shadow-none focus:ring-0 focus:border-0  bg-gray-100 mb-3 focus:!border-none focus:!outline-none">
                                         <SelectValue
                                             placeholder={
                                                 selectedCourse?.name ||
@@ -102,7 +98,7 @@ function Attendance() {
                                         <SelectGroup>
                                             <SelectLabel>Courses</SelectLabel>
                                             {enrolledCourse?.map(
-                                                (course: any) => (
+                                                (course: EnrolledCourse) => (
                                                     <SelectItem
                                                         key={course.id}
                                                         value={course.id.toString()}
@@ -151,3 +147,16 @@ function Attendance() {
 }
 
 export default Attendance
+
+
+
+
+
+
+
+
+
+
+
+
+

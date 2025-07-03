@@ -7,27 +7,7 @@ import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, CLASS_CARD_POSITION } from '@/utils/constant'
 import useDebounce from '@/hooks/useDebounce'
-
-interface Bootcamp {
-    id: number
-    name: string
-    coverImage: string
-    bootcampTopic: string
-    startTime: string
-    duration: string
-    language: string
-    createdAt: string
-    updatedAt: string
-    students_in_bootcamp: number
-    unassigned_students: number
-}
-
-interface BootcampData {
-    status: string
-    message: string
-    code: number
-    bootcamp: Bootcamp
-}
+import {BootcampData} from "@/app/student/courses/[viewcourses]/batch/[batchId]/classes/type"
 
 function Page({
     params,
@@ -65,7 +45,7 @@ function Page({
     const fetchRecordings = useCallback(
         async (offset: number) => {
             try {
-                let baseUrl = `/student/Dashboard/classes/?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
+                let baseUrl =`/student/Dashboard/classes/?batch_id=${params.batchId}&limit=${position}&offset=${offset}`
 
                 if (debouncedSearch) {
                     baseUrl += `&searchTerm=${encodeURIComponent(

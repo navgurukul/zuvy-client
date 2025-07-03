@@ -26,24 +26,14 @@ import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
+import {DisplayAttendance,ClassData} from "@/app/student/courses/[viewcourses]/[recordings]/_components/type"
 
-interface StudentsInfo {
-    total_students: number
-    present: number
-    s3link: string
-}
-
-interface DisplayAttendance {
-    status: string
-    message: string
-    studentsInfo: StudentsInfo
-}
 
 function RecordingCard({
     classData,
     isAdmin,
 }: {
-    classData: any
+    classData: ClassData
     isAdmin: Boolean
 }) {
     // misc
@@ -103,7 +93,7 @@ function RecordingCard({
 
     const handleAttendance = async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<DisplayAttendance>(
                 `/classes/getAttendance/${classData.meetingId}`
             )
             const attendanceData = response.data.attendanceSheet
