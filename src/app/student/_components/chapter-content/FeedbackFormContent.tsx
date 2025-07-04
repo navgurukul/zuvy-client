@@ -35,10 +35,12 @@ interface FeedbackFormContentProps {
         status: string
         moduleId: number
     }
+    onChapterComplete: () => void
 }
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     chapterDetails,
+    onChapterComplete,
 }) => {
     const { courseId: courseIdParam, moduleId: moduleIdParam } = useParams()
     const router = useRouter()
@@ -64,6 +66,9 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             moduleId: moduleId ?? '',
             chapterId: chapterId ? Number(chapterId) : 0,
             bootcampId: bootcampId ? Number(bootcampId) : 0,
+            onSuccess: () => {
+                onChapterComplete() // Refetch the chapter list in the background
+            },
         })
 
     const form = useForm({
@@ -346,14 +351,16 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                                     className="mt-2 w-[130px] justify-start text-left font-normal"
                                                 >
                                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                                    {item.formTrackingData?.[0]?.answer && format(
-                                                        new Date(
-                                                            item
-                                                                .formTrackingData?.[0]
-                                                                ?.answer as string
-                                                        ),
-                                                        'd/M/yyyy'
-                                                    )}
+                                                    {item.formTrackingData?.[0]
+                                                        ?.answer &&
+                                                        format(
+                                                            new Date(
+                                                                item
+                                                                    .formTrackingData?.[0]
+                                                                    ?.answer as string
+                                                            ),
+                                                            'd/M/yyyy'
+                                                        )}
                                                 </Button>
                                             </PopoverTrigger>
                                         </Popover>
