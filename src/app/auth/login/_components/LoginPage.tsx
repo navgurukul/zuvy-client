@@ -76,7 +76,6 @@ function LoginPage({}: Props) {
 
             // Handle your backend response
             if (response.data.access_token) {
-                // localStorage.setItem('token', userToken)
                 localStorage.setItem('access_token', response.data.access_token)
                 localStorage.setItem(
                     'refresh_token',
@@ -146,14 +145,6 @@ function LoginPage({}: Props) {
             localStorage.setItem('redirectedUrl', redirectedUrl)
             setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
         }
-
-        // Initialize localStorage items
-        if (!localStorage.getItem('token')) {
-            localStorage.setItem('token', '')
-        }
-        if (!localStorage.getItem('loggedOut')) {
-            localStorage.setItem('loggedOut', String(false))
-        }
     }, [router])
 
     if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
@@ -181,8 +172,7 @@ function LoginPage({}: Props) {
         } else {
             toast({
                 title: 'Login Error',
-                description:
-                    'Could not start Google login. Please try again.',
+                description: 'Could not start Google login. Please try again.',
                 className:
                     'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
@@ -318,7 +308,10 @@ function LoginPage({}: Props) {
                                     Start learning today!
                                 </p>
 
-                                <div className="hidden" ref={googleLoginWrapperRef}>
+                                <div
+                                    className="hidden"
+                                    ref={googleLoginWrapperRef}
+                                >
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={handleGoogleError}

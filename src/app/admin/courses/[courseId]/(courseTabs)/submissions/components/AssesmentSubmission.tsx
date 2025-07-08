@@ -40,6 +40,11 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
         try {
             const response = await api.get(apiUrl)
+            console.log('response.data', response.data)
+            console.log(
+                'response?.data.passPercentage',
+                response?.data.ModuleAssessment.passPercentage
+            )
             const assessments = response.data.submitedOutsourseAssessments
             const requiredCodingScore =
                 assessments[0]?.requiredCodingScore || null
@@ -66,7 +71,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             doc.setFont('helvetica', 'normal')
             doc.text(`Assessment Name: ${assessment.title}`, 10, 20)
             doc.text(
-                `Qualifying Criteria: ${response?.data.passPercentage}%`,
+                `Qualifying Criteria: ${response?.data.ModuleAssessment.passPercentage}%`,
                 10,
                 26
             )
