@@ -250,6 +250,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                   initialContent={initialContent} 
                   setInitialContent={setInitialContent} 
                   preview={true} 
+                  hideBorder={true}
                 />
               </div>
             )}

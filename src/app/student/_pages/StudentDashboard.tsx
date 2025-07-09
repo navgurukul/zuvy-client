@@ -1,5 +1,5 @@
 'use client';
-import { useState } from "react";
+import { useState , useEffect ,  } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import Image from "next/image";
 import { useLazyLoadedStudentData } from '@/store/store';
 import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
 import { useStudentData } from "@/hooks/useStudentData";
+import { useRouter } from "next/navigation";
 
 interface UpcomingEvent {
   id: number;
@@ -57,10 +58,18 @@ const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const { studentData, loading, error, refetch } = useStudentData();
   const { studentData: studentProfile } = useLazyLoadedStudentData();
-
+  const router = useRouter();
   const filteredBootcamps = filter === 'enrolled'
     ? studentData?.inProgressBootcamps || []
     : studentData?.completedBootcamps || [];
+
+  const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
+
+  useEffect(() => {
+    if (isStudentEnroledInOneBootcamp) {
+      router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}`);
+    }
+  }, [isStudentEnroledInOneBootcamp]);
 
   const getActionButton = (bootcamp: Bootcamp) => {
     if (filter === 'completed') {
@@ -199,7 +208,7 @@ const StudentDashboard = () => {
         {/* Welcome Message */}
         <div className="mb-8 text-left">
           <h1 className="text-3xl font-heading font-bold mb-2">
-            Welcome back, {studentProfile?.name || 'Student'}!
+            Welcome {studentProfile?.name || 'Student'}!
           </h1>
           <p className="text-lg text-muted-foreground">
             What will you be learning today?
@@ -245,13 +254,13 @@ const StudentDashboard = () => {
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Course Image */}
-                  <div className="flex-shrink-0 md:w-20  md:h-20">
+                  <div className="">
                     <Image
                       src={bootcamp.coverImage || '/logo.PNG'}
                       alt={bootcamp.name}
-                      width={100}
-                      height={100}
-                      className="w-[200px] h-[80px]  rounded-lg "
+                      width={128}
+                     height={128}
+                     className="w-32 h-32 rounded-lg object-contain"
                     />
                   </div>
 
@@ -266,12 +275,12 @@ const StudentDashboard = () => {
                           {bootcamp.description || `${bootcamp.bootcampTopic} • ${bootcamp.language} • ${bootcamp.duration}`}
                         </p>
                         <div className="flex items-center gap-2 mb-4">
-                          <Avatar className="w-6 h-6">
+                          {/* <Avatar className="w-6 h-6">
                             <AvatarImage src={bootcamp.instructorDetails.profilePicture || undefined} />
-                            <AvatarFallback>{bootcamp.instructorDetails.name[0]}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm text-muted-foreground">
-                            {bootcamp.instructorDetails.name}
+                            <AvatarFallback>Instructor:-{bootcamp.instructorDetails.name[0]}</AvatarFallback>
+                          </Avatar> */}
+                          <span className="text-sm font-medium capitalize ">
+                            Instructor:- {bootcamp.instructorDetails.name}
                           </span>
                           <span className="text-sm text-muted-foreground">•</span>
                           {/* <span className="text-sm text-muted-foreground">

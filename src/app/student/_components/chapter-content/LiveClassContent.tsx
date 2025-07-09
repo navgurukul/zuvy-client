@@ -59,6 +59,30 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
   // Chapter completion status
   const isCompleted = localIsCompleted || chapterDetails.status === 'Completed';
 
+  // Helper function to format date and time
+  const formatDateTime = (date: Date) => {
+    const getOrdinalSuffix = (day: number) => {
+      if (day > 3 && day < 21) return 'th';
+      switch (day % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit', 
+      hour12: true 
+    });
+
+    return `${day}${getOrdinalSuffix(day)} ${month} ${year} at ${time}`;
+  };
+
   // Helper function to get time remaining
   const getTimeRemaining = (scheduledDateTime: Date) => {
     const now = new Date();
@@ -118,13 +142,13 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
               Scheduled
             </Badge>
           </div>
-          <p className="text-muted-foreground mb-6">{item.description || "Join this live interactive session with your instructor and fellow students."}</p>
+          <p className="text-muted-foreground text-left mb-6">{item.description || "Join this live interactive session with your instructor and fellow students."}</p>
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
+            <div  className="text-left">
               <p className="text-sm text-muted-foreground">Scheduled Date & Time</p>
-              <p className="font-medium">{item.scheduledDateTime?.toLocaleString()}</p>
+              <p className="font-medium">{item.scheduledDateTime ? formatDateTime(item.scheduledDateTime) : 'TBD'}</p>
             </div>
-            <div>
+            <div className="text-left">
               <p className="text-sm text-muted-foreground"> Duration</p>
               <p className="font-medium">{item.duration || '45 mins'}</p>
             </div>
@@ -156,7 +180,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Scheduled Date & Time</p>
-              <p className="font-medium">{item.scheduledDateTime?.toLocaleString()}</p>
+              <p className="font-medium">{item.scheduledDateTime ? formatDateTime(item.scheduledDateTime) : 'TBD'}</p>
             </div>
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Duration</p>
@@ -195,7 +219,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Date & Time</p>
-              <p className="font-medium">{item.scheduledDateTime?.toLocaleString()}</p>
+              <p className="font-medium">{item.scheduledDateTime ? formatDateTime(item.scheduledDateTime) : 'TBD'}</p>
             </div>
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Your Duration</p>

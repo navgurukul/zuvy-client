@@ -5,8 +5,53 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircle } from "lucide-react";
+import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircle, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import useCourseSyllabus from "@/hooks/useCourseSyllabus";
+import { useState } from "react";
+import Link from "next/link";
+
+// Truncated Description Component
+const TruncatedDescription = ({ 
+  text, 
+  maxLength = 150, 
+  className = "" 
+}: { 
+  text: string; 
+  maxLength?: number; 
+  className?: string;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const shouldTruncate = text.length > maxLength;
+  const displayText = shouldTruncate && !isExpanded ? text.slice(0, maxLength) + "..." : text;
+
+  if (!shouldTruncate) {
+    return <p className={className}>{text}</p>;
+  }
+
+  return (
+    <div className="text-left mb-4 mt-2 " >
+      <p className={className}>{displayText}</p>
+      <Button
+        variant="link"
+        size="sm"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="p-0 h-auto text-primary text-sm mt-1 flex items-center gap-1"
+      >
+        {isExpanded ? (
+          <>
+            Show less
+            <ChevronUp className="w-3 h-3" />
+          </>
+        ) : (
+          <>
+            View full description
+            <ChevronDown className="w-3 h-3" />
+          </>
+        )}
+      </Button>
+    </div>
+  );
+};
 
 const CourseSyllabusPage = () => {
   const { courseId } = useParams();
@@ -172,6 +217,11 @@ const CourseSyllabusPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <div className="flex items-center justify-start hover:text-primary cursor-pointer" onClick={() => router.back()}>
+
+      <ArrowLeft className="w-4 h-4 ml-10 mt-1  inline-block text-left  "  />
+        <span className="text-sm font-medium  ml-2 mt-1 ">Back</span>
+      </div>
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
         {/* Course Information */}
         <Card className="mb-8 shadow-4dp">
@@ -219,13 +269,15 @@ const CourseSyllabusPage = () => {
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                   <div className="flex-1">
                     <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{syllabusData.bootcampName}</h1>
-                    <p className="text-base md:text-lg text-left text-muted-foreground mb-4">{syllabusData.bootcampDescription}</p>
+                    {syllabusData.bootcampDescription && (
+                      <TruncatedDescription text={syllabusData.bootcampDescription} maxLength={150} className="text-base md:text-lg text-left text-muted-foreground mb-4" />
+                    )}
                     <div className="flex items-center gap-2 mb-4">
-                      <Avatar className="w-8 h-8">
+                      {/*   <Avatar className="w-8 h-8">
                         <AvatarImage src={syllabusData.instructorProfilePicture} />
                         <AvatarFallback>{syllabusData.instructorName?.charAt(0)?.toUpperCase() || 'I'}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium capitalize">{syllabusData.instructorName}</span>
+                      </Avatar> */}
+                      <span className="font-medium capitalize text-sm ">Instructor:- {syllabusData.instructorName}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -257,7 +309,7 @@ const CourseSyllabusPage = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-sm text-muted-foreground">Duration</p>
-                  <p className="font-medium">{syllabusData.courseDuration} weeks</p>
+                  <p className="font-medium">{syllabusData.courseDuration}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -284,9 +336,9 @@ const CourseSyllabusPage = () => {
                     <h3 className="text-xl font-heading font-semibold mb-2 text-left">
                       Module {moduleIndex + 1}: {module.moduleName}
                     </h3>
-                    <p className="text-muted-foreground mb-2 text-left">
-                      {module.moduleDescription}
-                    </p>
+                    {module.moduleDescription && (
+                      <TruncatedDescription text={module.moduleDescription} maxLength={150} className="text-muted-foreground mb-2 text-left" />
+                    )}
                     <p className="text-sm text-muted-foreground text-left">
                       Duration: {formatDuration(module.moduleDuration)} • {module.chapters.length} chapters
                     </p>
@@ -296,24 +348,23 @@ const CourseSyllabusPage = () => {
                     {module.chapters
                       .sort((a, b) => a.chapterOrder - b.chapterOrder)
                       .map((chapter, chapterIndex) => (
-                        <div key={chapter.chapterId} className="border-l-2 border-border pl-4">
-                          <div className="flex items-center gap-3 py-2">
-                            <div className="flex-shrink-0">
+                        <div key={chapter.chapterId} className="border-l-2 flex items-start gap-3 border-border pl-2">
+                            <div className="flex-shrink-0 mt-1">
                               {getItemIcon(chapter.chapterType)}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between">
                                 <div className="text-left">
+                          <Link href={`/student/course/${courseId}/modules/${module.moduleId}?chapterId=${chapter.chapterId}`} className="hover:text-primary"   >
                                   <h4 className="font-medium text-sm text-left">
                                     {chapter.chapterName || `Chapter ${chapter.chapterOrder}`}
                                   </h4>
+                                  </Link>
                                   <p className="text-xs text-muted-foreground text-left">
                                     {getChapterTypeLabel(chapter.chapterType)}
                                   </p>
                                   {chapter.chapterDescription && (
-                                    <p className="text-xs text-muted-foreground mt-1 text-left">
-                                      {chapter.chapterDescription}
-                                    </p>
+                                    <TruncatedDescription text={chapter.chapterDescription} maxLength={100} className="text-xs text-muted-foreground mt-1 text-left" />
                                   )}
                                 </div>
                                 <span className="text-xs text-muted-foreground whitespace-nowrap ml-4">
@@ -321,7 +372,6 @@ const CourseSyllabusPage = () => {
                                 </span>
                               </div>
                             </div>
-                          </div>
                         </div>
                       ))}
                   </div>

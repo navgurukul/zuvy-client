@@ -11,6 +11,18 @@ import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import parse from 'html-react-parser';
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm';
+import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { cn, difficultyColor } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface QuizContentProps {
   chapterDetails: {
@@ -28,6 +40,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [localIsCompleted, setLocalIsCompleted] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { isCompleting, completeChapter } = useChapterCompletion({
     courseId: courseId as string,
@@ -55,25 +68,32 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionId }));
   };
 
+  // Handle submit button click
+  const handleSubmitClick = () => {
+    if (Object.keys(selectedAnswers).length === 0) {
+      toast({
+        title: 'Cannot Submit',
+        description: 'Select at least one question',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsDialogOpen(true);
+  };
+
   // Submit quiz answers
   const handleQuizSubmit = async () => {
     if (!quizQuestions.length) return;
     setIsSubmitting(true);
+    setIsDialogOpen(false);
+    
     const mappedAnswers = Object.entries(selectedAnswers).map(
       ([mcqId, chosenOption]) => ({
         mcqId: Number(mcqId),
         chossenOption: Number(chosenOption),
       })
     );
-    if (mappedAnswers.length === 0) {
-      toast({
-        title: 'Cannot Submit',
-        description: 'Select at least one question',
-        variant: 'destructive',
-      });
-      setIsSubmitting(false);
-      return;
-    }
+    
     try {
       await api.post(
         `/tracking/updateQuizAndAssignmentStatus/${courseId}/${moduleId}?chapterId=${chapterDetails.id}`,
@@ -101,7 +121,9 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     if (!isCompleted) {
       // For incomplete quiz, show normal styling
       return {
-        textColor: "text-gray-900"
+        borderColor: "border-border",
+        bgColor: "bg-muted/30",
+        textColor: "text-foreground"
       };
     }
     
@@ -113,23 +135,31 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     if (isCorrect && isSelected) {
       // Correct answer that was selected - green
       return {
-        textColor: "text-green-700 font-semibold"
+        borderColor: "border-green-500",
+        bgColor: "bg-green-50",
+        textColor: "text-green-700"
       };
     } else if (isCorrect && !isSelected) {
       // Correct answer that wasn't selected - green
       return {
-        textColor: "text-green-600 font-medium"
+        borderColor: "border-green-300",
+        bgColor: "bg-green-25",
+        textColor: "text-green-600"
       };
     } else if (!isCorrect && isSelected) {
       // Wrong answer that was selected - red
       return {
-        textColor: "text-red-600 font-semibold"
+        borderColor: "border-red-500",
+        bgColor: "bg-red-50",
+        textColor: "text-red-600"
       };
     }
     
     // Other options - default
     return {
-      textColor: "text-gray-700"
+      borderColor: "border-border",
+      bgColor: "bg-muted/30",
+      textColor: "text-foreground"
     };
   };
 
@@ -143,9 +173,9 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     if (!isAttempted) {
       return {
         text: "Not attempted",
-        color: "text-yellow-600",
-        bgColor: "bg-yellow-50",
-        borderColor: "border-yellow-200"
+        color: "text-warning",
+        bgColor: "bg-warning/10",
+        borderColor: "border-warning/20"
       };
     }
     
@@ -154,106 +184,151 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     if (isCorrect) {
       return {
         text: "Correct",
-        color: "text-green-600",
-        bgColor: "bg-green-50",
-        borderColor: "border-green-200"
+        color: "text-success",
+        bgColor: "bg-success/10",
+        borderColor: "border-success/20"
       };
     } else {
       return {
         text: "Incorrect",
-        color: "text-red-600",
-        bgColor: "bg-red-50",
-        borderColor: "border-red-200"
+        color: "text-destructive",
+        bgColor: "bg-destructive/10",
+        borderColor: "border-destructive/20"
       };
     }
   };
 
   if (loading) {
     return (
-      <div className="h-full p-4">
-        <div className="flex justify-between items-center mb-4">
-          <Skeleton className="h-8 w-1/2" />
-          <Skeleton className="h-6 w-24" />
-        </div>
-        <div className="space-y-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="space-y-3">
-              <Skeleton className="h-6 w-3/4" />
-              <div className="space-y-2">
-                {[...Array(4)].map((_, j) => (
-                  <div key={j} className="flex items-center space-x-2">
-                    <Skeleton className="h-4 w-4 rounded-full" />
-                    <Skeleton className="h-4 w-1/2" />
+      <div className="h-full bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 overflow-y-auto">
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="flex justify-between items-center mb-8">
+            <Skeleton className="h-8 w-1/2" />
+            <Skeleton className="h-6 w-24" />
+          </div>
+          <div className="space-y-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl shadow-8dp p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-6 w-20" />
                   </div>
-                ))}
+                  <Skeleton className="h-6 w-3/4" />
+                  <div className="space-y-3">
+                    {[...Array(4)].map((_, j) => (
+                      <div key={j} className="flex items-center space-x-3 p-4 rounded-xl border">
+                        <Skeleton className="h-4 w-4 rounded-full" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-center mt-8">
-          <Skeleton className="h-10 w-32" />
+            ))}
+          </div>
+          <div className="flex justify-center mt-8">
+            <Skeleton className="h-12 w-32" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-left">{chapterDetails.title}</h1>
-        <Badge 
-          variant="outline" 
-          className={`px-3 py-1 text-sm font-medium ${
-            isCompleted 
-              ? "bg-green-50 text-green-700 border-green-200" 
-              : "bg-gray-50 text-gray-600 border-gray-200"
-          }`}
-        >
-          {isCompleted ? 'Completed' : 'Not Completed'}
-        </Badge>
-      </div>
-      
-      {chapterDetails.description && (
-        <p className="text-muted-foreground mb-6 text-left">{chapterDetails.description}</p>
-      )}
-      
-      {quizQuestions.length === 0 ? (
-        <div className="text-left text-muted-foreground py-12">
-          No quiz questions have been added by the instructor.
+    <div className="h-full bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 overflow-y-auto">
+      <div className="max-w-4xl mx-auto p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-foreground">{chapterDetails.title}</h1>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "px-3 py-1 text-sm font-medium border",
+              isCompleted 
+                ? "bg-success/10 text-success border-success/20" 
+                : "bg-muted text-muted-foreground border-border"
+            )}
+          >
+            {isCompleted ? 'Completed' : 'Not Completed'}
+          </Badge>
         </div>
-      ) : (
-        <div className="space-y-8">
-          {quizQuestions.map((q: any, index: number) => {
-            const questionStatus = getQuestionStatus(q);
-            const quizTrack = q.quizTrackingData?.[0];
-            const isAttempted = !!quizTrack;
-            
-            return (
-              <div key={q.id} className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex text-left space-x-2 items-start flex-1">
-                    <h6 className="text-left font-semibold">{`Q${index + 1}.`}</h6>
-                    <div className="flex-1 text-left">
-                      <RemirrorForm
-                        description={q.question}
-                        preview={true}
-                        bigScreen={true}
-                      />
+        
+        {chapterDetails.description && (
+          <div className="mb-8">
+            <p className="text-muted-foreground text-left leading-relaxed">{chapterDetails.description}</p>
+          </div>
+        )}
+        
+        {quizQuestions.length === 0 ? (
+          <div className="bg-card border border-border rounded-2xl shadow-8dp p-12">
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">No quiz questions have been added by the instructor.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {quizQuestions.map((q: any, index: number) => {
+              const questionStatus = getQuestionStatus(q);
+              const quizTrack = q.quizTrackingData?.[0];
+              const isAttempted = !!quizTrack;
+              
+              return (
+                <div key={q.id} className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden">
+                  {/* Question Header */}
+                  <div className="bg-card-elevated border-b border-border p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                          <span className="text-sm font-bold text-primary">{index + 1}</span>
+                        </div>
+                        <h3 className="text-lg font-bold text-foreground">Question {index + 1}</h3>
+                      </div>
+                      
+                      <div className="flex items-center space-x-3">
+                        {q.difficulty && (
+                          <span className={cn(
+                            'px-3 py-1 rounded-full text-xs font-medium border',
+                            difficultyColor(q.difficulty)
+                          )}>
+                            {q.difficulty}
+                          </span>
+                        )}
+                        {q.marks && (
+                          <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium border border-primary/20">
+                            {Math.trunc(Number(q.marks))} Marks
+                          </div>
+                        )}
+                        {questionStatus && (
+                          <Badge 
+                            variant="outline" 
+                            className={cn(
+                              "px-2 py-1 text-xs font-medium",
+                              questionStatus.bgColor,
+                              questionStatus.color,
+                              questionStatus.borderColor
+                            )}
+                          >
+                            {questionStatus.text}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  {questionStatus && (
-                    <Badge 
-                      variant="outline" 
-                      className={`ml-4 px-2 py-1 text-xs font-medium ${questionStatus.bgColor} ${questionStatus.color} ${questionStatus.borderColor}`}
-                    >
-                      {questionStatus.text}
-                    </Badge>
-                  )}
-                </div>
-                
-                <div className="flex text-left space-x-2 items-start">
-                  <div className="w-6"></div> {/* Spacer to align with question */}
-                  <div className="flex-1">
+
+                  {/* Question Content */}
+                  <div className="p-6">
+                    <div className="mb-6">
+                      <div className="prose prose-neutral  max-w-none text-left">
+                        <RemirrorForm
+                          description={q.question}
+                          preview={true}
+                          bigScreen={true}
+                        />
+                      </div>
+                    </div>
+
                     <RadioGroup
                       value={
                         isCompleted && isAttempted 
@@ -262,7 +337,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                       }
                       onValueChange={(value) => handleSelect(q.id, value)}
                       disabled={isCompleted || isSubmitting || isCompleting}
-                      className="space-y-2"
+                      className="space-y-3"
                     >
                       {Object.entries(q.options).map(([optionId, optionText]) => {
                         const styling = getOptionStyling(q, optionId);
@@ -274,24 +349,30 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                         return (
                           <div 
                             key={optionId} 
-                            className={`flex items-start space-x-2 ${
-                              isCompleted ? 'cursor-default' : 'cursor-pointer'
-                            }`}
+                            className={cn(
+                              "flex items-start space-x-3 p-4 rounded-xl border transition-all duration-200",
+                              !isCompleted && "cursor-pointer hover:border-primary/30 hover:bg-primary/5",
+                              isSelected && !isCompleted && "border-primary bg-primary/10",
+                              styling.borderColor,
+                              styling.bgColor
+                            )}
                           >
                             <RadioGroupItem 
                               value={optionId} 
                               id={`q${index}_option${optionId}`}
-                              className={`mt-0.5 ${
-                                isCorrect ? 'border-green-500 text-green-500' : ''
-                              } ${
-                                !isCorrect && isSelected && isCompleted ? 'border-red-500 text-red-500' : ''
-                              }`}
+                              className={cn(
+                                "mt-0.5",
+                                isCorrect && "border-green-500 text-green-500",
+                                !isCorrect && isSelected && isCompleted && "border-red-500 text-red-500"
+                              )}
                             />
                             <Label 
                               htmlFor={`q${index}_option${optionId}`} 
-                              className={`flex-1 text-left text-sm leading-5 ${
-                                isCompleted ? 'cursor-default' : 'cursor-pointer'
-                              } ${styling.textColor}`}
+                              className={cn(
+                                "flex-1 text-left leading-relaxed",
+                                !isCompleted ? "cursor-pointer" : "cursor-default",
+                                styling.textColor
+                              )}
                             >
                               {optionText as string}
                               {isCompleted && isCorrect && (
@@ -307,27 +388,69 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                     </RadioGroup>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      
-      {!isCompleted && (
-        <div className="flex justify-center mt-8">
-          <Button 
-            onClick={handleQuizSubmit}
-            disabled={
-              isSubmitting || isCompleting ||
-              quizQuestions.length === 0 ||
-              Object.keys(selectedAnswers).length === 0
-            }
-            className="px-8 py-2 text-left"
-          >
-            {isSubmitting || isCompleting ? 'Submitting...' : 'Submit'}
-          </Button>
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+        
+        {!isCompleted && quizQuestions.length > 0 && (
+          <div className="flex justify-center pt-8 pb-6">
+            <button
+              onClick={handleSubmitClick}
+              disabled={
+                isSubmitting || isCompleting ||
+                Object.keys(selectedAnswers).length === 0
+              }
+              className={cn(
+                "px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp",
+                isSubmitting || isCompleting
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "bg-primary hover:bg-primary-dark text-primary-foreground"
+              )}
+            >
+              {isSubmitting || isCompleting ? (
+                <div className="flex items-center space-x-2">
+                  <div className="w-5 h-5 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
+                  <span>Submitting...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="w-5 h-5" />
+                  <span>Submit Quiz</span>
+                </div>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Confirmation Dialog */}
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <AlertDialogContent className="bg-card border-border shadow-32dp">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="text-foreground">
+                Are you absolutely sure?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-muted-foreground">
+                This action cannot be undone and you can submit the quiz only once.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                onClick={() => setIsDialogOpen(false)}
+                className="bg-muted hover:bg-muted-dark text-foreground border-border"
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-primary hover:bg-primary-dark text-primary-foreground"
+                onClick={handleQuizSubmit}
+              >
+                Submit Quiz
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 };
