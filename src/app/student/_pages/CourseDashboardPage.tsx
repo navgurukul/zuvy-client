@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer } from "lucide-react";
+import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer, ChevronDown, ChevronUp } from "lucide-react";
 import Image from "next/image";
 import { useBootcampProgress } from '@/hooks/useBootcampProgress';
 import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
@@ -16,6 +16,49 @@ import { useCompletedClasses, CompletedClass } from '@/hooks/useCompletedClasses
 import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton';
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
+// Truncated Description Component
+const TruncatedDescription = ({ 
+  text, 
+  maxLength = 150, 
+  className = "" 
+}: { 
+  text: string; 
+  maxLength?: number; 
+  className?: string;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const shouldTruncate = text.length > maxLength;
+  const displayText = shouldTruncate && !isExpanded ? text.slice(0, maxLength) + "..." : text;
+
+  if (!shouldTruncate) {
+    return <p className={className}>{text}</p>;
+  }
+
+  return (
+    <div className="my-3">
+      <p className={className}>{displayText}</p>
+      <Button
+        variant="link"
+        size="sm"
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="p-0 h-auto text-primary text-sm mt-1 flex items-center gap-1"
+      >
+        {isExpanded ? (
+          <>
+            Show less
+            <ChevronUp className="w-3 h-3" />
+          </>
+        ) : (
+          <>
+            View full description
+            <ChevronDown className="w-3 h-3" />
+          </>
+        )}
+      </Button>
+    </div>
+  );
+};
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
@@ -229,7 +272,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               View Full Attendance
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-x-hidden overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl">Full Attendance Record</DialogTitle>
             </DialogHeader>
@@ -250,9 +293,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                                {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500 bg-primary-light text-sm border-primary">
+                                {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500    text-sm ">
                                 <Video className="w-4 h-4 " />
-                              </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary bg-primary-light text-sm border-primary">
+                              </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary  text-sm ">
                                 <Video className="w-4 h-4 " />
                               </button>}
 
@@ -468,13 +511,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-                    <p className="text-base md:text-lg text-muted-foreground mb-4 text-left">{courseDescription}</p>
+                    <TruncatedDescription text={courseDescription} maxLength={150} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
                     <div className="flex items-center gap-2 mb-4">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={instructorAvatar || '/logo.PNG'} />
-                        <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium capitalize">{instructorName}</span>
+                        {/* <Avatar className="w-8 h-8">
+                          <AvatarImage src={instructorAvatar || '/logo.PNG'} />
+                          <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
+                        </Avatar> */}
+                      <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
                     </div>
                   </div>
                   {collaborator && <div className="flex items-center gap-2">
@@ -502,13 +545,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 className="w-full h-40 rounded-lg object-cover mb-4"
               />
               <h1 className="text-2xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-              <p className="text-base text-muted-foreground mb-4 text-left">{courseDescription}</p>
+              <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
               <div className="flex items-center gap-2 mb-4">
-                <Avatar className="w-8 h-8">
+                {/* <Avatar className="w-8 h-8">
                   <AvatarImage src={instructorAvatar || '/logo.PNG'} />
                   <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
-                </Avatar>
-                <span className="font-medium">{instructorName}</span>
+                </Avatar> */}
+                <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
               </div>
               {collaborator && <div className="flex items-center gap-2 mb-4">
                 <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
@@ -530,7 +573,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   style={{ width: `${currentProgress}%` }}
                 >
                   <div
-                    className="absolute top-1/2 transform -translate-y-1/2 bg-white px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
+                    className="absolute top-1/2 transform -translate-y-1/2 bg-card text-card-foreground px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
                     style={{
                       right: currentProgress === 100 ? '0' : currentProgress === 0 ? 'auto' : '-12px',
                       left: currentProgress === 0 ? '0' : 'auto'
@@ -581,7 +624,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             <div className="lg:col-span-2 space-y-8">
               {/* Course Modules Section */}
               <div>
-                <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Modules</h2>
+                <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Content</h2>
 
                 <div className="space-y-4">
                   {modulesToShow.map((module: any) => {
@@ -592,7 +635,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
                     return (
                       <Link key={module.id} href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
-                        <Card className={`shadow-4dp ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''}`}>
+                        <Card className={`shadow-4dp ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
                           <CardContent className="p-6">
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                               <div className="flex-1 text-left">
@@ -611,9 +654,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <h3 className="text-xl font-heading font-semibold mb-2 text-left">
                                   Module {module.order}: {module.name}
                                 </h3>
-                                <p className="text-muted-foreground mb-3 text-sm text-left">
-                                  {getModuleDescription(module)}
-                                </p>
+                                <TruncatedDescription text={getModuleDescription(module)} maxLength={150} className="text-muted-foreground mb-3 text-sm text-left " />
                                 {/* <div className="flex flex-wrap gap-2 mb-3">
                                 <Badge variant="outline" className="text-xs">
                                   {formatTimeAlloted(module.timeAlloted)}
@@ -631,15 +672,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <Button
                                   className={`px-6 ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
                                   disabled={isLocked}
-                                  asChild={!isLocked}
+                                  onClick={(e) => {
+                                    if (isLocked) {
+                                      e.preventDefault();
+                                    }
+                                  }}
                                 >
-                                  {isLocked ? (
-                                    <span>Module Locked</span>
-                                  ) : (
-                                    <Link href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
-                                      {getModuleCTA(module, moduleProgress)}
-                                    </Link>
-                                  )}
+                                  {getModuleCTA(module, moduleProgress)}
                                 </Button>
                               </div>
                             </div>
@@ -652,7 +691,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   style={{ width: `${moduleProgress}%` }}
                                 >
                                   <div
-                                    className="absolute top-1/2 transform -translate-y-1/2 bg-white px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
+                                    className="absolute top-1/2 transform -translate-y-1/2 bg-card text-card-foreground px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
                                     style={{
                                       right: moduleProgress === 100 ? '0' : moduleProgress === 0 ? 'auto' : '-12px',
                                       left: moduleProgress === 0 ? '0' : 'auto'
@@ -669,15 +708,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                               <Button
                                 className={`w-full ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
                                 disabled={isLocked}
-                                asChild={!isLocked}
+                                onClick={(e) => {
+                                  if (isLocked) {
+                                    e.preventDefault();
+                                  }
+                                }}
                               >
-                                {isLocked ? (
-                                  <span>Module Locked</span>
-                                ) : (
-                                  <Link href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
-                                    {getModuleCTA(module, moduleProgress)}
-                                  </Link>
-                                )}
+                                {getModuleCTA(module, moduleProgress)}
                               </Button>
                             </div>
                           </CardContent>
@@ -810,9 +847,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger>
-                                {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500 bg-primary-light text-sm border-primary">
+                                {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500  text-sm ">
                                 <Video className="w-4 h-4 " />
-                              </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary bg-primary-light text-sm border-primary">
+                              </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary  text-sm ">
                                 <Video className="w-4 h-4 " />
                               </button>}
 
