@@ -61,6 +61,7 @@ const Courses: React.FC = () => {
     const [newCourseName, setNewCourseName] = useState<string>('')
     const [newCourseDescription, setNewCourseDescription] = useState<string>('')
     const [hasAccess, setHasAccess] = useState<boolean>(true)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // func
     // const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
@@ -127,7 +128,7 @@ const Courses: React.FC = () => {
         } else {
             try {
                 const response = await api.post('/bootcamp', courseData)
-                
+
                 toast.success({
                     title: response.data.status,
                     description: response.data.message,
@@ -139,7 +140,8 @@ const Courses: React.FC = () => {
             } catch (error: any) {
                 toast.error({
                     title: error?.data?.status || 'Error',
-                    description: error?.data?.message || 'Failed to create course',
+                    description:
+                        error?.data?.message || 'Failed to create course',
                 })
             }
         }
@@ -210,7 +212,16 @@ const Courses: React.FC = () => {
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />
-                            <Dialog>
+                            <Dialog
+                                open={isDialogOpen}
+                                onOpenChange={(open) => {
+                                    if (!open) {
+                                        setNewCourseName('')
+                                        setNewCourseDescription('')
+                                    }
+                                    setIsDialogOpen(open)
+                                }}
+                            >
                                 <DialogTrigger asChild>
                                     <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
                                         <Plus className="w-5 mr-2" />
@@ -228,6 +239,7 @@ const Courses: React.FC = () => {
                                         handleNewCourseDescriptionChange
                                     }
                                     handleCreateCourse={handleCreateCourse}
+                                    isDialogOpen={isDialogOpen}
                                 />
                             </Dialog>
                         </div>
@@ -289,6 +301,9 @@ const Courses: React.FC = () => {
                                                         }
                                                         handleCreateCourse={
                                                             handleCreateCourse
+                                                        }
+                                                        isDialogOpen={
+                                                            isDialogOpen
                                                         }
                                                     />
                                                 </Dialog>
@@ -426,4 +441,3 @@ const Courses: React.FC = () => {
 }
 
 export default Courses
-

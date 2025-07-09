@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -29,6 +29,7 @@ interface newCourseDialogProps {
         event: React.ChangeEvent<HTMLTextAreaElement>
     ) => void
     handleCreateCourse: (courseData: CourseData) => void
+    isDialogOpen: boolean
 }
 
 interface CourseData {
@@ -43,9 +44,12 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     handleNewCourseNameChange,
     handleNewCourseDescriptionChange,
     handleCreateCourse,
+    isDialogOpen,
 }) => {
     const [collaborator, setCollaborator] = useState('')
-    const [collaboratorInputType, setCollaboratorInputType] = useState<'text' | 'file'>('text')
+    const [collaboratorInputType, setCollaboratorInputType] = useState<
+        'text' | 'file'
+    >('text')
     const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
     const [isUploading, setIsUploading] = useState(false)
     const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([])
@@ -59,6 +63,12 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         // if (pdfInput) pdfInput.value = ''
     }
 
+    useEffect(() => {
+        if (!isDialogOpen) {
+            resetForm()
+        }
+    }, [isDialogOpen])
+
     const handleCreateCourseWithUpload = async () => {
         try {
             if (!newCourseName.trim()) {
@@ -71,7 +81,11 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             let collaboratorValue = ''
 
-            if (collaboratorInputType === 'file' && selectedFiles && selectedFiles.length > 0) {
+            if (
+                collaboratorInputType === 'file' &&
+                selectedFiles &&
+                selectedFiles.length > 0
+            ) {
                 const formData = new FormData()
                 Array.from(selectedFiles).forEach((file) => {
                     formData.append('images', file)
@@ -90,7 +104,9 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         }
                     )
 
-                    const uploadedUrls = Array.isArray(data?.urls) ? data.urls : []
+                    const uploadedUrls = Array.isArray(data?.urls)
+                        ? data.urls
+                        : []
                     if (uploadedUrls.length === 0) {
                         toast.error({
                             title: 'error',
@@ -101,7 +117,6 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
                     collaboratorValue = uploadedUrls[0]
                     setUploadedImageUrls(uploadedUrls)
-
                 } catch (error) {
                     console.error('File upload failed:', error)
                     toast.error({
@@ -130,12 +145,16 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             resetForm()
             handleCreateCourse(payload)
-
         } catch (error: any) {
-            console.error('Error creating bootcamp:', error?.response?.data || error)
+            console.error(
+                'Error creating bootcamp:',
+                error?.response?.data || error
+            )
         }
     }
-    const handleCollaboratorFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCollaboratorFileChange = async (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
         const files = event.target.files
         setSelectedFiles(files)
 
@@ -220,7 +239,8 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         value={collaboratorInputType}
                         onValueChange={(value: 'text' | 'file') => {
                             const hasText = collaborator.trim().length > 0
-                            const hasFiles = selectedFiles && selectedFiles.length > 0
+                            const hasFiles =
+                                selectedFiles && selectedFiles.length > 0
 
                             if (value === 'file' && hasText) return
                             if (value === 'text' && hasFiles) return
@@ -229,17 +249,28 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         }}
                         className="flex gap-3 mt-2 mb-1"
                     >
-                        <Label htmlFor="text" className="flex items-center gap-1 cursor-pointer">
+                        <Label
+                            htmlFor="text"
+                            className="flex items-center gap-1 cursor-pointer"
+                        >
                             <RadioGroupItem
                                 value="text"
                                 id="text"
                                 className="m-0 p-0 scale-95"
-                                disabled={!!(selectedFiles && selectedFiles.length > 0)}
+                                disabled={
+                                    !!(
+                                        selectedFiles &&
+                                        selectedFiles.length > 0
+                                    )
+                                }
                             />
                             Text Input
                         </Label>
 
-                        <Label htmlFor="file" className="flex items-center gap-1 cursor-pointer">
+                        <Label
+                            htmlFor="file"
+                            className="flex items-center gap-1 cursor-pointer"
+                        >
                             <RadioGroupItem
                                 value="file"
                                 id="file"
@@ -268,11 +299,20 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
                                     >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                        />
                                     </svg>
                                     <div className="flex-1 text-left">
-                                        <h3 className="text-sm font-medium text-gray-900">Upload Images</h3>
-                                        <p className="text-xs text-gray-500">Image files allowed</p>
+                                        <h3 className="text-sm font-medium text-gray-900">
+                                            Upload Images
+                                        </h3>
+                                        <p className="text-xs text-gray-500">
+                                            Image files allowed
+                                        </p>
                                     </div>
                                     <Input
                                         type="file"
@@ -285,13 +325,18 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                                         type="button"
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => document.getElementById('collaborator-file-input')?.click()}
+                                        onClick={() =>
+                                            document
+                                                .getElementById(
+                                                    'collaborator-file-input'
+                                                )
+                                                ?.click()
+                                        }
                                     >
                                         Choose Image
                                     </Button>
                                 </div>
                             </div>
-
                         </div>
                     )}
                 </div>
@@ -300,8 +345,11 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         <Label className="text-left">Uploaded Files:</Label>
                         <div className="flex flex-col gap-1 mt-2">
                             {uploadedImageUrls.map((url, index) => {
-                                const fileName = decodeURIComponent(url.split('/').pop() || `File-${index + 1}`)
-                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName)
+                                const fileName = decodeURIComponent(
+                                    url.split('/').pop() || `File-${index + 1}`
+                                )
+                                const isImage =
+                                    /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName)
                                 // const isPDF = /\.pdf$/i.test(fileName)
 
                                 return (
@@ -314,20 +362,24 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                                             if (isImage) {
                                                 const imgTab = window.open()
                                                 if (imgTab) {
-                                                    imgTab.document.write(`<img src="${url}" style="max-width:100%;height:auto;" />`)
-                                                    imgTab.document.title = fileName
+                                                    imgTab.document.write(
+                                                        `<img src="${url}" style="max-width:100%;height:auto;" />`
+                                                    )
+                                                    imgTab.document.title =
+                                                        fileName
                                                 } else {
                                                     toast.error({
                                                         title: 'Popup Blocked',
-                                                        description: 'Please allow popups in your browser.',
+                                                        description:
+                                                            'Please allow popups in your browser.',
                                                     })
                                                 }
-                                            // } 
-                                            // else if (isPDF) {
-                                            //     window.open(
-                                            //         `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`,
-                                            //         '_blank'
-                                            //     )
+                                                // }
+                                                // else if (isPDF) {
+                                                //     window.open(
+                                                //         `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`,
+                                                //         '_blank'
+                                                //     )
                                             } else {
                                                 toast.error({
                                                     title: 'Unsupported file type',
@@ -344,7 +396,6 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         </div>
                     </div>
                 )}
-
             </div>
 
             <DialogFooter className="sm:justify-end">
