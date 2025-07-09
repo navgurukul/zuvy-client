@@ -2,14 +2,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
-import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import CreateSessionDialog from './CreateSession'
 import { api } from '@/utils/axios.config'
-import { getCourseData, setStoreBatchValue } from '@/store/store'
+import { setStoreBatchValue } from '@/store/store'
 import RecordingCard from '../../_components/RecordingCard'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -176,7 +173,7 @@ function Page({ params }: any) {
     }, [params.courseId])
     const getAllModulesDetails = async () => {
         const response = await api.get(`/content/allModules/${params.courseId}`)
-        setModulesData(response.data);
+        setModulesData(response.data)
     }
 
     useEffect(() => {
@@ -230,7 +227,6 @@ function Page({ params }: any) {
                         />
                     </div>
                     <div className="flex flex-col lg:flex-row justify-between items-center">
-                        {/* <div className="w-[400px] pr-3"> */}
                         <Input
                             type="text"
                             placeholder="Search Classes"
@@ -238,18 +234,6 @@ function Page({ params }: any) {
                             value={search}
                             onChange={handleSetSearch}
                         />
-                        {/* </div> */}
-                        {
-                            <CreateSessionDialog
-                                courseId={params?.courseId || 0}
-                                bootcampData={bootcampData}
-                                getClasses={getHandleAllClasses}
-                                students={students}
-                                checkopenSessionForm={checkopenSessionForm}
-                                onClick={onClickHandler}
-                                modulesData={modulesData}
-                            />
-                        }
                     </div>
                     <div className="flex justify-start gap-6 my-6">
                         {tabs.map((tab) => (
@@ -357,18 +341,6 @@ function Page({ params }: any) {
                                         with the learners for course lessons or
                                         doubts
                                     </p>
-                                    <CreateSessionDialog
-                                        courseId={params.courseId || 0}
-                                        bootcampData={bootcampData}
-                                        getClasses={getHandleAllClasses}
-                                        students={students}
-                                        onClick={onClickHandler}
-                                        checkopenSessionForm={
-                                            checkopenSessionForm
-                                        }
-                                        modulesData={modulesData}
-
-                                    />
                                 </div>
                             )}
                         </div>

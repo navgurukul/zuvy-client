@@ -118,11 +118,14 @@ const formSchema = z
             'Total Classes must be at least equal to the number of selected days of week.',
         path: ['totalClasses'],
     })
-    type CreateSessionDialogProps = {
-        fetchingChapters: () => void;
-        onClose: () => void; // <-- Add this
-      };
-const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapters, onClose}) => {
+type CreateSessionDialogProps = {
+    fetchingChapters: () => void
+    onClose: () => void // <-- Add this
+}
+const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
+    fetchingChapters,
+    onClose,
+}) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
@@ -175,7 +178,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
             endTime: '',
             batch: '',
             daysOfWeek: [],
-            totalClasses: 0,
+            totalClasses: 1,
             // modulesId: 0,
         },
         mode: 'onChange',
@@ -285,13 +288,17 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
 
         try {
             await api.post('/classes', transformedData)
-            
-            const chaptersRes = await api.get(`/Content/allChaptersOfModule/${params.moduleId}`)
+
+            const chaptersRes = await api.get(
+                `/Content/allChaptersOfModule/${params.moduleId}`
+            )
             const chapters = chaptersRes?.data?.chapterWithTopic || []
-            
+
             const latestChapter = chapters[chapters.length - 1]
             if (latestChapter) {
-                router.push(`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`)
+                router.push(
+                    `/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
+                )
             }
             toast.success({
                 title: 'Success',
@@ -387,12 +394,12 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                                               'EE MMM dd yyyy'
                                                           )
                                                         : 'Pick a date'}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                                                 </Button>
                                             </FormControl>
                                         </DialogTrigger>
 
-                                        <DialogContent className="w-[35%] ">
+                                        <DialogContent className="w-auto">
                                             <Calendar
                                                 mode="single"
                                                 selected={
@@ -681,7 +688,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             )}
                         />
                     </div>
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="totalClasses"
                         render={({ field }) => (
@@ -705,8 +712,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
-                     
+                    /> */}
+
                     <div className="flex justify-end">
                         {isLoading ? (
                             <Button disabled>

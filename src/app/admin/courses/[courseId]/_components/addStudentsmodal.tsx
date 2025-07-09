@@ -30,7 +30,9 @@ const AddStudentsModal = ({
     batch,
     batchId,
     fetchBatchesData,
-    batchData
+    batchData,
+    studentData,
+    setStudentData,
 }: {
     id: number
     message: boolean
@@ -38,18 +40,20 @@ const AddStudentsModal = ({
     batchId: any
     fetchBatchesData?: any
     batchData?: boolean
+    studentData: { name: string; email: string }
+    setStudentData: (data: { name: string; email: string }) => void
 }) => {
     // misc
-    interface Student {
-        email: string
-        name: string
-    }
+    // interface Student {
+    //     email: string
+    //     name: string
+    // }
 
-    type StudentDataState = Student[]
+    // type StudentDataState = Student[]
 
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
-    const [studentData, setStudentData] = useState<StudentDataState | any>({})
+    // const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const { fetchCourseDetails } = getCourseData()
     const {
         setStudents,
@@ -128,7 +132,9 @@ const AddStudentsModal = ({
                 </DialogTitle>
                 <span>
                     {message
-                        ? batchData ? 'All the students are assigned to batches. Please add new students to create new batches' : 'Please add student(s) to create New Batches'
+                        ? batchData
+                            ? 'All the students are assigned to batches. Please add new students to create new batches'
+                            : 'Please add student(s) to create New Batches'
                         : ''}
                 </span>
             </DialogHeader>

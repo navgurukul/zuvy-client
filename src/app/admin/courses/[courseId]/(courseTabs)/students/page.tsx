@@ -38,6 +38,13 @@ export type StudentData = {
     profilePicture: string
 }
 
+interface Student {
+    email: string
+    name: string
+}
+
+type StudentDataState = Student[]
+
 const Page = ({ params }: { params: any }) => {
     const {
         students,
@@ -56,6 +63,8 @@ const Page = ({ params }: { params: any }) => {
     const { batchData } = getBatchData()
     const { attendanceData } = useAttendanceData(params.courseId)
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+    const [studentData, setStudentData] = useState<StudentDataState | any>({})
+    const [isOpen, setIsOpen] = useState(false)
 
     const newBatchData = batchData?.map((data) => {
         return {
@@ -106,8 +115,17 @@ const Page = ({ params }: { params: any }) => {
                                 />
                             </>
                         )}
-                        <Dialog>
-                            <DialogTrigger asChild>
+                        <Dialog
+                            open={isOpen}
+                            onOpenChange={(open) => {
+                                setIsOpen(open)
+                                if (!open) {
+                                    // Modal is closing → reset studentData
+                                    setStudentData({ name: '', email: '' })
+                                }
+                            }}
+                        >
+                            <DialogTrigger>
                                 <Button className="gap-x-2">
                                     <Plus /> Add Students
                                 </Button>
@@ -118,6 +136,8 @@ const Page = ({ params }: { params: any }) => {
                                 id={params.courseId || 0}
                                 batch={false}
                                 batchId={0}
+                                setStudentData={setStudentData}
+                                studentData={studentData}
                             />
                         </Dialog>
                         {attendanceData?.length > 0 && (
