@@ -45,6 +45,7 @@ function Page() {
         CurriculumItem[]
     >([])
     const { courseData } = getCourseData()
+    const [isLoading, setIsLoading] = useState(false)
     const [typeId, setTypeId] = useState(1)
     const [loading, setLoading] = useState(true)
     const [editMode, setEditMode] = useState(false)
@@ -285,8 +286,10 @@ function Page() {
                 })
                 fetchCourseModules()
                 setIsOpen(false)
+                setIsLoading(false)
             })
             .catch(() => {
+                setIsLoading(false)
                 toast.error({
                     title: 'Error',
                     description: "'Error creating module'",
@@ -429,6 +432,8 @@ function Page() {
                             handleTypeChange={handleTypeChange}
                             typeId={typeId}
                             isOpen={isOpen}
+                            setIsLoading={setIsLoading}
+                            isLoading={isLoading}
                         />
                     </Dialog>
                 </div>
@@ -522,6 +527,8 @@ function Page() {
                                     handleTypeChange={handleTypeChange}
                                     typeId={typeId}
                                     isOpen={isOpen}
+                                    setIsLoading={setIsLoading}
+                                    isLoading={isLoading}
                                 />
                             </Dialog>
                         </div>

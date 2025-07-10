@@ -387,7 +387,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                                                 })
                                             }
                                         }}
-                                        className="text-blue-600 text-sm"
+                                        className="text-blue-600 text-sm truncate overflow-hidden whitespace-nowrap w-full max-w-[23rem]"
                                     >
                                         {fileName}
                                     </a>

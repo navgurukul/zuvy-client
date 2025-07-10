@@ -46,6 +46,8 @@ interface newModuleDialogProps {
     handleTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void
     typeId: number
     isOpen: any
+    setIsLoading: (loading: boolean) => void
+    isLoading: boolean
 }
 
 const moduleSchema = z.object({
@@ -70,6 +72,8 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     handleTypeChange,
     typeId,
     isOpen,
+    setIsLoading,
+    isLoading,
 }) => {
     const form = useForm<z.infer<typeof moduleSchema>>({
         resolver: zodResolver(moduleSchema),
@@ -83,6 +87,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     })
 
     const onSubmit: any = (values: z.infer<typeof moduleSchema>) => {
+        setIsLoading(true)
         createModule()
     }
 
@@ -279,7 +284,11 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         }
                                                         name="months"
                                                         onKeyDown={(e) => {
-                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                            if (
+                                                                e.key === '-' ||
+                                                                e.key === 'e'
+                                                            )
+                                                                e.preventDefault()
                                                         }}
                                                         min={0}
                                                     />
@@ -312,7 +321,11 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         }
                                                         name="weeks"
                                                         onKeyDown={(e) => {
-                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                            if (
+                                                                e.key === '-' ||
+                                                                e.key === 'e'
+                                                            )
+                                                                e.preventDefault()
                                                         }}
                                                         min={0}
                                                     />
@@ -345,7 +358,11 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         }
                                                         name="days"
                                                         onKeyDown={(e) => {
-                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                            if (
+                                                                e.key === '-' ||
+                                                                e.key === 'e'
+                                                            )
+                                                                e.preventDefault()
                                                         }}
                                                         min={0}
                                                     />
@@ -360,7 +377,10 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
-                            <Button onClick={form.handleSubmit(onSubmit)}>
+                            <Button
+                                onClick={form.handleSubmit(onSubmit)}
+                                disabled={isLoading}
+                            >
                                 Create Module
                             </Button>
                         </DialogClose>

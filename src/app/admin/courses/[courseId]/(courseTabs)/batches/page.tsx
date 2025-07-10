@@ -44,10 +44,10 @@ import { useStudentData } from '@/app/admin/courses/[courseId]/(courseTabs)/stud
 import { columns } from './columns'
 // import { DataTable } from './dataTable'
 import {
-Tooltip,
-TooltipContent,
-TooltipProvider,
-TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
 } from '@/components/ui/tooltip'
 
 export type StudentData = {
@@ -57,6 +57,13 @@ export type StudentData = {
     name: string
     profilePicture: string
 }
+
+interface Student {
+    email: string
+    name: string
+}
+
+type StudentDataState = Student[]
 
 const Page = ({ params }: { params: any }) => {
     const { students } = useStudentData(params.courseId)
@@ -71,6 +78,7 @@ const Page = ({ params }: { params: any }) => {
     const [search, setSearch] = useState<string>('')
     const debouncedSearch = useDebounce(search, 1000)
     const debouncedSearchStudent = useDebounce(searchStudent, 1000)
+    const [studentData, setStudentData] = useState<StudentDataState | any>({})
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -83,7 +91,11 @@ const Page = ({ params }: { params: any }) => {
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const parsedValue = parseInt(capEnrollment)
-                return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
+                return (
+                    !isNaN(parsedValue) &&
+                    parsedValue > 0 &&
+                    parsedValue <= 100000
+                )
             },
             {
                 message:
@@ -138,6 +150,7 @@ const Page = ({ params }: { params: any }) => {
                 })
             } else {
                 const res = await api.post(`/batch`, convertedData)
+                setAssignStudents('')
                 if (params.courseId) {
                     fetchBatches(params.courseId)
                     fetchStudentData(params.courseId, setStoreStudentData)
@@ -150,6 +163,7 @@ const Page = ({ params }: { params: any }) => {
                 return true
             }
         } catch (error: any) {
+            setAssignStudents('')
             toast.error({
                 title: 'Failed',
                 description:
@@ -226,6 +240,8 @@ const Page = ({ params }: { params: any }) => {
                         batch={false}
                         batchData={batchData ? batchData?.length > 0 : false}
                         batchId={0}
+                        setStudentData={setStudentData}
+                        studentData={studentData}
                     />
                 </Dialog>
             )
@@ -350,11 +366,20 @@ const Page = ({ params }: { params: any }) => {
                                                                 placeholder="Cap Enrollment (max: 100,000)"
                                                                 type="name"
                                                                 {...field}
-                                                                onChange={(e) => {
+                                                                onChange={(
+                                                                    e
+                                                                ) => {
                                                                     // Prevent entering more than 6 digits
-                                                                    const value = e.target.value;
-                                                                    if (value.length <= 6) {
-                                                                        field.onChange(e);
+                                                                    const value =
+                                                                        e.target
+                                                                            .value
+                                                                    if (
+                                                                        value.length <=
+                                                                        6
+                                                                    ) {
+                                                                        field.onChange(
+                                                                            e
+                                                                        )
                                                                     }
                                                                 }}
                                                             />
@@ -506,12 +531,17 @@ const Page = ({ params }: { params: any }) => {
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <CardTitle className="font-semibold capitalize cursor-pointer">
-                                                                {batch.name.length > 25
-                                                                    ? batch.name.substring(0, 25) + '...'
+                                                                {batch.name
+                                                                    .length > 25
+                                                                    ? batch.name.substring(
+                                                                          0,
+                                                                          25
+                                                                      ) + '...'
                                                                     : batch.name}
                                                             </CardTitle>
                                                         </TooltipTrigger>
-                                                        {batch.name.length > 25 && (
+                                                        {batch.name.length >
+                                                            25 && (
                                                             <TooltipContent>
                                                                 {batch.name}
                                                             </TooltipContent>
