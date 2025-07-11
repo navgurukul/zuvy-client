@@ -403,7 +403,7 @@
                      <Dialog open={isOpen} onOpenChange={setIsOpen}>
                          <DialogTrigger asChild>
                              <Button
-                                 className="text-white bg-secondary"
+                                 className="text-white bg-success-dark opacity-75"
                              >
                                  Add Module
                              </Button>
@@ -501,11 +501,11 @@
                                  width={200}
                                  height={200}
                              />
-                             <p>Create new modules for the curriculum on Strapi CMS</p>
+                             <p className='text-gray-600 text-lg'>Create new modules for the curriculum on Strapi CMS</p>
                              <Dialog>
                                  <DialogTrigger asChild>
                                      <Button
-                                         className="text-white bg-secondary"
+                                         className="text-white bg-success-dark opacity-75"
                                      >
                                          Add Module
                                      </Button>

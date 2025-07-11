@@ -311,7 +311,7 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
             <DialogTrigger asChild>
                 <Button
                     onClick={toggleForm}
-                    className="text-white bg-secondary lg:max-w-[150px] w-full lg:mt-2 mt-5"
+                    className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full lg:mt-2 mt-5"
                 >
                     Create Session
                 </Button>
@@ -898,11 +898,10 @@ const CreateSessionDialog: React.FC<CreateSessionProps> = (props) => {
                                             ) : (
                                                 <Button
                                                     disabled={isSubmitDisabled}
-                                                    variant={'secondary'}
                                                     onClick={form.handleSubmit(
                                                         onSubmit
                                                     )}
-                                                    className={`w-1/3 mt-3`}
+                                                    className={`w-1/3 mt-3 text-green-700 border-green-700 bg-white border hover:bg-success-dark opacity-75 hover:text-white`}
                                                 >
                                                     Create Session
                                                 </Button>

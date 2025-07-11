@@ -71,13 +71,13 @@ function CourseLayout() {
     return (
         <>
             {/* <Breadcrumb crumbs={crumbs} /> */}
-            <Link href={'/admin/courses'} className="flex space-x-2 w-[120px]">
+            <Link href={'/admin/courses'} className="flex space-x-2 w-[120px] text-gray-800">
                 <ArrowLeft size={20} />
-                <p className="ml-1 inline-flex text-sm font-medium text-gray-800 md:ml-2">
+                <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
                     My Courses
                 </p>
             </Link>
-            <h1 className="text-3xl text-start font-bold my-6">
+            <h1 className="text-3xl text-start font-bold my-6 text-gray-600">
                 {courseData?.name}
             </h1>
 

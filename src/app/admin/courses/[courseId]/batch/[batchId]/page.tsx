@@ -656,7 +656,7 @@ const BatchesInfo = ({
                             />
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className=" gap-x-2 ">
+                                    <Button className=" gap-x-2 bg-success-dark opacity-75">
                                         <Plus /> Add Students
                                     </Button>
                                 </DialogTrigger>

@@ -112,7 +112,7 @@ const Page = ({ params }: any) => {
             <>
                 <BreadcrumbComponent crumbs={crumbs} />
                 <MaxWidthWrapper>
-                    <div className="flex  items-center gap-x-3">
+                    <div className="flex text-gray-600 items-center gap-x-3">
                         <div className="flex flex-col gap-x-2">
                             <div className="flex gap-x-4 my-4">
                                 <Avatar>
@@ -131,19 +131,19 @@ const Page = ({ params }: any) => {
                                                 .userDetails.name
                                         }
                                     </h1>
-                                    <h3 className="text-left font-semibold">
+                                    <h3 className="text-left font-semibold text-[15px]">
                                         Individual Report
                                     </h3>
-                                    <h3 className="text-left font-semibold">
+                                    <h3 className="text-left font-semibold text-[15px]">
                                         Submitted on {formattedDate}
                                     </h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 text-gray-600">
                         <div className="p-4 bg-white rounded shadow">
-                            <h2 className="text-xl text-left font-bold mb-2">
+                            <h2 className="text-lg text-left font-bold mb-2">
                                 Title:-{' '}
                                 {
                                     indiviDualStudentData
@@ -152,7 +152,7 @@ const Page = ({ params }: any) => {
                             </h2>
                             <div></div>
                             <div className="w-full flex flex-col flex-start">
-                                <h3 className="text-md  font-semibold text-left  mb-2">
+                                <h3 className="text-[15px]  font-semibold text-left  mb-2">
                                     Problem Description:
                                 </h3>
 
@@ -166,7 +166,7 @@ const Page = ({ params }: any) => {
                             </div>
                         </div>
                         <div className="p-4 flex flex-col gap-y-1 bg-white rounded shadow">
-                            <h2 className="text-lg text-left font-bold mb-2">
+                            <h2 className="text-[15px] text-left font-bold mb-2">
                                 Project Link
                             </h2>
                             <Link
@@ -174,7 +174,7 @@ const Page = ({ params }: any) => {
                                 className="text-blue-600 text-left hover:underline"
                                 target="_blank"
                             >
-                                <h2 className="text-left">
+                                <h2 className="text-left  text-[15px]">
                                     {
                                         indiviDualStudentData
                                             ?.projectSubmissionDetails

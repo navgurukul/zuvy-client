@@ -316,14 +316,14 @@ const Mcqs = (props: Props) => {
             {isEditQuizModalOpen && (
                 <div>
                     <div
-                        className="flex cursor-pointer p-5 text-secondary"
+                        className="flex cursor-pointer p-5 text-[rgb(81,134,114)]"
                         onClick={() => setIsEditModalOpen(false)}
                     >
                         <ChevronLeft />
-                        <h1>MCQ Problems</h1>
+                        <h6>MCQ Problems</h6>
                     </div>
                     <div className="flex flex-col items-center justify-center">
-                        <h1 className="text-xl mb-4 ml-4 font-semibold text-start w-[590px] justify-start ">
+                        <h1 className="text-lg mb-4 ml-4 font-semibold text-start w-[590px] justify-start text-gray-600">
                             Edit MCQ
                         </h1>
                         <EditMcqForm
@@ -338,15 +338,15 @@ const Mcqs = (props: Props) => {
             {isMcqModalOpen && (
                 <div className=" ">
                     <div
-                        className="flex cursor-pointer p-5 text-secondary"
+                        className="flex cursor-pointer p-5 text-[rgb(81,134,114)]"
                         onClick={() =>
                             setIsMcqModalOpen((prevState) => !prevState)
                         }
                     >
                         <ChevronLeft />
-                        <h1>MCQ Problems</h1>
+                        <h6>MCQ Problems</h6>
                     </div>
-                    <div className="flex flex-col items-center justify-center ">
+                    <div className="flex flex-col items-center justify-center text-gray-600">
                         <div>
                             <RadioGroup
                                 className="flex flex-col items-center w-full  "
@@ -362,7 +362,7 @@ const Mcqs = (props: Props) => {
                                             <RadioGroupItem
                                                 value="bulk"
                                                 id="r1"
-                                                className="text-secondary mt-1"
+                                                className="text-[rgb(81,134,114)] border-black mt-1"
                                             />
                                             <Label
                                                 className="font-semibold text-md"
@@ -375,7 +375,7 @@ const Mcqs = (props: Props) => {
                                             <RadioGroupItem
                                                 value="oneatatime"
                                                 id="r2"
-                                                className="text-secondary mt-1"
+                                                className="text-[rgb(81,134,114)] border-black mt-1"
                                             />
                                             <Label
                                                 className="font-semibold text-md"
@@ -388,7 +388,7 @@ const Mcqs = (props: Props) => {
                                             <RadioGroupItem
                                                 value="AI"
                                                 id="r2"
-                                                className="text-secondary mt-1"
+                                                className="text-[rgb(81,134,114)] border-black mt-1"
                                             />
                                             <Label
                                                 className="font-semibold text-lg"
@@ -407,7 +407,7 @@ const Mcqs = (props: Props) => {
             )}
             {!isMcqModalOpen && !isEditQuizModalOpen && (
                 <MaxWidthWrapper className="h-screen">
-                    <h1 className="text-left font-semibold text-2xl">
+                    <h1 className="text-left font-semibold text-2xl text-gray-600">
                         Resource Library - MCQs
                     </h1>
                     <div className="flex justify-between">
@@ -425,7 +425,7 @@ const Mcqs = (props: Props) => {
                         <div className="flex flex-row items-center gap-2">
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
+                                    <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full mt-5">
                                         <p>Create Topic</p>
                                     </Button>
                                 </DialogTrigger>
@@ -440,7 +440,7 @@ const Mcqs = (props: Props) => {
                                 onClick={() =>
                                     setIsMcqModalOpen((prevState) => !prevState)
                                 }
-                                className="mt-5"
+                                className="mt-5 bg-success-dark opacity-75"
                             >
                                 + Create MCQ
                             </Button>

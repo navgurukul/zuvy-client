@@ -215,7 +215,7 @@ const Page = ({ params }: { params: any }) => {
             return (
                 <Dialog>
                     <DialogTrigger asChild>
-                        <Button className="lg:max-w-[150px] w-full mt-5">
+                        <Button className="lg:max-w-[150px] bg-success-dark opacity-75 w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
@@ -233,7 +233,7 @@ const Page = ({ params }: { params: any }) => {
             return (
                 <Dialog onOpenChange={(isOpen) => isOpen && form.reset()}>
                     <DialogTrigger asChild>
-                        <Button className="lg:max-w-[150px] w-full mt-5">
+                        <Button className="lg:max-w-[150px] bg-success-dark opacity-75 w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
                         </Button>
                     </DialogTrigger>
@@ -277,7 +277,7 @@ const Page = ({ params }: { params: any }) => {
                                             </h1>
                                             <div className="flex justify-between w-full pt-2">
                                                 <Button
-                                                    className="w-3/2 bg-muted text-muted-foreground"
+                                                    className="w-3/2 bg-secondary opacity-75"
                                                     onClick={() =>
                                                         setAssignStudents('')
                                                     }
@@ -286,7 +286,7 @@ const Page = ({ params }: { params: any }) => {
                                                 </Button>
                                                 <DialogClose asChild>
                                                     <Button
-                                                        className="w-3/2"
+                                                        className="w-3/2 bg-success-dark opacity-75"
                                                         type="submit"
                                                         disabled={
                                                             !form.formState
@@ -426,7 +426,7 @@ const Page = ({ params }: { params: any }) => {
                                                 {assignLearners === 'all' ? (
                                                     <DialogClose asChild>
                                                         <Button
-                                                            className="w-1/2"
+                                                            className="w-1/2 bg-success-dark opacity-75"
                                                             type="submit"
                                                             disabled={
                                                                 !form.formState
@@ -484,7 +484,7 @@ const Page = ({ params }: { params: any }) => {
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
                             <div className="relative top-[70%]">
-                                <Spinner className="text-secondary" />
+                                <Spinner className="text-[rgb(81,134,114)]" />
                             </div>
                         </div>
                     </div>

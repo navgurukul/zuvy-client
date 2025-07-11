@@ -119,9 +119,9 @@ const IndividualStudentAssesment = ({
                         />
                         <h1 className="text-start">
                             {type !== 'codingSubmission' ? (
-                                <span>Score: {scoreHandler().score}</span>
+                                <span className="text-[15px]">Score: {scoreHandler().score}</span>
                             ) : (
-                                <span>Status: {data.status}</span>
+                                <span className="text-[15px]">Status: {data.status}</span>
                             )}
                         </h1>
                     </div>
@@ -131,7 +131,7 @@ const IndividualStudentAssesment = ({
                 <div className="absolute bottom-3 right-3">
                     <Button variant={'ghost'} className="w-full lg:w-auto">
                         <Link
-                            className="text-secondary font-semibold text-md flex items-center w-full truncate"
+                            className="text-[rgb(81,134,114)] font-semibold text-md flex items-center w-full truncate"
                             href={questionInfo.link}
                         >
                             View Answers

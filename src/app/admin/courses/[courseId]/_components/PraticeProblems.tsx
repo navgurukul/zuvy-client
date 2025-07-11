@@ -21,7 +21,7 @@ type Props = {
 const PracticeProblems = (props: Props) => {
     return (
         <div className="w-full mb-10">
-            <h1 className=" text-start font-semibold">{props.name}</h1>
+            <h1 className=" text-start text-lg font-semibold">{props.name}</h1>
             <section className=" bg-white dark:bg-gray-900">
                 <div className="mx-auto">
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-3">

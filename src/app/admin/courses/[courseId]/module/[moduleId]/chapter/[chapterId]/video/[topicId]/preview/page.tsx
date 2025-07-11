@@ -17,7 +17,7 @@ const PreviewVideo = ({ params }: { params: any }) => {
     return (
         <>
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode.
                 </h1>
             </div>
@@ -36,7 +36,7 @@ const PreviewVideo = ({ params }: { params: any }) => {
                 <div className="w-full flex flex-col items-center justify-center">
                     <div className="w-[70%] aspect-video justify-center items-center">
                         <div className="flex flex-col items-start mb-5">
-                            <h1 className="text-2xl font-semibold text-left">
+                            <h1 className="text-2xl font-semibold text-gray-600 text-left">
                                 {videoPreviewContent?.title
                                     ? videoPreviewContent.title
                                     : 'No Title yet'}

@@ -113,8 +113,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
-                            variant="outline"
-                            className="w-48 sm:w-56 justify-between"
+                            className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]"
                         >
                             {getTopicsButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -147,8 +146,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
-                            variant="outline"
-                            className="w-48 sm:w-56 justify-between"
+                            className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]"
                         >
                             {getDifficultiesButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

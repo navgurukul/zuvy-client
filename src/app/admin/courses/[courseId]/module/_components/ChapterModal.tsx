@@ -80,38 +80,38 @@ function ChapterModal({
     return (
         <Dialog open={true}>
             <DialogContent className='max-w-max'>
-                <DialogTitle className="mb-3 text-left">New Chapter</DialogTitle>
+                <DialogTitle className="mb-3 text-left text-gray-600 text-[16px]">New Chapter</DialogTitle>
                 <div className="grid grid-cols-3 p-3 gap-y-6 gap-x-2 ">
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(1)}
                     >
                         <Video className="mr-2 h-6 w-6" />
                         <span>Video</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(2)}
                     >
                         <BookOpenText className="mr-2 h-6 w-6" />
                         <span>Article</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(3)}
                     >
                         <SquareCode className="mr-2 h-6 w-6" />
                         <span>Coding Problem</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(4)}
                     >
                         <FileQuestion className="mr-2 h-6 w-6" />
                         <span>Quiz</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(5)}
                     >
                         <PencilLine className="mr-2 h-6 w-6" />
@@ -119,21 +119,21 @@ function ChapterModal({
                     </div>
 
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(6)}
                     >
                         <BookOpenCheck className="mr-2 h-6 w-6" />
                         <span>Assessment</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => createChapter(7)}
                     >
                         <Newspaper className="mr-2 h-6 w-6" />
                         <span>Form</span>
                     </div>
                     <div
-                        className="flex items-center cursor-pointer hover:bg-secondary/50 p-2 rounded-sm"
+                        className="flex items-center cursor-pointer hover:bg-[rgb(81,134,114)]/50 p-2 rounded-sm text-gray-600 text-[16px]"
                         onClick={() => setLiveDialogOpen(true)}
                     >
                         <Play className="mr-2 h-6 w-6" />
@@ -146,13 +146,13 @@ function ChapterModal({
                     if (!open) setClassType('createLiveClass')
                 }}>
                     <DialogContent className="max-w-2xl w-full">
-                        <RadioGroup value={classType} className='flex flex-row items-center' onValueChange={setClassType} defaultValue="createLiveClass">
+                        <RadioGroup value={classType} className='flex flex-row items-center text-gray-600' onValueChange={setClassType} defaultValue="createLiveClass">
                             <div className="flex  space-x-2">
-                                <RadioGroupItem value="createLiveClass" id="r1" />
+                                <RadioGroupItem className='!border-black !text-black' value="createLiveClass" id="r1" />
                                 <Label htmlFor="r1">Create Live Class</Label>
                             </div>
                             <div className="flex space-x-2 ">
-                                <RadioGroupItem value="existingLiveClass" id="r2" />
+                                <RadioGroupItem className='!border-black !text-black' value="existingLiveClass" id="r2" />
                                 <Label htmlFor="r2">Select from Existing Classes</Label>
                             </div>
                         </RadioGroup>

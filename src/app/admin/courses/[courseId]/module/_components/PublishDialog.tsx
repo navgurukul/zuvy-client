@@ -262,7 +262,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
     return (
         <>
             <DialogHeader>
-                <DialogTitle className="text-lg font-semibold">Publish</DialogTitle>
+                <DialogTitle className="text-lg font-semibold text-gray-600">Publish</DialogTitle>
             </DialogHeader>
             <Tabs value={tab} onValueChange={(val) => setTab(val as 'schedule' | 'now' | 'draft')} // Added 'draft' to cast
                 className={`mt-4 text-left`}>
@@ -270,7 +270,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                     <div>
                         <TabsTrigger
                             value="schedule"
-                            className={`flex-1 mt-1 ${tab === 'schedule' ? '!text-secondary border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
+                            className={`flex-1 mt-1 ${tab === 'schedule' ? '!text-[rgb(81,134,114)] border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
                         >
                             Schedule for Future
                         </TabsTrigger>
@@ -278,7 +278,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                     <div>
                         <TabsTrigger
                             value="now"
-                            className={`flex-1 mt-1 ${tab === 'now' ? '!text-secondary border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
+                            className={`flex-1 mt-1 ${tab === 'now' ? '!text-[rgb(81,134,114)] border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
                         >
                             Publish Now
                         </TabsTrigger>
@@ -286,7 +286,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                     <div>
                         <TabsTrigger
                             value="draft"
-                            className={`flex-1 mt-1 ${tab === 'draft' ? '!text-secondary border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
+                            className={`flex-1 mt-1 ${tab === 'draft' ? '!text-[rgb(81,134,114)] border-b-green-700 border-b-2 text-bold' : '!text-[#6E6E6E]'}`}
                         >
                             Move To Draft
                         </TabsTrigger>
@@ -320,12 +320,12 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                             error: errors.endTime,
                         },                    ].map(({ label, date, setDate, time, setTime, error }, i) => (
                         <div key={i} className="space-y-1">
-                            <label className="text-sm font-medium block">{label}</label>
+                            <label className="text-sm text-[#6E6E6E] font-medium block">{label}</label>
                             <div className="flex items-center gap-4"> {/* Changed items-start to items-center */}
                                 <div className="flex-1 mt-2">
                                     <Dialog open={scheduleCalendarOpen[i]} onOpenChange={(isOpen) => setScheduleCalendarOpen(prev => { const newState = [...prev]; newState[i] = isOpen; return newState; })}>
                                         <DialogTrigger asChild>
-                                            <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 w-full justify-start text-left font-normal">
                                                 {date ? format(date, 'dd/MM/yyyy') : <span className="text-muted-foreground">DD/MM/YYYY</span>}
                                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                             </Button>
@@ -367,9 +367,9 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                     )}
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">Cancel</Button>
                         </DialogClose>
-                        <Button onClick={handleScheduleAssessment}>Schedule Assessment</Button>
+                        <Button onClick={handleScheduleAssessment} className='bg-success-dark opacity-75'>Schedule Assessment</Button>
                     </div>
                 </TabsContent>
 
@@ -378,12 +378,12 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                         The assessment will be published and start immediately. End date and time are optional.
                     </p>                    
                     <div className="space-y-1">
-                        <label className="text-sm font-medium block">Assessment End Date and Time (Optional)</label>
+                        <label className="text-sm font-medium block text-gray-600">Assessment End Date and Time (Optional)</label>
                         <div className="flex justify-start items-center gap-4"> {/* Changed items-start to items-center */}
                             <div className="flex-1 mt-2">
                                 <Dialog open={endNowCalendarOpen} onOpenChange={setEndNowCalendarOpen}>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" className="w-full text-left font-normal">
+                                        <Button className="w-full text-left font-normal border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
                                             {endNowDate ? format(endNowDate, 'dd/MM/yyyy') : <span className="text-muted-foreground">DD/MM/YYYY</span>}
                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
@@ -419,9 +419,9 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                     </div>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">Cancel</Button>
                         </DialogClose>
-                        <Button onClick={handlePublishNow}>Publish Assessment</Button>
+                        <Button onClick={handlePublishNow} className='bg-success-dark opacity-75'>Publish Assessment</Button>
                     </div>
                 </TabsContent>
 
@@ -431,12 +431,12 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
                         {currentAssessmentStatus && ` The current status is: ${currentAssessmentStatus}. `}
                         Students will no longer be able to access or submit it once it is in a draft state.
                     </p>
-                    <p className="text-sm">
+                    <p className="text-sm text-gray-600">
                         Clicking the button below will clear its current publish, start, and end dates, reverting it to a draft state.
                     </p>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">Cancel</Button>
                         </DialogClose>
                         <Button onClick={handleMoveToDraft} variant="destructive">Move to Draft</Button>
                     </div>

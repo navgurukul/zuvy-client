@@ -116,7 +116,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('practice')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'practice'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -126,7 +126,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('assessments')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'assessments'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -136,7 +136,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('projects')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'projects'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -146,7 +146,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('form')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'form'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -156,7 +156,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('assignments')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'assignments'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -166,7 +166,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('video')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'video'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -315,7 +315,7 @@ const Page = ({ params }: { params: any }) => {
                                 return (
                                     <div
                                         key={item.id}
-                                        className="relative lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4"
+                                        className="relative lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4 text-gray-600"
                                     >
                                         {/* Download Icon positioned at the top right corner of the card */}
                                         <button
@@ -339,7 +339,7 @@ const Page = ({ params }: { params: any }) => {
                                         </button>
 
                                         <div className="flex flex-col w-full">
-                                            <h1 className="font-semibold text-start">
+                                            <h1 className="font-semibold text-start text-sm">
                                                 {item.projectData[0].title}
                                             </h1>
                                             <div className="flex items-center gap-2">
@@ -358,11 +358,11 @@ const Page = ({ params }: { params: any }) => {
                                                 >
                                                     <Button
                                                         variant={'ghost'}
-                                                        className="text-secondary text-md"
+                                                        className="text-green-700 text-sm"
                                                     >
                                                         View Submission{' '}
                                                         <ChevronRight
-                                                            className="text-secondary"
+                                                            className="text-green-700"
                                                             size={17}
                                                         />
                                                     </Button>
@@ -383,9 +383,9 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     ) : (
                         <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                            <h1 className="text-center font-semibold ">
+                            <h5 className="text-center font-semibold">
                                 No Projects Found
-                            </h1>
+                            </h5>
                             <Image
                                 src="/emptyStates/curriculum.svg"
                                 alt="No Video Found"
@@ -413,9 +413,9 @@ const Page = ({ params }: { params: any }) => {
                             })
                         ) : (
                             <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                                <h1 className="text-center font-semibold ">
+                                <h5 className="text-center font-semibold">
                                     No Form Found
-                                </h1>
+                                </h5>
                                 <Image
                                     src="/emptyStates/curriculum.svg"
                                     alt="No Video Found"

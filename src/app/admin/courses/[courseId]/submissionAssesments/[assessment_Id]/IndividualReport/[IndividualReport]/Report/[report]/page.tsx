@@ -352,10 +352,10 @@ const Page = ({ params }: { params: any }) => {
                             {/* Coding Submission */}
                             {codingdata && codingdata.length === 0 ? (
                                 <div className='w-full '>
-                                    <h1 className="text-left font-semibold">
+                                    <h1 className="text-left text-gray-600 text-[14px] font-semibold">
                                         Coding Questions
                                     </h1>
-                                    <p className="text-center py-20 font-semibold w-5/6 h-1/2 shadow-lg transition-transform transform hover:shadow-xl">
+                                    <p className="text-center text-gray-600 py-20 font-semibold w-5/6 h-1/2 shadow-lg transition-transform transform hover:shadow-xl">
                                         This student has not submitted any coding question.
                                     </p>
                                 </div>
@@ -363,7 +363,7 @@ const Page = ({ params }: { params: any }) => {
                                 codingdata.map((data) => (
                                     <>
                                   <div>
-                                  <h1 className="text-left font-semibold">
+                                  <h1 className="text-left text-gray-600 text-[14px] font-semibold">
                                             Coding Question
                                         </h1>
                                         <IndividualStudentAssesment
@@ -392,7 +392,7 @@ const Page = ({ params }: { params: any }) => {
                                 assesmentData?.submitedOutsourseAssessment
                                     ?.hardMcqQuestions > 0) && (
                                     <div className="w-full">
-                                        <h1 className="text-left font-semibold">
+                                        <h1 className="text-left text-gray-600 text-[14px] font-semibold">
                                             MCQs
                                         </h1>
                                         {assesmentData?.mcqQuestionCount === 0 &&

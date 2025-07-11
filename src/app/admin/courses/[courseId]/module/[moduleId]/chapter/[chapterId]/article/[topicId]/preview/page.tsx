@@ -58,7 +58,7 @@ const PreviewArticle = ({ params }: { params: any }) => {
     return (
         <div className="">
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode.
                 </h1>
             </div>
@@ -95,7 +95,7 @@ const PreviewArticle = ({ params }: { params: any }) => {
                             />
                         </div>
                         <div className="mt-2 text-end">
-                            <Button disabled>Mark as Done </Button>
+                            <Button className='bg-[#518672]' disabled>Mark as Done </Button>
                         </div>
                     </div>
                 </div>

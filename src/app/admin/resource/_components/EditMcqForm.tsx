@@ -311,7 +311,7 @@ const EditMcqForm = ({
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmitHandler)}
-                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center "
+                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center text-gray-600"
             >
                 <FormField
                     control={form.control}
@@ -338,7 +338,7 @@ const EditMcqForm = ({
                                                     <FormControl className="">
                                                         <RadioGroupItem
                                                             value={difficulty}
-                                                            className="text-secondary"
+                                                            className="text-[rgb(81,134,114)] border-black"
                                                         />
                                                     </FormControl>
                                                     <FormLabel className="font-normal text-md ">
@@ -421,7 +421,7 @@ const EditMcqForm = ({
                                     key={field.id}
                                     className={`${
                                         activeVariantIndex === index
-                                            ? 'border-b-4 border-secondary text-secondary text-md'
+                                            ? 'border-b-4 border-[rgb(81,134,114)] text-[rgb(81,134,114)] text-md'
                                             : ''
                                     } rounded-none`}
                                     variant="ghost"
@@ -502,6 +502,7 @@ const EditMcqForm = ({
                                                         >
                                                             <FormControl>
                                                                 <RadioGroupItem
+                                                                    className="text-black border-black"
                                                                     value={optionIndex.toString()}
                                                                 />
                                                             </FormControl>
@@ -560,7 +561,7 @@ const EditMcqForm = ({
                                             onClick={() =>
                                                 appendOption({ optionText: '' })
                                             }
-                                            className="text-left text-secondary font-semibold text-md"
+                                            className="text-left text-[rgb(81,134,114)] font-semibold text-md"
                                         >
                                             + Add Option
                                         </Button>
@@ -606,7 +607,7 @@ const EditMcqForm = ({
                             />
                         </>
                     )}
-                    <Button className="" type="submit">
+                    <Button className="bg-success-dark opacity-75" type="submit">
                         {isVariantAdded ? 'Add Variant' : 'Save Question'}
                     </Button>
                 </div>

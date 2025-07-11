@@ -33,7 +33,7 @@ export function SessionExpiredModal() {
                     Your session has expired. Please log in again to continue.
                 </p>
                 <DialogFooter>
-                    <Button onClick={handleLogout}>Login Again</Button>
+                    <Button onClick={handleLogout} className="bg-success-dark opacity-75">Login Again</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

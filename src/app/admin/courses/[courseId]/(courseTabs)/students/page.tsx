@@ -79,7 +79,7 @@ const Page = ({ params }: { params: any }) => {
     const userIds = selectedRows.map((item: any) => item.userId)
 
     return (
-        <div>
+        <div className="text-gray-600">
             <div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
                     <Input
@@ -108,7 +108,7 @@ const Page = ({ params }: { params: any }) => {
                         )}
                         <Dialog>
                             <DialogTrigger asChild>
-                                <Button className="gap-x-2">
+                                <Button className="gap-x-2 bg-success-dark opacity-75">
                                     <Plus /> Add Students
                                 </Button>
                             </DialogTrigger>

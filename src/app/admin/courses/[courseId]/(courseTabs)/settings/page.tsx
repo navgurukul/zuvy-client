@@ -96,13 +96,13 @@ const Page = ({ params }: { params: any }) => {
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
                             <div className="relative top-[25%]">
-                                <Spinner className="text-secondary" />
+                                <Spinner className="text-[rgb(81,134,114)]" />
                             </div>
                         </div>
                     </div>
                 </div>
             ) : (
-                <div>
+                <div className="text-gray-600">
                     <div className=" w-full text-start mb-5">
                         <div>
                             <h1 className="text-lg font-semibold">

@@ -297,7 +297,7 @@ function Page({ params }: { params: any }) {
     }
 
     return (
-        <div className="max-w-[400px] m-auto">
+        <div className="max-w-[400px] m-auto text-gray-600">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
@@ -336,7 +336,7 @@ function Page({ params }: { params: any }) {
                         ref={fileInputRef}
                     />
                     <Button
-                        variant={'outline'}
+                        className='text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]'
                         type="button"
                         onClick={handleButtonClick}
                     >
@@ -507,9 +507,8 @@ function Page({ params }: { params: any }) {
                                     <PopoverTrigger asChild>
                                         <FormControl>
                                             <Button
-                                                variant={'outline'}
                                                 className={cn(
-                                                    'pl-3 text-left font-normal w-full',
+                                                    'pl-3 text-left font-normal w-full text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                     !field.value &&
                                                     'text-muted-foreground'
                                                 )}
@@ -578,6 +577,7 @@ function Page({ params }: { params: any }) {
                                                 <FormControl>
                                                     <RadioGroupItem
                                                         value={language}
+                                                        className='text-black border-black'
                                                     />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
@@ -592,7 +592,7 @@ function Page({ params }: { params: any }) {
                         )}
                     />
 
-                    <Button type="submit">Submit</Button>
+                    <Button className='bg-success-dark opacity-75' type="submit">Submit</Button>
                 </form>
             </Form>
         </div>

@@ -185,7 +185,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     }
 
     return (
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md text-gray-600">
             <DialogHeader className="text-left">
                 <DialogTitle className="text-left">New Course</DialogTitle>
             </DialogHeader>
@@ -233,7 +233,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             <RadioGroupItem
                                 value="text"
                                 id="text"
-                                className="m-0 p-0 scale-95"
+                                className="m-0 p-0 scale-95 text-black border-black"
                                 disabled={!!(selectedFiles && selectedFiles.length > 0)}
                             />
                             Text Input
@@ -243,7 +243,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             <RadioGroupItem
                                 value="file"
                                 id="file"
-                                className="m-0 p-0 scale-95"
+                                className="m-0 p-0 scale-95 text-black border-black"
                                 disabled={!!collaborator.trim()}
                             />
                             Image Upload
@@ -283,7 +283,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                                     />
                                     <Button
                                         type="button"
-                                        variant="outline"
+                                        className='text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]'
                                         size="sm"
                                         onClick={() => document.getElementById('collaborator-file-input')?.click()}
                                     >
@@ -349,10 +349,11 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button variant="outline">Cancel</Button>
+                    <Button className='text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]'>Cancel</Button>
                 </DialogClose>
                 <DialogClose asChild>
                     <Button
+                        className='bg-[rgb(81,134,114)]'
                         onClick={handleCreateCourseWithUpload}
                         disabled={!newCourseName.trim() || isUploading}
                     >

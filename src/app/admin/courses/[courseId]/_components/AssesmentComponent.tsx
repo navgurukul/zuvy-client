@@ -201,9 +201,9 @@ const AssesmentComponent = (props: Props) => {
                     >
                         <Button
                             variant="ghost"
-                            className="flex h-full justify-center items-center w-full lg:w-auto py-2 text-secondary font-bold rounded-md transition-all duration-300"
+                            className="flex h-full justify-center items-center w-full lg:w-auto py-2 font-bold rounded-md transition-all duration-300"
                         >
-                            <h1 className="w-full text-center flex lg:text-right">
+                            <h1 className="w-full text-center text-sm flex lg:text-right text-green-700">
                                 View Submission
                                 <ChevronRight size={20} className="ml-2" />
                             </h1>

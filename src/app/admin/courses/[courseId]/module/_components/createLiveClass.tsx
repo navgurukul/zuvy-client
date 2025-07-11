@@ -328,7 +328,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
 
     return (
         <div className="w-full ">
-            <div className="text-lg text-left font-semibold mb-4">
+            <div className="text-lg text-left font-semibold mb-4 text-gray-600">
                 Live Classes Chapter
             </div>
 
@@ -341,7 +341,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                         control={form.control}
                         name="sessionTitle"
                         render={({ field }) => (
-                            <FormItem className="text-left">
+                            <FormItem className="text-left text-gray-600">
                                 <FormLabel>
                                     Session Title
                                     <span className="text-red-500">*</span>
@@ -363,7 +363,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             control={form.control}
                             name="startDate"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col text-left">
+                                <FormItem className="flex flex-col text-left text-gray-600">
                                     <FormLabel className="p-0 my-2">
                                         Classes start date
                                         <span className="text-red-500">*</span>
@@ -375,8 +375,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={'outline'}
-                                                    className={`w-full text-left font-normal ${
+                                                    className={`w-full text-left font-normal text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)] ${
                                                         !field.value &&
                                                         'text-muted-foreground'
                                                     }`}
@@ -425,7 +424,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                 control={form.control}
                                 name="startTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left ">
+                                    <FormItem className="flex flex-col text-left text-gray-600">
                                         <FormLabel className="p-0 my-2">
                                             Start Time
                                             <span className="text-red-500">
@@ -471,7 +470,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                 control={form.control}
                                 name="endTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left ">
+                                    <FormItem className="flex flex-col text-left text-gray-600">
                                         <FormLabel className="p-0 my-2">
                                             End Time
                                             <span className="text-red-500">
@@ -496,7 +495,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             control={form.control}
                             name="batch"
                             render={({ field }) => (
-                                <FormItem className="text-left">
+                                <FormItem className="text-left text-gray-600">
                                     <FormLabel>
                                         Batches
                                         <span className="text-red-500">*</span>
@@ -505,11 +504,10 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant="outline"
                                                     role="combobox"
                                                     aria-expanded={formIsOpen}
                                                     className={cn(
-                                                        'w-full justify-between',
+                                                        'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                         !field.value &&
                                                             'text-muted-foreground'
                                                     )}
@@ -580,7 +578,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             control={form.control}
                             name="daysOfWeek"
                             render={({ field }) => (
-                                <FormItem className="text-left">
+                                <FormItem className="text-left text-gray-600">
                                     <FormLabel>
                                         Days of Week
                                         <span className="text-red-500">*</span>
@@ -589,11 +587,10 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant="outline"
                                                     role="combobox"
                                                     aria-expanded={formIsOpen}
                                                     className={cn(
-                                                        'w-full justify-between',
+                                                        'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                         field.value.length ===
                                                             0 &&
                                                             'text-muted-foreground'
@@ -685,7 +682,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                         control={form.control}
                         name="totalClasses"
                         render={({ field }) => (
-                            <FormItem className="text-left flex flex-col">
+                            <FormItem className="text-left flex flex-col text-gray-600">
                                 <FormLabel className="p-0 my-2">
                                     Total Classes
                                     <span className="text-red-500">*</span>
@@ -716,9 +713,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                         ) : (
                             <Button
                                 disabled={isSubmitDisabled}
-                                variant={'secondary'}
                                 onClick={form.handleSubmit(onSubmit)}
-                                className="w-1/3 mt-3"
+                                className="w-1/3 mt-3 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border hover:bg-[rgb(81,134,114)] hover:text-white"
                             >
                                 Create Session
                             </Button>

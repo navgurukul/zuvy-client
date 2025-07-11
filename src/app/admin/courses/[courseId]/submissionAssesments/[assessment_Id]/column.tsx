@@ -317,7 +317,7 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex ">
                     <Link
                         href={submitedAt ? `/admin/courses/${bootcampId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}` : '#'}
-                        className={submitedAt ? `max-w-[500px] text-secondary font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
+                        className={submitedAt ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
                     >
                         <FileText size={16} />
                         <p className="text-[15px]"> View Report</p>

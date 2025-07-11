@@ -80,8 +80,8 @@ function ChapterItem({
 
     const setActiveChapterItem = () => {
         return activeChapter === chapterId
-            ? 'bg-secondary/50 text-primary'
-            : 'text-black hover:bg-secondary/20'
+            ? 'bg-[rgb(81,134,114)]/50 text-gray-700'
+            : 'text-black hover:bg-[rgb(81,134,114)]/20'
     }
 
     const handleClick = () => {

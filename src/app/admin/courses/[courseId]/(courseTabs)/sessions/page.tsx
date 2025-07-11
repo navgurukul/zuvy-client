@@ -255,9 +255,9 @@ function Page({ params }: any) {
                         {tabs.map((tab) => (
                             <Button
                                 key={tab}
-                                className={`p-1 w-[100px] h-[30px] rounded-lg ${
+                                className={`p-1 w-[100px] h-[30px] rounded-lg border border-input bg-background hover:border-green-700 hover:text-black ${
                                     activeTab === tab
-                                        ? 'bg-secondary text-white'
+                                        ? 'bg-success-dark opacity-75 text-white'
                                         : 'bg-white'
                                 }`}
                                 onClick={() => handleTabChange(tab)}
