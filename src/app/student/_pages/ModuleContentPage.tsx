@@ -475,16 +475,15 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
 
       {/* Main Content Area */}
       <div className={`flex-1 h-screen flex flex-col ${!isMobile ? '' : 'pb-20'}`}>
-        <ScrollArea className="flex-1">
-          <div className="p-6">
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full p-6">
             <ModuleContentRenderer
               selectedItemData={selectedItemData}
               getAssessmentData={getAssessmentData}
               onChapterComplete={refetch}
             />
           </div>
-          <ScrollBar />
-        </ScrollArea>
+        </div>
       </div>
       
       {/* Mobile Bottom Navigation */}
