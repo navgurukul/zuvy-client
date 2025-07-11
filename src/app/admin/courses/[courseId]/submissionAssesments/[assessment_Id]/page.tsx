@@ -165,6 +165,12 @@ const Page = ({ params }: any) => {
                                     Pass Percentage
                                 </p>
                             </div>
+                            <div className="p-4 rounded-lg shadow-md ">
+                                <h1 className="text-gray-600 font-semibold text-xl">
+                                    {assesmentData?.totalQualifiedStudents}
+                                </h1>
+                                <p className="text-gray-500 ">Total Qualified Students</p>
+                            </div>
                         </div>
                     }
                     <div className="relative">
