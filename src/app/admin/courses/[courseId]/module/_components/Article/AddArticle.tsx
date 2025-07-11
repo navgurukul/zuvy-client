@@ -178,7 +178,7 @@ const AddArticle = ({
         try {
             setIsDataLoading(true) 
             const response = await api.get(
-                `/Content/chapterDetailsById/${content.id}`
+                `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
             const contentDetails = response?.data?.contentDetails?.[0]
 

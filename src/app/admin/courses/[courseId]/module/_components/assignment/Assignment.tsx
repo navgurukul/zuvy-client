@@ -212,7 +212,7 @@ const AddAssignent = ({
         setIsDataLoading(true) 
         try {
             const response = await api.get(
-                `/Content/chapterDetailsById/${content.id}`
+                `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
 
             setDeadline(response.data.completionDate)

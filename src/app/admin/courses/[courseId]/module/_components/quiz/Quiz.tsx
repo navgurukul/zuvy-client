@@ -134,7 +134,7 @@ function Quiz(props: any) {
 
         try {
             const res = await api.get(
-                `/Content/chapterDetailsById/${props.chapterId}`
+                `/Content/chapterDetailsById/${props.chapterId}?bootcampId=${props.courseId}&moduleId=${props.moduleId}&topicId=${props.content.topicId}`
             )
             setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
