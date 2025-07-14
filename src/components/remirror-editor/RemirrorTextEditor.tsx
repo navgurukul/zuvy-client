@@ -31,6 +31,7 @@ interface RemirrorTextEditorProps {
     initialContent: any
     setInitialContent: (content: any) => void
     preview?: boolean
+    hideBorder?: boolean
 }
 
 // Create empty content structure
@@ -84,6 +85,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     initialContent,
     setInitialContent,
     preview,
+    hideBorder = false,
 }) => {
     // Track if we're in the middle of editing to prevent feedback loops
     const isEditingRef = useRef<boolean>(false)
@@ -235,7 +237,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                 fontFamily: { default: 'Inter, sans-serif' },
             }}
         >
-            <div className="border rounded shadow">
+            <div className={hideBorder ? "" : "border rounded shadow"}>
                 <Remirror
                     manager={manager}
                     initialContent={state}

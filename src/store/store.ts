@@ -1058,3 +1058,55 @@ export const getModuleDataNew = create<ModuleStore>((set) => ({
 }))
 
 // ------------------------- User ------------------------
+
+// Theme Store for Student Section
+type ThemeStore = {
+    isDark: boolean
+    toggleTheme: () => void
+    setTheme: (isDark: boolean) => void
+}
+
+export const useThemeStore = create<ThemeStore>()(
+    persist(
+        (set, get) => ({
+            isDark: false,
+            toggleTheme: () => {
+                const newIsDark = !get().isDark;
+                set({ isDark: newIsDark });
+                // Apply theme to document
+                if (typeof window !== 'undefined') {
+                    if (newIsDark) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            },
+            setTheme: (isDark: boolean) => {
+                set({ isDark });
+                // Apply theme to document
+                if (typeof window !== 'undefined') {
+                    if (isDark) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            }
+        }),
+        {
+            name: 'student-theme-storage',
+            partialize: (state) => ({ isDark: state.isDark }),
+            onRehydrateStorage: () => (state) => {
+                // Apply theme immediately after rehydration
+                if (typeof window !== 'undefined' && state) {
+                    if (state.isDark) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            }
+        }
+    )
+)
