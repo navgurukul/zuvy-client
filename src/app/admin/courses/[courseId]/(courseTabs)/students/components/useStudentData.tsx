@@ -38,6 +38,7 @@ export const useStudentData = (courseId: any) => {
             setTotalPages,
             setTotalStudents,
             setCurrentPage,
+            showError: false,
         })
     }, [
         courseId,

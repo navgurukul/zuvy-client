@@ -1,5 +1,5 @@
 'use client'
-
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
@@ -7,6 +7,9 @@ import { z } from 'zod'
 import { format } from 'date-fns'
 import { CalendarIcon } from 'lucide-react'
 import axios from 'axios'
+import { Spinner } from '@/components/ui/spinner'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -36,14 +39,23 @@ import { getCourseData, getStoreStudentData } from '@/store/store'
 import { api, apiMeraki } from '@/utils/axios.config'
 
 const FormSchema = z.object({
-    name: z.string(),
-    bootcampTopic: z.string(),
-    description: z.string().optional(),
-    duration: z.string().optional(),
-    language: z.string(),
-    startTime: z.date().optional(),
-    coverImage: z.string().optional(),
-    collaborator: z.string().optional(),
+    // name: z.string(),
+    // bootcampTopic: z.string(),
+    // description: z.string().optional(),
+    // duration: z.string().min(1, "This field is required"),
+    // language: z.string(),
+    // startTime: z.date().optional(),
+    // coverImage: z.string().optional(),
+    // collaborator: z.string().optional(),
+
+  name: z.string().min(1, "Please enter the course name."),
+  bootcampTopic: z.string().min(1, "Please specify the course topic."),
+  description: z.string().min(1, "Please add a course description."),
+  duration: z.string().min(1, "Please enter the course duration."),
+  language: z.string().min(1, "Please select the language."),
+  startTime: z.date({ required_error: "Please choose a start date for the course." }),
+  coverImage: z.string().min(1, "Please upload a cover image."),
+  collaborator: z.string().optional(),
 })
 
 interface CourseData {
@@ -53,13 +65,14 @@ interface CourseData {
     description?: string
     coverImage?: string
     collaborator?: string
-    duration?: string
+    duration?: number
     language: string
     startTime?: string
     unassigned_students?: number
 }
 
 function Page({ params }: { params: any }) {
+    const router = useRouter()
     const [image, setImage] = useState<string | null>(null)
     const [cropper, setCropper] = useState<Cropper | null>(null)
     const [isCropping, setIsCropping] = useState(false)
@@ -73,7 +86,7 @@ function Page({ params }: { params: any }) {
 
     const { courseData, setCourseData } = getCourseData()
     const { setStoreStudentData } = getStoreStudentData()
-
+    const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -296,6 +309,26 @@ function Page({ params }: { params: any }) {
         }
     }
 
+
+if (loadingCourseCheck) {
+  return (
+    <div className="flex justify-center items-center h-full mt-20">
+      <Spinner className="text-secondary" />
+    </div>
+  )
+}
+
+if (isCourseDeleted) {
+  return (
+    <div className="flex flex-col justify-center items-center h-full mt-20">
+      <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
+      <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
+      <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
+        Back to Courses
+      </Button>
+    </div>
+  )
+}
     return (
         <div className="max-w-[400px] m-auto">
             <Form {...form}>
@@ -548,10 +581,32 @@ function Page({ params }: { params: any }) {
                             <FormItem className="text-start">
                                 <FormLabel>Duration</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        placeholder="Enter Duration in Weeks"
-                                        {...(field || '')}
-                                    />
+                                   <Input
+                                    type="text"
+                                    placeholder="Enter Duration in Weeks"
+                                    value={field.value}
+                                    onChange={(e) => {
+                                     const value = e.target.value
+
+                                    // Allow empty string
+                                    if (value === "") {
+                                      field.onChange(value)
+                                       return
+                                    }
+
+                                    // Validate integer
+                                    const isValidInteger = /^\d+$/.test(value)
+                                    if (!isValidInteger) {
+                                     toast.error({
+                                      title: "Invalid Integer",
+                                      description: "Please enter a valid integer value",
+                                     })
+                                        return
+                                    }
+
+                                     field.onChange(value)
+                                    }}
+                                  />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

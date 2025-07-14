@@ -128,7 +128,8 @@ const Courses: React.FC = () => {
         } else {
             try {
                 const response = await api.post('/bootcamp', courseData)
-
+                const newCourseId = response.data?.bootcamp?.id
+                
                 toast.success({
                     title: response.data.status,
                     description: response.data.message,
@@ -137,6 +138,10 @@ const Courses: React.FC = () => {
                 setNewCourseName('')
                 setNewCourseDescription('')
                 getBootcamp(offset)
+
+                if (newCourseId) {
+                handleCardClick(newCourseId) 
+            }
             } catch (error: any) {
                 toast.error({
                     title: error?.data?.status || 'Error',
