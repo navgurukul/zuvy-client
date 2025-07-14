@@ -320,7 +320,7 @@ const Mcqs = (props: Props) => {
                         onClick={() => setIsEditModalOpen(false)}
                     >
                         <ChevronLeft />
-                        <h6>MCQ Problems</h6>
+                        <h6 className="text-[15px]">MCQ Problems</h6>
                     </div>
                     <div className="flex flex-col items-center justify-center">
                         <h1 className="text-lg mb-4 ml-4 font-semibold text-start w-[590px] justify-start text-gray-600">

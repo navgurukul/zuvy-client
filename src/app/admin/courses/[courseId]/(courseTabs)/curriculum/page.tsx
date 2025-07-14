@@ -442,7 +442,7 @@
                  <div className="my-5 flex justify-center items-center">
                      <div className="absolute h-screen">
                          <div className="relative top-[75%]">
-                             <Spinner className="text-secondary" />
+                             <Spinner className="text-[rgb(81,134,114)]" />
                          </div>
                      </div>
                  </div>

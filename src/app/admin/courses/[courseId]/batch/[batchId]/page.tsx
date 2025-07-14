@@ -296,7 +296,7 @@ const BatchesInfo = ({
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
-            <MaxWidthWrapper className="p-4 ">
+            <MaxWidthWrapper className="p-4 text-gray-600">
                 <div className="flex justify-between">
                     <div className="w-1/2 flex flex-col items-start ">
                         <div className=" flex flex-col ">
@@ -674,7 +674,7 @@ const BatchesInfo = ({
                 </div>
                 {loading ? (
                     <div className="flex justify-center">
-                        <Spinner className="text-secondary" />
+                        <Spinner className="text-[rgb(81,134,114)]" />
                     </div>
                 ) : (
                     <div>

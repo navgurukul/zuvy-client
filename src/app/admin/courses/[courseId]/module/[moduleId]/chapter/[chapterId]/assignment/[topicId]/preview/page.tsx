@@ -108,7 +108,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                 </div>
 
                 {/* Right Section: Editor */}
-                <div className="pt-12 w-[395%]">
+                <div className="pt-12 w-[395%] text-gray-600">
                     <div className="flex justify-between">
                         <div className="flex flex-col items-start mb-3">
                             <h1 className="text-2xl font-semibold text-left">
@@ -116,7 +116,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                                     ? assignmentPreviewContent.title
                                     : 'No Title yet'}
                             </h1>
-                            <h1 className="font-semibold">
+                            <h1 className="font-semibold text-[15px]">
                                 Deadline: {formattedDate}
                             </h1>
                         </div>

@@ -292,7 +292,7 @@ const OpenEndedQuestions = (props: Props) => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+                    <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
                 <div>

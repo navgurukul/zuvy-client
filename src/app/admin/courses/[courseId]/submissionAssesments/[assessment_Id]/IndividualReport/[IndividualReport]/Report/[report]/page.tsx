@@ -432,7 +432,7 @@ const Page = ({ params }: { params: any }) => {
                             {/* Open Ended Submission */}
                             {assesmentData?.openEndedQuestionCount > 0 && (
                                 <div className="w-full">
-                                    <h1 className="text-left font-semibold">
+                                    <h1 className="text-left text-gray-600 text-[14px] font-semibold">
                                         Open-Ended
                                     </h1>
                                     {assesmentData?.openEndedQuestionCount ===
