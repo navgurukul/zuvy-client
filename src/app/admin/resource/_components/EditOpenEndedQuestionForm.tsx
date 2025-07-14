@@ -123,7 +123,7 @@ function EditOpenEndedQuestionForm({
                                         </FormLabel>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -131,7 +131,7 @@ function EditOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -139,7 +139,7 @@ function EditOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -233,7 +233,7 @@ function EditOpenEndedQuestionForm({
                         }}
                     />
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2">
+                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
                             Edit Open-Ended Question
                         </Button>
                     </div>

@@ -31,9 +31,9 @@ export function isPlural(count: number): boolean {
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'text-secondary'
+            return 'text-[rgb(81,134,114)]'
         case 'medium':
-            return 'text-yellow-dark'
+            return 'text-secondary'
         case 'hard':
             return 'text-destructive'
         default:

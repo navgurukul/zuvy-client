@@ -218,8 +218,7 @@ function Chapter() {
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
                             <Button
-                                variant="secondary"
-                                className="py-2 px-2 h-full w-full mr-4"
+                                className="py-2 px-2 h-full w-full mr-4 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border hover:bg-[rgb(81,134,114)] hover:text-white"
                                 onClick={handleAddChapter}
                             >
                                 Add Chapter

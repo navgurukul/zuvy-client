@@ -179,7 +179,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
                         ) : (
                             // Show join button for upcoming/ongoing meetings or completed without recording
                             <Button
-                                className="w-full bg-secondary hover:bg-primary text-primary-foreground font-medium py-2.5 transition-all duration-200"
+                                className="w-full bg-success-dark opacity-75 font-medium py-2.5 transition-all duration-200"
                                 onClick={() =>
                                     window.open(session.hangoutLink, '_blank')
                                 }

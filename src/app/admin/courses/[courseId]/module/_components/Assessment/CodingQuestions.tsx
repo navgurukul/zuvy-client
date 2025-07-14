@@ -72,7 +72,7 @@ const CodingQuestions = ({
                             <div className="flex justify-between text-start items-center w-full">
                                 <div className="w-full">
                                     <div className="flex items-center justify-between w-full">
-                                        <h2 className="font-bold">
+                                        <h2 className="font-bold text-[1rem] text-gray-600">
                                             {ellipsis(question.title, 30)}
                                         </h2>
                                         <div className="flex gap-2 ml-auto">
@@ -128,14 +128,14 @@ const CodingQuestions = ({
                                                           setIsNewQuestionAdded
                                                         );
                                                       }}
-                                                        className="text-secondary cursor-pointer"
+                                                        className="text-[rgb(81,134,114)] cursor-pointer"
                                                         size={20}
                                                     />
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-[#4A4A4A] mt-1 font-[14px]">
+                                    <p className="text-[#4A4A4A] mt-1 text-[1rem] font-[14px]">
                                         {ellipsis(question.description, 45)}
                                     </p>
                                     <Dialog>

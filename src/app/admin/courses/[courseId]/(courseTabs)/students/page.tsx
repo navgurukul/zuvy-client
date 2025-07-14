@@ -116,7 +116,7 @@ const Page = ({ params }: { params: any }) => {
   }
 
     return (
-        <div>
+        <div className="text-gray-600">
             <div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
                     <Input
@@ -153,8 +153,8 @@ const Page = ({ params }: { params: any }) => {
                                 }
                             }}
                         >
-                            <DialogTrigger>
-                                <Button className="gap-x-2">
+                            <DialogTrigger asChild>
+                                <Button className="gap-x-2 bg-success-dark opacity-75">
                                     <Plus /> Add Students
                                 </Button>
                             </DialogTrigger>

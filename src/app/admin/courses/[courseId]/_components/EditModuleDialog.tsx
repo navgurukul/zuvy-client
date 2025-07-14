@@ -92,7 +92,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4 "
             >
-                <DialogContent>
+                <DialogContent className='text-gray-600'>
                     <DialogHeader>
                         <DialogTitle>
                             Edit Module
@@ -243,7 +243,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
-                            <Button onClick={form.handleSubmit(onSubmit)}>
+                            <Button onClick={form.handleSubmit(onSubmit)} className="bg-[rgb(81,134,114)]">
                                 Edit Module
                             </Button>
                         </DialogClose>

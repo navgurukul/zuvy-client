@@ -124,7 +124,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4 "
             >
-                <DialogContent>
+                <DialogContent className='text-gray-600'>
                     <DialogHeader>
                         <DialogTitle>New Module</DialogTitle>
                         <div className="main_container flex items-center align-middle text-center">
@@ -379,6 +379,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                         <DialogClose asChild>
                             <Button
                                 onClick={form.handleSubmit(onSubmit)}
+                                className='bg-[rgb(81,134,114)]'
                                 disabled={isLoading}
                             >
                                 Create Module

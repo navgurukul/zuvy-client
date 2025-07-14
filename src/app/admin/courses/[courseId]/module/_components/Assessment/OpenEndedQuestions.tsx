@@ -47,7 +47,7 @@ const OpenEndedQuestions = ({
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">
                                 <div className="flex items-center justify-between w-full">
-                                    <h2 className="font-bold">
+                                    <h2 className="font-bold text-[15px] text-gray-600">
                                         {ellipsis(question?.question, 35)}
                                     </h2>
                                     <div className="flex gap-2 ml-auto">
@@ -71,7 +71,7 @@ const OpenEndedQuestions = ({
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-[#4A4A4A] mt-1 font-[14px]">
+                                <p className="text-[#4A4A4A] mt-1 text-[1rem] font-[14px]">
                                     {ellipsis(question?.question, 45)}
                                 </p>
                                 <Dialog>
@@ -123,7 +123,7 @@ const OpenEndedQuestions = ({
                                                 ])
                                             }
                                         }}
-                                        className="text-secondary cursor-pointer"
+                                        className="text-[rgb(81,134,114)] cursor-pointer"
                                         size={20}
                                     />
                                 )}

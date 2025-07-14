@@ -121,7 +121,7 @@ const AddStudentsModal = ({
     }
 
     return (
-        <DialogContent>
+        <DialogContent className='text-gray-600'>
             <DialogHeader>
                 <DialogTitle>
                     {message
@@ -146,7 +146,7 @@ const AddStudentsModal = ({
                         onValueChange={handleStudentUploadType}
                     >
                         <div className="flex   space-x-2 mr-4">
-                            <RadioGroupItem value={id} id={id} />
+                            <RadioGroupItem value={id} id={id} className='text-black border-black' />
                             <Label htmlFor={id}>{label}</Label>
                         </div>
                     </RadioGroup>
@@ -183,7 +183,7 @@ const AddStudentsModal = ({
             )}
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button type="submit" onClick={handleSubmit}>
+                    <Button type="submit" onClick={handleSubmit} className='bg-success-dark opacity-75'>
                         {selectedOption === '2'
                             ? 'Add Student'
                             : 'Add Students'}

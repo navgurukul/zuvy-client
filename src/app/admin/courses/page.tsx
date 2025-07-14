@@ -185,7 +185,7 @@ const Courses: React.FC = () => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+                    <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
                 <div>
@@ -203,7 +203,7 @@ const Courses: React.FC = () => {
                                     Your calendar access has expired. Please log
                                     in again to gain access to the courses
                                 </AlertDescription>
-                                <Button onClick={calendarAccess}>
+                                <Button onClick={calendarAccess} className='bg-success-dark opacity-75 font-semibold'>
                                     Give access
                                 </Button>
                             </Alert>
@@ -228,7 +228,7 @@ const Courses: React.FC = () => {
                                 }}
                             >
                                 <DialogTrigger asChild>
-                                    <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
+                                    <Button className="text-white bg-success-dark opacity-75 font-semibold lg:max-w-[150px] w-full mt-5">
                                         <Plus className="w-5 mr-2" />
                                         <p>New Course</p>
                                     </Button>

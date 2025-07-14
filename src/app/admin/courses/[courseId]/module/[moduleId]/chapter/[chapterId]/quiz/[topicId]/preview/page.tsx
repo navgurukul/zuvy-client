@@ -18,7 +18,7 @@ const PreviewQuiz = ({ params }: { params: any }) => {
     return (
         <>
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode. The questions cannot be
                     interacted with.
                 </h1>
@@ -41,7 +41,7 @@ const PreviewQuiz = ({ params }: { params: any }) => {
                 </div>
 
                 <div className="pt-5">
-                    <h1 className="text-start text-lg font-semibold">
+                    <h1 className="text-start text-lg text-gray-600 font-semibold">
                         {quizPreviewContent?.title}
                     </h1>
                     {quizPreviewContent?.quizQuestionDetails.map(
@@ -65,7 +65,7 @@ const PreviewQuiz = ({ params }: { params: any }) => {
                                             }}
                                         />
                                     </div> */}
-                                    <h3 className="font-semibold text-left">
+                                    <h3 className="font-semibold text-gray-600 text-[15px] text-left">
                                         Q{index + 1}.{' '}
                                         {question.quizVariants[0].question}
                                     </h3>
@@ -78,7 +78,7 @@ const PreviewQuiz = ({ params }: { params: any }) => {
                                         ).map(([optionId, optionText]) => (
                                             <div
                                                 key={optionId}
-                                                className="flex items-center p-3"
+                                                className="flex items-center p-3 text-gray-600"
                                             >
                                                 <input
                                                     type="radio"
@@ -110,7 +110,7 @@ const PreviewQuiz = ({ params }: { params: any }) => {
                 </div>
             </div>
             <div className="mt-2 text-end">
-                <Button disabled>Submit</Button>
+                <Button className='bg-success-dark opacity-75' disabled>Submit</Button>
             </div>
         </>
     )

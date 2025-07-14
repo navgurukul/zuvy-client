@@ -86,11 +86,11 @@ const IndividualStudentAssesment = ({
 
     return (
         <div
-            className={`flex flex-col h-[160px] lg:h-[150px] p-3 shadow-lg  transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 w-5/6 relative`}
+            className={`flex flex-col h-[160px] lg:h-[150px] p-6 shadow-lg  transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 w-5/6 relative`}
         >
             <div className="flex flex-col w-full h-full justify-between">
-                <div className="flex flex-col p-4 gap-y-4 lg:gap-y-7 overflow-hidden">
-                    <h1 className="  capitalize text-start font-semibold text-gray-600 dark:text-white truncate w-full">
+                <div>
+                    <h1 className="capitalize text-start text-[14px] font-semibold mb-2 text-gray-600 dark:text-white truncate w-full">
                         {type === 'codingSubmission'
                             ? data.questionDetail.title
                             : questionInfo.title}
@@ -107,23 +107,23 @@ const IndividualStudentAssesment = ({
                             Tab Change: {tabchanges == 0 ? 'None' : tabchanges}
                         </h1>
                     </div> */}
-                    <div className="flex items-center gap-x-2">
-                        <div
-                            className={`h-2 w-2 ${
+                    <div className="flex items-center gap-x-2 my-4">
+                        <span
+                            className={`h-2 w-2 rounded-full ${
                                 type !== 'codingSubmission'
                                     ? scoreHandler().className
                                     : data.status == 'Accepted'
-                                    ? `bg-green-300`
-                                    : `bg-red-500`
-                            } rounded-full`}
+                                        ? 'bg-green-300'
+                                        : 'bg-red-500'
+                                }`}
                         />
-                        <h1 className="text-start">
+                        <span className="text-[15px] text-gray-600">
                             {type !== 'codingSubmission' ? (
-                                <span>Score: {scoreHandler().score}</span>
+                                <>Score: {scoreHandler().score}</>
                             ) : (
-                                <span>Status: {data.status}</span>
+                                <>Status: {data.status}</>
                             )}
-                        </h1>
+                        </span>
                     </div>
                 </div>
 
@@ -131,7 +131,7 @@ const IndividualStudentAssesment = ({
                 <div className="absolute bottom-3 right-3">
                     <Button variant={'ghost'} className="w-full lg:w-auto">
                         <Link
-                            className="text-secondary font-semibold text-md flex items-center w-full truncate"
+                            className="text-[rgb(81,134,114)] font-semibold text-md flex items-center w-full truncate"
                             href={questionInfo.link}
                         >
                             View Answers

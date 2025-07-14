@@ -535,7 +535,7 @@ const AddAssignent = ({
                                                             field.onChange(e)
                                                         }}
                                                         placeholder="Untitled Assignment"
-                                                        className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                        className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
                                                     />
                                                     {!titles && ( // Show pencil icon only when the title is empty
@@ -556,7 +556,7 @@ const AddAssignent = ({
                                                                 className="flex hover:bg-gray-300 rounded-md p-1 cursor-pointer"
                                                             >
                                                                 <Eye size={18} />
-                                                                <h6 className="ml-1 text-sm">
+                                                                <h6 className="ml-1 text-sm text-gray-600">
                                                                     Preview Assignment
                                                                 </h6>
                                                             </div>
@@ -571,14 +571,14 @@ const AddAssignent = ({
                                                                     }`}
                                                             >
                                                                 <Eye size={18} />
-                                                                <h6 className="ml-1 text-sm">
+                                                                <h6 className="ml-1 text-sm text-gray-600">
                                                                     Preview PDF
                                                                 </h6>
                                                             </div>
                                                         )}
                                                     </div>
                                                     {defaultValue === 'editor' ? (
-                                                        <Button
+                                                        <Button className='bg-success-dark opacity-75'
                                                             type="submit"
                                                             form="myForm"
                                                             disabled={!hasEditorContent || isSaving}
@@ -588,6 +588,7 @@ const AddAssignent = ({
                                                     ) : (
                                                         <div>
                                                             <Button
+                                                                className='bg-success-dark opacity-75'
                                                                 type="button"
                                                                 onClick={
                                                                     onFileUpload
@@ -622,7 +623,7 @@ const AddAssignent = ({
                                     return (
                                         <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
                                             <FormLabel className="m-0">
-                                                <span className="text-xl">
+                                                <span className="text-xl text-gray-600">
                                                     Choose Deadline Date
                                                 </span>
                                                 <span className="text-red-500">
@@ -633,8 +634,7 @@ const AddAssignent = ({
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
                                                         <Button
-                                                            variant={'outline'}
-                                                            className={`w-1/6  text-left font-normal ${
+                                                            className={`w-1/6  text-left font-normal border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)] ${
                                                                 !field.value &&
                                                                 'text-muted-foreground'
                                                                 }`}
@@ -692,7 +692,7 @@ const AddAssignent = ({
                                             value="editor"
                                             disabled={!!pdfLink}
                                             id="r1"
-                                            className="mt-1"
+                                            className="mt-1 text-black border-black"
                                         />
                                     </TooltipTrigger>
                                     {pdfLink && (
@@ -715,7 +715,7 @@ const AddAssignent = ({
                                         <RadioGroupItem
                                             value="pdf"
                                             id="r2"
-                                            className="mt-1"
+                                            className="mt-1 text-black border-black"
                                             disabled={isEditorSaved}
                                         />
                                     </TooltipTrigger>

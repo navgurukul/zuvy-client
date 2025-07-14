@@ -270,7 +270,7 @@ function Page({ params }: any) {
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
-                            <Spinner className="text-secondary" />
+                            <Spinner className="text-[rgb(81,134,114)]" />
                         </div>
                     </div>
                 </div>
@@ -298,9 +298,9 @@ function Page({ params }: any) {
                         {tabs.map((tab) => (
                             <Button
                                 key={tab}
-                                className={`p-1 w-[100px] h-[30px] rounded-lg ${
+                                className={`p-1 w-[100px] h-[30px] rounded-lg border border-input bg-background hover:border-green-700 hover:text-black ${
                                     activeTab === tab
-                                        ? 'bg-secondary text-white'
+                                        ? 'bg-success-dark opacity-75 text-white'
                                         : 'bg-white'
                                 }`}
                                 onClick={() => handleTabChange(tab)}
@@ -312,7 +312,7 @@ function Page({ params }: any) {
                     </div>
                     {loading ? (
                         <div className="flex justify-center">
-                            <Spinner className="text-secondary" />
+                            <Spinner className="text-[rgb(81,134,114)]" />
                         </div>
                     ) : (
                         <div>

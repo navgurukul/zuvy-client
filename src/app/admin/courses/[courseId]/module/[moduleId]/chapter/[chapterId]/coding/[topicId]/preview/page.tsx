@@ -41,7 +41,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
     return (
         <>
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode. The questions cannot be
                     interacted with.
                 </h1>
@@ -77,7 +77,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
                     </div>
                 ) : (
                     <>
-                        <h2 className="font-bold">Coding Challenges</h2>
+                        <h2 className="font-bold text-gray-600 text-[15px]">Coding Challenges</h2>
                         {codingPreviewContent?.codingQuestionDetails?.map(
                             (question: any) => (
                                 <CodingQuestionCard

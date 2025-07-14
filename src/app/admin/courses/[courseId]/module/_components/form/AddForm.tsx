@@ -329,7 +329,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                                         field.onChange(e)
                                                     }}
                                                     placeholder="Untitled Form"
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                     autoFocus
                                                 />
                                                 {!titles && (
@@ -344,7 +344,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                             <div className="flex justify-start">
                                                 <Button
                                                     type="submit"
-                                                    className="w-3/3"
+                                                    className="w-3/3 bg-success-dark opacity-75"
                                                 >
                                                     Save
                                                 </Button>
@@ -355,7 +355,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                         <div
                                             id="previewForm"
                                             onClick={previewForm}
-                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                            className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer"
                                         >
                                             <Eye size={18} />
                                             <h6 className="ml-1 text-sm">
@@ -372,13 +372,13 @@ const AddForm: React.FC<AddFormProps> = ({
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="flex text-left text-md font-semibold mb-1">
+                                    <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
                                         Description
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            className="w-[450px] px-3 py-2 border rounded-md"
+                                            className="w-[450px] px-3 py-2 border text-gray-600 rounded-md"
                                             placeholder="Add Description"
                                         />
                                     </FormControl>
@@ -403,7 +403,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                 variant={'secondary'}
                                 type="button"
                                 onClick={addQuestion}
-                                className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
+                                className="gap-x-2 border-none text-[rgb(81,134,114)] hover:text-[rgb(81,134,114)] hover:bg-popover"
                             >
                                 <Plus /> Add Question
                             </Button>

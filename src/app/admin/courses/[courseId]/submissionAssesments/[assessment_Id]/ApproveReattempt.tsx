@@ -52,12 +52,12 @@ const ApproveReattempt = ({ data }: { data: any }) => {
         <>
             {/* Approve Re-attempt Button (outside Dialog) */}
             {(!reattemptRequested || reattemptApproved) ? (
-                <div className="w-14 text-secondary font-bold opacity-50 cursor-not-allowed">
+                <div className="w-14 text-[rgb(81,134,114)] font-bold opacity-50 cursor-not-allowed">
                     Approve Re-attempt
                 </div>
             ) : (
                 <div
-                    className={`w-14 text-secondary font-bold ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    className={`w-14 text-[rgb(81,134,114)] font-bold ${buttonDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     onClick={!buttonDisabled ? handleApproveReattempt : undefined}
                 >
                     Approve Re-attempt

@@ -99,7 +99,7 @@ function NewOpenEndedQuestionForm({
     }
 
     return (
-        <main className="flex  flex-col p-3 ">
+        <main className="flex  flex-col p-3 text-gray-600">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
@@ -121,7 +121,7 @@ function NewOpenEndedQuestionForm({
                                         </FormLabel>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -129,7 +129,7 @@ function NewOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -137,7 +137,7 @@ function NewOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -211,7 +211,7 @@ function NewOpenEndedQuestionForm({
                         }}
                     />
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2 ">
+                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
                             Create Open-Ended Question
                         </Button>
                     </div>

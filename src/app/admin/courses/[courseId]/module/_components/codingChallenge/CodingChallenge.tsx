@@ -297,7 +297,7 @@ function CodingChallenge({
                                 }}
                                 value={chapterTitle}
                                 placeholder="Untitled Coding Problem"
-                                className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                 autoFocus
                             />
                             {!chapterTitle && (
@@ -313,7 +313,7 @@ function CodingChallenge({
                             <div
                                 id="previewCodingChallenge"
                                 onClick={previewCodingChallenge}
-                                className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
+                                className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
                             >
                                 <Eye size={18} />
                                 <h6 className="ml-1 text-sm">Preview</h6>
@@ -321,7 +321,7 @@ function CodingChallenge({
                             {selectedQuestions?.length > 0 && (
                                 <Button
                                     onClick={handleSaveClick}
-                                    className="mt-5"
+                                    className="mt-5 bg-success-dark opacity-75"
                                 >
                                     Save
                                 </Button>
@@ -345,7 +345,7 @@ function CodingChallenge({
                                 tags={tags}
                             />
                         </div>
-                        <h1 className="text-left font-bold mt-5 pb-3">
+                        <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
                             Coding Library
                         </h1>
                         {/* <ScrollArea className="h-dvh pr-4"> */}
@@ -363,7 +363,7 @@ function CodingChallenge({
                                             <div className="flex justify-between text-start items-center w-full">
                                                 <div className="w-full">
                                                     <div className="flex items-center gap-2 justify-between">
-                                                        <h2 className="font-bold text-lg">
+                                                        <h2 className="font-bold text-[16px] text-gray-600">
                                                             {ellipsis(
                                                                 question.title,
                                                                 30
@@ -430,7 +430,7 @@ function CodingChallenge({
                                                                                 ]
                                                                             )
                                                                         }}
-                                                                        className="text-secondary cursor-pointer"
+                                                                        className="text-[rgb(81,134,114)] cursor-pointer"
                                                                         size={
                                                                             20
                                                                         }
@@ -440,7 +440,7 @@ function CodingChallenge({
                                                         </div>
                                                     </div>
                                                     <div className="w-full">
-                                                        <p className="text-gray-600 mt-1">
+                                                        <p className="text-gray-600 text-[15px] mt-1">
                                                             {ellipsis(
                                                                 question.description,
                                                                 60

@@ -479,7 +479,7 @@ function Page() {
                 <div>
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
-                            <Button className="text-white bg-secondary">
+                            <Button className="text-white bg-success-dark opacity-75">
                                 Add Module
                             </Button>
                         </DialogTrigger>
@@ -519,7 +519,7 @@ function Page() {
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
-                            <Spinner className="text-secondary" />
+                            <Spinner className="text-[rgb(81,134,114)]" />
                         </div>
                     </div>
                 </div>
@@ -566,13 +566,13 @@ function Page() {
                                 width={200}
                                 height={200}
                             />
-                            <p>
+                            <p className="text-gray-600 text-lg">
                                 Create new modules for the curriculum on Strapi
                                 CMS
                             </p>
                             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className="text-white bg-secondary">
+                                    <Button className="text-white bg-success-dark opacity-75">
                                         Add Module
                                     </Button>
                                 </DialogTrigger>

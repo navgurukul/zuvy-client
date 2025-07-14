@@ -292,13 +292,13 @@ const OpenEndedQuestions = (props: Props) => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+                    <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
                 <div>
                     {allOpenEndedQuestions?.length > 0 ? (
                         <MaxWidthWrapper>
-                            <h1 className="text-left font-semibold text-2xl">
+                            <h1 className="text-left font-semibold text-2xl text-gray-600">
                                 Resource Library - Open-Ended-Questions
                             </h1>
                             <div className="flex justify-between">
@@ -321,7 +321,7 @@ const OpenEndedQuestions = (props: Props) => {
                                 <div className="flex flex-row items-center gap-2">
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button className="text-white bg-secondary lg:max-w-[150px] w-full">
+                                            <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full">
                                                 <p>Create Topic</p>
                                             </Button>
                                         </DialogTrigger>
@@ -341,7 +341,7 @@ const OpenEndedQuestions = (props: Props) => {
                                         open={isDialogOpen}
                                     >
                                         <DialogTrigger asChild>
-                                            <Button> Create Question</Button>
+                                            <Button className='bg-success-dark opacity-75'> Create Question</Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[500px]">
                                             <DialogHeader>
@@ -403,7 +403,7 @@ const OpenEndedQuestions = (props: Props) => {
                         </MaxWidthWrapper>
                     ) : (
                         <>
-                            <h1 className="text-left font-semibold text-2xl">
+                            <h1 className="text-left font-semibold text-2xl text-gray-600">
                                 Resource Library - Open-Ended-Questions
                             </h1>
                             <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">

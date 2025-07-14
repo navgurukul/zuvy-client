@@ -91,7 +91,7 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex space-x-2">
                     <Link
                         href={`/admin/courses/${row.original.bootcampId}/submissionProjects/${row.original.projectId}/IndividualReport/${row.original.userId}`}
-                        className="max-w-[500px] text-secondary font-medium flex items-center"
+                        className="max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center"
                     >
                         <FileText size={16} />
                         <p className="text-[15px]"> View Report</p>
