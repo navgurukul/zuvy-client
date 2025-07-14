@@ -42,6 +42,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { useStudentData } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/useStudentData'
 import { columns } from './columns'
+import { useParams, useRouter } from 'next/navigation'
 // import { DataTable } from './dataTable'
 import {
 Tooltip,
@@ -58,7 +59,11 @@ export type StudentData = {
     profilePicture: string
 }
 
-const Page = ({ params }: { params: any }) => {
+const Page = ({params}: { params: any }) => {
+    const router = useRouter()
+    const param = useParams()
+    const courseId = param.courseId
+    const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const { students } = useStudentData(params.courseId)
     const { courseData, fetchCourseDetails } = getCourseData()
     const { fetchBatches, batchData, setBatchData } = getBatchData()
@@ -112,6 +117,8 @@ const Page = ({ params }: { params: any }) => {
         mode: 'onChange',
     })
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+
+        if (!courseId || isCourseDeleted) return
         try {
             const studentIds = selectedRows.map((student) => student.id)
 
@@ -150,6 +157,7 @@ const Page = ({ params }: { params: any }) => {
                 return true
             }
         } catch (error: any) {
+            if (isCourseDeleted) return
             toast.error({
                 title: 'Failed',
                 description:
@@ -168,37 +176,77 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
-    useEffect(() => {
-        fetchCourseDetails(params.courseId)
-    }, [fetchCourseDetails, params.courseId])
 
-    const getUnAssignedStudents = useCallback(async () => {
-        await api
-            .get(
-                `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
-            )
-            .then((res) => {
-                setTotalStudents(res.data.data)
-            })
-    }, [debouncedSearchStudent, params.courseId])
+ const checkIfCourseExists = async () => {
+    if (!courseId) return
+
+     try {
+      await api.get(`/bootcamp/${courseId}`)
+      setIsCourseDeleted(false)
+    } catch (error) {
+      setIsCourseDeleted(true)
+      getCourseData.setState({ courseData: null }) // Zustand clear
+    }
+ }
+
+// ✅ 1. Initial mount check
+useEffect(() => {
+  let interval: NodeJS.Timeout
+
+  if (!isCourseDeleted) {
+    interval = setInterval(() => {
+      checkIfCourseExists()
+    }, 500)
+  }
+
+  return () => clearInterval(interval)
+}, [courseId, isCourseDeleted])
+
+
+useEffect(() => {
+  if (!courseId ||isCourseDeleted) fetchCourseDetails(params.courseId)
+}, [fetchCourseDetails, courseId, isCourseDeleted])
+
+
+ const getUnAssignedStudents = useCallback(async () => {
+  if (!courseId || isCourseDeleted) return
+
+  try {
+    const res = await api.get(
+      `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
+    )
+    setTotalStudents(res.data.data)
+  } catch (error) {
+    if (isCourseDeleted) return
+    console.error('Error fetching unassigned students:', error)
+  }
+}, [debouncedSearchStudent, courseId, isCourseDeleted])
+
 
     useEffect(() => {
         getUnAssignedStudents()
     }, [getUnAssignedStudents, debouncedSearchStudent, params.courseId])
 
-    useEffect(() => {
-        const searchBatchHandler = async () => {
-            await api
-                .get(
-                    `/bootcamp/searchBatch/${params.courseId}?searchTerm=${debouncedSearch}`
-                )
-                .then((res) => {
-                    setBatchData(res.data)
-                })
-        }
-        if (debouncedSearch) searchBatchHandler()
-        if (debouncedSearch.trim()?.length === 0) fetchBatches(params.courseId)
-    }, [params.courseId, debouncedSearch, fetchBatches, setBatchData])
+useEffect(() => {
+  const searchBatchHandler = async () => {
+    if (!courseId || isCourseDeleted) return
+    try {
+      const res = await api.get(
+        `/bootcamp/searchBatch/${params.courseId}?searchTerm=${debouncedSearch}`
+      )
+      setBatchData(res.data)
+    } catch (error) {
+      if (isCourseDeleted) return
+      console.error('Error fetching batch:', error)
+    }
+  }
+
+  if (debouncedSearch) searchBatchHandler()
+  if (debouncedSearch.trim()?.length === 0 && !isCourseDeleted) {
+    fetchBatches(params.courseId)
+  }
+}, [courseId, debouncedSearch, fetchBatches, setBatchData, isCourseDeleted])
+
 
     const handleSearchStudents = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchStudent(e.target.value)
@@ -464,6 +512,31 @@ const Page = ({ params }: { params: any }) => {
             )
         }
     }
+     
+  if (isCourseDeleted) {
+  return (
+    <div className="flex flex-col justify-center items-center h-full mt-20">
+      <Image src="\images\undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
+      <p className="text-lg text-red-600  mt-4">
+        This course has been deleted.
+      </p>
+      <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
+        Back to Courses
+      </Button>
+    </div>
+  )
+}
+
+if (loading) {
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <Spinner className="text-secondary" />
+    </div>
+  )
+}
+
+
+
     if (courseData?.id) {
         return (
             <div>

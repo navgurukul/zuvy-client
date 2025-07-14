@@ -671,6 +671,7 @@ interface FetchStudentsParams {
     setTotalPages: (totalPages: number) => void
     setTotalStudents: (totalStudents: number) => void
     setCurrentPage: (currentPage: number) => void
+    showError?: boolean
 }
 
 export const fetchStudentsHandler = async ({
@@ -683,6 +684,7 @@ export const fetchStudentsHandler = async ({
     setTotalPages,
     setTotalStudents,
     setCurrentPage,
+    showError = true, // default true
 }: FetchStudentsParams) => {
     setLoading(true)
 
@@ -697,10 +699,12 @@ export const fetchStudentsHandler = async ({
         setTotalStudents(res.data.totalStudentsCount)
         setCurrentPage(res.data.currentPage)
     } catch (error) {
+        if (showError){
         toast.error({
             title: 'Error',
             description: 'Failed to fetch the data',
         })
+    }
     } finally {
         setLoading(false)
     }

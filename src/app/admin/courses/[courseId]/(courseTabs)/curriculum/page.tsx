@@ -14,6 +14,7 @@
  import EditModuleDialog from '../../_components/EditModuleDialog'
  import { X } from "lucide-react"
  import { toast } from '@/components/ui/use-toast'
+ import { useParams, useRouter } from 'next/navigation'
 
  interface CurriculumItem {
      id: number
@@ -40,6 +41,10 @@
  }
  
  function Page() {
+     const router = useRouter()
+     const params = useParams()
+     const courseId = params.courseId
+     const [isCourseDeleted, setIsCourseDeleted] = useState(false)
      const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
      const [originalCurriculum, setOriginalCurriculum] = useState<CurriculumItem[]>([])
      const { courseData } = getCourseData()
@@ -287,6 +292,31 @@
              })
      }
  
+       const checkIfCourseExists = async () => {
+       if (!courseId) return
+
+       try {
+        await api.get(`/bootcamp/${courseId}`)
+        setIsCourseDeleted(false)
+       } catch (error) {
+        setIsCourseDeleted(true)
+        getCourseData.setState({ courseData: null }) // Zustand clear
+      }
+     }
+
+
+      useEffect(() => {
+      let interval: NodeJS.Timeout
+
+      if (!isCourseDeleted) {
+        interval = setInterval(() => {
+        checkIfCourseExists()
+       }, 500)
+     }
+
+  return () => clearInterval(interval)
+}, [courseId, isCourseDeleted])
+
      const fetchCourseModules = async () => {
          if (!courseData?.id) {
             toast.error({
@@ -396,6 +426,30 @@
          handleReorder(newOrderModules)
      }
  
+
+     
+  if (isCourseDeleted) {
+  return (
+    <div className="flex flex-col justify-center items-center h-full mt-20">
+      <Image src="\images\undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
+      <p className="text-lg text-red-600  mt-4">
+        This course has been deleted.
+      </p>
+      <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
+        Back to Courses
+      </Button>
+    </div>
+  )
+}
+
+if (loading) {
+  return (
+    <div className="flex justify-center items-center h-screen">
+      <Spinner className="text-secondary" />
+    </div>
+  )
+}
+
      return (
          <div className="w-full">
              <div className="w-full flex justify-end pr-4">
