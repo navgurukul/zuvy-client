@@ -38,7 +38,7 @@ import { api, apiMeraki } from '@/utils/axios.config'
 const FormSchema = z.object({
     name: z.string(),
     bootcampTopic: z.string(),
-    description: z.string().optional(),
+    description: z.string().min(10, "Description must be at least 10 characters long"),
     duration: z.string().optional(),
     language: z.string(),
     startTime: z.date().optional(),
