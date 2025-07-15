@@ -34,6 +34,7 @@ function ChapterItem({
     isChapterClickedRef,
     chapterData,
     isLastItem,
+    isDragging,
 }: {
     title: string
     topicId: number
@@ -47,6 +48,7 @@ function ChapterItem({
     isChapterClickedRef: any
     chapterData: any
     isLastItem?: boolean
+     isDragging?: boolean
 }) {
     // states and variables
     const { courseId } = useParams()
@@ -54,7 +56,7 @@ function ChapterItem({
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const { setTopicId } = getTopicId()
     const dragControls = useDragControls()
-    const [isDragging, setIsDragging] = useState(false)
+    const [isBeingDragged, setIsBeingDragged] = useState(false)
 
     // functions
     const setTopicIcon = () => {
@@ -85,7 +87,13 @@ function ChapterItem({
     }
 
     const handleClick = () => {
-        setActiveChapter(chapterId) // Set the active chapter in the parent component
+         // Prevent click during drag
+        if (isBeingDragged || isDragging) {
+            console.log('Click prevented during drag')
+            return
+        }
+        
+        setActiveChapter(chapterId)
         if (topicId) {
             setTopicId(topicId)
         }
@@ -127,6 +135,18 @@ function ChapterItem({
         setDeleteModalOpen(true)
     }
 
+    const handleDragStart = () => {
+        setIsBeingDragged(true)
+        // Don't show any toast during drag
+    }
+
+    const handleDragEnd = () => {
+        // Add small delay to prevent click after drag
+        setTimeout(() => {
+            setIsBeingDragged(false)
+        }, 300)
+    }
+
 
     return (
         <Reorder.Item
@@ -134,15 +154,41 @@ function ChapterItem({
             id={isLastItem ? 'last-chapter' : `chapter-${chapterId}`}
             dragListener={false}
             dragControls={dragControls}
+            whileDrag={{ 
+                scale: 1.02,
+                boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                zIndex: 1000,
+                cursor: 'grabbing',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)'
+            }}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            transition={{ 
+                type: "spring",
+                stiffness: 500,
+                damping: 35,
+                mass: 0.8
+            }}
+            // Improved drag styling
+            style={{
+                listStyle: 'none',
+                margin: 0,
+                padding: 0,
+                marginBottom: '4px'
+            }}
         >
             <div ref={chapterId === activeChapter ? activeChapterRef : null}>
                 <div
                     className={cn(
-                        'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center select-none',
-                        setActiveChapterItem()
+                        'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center select-none transition-all duration-200',
+                        setActiveChapterItem(),
+                        isBeingDragged ? 'opacity-90 cursor-grabbing' : 'opacity-100 cursor-pointer'
                     )}
-                    onClick={() => {
-                        handleClick()
+                    onClick={handleClick}
+                    style={{
+                        pointerEvents: isBeingDragged ? 'none' : 'auto',
+                        userSelect: 'none', // Prevent text selection during drag
+                        WebkitUserSelect: 'none'
                     }}
                 >
                     <div className="flex gap-2 capitalize">
@@ -152,24 +198,27 @@ function ChapterItem({
                     <div className="flex items-center gap-2">
                         <Trash2
                             onClick={(e) => {
-                                e.stopPropagation()
-                                handleDeleteModal()
+                                  if (!isBeingDragged && !isDragging) {
+                                    handleDeleteModal()
+                                }
                             }}
-                            className="hover:text-destructive cursor-pointer"
+                            className="hover:text-destructive cursor-pointer transition-colors"
                             size={15}
+                            style={{
+                                pointerEvents: isBeingDragged ? 'none' : 'auto'
+                            }}
                         />
                         <GripVertical
                             style={{
-                                cursor: isDragging ? 'grabbing' : 'grab',
+                                cursor: isBeingDragged ? 'grabbing' : 'grab',
+                                pointerEvents: 'auto'
                             }}
+                            className="text-gray-600 hover:text-gray-600 transition-colors"
                             onPointerDown={(e) => {
+                                e.preventDefault()
                                 e.stopPropagation()
-                                setIsDragging(true)
                                 dragControls.start(e)
                             }}
-                            onPointerUp={() => setIsDragging(false)}
-                            onPointerLeave={() => setIsDragging(false)}
-                            onClick={(e) => e.stopPropagation()}
                             size={15}
                         />
                     </div>

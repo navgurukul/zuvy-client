@@ -62,6 +62,8 @@ function Page() {
     const [isReordering, setIsReordering] = useState(false)
     const [selectedModuleData, setSelectedModuleData] =
         useState<ModuleData | null>(null)
+    const [pendingOrder, setPendingOrder] = useState<CurriculumItem[] | null>(null)
+    const [reorderTimeout, setReorderTimeout] = useState<NodeJS.Timeout | null>(null)
     const [moduleData, setModuleData] = useState({
         name: '',
         description: '',
@@ -376,6 +378,7 @@ function Page() {
         setIsReordering(true)
         const oldOrder = originalCurriculum.map((item) => item.id)
         const newOrder = newOrderModules.map((item) => item.id)
+        const isSameOrder = JSON.stringify(oldOrder) === JSON.stringify(newOrder)
 
         let movedModuleId: number | null = null
 
@@ -407,40 +410,47 @@ function Page() {
                     reOrderDto: { newOrder: newPosition },
                 }
             )
-            setOriginalCurriculum([...updatedModules])
+            // setOriginalCurriculum([...updatedModules])
+             const warningMsg = response.data?.[0]?.message ?? ""
 
-            if (
-                response.data[0]?.message &&
-                response.data[0].message.includes('started by')
-            ) {
-                // Display the error in the popup instead of toast
-                toast.warning({
-                    title: 'Warning',
-                    description: response.data[0].message,
-                })
-                setCurriculum([...originalCurriculum])
+            if (warningMsg.includes("started by")) {
+            toast.warning({
+            title: "Warning",
+            description: warningMsg,
+        })
 
-                const updatedOriginal = originalCurriculum.map((item) =>
-                    item.id === movedModuleId
-                        ? { ...item, isStarted: true }
-                        : item
-                )
-                setOriginalCurriculum(updatedOriginal)
-                setCurriculum(updatedOriginal)
-            }
+         const updatedOriginal = originalCurriculum.map(item =>
+            item.id === movedModuleId ? { ...item, isStarted: true } : item
+        )
+            setOriginalCurriculum(updatedOriginal)
+            setCurriculum(updatedOriginal)
+        }else {
+           setOriginalCurriculum([...updatedModules])
+        }
+
         } catch (error) {
             setCurriculum([...originalCurriculum])
             toast.error({
-                title: 'Error',
-                description: 'Error updating module order',
+            title: "Error",
+            description: "Error updating module order"
             })
-        } finally {
-            setIsReordering(false)
-        }
+        } 
     }
 
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
-        handleReorder(newOrderModules)
+         //handleReorder(newOrderModules)
+        if (reorderTimeout) clearTimeout(reorderTimeout)
+
+        setPendingOrder(newOrderModules)
+
+       const timeout = setTimeout(() => {
+        if (pendingOrder) {
+         handleReorder(pendingOrder)
+         setPendingOrder(null)
+       }
+       }, 500) // wait for 300ms after drag stops
+
+       setReorderTimeout(timeout)
     }
 
     if (isCourseDeleted) {
