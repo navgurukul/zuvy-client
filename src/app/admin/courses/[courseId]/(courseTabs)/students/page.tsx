@@ -13,7 +13,7 @@ import { ROWS_PER_PAGE } from '@/utils/constant'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { columns } from './columns'
 import { getCourseData, getBatchData } from '@/store/store'
-import { useParams,useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -30,7 +30,6 @@ import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'
 import AlertDialogDemo from './components/deleteModalNew'
 import { Spinner } from '@/components/ui/spinner'
-
 
 export type StudentData = {
     email: string
@@ -52,7 +51,7 @@ type StudentDataState = Student[]
 
 const Page = ({ params }: { params: any }) => {
     const router = useRouter()
-    const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
     const {
         students,
         totalPages,
@@ -95,25 +94,25 @@ const Page = ({ params }: { params: any }) => {
 
     const userIds = selectedRows.map((item: any) => item.userId)
 
-    if (loadingCourseCheck) {
-      return (
-      <div className="flex justify-center items-center h-full mt-20">
-       <Spinner className="text-secondary" />
-     </div>
-     )
-   }
+    //     if (loadingCourseCheck) {
+    //       return (
+    //       <div className="flex justify-center items-center h-full mt-20">
+    //        <Spinner className="text-secondary" />
+    //      </div>
+    //      )
+    //    }
 
-   if (isCourseDeleted) {
-    return (
-     <div className="flex flex-col justify-center items-center h-full mt-20">
-       <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-      <p className="text-lg text-red-600 mt-4">This course has been deleted.</p>
-      <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-        Back to Courses
-      </Button>
-     </div>
-   )
-  }
+    //    if (isCourseDeleted) {
+    //     return (
+    //      <div className="flex flex-col justify-center items-center h-full mt-20">
+    //        <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
+    //       <p className="text-lg text-red-600 mt-4">This course has been deleted.</p>
+    //       <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
+    //         Back to Courses
+    //       </Button>
+    //      </div>
+    //    )
+    //   }
 
     return (
         <div className="text-gray-600">

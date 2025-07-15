@@ -24,7 +24,9 @@ import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 const Page = ({ params }: { params: any }) => {
     const router = useRouter()
-    const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
+    //     params.courseId
+    // )
     const [activeTab, setActiveTab] = useState('practice')
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
@@ -75,7 +77,7 @@ const Page = ({ params }: { params: any }) => {
     }, [params.courseId, debouncedSearch])
 
     const getFormData = useCallback(async () => {
-        if(isCourseDeleted) return
+        // if(isCourseDeleted) return
         try {
             const res = await api.get(
                 `/submission/submissionsOfForms/${params.courseId}`
@@ -83,21 +85,27 @@ const Page = ({ params }: { params: any }) => {
             setFormData(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
-            if (!isCourseDeleted) {
+            // if (!isCourseDeleted) {
             toast.error({
                 title: 'Error',
                 description: 'Error fetching form data',
             })
+            // }
         }
-        }
-    }, [params.courseId, isCourseDeleted])
+    }, [params.courseId])
 
     useEffect(() => {
-        if (!loadingCourseCheck && !isCourseDeleted && params.courseId) {
+        if (params.courseId) {
             getProjectsData()
             getFormData()
         }
-    }, [params.courseId,isCourseDeleted, getProjectsData, getFormData, debouncedSearch])
+    }, [
+        params.courseId,
+        // isCourseDeleted,
+        getProjectsData,
+        getFormData,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -107,26 +115,35 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
+    // if (loadingCourseCheck) {
+    //     return (
+    //         <div className="flex justify-center items-center h-full mt-20">
+    //             <Spinner className="text-secondary" />
+    //         </div>
+    //     )
+    // }
 
-    if (loadingCourseCheck) {
-      return (
-        <div className="flex justify-center items-center h-full mt-20">
-          <Spinner className="text-secondary" />
-        </div>
-      )
-    }
-    
-    if (isCourseDeleted) {
-      return (
-        <div className="flex flex-col justify-center items-center h-full mt-20">
-          <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-          <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
-          <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-            Back to Courses
-          </Button>
-        </div>
-      )
-    }
+    // if (isCourseDeleted) {
+    //     return (
+    //         <div className="flex flex-col justify-center items-center h-full mt-20">
+    //             <Image
+    //                 src="/images/undraw_select-option_6wly.svg"
+    //                 width={350}
+    //                 height={350}
+    //                 alt="Deleted"
+    //             />
+    //             <p className="text-lg text-red-600 mt-4">
+    //                 This course has been deleted !
+    //             </p>
+    //             <Button
+    //                 onClick={() => router.push('/admin/courses')}
+    //                 className="mt-6 bg-secondary"
+    //             >
+    //                 Back to Courses
+    //             </Button>
+    //         </div>
+    //     )
+    // }
 
     return (
         <div className="">

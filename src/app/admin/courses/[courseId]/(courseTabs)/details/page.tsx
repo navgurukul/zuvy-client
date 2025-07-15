@@ -48,14 +48,16 @@ const FormSchema = z.object({
     // coverImage: z.string().optional(),
     // collaborator: z.string().optional(),
 
-  name: z.string().min(1, "Please enter the course name."),
-  bootcampTopic: z.string().min(1, "Please specify the course topic."),
-  description: z.string().min(1, "Please add a course description."),
-  duration: z.string().min(1, "Please enter the course duration."),
-  language: z.string().min(1, "Please select the language."),
-  startTime: z.date({ required_error: "Please choose a start date for the course." }),
-  coverImage: z.string().min(1, "Please upload a cover image."),
-  collaborator: z.string().optional(),
+    name: z.string().min(1, 'Please enter the course name.'),
+    bootcampTopic: z.string().min(1, 'Please specify the course topic.'),
+    description: z.string().min(1, 'Please add a course description.'),
+    duration: z.string().min(1, 'Please enter the course duration.'),
+    language: z.string().min(1, 'Please select the language.'),
+    startTime: z.date({
+        required_error: 'Please choose a start date for the course.',
+    }),
+    coverImage: z.string().min(1, 'Please upload a cover image.'),
+    collaborator: z.string().optional(),
 })
 
 interface CourseData {
@@ -79,14 +81,21 @@ function Page({ params }: { params: any }) {
     const [croppedImage, setCroppedImage] = useState<string | null>(null)
 
     // Collaborator image states
-    const [collaboratorImage, setCollaboratorImage] = useState<string | null>(null)
-    const [collaboratorCropper, setCollaboratorCropper] = useState<Cropper | null>(null)
+    const [collaboratorImage, setCollaboratorImage] = useState<string | null>(
+        null
+    )
+    const [collaboratorCropper, setCollaboratorCropper] =
+        useState<Cropper | null>(null)
     const [isCollaboratorCropping, setIsCollaboratorCropping] = useState(false)
-    const [croppedCollaboratorImage, setCroppedCollaboratorImage] = useState<string | null>(null)
+    const [croppedCollaboratorImage, setCroppedCollaboratorImage] = useState<
+        string | null
+    >(null)
 
     const { courseData, setCourseData } = getCourseData()
     const { setStoreStudentData } = getStoreStudentData()
-    const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
+    //     params.courseId
+    // )
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -103,12 +112,15 @@ function Page({ params }: { params: any }) {
 
     // Helper function to check if string is an image URL
     const isImageUrl = (str: string) => {
-        if (!str) return false;
+        if (!str) return false
         // Check if string contains image file extensions or is a URL
-        const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i;
-        const isUrl = str.startsWith('http') || str.startsWith('https') || str.startsWith('data:image');
-        return imageExtensions.test(str) || isUrl;
-    };
+        const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i
+        const isUrl =
+            str.startsWith('http') ||
+            str.startsWith('https') ||
+            str.startsWith('data:image')
+        return imageExtensions.test(str) || isUrl
+    }
 
     useEffect(() => {
         if (courseData) {
@@ -165,12 +177,19 @@ function Page({ params }: { params: any }) {
                 coverImage = res.data.file.url
             }
 
-            if (croppedCollaboratorImage && croppedCollaboratorImage !== courseData?.collaborator) {
-                const response = await fetch(croppedCollaboratorImage);
-                const blob = await response.blob();
-                const file = new File([blob], 'cropped-collaborator-image.png', {
-                    type: 'image/png',
-                });
+            if (
+                croppedCollaboratorImage &&
+                croppedCollaboratorImage !== courseData?.collaborator
+            ) {
+                const response = await fetch(croppedCollaboratorImage)
+                const blob = await response.blob()
+                const file = new File(
+                    [blob],
+                    'cropped-collaborator-image.png',
+                    {
+                        type: 'image/png',
+                    }
+                )
 
                 const formData = new FormData()
                 formData.append('image', file)
@@ -309,26 +328,26 @@ function Page({ params }: { params: any }) {
         }
     }
 
+    // if (loadingCourseCheck) {
+    //   return (
+    //     <div className="flex justify-center items-center h-full mt-20">
+    //       <Spinner className="text-secondary" />
+    //     </div>
+    //   )
+    // }
 
-if (loadingCourseCheck) {
-  return (
-    <div className="flex justify-center items-center h-full mt-20">
-      <Spinner className="text-secondary" />
-    </div>
-  )
-}
+    // if (isCourseDeleted) {
+    //   return (
+    //     <div className="flex flex-col justify-center items-center h-full mt-20">
+    //       <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
+    //       <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
+    //       <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
+    //         Back to Courses
+    //       </Button>
+    //     </div>
+    //   )
+    // }
 
-if (isCourseDeleted) {
-  return (
-    <div className="flex flex-col justify-center items-center h-full mt-20">
-      <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-      <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
-      <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-        Back to Courses
-      </Button>
-    </div>
-  )
-}
     return (
         <div className="max-w-[400px] m-auto text-gray-600">
             <Form {...form}>
@@ -369,7 +388,7 @@ if (isCourseDeleted) {
                         ref={fileInputRef}
                     />
                     <Button
-                        className='text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]'
+                        className="text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                         type="button"
                         onClick={handleButtonClick}
                     >
@@ -456,14 +475,19 @@ if (isCourseDeleted) {
                                                 <div className="w-full h-[200px] overflow-hidden border rounded-md">
                                                     {croppedCollaboratorImage ? (
                                                         <img
-                                                            src={croppedCollaboratorImage}
+                                                            src={
+                                                                croppedCollaboratorImage
+                                                            }
                                                             alt="Collaborator"
                                                             className="w-full h-full object-cover"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full object-cover">
                                                             <OptimizedImageWithFallback
-                                                                src={field.value || ''}
+                                                                src={
+                                                                    field.value ||
+                                                                    ''
+                                                                }
                                                                 alt="Collaborator"
                                                                 fallBackSrc="/default-avatar.png"
                                                             />
@@ -477,24 +501,36 @@ if (isCourseDeleted) {
                                                 id="collaborator-picture"
                                                 type="file"
                                                 accept="image/*"
-                                                onChange={handleCollaboratorFileChange}
+                                                onChange={
+                                                    handleCollaboratorFileChange
+                                                }
                                                 className="hidden"
                                                 ref={collaboratorFileInputRef}
                                             />
 
                                             {/* Cropper */}
-                                            {collaboratorImage && isCollaboratorCropping ? (
+                                            {collaboratorImage &&
+                                            isCollaboratorCropping ? (
                                                 <div className="my-3">
                                                     <Cropper
                                                         src={collaboratorImage}
-                                                        style={{ height: 150, width: 150 }}
+                                                        style={{
+                                                            height: 150,
+                                                            width: 150,
+                                                        }}
                                                         aspectRatio={1}
-                                                        onInitialized={(instance) =>
-                                                            setCollaboratorCropper(instance)
+                                                        onInitialized={(
+                                                            instance
+                                                        ) =>
+                                                            setCollaboratorCropper(
+                                                                instance
+                                                            )
                                                         }
                                                     />
                                                     <Button
-                                                        onClick={handleCollaboratorCrop}
+                                                        onClick={
+                                                            handleCollaboratorCrop
+                                                        }
                                                         type="button"
                                                         variant="outline"
                                                         className="mt-2"
@@ -507,7 +543,9 @@ if (isCourseDeleted) {
                                                 <Button
                                                     variant="outline"
                                                     type="button"
-                                                    onClick={handleCollaboratorButtonClick}
+                                                    onClick={
+                                                        handleCollaboratorButtonClick
+                                                    }
                                                     size="sm"
                                                 >
                                                     Change Image
@@ -543,7 +581,7 @@ if (isCourseDeleted) {
                                                 className={cn(
                                                     'pl-3 text-left font-normal w-full text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                     !field.value &&
-                                                    'text-muted-foreground'
+                                                        'text-muted-foreground'
                                                 )}
                                             >
                                                 {field.value
@@ -580,32 +618,35 @@ if (isCourseDeleted) {
                             <FormItem className="text-start">
                                 <FormLabel>Duration</FormLabel>
                                 <FormControl>
-                                   <Input
-                                    type="text"
-                                    placeholder="Enter Duration in Weeks"
-                                    value={field.value}
-                                    onChange={(e) => {
-                                     const value = e.target.value
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter Duration in Weeks"
+                                        value={field.value}
+                                        onChange={(e) => {
+                                            const value = e.target.value
 
-                                    // Allow empty string
-                                    if (value === "") {
-                                      field.onChange(value)
-                                       return
-                                    }
+                                            // Allow empty string
+                                            if (value === '') {
+                                                field.onChange(value)
+                                                return
+                                            }
 
-                                    // Validate integer
-                                    const isValidInteger = /^\d+$/.test(value)
-                                    if (!isValidInteger) {
-                                     toast.error({
-                                      title: "Invalid Integer",
-                                      description: "Please enter a valid integer value",
-                                     })
-                                        return
-                                    }
+                                            // Validate integer
+                                            const isValidInteger = /^\d+$/.test(
+                                                value
+                                            )
+                                            if (!isValidInteger) {
+                                                toast.error({
+                                                    title: 'Invalid Integer',
+                                                    description:
+                                                        'Please enter a valid integer value',
+                                                })
+                                                return
+                                            }
 
-                                     field.onChange(value)
-                                    }}
-                                  />
+                                            field.onChange(value)
+                                        }}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -632,7 +673,7 @@ if (isCourseDeleted) {
                                                 <FormControl>
                                                     <RadioGroupItem
                                                         value={language}
-                                                        className='text-black border-black'
+                                                        className="text-black border-black"
                                                     />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
@@ -647,7 +688,12 @@ if (isCourseDeleted) {
                         )}
                     />
 
-                    <Button className='bg-success-dark opacity-75' type="submit">Submit</Button>
+                    <Button
+                        className="bg-success-dark opacity-75"
+                        type="submit"
+                    >
+                        Submit
+                    </Button>
                 </form>
             </Form>
         </div>

@@ -18,7 +18,7 @@ import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 const Page = ({ params }: { params: any }) => {
     // misc
     const router = useRouter()
-    const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
     const [loading, setLoading] = useState(true)
     const { courseData } = getCourseData()
     // state and variables
@@ -92,25 +92,25 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
-      if (loadingCourseCheck) {
-          return (
-            <div className="flex justify-center items-center h-full mt-20">
-              <Spinner className="text-secondary" />
-            </div>
-          )
-        }
+    //   if (loadingCourseCheck) {
+    //       return (
+    //         <div className="flex justify-center items-center h-full mt-20">
+    //           <Spinner className="text-secondary" />
+    //         </div>
+    //       )
+    //     }
         
-        if (isCourseDeleted) {
-          return (
-            <div className="flex flex-col justify-center items-center h-full mt-20">
-              <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-              <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
-              <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-                Back to Courses
-              </Button>
-            </div>
-          )
-        }
+    //     if (isCourseDeleted) {
+    //       return (
+    //         <div className="flex flex-col justify-center items-center h-full mt-20">
+    //           <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
+    //           <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
+    //           <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
+    //             Back to Courses
+    //           </Button>
+    //         </div>
+    //       )
+    //     }
     
     return (
         <>

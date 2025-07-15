@@ -57,32 +57,33 @@ function Page({ params }: any) {
     const [checkopenSessionForm, setOpenSessionForm] = useState(true)
     const [modulesData, setModulesData] = useState<any>([])
     const debouncedSearch = useDebounce(search, 1000)
-    const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
+    //     params.courseId
+    // )
 
+    //     const checkIfCourseExists = async () => {
+    //     if (!params.courseId) return
 
-//     const checkIfCourseExists = async () => {
-//     if (!params.courseId) return
+    //     try {
+    //       await api.get(`/bootcamp/${params.courseId}`)
+    //       setIsCourseDeleted(false)
+    //     } catch (error) {
+    //       setIsCourseDeleted(true)
+    //       getCourseData.setState({ courseData: null })
+    //     }
+    //   }
 
-//     try {
-//       await api.get(`/bootcamp/${params.courseId}`)
-//       setIsCourseDeleted(false)
-//     } catch (error) {
-//       setIsCourseDeleted(true)
-//       getCourseData.setState({ courseData: null })
-//     }
-//   }
+    //   useEffect(() => {
+    //     let interval: NodeJS.Timeout
 
-//   useEffect(() => {
-//     let interval: NodeJS.Timeout
+    //     if (!isCourseDeleted) {
+    //       interval = setInterval(() => {
+    //         checkIfCourseExists()
+    //       }, 3000)
+    //     }
 
-//     if (!isCourseDeleted) {
-//       interval = setInterval(() => {
-//         checkIfCourseExists()
-//       }, 3000)
-//     }
-
-//     return () => clearInterval(interval)
-//   }, [params.courseId, isCourseDeleted])
+    //     return () => clearInterval(interval)
+    //   }, [params.courseId, isCourseDeleted])
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
@@ -202,18 +203,19 @@ function Page({ params }: any) {
                 })
         }
     }, [params.courseId])
-    
-     const getAllModulesDetails = async () => {
-      if (!params.courseId) return
 
-      try {
-        const response = await api.get(`/content/allModules/${params.courseId}`)
-         setModulesData(response.data)
-       } catch (error) {
-        console.error("Failed to fetch modules data:", error)
+    const getAllModulesDetails = async () => {
+        if (!params.courseId) return
+
+        try {
+            const response = await api.get(
+                `/content/allModules/${params.courseId}`
+            )
+            setModulesData(response.data)
+        } catch (error) {
+            console.error('Failed to fetch modules data:', error)
+        }
     }
-  }
-
 
     useEffect(() => {
         getHandleAllClasses(offset)
@@ -244,26 +246,36 @@ function Page({ params }: any) {
         }
     }
 
-          
-     if (loadingCourseCheck) {
-          return (
-              <div className="flex justify-center items-center h-full mt-20">
-                <Spinner className="text-secondary" />
-              </div>
-            )
-          }
-          
-          if (isCourseDeleted) {
-            return (
-              <div className="flex flex-col justify-center items-center h-full mt-20">
-                <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-                <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
-                <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-                  Back to Courses
-                </Button>
-              </div>
-            )
-          }
+    // if (loadingCourseCheck) {
+    //     return (
+    //         <div className="flex justify-center items-center h-full mt-20">
+    //             <Spinner className="text-secondary" />
+    //         </div>
+    //     )
+    // }
+
+    // if (isCourseDeleted) {
+    //     return (
+    //         <div className="flex flex-col justify-center items-center h-full mt-20">
+    //             <Image
+    //                 src="/images/undraw_select-option_6wly.svg"
+    //                 width={350}
+    //                 height={350}
+    //                 alt="Deleted"
+    //             />
+    //             <p className="text-lg text-red-600 mt-4">
+    //                 This course has been deleted !
+    //             </p>
+    //             <Button
+    //                 onClick={() => router.push('/admin/courses')}
+    //                 className="mt-6 bg-secondary"
+    //             >
+    //                 Back to Courses
+    //             </Button>
+    //         </div>
+    //     )
+    // }
+
     return (
         <>
             {loading ? (
@@ -411,4 +423,3 @@ function Page({ params }: any) {
 }
 
 export default Page
-
