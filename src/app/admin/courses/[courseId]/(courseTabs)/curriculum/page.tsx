@@ -273,17 +273,17 @@ function Page() {
         }
     }
 
-    useEffect(() => {
-        let interval: NodeJS.Timeout
+    // useEffect(() => {
+    //     // let interval: NodeJS.Timeout
 
-        if (!isCourseDeleted) {
-            interval = setInterval(() => {
-                checkIfCourseExists()
-            }, 500)
-        }
+    //     // if (!isCourseDeleted) {
+    //     //     interval = setInterval(() => {
+    //             checkIfCourseExists()
+    //     //     }, 500)
+    //     // }
 
-        return () => clearInterval(interval)
-    }, [courseId, isCourseDeleted])
+    //     // return () => clearInterval(interval)
+    // }, [])
 
     const createModule = () => {
         if (!courseData?.id) {

@@ -205,17 +205,17 @@ const Page = ({ params }: { params: any }) => {
         }
 
         // ✅ 1. Initial mount check
-        useEffect(() => {
-            let interval: NodeJS.Timeout
+        // useEffect(() => {
+        //     // let interval: NodeJS.Timeout
 
-            if (!isCourseDeleted) {
-                interval = setInterval(() => {
-                    checkIfCourseExists()
-                }, 500)
-            }
+        //     // if (!isCourseDeleted) {
+        //     //     interval = setInterval(() => {
+        //             checkIfCourseExists()
+        //     //     }, 500)
+        //     // }
 
-            return () => clearInterval(interval)
-        }, [courseId, isCourseDeleted])
+        //     // return () => clearInterval(interval)
+        // }, [])
 
         useEffect(() => {
             if (!courseId || isCourseDeleted)
