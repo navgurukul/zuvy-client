@@ -39,15 +39,6 @@ import { getCourseData, getStoreStudentData } from '@/store/store'
 import { api, apiMeraki } from '@/utils/axios.config'
 
 const FormSchema = z.object({
-    // name: z.string(),
-    // bootcampTopic: z.string(),
-    // description: z.string().optional(),
-    // duration: z.string().min(1, "This field is required"),
-    // language: z.string(),
-    // startTime: z.date().optional(),
-    // coverImage: z.string().optional(),
-    // collaborator: z.string().optional(),
-
     name: z.string().min(1, 'Please enter the course name.'),
     bootcampTopic: z.string().min(1, 'Please specify the course topic.'),
     description: z.string().min(1, 'Please add a course description.'),
