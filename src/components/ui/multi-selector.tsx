@@ -35,18 +35,20 @@ export default function MultiSelector({
                             {selectedCount > 0
                                 ? selectedCount === 1
                                     ? selectedOptions[0].label
-                                    : `${selectedCount} selected`
-                                : 'Select options'}
+                                    : `${selectedCount} ${type} Selected`
+                                : type === 'Topic' || type === 'Topics'
+                                    ? 'All Topics'
+                                    : 'All Difficulty'}
+
                         </span>
                         <ChevronDown className="ml-2 h-5 w-5 text-secondary" />
                     </button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full lg:w-[250px] p-4 border border-secondary text-secondary">
                     <ScrollArea
-                        className={`${
-                            (type === 'Topic' || type === 'Topics') &&
+                        className={`${(type === 'Topic' || type === 'Topics') &&
                             'h-[300px]'
-                        } pr-4`}
+                            } pr-4`}
                         type="hover"
                         style={{
                             scrollbarWidth: 'none', // Firefox
@@ -65,8 +67,8 @@ export default function MultiSelector({
                                         (selected: any) =>
                                             selected.value === option.value
                                     ) && (
-                                        <Check className="h-5 w-5 text-secondary" />
-                                    )}
+                                            <Check className="h-5 w-5 text-secondary" />
+                                        )}
                                 </div>
                             ))}
                         </div>
