@@ -46,7 +46,6 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const router = useRouter();
   const searchParams = useSearchParams();
   const chapterId = searchParams.get('chapterId');
-  console.log(chapterId);
   
   // Move hooks before conditional return
   const { trackingData, moduleDetails, loading, error, refetch } = useAllChaptersWithStatus(moduleId);
@@ -155,7 +154,6 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
 
   // Add validation for moduleId after hooks
   if (!moduleId) {
-    console.log('ModuleContentPage - moduleId is missing');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

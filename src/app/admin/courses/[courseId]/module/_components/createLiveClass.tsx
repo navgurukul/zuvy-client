@@ -284,7 +284,6 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
             daysOfWeek: daysWeek,
             totalClasses: values.totalClasses,
         }
-        console.log(transformedData)
 
         try {
             await api.post('/classes', transformedData)

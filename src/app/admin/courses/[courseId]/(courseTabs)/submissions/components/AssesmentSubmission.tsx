@@ -40,11 +40,6 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
         try {
             const response = await api.get(apiUrl)
-            console.log('response.data', response.data)
-            console.log(
-                'response?.data.passPercentage',
-                response?.data.ModuleAssessment.passPercentage
-            )
             const assessments = response.data.submitedOutsourseAssessments
             const requiredCodingScore =
                 assessments[0]?.requiredCodingScore || null

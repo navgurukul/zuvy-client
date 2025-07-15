@@ -279,8 +279,6 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             // const isChecked = row.original.isChecked
             const isQualified = row.original.isPassed
-            console.log('row.original', row.original)
-            console.log('isQualified', isQualified)
             return (
                 <div className="flex ">
                     <div className="max-w-[500px] truncate flex items-center gap-x-2 ml-1 font-medium">
