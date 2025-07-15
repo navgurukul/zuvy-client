@@ -27,30 +27,11 @@ import {
     getCourseData,
 } from '@/store/store'
 
-type Chapter = {
-    chapterId: number
-    chapterTitle: string
-    topicId: number
-    topicName: string
-    order: number
-}
+import {QuizOptions,QuizQuestionDetails,ChapterResponse,Chapter} from '@/components/ui/type'
+import { AnyAaaaRecord } from 'dns'
 
-interface QuizOptions {
-    option1: string
-    option2: string
-    option3: string
-    option4: string
-}
 
-interface QuizQuestionDetails {
-    id: number
-    question: string
-    options: QuizOptions
-    correctOption: string
-    marks: null | number
-    difficulty: string
-    tagId: number
-}
+
 
 function Chapter() {
     const { courseId, moduleId, chapterID } = useParams()
@@ -83,7 +64,7 @@ function Chapter() {
     const [isNewChapterCreated, setIsNewChapterCreated] = useState(false)
     const [isChapterClicked, setIsChapterClicked] = useState(false)
     const isChapterClickedRef = useRef(false)
-    const [currentChapter, setCurrentChapter] = useState<any>([])
+    const [currentChapter, setCurrentChapter] =useState<Chapter[]>([])
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { courseData, fetchCourseDetails } = getCourseData()
 
@@ -110,15 +91,17 @@ function Chapter() {
 
     const fetchChapters = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<ChapterResponse>(
                 `/Content/allChaptersOfModule/${moduleId}`
             )
             const clickedChapter = response.data.chapterWithTopic.find(
-                (item: any) => item.chapterId === chapter_id
+                (item:any) => item.chapterId === chapter_id
             )
-            setTopicId(clickedChapter?.topicId)
+            // setTopicId(clickedChapter?.topicId)
+            setTopicId(clickedChapter?.topicId ?? 0)
             setCurrentChapter(clickedChapter)
-            setChapterData(response.data.chapterWithTopic)
+            setChapterData(response.data?.chapterWithTopic)
+           
             setModuleName(response.data.moduleName)
             setModuleData(response.data.chapterWithTopic)
         } catch (error) {
@@ -163,15 +146,15 @@ function Chapter() {
         }
     }, [activeChapter])
 
-    async function handleReorder(newOrderChapters: any) {
-        newOrderChapters = newOrderChapters.map((item: any, index: any) => ({
+    async function handleReorder(newOrderChapters: Chapter[]) {
+        newOrderChapters = newOrderChapters.map((item,index) => ({
             ...item,
             order: index + 1,
         }))
 
-        const oldOrder = chapterData.map((item: any) => item?.chapterId)
+        const oldOrder = chapterData.map((item: Chapter) => item?.chapterId)
         const movedItem = newOrderChapters.find(
-            (item: any, index: any) => item?.chapterId !== oldOrder[index]
+            (item,index) => item?.chapterId !== oldOrder[index]
         )
         if (!movedItem) return
         try {
@@ -250,7 +233,7 @@ function Chapter() {
                         }}
                     >
                         {chapterData &&
-                            chapterData.map((item: any, index: any) => {
+                            chapterData.map((item, index) => {
                                 const isLastItem =
                                     index === chapterData.length - 1
 

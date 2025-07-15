@@ -26,13 +26,9 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Toolbar } from './Toolbar'
 import './remirror-editor.css'
+import{RemirrorTextEditorProps} from '@/components/remirror-editor/type'
 
-interface RemirrorTextEditorProps {
-    initialContent: any
-    setInitialContent: (content: any) => void
-    preview?: boolean
-    hideBorder?: boolean
-}
+
 
 // Create empty content structure
 const createEmptyContent = () => {

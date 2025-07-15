@@ -13,21 +13,8 @@ import {
 } from '@/components/ui/popover'
 import { Check, ChevronDown } from 'lucide-react'
 import axios, { AxiosError } from 'axios'
+import {RadioCheckboxProps,Option,Batch,UpcomingClassResponse} from '@/app/instructor/_components/type'
 
-export interface RadioCheckboxProps {
-    fetchSessions: (data: any) => void
-    offset: number
-    position: any
-    setTotalSessions: any
-    setPages: any
-    setLastPage: any
-    debouncedSearch?: string
-}
-
-interface Option {
-    label: string
-    value: string
-}
 
 const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     fetchSessions,
@@ -38,8 +25,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     setLastPage,
     debouncedSearch,
 }: RadioCheckboxProps) => {
-    const [batches, setBatches] = useState<any[]>([])
-    const [batchId, setBatchId] = useState<any[]>([])
+    const [batches, setBatches] = useState<Batch[]>([])
+    const [batchId, setBatchId] = useState<Batch[]>([])
     const [timeFrame, setTimeFrame] = useState<string>('all')
     const [weeks, setWeeks] = useState<number>(0)
     const pathname = usePathname()
@@ -50,7 +37,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
         try {
             const response = await api.get(`/instructor/batchOfInstructor`)
             const transformedData = response.data.data.map(
-                (item: { batchId: any; batchName: any }) => ({
+                (item: { batchId: Batch; batchName: Batch }) => ({
                     value: item.batchId.toString(),
                     label: item.batchName,
                 })
@@ -72,12 +59,12 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
             try {
                 let ids = ''
                 batchId.map((item) => (ids += '&batchId=' + item.value))
-                const response = await api.get(
+                const response = await api.get<{ data: UpcomingClassResponse }>(
                     `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}${ids}`
                 )
 
-                fetchSessions(response.data.data.responses)
-                setTotalSessions(response.data.data.totalUpcomingClasses)
+                fetchSessions(response.data.data.response)
+                setTotalSessions(response.data.data.totalCompletedClass)
                 setPages(response.data.data.totalUpcomingPages)
                 setLastPage(response.data.data.totalUpcomingPages)
             } catch (error) {
@@ -114,11 +101,11 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                         debouncedSearch
                     )}`
                 }
-                const response = await api.get(baseUrl)
+                const response = await api.get<{ data:UpcomingClassResponse }>(baseUrl)
                 fetchSessions(response.data.data.classDetails)
                 setTotalSessions(response.data.data.totalCompletedClass)
                 setPages(response.data.data.totalPages)
-                setLastPage(response.data.data.totalPages)
+                setLastPage(response.data.data.totalPage)
             } catch (error) {
                 let errorMessage = 'An unknown error occurred'
                 // Type checking for error
@@ -262,5 +249,4 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
         </div>
     )
 }
-
 export default RadioCheckbox

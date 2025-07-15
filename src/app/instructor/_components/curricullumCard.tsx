@@ -11,21 +11,22 @@ import {
     FileQuestion,
     PencilLine,
 } from 'lucide-react'
+import {Course,TrackingResponse} from '@/app/instructor/_components/type'
 
 type Props = {
-    course: any
+    course: Course
 }
 
 const CurricullumCard = ({ course }: Props) => {
     const router = useRouter()
     const { viewcourses } = useParams()
-    const [chapterId, setChapterId] = useState<any>()
+    const [chapterId, setChapterId] = useState<number>()
 
     const timeAllotedInWeeks = Math.ceil(course.timeAlloted / 604800)
 
     const getChapterId = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<TrackingResponse>(
                 `tracking/getAllChaptersWithStatus/${course.id}`
             )
             setChapterId(response.data.trackingData[0].id)

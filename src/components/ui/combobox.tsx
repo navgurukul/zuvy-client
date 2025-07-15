@@ -15,16 +15,8 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
+import {ComboboxProps,Option} from '@/components/ui/type'
 
-export interface ComboboxProps {
-    data: any
-    title: string
-    onChange: (selectedValue: string) => void
-    initialValue?: string
-    isDisabled?: boolean
-    batch: boolean
-    batchChangeData: any
-}
 
 export function Combobox({
     data,
@@ -53,7 +45,7 @@ export function Combobox({
                     {batch
                         ? batchChangeData?.label
                         : value
-                        ? data.find((item: any) => item.value === value)
+                        ? data.find((item: Option) => item.value === value)
                               ?.label ?? 'No Batch is Assigned'
                         : 'No Batch is Assigned'}
 
@@ -68,7 +60,7 @@ export function Combobox({
                     />
                     <CommandEmpty>No {title} found.</CommandEmpty>
                     <CommandGroup>
-                        {data.map((item: any) => (
+                        {data.map((item: Option) => (
                             <CommandItem
                                 key={item.value}
                                 value={item.value}
@@ -90,7 +82,9 @@ export function Combobox({
                                             ? 'opacity-100'
                                             : 'opacity-0'
                                     }
-                                    aria-hidden={!value === item.value}
+                                    // aria-hidden={!value === item.value}
+                                    aria-hidden={value !== item.value}
+
                                 />
                                 {item.label}
                             </CommandItem>

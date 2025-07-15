@@ -93,8 +93,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   // Use real progress data if available, otherwise fall back to mock data
   const currentProgress = progressData?.data?.progress || 0;
   const batchName = progressData?.batchInfo?.batchName || '';
-  const totalStudents = progressData?.batchInfo?.totalEnrolledStudents || 0;
-  const instructorName = progressData?.instructorDetails?.instructorName || '';
+  const totalStudents = progressData?.batchInfo?.totalEnrolledStudents|| 0;
+  const instructorName = progressData?.instructorDetails?.instructorId || '';
   const instructorAvatar = progressData?.instructorDetails?.instructorProfilePicture || '';
   const courseName = progressData?.data?.bootcampTracking?.name || '';
   const courseDescription = progressData?.data?.bootcampTracking?.description || '';

@@ -5,6 +5,7 @@ import {
 } from '@/components/ui/popover'
 import { Check, ChevronDown } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import {MultiSelectorProps,Option} from '@/components/ui/type'
 
 export default function MultiSelector({
     selectedCount,
@@ -12,13 +13,7 @@ export default function MultiSelector({
     selectedOptions,
     handleOptionClick,
     type,
-}: {
-    selectedCount: any
-    options: any[]
-    selectedOptions: any
-    handleOptionClick: (option: any) => void
-    type: string
-}) {
+}:MultiSelectorProps) {
     return (
         <>
             <Popover>
@@ -54,7 +49,7 @@ export default function MultiSelector({
                         }}
                     >
                         <div className="space-y-2">
-                            {options.map((option: any) => (
+                            {options.map((option: Option) => (
                                 <div
                                     key={option.value}
                                     className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer rounded-md"
@@ -62,7 +57,7 @@ export default function MultiSelector({
                                 >
                                     <span>{option.label}</span>
                                     {selectedOptions.some(
-                                        (selected: any) =>
+                                        (selected: Option) =>
                                             selected.value === option.value
                                     ) && (
                                         <Check className="h-5 w-5 text-secondary" />
