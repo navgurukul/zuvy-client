@@ -320,7 +320,7 @@ const CodingProblems = () => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+                    <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : openEditDialog ? (
                 <EditCodingQuestionForm />
@@ -328,7 +328,7 @@ const CodingProblems = () => {
                 <div>
                     {allCodingQuestions.length > 0 && !isCodingDialogOpen ? (
                         <MaxWidthWrapper>
-                            <h1 className="text-left font-semibold text-2xl">
+                            <h1 className="text-left font-semibold text-2xl text-gray-600">
                                 Resource Library - Coding Problems
                             </h1>
                             <div className="flex justify-between">
@@ -351,7 +351,7 @@ const CodingProblems = () => {
                                 <div className="flex flex-row items-center gap-2">
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button className="text-white bg-secondary lg:max-w-[150px] w-full">
+                                            <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full">
                                                 <p>Create Topic</p>
                                             </Button>
                                         </DialogTrigger>
@@ -367,7 +367,7 @@ const CodingProblems = () => {
                                         />
                                     </Dialog>
 
-                                    <Button
+                                    <Button className='bg-success-dark opacity-75'
                                         onClick={() =>
                                             setIsCodingDialogOpen(true)
                                         }
@@ -424,7 +424,7 @@ const CodingProblems = () => {
                                 !isCodingEditDialogOpen &&
                                 codingQuestions.length === 0 ? (
                                 <>
-                                    <h1 className="text-left font-semibold text-2xl">
+                                    <h1 className="text-left font-semibold text-2xl text-gray-600">
                                         Resource Library - Coding Problems
                                     </h1>
                                     <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
@@ -441,6 +441,7 @@ const CodingProblems = () => {
                                             yet. Start by adding the first one
                                         </h2>
                                         <Button
+                                            className="bg-success-dark opacity-75"
                                             onClick={() =>
                                                 setIsCodingDialogOpen(true)
                                             }
@@ -460,7 +461,7 @@ const CodingProblems = () => {
                                                             false
                                                         )
                                                     }
-                                                    className="text-secondary cursor-pointer self-start flex"
+                                                    className="text-[rgb(81,134,114)] cursor-pointer self-start flex"
                                                 >
                                                     {' '}
                                                     <ChevronLeft /> Coding

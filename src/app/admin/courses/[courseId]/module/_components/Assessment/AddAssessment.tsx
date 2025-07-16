@@ -401,7 +401,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     <Button
                         className={`${
                             questionType === 'coding'
-                                ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
+                                ? 'bg-transparent text-[rgb(81,134,114)] border-b-4 border-[rgb(81,134,114)] rounded-none my-0 mx-2 p-0'
                                 : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
                             }`}
                         onClick={handleCodingButtonClick}
@@ -411,7 +411,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     <Button
                         className={`${
                             questionType === 'mcq'
-                                ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
+                                ? 'bg-transparent text-[rgb(81,134,114)] border-b-4 border-[rgb(81,134,114)] rounded-none my-0 mx-2 p-0'
                                 : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
                             }`}
                         onClick={handleMCQButtonClick}
@@ -421,7 +421,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                     <Button
                         className={`${
                             questionType === 'open-ended'
-                                ? 'bg-transparent text-secondary border-b-4 border-secondary rounded-none my-0 mx-2 p-0'
+                                ? 'bg-transparent text-[rgb(81,134,114)] border-b-4 border-[rgb(81,134,114)] rounded-none my-0 mx-2 p-0'
                                 : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
                             }`}
                         onClick={handleOpenEndedButtonClick}
@@ -447,7 +447,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         />
                     </div>
                     <div className="flex justify-between w-2/3">
-                        <h3 className="text-left font-bold mb-5 ml-2">
+                        <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
                             {questionType === 'coding'
                                 ? 'Coding Problem Library'
                                 : questionType === 'mcq'
@@ -456,7 +456,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         ? 'Open-Ended Question Library'
                                         : ''}
                         </h3>
-                        <h1 className="text-left font-bold mb-5 mr-3">
+                        <h1 className="text-left text-[15px] text-gray-600 font-bold mb-5 mr-3">
                             Selected Questions
                         </h1>
                     </div>
@@ -587,7 +587,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         setIsNewQuestionAdded = {setIsNewQuestionAdded}
                                     />
                                 ) : (
-                                    <h1 className="text-left italic pl-5">
+                                    <h1 className="text-left text-gray-600 text-[18px] italic pl-5">
                                         No Selected questions
                                     </h1>
                                 )}

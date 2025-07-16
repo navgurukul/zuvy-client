@@ -52,7 +52,7 @@ export const SidebarItem = ({
                 className={cn(
                     'flex justify-between items-center gap-x-2 text-slate-500 text-sm font-[500] pl-6 transition-all hover:text-slate-600 hover:bg-slate-300/20 w-full rounded-lg',
                     isActive &&
-                        'font-semibold text-secondary bg-secondary/20 hover:bg-secondary/20 hover:text-secondary ',
+                        'font-semibold text-[rgb(81,134,114)] bg-slate-200 hover:bg-slate-200 hover:text-[rgb(81,134,114)] ',
                     open && 'font-semibold text-black'
                 )}
             >
@@ -62,7 +62,7 @@ export const SidebarItem = ({
                             size={22}
                             className={cn(
                                 'text-slate-500',
-                                isActive && 'text-secondary',
+                                isActive && 'text-[rgb(81,134,114)]',
                                 open && 'text-black'
                             )}
                         />

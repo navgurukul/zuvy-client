@@ -672,7 +672,7 @@ export default function EditCodingQuestionForm() {
     return (
         <main className="flex flex-col p-3 w-full items-center ">
             <div
-                className="flex align-middle self-start text-secondary cursor-pointer"
+                className="flex align-middle self-start text-[rgb(81,134,114)] cursor-pointer"
                 onClick={() => setIsCodingEditDialogOpen(false)}
             >
                 <p>
@@ -684,7 +684,7 @@ export default function EditCodingQuestionForm() {
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleEditSubmit)}
-                    className="w-2/4 flex flex-col gap-4"
+                    className="w-2/4 flex flex-col gap-4 text-gray-600"
                 >
                     <FormField
                         control={form.control}
@@ -748,7 +748,7 @@ export default function EditCodingQuestionForm() {
                                     >
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -756,7 +756,7 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -764,7 +764,7 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -964,9 +964,8 @@ export default function EditCodingQuestionForm() {
                         ))}
 
                         <Button
-                            variant="outline"
                             type="button"
-                            className="mt-2"
+                            className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                             onClick={handleAddTestCase}
                         >
                             <Plus size={20} className="mr-2" />
@@ -976,7 +975,7 @@ export default function EditCodingQuestionForm() {
 
                     <div className="flex justify-end gap-3">
 
-                        <Button type="submit">Save</Button>
+                        <Button type="submit" className="bg-success-dark opacity-75">Save</Button>
                     </div>
                 </form>
             </Form>

@@ -38,7 +38,7 @@ const SelectCodingQuestions = ({
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <div className="flex items-center justify-between w-full">
-                                    <h2 className="font-bold truncate">
+                                    <h2 className="font-bold truncate text-[15px] text-gray-600">
                                         {ellipsis(question.title, 25)}
                                     </h2>
                                     <div className="flex gap-2 ml-auto">
@@ -58,7 +58,7 @@ const SelectCodingQuestions = ({
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-gray-600 mt-1 text-left">
+                                <p className="text-gray-600 mt-1 text-[1rem] text-left">
                                     {ellipsis(question.description, 45)}
                                 </p>
                                 <Dialog>

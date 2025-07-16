@@ -34,7 +34,6 @@ interface CodingChallengeResultProps {
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
   const router = useRouter();
   const params = useParams();
-console.log(submissionResults)
   const handleViewSolution = (questionId: number) => {
     router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}`);
   };

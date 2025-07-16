@@ -310,7 +310,7 @@ const AddVideo = ({
                                                     placeholder={
                                                         'Untitled Video'
                                                     }
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize  placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize  placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                     autoFocus
                                                 />
                                                 {!videoTitle && (
@@ -337,7 +337,7 @@ const AddVideo = ({
                                         <div
                                             id="previewVideo"
                                             onClick={previewVideo}
-                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer text-gray-600"
                                         >
                                             <Eye size={18} />
                                             <h6 className="ml-1 text-sm">
@@ -406,7 +406,7 @@ const AddVideo = ({
                             />
                             <Button
                                 type="submit"
-                                className=" flex flex-start w-[450px]  text-white font-bold py-2 px-4 rounded"
+                                className=" flex flex-start w-[450px] bg-success-dark opacity-75 text-white font-bold py-2 px-4 rounded"
                             >
                                 Save
                             </Button>

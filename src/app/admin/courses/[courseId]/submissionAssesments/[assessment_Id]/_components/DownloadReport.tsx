@@ -185,7 +185,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
         <div className="flex items-center space-x-2">
             <button
                 onClick={handleDownload}
-                className={ submitedAt ? `max-w-[500px] text-secondary font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
+                className={ submitedAt ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
             >
                 <ArrowBigDownDash className="mr-2" />
                 Download Report

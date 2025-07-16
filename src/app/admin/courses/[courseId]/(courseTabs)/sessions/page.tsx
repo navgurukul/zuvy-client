@@ -2,14 +2,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
-import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import CreateSessionDialog from './CreateSession'
 import { api } from '@/utils/axios.config'
-import { getCourseData, setStoreBatchValue } from '@/store/store'
+import { setStoreBatchValue } from '@/store/store'
 import RecordingCard from '../../_components/RecordingCard'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -17,6 +14,8 @@ import useDebounce from '@/hooks/useDebounce'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
 import ClassCardSkeleton from '../../_components/classCardSkeleton'
+import { useRouter } from 'next/navigation'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -39,6 +38,8 @@ interface State {
 }
 
 function Page({ params }: any) {
+    const router = useRouter()
+    // const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const [classes, setClasses] = useState<any[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()
@@ -56,6 +57,33 @@ function Page({ params }: any) {
     const [checkopenSessionForm, setOpenSessionForm] = useState(true)
     const [modulesData, setModulesData] = useState<any>([])
     const debouncedSearch = useDebounce(search, 1000)
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
+    //     params.courseId
+    // )
+
+    //     const checkIfCourseExists = async () => {
+    //     if (!params.courseId) return
+
+    //     try {
+    //       await api.get(`/bootcamp/${params.courseId}`)
+    //       setIsCourseDeleted(false)
+    //     } catch (error) {
+    //       setIsCourseDeleted(true)
+    //       getCourseData.setState({ courseData: null })
+    //     }
+    //   }
+
+    //   useEffect(() => {
+    //     let interval: NodeJS.Timeout
+
+    //     if (!isCourseDeleted) {
+    //       interval = setInterval(() => {
+    //         checkIfCourseExists()
+    //       }, 3000)
+    //     }
+
+    //     return () => clearInterval(interval)
+    //   }, [params.courseId, isCourseDeleted])
 
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
@@ -127,6 +155,7 @@ function Page({ params }: any) {
 
         fetchStudents()
     }, [params.courseId])
+
     useEffect(() => {
         let timeouts: NodeJS.Timeout[] = []
 
@@ -174,9 +203,18 @@ function Page({ params }: any) {
                 })
         }
     }, [params.courseId])
+
     const getAllModulesDetails = async () => {
-        const response = await api.get(`/content/allModules/${params.courseId}`)
-        setModulesData(response.data);
+        if (!params.courseId) return
+
+        try {
+            const response = await api.get(
+                `/content/allModules/${params.courseId}`
+            )
+            setModulesData(response.data)
+        } catch (error) {
+            console.error('Failed to fetch modules data:', error)
+        }
     }
 
     useEffect(() => {
@@ -208,13 +246,43 @@ function Page({ params }: any) {
         }
     }
 
+    // if (loadingCourseCheck) {
+    //     return (
+    //         <div className="flex justify-center items-center h-full mt-20">
+    //             <Spinner className="text-secondary" />
+    //         </div>
+    //     )
+    // }
+
+    // if (isCourseDeleted) {
+    //     return (
+    //         <div className="flex flex-col justify-center items-center h-full mt-20">
+    //             <Image
+    //                 src="/images/undraw_select-option_6wly.svg"
+    //                 width={350}
+    //                 height={350}
+    //                 alt="Deleted"
+    //             />
+    //             <p className="text-lg text-red-600 mt-4">
+    //                 This course has been deleted !
+    //             </p>
+    //             <Button
+    //                 onClick={() => router.push('/admin/courses')}
+    //                 className="mt-6 bg-secondary"
+    //             >
+    //                 Back to Courses
+    //             </Button>
+    //         </div>
+    //     )
+    // }
+
     return (
         <>
             {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
-                            <Spinner className="text-secondary" />
+                            <Spinner className="text-[rgb(81,134,114)]" />
                         </div>
                     </div>
                 </div>
@@ -230,7 +298,6 @@ function Page({ params }: any) {
                         />
                     </div>
                     <div className="flex flex-col lg:flex-row justify-between items-center">
-                        {/* <div className="w-[400px] pr-3"> */}
                         <Input
                             type="text"
                             placeholder="Search Classes"
@@ -238,26 +305,14 @@ function Page({ params }: any) {
                             value={search}
                             onChange={handleSetSearch}
                         />
-                        {/* </div> */}
-                        {
-                            <CreateSessionDialog
-                                courseId={params?.courseId || 0}
-                                bootcampData={bootcampData}
-                                getClasses={getHandleAllClasses}
-                                students={students}
-                                checkopenSessionForm={checkopenSessionForm}
-                                onClick={onClickHandler}
-                                modulesData={modulesData}
-                            />
-                        }
                     </div>
                     <div className="flex justify-start gap-6 my-6">
                         {tabs.map((tab) => (
                             <Button
                                 key={tab}
-                                className={`p-1 w-[100px] h-[30px] rounded-lg ${
+                                className={`p-1 w-[100px] h-[30px] rounded-lg border border-input bg-background hover:border-green-700 hover:text-black ${
                                     activeTab === tab
-                                        ? 'bg-secondary text-white'
+                                        ? 'bg-success-dark opacity-75 text-white'
                                         : 'bg-white'
                                 }`}
                                 onClick={() => handleTabChange(tab)}
@@ -269,7 +324,7 @@ function Page({ params }: any) {
                     </div>
                     {loading ? (
                         <div className="flex justify-center">
-                            <Spinner className="text-secondary" />
+                            <Spinner className="text-[rgb(81,134,114)]" />
                         </div>
                     ) : (
                         <div>
@@ -357,18 +412,6 @@ function Page({ params }: any) {
                                         with the learners for course lessons or
                                         doubts
                                     </p>
-                                    <CreateSessionDialog
-                                        courseId={params.courseId || 0}
-                                        bootcampData={bootcampData}
-                                        getClasses={getHandleAllClasses}
-                                        students={students}
-                                        onClick={onClickHandler}
-                                        checkopenSessionForm={
-                                            checkopenSessionForm
-                                        }
-                                        modulesData={modulesData}
-
-                                    />
                                 </div>
                             )}
                         </div>

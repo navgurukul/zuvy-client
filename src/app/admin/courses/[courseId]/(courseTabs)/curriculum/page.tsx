@@ -1,535 +1,613 @@
 'use client'
- import React, { useEffect, useState } from 'react'
- import Link from 'next/link'
- import Image from 'next/image'
- import moment from 'moment'
- import { api } from '@/utils/axios.config'
- import { getCourseData } from '@/store/store'
- import { Button } from '@/components/ui/button'
- import CurricullumCard from '@/app/admin/courses/[courseId]/_components/curricullumCard'
- import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
- import NewModuleDialog from '@/app/admin/courses/[courseId]/_components/newModuleDialog'
- import { Reorder, useDragControls } from 'framer-motion'
- import { Spinner } from '@/components/ui/spinner'
- import EditModuleDialog from '../../_components/EditModuleDialog'
- import { X } from "lucide-react"
- import { toast } from '@/components/ui/use-toast'
+import React, { useEffect, useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import moment from 'moment'
+import { api } from '@/utils/axios.config'
+import { getCourseData } from '@/store/store'
+import { Button } from '@/components/ui/button'
+import CurricullumCard from '@/app/admin/courses/[courseId]/_components/curricullumCard'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import NewModuleDialog from '@/app/admin/courses/[courseId]/_components/newModuleDialog'
+import { Reorder, useDragControls } from 'framer-motion'
+import { Spinner } from '@/components/ui/spinner'
+import EditModuleDialog from '../../_components/EditModuleDialog'
+import { X } from 'lucide-react'
+import { toast } from '@/components/ui/use-toast'
+import { useParams, useRouter } from 'next/navigation'
 
- interface CurriculumItem {
-     id: number
-     name: string
-     description: string
-     order: number
-     timeAlloted: number
-     quizCount: number
-     assignmentCount: number
-     codingProblemsCount: number
-     articlesCount: number
-     typeId: number
-     projectId: number
-     ChapterId: number
-     isStarted?: boolean
- }
- 
- interface ModuleData {
-     name: string
-     description: string
-     type: string
-     timeAlloted: number
-     typeId: number
- }
- 
- function Page() {
-     const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
-     const [originalCurriculum, setOriginalCurriculum] = useState<CurriculumItem[]>([])
-     const { courseData } = getCourseData()
-     const [typeId, setTypeId] = useState(1)
-     const [loading, setLoading] = useState(true)
-     const [editMode, setEditMode] = useState(false)
-     const [moduleId, setModuleId] = useState(0)
-     const [isOpen, setIsOpen] = useState(false)
-     const [isModalOpen, setIsModalOpen] = useState(false)
-     const [message, setMessage] = useState("")
-     const [isEditOpen, setIsEditOpen] = useState(false)
-     const [isReordering, setIsReordering] = useState(false)
-     const [selectedModuleData, setSelectedModuleData] = useState<ModuleData | null>(null)
-     const [moduleData, setModuleData] = useState({
-         name: '',
-         description: '',
-     })
-     const [timeData, setTimeData] = useState({
-         months: -1,
-         weeks: -1,
-         days: -1,
-     })
-     const dragControls = useDragControls()
- 
-     const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-         const { value } = event.target
-         setTypeId(value === 'learning-material' ? 1 : 2)
-     }
- 
-     const handleModuleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-         const { name, value } = e.target
-         setModuleData((prev) => ({ ...prev, [name]: value }))
-     }
- 
-     const handleTimeAllotedChange = (
-         e: React.ChangeEvent<HTMLInputElement>
-     ) => {
-         const { name, value } = e.target
-         setTimeData((prev) => ({ ...prev, [name]: parseInt(value, 10) }))
-     }
- 
-     useEffect(() => {
-         if (moduleId && courseData?.id) {
-             api.get(`/content/allModules/${courseData.id}`).then((res) => {
-                 const data = res.data.find((item: any) => moduleId === item.id)
-                 setSelectedModuleData(data)
-             }).catch(() => {
-                 toast.error({
-                    title: "Error",
-                    description:'Failed to fetch module data',
-                  })
-             })
-         }
-     }, [moduleId, courseData?.id])
- 
-     const editHandle = (module: any) => {
-         setEditMode(true)
-         setModuleId(module)
-         setIsEditOpen(true)
-     }
-     // Convert seconds to months, weeks and days:-
-     const convertSeconds = (seconds: number) => {
-         const SECONDS_IN_A_MINUTE = 60
-         const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
-         const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
-         const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
-         const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
-         const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
-         seconds %= SECONDS_IN_A_MONTH
-         const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
-         seconds %= SECONDS_IN_A_WEEK
-         const days = Math.floor(seconds / SECONDS_IN_A_DAY)
-         seconds %= SECONDS_IN_A_DAY
-         return {
-             months: months,
-             weeks: weeks,
-             days: days,
-         }
-     }
- 
-     useEffect(() => {
-         if (isOpen) {
-             setModuleData({
-                 name: '',
-                 description: '',
-             })
-             setTimeData({
-                 months: -1,
-                 weeks: -1,
-                 days: -1,
-             })
-         }
-     }, [isOpen])
- 
-     useEffect(() => {
-         if (isEditOpen) {
-             if (selectedModuleData) {
-                 setModuleData({
-                     name: selectedModuleData.name || '',
-                     description: selectedModuleData.description || '',
-                 })
-                 setTypeId(selectedModuleData.typeId)
-                 const result = convertSeconds(selectedModuleData.timeAlloted)
-                 setTimeData({
-                     days: result.days,
-                     weeks: result.weeks,
-                     months: result.months,
-                 })
-             }
-         } else {
-             setModuleData({
-                 name: '',
-                 description: '',
-             })
-             setTimeData({
-                 months: -1,
-                 weeks: -1,
-                 days: -1,
-             })
-         }
-     }, [selectedModuleData])
- 
-     useEffect(() => {
-         if (isEditOpen && moduleId && courseData?.id) {
-             api.get(`/content/allModules/${courseData.id}`)
-                 .then((res) => {
-                     const data = res.data.find(
-                         (module: any) => module.id === moduleId
-                     )
-                     setSelectedModuleData(data) // Set the selected module's data
-                     // Update the form fields when module data is fetched
-                     setModuleData({
-                         name: data?.name || '',
-                         description: data?.description || '',
-                     })
-                     setTypeId(data?.typeId || 1)
-                     // Convert seconds to time data and set it in state
-                     const result = convertSeconds(data?.timeAlloted)
-                     setTimeData({
-                         days: result.days,
-                         weeks: result.weeks,
-                         months: result.months,
-                     })
-                 })
-                 .catch(() => {
-                     toast.error({
-                        title: "Error",
-                        description:'Failed to fetch module data',
-                      })
-                 })
-         }
-     }, [isEditOpen, moduleId, courseData?.id])
- 
-     const editModule = () => { 
-         if (!courseData?.id) {
-             toast.error({
-                title: "Error",
-                description:'Course ID is missing',
-              })
-             return
-         }
- 
-         const { days, weeks, months } = timeData
-         const totalDays = days + weeks * 7 + months * 28
-         const totalSeconds = totalDays * 86400
-         const moduleDto = {
-             ...moduleData,
-             timeAlloted: totalSeconds,
-             isLock: false,
-         }
- 
-         if (totalSeconds === 0) {
-             toast.error({
-                title: "Error",
-                description:'Please enter a valid duration',
-              })
-             return
-         }
- 
-         api.put(
-             `/content/editModuleOfBootcamp/${courseData.id}?moduleId=${moduleId}`,
-             { moduleDto }
-         )
-             .then((res) => {
-                 if (res.data.message === "Modified successfully") {
-                     toast.success({
-                        title: "Success",
-                        description:'Module Edited Successfully'
-                      })
-                 } else {
-                     toast.error({
-                        title: "Error",
-                        description:res.data[0].message,
-                      })
-                 }
-                 fetchCourseModules()
-                 setIsEditOpen(false)
-             })
-             .catch(() => {
-                 toast.error({
-                    title: "Error",
-                    description: "Error updating module"
-                  })
-             })
-     }
- 
-     const createModule = () => { 
-         if (!courseData?.id) {
-             toast.error({
-                title: "Error",
-                description: "'Course ID is missing'"
-              })
-             return
-         }
- 
-         const { days, weeks, months } = timeData
-         const totalDays = days + weeks * 7 + months * 28
-         const totalSeconds = totalDays * 86400
- 
-         if (totalSeconds === 0) {
-             toast.error({
-                title: "Error",
-                description: "'Please enter a valid duration'"
-              })
-             return
-         }
- 
-         api.post(`/content/modules/${courseData.id}?typeId=${typeId}`, {
-             ...moduleData,
-             timeAlloted: totalSeconds,
-         })
-             .then(() => {
-                 toast.success({
-                    title: "Success",
-                    description: 'Module Created Successfully',
-                  })
-                 fetchCourseModules()
-                 setIsOpen(false)
-             })
-             .catch(() => {
-                 toast.error({
-                    title: "Error",
-                    description: "'Error creating module'"
-                  })
-             })
-     }
- 
-     const fetchCourseModules = async () => {
-         if (!courseData?.id) {
+interface CurriculumItem {
+    id: number
+    name: string
+    description: string
+    order: number
+    timeAlloted: number
+    quizCount: number
+    assignmentCount: number
+    codingProblemsCount: number
+    articlesCount: number
+    typeId: number
+    projectId: number
+    ChapterId: number
+    isStarted?: boolean
+}
+
+interface ModuleData {
+    name: string
+    description: string
+    type: string
+    timeAlloted: number
+    typeId: number
+}
+
+function Page() {
+    const router = useRouter()
+    const params = useParams()
+    const courseId = params.courseId
+    const [isCourseDeleted, setIsCourseDeleted] = useState(false)
+    const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
+    const [originalCurriculum, setOriginalCurriculum] = useState<
+        CurriculumItem[]
+    >([])
+    const { courseData } = getCourseData()
+    const [isLoading, setIsLoading] = useState(false)
+    const [typeId, setTypeId] = useState(1)
+    const [loading, setLoading] = useState(true)
+    const [editMode, setEditMode] = useState(false)
+    const [moduleId, setModuleId] = useState(0)
+    const [isOpen, setIsOpen] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [message, setMessage] = useState('')
+    const [isEditOpen, setIsEditOpen] = useState(false)
+    const [isReordering, setIsReordering] = useState(false)
+    const [selectedModuleData, setSelectedModuleData] =
+        useState<ModuleData | null>(null)
+    const [pendingOrder, setPendingOrder] = useState<CurriculumItem[] | null>(null)
+    const [reorderTimeout, setReorderTimeout] = useState<NodeJS.Timeout | null>(null)
+    const [moduleData, setModuleData] = useState({
+        name: '',
+        description: '',
+    })
+    const [timeData, setTimeData] = useState({
+        months: -1,
+        weeks: -1,
+        days: -1,
+    })
+    const dragControls = useDragControls()
+
+    const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { value } = event.target
+        setTypeId(value === 'learning-material' ? 1 : 2)
+    }
+
+    const handleModuleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target
+        setModuleData((prev) => ({ ...prev, [name]: value }))
+    }
+
+    const handleTimeAllotedChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const { name, value } = e.target
+        setTimeData((prev) => ({ ...prev, [name]: parseInt(value, 10) }))
+    }
+
+    useEffect(() => {
+        if (moduleId && courseData?.id) {
+            api.get(`/content/allModules/${courseData.id}`)
+                .then((res) => {
+                    const data = res.data.find(
+                        (item: any) => moduleId === item.id
+                    )
+                    setSelectedModuleData(data)
+                })
+                .catch(() => {
+                    toast.error({
+                        title: 'Error',
+                        description: 'Failed to fetch module data',
+                    })
+                })
+        }
+    }, [moduleId, courseData?.id])
+
+    const editHandle = (module: any) => {
+        setEditMode(true)
+        setModuleId(module)
+        setIsEditOpen(true)
+    }
+    // Convert seconds to months, weeks and days:-
+    const convertSeconds = (seconds: number) => {
+        const SECONDS_IN_A_MINUTE = 60
+        const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
+        const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
+        const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
+        const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
+        const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
+        seconds %= SECONDS_IN_A_MONTH
+        const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
+        seconds %= SECONDS_IN_A_WEEK
+        const days = Math.floor(seconds / SECONDS_IN_A_DAY)
+        seconds %= SECONDS_IN_A_DAY
+        return {
+            months: months,
+            weeks: weeks,
+            days: days,
+        }
+    }
+
+    useEffect(() => {
+        if (isOpen) {
+            setModuleData({
+                name: '',
+                description: '',
+            })
+            setTimeData({
+                months: -1,
+                weeks: -1,
+                days: -1,
+            })
+        }
+    }, [isOpen])
+
+    useEffect(() => {
+        if (isEditOpen) {
+            if (selectedModuleData) {
+                setModuleData({
+                    name: selectedModuleData.name || '',
+                    description: selectedModuleData.description || '',
+                })
+                setTypeId(selectedModuleData.typeId)
+                const result = convertSeconds(selectedModuleData.timeAlloted)
+                setTimeData({
+                    days: result.days,
+                    weeks: result.weeks,
+                    months: result.months,
+                })
+            }
+        } else {
+            setModuleData({
+                name: '',
+                description: '',
+            })
+            setTimeData({
+                months: -1,
+                weeks: -1,
+                days: -1,
+            })
+        }
+    }, [selectedModuleData])
+
+    useEffect(() => {
+        if (isEditOpen && moduleId && courseData?.id) {
+            api.get(`/content/allModules/${courseData.id}`)
+                .then((res) => {
+                    const data = res.data.find(
+                        (module: any) => module.id === moduleId
+                    )
+                    setSelectedModuleData(data) // Set the selected module's data
+                    // Update the form fields when module data is fetched
+                    setModuleData({
+                        name: data?.name || '',
+                        description: data?.description || '',
+                    })
+                    setTypeId(data?.typeId || 1)
+                    // Convert seconds to time data and set it in state
+                    const result = convertSeconds(data?.timeAlloted)
+                    setTimeData({
+                        days: result.days,
+                        weeks: result.weeks,
+                        months: result.months,
+                    })
+                })
+                .catch(() => {
+                    toast.error({
+                        title: 'Error',
+                        description: 'Failed to fetch module data',
+                    })
+                })
+        }
+    }, [isEditOpen, moduleId, courseData?.id])
+
+    const editModule = () => {
+        if (!courseData?.id) {
             toast.error({
-                title: "Error",
+                title: 'Error',
                 description: 'Course ID is missing',
-              })
-             setLoading(false)
-             return
-         }
- 
-         try {
-             const response = await api.get(
-                 `/content/allModules/${courseData.id}`
-             )
-             const modulesWithStartedFlag = response.data.map((module: any) => ({
-                 ...module,
-                 isStarted: false
-             }))
-             setCurriculum(modulesWithStartedFlag)
-             setOriginalCurriculum([...modulesWithStartedFlag])
-             setLoading(false)
-         } catch (error) {
+            })
+            return
+        }
+
+        const { days, weeks, months } = timeData
+        const totalDays = days + weeks * 7 + months * 28
+        const totalSeconds = totalDays * 86400
+        const moduleDto = {
+            ...moduleData,
+            timeAlloted: totalSeconds,
+            isLock: false,
+        }
+
+        if (totalSeconds === 0) {
             toast.error({
-                title: "Error",
-                description:'Failed to fetch course Modules',
-              })
-             setLoading(false)
-         }
-     }
- 
-     useEffect(() => {
-         if (courseData?.id) {
-             fetchCourseModules()
-         }
-     }, [courseData?.id])
- 
-     async function handleReorder(newOrderModules: CurriculumItem[]) { 
-         if (!courseData?.id) {
-             toast.error({
-                title: "Error",
-                description: "Course ID is missing"
-              })
-             return
-         }
- 
-         setIsReordering(true)
-         const oldOrder = originalCurriculum.map(item => item.id)
-         const newOrder = newOrderModules.map(item => item.id)
- 
-         let movedModuleId: number | null = null
- 
-         for (let i = 0; i < oldOrder.length; i++) {
-             if (oldOrder[i] !== newOrder[i]) {
-                 movedModuleId = newOrder[i]
-                 break
-             }
-         }
- 
-         if (!movedModuleId) {
-             setIsReordering(false)
-             return
-         }
- 
-         const newPosition = newOrderModules.findIndex(item => item.id === movedModuleId) + 1
-         const updatedModules = newOrderModules.map((item, index) => ({
-             ...item,
-             order: index + 1,
-         }))
- 
-         setCurriculum(updatedModules)
- 
-         try {
-             const response = await api.put(
-                 `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${movedModuleId}`,
-                 {
-                     reOrderDto: { newOrder: newPosition },
-                 }
-             )
-             setOriginalCurriculum([...updatedModules])
- 
-             if (response.data[0]?.message && response.data[0].message.includes("started by")) {
-                 // Display the error in the popup instead of toast
-                 toast.warning({
-                    title: "Warning",
-                    description: response.data[0].message,
-                  })
-                 setCurriculum([...originalCurriculum])
- 
-                 const updatedOriginal = originalCurriculum.map(item =>
-                     item.id === movedModuleId ? { ...item, isStarted: true } : item
-                 )
-                 setOriginalCurriculum(updatedOriginal)
-                 setCurriculum(updatedOriginal)
-             }
-         } catch (error) {
-             setCurriculum([...originalCurriculum])
-             toast.error({
-                title: "Error",
-                description: "Error updating module order"
-              })
-         } finally {
-             setIsReordering(false)
-         }
-     }
- 
-     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
-         handleReorder(newOrderModules)
-     }
- 
-     return (
-         <div className="w-full">
-             <div className="w-full flex justify-end pr-4">
-                 <div>
-                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                         <DialogTrigger asChild>
-                             <Button
-                                 className="text-white bg-secondary"
-                             >
-                                 Add Module
-                             </Button>
-                         </DialogTrigger>
-                         <DialogOverlay />
-                         <NewModuleDialog
-                             moduleData={moduleData}
-                             timeData={timeData}
-                             createModule={createModule}
-                             handleModuleChange={handleModuleChange}
-                             handleTimeAllotedChange={handleTimeAllotedChange}
-                             handleTypeChange={handleTypeChange}
-                             typeId={typeId}
-                             isOpen={isOpen}
-                         />
-                     </Dialog>
-                 </div>
-             </div>
- 
-             {isEditOpen && (
-                 <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                     <EditModuleDialog
-                         editMode={editMode}
-                         moduleData={moduleData}
-                         timeData={timeData}
-                         createModule={createModule}
-                         editModule={editModule}
-                         handleModuleChange={handleModuleChange}
-                         handleTimeAllotedChange={handleTimeAllotedChange}
-                         typeId={typeId}
-                     />
-                 </Dialog>
-             )}
- 
-             {loading ? (
-                 <div className="my-5 flex justify-center items-center">
-                     <div className="absolute h-screen">
-                         <div className="relative top-[75%]">
-                             <Spinner className="text-secondary" />
-                         </div>
-                     </div>
-                 </div>
-             ) : (
-                 <div className="flex flex-col items-center justify-center">
-                     {curriculum.length > 0 ? (
-                         <Reorder.Group
-                             className="w-1/2"
-                             values={curriculum}
-                             onReorder={handleReorderModules}
-                             axis="y"
-                         >
-                             {curriculum.map((item, index) => (
+                title: 'Error',
+                description: 'Please enter a valid duration',
+            })
+            return
+        }
+
+        api.put(
+            `/content/editModuleOfBootcamp/${courseData.id}?moduleId=${moduleId}`,
+            { moduleDto }
+        )
+            .then((res) => {
+                if (res.data.message === 'Modified successfully') {
+                    toast.success({
+                        title: 'Success',
+                        description: 'Module Edited Successfully',
+                    })
+                } else {
+                    toast.error({
+                        title: 'Error',
+                        description: res.data[0].message,
+                    })
+                }
+                fetchCourseModules()
+                setIsEditOpen(false)
+            })
+            .catch(() => {
+                toast.error({
+                    title: 'Error',
+                    description: 'Error updating module',
+                })
+            })
+    }
+
+    // Removed duplicate createModule function declaration
+
+    const checkIfCourseExists = async () => {
+        if (!courseId) return
+
+        try {
+            await api.get(`/bootcamp/${courseId}`)
+            setIsCourseDeleted(false)
+        } catch (error) {
+            setIsCourseDeleted(true)
+            getCourseData.setState({ courseData: null }) // Zustand clear
+        }
+    }
+
+    // useEffect(() => {
+    //     let interval: NodeJS.Timeout
+
+    //     if (!isCourseDeleted) {
+    //         interval = setInterval(() => {
+    //             checkIfCourseExists()
+    //         }, 500)
+    //     }
+
+    //     return () => clearInterval(interval)
+    // }, [courseId, isCourseDeleted])
+
+    const createModule = () => {
+        if (!courseData?.id) {
+            toast.error({
+                title: 'Error',
+                description: "'Course ID is missing'",
+            })
+            return
+        }
+
+        const { days, weeks, months } = timeData
+        const totalDays = days + weeks * 7 + months * 28
+        const totalSeconds = totalDays * 86400
+
+        if (totalSeconds === 0) {
+            toast.error({
+                title: 'Error',
+                description: "'Please enter a valid duration'",
+            })
+            return
+        }
+
+        api.post(`/content/modules/${courseData.id}?typeId=${typeId}`, {
+            ...moduleData,
+            timeAlloted: totalSeconds,
+        })
+            .then(() => {
+                toast.success({
+                    title: 'Success',
+                    description: 'Module Created Successfully',
+                })
+                fetchCourseModules()
+                setIsOpen(false)
+                setIsLoading(false)
+            })
+            .catch(() => {
+                setIsLoading(false)
+                toast.error({
+                    title: 'Error',
+                    description: "'Error creating module'",
+                })
+            })
+    }
+
+    const fetchCourseModules = async () => {
+        if (!courseData?.id) {
+            toast.error({
+                title: 'Error',
+                description: 'Course ID is missing',
+            })
+            setLoading(false)
+            return
+        }
+
+        try {
+            const response = await api.get(
+                `/content/allModules/${courseData.id}`
+            )
+            const modulesWithStartedFlag = response.data.map((module: any) => ({
+                ...module,
+                isStarted: false,
+            }))
+            setCurriculum(modulesWithStartedFlag)
+            setOriginalCurriculum([...modulesWithStartedFlag])
+            setLoading(false)
+        } catch (error) {
+            toast.error({
+                title: 'Error',
+                description: 'Failed to fetch course Modules',
+            })
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (courseData?.id) {
+            fetchCourseModules()
+        }
+    }, [courseData?.id])
+
+    async function handleReorder(newOrderModules: CurriculumItem[]) {
+        if (!courseData?.id) {
+            toast.error({
+                title: 'Error',
+                description: 'Course ID is missing',
+            })
+            return
+        }
+
+        setIsReordering(true)
+        const oldOrder = originalCurriculum.map((item) => item.id)
+        const newOrder = newOrderModules.map((item) => item.id)
+        const isSameOrder = JSON.stringify(oldOrder) === JSON.stringify(newOrder)
+
+        let movedModuleId: number | null = null
+
+        for (let i = 0; i < oldOrder.length; i++) {
+            if (oldOrder[i] !== newOrder[i]) {
+                movedModuleId = newOrder[i]
+                break
+            }
+        }
+
+        if (!movedModuleId) {
+            setIsReordering(false)
+            return
+        }
+
+        const newPosition =
+            newOrderModules.findIndex((item) => item.id === movedModuleId) + 1
+        const updatedModules = newOrderModules.map((item, index) => ({
+            ...item,
+            order: index + 1,
+        }))
+
+        setCurriculum(updatedModules)
+
+        try {
+            const response = await api.put(
+                `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${movedModuleId}`,
+                {
+                    reOrderDto: { newOrder: newPosition },
+                }
+            )
+            // setOriginalCurriculum([...updatedModules])
+             const warningMsg = response.data?.[0]?.message ?? ""
+
+            if (warningMsg.includes("started by")) {
+            toast.warning({
+            title: "Warning",
+            description: warningMsg,
+        })
+
+         const updatedOriginal = originalCurriculum.map(item =>
+            item.id === movedModuleId ? { ...item, isStarted: true } : item
+        )
+            setOriginalCurriculum(updatedOriginal)
+            setCurriculum(updatedOriginal)
+        }else {
+           setOriginalCurriculum([...updatedModules])
+        }
+
+        } catch (error) {
+            setCurriculum([...originalCurriculum])
+            toast.error({
+            title: "Error",
+            description: "Error updating module order"
+            })
+        } 
+    }
+
+    const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
+         //handleReorder(newOrderModules)
+        if (reorderTimeout) clearTimeout(reorderTimeout)
+
+        setPendingOrder(newOrderModules)
+
+       const timeout = setTimeout(() => {
+        if (pendingOrder) {
+         handleReorder(pendingOrder)
+         setPendingOrder(null)
+       }
+       }, 500) // wait for 300ms after drag stops
+
+       setReorderTimeout(timeout)
+    }
+
+    if (isCourseDeleted) {
+        return (
+            <div className="flex flex-col justify-center items-center h-full mt-20">
+                <Image
+                    src="\images\undraw_select-option_6wly.svg"
+                    width={350}
+                    height={350}
+                    alt="Deleted"
+                />
+                <p className="text-lg text-red-600  mt-4">
+                    This course has been deleted.
+                </p>
+                <Button
+                    onClick={() => router.push('/admin/courses')}
+                    className="mt-6 bg-secondary"
+                >
+                    Back to Courses
+                </Button>
+            </div>
+        )
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Spinner className="text-secondary" />
+            </div>
+        )
+    }
+
+    return (
+        <div className="w-full">
+            <div className="w-full flex justify-end pr-4">
+                <div>
+                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="text-white bg-success-dark opacity-75">
+                                Add Module
+                            </Button>
+                        </DialogTrigger>
+                        <DialogOverlay />
+                        <NewModuleDialog
+                            moduleData={moduleData}
+                            timeData={timeData}
+                            createModule={createModule}
+                            handleModuleChange={handleModuleChange}
+                            handleTimeAllotedChange={handleTimeAllotedChange}
+                            handleTypeChange={handleTypeChange}
+                            typeId={typeId}
+                            isOpen={isOpen}
+                            setIsLoading={setIsLoading}
+                            isLoading={isLoading}
+                        />
+                    </Dialog>
+                </div>
+            </div>
+
+            {isEditOpen && (
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                    <EditModuleDialog
+                        editMode={editMode}
+                        moduleData={moduleData}
+                        timeData={timeData}
+                        createModule={createModule}
+                        editModule={editModule}
+                        handleModuleChange={handleModuleChange}
+                        handleTimeAllotedChange={handleTimeAllotedChange}
+                        typeId={typeId}
+                    />
+                </Dialog>
+            )}
+
+            {loading ? (
+                <div className="my-5 flex justify-center items-center">
+                    <div className="absolute h-screen">
+                        <div className="relative top-[75%]">
+                            <Spinner className="text-[rgb(81,134,114)]" />
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center justify-center">
+                    {curriculum.length > 0 ? (
+                        <Reorder.Group
+                            className="w-1/2"
+                            values={curriculum}
+                            onReorder={handleReorderModules}
+                            axis="y"
+                        >
+                            {curriculum.map((item, index) => (
                                 <CurricullumCard
                                     key={item.id}
                                     value={item}
                                     isStarted={item.isStarted}
                                     editHandle={editHandle}
                                     moduleId={item.id}
-                                    courseId={
-                                        courseData?.id ?? 0
-                                    }
+                                    courseId={courseData?.id ?? 0}
                                     order={item.order}
                                     name={item.name}
-                                    description={
-                                        item.description
-                                    }
+                                    description={item.description}
                                     index={index}
                                     quizCount={item.quizCount}
-                                    assignmentCount={
-                                        item.assignmentCount
-                                    }
-                                    timeAlloted={
-                                        item.timeAlloted
-                                    }
+                                    assignmentCount={item.assignmentCount}
+                                    timeAlloted={item.timeAlloted}
                                     codingProblemsCount={
                                         item.codingProblemsCount
                                     }
-                                    articlesCount={
-                                        item.articlesCount
-                                    }
+                                    articlesCount={item.articlesCount}
                                     typeId={item?.typeId}
-                                    fetchCourseModules={
-                                        fetchCourseModules
-                                    }
+                                    fetchCourseModules={fetchCourseModules}
                                     projectId={item.projectId}
                                     chapterId={item.ChapterId}
                                 />
                             ))}
-                         </Reorder.Group>
-                     ) : (
-                         <div className="w-full flex flex-col gap-y-5 items-center justify-center">
-                             <Image
-                                 src="/emptyStates/curriculum.svg"
-                                 alt="curriculum"
-                                 width={200}
-                                 height={200}
-                             />
-                             <p>Create new modules for the curriculum on Strapi CMS</p>
-                             <Dialog>
-                                 <DialogTrigger asChild>
-                                     <Button
-                                         className="text-white bg-secondary"
-                                     >
-                                         Add Module
-                                     </Button>
-                                 </DialogTrigger>
-                                 <DialogOverlay />
-                                 <NewModuleDialog
-                                     moduleData={moduleData}
-                                     createModule={createModule}
-                                     handleModuleChange={handleModuleChange}
-                                     handleTimeAllotedChange={
-                                         handleTimeAllotedChange
-                                     }
-                                     timeData={timeData}
-                                     handleTypeChange={handleTypeChange}
-                                     typeId={typeId}
-                                     isOpen={isOpen}
-                                 />
-                             </Dialog>
-                         </div>
-                     )}
-                 </div>
-             )}
-         </div>
-     )
- }
- 
- export default Page
+                        </Reorder.Group>
+                    ) : (
+                        <div className="w-full flex flex-col gap-y-5 items-center justify-center">
+                            <Image
+                                src="/emptyStates/curriculum.svg"
+                                alt="curriculum"
+                                width={200}
+                                height={200}
+                            />
+                            <p className="text-gray-600 text-lg">
+                                Create new modules for the curriculum on Strapi
+                                CMS
+                            </p>
+                            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="text-white bg-success-dark opacity-75">
+                                        Add Module
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogOverlay />
+                                <NewModuleDialog
+                                    moduleData={moduleData}
+                                    createModule={createModule}
+                                    handleModuleChange={handleModuleChange}
+                                    handleTimeAllotedChange={
+                                        handleTimeAllotedChange
+                                    }
+                                    timeData={timeData}
+                                    handleTypeChange={handleTypeChange}
+                                    typeId={typeId}
+                                    isOpen={isOpen}
+                                    setIsLoading={setIsLoading}
+                                    isLoading={isLoading}
+                                />
+                            </Dialog>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default Page

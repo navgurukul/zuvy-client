@@ -178,7 +178,7 @@ const AddArticle = ({
         try {
             setIsDataLoading(true) 
             const response = await api.get(
-                `/Content/chapterDetailsById/${content.id}`
+                `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
             const contentDetails = response?.data?.contentDetails?.[0]
 
@@ -467,7 +467,7 @@ const AddArticle = ({
                                                             ? "Untitled Article"
                                                             : "Untitled PDF"
                                                     }
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                     autoFocus
                                                 />
                                                 {!title && (
@@ -511,6 +511,7 @@ const AddArticle = ({
                                                 </div>
                                                 {defaultValue === 'editor' ? (
                                                     <Button
+                                                        className='bg-success-dark opacity-75'
                                                         type="submit"
                                                         form="myForm"
                                                         disabled={!hasEditorContent || isSaving}
@@ -520,6 +521,7 @@ const AddArticle = ({
                                                 ) : (
                                                     <div>
                                                         <Button
+                                                            className='bg-success-dark opacity-75'
                                                             type="button"
                                                             onClick={
                                                                 onFileUpload
@@ -556,7 +558,7 @@ const AddArticle = ({
                                             value="editor"
                                             disabled={!!pdfLink}
                                             id="r1"
-                                            className="mt-1"
+                                            className="mt-1 text-black border-black"
                                         />
                                     </TooltipTrigger>
                                     {pdfLink && (
@@ -579,7 +581,7 @@ const AddArticle = ({
                                         <RadioGroupItem
                                             value="pdf"
                                             id="r2"
-                                            className="mt-1"
+                                            className="mt-1 text-black border-black"
                                             disabled={isEditorSaved}
                                         />
                                     </TooltipTrigger>

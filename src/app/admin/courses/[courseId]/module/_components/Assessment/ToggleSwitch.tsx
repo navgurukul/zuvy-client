@@ -15,7 +15,7 @@ const ToggleSwitch = ({
     return (
       <div
         className={`relative w-[38px] h-6 rounded-full bg-gray-300 p-1 cursor-pointer ${
-          isChecked ? 'bg-secondary' : ''
+          isChecked ? 'bg-[rgb(81,134,114)]' : ''
         }`}
         onClick={handleToggle}
       >
