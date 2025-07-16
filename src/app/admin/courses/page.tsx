@@ -503,7 +503,7 @@ const Courses: React.FC = () => {
                                                         No course found with the
                                                         name{' '}
                                                         <span className="font-semibold">
-                                                            "{activeSearchTerm}"
+                                                            {activeSearchTerm}
                                                         </span>
                                                     </AlertDescription>
                                                     <Button

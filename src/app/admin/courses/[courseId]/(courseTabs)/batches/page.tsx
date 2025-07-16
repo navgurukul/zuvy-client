@@ -832,7 +832,7 @@ const Page = ({ params }: { params: any }) => {
                             <div className="w-full flex flex-col items-center justify-center gap-y-3 absolute">
                                 <div className="text-center">
                                     <p className="text-lg font-medium text-gray-600">
-                                        No batches found for "{searchQuery}"
+                                        No batches found for {searchQuery}
                                     </p>
                                     <p className="text-sm text-gray-500 mt-2">
                                         Try adjusting your search or create a new batch
