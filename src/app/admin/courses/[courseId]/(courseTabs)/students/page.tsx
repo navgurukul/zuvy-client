@@ -41,6 +41,7 @@ export type StudentData = {
     progress: number
     profilePicture: string
 }
+import useDebounce from '@/hooks/useDebounce'
 
 interface Student {
     email: string
@@ -58,19 +59,42 @@ const Page = ({ params }: { params: any }) => {
         currentPage,
         limit,
         offset,
+        search,
         setStudents,
+        setSearch, // Add this from the hook
         nextPageHandler,
         previousPageHandler,
         firstPageHandler,
         lastPageHandler,
         onLimitChange,
         handleSetSearch,
+        commitSearch,
+        internalSearch,
+        debouncedInternalSearch,
     } = useStudentData(params.courseId)
     const { batchData } = getBatchData()
     const { attendanceData } = useAttendanceData(params.courseId)
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [isOpen, setIsOpen] = useState(false)
+
+    const [showSuggestions, setShowSuggestions] = useState(false)
+
+    const filteredSuggestions = students
+        .filter(
+            (student: StudentData) =>
+                student.name &&
+                student.name.toLowerCase().includes(debouncedInternalSearch.toLowerCase()) &&
+                debouncedInternalSearch.trim() !== ''
+        )
+        .slice(0, 5)
+
+
+
+    // Reset selectedRows when course changes
+    useEffect(() => {
+        setSelectedRows([])
+    }, [params.courseId])
 
     const newBatchData = batchData?.map((data) => {
         return {
@@ -79,19 +103,18 @@ const Page = ({ params }: { params: any }) => {
         }
     })
 
-    const fetchStudentData = useCallback(async () => {
+    const fetchStudentData = useCallback(async (offsetValue: number) => {
         try {
-            await api
-                .get(
-                    `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
-                )
-                .then((res) => {
-                    setSelectedRows([])
-                    setStudents(res.data.modifiedStudentInfo)
-                })
-        } catch (error: any) {}
-    }, [params.courseId, limit, offset, setStudents])
-
+            const res = await api.get(
+                `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offsetValue}`
+            )
+            setSelectedRows([])
+            setStudents(res.data.modifiedStudentInfo)
+        } catch (error: any) {
+            console.error(error)
+        }
+    }, [params.courseId, limit, setStudents])
+    
     const userIds = selectedRows.map((item: any) => item.userId)
 
     //     if (loadingCourseCheck) {
@@ -118,12 +141,52 @@ const Page = ({ params }: { params: any }) => {
         <div className="text-gray-600">
             <div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
-                    <Input
-                        type="search"
-                        placeholder="Search"
-                        className="w-full md:w-1/2 lg:w-1/4"
-                        onChange={handleSetSearch}
-                    />
+                    <div className="relative w-full md:w-1/2 lg:w-1/4">
+                        <Input
+                            type="search"
+                            placeholder="Search"
+                            className="w-full"
+                            value={internalSearch}
+                            onChange={(e) => {
+                                handleSetSearch(e)
+                                setShowSuggestions(true)
+
+                                // 👇 If cleared, reset to show all data
+                                if (e.target.value.trim() === '') {
+                                    commitSearch('')
+                                    setShowSuggestions(false)
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && internalSearch.trim()) {
+                                    commitSearch(internalSearch.trim())
+                                    setShowSuggestions(false)
+                                }
+                            }}
+                            onFocus={() => setShowSuggestions(true)}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        />
+
+                        {showSuggestions && filteredSuggestions.length > 0 && (
+                            <div className="absolute z-50 w-full bg-white border border-border rounded-md mt-1 shadow-lg">
+                                {filteredSuggestions.map((student: StudentData, i: number) => (
+                                    <div
+                                        key={i}
+                                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
+                                        onClick={() => {
+                                            commitSearch(student.name)
+                                            setShowSuggestions(false)
+                                        }}
+                                    >
+                                        {student.name}
+                                    </div>
+                                ))}
+
+                            </div>
+                        )}
+                    </div>
+
+
                     <div className="flex flex-col md:flex-row items-center gap-x-2 gap-y-4">
                         {selectedRows.length > 0 && (
                             <>
@@ -262,6 +325,7 @@ const Page = ({ params }: { params: any }) => {
                             </div>
                         </div>
                     </div>
+                    
                 </div>
             </div>
         </div>

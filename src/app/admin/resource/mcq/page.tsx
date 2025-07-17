@@ -1,8 +1,9 @@
 'use client'
 
 // External imports
-import React, { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, Search } from 'lucide-react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { ChevronLeft, Search, X } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -52,41 +53,189 @@ interface Option {
     value: string
 }
 
+interface SearchSuggestion {
+    id: string
+    question: string
+    topic: string
+    type: 'question' | 'topic'
+}
+
 const Mcqs = (props: Props) => {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+
     const [isOpen, setIsOpen] = useState(false)
     const [isMcqModalOpen, setIsMcqModalOpen] = useState<boolean>(false)
-    const { position, setPosition } = getPosition()
     const [currentPage, setCurrentPage] = useState(1)
     const [totalMCQQuestion, setTotalMCQQuestion] = useState<any>(0)
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset } = getOffset()
     const [search, setSearch] = useState('')
-    const debouncedSearch = useDebounce(search, 500)
+    const [mcqType, setMcqType] = useState<string>('')
+    const [newTopic, setNewTopic] = useState<string>('')
+    const [options, setOptions] = useState<Option[]>([
+        { value: '-1', label: 'All Topics' },
+    ])
+    const [loading, setLoading] = useState(true)
+
+    // New search enhancement states
+    const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+    const [isSearchFocused, setIsSearchFocused] = useState(false)
+    const searchInputRef = useRef<HTMLInputElement>(null)
+    const suggestionsRef = useRef<HTMLDivElement>(null)
+
+    // Zustand stores
+    const { position, setPosition } = getPosition()
+    const { offset, setOffset } = getOffset()
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
         getmcqdifficulty()
-    const { setmcqSearch } = getMcqSearch()
-    const [mcqType, setMcqType] = useState<string>('')
-    const [newTopic, setNewTopic] = useState<string>('')
+    const { mcqSearch, setmcqSearch } = getMcqSearch()
     const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
-
-    const [options, setOptions] = useState<Option[]>([
-        { value: '-1', label: 'All Topics' },
-    ])
-    // const [selectedTag, setSelectedTag] = useState<Tag>(() => {
-    //     if (typeof window !== 'undefined') {
-    //         const storedTag = localStorage.getItem('MCQCurrentTag')
-    //         return storedTag !== null
-    //             ? JSON.parse(storedTag)
-    //             : { id: -1, tagName: 'All Topics' }
-    //     }
-    //     return { id: -1, tagName: 'All Topics' }
-    // })
-    const [loading, setLoading] = useState(true)
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
+
+    const debouncedSearch = useDebounce(search, 300)
+
+    // Update mcqSearch store when search changes
+    useEffect(() => {
+        setmcqSearch(debouncedSearch)
+    }, [debouncedSearch, setmcqSearch])
+
+    // Initialize search from URL params
+    useEffect(() => {
+        const searchQuery = searchParams.get('search')
+        const topicFilter = searchParams.get('topic')
+        const difficultyFilter = searchParams.get('difficulty')
+
+        if (searchQuery) {
+            setSearch(searchQuery)
+        }
+
+        if (topicFilter) {
+            const topicOptions = topicFilter.split(',').map(topic => ({
+                value: topic,
+                label: options.find(opt => opt.value === topic)?.label || topic
+            }))
+            setSelectedOptions(topicOptions)
+        }
+
+        if (difficultyFilter) {
+            const difficultyOptions = difficultyFilter.split(',').map(diff => ({
+                value: diff,
+                label: diff
+            }))
+            setDifficulty(difficultyOptions)
+        }
+    }, [searchParams])
+
+    const updateURL = useCallback((searchTerm: string, topics: Option[], difficulties: Option[]) => {
+        let query = ''
+
+        // Always follow this order: difficulty > topic > search
+        const difficultyPart =
+            difficulties.length > 0 && !difficulties.some(d => d.value === 'None')
+                ? `difficulty=${difficulties.map(d => d.value).join(',')}`
+                : ''
+
+        const topicPart =
+            topics.length > 0 && !topics.some(t => t.value === '-1')
+                ? `topic=${topics.map(t => t.value).join(',')}`
+                : ''
+
+        const searchPart = searchTerm.trim() ? `search=${encodeURIComponent(searchTerm.trim())}` : ''
+
+        // Combine in order
+        const parts = [difficultyPart, topicPart, searchPart].filter(Boolean)
+        query = parts.length > 0 ? `?${parts.join('&')}` : window.location.pathname
+
+        router.replace(query, { scroll: false })
+    }, [router])
+
+
+    // Fetch search suggestions
+    const fetchSearchSuggestions = useCallback(async (query: string) => {
+        if (!query.trim() || query.length < 2) {
+            setSearchSuggestions([])
+            return
+        }
+
+        try {
+            const response = await api.get(`/Content/searchSuggestions?q=${encodeURIComponent(query)}`)
+            if (response.data?.suggestions) {
+                setSearchSuggestions(response.data.suggestions)
+            }
+        } catch (error) {
+            console.error('Error fetching search suggestions:', error)
+            // Fallback: create suggestions from existing data
+            const questionSuggestions = quizData
+                .filter(item => {
+                    return item.quizVariants?.some(variant =>
+                        variant.question?.toLowerCase().includes(query.toLowerCase())
+                    ) || item.title?.toLowerCase().includes(query.toLowerCase())
+                })
+                .slice(0, 5)
+                .map(item => {
+                    const matchingVariant = item.quizVariants?.find(variant =>
+                        variant.question?.toLowerCase().includes(query.toLowerCase())
+                    )
+
+                    const rawHTML = matchingVariant?.question || item.title || ''
+                    const tempDiv = document.createElement('div')
+                    tempDiv.innerHTML = rawHTML
+
+                    // Remove <pre>, <code>, <img> completely to avoid including code and images
+                    Array.from(tempDiv.querySelectorAll('pre, code, img')).forEach(el => el.remove())
+
+                    let plainText = tempDiv.textContent || tempDiv.innerText || ''
+                    plainText = plainText
+                        .split('\n')
+                        .find(line => line.trim() !== '') // ✅ First meaningful line
+                        ?.trim() || ''
+                    const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
+
+                    return {
+                        id: item.id?.toString() || Math.random().toString(),
+                        question: plainText,
+                        topic: tagName,
+                        type: 'question' as const,
+                    }
+                })
+
+
+            const topicSuggestions = tags
+                .filter(tag => tag.tagName.toLowerCase().includes(query.toLowerCase()))
+                .slice(0, 3)
+                .map(tag => ({
+                    id: tag.id.toString(),
+                    question: `Search in ${tag.tagName}`,
+                    topic: tag.tagName,
+                    type: 'topic' as const
+                }))
+
+            setSearchSuggestions([...questionSuggestions, ...topicSuggestions])
+        }
+    }, [quizData, tags])
+
+    const debouncedSuggestionSearch = useDebounce(search, 200)
+
+    useEffect(() => {
+        if (debouncedSuggestionSearch && isSearchFocused) {
+            fetchSearchSuggestions(debouncedSuggestionSearch)
+        } else {
+            setSearchSuggestions([])
+        }
+    }, [debouncedSuggestionSearch, isSearchFocused, fetchSearchSuggestions])
+
+    const submitSearch = () => {
+        setOffset(0)
+        setCurrentPage(1)
+        updateURL(search.trim(), selectedOptions, difficulty)
+        fetchCodingQuestions(0, search.trim())
+    }
 
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
@@ -159,8 +308,88 @@ const Mcqs = (props: Props) => {
 
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
+
     const handleSetsearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value)
+        const value = e.target.value
+        setSearch(value)
+        setShowSuggestions(value.trim().length > 0)
+        setSelectedSuggestionIndex(-1)
+    }
+
+    const handleSearchFocus = () => {
+        setIsSearchFocused(true)
+        setShowSuggestions(search.trim().length > 0)
+    }
+
+    const handleSearchBlur = () => {
+        // Delay hiding suggestions to allow for clicks
+        setTimeout(() => {
+            setIsSearchFocused(false)
+            setShowSuggestions(false)
+        }, 200)
+    }
+
+    const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+        if (suggestion.type === 'question') {
+            const trimmed = suggestion.question.trim()
+            setSearch(trimmed)
+            setOffset(0) // Reset offset when searching
+            setCurrentPage(1) // Reset page when searching
+            updateURL(trimmed, selectedOptions, difficulty)
+            // Pass the search term directly to bypass debounce timing issues
+            fetchCodingQuestions(0, trimmed)
+        } else {
+            // Topic click
+            const topicOption = options.find(opt => opt.label === suggestion.topic)
+            if (topicOption) {
+                handleTagOption(topicOption)
+            }
+            setSearch('')
+            setOffset(0) // Reset offset when changing filters
+            setCurrentPage(1) // Reset page when changing filters
+            updateURL('', selectedOptions, difficulty)
+            fetchCodingQuestions(0, '')
+        }
+
+        setShowSuggestions(false)
+        setIsSearchFocused(false)
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!showSuggestions || searchSuggestions.length === 0) {
+            if (e.key === 'Enter') {
+                e.preventDefault()
+                submitSearch()
+            }
+            return
+        }
+
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault()
+                setSelectedSuggestionIndex(prev =>
+                    prev < searchSuggestions.length - 1 ? prev + 1 : 0
+                )
+                break
+            case 'ArrowUp':
+                e.preventDefault()
+                setSelectedSuggestionIndex(prev =>
+                    prev > 0 ? prev - 1 : searchSuggestions.length - 1
+                )
+                break
+            case 'Enter':
+                e.preventDefault()
+                if (selectedSuggestionIndex >= 0) {
+                    handleSuggestionClick(searchSuggestions[selectedSuggestionIndex])
+                } else {
+                    submitSearch()
+                }
+                break
+            case 'Escape':
+                setShowSuggestions(false)
+                setIsSearchFocused(false)
+                break
+        }
     }
 
     async function getAllTags() {
@@ -195,8 +424,10 @@ const Mcqs = (props: Props) => {
     }, [])
 
     const fetchCodingQuestions = useCallback(
-        async (offset: number) => {
+        async (offset: number, searchTerm?: string) => {
             if (offset >= 0) {
+                // Use the passed searchTerm if provided, otherwise use the current debouncedSearch
+                const currentSearchTerm = searchTerm !== undefined ? searchTerm : debouncedSearch
                 filteredQuizQuestions(
                     setStoreQuizData,
                     offset,
@@ -206,13 +437,12 @@ const Mcqs = (props: Props) => {
                     setTotalMCQQuestion,
                     setLastPage,
                     setTotalPages,
-                    debouncedSearch
+                    currentSearchTerm
                 )
             }
         },
         [
             setStoreQuizData,
-            offset,
             position,
             difficulty,
             selectedOptions,
@@ -223,19 +453,10 @@ const Mcqs = (props: Props) => {
         ]
     )
 
+    // Effect to fetch data when filters change (but not search while typing)
     useEffect(() => {
         fetchCodingQuestions(offset)
-    }, [
-        setStoreQuizData,
-        offset,
-        position,
-        difficulty,
-        selectedOptions,
-        setTotalMCQQuestion,
-        setLastPage,
-        setTotalPages,
-        debouncedSearch,
-    ])
+    }, [offset, position, difficulty, selectedOptions])
 
     const handleNewTopicChange = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -262,6 +483,18 @@ const Mcqs = (props: Props) => {
                     'Unable to create session. Please try again later.',
             })
         }
+    }
+
+    const clearSearch = () => {
+        setSearch('')
+        setSelectedOptions([])
+        setDifficulty([])
+        setOffset(0) // Reset offset when clearing search
+        setCurrentPage(1) // Reset page when clearing search
+        updateURL('', [], [])
+        fetchCodingQuestions(0, '') // Pass empty search explicitly
+        setShowSuggestions(false)
+        searchInputRef.current?.focus()
     }
 
     const selectedTagCount = selectedOptions.length
@@ -412,14 +645,49 @@ const Mcqs = (props: Props) => {
                     </h1>
                     <div className="flex justify-between">
                         <div className="relative w-full">
-                            <Input
-                                value={search}
-                                onChange={handleSetsearch}
-                                placeholder="Search for Question"
-                                className="w-1/4 p-2 my-6 input-with-icon pl-8"
-                            />
-                            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                <Search className="text-gray-400" size={20} />
+                            <div className="relative w-1/4">
+                                <Input
+                                    ref={searchInputRef}
+                                    value={search}
+                                    onChange={handleSetsearch}
+                                    onFocus={handleSearchFocus}
+                                    onBlur={handleSearchBlur}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Search for Question"
+                                    className="w-full p-2 my-6 input-with-icon pl-8 pr-8"
+                                />
+                                <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                    <Search className="text-gray-400" size={20} />
+                                </div>
+                                {search && (
+                                    <button
+                                        onClick={clearSearch}
+                                        className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
+                                    >
+                                        <X size={16} />
+                                    </button>
+                                )}
+                                {showSuggestions && searchSuggestions.length > 0 && (
+                                    <div
+                                        ref={suggestionsRef}
+                                        className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden"
+                                        style={{ top: '100%' }}
+                                    >
+                                        {searchSuggestions.slice(0, 6).map((suggestion, index) => (
+                                            <div
+                                                key={`${suggestion.type}-${suggestion.id}`}
+                                                className={`pl-2 pr-3 py-2 cursor-pointer hover:bg-gray-100 ${index === selectedSuggestionIndex ? 'bg-blue-50' : ''}`}
+                                                onClick={() => handleSuggestionClick(suggestion)}
+                                            >
+                                                <p className="text-sm font-medium text-gray-900 truncate text-left m-0">
+                                                    {suggestion.question}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+
                             </div>
                         </div>
                         <div className="flex flex-row items-center gap-2">
@@ -479,14 +747,9 @@ const Mcqs = (props: Props) => {
                     {totalMCQQuestion > 0 && (
                         <DataTablePagination
                             totalStudents={totalMCQQuestion}
-                            position={position}
-                            setPosition={setPosition}
-                            pages={totalPages}
                             lastPage={lastPage}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
+                            pages={totalPages}
                             fetchStudentData={fetchCodingQuestions}
-                            setOffset={setOffset}
                         />
                     )}
                 </MaxWidthWrapper>
