@@ -79,6 +79,9 @@ const CodingProblems = () => {
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [areOptionsLoaded, setAreOptionsLoaded] = useState(false)
+    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+    
+    // Only debounce for suggestions, not for confirmed search
     const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
     const {
@@ -191,6 +194,72 @@ const CodingProblems = () => {
         initializeFromURL()
     }, [initializeFromURL])
 
+    // Fetch suggestions with debouncing - FIXED VERSION
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            // Clear suggestions if search term is too short
+            if (!debouncedSearchTerm || debouncedSearchTerm.length < 2) {
+                setSearchSuggestions([])
+                setIsLoadingSuggestions(false)
+                return
+            }
+
+            setIsLoadingSuggestions(true)
+            
+            try {
+                const response = await api.get('/Content/allCodingQuestions', {
+                    params: {
+                        searchTerm: debouncedSearchTerm,
+                        limit: 8 // Add limit to get only top 8 suggestions
+                    },
+                })
+
+                console.log("Suggestions API response:", response.data)
+
+                // Handle different response structures
+                let questionsData = response.data;
+                
+                // If the response has a data property, use that
+                if (response.data.data) {
+                    questionsData = response.data.data;
+                }
+                
+                // If the response has a questions property, use that
+                if (response.data.questions) {
+                    questionsData = response.data.questions;
+                }
+
+                // Ensure questionsData is an array
+                if (!Array.isArray(questionsData)) {
+                    console.error("Expected array but got:", typeof questionsData);
+                    setSearchSuggestions([]);
+                    return;
+                }
+
+                const suggestions = questionsData
+                    .filter((question: any) => 
+                        question.title && 
+                        question.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+                    )
+                    .slice(0, 8)
+                    .map((question: any) => ({
+                        id: question.id,
+                        title: question.title,
+                        difficulty: question.difficulty || 'N/A',
+                    }));
+
+                setSearchSuggestions(suggestions)
+            } catch (error) {
+                console.error('Error fetching suggestions:', error)
+                setSearchSuggestions([])
+            } finally {
+                setIsLoadingSuggestions(false)
+            }
+        }
+
+        fetchSuggestions()
+    }, [debouncedSearchTerm])
+
     // Update URL when filters change - but only after URL is initialized
     useEffect(() => {
         if (!urlInitialized) return
@@ -221,27 +290,6 @@ const CodingProblems = () => {
             router.replace(newUrl)
         }
     }, [confirmedSearch, selectedOptions, difficulty, router, urlInitialized])
-
-    // Generate search suggestions (debounced)
-    useEffect(() => {
-        if (!debouncedSearchTerm || debouncedSearchTerm.length < 2) {
-            setSearchSuggestions([])
-            return
-        }
-
-        const suggestions = allCodingQuestions
-            .filter((question: any) =>
-                question.title?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-            )
-            .slice(0, 8)
-            .map((question: any) => ({
-                id: question.id,
-                title: question.title,
-                difficulty: question.difficulty
-            }))
-
-        setSearchSuggestions(suggestions)
-    }, [debouncedSearchTerm, allCodingQuestions])
 
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
@@ -280,16 +328,26 @@ const CodingProblems = () => {
     }
 
     const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value)
-        setShowSuggestions(true)
+        const value = e.target.value;
+        setSearchTerm(value);
+        
+        // Show suggestions when typing (if there's text and input is focused)
+        if (value.length > 0 && isSearchFocused) {
+            setShowSuggestions(true);
+        } else {
+            setShowSuggestions(false);
+        }
     }
 
     const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             setConfirmedSearch(searchTerm)
             setShowSuggestions(false)
-            setOffset(0)
             setCurrentPage(1)
+        }
+        // Hide suggestions on Escape
+        if (e.key === 'Escape') {
+            setShowSuggestions(false)
         }
     }
 
@@ -297,17 +355,23 @@ const CodingProblems = () => {
         setSearchTerm(suggestion.title)
         setConfirmedSearch(suggestion.title)
         setShowSuggestions(false)
-        setOffset(0)
         setCurrentPage(1)
     }
 
     const handleSearchFocus = () => {
         setIsSearchFocused(true)
-        if (searchTerm.length > 0) setShowSuggestions(true)
+        // Show suggestions if there's text and suggestions available
+        if (searchTerm.length > 1 && searchSuggestions.length > 0) {
+            setShowSuggestions(true)
+        }
     }
 
     const handleSearchBlur = () => {
-        setTimeout(() => setShowSuggestions(false), 200)
+        setIsSearchFocused(false)
+        // Use a longer timeout to allow clicking on suggestions
+        setTimeout(() => {
+            setShowSuggestions(false)
+        }, 200)
     }
 
     // Clear ALL filters (search, topics, difficulty)
@@ -317,7 +381,6 @@ const CodingProblems = () => {
         setSelectedOptions([{ value: '-1', label: 'All Topics' }])
         setDifficulty([{ value: 'None', label: 'All Difficulty' }])
         setShowSuggestions(false)
-        setOffset(0)
         setCurrentPage(1)
     }
 
@@ -372,6 +435,7 @@ const CodingProblems = () => {
     }
 
     const activeFiltersCount = getActiveFiltersCount()
+    
     return (
         <>
             {loading ? (
@@ -411,20 +475,34 @@ const CodingProblems = () => {
                                                 <X size={16} />
                                             </button>
                                         )}
-                                        {/* Suggestions dropdown will now inherit the width from parent container */}
-                                        {showSuggestions && searchSuggestions.length > 0 && (
-                                            <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg top-full">
-                                                {searchSuggestions.map((suggestion) => (
-                                                    <div
-                                                        key={suggestion.id}
-                                                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
-                                                        onMouseDown={() => handleSuggestionClick(suggestion)}
-                                                    >
-                                                        <p className="text-sm font-medium text-gray-900 truncate text-left">
-                                                            {suggestion.title}
-                                                        </p>
+                                        
+                                        {/* Fixed Suggestions dropdown */}
+                                        {showSuggestions && (
+                                            <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg top-full mt-1">
+                                                {isLoadingSuggestions ? (
+                                                    <div className="px-4 py-3 text-sm text-gray-500">
+                                                        Loading suggestions...
                                                     </div>
-                                                ))}
+                                                ) : searchSuggestions.length > 0 ? (
+                                                    searchSuggestions.map((suggestion) => (
+                                                        <div
+                                                            key={suggestion.id}
+                                                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                                            onMouseDown={(e) => {
+                                                                e.preventDefault(); // Prevent input blur
+                                                                handleSuggestionClick(suggestion);
+                                                            }}
+                                                        >
+                                                            <p className="text-sm font-medium text-gray-900 truncate text-left">
+                                                                {suggestion.title}
+                                                            </p>
+                                                        </div>
+                                                    ))
+                                                ) : debouncedSearchTerm && debouncedSearchTerm.length >= 2 ? (
+                                                    <div className="px-4 py-3 text-sm text-gray-500">
+                                                        No suggestions found
+                                                    </div>
+                                                ) : null}
                                             </div>
                                         )}
                                     </div>

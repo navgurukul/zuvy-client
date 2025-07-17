@@ -354,7 +354,6 @@ const OpenEndedQuestions = (props: Props) => {
         setSelectedOptions([{ value: '-1', label: 'All Topics' }])
         setDifficulty([{ value: 'None', label: 'All Difficulty' }])
         localStorage.setItem('openEndedCurrentTag', JSON.stringify({ tagName: 'All Topics', id: -1 }))
-        setOffset(0)
         setCurrentPage(1)
         searchInputRef.current?.focus()
 
@@ -366,7 +365,6 @@ const OpenEndedQuestions = (props: Props) => {
     const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             setConfirmedSearch(searchTerm)
-            setOffset(0)
             setCurrentPage(1)
             setShowSuggestions(false)
             setIsSuggestionClicked(true)
@@ -385,7 +383,6 @@ const OpenEndedQuestions = (props: Props) => {
         setConfirmedSearch(question)
         setShowSuggestions(false)
         setIsSuggestionClicked(true)
-        setOffset(0)
         setCurrentPage(1)
     }
 

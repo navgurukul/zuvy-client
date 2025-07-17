@@ -155,69 +155,58 @@ const Mcqs = (props: Props) => {
         router.replace(query, { scroll: false })
     }, [router])
 
-
-    // Fetch search suggestions
     const fetchSearchSuggestions = useCallback(async (query: string) => {
         if (!query.trim() || query.length < 2) {
             setSearchSuggestions([])
             return
         }
 
-        try {
-            const response = await api.get(`/Content/searchSuggestions?q=${encodeURIComponent(query)}`)
-            if (response.data?.suggestions) {
-                setSearchSuggestions(response.data.suggestions)
-            }
-        } catch (error) {
-            console.error('Error fetching search suggestions:', error)
-            // Fallback: create suggestions from existing data
-            const questionSuggestions = quizData
-                .filter(item => {
-                    return item.quizVariants?.some(variant =>
-                        variant.question?.toLowerCase().includes(query.toLowerCase())
-                    ) || item.title?.toLowerCase().includes(query.toLowerCase())
-                })
-                .slice(0, 5)
-                .map(item => {
-                    const matchingVariant = item.quizVariants?.find(variant =>
-                        variant.question?.toLowerCase().includes(query.toLowerCase())
-                    )
+        // Fallback: create suggestions from existing data
+        const questionSuggestions = quizData
+            .filter(item => {
+                return item.quizVariants?.some(variant =>
+                    variant.question?.toLowerCase().includes(query.toLowerCase())
+                ) || item.title?.toLowerCase().includes(query.toLowerCase())
+            })
+            .slice(0, 5)
+            .map(item => {
+                const matchingVariant = item.quizVariants?.find(variant =>
+                    variant.question?.toLowerCase().includes(query.toLowerCase())
+                )
 
-                    const rawHTML = matchingVariant?.question || item.title || ''
-                    const tempDiv = document.createElement('div')
-                    tempDiv.innerHTML = rawHTML
+                const rawHTML = matchingVariant?.question || item.title || ''
+                const tempDiv = document.createElement('div')
+                tempDiv.innerHTML = rawHTML
 
                     // Remove <pre>, <code>, <img> completely to avoid including code and images
                     Array.from(tempDiv.querySelectorAll('pre, code, img')).forEach(el => el.remove())
 
-                    let plainText = tempDiv.textContent || tempDiv.innerText || ''
-                    plainText = plainText
-                        .split('\n')
-                        .find(line => line.trim() !== '') // ✅ First meaningful line
-                        ?.trim() || ''
-                    const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
+                let plainText = tempDiv.textContent || tempDiv.innerText || ''
+                plainText = plainText
+                    .split('\n')
+                    .find(line => line.trim() !== '') // ✅ First meaningful line
+                    ?.trim() || ''
+                const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
 
-                    return {
-                        id: item.id?.toString() || Math.random().toString(),
-                        question: plainText,
-                        topic: tagName,
-                        type: 'question' as const,
-                    }
-                })
+                return {
+                    id: item.id?.toString() || Math.random().toString(),
+                    question: plainText,
+                    topic: tagName,
+                    type: 'question' as const,
+                }
+            })
 
+        const topicSuggestions = tags
+            .filter(tag => tag.tagName.toLowerCase().includes(query.toLowerCase()))
+            .slice(0, 3)
+            .map(tag => ({
+                id: tag.id.toString(),
+                question: `Search in ${tag.tagName}`,
+                topic: tag.tagName,
+                type: 'topic' as const
+            }))
 
-            const topicSuggestions = tags
-                .filter(tag => tag.tagName.toLowerCase().includes(query.toLowerCase()))
-                .slice(0, 3)
-                .map(tag => ({
-                    id: tag.id.toString(),
-                    question: `Search in ${tag.tagName}`,
-                    topic: tag.tagName,
-                    type: 'topic' as const
-                }))
-
-            setSearchSuggestions([...questionSuggestions, ...topicSuggestions])
-        }
+        setSearchSuggestions([...questionSuggestions, ...topicSuggestions])
     }, [quizData, tags])
 
     const debouncedSuggestionSearch = useDebounce(search, 200)
@@ -231,7 +220,6 @@ const Mcqs = (props: Props) => {
     }, [debouncedSuggestionSearch, isSearchFocused, fetchSearchSuggestions])
 
     const submitSearch = () => {
-        setOffset(0)
         setCurrentPage(1)
         updateURL(search.trim(), selectedOptions, difficulty)
         fetchCodingQuestions(0, search.trim())
@@ -333,7 +321,6 @@ const Mcqs = (props: Props) => {
         if (suggestion.type === 'question') {
             const trimmed = suggestion.question.trim()
             setSearch(trimmed)
-            setOffset(0) // Reset offset when searching
             setCurrentPage(1) // Reset page when searching
             updateURL(trimmed, selectedOptions, difficulty)
             // Pass the search term directly to bypass debounce timing issues
@@ -345,7 +332,6 @@ const Mcqs = (props: Props) => {
                 handleTagOption(topicOption)
             }
             setSearch('')
-            setOffset(0) // Reset offset when changing filters
             setCurrentPage(1) // Reset page when changing filters
             updateURL('', selectedOptions, difficulty)
             fetchCodingQuestions(0, '')
@@ -489,7 +475,6 @@ const Mcqs = (props: Props) => {
         setSearch('')
         setSelectedOptions([])
         setDifficulty([])
-        setOffset(0) // Reset offset when clearing search
         setCurrentPage(1) // Reset page when clearing search
         updateURL('', [], [])
         fetchCodingQuestions(0, '') // Pass empty search explicitly

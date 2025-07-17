@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { getBatchData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { getStoreStudentDataNew } from '@/store/store'
@@ -29,34 +29,68 @@ export const useStudentData = (courseId: any) => {
     const { fetchBatches, batchData } = getBatchData()
     const searchParams = useSearchParams()
     const router = useRouter()
+    const prevCourseId = useRef<any>(null)
 
-    const [initialSearch, setInitialSearch] = useState<string | null>(null)
     const [internalSearch, setInternalSearch] = useState('') // for suggestions
     const [suggestions, setSuggestions] = useState<any[]>([]) // separate state for suggestions
+    const [isInitialized, setIsInitialized] = useState(false) // Track if we've initialized from URL
     const debouncedInternalSearch = useDebounce(internalSearch, 300)
 
+    // Clear search immediately when courseId changes
     useEffect(() => {
-        const searchQuery = searchParams.get('search') || ''
-        setSearch(searchQuery)
-        setInternalSearch(searchQuery)
-        setInitialSearch(searchQuery)
-    }, [searchParams, setSearch])
-
-    useEffect(() => {
-        if (courseId !== undefined && initialSearch !== null && search === initialSearch) {
-            fetchData()
-            setInitialSearch(null)
-        }
-    }, [courseId, search, initialSearch])
-
-    useEffect(() => {
-        if (!searchParams.get('search')) {
+        if (prevCourseId.current !== null && prevCourseId.current !== courseId) {
+            // Course changed - force clear everything
             setSearch('')
             setInternalSearch('')
-            // Don't reset currentPage and offset here - let it stay on current page
-            setLoading(true)
+            setSuggestions([])
+            setOffset(0)
+            setCurrentPage(1)
+            setStudents([]) // Clear students data immediately
+            setTotalPages(0)
+            setTotalStudents(0)
+            setIsInitialized(false) // Reset initialization flag
+            
+            // Clear URL immediately
+            const currentUrl = new URL(window.location.href)
+            currentUrl.searchParams.delete('search')
+            window.history.replaceState({}, '', currentUrl.toString())
         }
-    }, [courseId])
+        prevCourseId.current = courseId
+    }, [courseId, setStudents, setTotalPages, setTotalStudents, setSearch, setInternalSearch, setOffset, setCurrentPage])
+
+    // Initialize search from URL params first
+    useEffect(() => {
+        if (courseId !== undefined && !isInitialized) {
+            const searchQuery = searchParams.get('search') || ''
+            setSearch(searchQuery)
+            setInternalSearch(searchQuery)
+            setIsInitialized(true)
+        }
+    }, [courseId, searchParams, isInitialized, setSearch])
+
+    // Fetch data when courseId and search are ready
+    useEffect(() => {
+        if (courseId !== undefined && isInitialized) {
+            // Clear existing data first
+            setStudents([])
+            setTotalPages(0)
+            setTotalStudents(0)
+            
+            // Then fetch new data with the correct search term
+            fetchStudentsHandler({
+                courseId,
+                limit,
+                offset: 0, // Always start from 0 when initializing
+                searchTerm: search, // Use the search term from URL
+                setLoading,
+                setStudents,
+                setTotalPages,
+                setTotalStudents,
+                setCurrentPage,
+                showError: false,
+            })
+        }
+    }, [courseId, isInitialized, search, limit, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     // Fetch suggestions separately from main data
     useEffect(() => {

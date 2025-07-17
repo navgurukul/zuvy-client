@@ -252,5 +252,4 @@ const Page = ({ params }: { params: any }) => {
         </div>
     )
 }
-
 export default Page

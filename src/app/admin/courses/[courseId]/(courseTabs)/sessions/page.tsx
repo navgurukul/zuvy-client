@@ -117,7 +117,6 @@ function Page({ params }: any) {
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         setSearch(value)
-        setOffset(0)
         setCurrentPage(1)
         setShowSuggestions(true)
         setSearchLoading(true)
@@ -296,7 +295,6 @@ function Page({ params }: any) {
         setSearch(title)
         setShowSuggestions(false)
         setIsSuggestionClicked(true)
-        setOffset(0)
         setCurrentPage(1)
         setSearchLoading(false)
     
