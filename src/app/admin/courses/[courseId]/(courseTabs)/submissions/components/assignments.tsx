@@ -109,8 +109,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
             {assignmentData?.length > 0 ? (
                 assignmentData?.map((data) => {
                     const moduleDataLength = data.moduleChapterData.length
-
-                    if (moduleDataLength > 0)
+                    if (moduleDataLength > 0) {
                         return (
                             <div className="my-3" key={data.id}>
                                 <div className="w-full flex flex-col gap-y-5">
@@ -194,7 +193,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                                                                         }`}
                                                                     ></div>
                                                                 </div>
-                                                                <p className='text-sm'>
+                                                                <p className="text-sm">
                                                                     {
                                                                         moduleData.submitStudents
                                                                     }
@@ -236,6 +235,21 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                                 </div>
                             </div>
                         )
+                    } else {
+                        return (
+                            <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                                <h5 className="text-center font-semibold">
+                                    No Assignment Found
+                                </h5>
+                                <Image
+                                    src="/emptyStates/curriculum.svg"
+                                    alt="No Assessment Found"
+                                    width={400}
+                                    height={400}
+                                />
+                            </div>
+                        )
+                    }
                 })
             ) : (
                 <div className="w-screen flex flex-col justify-center items-center h-4/5">

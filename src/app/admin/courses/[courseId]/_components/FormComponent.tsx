@@ -28,16 +28,29 @@ const FormComponent = (props: Props) => {
 
                 <div className="flex  justify-between gap-x-2 w-full">
                     <div className="flex items-center gap-x-2 justify-between">
-                        <div
+                        {/* <div
                             className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
-                        ></div>
-                        <h3 className='text-lg'>
+                        ></div> */}
+                        <div
+                            className={`h-3 w-3 rounded-full ${
+                                props.data.submitStudents /
+                                    props.totalStudents >
+                                0.8
+                                    ? 'bg-green-400'
+                                    : props.data.submitStudents /
+                                          props.totalStudents >=
+                                      0.5
+                                    ? 'bg-orange-400'
+                                    : 'bg-red-500'
+                            }`}
+                        />
+                        <div className="text-base lg:text-lg font-medium text-gray-700">
                             {props.data.submitStudents}/{props.totalStudents}
-                        </h3>
+                        </div>
 
-                        <h3 className="text-gray-400 text-lg font-semibold ">
+                        <p className="text-gray-700 font-normal text-md">
                             Submissions
-                        </h3>
+                        </p>
                     </div>
                 </div>
                 <div className="flex items-center ml-auto">
@@ -50,24 +63,27 @@ const FormComponent = (props: Props) => {
                                 },
                             }}
                         >
-                            <div className="flex items-center text-secondary hover:bg-popover">
-                                <Button variant="ghost" className='text-green-700'>
+                            <h1 className="w-full text-center text-sm flex lg:text-right text-green-700">
+                                <Button
+                                    variant="ghost"
+                                    className="text-green-700"
+                                >
                                     View Submissions
                                     <ChevronRight size={20} />
                                 </Button>
-                            </div>
+                            </h1>
                         </Link>
                     ) : (
-                        <div className="flex items-center cursor-no-drop text-secondary hover:bg-popover">
+                        <h1 className="w-full text-center text-sm flex lg:text-right text-green-700">
                             <Button
-                                className='text-green-700'
+                                className="text-green-700"
                                 variant="ghost"
                                 disabled={props.data.submitStudents === 0}
                             >
                                 View Submissions
                                 <ChevronRight size={20} />
                             </Button>
-                        </div>
+                        </h1>
                     )}
                 </div>
             </div>
