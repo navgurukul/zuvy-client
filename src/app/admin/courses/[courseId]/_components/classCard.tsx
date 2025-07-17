@@ -107,7 +107,7 @@ function ClassCard({
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <h3 className="font-semibold">
+                                        <h3 className="font-semibold text-lg">
                                             {ellipsis(classData.title, 30)}
                                         </h3>
                                     </TooltipTrigger>

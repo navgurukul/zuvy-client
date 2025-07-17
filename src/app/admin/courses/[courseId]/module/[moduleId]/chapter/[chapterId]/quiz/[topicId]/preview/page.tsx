@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { addClassToCodeTags } from '@/utils/admin'
 import { Button } from '@/components/ui/button'
+import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 
 const PreviewQuiz = ({ params }: { params: any }) => {
     const { quizPreviewContent, setQuizPreviewContent } = getQuizPreviewStore()
@@ -46,11 +47,6 @@ const PreviewQuiz = ({ params }: { params: any }) => {
                     </h1>
                     {quizPreviewContent?.quizQuestionDetails.map(
                         (question: any, index: number) => {
-                            const additionalClass = 'bg-gray-300 text-start'
-                            const processedHtml = addClassToCodeTags(
-                                question.quizVariants[0].question,
-                                additionalClass
-                            )
                             return (
                                 <div key={question.id} className="mb-4 p-4 ">
                                     {/* <div className="flex items-center space-x-2">
@@ -66,9 +62,15 @@ const PreviewQuiz = ({ params }: { params: any }) => {
                                         />
                                     </div> */}
                                     <h3 className="font-semibold text-gray-600 text-[15px] text-left">
-                                        Q{index + 1}.{' '}
-                                        {question.quizVariants[0].question}
+                                        Q{index + 1}.
                                     </h3>
+                                    {/* Render question using RemirrorForm */}
+                                    <div className="text-left text-gray-600 mb-2">
+                                        <RemirrorForm
+                                            description={question.quizVariants[0].question}
+                                            preview={true} // Enable preview mode
+                                        />
+                                    </div>
 
                                     {/* Render options */}
                                     <div className="mt-2">

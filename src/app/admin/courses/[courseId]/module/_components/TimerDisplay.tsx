@@ -23,7 +23,7 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
     return (
         <div className="flex items-center justify-end gap-2">
             <Timer size={24} />
-            <h1 className="text-right">{formatTime(remainingTime)}</h1>
+            <h1 className="text-right text-xl">{formatTime(remainingTime)}</h1>
         </div>
     )
 }

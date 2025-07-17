@@ -59,7 +59,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
                     </p>
                 </Link>
                 {showCodePanel ? (
-                    <div className="mt-5">
+                    <div className="mt-5 w-full">
                         <IDE
                             params={{
                                 editor: String(
