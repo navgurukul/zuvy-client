@@ -384,16 +384,16 @@ const CodingProblems = () => {
                 <div>
                     {allCodingQuestions.length > 0 && !isCodingDialogOpen ? (
                         <MaxWidthWrapper>
-                                <h1 className="text-left font-semibold text-2xl text-gray-600">
-                                    Resource Library - Coding Problems
-                                </h1>
+                            <h1 className="text-left font-semibold text-2xl text-gray-600">
+                                Resource Library - Coding Problems
+                            </h1>
 
                             <div className="flex justify-between">
                                 <div className="relative w-full">
-                                    <div className="relative">
+                                    <div className="relative w-1/4">
                                         <Input
                                             placeholder="Problem Name..."
-                                            className="w-full p-2 pl-8 pr-8"
+                                            className="w-full p-2 my-6 input-with-icon pl-8"
                                             value={searchTerm}
                                             onChange={handleSearchInputChange}
                                             onFocus={handleSearchFocus}
@@ -411,23 +411,23 @@ const CodingProblems = () => {
                                                 <X size={16} />
                                             </button>
                                         )}
+                                        {/* Suggestions dropdown will now inherit the width from parent container */}
+                                        {showSuggestions && searchSuggestions.length > 0 && (
+                                            <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg top-full">
+                                                {searchSuggestions.map((suggestion) => (
+                                                    <div
+                                                        key={suggestion.id}
+                                                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                                                        onMouseDown={() => handleSuggestionClick(suggestion)}
+                                                    >
+                                                        <p className="text-sm font-medium text-gray-900 truncate text-left">
+                                                            {suggestion.title}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                    {showSuggestions && searchSuggestions.length > 0 && (
-                                        <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg mt-1">
-                                            {searchSuggestions.map((suggestion) => (
-                                                <div
-                                                    key={suggestion.id}
-                                                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer"
-                                                    onMouseDown={() => handleSuggestionClick(suggestion)}
-                                                >
-                                                    <p className="text-sm font-medium text-gray-900 truncate text-left">
-                                                        {suggestion.title}
-                                                    </p>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
                                 </div>
 
                                 <div className="flex flex-row items-center gap-2">
@@ -490,51 +490,51 @@ const CodingProblems = () => {
                                 </div>
                             </div>
 
-                            <DataTable 
-                                data={codingQuestions} 
-                                columns={columns} 
+                            <DataTable
+                                data={codingQuestions}
+                                columns={columns}
                             />
                         </MaxWidthWrapper>
                     ) : (
                         <>
                             {
-                            !isCodingDialogOpen && 
-                            !isCodingEditDialogOpen && 
-                            codingQuestions.length === 0 && (
-                                <>
-                                    <h1 className="text-left font-semibold text-2xl text-gray-600">
-                                        Resource Library - Coding Problems
-                                    </h1>
-                                    <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                                        <div>
-                                            <Image
-                                                src="/resource_library_empty_state.svg"
-                                                alt="Empty State"
-                                                width={500}
-                                                height={500}
-                                            />
-                                        </div>
-                                        <h2>
-                                            No coding problems have been created
-                                            yet. Start by adding the first one
-                                        </h2>
-                                        <Button
-                                            className="bg-success-dark opacity-75"
-                                            onClick={() =>
-                                                setIsCodingDialogOpen(true)
-                                            }
-                                        >
-                                            + Create Problems
-                                        </Button>
-                                    </MaxWidthWrapper>
-                                </>
-                            )}
+                                !isCodingDialogOpen &&
+                                !isCodingEditDialogOpen &&
+                                codingQuestions.length === 0 && (
+                                    <>
+                                        <h1 className="text-left font-semibold text-2xl text-gray-600">
+                                            Resource Library - Coding Problems
+                                        </h1>
+                                        <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                                            <div>
+                                                <Image
+                                                    src="/resource_library_empty_state.svg"
+                                                    alt="Empty State"
+                                                    width={500}
+                                                    height={500}
+                                                />
+                                            </div>
+                                            <h2>
+                                                No coding problems have been created
+                                                yet. Start by adding the first one
+                                            </h2>
+                                            <Button
+                                                className="bg-success-dark opacity-75"
+                                                onClick={() =>
+                                                    setIsCodingDialogOpen(true)
+                                                }
+                                            >
+                                                + Create Problems
+                                            </Button>
+                                        </MaxWidthWrapper>
+                                    </>
+                                )}
 
                             {isCodingDialogOpen && !isCodingEditDialogOpen && (
                                 <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                                    <div onClick={() => setIsCodingDialogOpen(false)} 
+                                    <div onClick={() => setIsCodingDialogOpen(false)}
                                         className="text-[rgb(81,134,114)] cursor-pointer self-start flex">
-                                            {' '}
+                                        {' '}
                                         <ChevronLeft /> Coding Problems
                                     </div>
                                     <NewCodingProblemForm

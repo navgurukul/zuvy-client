@@ -77,7 +77,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                         >
                                             {/* Content */}
                                             <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                <h1 className="w-1/2 text-start">
+                                                <h1 className="w-1/2 text-start text-sm">
                                                     {video.title}
                                                 </h1>
                                                 <h2 className="w-1/2 flex mt-2">
@@ -87,14 +87,17 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                                 className={`w-2 h-2 rounded-full flex items-center justify-center  ${
                                                                     submissionPercentage >= 
                                                                     0.8
-                                                                        ? 'bg-green-300'
-                                                                        : submissionPercentage >= 0.5
-                                                                        ? 'bg-yellow-300'
-                                                                        : 'bg-red-500'
+                                                                    ? 'bg-green-300'
+                                                                    : submissionPercentage <=
+                                                                          0.8 &&
+                                                                      submissionPercentage >=
+                                                                          0.5
+                                                                    ? 'bg-yellow-300'
+                                                                    : 'bg-red-500'
                                                                 }`}
                                                             ></div>
                                                         </div>
-                                                        <p>
+                                                        <p className="text-sm">
                                                             {
                                                                 video.completedStudents
                                                             }
@@ -103,7 +106,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                                 videoData.totalStudents
                                                             }
                                                         </p>
-                                                        <h3 className="text-gray-400 font-semibold cursor-not-allowed">
+                                                        <h3 className="text-gray-400 text-sm font-semibold cursor-not-allowed">
                                                             Submissions
                                                         </h3>
                                                     </div>
@@ -136,7 +139,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                             variant={
                                                                 'secondary'
                                                             }
-                                                            className="flex items-center border-none hover:text-secondary hover:bg-popover"
+                                                            className="flex items-center border-none text-green-700 hover:text-green-800 hover:bg-popover"
                                                             disabled={
                                                                 true
                                                             }
