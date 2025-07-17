@@ -47,7 +47,7 @@ const FormSchema = z.object({
     startTime: z.date({
         required_error: 'Please choose a start date for the course.',
     }),
-    coverImage: z.string().min(1, 'Please upload a cover image.'),
+    coverImage: z.string().optional(),
     collaborator: z.string().optional(),
 })
 
