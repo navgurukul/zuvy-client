@@ -32,7 +32,7 @@ export function DataTablePagination<TData>({
     const searchParams = useSearchParams()
 
     const currentPage = parseInt(searchParams.get('page') || '1')
-    const position = searchParams.get('limit') || ROWS_PER_PAGE[0]
+    const position = searchParams.get('limit') || ROWS_PER_PAGE[1]
     const offset = (currentPage - 1) * +position
 
     const updateURLParams = (page: number, limit: string = position) => {
