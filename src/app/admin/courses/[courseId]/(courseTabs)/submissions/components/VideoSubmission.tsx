@@ -34,7 +34,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (
                 <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h5 className="text-center font-semibold">
+                    <h5 className="text-center font-semibold text-[17px]">
                         No Video Found
                     </h5>
                     <Image
