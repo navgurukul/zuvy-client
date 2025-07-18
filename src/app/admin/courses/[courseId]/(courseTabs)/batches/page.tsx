@@ -198,7 +198,7 @@ const Page = ({ params }: { params: any }) => {
             setSuggestions([])
         }
     }, [params.courseId])
-
+  
     // SIMPLIFIED: Single initialization effect
     useEffect(() => {
         if (!isInitialized) {
@@ -253,6 +253,7 @@ const Page = ({ params }: { params: any }) => {
             .slice(0, 6);
     }, [suggestions, searchQuery]);
 
+    
     // Clear input function to show all batches
     const clearSearch = () => {
         setSearchQuery('')
@@ -328,6 +329,7 @@ const Page = ({ params }: { params: any }) => {
                     handleSuggestionClick(filteredSuggestions[selectedIndex])
                 }
                 else {
+                    updateURL(searchQuery)
                     await handleSearch(searchQuery) // Search when user presses Enter directly
                 }
                 break

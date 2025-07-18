@@ -405,11 +405,7 @@ function Page({ params }: any) {
                                     onFocus={() => {
                                         if (search) setShowSuggestions(true)
                                     }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            setIsSuggestionClicked(true)
-                                        }
-                                    }}
+                                    onKeyDown={handleSearchSubmit}
                                 />
                                 {search && (
                                     <Button

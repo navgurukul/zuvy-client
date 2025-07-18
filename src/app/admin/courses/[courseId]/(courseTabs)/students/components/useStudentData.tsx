@@ -104,7 +104,7 @@ export const useStudentData = (courseId: any) => {
     const fetchSuggestions = useCallback(async (searchTerm: string) => {
         try {
             const response = await api.get(
-                `/bootcamp/students/${courseId}?limit=50&offset=0&search=${searchTerm}`
+                `/bootcamp/students/${courseId}?&search=${searchTerm}`
             )
             setSuggestions(response.data.modifiedStudentInfo || [])
         } catch (error) {

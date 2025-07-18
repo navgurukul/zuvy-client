@@ -105,33 +105,6 @@ const Mcqs = (props: Props) => {
         setmcqSearch(debouncedSearch)
     }, [debouncedSearch, setmcqSearch])
 
-    // Initialize search from URL params
-    useEffect(() => {
-        const searchQuery = searchParams.get('search')
-        const topicFilter = searchParams.get('topic')
-        const difficultyFilter = searchParams.get('difficulty')
-
-        if (searchQuery) {
-            setSearch(searchQuery)
-        }
-
-        if (topicFilter) {
-            const topicOptions = topicFilter.split(',').map(topic => ({
-                value: topic,
-                label: options.find(opt => opt.value === topic)?.label || topic
-            }))
-            setSelectedOptions(topicOptions)
-        }
-
-        if (difficultyFilter) {
-            const difficultyOptions = difficultyFilter.split(',').map(diff => ({
-                value: diff,
-                label: diff
-            }))
-            setDifficulty(difficultyOptions)
-        }
-    }, [searchParams])
-
     const updateURL = useCallback((searchTerm: string, topics: Option[], difficulties: Option[]) => {
         let query = ''
 
@@ -154,6 +127,35 @@ const Mcqs = (props: Props) => {
 
         router.replace(query, { scroll: false })
     }, [router])
+
+    // Initialize search from URL params
+    useEffect(() => {
+        const searchQuery = searchParams.get('search')
+        const topicFilter = searchParams.get('topic')
+        const difficultyFilter = searchParams.get('difficulty')
+
+        if (searchQuery) {
+            setSearch(searchQuery)
+        }
+
+        if (topicFilter && options.length > 0) {
+            const topicIds = topicFilter.split(',')
+            const topicOptions = topicIds.map(id => {
+                const foundOption = options.find(opt => opt.value === id)
+                return foundOption || { value: id, label: id }
+            })
+            setSelectedOptions(topicOptions)
+        }
+
+        if (difficultyFilter) {
+            const difficultyValues = difficultyFilter.split(',')
+            const difficultyOptionsArr = difficultyValues.map(value => {
+                const foundDifficulty = difficultyOptions.find(opt => opt.value === value)
+                return foundDifficulty || { value: value, label: value }
+            })
+            setDifficulty(difficultyOptionsArr)
+        }
+    }, [searchParams, options])
 
     const fetchSearchSuggestions = useCallback(async (query: string) => {
         if (!query.trim() || query.length < 2) {
@@ -226,72 +228,69 @@ const Mcqs = (props: Props) => {
     }
 
     const handleTagOption = (option: Option) => {
+        let newSelectedOptions: Option[] = []
+        
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
-                setSelectedOptions(
-                    selectedOptions.filter(
-                        (selected) => selected.value !== option.value
-                    )
+                newSelectedOptions = selectedOptions.filter(
+                    (selected) => selected.value !== option.value
                 )
             } else {
-                setSelectedOptions([option])
+                newSelectedOptions = [option]
             }
         } else {
             if (selectedOptions.some((item) => item.value === '-1')) {
-                setSelectedOptions([option])
+                newSelectedOptions = [option]
             } else {
-                if (
-                    selectedOptions.some(
-                        (selected) => selected.value === option.value
-                    )
-                ) {
-                    setSelectedOptions(
-                        selectedOptions.filter(
-                            (selected) => selected.value !== option.value
-                        )
+                if (selectedOptions.some((selected) => selected.value === option.value)) {
+                    newSelectedOptions = selectedOptions.filter(
+                        (selected) => selected.value !== option.value
                     )
                 } else {
-                    setSelectedOptions([...selectedOptions, option])
+                    newSelectedOptions = [...selectedOptions, option]
                 }
             }
         }
+        
+        setSelectedOptions(newSelectedOptions)
+        setCurrentPage(1)
+        // Immediately update URL
+        updateURL(search, newSelectedOptions, difficulty)
+        fetchCodingQuestions(0, search)
     }
 
     const handleDifficulty = (option: Option) => {
+        let newDifficulty: Option[] = []
+        
         // When user selects All Difficulty
         if (option.value === 'None') {
-            // It will check if the user has already selected All Difficulty or not
             if (difficulty.some((item) => item.value === option.value)) {
-                // If All Difficulty is already selected it will remove
-                const filteredDifficulty = difficulty.filter(
+                newDifficulty = difficulty.filter(
                     (item) => item.value !== option.value
                 )
-                setDifficulty(filteredDifficulty)
             } else {
-                // If user selects All Difficulty when it is not already selected,
-                // Rest other difficulties will be removed and only All Difficulty will be added in the array
-                setDifficulty([option])
+                newDifficulty = [option]
             }
         } else {
             // When user selects other Difficulties
             if (difficulty.some((item) => item.value === 'None')) {
-                // When All Difficulty is already selected and user selects other difficulties
-                // then All Difficulty will be removed and new difficulty will be added to the list
-                setDifficulty([option])
+                newDifficulty = [option]
             } else {
                 if (difficulty.some((item) => item.value === option.value)) {
-                    // Removing other difficulty when already selected
-                    const filteredDifficulty = difficulty.filter(
+                    newDifficulty = difficulty.filter(
                         (item) => item.value !== option.value
                     )
-                    setDifficulty(filteredDifficulty)
                 } else {
-                    // Add other difficulties
-                    const filteredDifficulty = [...difficulty, option]
-                    setDifficulty(filteredDifficulty)
+                    newDifficulty = [...difficulty, option]
                 }
             }
         }
+        
+        setDifficulty(newDifficulty)
+        setCurrentPage(1)
+        // Immediately update URL
+        updateURL(search, selectedOptions, newDifficulty)
+        fetchCodingQuestions(0, search)
     }
 
     const openModal = () => setIsOpen(true)
@@ -321,20 +320,37 @@ const Mcqs = (props: Props) => {
         if (suggestion.type === 'question') {
             const trimmed = suggestion.question.trim()
             setSearch(trimmed)
-            setCurrentPage(1) // Reset page when searching
+            setCurrentPage(1)
             updateURL(trimmed, selectedOptions, difficulty)
-            // Pass the search term directly to bypass debounce timing issues
             fetchCodingQuestions(0, trimmed)
         } else {
             // Topic click
             const topicOption = options.find(opt => opt.label === suggestion.topic)
             if (topicOption) {
-                handleTagOption(topicOption)
+                let newSelectedOptions: Option[] = []
+                
+                if (topicOption.value === '-1') {
+                    newSelectedOptions = [topicOption]
+                } else {
+                    if (selectedOptions.some((item) => item.value === '-1')) {
+                        newSelectedOptions = [topicOption]
+                    } else {
+                        if (selectedOptions.some((selected) => selected.value === topicOption.value)) {
+                            newSelectedOptions = selectedOptions.filter(
+                                (selected) => selected.value !== topicOption.value
+                            )
+                        } else {
+                            newSelectedOptions = [...selectedOptions, topicOption]
+                        }
+                    }
+                }
+                
+                setSelectedOptions(newSelectedOptions)
+                setCurrentPage(1)
+                updateURL('', newSelectedOptions, difficulty)
+                fetchCodingQuestions(0, '')
             }
             setSearch('')
-            setCurrentPage(1) // Reset page when changing filters
-            updateURL('', selectedOptions, difficulty)
-            fetchCodingQuestions(0, '')
         }
 
         setShowSuggestions(false)
@@ -441,8 +457,10 @@ const Mcqs = (props: Props) => {
 
     // Effect to fetch data when filters change (but not search while typing)
     useEffect(() => {
-        fetchCodingQuestions(offset)
-    }, [offset, position, difficulty, selectedOptions])
+        if (options.length > 0) {
+            fetchCodingQuestions(offset)
+        }
+    }, [offset, position, difficulty, selectedOptions, options])
 
     const handleNewTopicChange = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -473,11 +491,10 @@ const Mcqs = (props: Props) => {
 
     const clearSearch = () => {
         setSearch('')
-        setSelectedOptions([])
-        setDifficulty([])
-        setCurrentPage(1) // Reset page when clearing search
-        updateURL('', [], [])
-        fetchCodingQuestions(0, '') // Pass empty search explicitly
+        setCurrentPage(1)
+        // Only clear search, keep filters
+        updateURL('', selectedOptions, difficulty)
+        fetchCodingQuestions(0, '')
         setShowSuggestions(false)
         searchInputRef.current?.focus()
     }

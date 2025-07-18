@@ -375,11 +375,9 @@ const CodingProblems = () => {
     }
 
     // Clear ALL filters (search, topics, difficulty)
-    const clearAllFilters = () => {
+    const clearOnlySearchTerm = () => {
         setSearchTerm('')
         setConfirmedSearch('')
-        setSelectedOptions([{ value: '-1', label: 'All Topics' }])
-        setDifficulty([{ value: 'None', label: 'All Difficulty' }])
         setShowSuggestions(false)
         setCurrentPage(1)
     }
@@ -469,7 +467,7 @@ const CodingProblems = () => {
                                         </div>
                                         {(searchTerm || activeFiltersCount > 0) && (
                                             <button
-                                                onClick={clearAllFilters}
+                                                onClick={clearOnlySearchTerm}
                                                 className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
                                             >
                                                 <X size={16} />

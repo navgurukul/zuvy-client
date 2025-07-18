@@ -226,21 +226,11 @@ const Page = ({ params }: { params: any }) => {
                         })
                     }
                     break
-
                 case 'form':
-                    // Search through forms only
+                    // Search through forms only (but skip module name)
                     if (formData && formData.length > 0) {
                         formData.forEach((item: any) => {
-                            const title = item.name || ''
-                            if (title.toLowerCase().includes(term)) {
-                                newSuggestions.push({
-                                    id: item.id,
-                                    title: title,
-                                    type: 'form'
-                                })
-                            }
-
-                            // Also search through moduleChapterData
+                            // Only check moduleChapterData
                             if (item.moduleChapterData) {
                                 item.moduleChapterData.forEach((chapter: any) => {
                                     const chapterTitle = chapter.title || chapter.name || ''
@@ -256,6 +246,7 @@ const Page = ({ params }: { params: any }) => {
                         })
                     }
                     break
+
                 case 'assignments':
                     // Fixed assignment API endpoint and data handling
                     try {
@@ -471,61 +462,55 @@ const Page = ({ params }: { params: any }) => {
                 <div className="flex justify-start overflow-x-auto overflow-y-hidden items-start gap-x-3">
                     <Button
                         onClick={() => handleTabChange('practice')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'practice'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'practice'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                        }`}
+                            }`}
                     >
                         Practice Problems
                     </Button>
                     <Button
                         onClick={() => handleTabChange('assessments')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'assessments'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'assessments'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                        }`}
+                            }`}
                     >
                         Assessments
                     </Button>
                     <Button
                         onClick={() => handleTabChange('projects')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'projects'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'projects'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                        }`}
+                            }`}
                     >
                         Projects
                     </Button>
                     <Button
                         onClick={() => handleTabChange('form')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'form'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'form'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                        }`}
+                            }`}
                     >
                         Form
                     </Button>
                     <Button
                         onClick={() => handleTabChange('assignments')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'assignments'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'assignments'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                        }`}
+                            }`}
                     >
                         Assignments
                     </Button>
                     <Button
                         onClick={() => handleTabChange('video')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
-                            activeTab === 'video'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'video'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                        }`}
+                            }`}
                     >
                         Video
                     </Button>

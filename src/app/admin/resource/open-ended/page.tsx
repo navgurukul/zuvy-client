@@ -351,9 +351,6 @@ const OpenEndedQuestions = (props: Props) => {
         setSearchTerm('')
         setConfirmedSearch('')
         setShowSuggestions(false)
-        setSelectedOptions([{ value: '-1', label: 'All Topics' }])
-        setDifficulty([{ value: 'None', label: 'All Difficulty' }])
-        localStorage.setItem('openEndedCurrentTag', JSON.stringify({ tagName: 'All Topics', id: -1 }))
         setCurrentPage(1)
         searchInputRef.current?.focus()
 
