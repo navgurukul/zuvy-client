@@ -383,6 +383,21 @@ const OpenEndedQuestions = (props: Props) => {
         setCurrentPage(1)
     }
 
+    useEffect(() => {
+        const handleRouteChange = () => {
+            // Reset filters on route change
+            setSelectedOptions([{ value: '-1', label: 'All Topics' }])
+            setDifficulty([{ value: 'None', label: 'All Difficulty' }])
+            localStorage.removeItem('openEndedCurrentTag')
+        }
+    
+        window.addEventListener('beforeunload', handleRouteChange)
+        return () => {
+            handleRouteChange() // manually call on unmount
+            window.removeEventListener('beforeunload', handleRouteChange)
+        }
+    }, [])
+    
     return (
         <>
             {loading ? (

@@ -499,6 +499,22 @@ const Mcqs = (props: Props) => {
         searchInputRef.current?.focus()
     }
 
+    useEffect(() => {
+        const handleRouteChange = () => {
+            setSelectedOptions([{ value: '-1', label: 'All Topics' }])
+            setDifficulty([{ value: 'None', label: 'All Difficulty' }])
+            setmcqSearch('')
+            setSearch('')
+        }
+    
+        window.addEventListener('beforeunload', handleRouteChange)
+    
+        return () => {
+            handleRouteChange() // 🔁 Run when navigating away
+            window.removeEventListener('beforeunload', handleRouteChange)
+        }
+    }, [])
+    
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 

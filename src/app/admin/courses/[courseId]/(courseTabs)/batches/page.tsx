@@ -439,14 +439,18 @@ const Page = ({ params }: { params: any }) => {
     }, [])
 
     const getUnAssignedStudents = useCallback(async () => {
-        await api
-            .get(
+        if (!debouncedSearchStudent.trim()) return // ⛔ prevent API call if search term is empty
+    
+        try {
+            const res = await api.get(
                 `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
             )
-            .then((res) => {
-                setTotalStudents(res.data.data)
-            })
+            setTotalStudents(res.data.data)
+        } catch (err) {
+            console.error("Failed to fetch unassigned students:", err)
+        }
     }, [debouncedSearchStudent, params.courseId])
+    
 
     useEffect(() => {
         getUnAssignedStudents()
