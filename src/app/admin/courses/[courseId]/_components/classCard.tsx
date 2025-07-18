@@ -227,7 +227,7 @@ function ClassCard({
                             </TooltipProvider>
 
                             <AlertDialogContent>
-                                <AlertDialogAction className="w-2 h-2 bg-white text-black ">
+                                <AlertDialogAction className="absolute top-4 right-4 w-6 h-6 bg-white text-black flex items-center justify-center">
                                     X
                                 </AlertDialogAction>
                                 <EditSessionDialog
