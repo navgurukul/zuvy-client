@@ -189,14 +189,9 @@ const Page = ({ params }: any) => {
                     <DataTable data={dataTableAssesment} columns={columns} />
                     <DataTablePagination
                         totalStudents={totalStudents}
-                        position={position}
-                        setPosition={setPosition}
                         pages={totalPages}
                         lastPage={lastPage}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
                         fetchStudentData={getStudentAssesmentDataHandler}
-                        setOffset={setOffset}
                     />
                 </div>
             </MaxWidthWrapper>
