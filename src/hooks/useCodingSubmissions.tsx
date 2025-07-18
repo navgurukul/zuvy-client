@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/utils/axios.config';
 
 interface CodingSubmissionsResponse {
@@ -28,7 +28,7 @@ export const useCodingSubmissions = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCodingSubmissions = async () => {
+  const fetchCodingSubmissions = useCallback(async () => {
     if (!codingOutsourseId || !assessmentSubmissionId || !questionId) {
       return;
     }
@@ -47,13 +47,13 @@ export const useCodingSubmissions = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [codingOutsourseId, assessmentSubmissionId, questionId]);
 
   useEffect(() => {
     if (enabled && codingOutsourseId && assessmentSubmissionId && questionId) {
       fetchCodingSubmissions();
     }
-  }, [codingOutsourseId, assessmentSubmissionId, questionId, enabled]);
+  }, [codingOutsourseId, assessmentSubmissionId, questionId, enabled, fetchCodingSubmissions]);
 
   const refetch = () => {
     if (codingOutsourseId && assessmentSubmissionId && questionId) {

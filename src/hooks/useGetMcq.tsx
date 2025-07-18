@@ -36,7 +36,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
                 error?.response?.data?.message || 'Error fetching quiz data'
             )
         }
-    }, [id, tags])
+    }, [id, newTags])
 
     useEffect(() => {
         if (id) {

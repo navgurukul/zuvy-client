@@ -237,7 +237,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                         )
                     } else {
                         return (
-                            <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                            <div key={data.id} className="w-screen flex flex-col justify-center items-center h-4/5">
                                 <h5 className="text-center font-semibold">
                                     No Assignment Found
                                 </h5>

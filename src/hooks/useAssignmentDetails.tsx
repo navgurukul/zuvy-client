@@ -63,7 +63,7 @@ const useAssignmentDetails = (chapterId: string | null): UseAssignmentDetailsRet
 
   useEffect(() => {
     fetchData();
-  }, [chapterId]);
+  }, [chapterId, fetchData]);
 
   const refetch = () => {
     fetchData();

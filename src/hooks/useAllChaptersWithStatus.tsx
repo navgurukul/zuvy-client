@@ -87,7 +87,7 @@ const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusRet
 
   useEffect(() => {
     fetchData();
-  }, [moduleId]);
+  }, [moduleId, fetchData]);
 
   const refetch = () => {
     fetchData(true);
