@@ -287,7 +287,7 @@ const Page = ({ params }: { params: any }) => {
                                                 }
                                                 assignStudents={assignStudents}
                                             />
-                                            <h1 className="pt-2">
+                                            <h1 className="pt-2 text-[1rem]">
                                                 Total Learners Selected:{' '}
                                                 {selectedRows.length}
                                             </h1>
