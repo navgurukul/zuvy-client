@@ -1,32 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
+import {ChapterDetails,UseChapterDetailsResponse,ChapterDetailsApiResponse} from '@/hooks/type'
 
-interface ChapterDetails {
-  id: number;
-  title: string;
-  description: string | null;
-  topicId: number;
-  moduleId: number;
-  file: string | null;
-  links: string | null;
-  articleContent: string | null;
-  quizQuestions: any | null;
-  codingQuestions: any | null;
-  formQuestions: any | null;
-  assessmentId: number | null;
-  completionDate: string | null;
-  order: number;
-  version: string | null;
-  chapterTrackingDetails: any[];
-  status: string;
-}
 
-interface UseChapterDetailsResponse {
-  chapterDetails: ChapterDetails | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
 
 const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse => {
   const [chapterDetails, setChapterDetails] = useState<ChapterDetails | null>(null);
@@ -45,7 +21,7 @@ const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse 
       setLoading(true);
       setError(null);
       
-      const response = await api.get(`/tracking/getChapterDetailsWithStatus/${chapterId}`);
+      const response = await api.get<ChapterDetailsApiResponse>(`/tracking/getChapterDetailsWithStatus/${chapterId}`);
       
       if (response.data.status === 'success') {
         setChapterDetails(response.data.trackingData);

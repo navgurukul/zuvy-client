@@ -23,33 +23,20 @@ import useDebounce from '@/hooks/useDebounce'
 import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
+import {AddStudentsModalProps,Student,AddStudentsResponse} from '@/app/admin/courses/[courseId]/_components/type';  
 
-const AddStudentsModal = ({
-    id,
-    message,
-    batch,
-    batchId,
-    fetchBatchesData,
-    batchData
-}: {
-    id: number
-    message: boolean
-    batch: boolean
-    batchId: any
-    fetchBatchesData?: any
-    batchData?: boolean
+const AddStudentsModal: React.FC<AddStudentsModalProps> = ({
+  id,
+  message,
+  batch,
+  batchId,
+  fetchBatchesData,
+  batchData,
 }) => {
-    // misc
-    interface Student {
-        email: string
-        name: string
-    }
-
-    type StudentDataState = Student[]
 
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
-    const [studentData, setStudentData] = useState<StudentDataState | any>({})
+    const [studentData, setStudentData] = useState<Partial<Student>>({})
     const { fetchCourseDetails } = getCourseData()
     const {
         setStudents,
@@ -87,8 +74,8 @@ const AddStudentsModal = ({
                 const endpoint = batch
                     ? `/bootcamp/students/${id}?batch_id=${batchId}`
                     : `/bootcamp/students/${id}`
-                await api.post(endpoint, requestBody).then((response) => {
-                    batch && fetchBatchesData()
+                await api.post<AddStudentsResponse>(endpoint, requestBody).then((response) => {
+                    batch && fetchBatchesData?.()
                     toast.success({
                         title: response.data.status,
                         description: response.data.message,

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import React from 'react'
 import AssesmentComponent from './AssesmentComponent'
 import { Button } from '@/components/ui/button'
+import {AssessmentsProps,ModuleAssessment} from '@/app/admin/courses/[courseId]/_components/type';  
 
 type Props = {
     courseId: number

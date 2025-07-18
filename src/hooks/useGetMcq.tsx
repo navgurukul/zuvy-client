@@ -1,15 +1,11 @@
 import { useCallback, useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { getCodingQuestionTags } from '@/store/store'
+import {Tag, Props,Quiz,QuizApiResponse  } from '@/hooks/type'
 
-type Props = {
-    id: number
-    tags?: any
-    assesmentSide?: boolean
-}
 
 const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
-    const [quizData, setQuizData] = useState<any>(null)
+    const [quizData, setQuizData] = useState<Quiz | null>(null)
     const [noofExistingVariants, setNoofExistingVariants] = useState<number>(0)
     const [difficulty, setDifficulty] = useState<string | null>(null)
     const [tagName, setTagName] = useState<string | null>(null)
@@ -19,7 +15,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
 
     const fetchQuizHandler = useCallback(async () => {
         try {
-            const res = await api.get(`/Content/quiz/${id}`)
+            const res = await api.get<QuizApiResponse>(`/Content/quiz/${id}`)
             const quiz = res.data.data[0]
 
             setQuizData(quiz)
@@ -27,8 +23,8 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
             setNoofExistingVariants(quiz.quizVariants.length)
 
             // Find the tag name based on the `tagId`
-            const matchingTag = newTags.find(
-                (tag: any) => tag.id === quiz.tagId
+            const matchingTag = newTags?.find(
+                (tag: Tag) => tag.id === quiz.tagId
             )
             setTagName(matchingTag ? matchingTag.tagName : null)
         } catch (error: any) {
@@ -52,5 +48,4 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
         refetch: fetchQuizHandler,
     }
 }
-
 export default useGetMCQs

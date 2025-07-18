@@ -1,52 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
+import {Chapter,Module,CourseSyllabusData,ApiResponse,UseCourseSyllabusReturn} from '@/hooks/type'
 
-interface Chapter {
-  chapterId: number;
-  chapterName: string;
-  chapterDescription: string | null;
-  chapterType: string;
-  chapterDuration: string;
-  chapterOrder: number;
-}
-
-interface Module {
-  moduleId: number;
-  moduleName: string;
-  moduleDescription: string;
-  moduleDuration: string;
-  chapters: Chapter[];
-}
-
-interface CourseSyllabusData {
-  bootcampId: number;
-  bootcampName: string;
-  bootcampDescription: string;
-  collaboratorName: string;
-  courseDuration: string;
-  totalStudentsInCourse: number;
-  studentBatchId: number;
-  studentBatchName: string;
-  instructorName: string;
-  instructorProfilePicture: string | null;
-  modules: Module[];
-  coverImage: string;
-  collaboratorImage: string;
-}
-
-interface ApiResponse {
-  message: string;
-  code: number;
-  isSuccess: boolean;
-  data: CourseSyllabusData;
-}
-
-interface UseCourseSyllabusReturn {
-  syllabusData: CourseSyllabusData | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
 
 const useCourseSyllabus = (courseId: string | string[] | undefined): UseCourseSyllabusReturn => {
   const [syllabusData, setSyllabusData] = useState<CourseSyllabusData | null>(null);

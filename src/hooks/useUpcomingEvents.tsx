@@ -1,32 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
+import {UpcomingEventsData,UseUpcomingEventsReturn,UpcomingEventResponse }from '@/hooks/type'
 
-export interface Event {
-  type: "Live Class" | "Assessment" | "Assignment";
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  bootcampId: number;
-  bootcampName: string;
-  batchId: number;
-  eventDate: string;
-  moduleId: number;
-  chapterId: number;
-}
 
-interface UpcomingEventsData {
-  events: Event[];
-  totalEvents: number;
-  totalPages: number;
-}
-
-interface UseUpcomingEventsReturn {
-  upcomingEventsData: UpcomingEventsData | null;
-  loading: boolean;
-  error: string | null;
-}
 
 export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
   const [upcomingEventsData, setUpcomingEventsData] = useState<UpcomingEventsData | null>(null);
@@ -39,7 +15,7 @@ export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
         setLoading(true);
         setError(null);
         
-        const response = await api.get('/student/UpcomingEvents');
+        const response = await api.get<UpcomingEventResponse>('/student/UpcomingEvents');
         
         if (response.data && response.data.isSuccess) {
           setUpcomingEventsData(response.data.data);

@@ -1,18 +1,9 @@
 import { useState } from 'react';
 import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
+import {UseChapterCompletionParams,UseChapterCompletionReturn} from '@/hooks/type'
 
-interface UseChapterCompletionParams {
-  courseId: string;
-  moduleId: string;
-  chapterId: string;
-  onSuccess?: () => void;
-}
 
-interface UseChapterCompletionReturn {
-  isCompleting: boolean;
-  completeChapter: () => Promise<void>;
-}
 
 const useChapterCompletion = ({ courseId, moduleId, chapterId, onSuccess }: UseChapterCompletionParams): UseChapterCompletionReturn => {
   const [isCompleting, setIsCompleting] = useState(false);

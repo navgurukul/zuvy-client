@@ -1,36 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 
-export interface CompletedClass {
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  attendanceStatus: 'present' | 'absent';
-  duration: number;
-  s3Link: string;
-}
+import {CompletedClass,AttendanceStats,CompletedClassesData,UseCompletedClassesReturn,CompletedClassesApiResponse}from '@/hooks/type'
 
-export interface AttendanceStats {
-  presentCount: number;
-  absentCount: number;
-  attendancePercentage: number;
-}
-
-export interface CompletedClassesData {
-  batchId: number;
-  batchName: string;
-  classes: CompletedClass[];
-  totalClasses: number;
-  totalPages: number;
-  attendanceStats: AttendanceStats;
-}
-
-interface UseCompletedClassesReturn {
-  completedClassesData: CompletedClassesData | null;
-  loading: boolean;
-  error: string | null;
-}
 
 export const useCompletedClasses = (bootcampId: string): UseCompletedClassesReturn => {
   const [completedClassesData, setCompletedClassesData] = useState<CompletedClassesData | null>(null);
@@ -48,7 +20,7 @@ export const useCompletedClasses = (bootcampId: string): UseCompletedClassesRetu
         setLoading(true);
         setError(null);
         
-        const response = await api.get(`/student/bootcamp/${bootcampId}/completed-classes`);
+        const response = await api.get<CompletedClassesApiResponse>(`/student/bootcamp/${bootcampId}/completed-classes`);
         
         if (response.data && response.data.isSuccess) {
           setCompletedClassesData(response.data.data);

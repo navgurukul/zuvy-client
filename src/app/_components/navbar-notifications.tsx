@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import {Notification} from '@/app/_components/type'
 
-interface Notification {
-    id: number;
-    message: string;
-    time: string;
-    read: boolean;
-}
+
 //Replace the dummy with the live notifications from BE apis
 const NavbarNotifications = () => {
     const [showNotifications, setShowNotifications] = useState(false);

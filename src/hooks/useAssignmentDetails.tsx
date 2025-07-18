@@ -1,39 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
+import {AssignmentTracking,AssignmentChapterDetails,AssignmentDetailsData,ApiResponse,UseAssignmentDetailsReturn} from "@/hooks/type"
 
-interface AssignmentTracking {
-  id: number;
-  projectUrl: string;
-  timeLimit: string;
-  createdAt: string;
-  updatedAt: string;
-  userId: string;
-  chapterId: number;
-  bootcampId: number;
-  moduleId: number;
-}
-
-interface AssignmentChapterDetails {
-  completionDate: string; // This is the deadline
-}
-
-interface AssignmentDetailsData {
-  assignmentTracking: AssignmentTracking[];
-  chapterDetails: AssignmentChapterDetails;
-  status: 'Completed' | 'Pending';
-  quizDetails?: any[];
-}
-
-interface ApiResponse {
-  data: AssignmentDetailsData;
-}
-
-interface UseAssignmentDetailsReturn {
-  assignmentData: AssignmentDetailsData | null;
-  loading: boolean;
-  error: string | null;
-  refetch: () => void;
-}
 
 const useAssignmentDetails = (chapterId: string | null): UseAssignmentDetailsReturn => {
   const [assignmentData, setAssignmentData] = useState<AssignmentDetailsData | null>(null);

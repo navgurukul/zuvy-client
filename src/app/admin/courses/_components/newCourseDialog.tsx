@@ -18,24 +18,25 @@ import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {newCourseDialogProps, CourseData,UploadImagesResponse } from "@/app/admin/courses/_components/type"
 
-interface newCourseDialogProps {
-    newCourseName: string
-    newCourseDescription: string
-    handleNewCourseNameChange: (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => void
-    handleNewCourseDescriptionChange: (
-        event: React.ChangeEvent<HTMLTextAreaElement>
-    ) => void
-    handleCreateCourse: (courseData: CourseData) => void
-}
+// interface newCourseDialogProps {
+//     newCourseName: string
+//     newCourseDescription: string
+//     handleNewCourseNameChange: (
+//         event: React.ChangeEvent<HTMLInputElement>
+//     ) => void
+//     handleNewCourseDescriptionChange: (
+//         event: React.ChangeEvent<HTMLTextAreaElement>
+//     ) => void
+//     handleCreateCourse: (courseData: CourseData) => void
+// }
 
-interface CourseData {
-    name: string
-    description?: string
-    collaborator?: string
-}
+// interface CourseData {
+//     name: string
+//     description?: string
+//     collaborator?: string
+// }
 
 const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     newCourseName,
@@ -80,7 +81,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                 setIsUploading(true)
 
                 try {
-                    const { data } = await api.post(
+                    const { data } = await api.post<UploadImagesResponse>(
                         '/Content/curriculum/upload-images',
                         formData,
                         {
@@ -148,7 +149,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
             setIsUploading(true)
 
             try {
-                const { data } = await api.post(
+                const { data } = await api.post<UploadImagesResponse>(
                     '/Content/curriculum/upload-images',
                     formData,
                     {
