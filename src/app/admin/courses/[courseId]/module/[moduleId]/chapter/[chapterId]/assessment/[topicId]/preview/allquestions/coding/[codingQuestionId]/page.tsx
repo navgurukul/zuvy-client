@@ -153,7 +153,7 @@ function IdePreview({ params }: { params: any }) {
                     onClick={router.back}
                 >
                     <ChevronLeft strokeWidth={2} size={24} />
-                    <h1 className="font-extrabold">All Questions</h1>
+                    <h1 className="font-extrabold text-[15px]">All Questions</h1>
                 </div>
             </div>
 

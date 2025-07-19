@@ -47,7 +47,7 @@ const FormSchema = z.object({
     startTime: z.date({
         required_error: 'Please choose a start date for the course.',
     }),
-    coverImage: z.string().min(1, 'Please upload a cover image.'),
+    coverImage: z.string().optional(),
     collaborator: z.string().optional(),
 })
 
@@ -70,6 +70,7 @@ function Page({ params }: { params: any }) {
     const [cropper, setCropper] = useState<Cropper | null>(null)
     const [isCropping, setIsCropping] = useState(false)
     const [croppedImage, setCroppedImage] = useState<string | null>(null)
+    const [isCalendarOpen, setCalendarOpen] = useState(false)
 
     // Collaborator image states
     const [collaboratorImage, setCollaboratorImage] = useState<string | null>(
@@ -565,7 +566,10 @@ function Page({ params }: { params: any }) {
                         render={({ field }) => (
                             <FormItem className="text-start">
                                 <FormLabel>Date of Commencement</FormLabel>
-                                <Popover>
+                                <Popover
+                                    open={isCalendarOpen}
+                                    onOpenChange={setCalendarOpen}
+                                >
                                     <PopoverTrigger asChild>
                                         <FormControl>
                                             <Button
@@ -589,6 +593,7 @@ function Page({ params }: { params: any }) {
                                             onSelect={(date) => {
                                                 if (date) {
                                                     field.onChange(date)
+                                                    setCalendarOpen(false)
                                                 }
                                             }}
                                             disabled={(date) =>

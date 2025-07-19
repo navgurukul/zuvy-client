@@ -117,7 +117,7 @@ const CurricullumCard = (props: Props) => {
         >
             <div
                 className={`${
-                    props.typeId === 2 ? 'bg-yellow/50' : 'bg-muted'
+                    props.typeId === 2 ? 'bg-yellow-100/80' : 'bg-muted'
                 } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]`}
             >
                 <div className="w-full p-2" onClick={handleModuleRoute}>

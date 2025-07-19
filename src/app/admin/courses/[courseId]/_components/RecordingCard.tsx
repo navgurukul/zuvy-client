@@ -146,7 +146,7 @@ function RecordingCard({
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <h3 className="font-semibold">
+                                    <h3 className="font-semibold text-lg">
                                         {ellipsis(classData.title, 30)}
                                     </h3>
                                 </TooltipTrigger>
@@ -156,7 +156,7 @@ function RecordingCard({
                             </Tooltip>
                         </TooltipProvider>
                     </p>
-                    <div className="text-md flex font-semibold capitalize items-center">
+                    <div className="text-[15px] flex font-semibold capitalize items-center">
                         <Moment format="D MMMM">{classData.startTime}</Moment>
                         <p className="mr-2">,</p>
                         <Moment format="hh:mm A">{classData.startTime}</Moment>
@@ -216,12 +216,12 @@ function RecordingCard({
                         <SheetContent>
                             <SheetHeader>
                                 <SheetTitle>
-                                    <h1 className="mb-10 text-xl text-start">
+                                    <h1 className="mb-10 text-lg text-start">
                                         {classData.title}
                                     </h1>
                                 </SheetTitle>
                                 <SheetDescription>
-                                    <h2 className="mb-3 font-bold">
+                                    <h2 className="mb-3 font-bold text-[15px]">
                                         Session Recording
                                     </h2>
                                     {isVideo ? (
@@ -245,7 +245,7 @@ function RecordingCard({
                                     <p className="text-md text-start">
                                         {classData.description}
                                     </p>
-                                    <h3 className="mb-3 font-bold mt-3">
+                                    <h3 className="mb-3 font-bold mt-3 text-[15px]">
                                         Attendance Information
                                     </h3>
                                     {displayAttendance ? (

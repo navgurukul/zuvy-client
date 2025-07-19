@@ -525,7 +525,7 @@ const Page = ({ params }: { params: any }) => {
                                                 }
                                                 assignStudents={assignStudents}
                                             />
-                                            <h1 className="pt-2">
+                                            <h1 className="pt-2 text-[1rem]">
                                                 Total Learners Selected:{' '}
                                                 {selectedRows.length}
                                             </h1>
@@ -677,12 +677,8 @@ const Page = ({ params }: { params: any }) => {
 
                                             {assignLearners === 'all' && (
                                                 <FormDescription>
-                                                    {
-                                                        courseData?.unassigned_students
-                                                    }{' '}
-                                                    students will be added to
-                                                    this batch (Maximum current
-                                                    availability)
+                                                     {`${courseData?.unassigned_students} ${courseData?.unassigned_students === 1 ? ' student' : ' students'} will be added to
+                                                    this batch (Maximum current availability)`}
                                                 </FormDescription>
                                             )}
                                             <div className="w-full flex flex-col items-end gap-y-5 ">
