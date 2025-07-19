@@ -126,7 +126,7 @@ const Page = ({ params }: any) => {
             <BreadcrumbComponent crumbs={crumbs} />
             <MaxWidthWrapper className="p-4 ">
                 <div className="flex flex-col gap-y-4">
-                    <h1 className="text-start text-xl font-bold capitalize text-primary">
+                    <h1 className="text-start text-xl font-bold capitalize text-gray-700">
                         {assesmentData?.title}
                     </h1>
 
@@ -164,6 +164,12 @@ const Page = ({ params }: any) => {
                                 <p className="text-gray-500 ">
                                     Pass Percentage
                                 </p>
+                            </div>
+                            <div className="p-4 rounded-lg shadow-md ">
+                                <h1 className="text-gray-600 font-semibold text-xl">
+                                    {assesmentData?.totalQualifiedStudents}
+                                </h1>
+                                <p className="text-gray-500 ">Total Qualified Students</p>
                             </div>
                         </div>
                     }

@@ -9,7 +9,12 @@ import { DownloadIcon, FileText } from 'lucide-react'
 import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
 import ApproveReattempt from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
+import {
+    Tooltip,
+    TooltipTrigger,
+    TooltipContent,
+    TooltipProvider,
+} from '@/components/ui/tooltip'
 
 export const columns: ColumnDef<Task>[] = [
     // {
@@ -60,27 +65,29 @@ export const columns: ColumnDef<Task>[] = [
                 //         {name}
                 //     </span>
                 // </div>
-                
+
                 <TooltipProvider>
-                   <Tooltip>
-                     <TooltipTrigger asChild>
-                        <div className='flex'>
-                        <span
-                          className="truncate max-w-[500px] cursor-pointer font-medium capitalize"
-                          title=""
-                        >
-                          {/* Only show first 20 characters */}
-                          {name.length > 20 ? name.substring(0, 15) + '...' : name}
-                        </span>
-                        </div>
-                     </TooltipTrigger>
-                       {name.length > 20 && (
-                    <TooltipContent>
-                       <p>{name}</p>
-                    </TooltipContent>
-                    )}
-                 </Tooltip>
-               </TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex">
+                                <span
+                                    className="truncate max-w-[500px] cursor-pointer font-medium capitalize"
+                                    title=""
+                                >
+                                    {/* Only show first 20 characters */}
+                                    {name.length > 20
+                                        ? name.substring(0, 15) + '...'
+                                        : name}
+                                </span>
+                            </div>
+                        </TooltipTrigger>
+                        {name.length > 20 && (
+                            <TooltipContent>
+                                <p>{name}</p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </TooltipProvider>
             )
         },
         enableSorting: false,
@@ -102,23 +109,25 @@ export const columns: ColumnDef<Task>[] = [
                 // </div>
 
                 <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                    <div className="flex ">
-                     <span
-                      className="truncate max-w-[500px] cursor-pointer font-medium"
-                      title=""
-                     >
-                     {email.length > 25 ? email.substring(0, 18) + '...' : email}
-                    </span>
-                    </div>
-                  </TooltipTrigger>
-                   {email.length > 25 && (
-                   <TooltipContent>
-                     <p>{email}</p>
-                   </TooltipContent>
-                  )}
-                  </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex ">
+                                <span
+                                    className="truncate max-w-[500px] cursor-pointer font-medium"
+                                    title=""
+                                >
+                                    {email.length > 25
+                                        ? email.substring(0, 18) + '...'
+                                        : email}
+                                </span>
+                            </div>
+                        </TooltipTrigger>
+                        {email.length > 25 && (
+                            <TooltipContent>
+                                <p>{email}</p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
                 </TooltipProvider>
             )
         },
@@ -132,12 +141,12 @@ export const columns: ColumnDef<Task>[] = [
             const startedAt = row.original.startedAt
             const submitedAt = row.original.submitedAt
 
-            let timeTaken;
+            let timeTaken
 
-            if(!submitedAt){
+            if (!submitedAt) {
                 timeTaken = 'N/A'
-            }else{
-                timeTaken = calculateTimeTaken(startedAt, submitedAt);
+            } else {
+                timeTaken = calculateTimeTaken(startedAt, submitedAt)
             }
 
             return (
@@ -153,66 +162,90 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'startedAt',
         header: ({ column }) => (
-           <DataTableColumnHeader column={column} title="Started At" />
+            <DataTableColumnHeader column={column} title="Started At" />
         ),
         cell: ({ row }) => {
-           const startedAt = row.original.startedAt;
-           return (
+            const startedAt = row.original.startedAt
+            return (
                 <div className="flex">
-                     <span className="max-w-[500px] truncate font-medium ">
-                       {/* {startedAt ? new Date(startedAt).toLocaleString() : 'N/A'} */}
-                                {startedAt
-            ? (() => {
-                const date = new Date(startedAt);
-                const year = date.getFullYear().toString().slice(-2); 
-                const day = date.getDate().toString().padStart(2, '0');
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const hour = date.getHours().toString().padStart(2, '0');
-                const minute = date.getMinutes().toString().padStart(2, '0');
+                    <span className="max-w-[500px] truncate font-medium ">
+                        {/* {startedAt ? new Date(startedAt).toLocaleString() : 'N/A'} */}
+                        {startedAt
+                            ? (() => {
+                                  const date = new Date(startedAt)
+                                  const year = date
+                                      .getFullYear()
+                                      .toString()
+                                      .slice(-2)
+                                  const day = date
+                                      .getDate()
+                                      .toString()
+                                      .padStart(2, '0')
+                                  const month = (date.getMonth() + 1)
+                                      .toString()
+                                      .padStart(2, '0')
+                                  const hour = date
+                                      .getHours()
+                                      .toString()
+                                      .padStart(2, '0')
+                                  const minute = date
+                                      .getMinutes()
+                                      .toString()
+                                      .padStart(2, '0')
 
-                return `${day}/${month}/${year}, ${hour}:${minute}`;
-              })()
-            : 'N/A'}
-                       
+                                  return `${day}/${month}/${year}, ${hour}:${minute}`
+                              })()
+                            : 'N/A'}
                     </span>
                 </div>
-            );
+            )
         },
     },
-
 
     {
-       accessorKey: 'submitedAt',
-       header: ({ column }) => (
-         <DataTableColumnHeader column={column} title="Submitted At" />
-       ),
-       cell: ({ row }) => {
-           const submitedAt = row.original.submitedAt;
-           return (
-                 <div className="flex">
+        accessorKey: 'submitedAt',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Submitted At" />
+        ),
+        cell: ({ row }) => {
+            const submitedAt = row.original.submitedAt
+            return (
+                <div className="flex">
                     <span className="max-w-[500px] truncate font-medium ">
-                     {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
+                        {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
 
-          {submitedAt
-            ? (() => {
-                const date = new Date(submitedAt);
-                const year = date.getFullYear().toString().slice(-2); 
-                const day = date.getDate().toString().padStart(2, '0');
-                const month = (date.getMonth() + 1).toString().padStart(2, '0');
-                const hour = date.getHours().toString().padStart(2, '0');
-                const minute = date.getMinutes().toString().padStart(2, '0');
+                        {submitedAt
+                            ? (() => {
+                                  const date = new Date(submitedAt)
+                                  const year = date
+                                      .getFullYear()
+                                      .toString()
+                                      .slice(-2)
+                                  const day = date
+                                      .getDate()
+                                      .toString()
+                                      .padStart(2, '0')
+                                  const month = (date.getMonth() + 1)
+                                      .toString()
+                                      .padStart(2, '0')
+                                  const hour = date
+                                      .getHours()
+                                      .toString()
+                                      .padStart(2, '0')
+                                  const minute = date
+                                      .getMinutes()
+                                      .toString()
+                                      .padStart(2, '0')
 
-                return `${day}/${month}/${year}, ${hour}:${minute}`;
-              })()
-            : 'N/A'}
-
+                                  return `${day}/${month}/${year}, ${hour}:${minute}`
+                              })()
+                            : 'N/A'}
                     </span>
                 </div>
-            );
+            )
         },
     },
 
-    
     // {
     //     accessorKey: 'submission date',
     //     header: ({ column }) => (
@@ -254,7 +287,7 @@ export const columns: ColumnDef<Task>[] = [
                         ) : (
                             <div className="bg-red-600 h-3 w-3 rounded-full " />
                         )}
-                        {row?.original?.reattemptCount === 0 ? 'N/A' : isQualified ? ' Passed' : 'Failed'}
+                        {isQualified ? ' Passed' : 'Failed'}
                     </div>
                 </div>
             )
@@ -263,17 +296,14 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'percentage',
         header: ({ column }) => (
-            <DataTableColumnHeader
-                column={column}
-                title="Percentage"
-            />
+            <DataTableColumnHeader column={column} title="Percentage" />
         ),
         cell: ({ row }) => {
             const percentage = row.original.percentage
             return (
                 <div className="flex ">
                     <span className="font-semibold ml-4">
-                    {percentage ? `${percentage.toFixed(2)}%` : '0.00%'}
+                        {percentage ? `${percentage.toFixed(2)}%` : '0.00%'}
                     </span>
                 </div>
             )
@@ -302,12 +332,12 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             return (
                 <div className="flex  w-10" key={row.original.email}>
-                   <ApproveReattempt data={row.original}/>
+                    <ApproveReattempt data={row.original} />
                 </div>
             )
         },
     },
- 
+
     {
         id: 'actions',
         cell: ({ row }) => {
@@ -317,7 +347,7 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex ">
                     <Link
                         href={submitedAt ? `/admin/courses/${bootcampId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}` : '#'}
-                        className={submitedAt ? `max-w-[500px] text-secondary font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
+                        className={submitedAt ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center` : `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center opacity-50 cursor-not-allowed`}
                     >
                         <FileText size={16} />
                         <p className="text-[15px]"> View Report</p>
@@ -330,10 +360,13 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         cell: ({ row }) => {
             const submitedAt = row.original.submitedAt
-  
+
             return (
                 <>
-               <DownloadReport userInfo={row.original} submitedAt={submitedAt}/>
+                    <DownloadReport
+                        userInfo={row.original}
+                        submitedAt={submitedAt}
+                    />
                 </>
             )
         },

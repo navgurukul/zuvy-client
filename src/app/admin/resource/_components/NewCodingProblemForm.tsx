@@ -588,7 +588,7 @@ export default function NewCodingProblemForm({
 
 
     return (
-        <main className="flex flex-col p-3 w-full items-center">
+        <main className="flex flex-col p-3 w-full items-center text-gray-600">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
@@ -656,7 +656,7 @@ export default function NewCodingProblemForm({
                                     >
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -664,7 +664,7 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -672,7 +672,7 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -774,10 +774,9 @@ export default function NewCodingProblemForm({
                                         ))}
                                         {testCaseIndex === 0 && (
                                             <Button
-                                                variant="outline"
                                                 type="button"
                                                 onClick={() => handleAddInputType(testCase.id)}
-                                                className="mt-2"
+                                                className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                                                 disabled={testCase.inputs.length >= inputTypes.length}
                                             >
                                                 <Plus size={16} className="mr-2" />
@@ -872,9 +871,8 @@ export default function NewCodingProblemForm({
                         ))}
 
                         <Button
-                            variant="outline"
                             type="button"
-                            className="mt-2"
+                            className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                             onClick={handleAddTestCase}
                         >
                             <Plus size={20} className="mr-2" />
@@ -883,7 +881,7 @@ export default function NewCodingProblemForm({
                     </div>
 
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2">
+                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
                             Create Question
                         </Button>
                     </div>

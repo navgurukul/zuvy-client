@@ -22,7 +22,7 @@ const PreviewForm = ({ params }: { params: any }) => {
     return (
         <>
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode.
                 </h1>
             </div>
@@ -43,14 +43,14 @@ const PreviewForm = ({ params }: { params: any }) => {
 
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 text-left w-1/2">
-                        <h1 className="text-xl font-bold text-secondary-foreground">
+                        <h1 className="text-lg font-bold text-gray-600">
                             {formPreviewContent?.title}
                         </h1>
-                        <p className="text-lg">
+                        <p className="text-lg text-gray-600">
                             {formPreviewContent?.description}
                         </p>
                         <div className="description bg-blue-100 p-5 rounded-lg">
-                            <p className="text-lg">
+                            <p className="text-lg text-gray-700">
                                 Note: Please do not share any personal and
                                 sensitive information in the responses. We will
                                 never ask for such information from you
@@ -65,7 +65,7 @@ const PreviewForm = ({ params }: { params: any }) => {
                                 >
                                     {item.typeId === 1 && (
                                         <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
+                                            <div className="flex flex-row gap-x-2 font-semibold text-gray-600">
                                                 <p>{index + 1}.</p>
                                                 <p>{item.question}</p>
                                             </div>
@@ -76,7 +76,7 @@ const PreviewForm = ({ params }: { params: any }) => {
                                                         item.options
                                                     ).map((optionKey) => (
                                                         <div key={optionKey}>
-                                                            <div className="flex items-center w-full space-x-3 space-y-0">
+                                                            <div className="flex items-center text-gray-600 w-full space-x-3 space-y-0">
                                                                 <RadioGroupItem
                                                                     value={
                                                                         optionKey
@@ -100,7 +100,7 @@ const PreviewForm = ({ params }: { params: any }) => {
 
                                     {item.typeId === 2 && (
                                         <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
+                                            <div className="flex flex-row gap-x-2 font-semibold text-gray-600">
                                                 <p>{index + 1}.</p>
                                                 <p>{item.question}</p>
                                             </div>
@@ -109,7 +109,7 @@ const PreviewForm = ({ params }: { params: any }) => {
                                                     (optionKey) => (
                                                         <div
                                                         key={optionKey} 
-                                                        className="flex">
+                                                        className="flex text-gray-600">
                                                             <Checkbox
                                                                 aria-label={
                                                                     item
@@ -136,12 +136,12 @@ const PreviewForm = ({ params }: { params: any }) => {
 
                                     {item.typeId === 3 && (
                                         <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold mb-3">
+                                            <div className="flex flex-row gap-x-2 font-semibold mb-3 text-gray-600">
                                                 <p>{index + 1}.</p>
                                                 <p>{item.question}</p>
                                             </div>
                                             <Textarea
-                                                className="w-full h-[170px] px-3 py-2 border rounded-md" //w-[550px]
+                                                className="w-full h-[170px] px-3 py-2 border rounded-md text-gray-600" //w-[550px]
                                                 placeholder="Type your answer..."
                                             />
                                         </div>
@@ -149,12 +149,12 @@ const PreviewForm = ({ params }: { params: any }) => {
 
                                     {item.typeId === 4 && (
                                         <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
+                                            <div className="flex flex-row gap-x-2 font-semibold text-gray-600">
                                                 <p>{index + 1}.</p>
                                                 <p>{item.question}</p>
                                             </div>
                                             <div className="flex flex-row gap-x-2">
-                                                <Button variant={'outline'}>
+                                                <Button className="border border-input text-gray-600 bg-background hover:border-[rgb(81,134,114)]">
                                                     <span>Pick a date</span>
                                                     <CalendarIcon className="ml-3 h-4 w-4 opacity-50" />
                                                 </Button>
@@ -164,21 +164,21 @@ const PreviewForm = ({ params }: { params: any }) => {
 
                                     {item.typeId === 5 && (
                                         <div className="mt-6">
-                                            <div className="flex flex-row gap-x-2 font-semibold">
+                                            <div className="flex flex-row gap-x-2 font-semibold text-gray-600">
                                                 <p>{index + 1}.</p>
                                                 <p>{item.question}</p>
                                             </div>
                                             <Input
                                                 placeholder="Time"
                                                 type="time"
-                                                className="w-[100px]"
+                                                className="w-[100px] text-gray-600"
                                             />
                                         </div>
                                     )}
                                 </div>
                             )
                         )}
-                        <Button type="submit" className="mt-7 w-2/5" disabled>
+                        <Button type="submit" className="mt-7 w-2/5 bg-success-dark opacity-75" disabled>
                             Submit Responses
                         </Button>
                     </div>

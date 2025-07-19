@@ -51,7 +51,7 @@ function QuizList({
                                             (ques: any) => {
                                                 return (
                                                    <span
-                                                    className='text-base'
+                                                    className='text-base text-gray-600'
                                                         key={ques}
                                                          dangerouslySetInnerHTML={{
                                                      __html: ellipsis(stripHtmlTags(ques.question), 40),
@@ -104,7 +104,7 @@ function QuizList({
                                             ) : (
                                                 <PlusCircle
                                                     size={20}
-                                                    className="text-secondary cursor-pointer "
+                                                    className="text-[rgb(81,134,114)] cursor-pointer "
                                                     onClick={handleClick}
                                                 />
                                             )}

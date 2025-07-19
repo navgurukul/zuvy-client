@@ -51,6 +51,13 @@ import { ComboboxStudent } from '../../(courseTabs)/students/components/combobox
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 
+interface Student {
+    email: string
+    name: string
+}
+
+type StudentDataState = Student[]
+
 const BatchesInfo = ({
     params,
 }: {
@@ -78,6 +85,9 @@ const BatchesInfo = ({
     const debouncedValue = useDebounce(search, 1000)
     const [loading, setLoading] = useState(true)
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+    const [studentDataTable, setStudentDataTable] = useState<
+        StudentDataState | any
+    >({})
 
     const crumbs = [
         {
@@ -91,10 +101,11 @@ const BatchesInfo = ({
             isLast: false,
         },
         {
-            crumb: `${studentData?.length > 0
+            crumb: `${
+                studentData?.length > 0
                     ? studentData[0].batchName
                     : instructorsInfo.name
-                }`,
+            }`,
             isLast: true,
         },
     ]
@@ -110,7 +121,8 @@ const BatchesInfo = ({
                 const capEnrollmentValue = parseInt(capEnrollment)
                 return (
                     !isNaN(capEnrollmentValue) &&
-                    capEnrollmentValue >= studentsData.length   && capEnrollmentValue<= 100000
+                    capEnrollmentValue >= studentsData.length &&
+                    capEnrollmentValue <= 100000
                 )
             },
             {
@@ -233,7 +245,7 @@ const BatchesInfo = ({
                             setStudentData(response.data.modifiedStudentInfo)
 
                             //   }
-                        } catch (error) { }
+                        } catch (error) {}
                     }
                     fetchBatchesInfo()
                     fetchInstructorInfo(params.batchId)
@@ -296,7 +308,7 @@ const BatchesInfo = ({
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
-            <MaxWidthWrapper className="p-4 ">
+            <MaxWidthWrapper className="p-4 text-gray-600">
                 <div className="flex justify-between">
                     <div className="w-1/2 flex flex-col items-start ">
                         <div className=" flex flex-col ">
@@ -594,11 +606,21 @@ const BatchesInfo = ({
                                                                     placeholder="Cap Enrollment"
                                                                     type="name"
                                                                     {...field}
-                                                                    onChange={(e) => {
+                                                                    onChange={(
+                                                                        e
+                                                                    ) => {
                                                                         // Prevent entering more than 6 digits
-                                                                        const value = e.target.value;
-                                                                        if (value.length <= 6) {
-                                                                            field.onChange(e);
+                                                                        const value =
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        if (
+                                                                            value.length <=
+                                                                            6
+                                                                        ) {
+                                                                            field.onChange(
+                                                                                e
+                                                                            )
                                                                         }
                                                                     }}
                                                                 />
@@ -656,7 +678,7 @@ const BatchesInfo = ({
                             />
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className=" gap-x-2 ">
+                                    <Button className=" gap-x-2 bg-success-dark opacity-75">
                                         <Plus /> Add Students
                                     </Button>
                                 </DialogTrigger>
@@ -667,6 +689,8 @@ const BatchesInfo = ({
                                     batch={true}
                                     batchId={params.batchId}
                                     fetchBatchesData={fetchStudentData}
+                                    setStudentData={setStudentDataTable}
+                                    studentData={studentDataTable}
                                 />
                             </Dialog>
                         </div>
@@ -674,7 +698,7 @@ const BatchesInfo = ({
                 </div>
                 {loading ? (
                     <div className="flex justify-center">
-                        <Spinner className="text-secondary" />
+                        <Spinner className="text-[rgb(81,134,114)]" />
                     </div>
                 ) : (
                     <div>

@@ -94,10 +94,10 @@ export function DataTablePagination<TData>({
 
     return (
         <div className="flex items-center justify-end mt-2 px-2 gap-x-2">
-            <p className="text-sm font-medium">Items Per Page</p>
+            <p className="text-sm text-gray-600 font-medium">Items Per Page</p>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline">
+                    <Button className='border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]'>
                         {position} <ChevronDown className="ml-2" size={15} />
                     </Button>
                 </DropdownMenuTrigger>
@@ -122,7 +122,7 @@ export function DataTablePagination<TData>({
                 </DropdownMenuContent>
             </DropdownMenu>
             <div className="flex items-center space-x-6 lg:space-x-8">
-                <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                <div className="flex w-[100px] items-center text-gray-600 justify-center text-sm font-medium">
                     Page {currentPage} of {pages}
                 </div>
                 <div className="flex items-center space-x-2">

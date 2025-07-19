@@ -41,6 +41,7 @@ const QuizModal = ({
                 <div className="flex flex-col gap-2 w-full ">
                     <div className="font-semibold flex justify-between w-full ">
                         <span
+                            className='text-gray-600 text-[16px]'
                             dangerouslySetInnerHTML={{
                                 __html: ellipsis(
                                     data?.quizVariants[0]?.question,

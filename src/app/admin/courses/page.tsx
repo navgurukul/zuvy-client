@@ -61,6 +61,7 @@ const Courses: React.FC = () => {
     const [newCourseName, setNewCourseName] = useState<string>('')
     const [newCourseDescription, setNewCourseDescription] = useState<string>('')
     const [hasAccess, setHasAccess] = useState<boolean>(true)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // func
     // const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
@@ -127,6 +128,7 @@ const Courses: React.FC = () => {
         } else {
             try {
                 const response = await api.post('/bootcamp', courseData)
+                const newCourseId = response.data?.bootcamp?.id
                 
                 toast.success({
                     title: response.data.status,
@@ -136,10 +138,15 @@ const Courses: React.FC = () => {
                 setNewCourseName('')
                 setNewCourseDescription('')
                 getBootcamp(offset)
+
+                if (newCourseId) {
+                handleCardClick(newCourseId) 
+            }
             } catch (error: any) {
                 toast.error({
                     title: error?.data?.status || 'Error',
-                    description: error?.data?.message || 'Failed to create course',
+                    description:
+                        error?.data?.message || 'Failed to create course',
                 })
             }
         }
@@ -178,7 +185,7 @@ const Courses: React.FC = () => {
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+                    <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
                 <div>
@@ -196,7 +203,7 @@ const Courses: React.FC = () => {
                                     Your calendar access has expired. Please log
                                     in again to gain access to the courses
                                 </AlertDescription>
-                                <Button onClick={calendarAccess}>
+                                <Button onClick={calendarAccess} className='bg-success-dark opacity-75 font-semibold'>
                                     Give access
                                 </Button>
                             </Alert>
@@ -210,9 +217,18 @@ const Courses: React.FC = () => {
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />
-                            <Dialog>
+                            <Dialog
+                                open={isDialogOpen}
+                                onOpenChange={(open) => {
+                                    if (!open) {
+                                        setNewCourseName('')
+                                        setNewCourseDescription('')
+                                    }
+                                    setIsDialogOpen(open)
+                                }}
+                            >
                                 <DialogTrigger asChild>
-                                    <Button className="text-white bg-secondary lg:max-w-[150px] w-full mt-5">
+                                    <Button className="text-white bg-success-dark opacity-75 font-semibold lg:max-w-[150px] w-full mt-5">
                                         <Plus className="w-5 mr-2" />
                                         <p>New Course</p>
                                     </Button>
@@ -228,6 +244,7 @@ const Courses: React.FC = () => {
                                         handleNewCourseDescriptionChange
                                     }
                                     handleCreateCourse={handleCreateCourse}
+                                    isDialogOpen={isDialogOpen}
                                 />
                             </Dialog>
                         </div>
@@ -289,6 +306,9 @@ const Courses: React.FC = () => {
                                                         }
                                                         handleCreateCourse={
                                                             handleCreateCourse
+                                                        }
+                                                        isDialogOpen={
+                                                            isDialogOpen
                                                         }
                                                     />
                                                 </Dialog>
@@ -426,4 +446,3 @@ const Courses: React.FC = () => {
 }
 
 export default Courses
-

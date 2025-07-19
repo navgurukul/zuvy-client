@@ -116,7 +116,7 @@ export const columns: ColumnDef<Task>[] = [
                     >
                         <Link
                             href={`/admin/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
-                            className="max-w-[500px] text-secondary font-medium flex items-center"
+                            className="max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center"
                         >
                             <FileText size={16} />
                             <p className="text-[15px]"> View Report</p>

@@ -13,6 +13,7 @@ export interface newCourseDialogProps {
         event: React.ChangeEvent<HTMLTextAreaElement>
     ) => void
     handleCreateCourse: (courseData: CourseData) => void
+     isDialogOpen:boolean
 }
 // types.ts
 export interface UploadImagesResponse {

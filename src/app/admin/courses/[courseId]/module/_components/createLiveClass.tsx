@@ -118,11 +118,14 @@ const formSchema = z
             'Total Classes must be at least equal to the number of selected days of week.',
         path: ['totalClasses'],
     })
-    type CreateSessionDialogProps = {
-        fetchingChapters: () => void;
-        onClose: () => void; // <-- Add this
-      };
-const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapters, onClose}) => {
+type CreateSessionDialogProps = {
+    fetchingChapters: () => void
+    onClose: () => void // <-- Add this
+}
+const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
+    fetchingChapters,
+    onClose,
+}) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
@@ -175,7 +178,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
             endTime: '',
             batch: '',
             daysOfWeek: [],
-            totalClasses: 0,
+            totalClasses: 1,
             // modulesId: 0,
         },
         mode: 'onChange',
@@ -281,17 +284,20 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
             daysOfWeek: daysWeek,
             totalClasses: values.totalClasses,
         }
-        console.log(transformedData)
 
         try {
             await api.post('/classes', transformedData)
-            
-            const chaptersRes = await api.get(`/Content/allChaptersOfModule/${params.moduleId}`)
+
+            const chaptersRes = await api.get(
+                `/Content/allChaptersOfModule/${params.moduleId}`
+            )
             const chapters = chaptersRes?.data?.chapterWithTopic || []
-            
+
             const latestChapter = chapters[chapters.length - 1]
             if (latestChapter) {
-                router.push(`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`)
+                router.push(
+                    `/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
+                )
             }
             toast.success({
                 title: 'Success',
@@ -328,7 +334,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
 
     return (
         <div className="w-full ">
-            <div className="text-lg text-left font-semibold mb-4">
+            <div className="text-lg text-left font-semibold mb-4 text-gray-600">
                 Live Classes Chapter
             </div>
 
@@ -341,7 +347,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                         control={form.control}
                         name="sessionTitle"
                         render={({ field }) => (
-                            <FormItem className="text-left">
+                            <FormItem className="text-left text-gray-600">
                                 <FormLabel>
                                     Session Title
                                     <span className="text-red-500">*</span>
@@ -363,7 +369,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             control={form.control}
                             name="startDate"
                             render={({ field }) => (
-                                <FormItem className="flex flex-col text-left">
+                                <FormItem className="flex flex-col text-left text-gray-600">
                                     <FormLabel className="p-0 my-2">
                                         Classes start date
                                         <span className="text-red-500">*</span>
@@ -375,8 +381,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={'outline'}
-                                                    className={`w-full text-left font-normal ${
+                                                    className={`w-full text-left font-normal text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)] ${
                                                         !field.value &&
                                                         'text-muted-foreground'
                                                     }`}
@@ -387,12 +392,12 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                                               'EE MMM dd yyyy'
                                                           )
                                                         : 'Pick a date'}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                                                 </Button>
                                             </FormControl>
                                         </DialogTrigger>
 
-                                        <DialogContent className="w-[35%] ">
+                                        <DialogContent className="w-auto">
                                             <Calendar
                                                 mode="single"
                                                 selected={
@@ -425,7 +430,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                 control={form.control}
                                 name="startTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left ">
+                                    <FormItem className="flex flex-col text-left text-gray-600">
                                         <FormLabel className="p-0 my-2">
                                             Start Time
                                             <span className="text-red-500">
@@ -471,7 +476,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                 control={form.control}
                                 name="endTime"
                                 render={({ field }) => (
-                                    <FormItem className="flex flex-col text-left ">
+                                    <FormItem className="flex flex-col text-left text-gray-600">
                                         <FormLabel className="p-0 my-2">
                                             End Time
                                             <span className="text-red-500">
@@ -496,7 +501,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             control={form.control}
                             name="batch"
                             render={({ field }) => (
-                                <FormItem className="text-left">
+                                <FormItem className="text-left text-gray-600">
                                     <FormLabel>
                                         Batches
                                         <span className="text-red-500">*</span>
@@ -505,11 +510,10 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant="outline"
                                                     role="combobox"
                                                     aria-expanded={formIsOpen}
                                                     className={cn(
-                                                        'w-full justify-between',
+                                                        'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                         !field.value &&
                                                             'text-muted-foreground'
                                                     )}
@@ -580,7 +584,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             control={form.control}
                             name="daysOfWeek"
                             render={({ field }) => (
-                                <FormItem className="text-left">
+                                <FormItem className="text-left text-gray-600">
                                     <FormLabel>
                                         Days of Week
                                         <span className="text-red-500">*</span>
@@ -589,11 +593,10 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant="outline"
                                                     role="combobox"
                                                     aria-expanded={formIsOpen}
                                                     className={cn(
-                                                        'w-full justify-between',
+                                                        'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                         field.value.length ===
                                                             0 &&
                                                             'text-muted-foreground'
@@ -681,11 +684,11 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                             )}
                         />
                     </div>
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="totalClasses"
                         render={({ field }) => (
-                            <FormItem className="text-left flex flex-col">
+                            <FormItem className="text-left flex flex-col text-gray-600">
                                 <FormLabel className="p-0 my-2">
                                     Total Classes
                                     <span className="text-red-500">*</span>
@@ -705,8 +708,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
-                     
+                    /> */}
+
                     <div className="flex justify-end">
                         {isLoading ? (
                             <Button disabled>
@@ -716,9 +719,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                         ) : (
                             <Button
                                 disabled={isSubmitDisabled}
-                                variant={'secondary'}
                                 onClick={form.handleSubmit(onSubmit)}
-                                className="w-1/3 mt-3"
+                                className="w-1/3 mt-3 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border hover:bg-[rgb(81,134,114)] hover:text-white"
                             >
                                 Create Session
                             </Button>

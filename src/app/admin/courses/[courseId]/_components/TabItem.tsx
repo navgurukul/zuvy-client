@@ -16,7 +16,7 @@ function TabItem({ href, title }: { href: string; title: string }) {
       href={href}
       className={cn(
         "mx-1 px-3 py-1.5 text-sm font-medium rounded-sm",
-        isActive && "bg-white text-foreground"
+        isActive && "bg-white text-gray-700"
       )}
     >
       {title}

@@ -21,7 +21,7 @@ const FormComponent = (props: Props) => {
     return (
         <div className="lg:flex h-[220px] w-full shadow-[0_4px_4px_rgb(0,0,0,0.12)] my-5 rounded-md p-4">
             <div className="flex flex-col w-full justify-between py-2 lg:mx-2">
-                <h1 className="text-md text-start font-semibold text-gray-800 dark:text-white">
+                <h1 className="text-lg text-start font-semibold text-gray-800 dark:text-white">
                     {props.data.title}
                 </h1>
                 <p className="text-md text-start">{props.moduleName}</p>
@@ -31,11 +31,11 @@ const FormComponent = (props: Props) => {
                         <div
                             className={`w-2 h-2 rounded-full flex items-center justify-center cursor-pointer ${color}`}
                         ></div>
-                        <h3>
+                        <h3 className='text-lg'>
                             {props.data.submitStudents}/{props.totalStudents}
                         </h3>
 
-                        <h3 className="text-gray-400 font-semibold ">
+                        <h3 className="text-gray-400 text-lg font-semibold ">
                             Submissions
                         </h3>
                     </div>
@@ -51,7 +51,7 @@ const FormComponent = (props: Props) => {
                             }}
                         >
                             <div className="flex items-center text-secondary hover:bg-popover">
-                                <Button variant="ghost">
+                                <Button variant="ghost" className='text-green-700'>
                                     View Submissions
                                     <ChevronRight size={20} />
                                 </Button>
@@ -60,6 +60,7 @@ const FormComponent = (props: Props) => {
                     ) : (
                         <div className="flex items-center cursor-no-drop text-secondary hover:bg-popover">
                             <Button
+                                className='text-green-700'
                                 variant="ghost"
                                 disabled={props.data.submitStudents === 0}
                             >

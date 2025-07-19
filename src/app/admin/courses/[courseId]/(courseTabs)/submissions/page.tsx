@@ -19,8 +19,14 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import VideoSubmission from './components/VideoSubmission'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 
 const Page = ({ params }: { params: any }) => {
+    const router = useRouter()
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
+    //     params.courseId
+    // )
     const [activeTab, setActiveTab] = useState('practice')
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
@@ -71,6 +77,7 @@ const Page = ({ params }: { params: any }) => {
     }, [params.courseId, debouncedSearch])
 
     const getFormData = useCallback(async () => {
+        // if(isCourseDeleted) return
         try {
             const res = await api.get(
                 `/submission/submissionsOfForms/${params.courseId}`
@@ -78,10 +85,12 @@ const Page = ({ params }: { params: any }) => {
             setFormData(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
+            // if (!isCourseDeleted) {
             toast.error({
                 title: 'Error',
-                description: 'Error fetching form data:',
+                description: 'Error fetching form data',
             })
+            // }
         }
     }, [params.courseId])
 
@@ -90,7 +99,13 @@ const Page = ({ params }: { params: any }) => {
             getProjectsData()
             getFormData()
         }
-    }, [params.courseId, getProjectsData, getFormData, debouncedSearch])
+    }, [
+        params.courseId,
+        // isCourseDeleted,
+        getProjectsData,
+        getFormData,
+        debouncedSearch,
+    ])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -100,13 +115,43 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
+    // if (loadingCourseCheck) {
+    //     return (
+    //         <div className="flex justify-center items-center h-full mt-20">
+    //             <Spinner className="text-secondary" />
+    //         </div>
+    //     )
+    // }
+
+    // if (isCourseDeleted) {
+    //     return (
+    //         <div className="flex flex-col justify-center items-center h-full mt-20">
+    //             <Image
+    //                 src="/images/undraw_select-option_6wly.svg"
+    //                 width={350}
+    //                 height={350}
+    //                 alt="Deleted"
+    //             />
+    //             <p className="text-lg text-red-600 mt-4">
+    //                 This course has been deleted !
+    //             </p>
+    //             <Button
+    //                 onClick={() => router.push('/admin/courses')}
+    //                 className="mt-6 bg-secondary"
+    //             >
+    //                 Back to Courses
+    //             </Button>
+    //         </div>
+    //     )
+    // }
+
     return (
         <div className="">
             {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
-                            <Spinner className="text-secondary" />
+                            <Spinner className="text-[rgb(81,134,114)]" />
                         </div>
                     </div>
                 </div>
@@ -116,7 +161,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('practice')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'practice'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -126,7 +171,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('assessments')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'assessments'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -136,7 +181,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('projects')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'projects'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -146,7 +191,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('form')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'form'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -156,7 +201,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('assignments')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'assignments'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -166,7 +211,7 @@ const Page = ({ params }: { params: any }) => {
                         onClick={() => handleTabChange('video')}
                         className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
                             activeTab === 'video'
-                                ? 'bg-secondary  text-white'
+                                ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
                         }`}
                     >
@@ -315,7 +360,7 @@ const Page = ({ params }: { params: any }) => {
                                 return (
                                     <div
                                         key={item.id}
-                                        className="relative lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4"
+                                        className="relative lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4 text-gray-600"
                                     >
                                         {/* Download Icon positioned at the top right corner of the card */}
                                         <button
@@ -339,7 +384,7 @@ const Page = ({ params }: { params: any }) => {
                                         </button>
 
                                         <div className="flex flex-col w-full">
-                                            <h1 className="font-semibold text-start">
+                                            <h1 className="font-semibold text-start text-sm">
                                                 {item.projectData[0].title}
                                             </h1>
                                             <div className="flex items-center gap-2">
@@ -358,11 +403,11 @@ const Page = ({ params }: { params: any }) => {
                                                 >
                                                     <Button
                                                         variant={'ghost'}
-                                                        className="text-secondary text-md"
+                                                        className="text-green-700 text-sm"
                                                     >
                                                         View Submission{' '}
                                                         <ChevronRight
-                                                            className="text-secondary"
+                                                            className="text-green-700"
                                                             size={17}
                                                         />
                                                     </Button>
@@ -383,9 +428,9 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     ) : (
                         <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                            <h1 className="text-center font-semibold ">
+                            <h5 className="text-center font-semibold">
                                 No Projects Found
-                            </h1>
+                            </h5>
                             <Image
                                 src="/emptyStates/curriculum.svg"
                                 alt="No Video Found"
@@ -413,9 +458,9 @@ const Page = ({ params }: { params: any }) => {
                             })
                         ) : (
                             <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                                <h1 className="text-center font-semibold ">
+                                <h5 className="text-center font-semibold">
                                     No Form Found
-                                </h1>
+                                </h5>
                                 <Image
                                     src="/emptyStates/curriculum.svg"
                                     alt="No Video Found"

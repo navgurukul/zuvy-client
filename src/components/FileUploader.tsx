@@ -9,7 +9,6 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, allowedTyp
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  
   const handleFileChange = (event:any) => {
     const files = event.target.files;
     if (files.length > 0) {

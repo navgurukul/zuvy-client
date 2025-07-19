@@ -18,8 +18,8 @@ export default function MultiSelector({
         <>
             <Popover>
                 <PopoverTrigger asChild>
-                    <button className="flex w-full items-center justify-between rounded-md border border-secondary px-4 py-2 text-left focus:outline-none">
-                        <span className="truncate text-secondary">
+                    <button className="flex w-full items-center text-lg justify-between rounded-md border border-[rgb(81,134,114)] px-4 py-2 text-left focus:outline-none">
+                        <span className="truncate text-[rgb(81,134,114)]">
                             {/* {selectedOptions.length === 1 &&
                             (selectedOptions[0].value == -1 ||
                                 selectedOptions[0].value == 'None')
@@ -33,10 +33,10 @@ export default function MultiSelector({
                                     : `${selectedCount} selected`
                                 : 'Select options'}
                         </span>
-                        <ChevronDown className="ml-2 h-5 w-5 text-secondary" />
+                        <ChevronDown className="ml-2 h-5 w-5 text-[rgb(81,134,114)]" />
                     </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full lg:w-[250px] p-4 border border-secondary text-secondary">
+                <PopoverContent className="w-full lg:w-[250px] p-4 border border-[rgb(81,134,114)] text-[rgb(81,134,114)]">
                     <ScrollArea
                         className={`${
                             (type === 'Topic' || type === 'Topics') &&
@@ -60,7 +60,7 @@ export default function MultiSelector({
                                         (selected: Option) =>
                                             selected.value === option.value
                                     ) && (
-                                        <Check className="h-5 w-5 text-secondary" />
+                                        <Check className="h-5 w-5 text-[rgb(81,134,114)]" />
                                     )}
                                 </div>
                             ))}

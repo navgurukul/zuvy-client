@@ -116,7 +116,7 @@ const Page = ({ params }: { params: paramsType }) => {
     return (
         <>
             <BreadcrumbComponent crumbs={crumbs} />
-            <MaxWidthWrapper className="flex flex-col gap-y-4">
+            <MaxWidthWrapper className="flex flex-col gap-y-4 text-gray-600">
                 <div className="flex  items-center gap-x-3">
                     <div className="flex flex-col gap-x-2">
                         <div className="flex gap-x-4 my-4 ">
@@ -137,7 +137,7 @@ const Page = ({ params }: { params: paramsType }) => {
 
                 <div>
                     <div>
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        <h1 className="text-left text-[15px] font-semibold flex gap-x-3 m-3">
                             <span>Title:-</span>
                             <span>
                                 {
@@ -146,7 +146,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                 }
                             </span>
                         </h1>
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        <h1 className="text-left text-[15px] font-semibold flex gap-x-3 m-3">
                             <span>Description:-</span>
                             <span>
                                 {
@@ -155,7 +155,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                 }
                             </span>
                         </h1>
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        <h1 className="text-left text-[15px] font-semibold flex gap-x-3 m-3">
                             <span>Difficulty:-</span>
                             <span
                                 className={cn(
@@ -172,7 +172,7 @@ const Page = ({ params }: { params: paramsType }) => {
                                 }
                             </span>
                         </h1>
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        <h1 className="text-left text-[15px] font-semibold flex gap-x-3 m-3">
                             <span>Constraints:-</span>
                             <span>
                                 {

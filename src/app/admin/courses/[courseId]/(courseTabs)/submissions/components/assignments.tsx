@@ -174,7 +174,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
 
                                                     {/* Content */}
                                                     <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                        <h1 className="w-1/2 text-start">
+                                                        <h1 className="w-1/2 text-start text-sm">
                                                             {moduleData.title}
                                                         </h1>
                                                         <h2 className="w-1/2 flex mt-2">
@@ -194,7 +194,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                                                                         }`}
                                                                     ></div>
                                                                 </div>
-                                                                <p>
+                                                                <p className='text-sm'>
                                                                     {
                                                                         moduleData.submitStudents
                                                                     }
@@ -203,7 +203,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                                                                         totalStudents
                                                                     }
                                                                 </p>
-                                                                <h3 className="text-gray-400 font-semibold cursor-not-allowed">
+                                                                <h3 className="text-gray-400 text-sm font-semibold cursor-not-allowed">
                                                                     Submissions
                                                                 </h3>
                                                             </div>
@@ -215,7 +215,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                                                                 variant={
                                                                     'secondary'
                                                                 }
-                                                                className="flex items-center border-none hover:text-secondary hover:bg-popover"
+                                                                className="flex items-center text-green-700 border-none hover:text-green-700 hover:bg-popover"
                                                             >
                                                                 <Link
                                                                     href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
@@ -239,9 +239,9 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                 })
             ) : (
                 <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h1 className="text-center font-semibold ">
+                    <h5 className="text-center font-semibold">
                         No Assignment Found
-                    </h1>
+                    </h5>
                     <Image
                         src="/emptyStates/curriculum.svg"
                         alt="No Assessment Found"

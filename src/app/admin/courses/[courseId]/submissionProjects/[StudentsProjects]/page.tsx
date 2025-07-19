@@ -84,7 +84,7 @@ const Page = ({ params }: any) => {
             <MaxWidthWrapper className="p-4">
                 <div className="flex flex-col gap-y-4">
                     {data ? (
-                        <h1 className="text-start text-xl font-bold capitalize text-primary">
+                        <h1 className="text-start text-xl font-bold capitalize text-gray-600">
                             {data?.projectData[0].title}
                         </h1>
                     ) : (
