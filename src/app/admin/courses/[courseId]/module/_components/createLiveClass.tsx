@@ -384,13 +384,13 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                     className={`w-full text-left font-normal text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)] ${
                                                         !field.value &&
                                                         'text-muted-foreground'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {field.value
                                                         ? format(
-                                                              field.value,
-                                                              'EE MMM dd yyyy'
-                                                          )
+                                                            field.value,
+                                                            'EE MMM dd yyyy'
+                                                        )
                                                         : 'Pick a date'}
                                                     <CalendarIcon className="ml-2 h-4 w-4 opacity-50" />
                                                 </Button>
@@ -456,9 +456,9 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                             'endTime'
                                                         ) &&
                                                         e.target.value >
-                                                            form.getValues(
-                                                                'endTime'
-                                                            )
+                                                        form.getValues(
+                                                            'endTime'
+                                                        )
                                                     ) {
                                                         form.setValue(
                                                             'endTime',
@@ -514,17 +514,19 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                     aria-expanded={formIsOpen}
                                                     className={cn(
                                                         'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
-                                                        !field.value &&
-                                                            'text-muted-foreground'
+                                                        !field.value && 
+                                                        'text-muted-foreground'
                                                     )}
                                                 >
-                                                    {field.value
-                                                        ? bootcampData.find(
-                                                              (bootcamp: any) =>
-                                                                  bootcamp.value ===
-                                                                  field.value
-                                                          )?.label
-                                                        : 'Select batch...'}
+                                                    <span className="truncate text-left max-w-[90%]">
+                                                        {field.value
+                                                            ? bootcampData.find(
+                                                                (bootcamp: any) =>
+                                                                     bootcamp.value === 
+                                                                field.value
+                                                            )?.label
+                                                            : 'Select batch...'}
+                                                    </span>
                                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                 </Button>
                                             </FormControl>
@@ -548,27 +550,31 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                                     }
                                                                     onSelect={() => {
                                                                         form.setValue(
-                                                                            'batch',
+                                                                            'batch', 
                                                                             bootcamp.value
                                                                         )
                                                                         form.clearErrors(
                                                                             'batch'
                                                                         )
                                                                     }}
+                                                                    className="text-left"
                                                                 >
                                                                     <Check
                                                                         className={cn(
                                                                             'mr-2 h-4 w-4',
-                                                                            bootcamp.value ===
-                                                                                field.value
+                                                                            bootcamp.value === 
+                                                                            field.value
                                                                                 ? 'opacity-100'
                                                                                 : 'opacity-0'
                                                                         )}
                                                                     />
-                                                                    {
-                                                                        bootcamp.label
-                                                                    }
+                                                                    <span className="block max-w-[90%] break-words text-left">
+                                                                        {
+                                                                            bootcamp.label
+                                                                        }
+                                                                    </span>
                                                                 </CommandItem>
+
                                                             )
                                                         )}
                                                     </CommandGroup>
@@ -598,8 +604,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                     className={cn(
                                                         'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                         field.value.length ===
-                                                            0 &&
-                                                            'text-muted-foreground'
+                                                        0 &&
+                                                        'text-muted-foreground'
                                                     )}
                                                 >
                                                     {field.value.length > 0 ? (
@@ -611,8 +617,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                                 .length > 2 &&
                                                                 ` + ${
                                                                     field.value
-                                                                        .length -
-                                                                    2
+                                                                    .length -
+                                                                2
                                                                 } more`}
                                                         </>
                                                     ) : (
@@ -642,16 +648,16 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                                             day.value
                                                                         )
                                                                             ? field.value.filter(
-                                                                                  (
-                                                                                      value
-                                                                                  ) =>
-                                                                                      value !==
-                                                                                      day.value
-                                                                              )
+                                                                                (
+                                                                                    value
+                                                                                ) =>
+                                                                                    value !==
+                                                                                    day.value
+                                                                            )
                                                                             : [
-                                                                                  ...field.value,
-                                                                                  day.value,
-                                                                              ]
+                                                                                ...field.value,
+                                                                                day.value,
+                                                                            ]
                                                                     form.setValue(
                                                                         'daysOfWeek',
                                                                         newValue
