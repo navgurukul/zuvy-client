@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef } from 'react'
-import { useCommands, useActive } from '@remirror/react'
+import { useCommands, useActive, useRemirrorContext } from '@remirror/react'
 import {
     Camera,
     Code,
@@ -36,6 +36,8 @@ export const Toolbar = () => {
         focus,
     } = useCommands()
     const active = useActive()
+
+    const { manager } = useRemirrorContext()
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const { insertImage } = useCommands()
@@ -88,6 +90,31 @@ export const Toolbar = () => {
         if (fileInputRef.current) {
             fileInputRef.current.value = ''
         }
+    }
+
+    const handleCodeBlock = () => {
+        const { view } = manager
+        const { state, dispatch } = view
+        const { selection } = state
+        
+        if (active.codeBlock()) {
+            toggleCodeBlock()
+            return
+        }
+        
+        const selectedText = state.doc.textBetween(selection.from, selection.to, '\n')
+        
+        // Create code block with selected text
+        const codeBlock = state.schema.nodes.codeBlock.create(
+            { language: 'javascript' },
+            selectedText ? state.schema.text(selectedText) : undefined
+        )
+        
+        // Replace selection
+        const tr = state.tr.replaceSelectionWith(codeBlock)
+        dispatch(tr)
+        
+        focus()
     }
 
     return (
@@ -233,7 +260,7 @@ export const Toolbar = () => {
             </button>
 
             <button
-                onClick={() => toggleCodeBlock()}
+                onClick={handleCodeBlock}
                 className={`p-2 rounded ${
                     active.codeBlock() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
