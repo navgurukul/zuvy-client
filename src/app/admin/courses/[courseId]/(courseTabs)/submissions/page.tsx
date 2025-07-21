@@ -681,7 +681,7 @@ const Page = ({ params }: { params: any }) => {
                                         </button>
 
                                         <div className="flex flex-col w-full">
-                                            <h1 className="font-semibold text-start test-sm">
+                                            <h1 className="font-semibold text-start text-[1.5rem]">
                                                 {item.projectData[0].title || 'Untitled Project'}
                                             </h1>
                                             <div className="flex items-center gap-2">
@@ -724,7 +724,7 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     ) : (
                         <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                            <h1 className="text-center font-semibold">
+                            <h1 className="text-center font-semibold text-[1.125rem]">
                                 {appliedSearch ? `No Projects Found for "${appliedSearch}"` : 'No Projects Found'}
                             </h1>
                             <Image
@@ -762,7 +762,7 @@ const Page = ({ params }: { params: any }) => {
                             })
                         ) : (
                             <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                                <h1 className="text-center font-semibold">
+                                <h1 className="text-center font-semibold text-[1.125rem]">
                                     {appliedSearch ? `No Forms Found for "${appliedSearch}"` : 'No Forms Found'}
                                 </h1>
                                 <Image
