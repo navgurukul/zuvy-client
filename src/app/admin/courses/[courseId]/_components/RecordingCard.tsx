@@ -82,6 +82,17 @@ function RecordingCard({
 
     const presentStudents = displayAttendance?.studentsInfo?.present
 
+    const isWithin12Hours = () => {
+        if (!classData.endTime) return false
+        const classEndTime = new Date(classData.endTime)
+        const now = new Date()
+        const timeDiff = now.getTime() - classEndTime.getTime()
+        const hoursDiff = timeDiff / (1000 * 60 * 60)
+        return hoursDiff < 12
+    }
+
+    const within12Hours = isWithin12Hours()
+
     const handleViewRecording = () => {
         if (isVideo) {
             if (
@@ -174,120 +185,152 @@ function RecordingCard({
                         <p className="mr-1 text-lg">View Recording</p>
                         <ChevronRight size={15} />
                     </div>
-                ) : (
-                    <Sheet>
-                        <div className="flex items-center">
-                            <TooltipProvider>
-                                <SheetTrigger
-                                    disabled={
-                                        isVideo === 'not found' ||
-                                        presentStudents === 0
-                                    }
-                                >
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <div className="inline-block">
-                                                <Button
-                                                    variant="ghost"
-                                                    className="flex gap-2 items-center"
-                                                    onClick={handleClassDetails}
-                                                    disabled={
-                                                        isVideo ===
-                                                            'not found' ||
-                                                        presentStudents === 0
-                                                    }
-                                                >
-                                                    Class Details
-                                                </Button>
-                                            </div>
-                                        </TooltipTrigger>
-                                        {(isVideo === 'not found' ||
-                                            presentStudents === 0) && (
-                                            <TooltipContent className="font-semibold">
-                                                Recording is not available and
-                                                present students are 0
-                                            </TooltipContent>
-                                        )}
-                                    </Tooltip>
-                                </SheetTrigger>
-                            </TooltipProvider>
-                            <ChevronRight size={15} />
-                        </div>
-                        <SheetContent>
-                            <SheetHeader>
-                                <SheetTitle>
-                                    <h1 className="mb-10 text-lg text-start">
-                                        {classData.title}
-                                    </h1>
-                                </SheetTitle>
-                                <SheetDescription>
-                                    <h2 className="mb-3 font-bold text-[15px]">
-                                        Session Recording
-                                    </h2>
-                                    {isVideo ? (
-                                        <div
-                                            className="plyr__video-embed"
-                                            id="player"
-                                        >
-                                            <iframe
-                                                src={embedUrl}
-                                                allowFullScreen
-                                                allowTransparency
-                                                allow="autoplay"
-                                            ></iframe>
-                                        </div>
-                                    ) : (
-                                        <p className="mb-5">
-                                            Video is under processing...Please
-                                            check after some time
-                                        </p>
-                                    )}
-                                    <p className="text-md text-start">
-                                        {classData.description}
-                                    </p>
-                                    <h3 className="mb-3 font-bold mt-3 text-[15px]">
-                                        Attendance Information
-                                    </h3>
-                                    {displayAttendance ? (
-                                        <div className="flex mb-5">
-                                            <div className="flex-grow basis-0">
-                                                <p>Total Students</p>
-                                                <p>
-                                                    {
-                                                        displayAttendance
-                                                            ?.studentsInfo
-                                                            ?.total_students
-                                                    }
-                                                </p>
-                                            </div>
-                                            <div className="flex-grow basis-0">
-                                                <p>Present</p>
-                                                <p className="text-secondary">
-                                                    {presentStudents}
-                                                </p>
-                                            </div>
-                                            <div className="flex-grow basis-0">
-                                                <p>Absent</p>
-                                                <p className="text-destructive">
-                                                    {absentStudents}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <p className="my-5">Loading...</p>
-                                    )}
-                                    <Button
-                                        className="flex gap-2 items-center"
-                                        onClick={handleAttendance}
-                                        disabled={presentStudents === 0}
+                ) : (<Sheet>
+                    <div className={`flex items-center ${isVideo === 'not found' ||
+                        presentStudents === 0 ||
+                        within12Hours
+                        ? 'cursor-not-allowed'
+                        : 'cursor-pointer'
+                        }`}>
+                        <TooltipProvider>                                
+                            <SheetTrigger
+                            disabled={
+                                isVideo === 'not found' ||
+                                presentStudents === 0 ||
+                                within12Hours
+                            }
+                            className={
+                                isVideo === 'not found' ||
+                                    presentStudents === 0 ||
+                                    within12Hours
+                                    ? 'cursor-not-allowed'
+                                    : 'cursor-pointer'
+                            }
+                        >
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="inline-block">                                                
+                                        <Button
+                                        variant="ghost"
+                                        className={`flex gap-2 items-center ${isVideo === 'not found' ||
+                                            presentStudents === 0 ||
+                                            within12Hours
+                                            ? 'cursor-not-allowed'
+                                            : ''
+                                            }`}
+                                        onClick={handleClassDetails}
+                                        disabled={
+                                            isVideo ===
+                                            'not found' ||
+                                            presentStudents === 0 ||
+                                            within12Hours
+                                        }
                                     >
-                                        <p>Download Attendance Data</p>
-                                        <Download size={20} />
+                                        Class Details
                                     </Button>
-                                </SheetDescription>
-                            </SheetHeader>
-                        </SheetContent>
-                    </Sheet>
+                                    </div>
+                                </TooltipTrigger>
+                                {(isVideo === 'not found' ||
+                                    presentStudents === 0) && (
+                                        <TooltipContent className="font-semibold">
+                                            Recording is not available and
+                                            present students are 0
+                                        </TooltipContent>
+                                    )}
+                                {within12Hours && (
+                                    <TooltipContent className="font-semibold">
+                                        Class details will be updated 12 hours after the class ends.
+                                    </TooltipContent>
+                                )}
+                            </Tooltip>
+                        </SheetTrigger>                            
+                        </TooltipProvider>
+                        <ChevronRight
+                            size={15}
+                            className={
+                                isVideo === 'not found' ||
+                                    presentStudents === 0 ||
+                                    within12Hours
+                                    ? 'text-muted-foreground opacity-50'
+                                    : ''
+                            }
+                        />
+                    </div>
+                    <SheetContent>
+                        <SheetHeader>
+                            <SheetTitle>
+                                <h1 className="mb-10 text-lg text-start">
+                                    {classData.title}
+                                </h1>
+                            </SheetTitle>
+                            <SheetDescription>
+                                <h2 className="mb-3 font-bold text-[15px]">
+                                    Session Recording
+                                </h2>
+                                {isVideo ? (
+                                    <div
+                                        className="plyr__video-embed"
+                                        id="player"
+                                    >
+                                        <iframe
+                                            src={embedUrl}
+                                            allowFullScreen
+                                            allowTransparency
+                                            allow="autoplay"
+                                        ></iframe>
+                                    </div>
+                                ) : (
+                                    <p className="mb-5">
+                                        Video is under processing...Please
+                                        check after some time
+                                    </p>
+                                )}
+                                <p className="text-md text-start">
+                                    {classData.description}
+                                </p>
+                                <h3 className="mb-3 font-bold mt-3 text-[15px]">
+                                    Attendance Information
+                                </h3>
+                                {displayAttendance ? (
+                                    <div className="flex mb-5">
+                                        <div className="flex-grow basis-0">
+                                            <p>Total Students</p>
+                                            <p>
+                                                {
+                                                    displayAttendance
+                                                        ?.studentsInfo
+                                                        ?.total_students
+                                                }
+                                            </p>
+                                        </div>
+                                        <div className="flex-grow basis-0">
+                                            <p>Present</p>
+                                            <p className="text-secondary">
+                                                {presentStudents}
+                                            </p>
+                                        </div>
+                                        <div className="flex-grow basis-0">
+                                            <p>Absent</p>
+                                            <p className="text-destructive">
+                                                {absentStudents}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <p className="my-5">Loading...</p>
+                                )}
+                                <Button
+                                    className="flex gap-2 items-center"
+                                    onClick={handleAttendance}
+                                    disabled={presentStudents === 0}
+                                >
+                                    <p>Download Attendance Data</p>
+                                    <Download size={20} />
+                                </Button>
+                            </SheetDescription>
+                        </SheetHeader>
+                    </SheetContent>
+                </Sheet>
                 )}
             </div>
         </Card>
