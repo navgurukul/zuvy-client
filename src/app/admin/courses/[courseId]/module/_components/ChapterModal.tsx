@@ -48,22 +48,6 @@ function ChapterModal({
     const [liveDialogOpen, setLiveDialogOpen] = useState(false)
     const [currentUserId, setCurrentUserId] = useState<number | null>(null)
 
-    useEffect(() => {
-        // Get user ID from localStorage AUTH
-        const authData = localStorage.getItem('AUTH')
-        if (authData) {
-            try {
-                const parsedAuth = JSON.parse(authData)
-                setCurrentUserId(Number(parsedAuth.id))
-            } catch (error) {
-                console.error('Error parsing AUTH data:', error)
-            }
-        }
-    }, [])
-
-    //Only this user can create Live Classes 
-    const hasCreateAccess = currentUserId === 58083
-
     const createChapter = async (topicId: number) => {
         setTopicId(topicId)
         await api
@@ -159,7 +143,6 @@ function ChapterModal({
                 </div>
                 
                 {/* Dialog for users WITH CREATE access */}
-                {hasCreateAccess && (
                     <Dialog
                         open={liveDialogOpen}
                         onOpenChange={(open) => {
@@ -217,32 +200,6 @@ function ChapterModal({
                             )}
                         </DialogContent>
                     </Dialog>
-                )}
-
-                {/* Dialog for users WITHOUT CREATE access */}
-                {!hasCreateAccess && (
-                    <Dialog
-                        open={liveDialogOpen}
-                        onOpenChange={(open) => {
-                            setLiveDialogOpen(open)
-                        }}
-                    >
-                        <DialogContent className="max-w-2xl w-full">
-                            <DialogTitle className="mb-3 text-left text-gray-600 text-[16px]">
-                                Select Existing Live Class
-                            </DialogTitle>
-                            <div className="overflow-auto">
-                                <ExistingLiveClass
-                                    fetchingChapters={fetchChapters}
-                                    onClose={() => {
-                                        setLiveDialogOpen(false)
-                                        onClose()
-                                    }}
-                                />
-                            </div>
-                        </DialogContent>
-                    </Dialog>
-                )}
             </DialogContent>
         </Dialog>
     )
