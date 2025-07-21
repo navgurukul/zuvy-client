@@ -104,19 +104,26 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   );
 
   return (
-    <div className="h-full p-4">
-      {/* Header with Badge */}
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="font-bold text-lg">{chapterDetails?.title}</h1>
-        <Badge 
-          variant="outline" 
-          className={isCompleted ? "text-success border-success" : "text-muted-foreground"}
-        >
-          {isCompleted ? 'Read' : 'To be Read'}
-        </Badge>
-      </div>
+    <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
+      <div className="max-w-4xl mx-auto">
+        {/* Header with Badge */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-extrabold">{chapterDetails?.title}</h1>
+            {chapterDetails.description && (
+              <p className="text-muted-foreground text-base mt-6 text-start">
+                {chapterDetails.description}
+              </p>
+            )}
+          </div>
+          <Badge 
+            variant="outline" 
+            className={isCompleted ? "text-success border-success" : "text-muted-foreground"}
+          >
+            {isCompleted ? 'Read' : 'To be Read'}
+          </Badge>
+        </div>
 
-      <ScrollArea className="h-[calc(100vh-12rem)]">
         <div className="text-left">
           {viewPdf ? (
             /* PDF Content */
@@ -168,6 +175,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
                   <Button
                     disabled={!action || isCompleting}
                     onClick={completeChapter}
+                    className="bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg"
                   >
                     {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
                   </Button>
@@ -176,7 +184,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };

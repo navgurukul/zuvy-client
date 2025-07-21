@@ -8,6 +8,7 @@ import {
   Check
 } from "lucide-react";
 import useChapterCompletion from '@/hooks/useChapterCompletion';
+import { getEmbedLink } from '@/utils/students';
 
 interface Session {
   id: number;
@@ -201,6 +202,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
     }
 
     if (isSessionCompleted) {
+      const embedLink = getEmbedLink(item.s3link);
       const hasRecording = Boolean(
         item.s3link && 
         item.s3link !== 'not found' && 
@@ -222,7 +224,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
               <p className="font-medium">{item.scheduledDateTime ? formatDateTime(item.scheduledDateTime) : 'TBD'}</p>
             </div>
             <div className="text-left">
-              <p className="text-sm text-muted-foreground">Your Duration</p>
+              <p className="text-sm text-muted-foreground">Your Attendance Duration </p>
               <p className="font-medium">{item.duration || '45 mins'}</p>
             </div>
             <div className="text-left">
@@ -242,14 +244,17 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
               <h2 className="text-xl text-left font-heading font-semibold mb-4">Recording available for the live class</h2>
               <div 
                 className="bg-black rounded-lg aspect-video flex items-center justify-center cursor-pointer"
-                onClick={() => item.s3link && window.open(item.s3link, '_blank')}
               >
-                <div className="text-center text-white">
-                  <Play className="w-16 h-16 mx-auto mb-4" />
-                  <p>Class Recording</p>
-                  {/* <p className="text-sm opacity-75">{item.duration || '45 mins'}</p> */}
-                </div>
+                 <iframe
+                src={embedLink}
+                title="Google Drive Video"
+                allow="autoplay"
+                allowFullScreen
+                className="w-full h-full border-none"
+              />
+
               </div>
+              
               
               {!isCompleted && (
                 <div className="mt-6">

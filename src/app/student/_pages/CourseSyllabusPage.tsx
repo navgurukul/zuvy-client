@@ -5,53 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircle, ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircle, ArrowLeft } from "lucide-react";
 import useCourseSyllabus from "@/hooks/useCourseSyllabus";
+import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useState } from "react";
 import Link from "next/link";
 
-// Truncated Description Component
-const TruncatedDescription = ({ 
-  text, 
-  maxLength = 150, 
-  className = "" 
-}: { 
-  text: string; 
-  maxLength?: number; 
-  className?: string;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const shouldTruncate = text.length > maxLength;
-  const displayText = shouldTruncate && !isExpanded ? text.slice(0, maxLength) + "..." : text;
 
-  if (!shouldTruncate) {
-    return <p className={className}>{text}</p>;
-  }
-
-  return (
-    <div className="text-left mb-4 mt-2 " >
-      <p className={className}>{displayText}</p>
-      <Button
-        variant="link"
-        size="sm"
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="p-0 h-auto text-primary text-sm mt-1 flex items-center gap-1"
-      >
-        {isExpanded ? (
-          <>
-            Show less
-            <ChevronUp className="w-3 h-3" />
-          </>
-        ) : (
-          <>
-            View full description
-            <ChevronDown className="w-3 h-3" />
-          </>
-        )}
-      </Button>
-    </div>
-  );
-};
 
 const CourseSyllabusPage = () => {
   const { courseId } = useParams();

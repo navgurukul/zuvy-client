@@ -101,7 +101,7 @@ const Header = () => {
   // Don't render theme toggle until client-side
   if (!isClient) {
     return (
-      <header className="w-full h-16 px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
+      <header className="w-full h-16 px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
         {/* Left - Logo and Navigation */}
         <div className="flex items-center gap-4">
           <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
@@ -201,7 +201,6 @@ const Header = () => {
       </header>
     );
   }
-  console.log(studentData);
 
   return (
     <header className="w-full h-16 px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
@@ -217,13 +216,13 @@ const Header = () => {
 
         {/* Course Navigation Buttons */}
         {isOnCoursePage && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 ">
             <Button
               variant="link"
               size="sm"
               onClick={handleDashboardClick}
               className={`${ 
-                   'text-foreground  hover:text-primary'
+                   ' font-semibold text-foreground hover:underline hover:text-primary'
               }`}
             >
               Dashboard
@@ -232,10 +231,10 @@ const Header = () => {
               variant="link"
               size="sm"
               onClick={handleSyllabusClick}
-              className={`${
+              className={`font-semibold ${
                 isOnCourseSyllabus() 
                   ? 'text-primary font-medium' 
-                  : 'text-foreground hover:text-primary'
+                  : 'text-foreground hover:underline hover:text-primary'
               }`}
             >
               Course Syllabus
@@ -260,10 +259,11 @@ const Header = () => {
         </Button>
         
         {/* Student Avatar with Dropdown */}
+        {(studentData as any)?.profilePicture ? 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-8 w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-              <AvatarImage src={(studentData as any)?.profilePicture || '/default-avatar.png'} alt="Student" />
+              <AvatarImage src={(studentData as any)?.profilePicture || '/logo.PNG'} alt="Student" />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                 {getUserInitials(studentData?.name)}
               </AvatarFallback>
@@ -294,6 +294,16 @@ const Header = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        :
+        <div className="w-8 h-8">
+          <Avatar className="h-8 w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                <AvatarImage src={(studentData as any)?.profilePicture || '/logo.PNG'} alt="Student" />
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+                {getUserInitials(studentData?.name)}
+              </AvatarFallback>
+            </Avatar>
+        </div>
+        }
 
         <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
           <AlertDialogContent>

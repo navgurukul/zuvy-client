@@ -286,7 +286,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                   <Button 
                     type="submit" 
                     disabled={isSubmitting || isCompleting || !form.formState.isValid}
-                    className="px-6 py-2 h-12 text-left"
+                    className="px-6 py-2 h-12 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover"
                   >
                     {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
                   </Button>

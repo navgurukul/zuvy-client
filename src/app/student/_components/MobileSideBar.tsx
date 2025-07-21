@@ -151,7 +151,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
   return (
     <div className="w-full lg:w-80 h-full bg-background border-r border-border shadow-4dp flex flex-col">
       <div className="p-4 lg:p-6 text-left border-b border-border">
-        <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto text-foreground hover:text-foreground hover:no-underline">
+        <Button variant="link" size="sm" asChild className="mb-4 font-semibold p-0 h-auto text-foreground hover:text-foreground hover:no-underline">
           <Link href={`/student/course/${courseId}`}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Course

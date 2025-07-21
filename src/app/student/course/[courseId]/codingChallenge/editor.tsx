@@ -11,8 +11,9 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { ChevronLeft, Code, Play, Upload, CheckCircle, X } from 'lucide-react';
+import { ChevronLeft, Code, Play, Upload, CheckCircle, X, AlertTriangle } from 'lucide-react';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Input {
     parameterName: string
@@ -49,13 +50,14 @@ const editorLanguages = [
     { lang: 'javascript', id: 102 },
 ];
 
-const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps) => {
+const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps) => {
     const router = useRouter();
     const params = useParams();
     const { toast } = useToast();
     const searchParams = useSearchParams();
     const chapterId = searchParams.get('chapterId');
     const moduleId = searchParams.get('moduleId');
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const [questionDetails, setQuestionDetails] = useState<QuestionDetails | null>(null);
     const [currentCode, setCurrentCode] = useState('');
@@ -66,6 +68,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
     const [codeResult, setCodeResult] = useState<any[]>([]);
     const [codeError, setCodeError] = useState('');
     const [isOpen, setIsOpen] = useState(false);
+    const [isSolutionModalOpen , setIsSolutionModalOpen] = useState(false);
     const [modalType, setModalType] = useState<'success' | 'error'>('success');
     const [isAlreadySubmitted, setIsAlreadySubmitted] = useState(false);
     const [localIsCompleted, setLocalIsCompleted] = useState(false);
@@ -89,13 +92,13 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
             const response = await api.get(`/codingPlatform/submissions/questionId=${questionId}`);
             if (response.data.isSuccess && response.data.data) {
                 const submissionData = response.data.data;
-                
+
                 // If action is submit, mark as already submitted
                 if (submissionData.action === 'submit') {
                     setIsAlreadySubmitted(true);
                     setLocalIsCompleted(true);
                 }
-                
+
                 // Set the language and code from previous submission
                 if (submissionData.programLangId && submissionData.sourceCode) {
                     const langId = parseInt(submissionData.programLangId);
@@ -192,10 +195,14 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                 languageId: languageId,
                 sourceCode: b64EncodeUnicode(currentCode),
             });
-            
-            // Set the code result data
-            setCodeResult(response.data.data);
 
+            // Set the code result data
+            if(action == 'submit') {
+                
+                setIsSolutionModalOpen(true)
+                setShowConfirmModal(false)
+            }
+            setCodeResult(response.data.data);
             // Check if all test cases passed
             const allTestCasesPassed = response.data.data.every(
                 (testCase: any) => testCase.status === 'Accepted'
@@ -205,7 +212,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                 setIsSubmitting(true)
                 setIsAlreadySubmitted(true)
                 setIsOpen(true)
-                
+
                 if (allTestCasesPassed) {
                     setModalType('success')
                     toast({
@@ -223,8 +230,8 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
 
                 await completeChapter();
                 // Complete chapter after successful submission to coding platform
-                
-                
+
+
             } else if (allTestCasesPassed && action === 'run') {
                 toast({
                     title: 'Success',
@@ -249,6 +256,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
             }
         } catch (error: any) {
             setLoading(false)
+            setIsSubmitting(false)
             setCodeResult(error.response?.data?.data || [])
             toast({
                 title: 'Failed',
@@ -257,12 +265,17 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr || error.response?.data?.data?.[0]?.stdErr ||
-                    'Error occurred during submission. Network connection lost.'
+                'Error occurred during submission. Network connection lost.'
             )
         }
     };
 
-    const handleBack = () => router.back();
+    const handleBack = () => {
+        setIsSolutionModalOpen(false)
+        setShowConfirmModal(false)
+        setIsSubmitting(false)
+        router.back()
+    }
 
     function handleEditorChange(value: any) {
         setCurrentCode(value || '')
@@ -276,6 +289,19 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
             </div>
         );
     }
+    const onViewSolution = () => {
+        setIsSolutionModalOpen(false)
+        setShowConfirmModal(false)
+        setIsSubmitting(false)
+        router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}`);
+    }
+    const onReturnToCourse = () => {
+        setIsSolutionModalOpen(false)
+        setShowConfirmModal(false)
+        setIsSubmitting(false)
+        router.push(`/student/course/${params.courseId}/codingChallenge`); 
+    }
+
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
@@ -287,9 +313,11 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                         <div className="flex items-center space-x-4">
                             <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
-                                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                        <span className="font-medium">Back to Challenges</span>
+                                    <button 
+                                        className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg cursor-pointer"
+                                        style={{ pointerEvents: 'auto' }}
+                                    >
+                                        <span className="font-medium"><X className='w-4 h-4' /></span>
                                     </button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="bg-card border-border shadow-32dp">
@@ -321,9 +349,9 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                     {/* <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
                                         <Code className="w-4 h-4 text-accent" />
                                     </div> */}
-                                    <h1 className="text-xl font-bold text-foreground">
+                                    {/* <h1 className="text-xl font-bold text-foreground">
                                         {questionDetails.title}
-                                    </h1>
+                                    </h1> */}
                                     {isAlreadySubmitted && (
                                         <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
                                             Submitted
@@ -334,35 +362,105 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                         </div>
 
                         {/* Right: Action Buttons */}
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center  space-x-2">
                             <Button
                                 onClick={(e) => handleSubmit(e, 'run')}
                                 size="sm"
                                 variant="outline"
-                                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-semibold "
                                 disabled={loading || isSubmitting || isAlreadySubmitted}
                             >
                                 {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                                <span className="ml-2 font-medium">Run Code</span>
+                                <span className="ml-2 ">Run Code</span>
                             </Button>
                             <Button
-                                onClick={(e) => handleSubmit(e, 'submit')}
+                                onClick={() => setShowConfirmModal(true)}
                                 size="sm"
-                                className="bg-primary hover:bg-primary-dark text-primary-foreground"
+                                className="bg-primary hover:bg-primary-dark text-primary-foreground font-semibold"
                                 disabled={loading || isSubmitting || isAlreadySubmitted || isCompleting}
                             >
                                 {loading || isCompleting ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                                <span className="ml-2 font-medium">
-                                    {isAlreadySubmitted ? 'Already Submitted' : 'Submit Solution'}
+                                <span className="ml-2  ">
+                                    {isAlreadySubmitted ? 'Already Submitted' : 'Submit Code'}
                                 </span>
                             </Button>
                         </div>
                     </div>
                 </div>
             </div>
+            <AlertDialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Submit Solution</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to submit your solution? Once submitted, you cannot make changes to your code.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className='bg-muted hover:bg-muted-dark text-foreground border-border' >Cancel</AlertDialogCancel>
+                        <AlertDialogAction className='bg-primary hover:bg-primary-dark text-primary-foreground' onClick={(e) => handleSubmit(e, 'submit')}>
+                          {loading ? <span className='flex items-center gap-2'>  Submitting... </span>  : 'Submit'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+    <Dialog open={isSolutionModalOpen} onOpenChange={(open) => {
+        setIsSolutionModalOpen(open)
+        if (!open) {
+            setIsSubmitting(false)
+            setShowConfirmModal(false)
+        }
+    }} >
+      <DialogContent  className="max-w-md">
+        {modalType === 'success' ? 
+        <DialogHeader>
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-success-light rounded-full flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-success" />
+            </div>
+          </div>
+          <DialogTitle className="text-center text-xl">
+            Submission Successful!
+          </DialogTitle>
+        </DialogHeader> : 
+        <DialogHeader>
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-16 h-16 bg-destructive-light rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-destructive" />
+            </div>
+          </div>
+          <DialogTitle className="text-center text-xl">
+            Test Cases Failed
+          </DialogTitle>
+        </DialogHeader>
+        }
+        
+        <div className="text-center space-y-4 font-manrope">
+          <p className="text-muted-foreground">
+            Your solution for <span className="font-semibold">{questionDetails.title}</span> has been submitted successfully.
+          </p>
+          
+          {codeResult && (
+            <div className="bg-muted p-3 rounded-lg">
+              <p className="font-semibold text-sm">Your Score: {codeResult.filter((result: any) => result.status === 'Accepted').length}/{codeResult.length} test cases passed</p>
+            </div>
+          )}
+          
+          <div className="flex flex-col gap-3 pt-4">
+            <Button onClick={onViewSolution} size="lg" className="w-full bg-primary hover:bg-primary-dark text-primary-foreground font-semibold">
+              View Solution
+            </Button>
+            <Button onClick={onReturnToCourse} variant="outline" size="lg" className="w-full bg-muted hover:bg-muted-dark text-foreground border-border font-semibold">
+              Return to Course
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
 
             {/* Success/Error Modal */}
-            <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            {/* <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                 <AlertDialogContent className="bg-card border-border shadow-32dp max-w-md">
                     <button
                         className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors duration-200 p-1 rounded-lg hover:bg-muted"
@@ -398,7 +496,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                         )}
                     </AlertDialogHeader>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog> */}
 
             {/* Main Content Area */}
             <div className="w-full" style={{ height: 'calc(100vh - 80px)' }}>
@@ -416,10 +514,13 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                             <div className="p-6 space-y-8">
                                                 {/* Problem Description */}
                                                 <div>
+                                                     <h5 className=" text-left mb-4 font-bold text-foreground">
+                                        {questionDetails.title}
+                                    </h5>
                                                     <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
-                                                        <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center">
+                                                        {/* <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center">
                                                             <div className="w-2 h-2 bg-primary rounded-full"></div>
-                                                        </div>
+                                                        </div> */}
                                                         <span>Description</span>
                                                     </h2>
                                                     <div className="text-left">
@@ -433,9 +534,9 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                                 {questionDetails.constraints && (
                                                     <div>
                                                         <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
-                                                            <div className="w-5 h-5 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
+                                                            {/* <div className="w-5 h-5 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
                                                                 <Code className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                                                            </div>
+                                                            </div> */}
                                                             <span>Constraints</span>
                                                         </h2>
                                                         <div className="rounded-lg p-4">
@@ -449,13 +550,13 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                                 {/* Test Cases */}
                                                 <div>
                                                     <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
-                                                        <div className="w-5 h-5 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center">
+                                                        {/* <div className="w-5 h-5 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center">
                                                             <Play className="w-3 h-3 text-green-600 dark:text-green-400" />
-                                                        </div>
+                                                        </div> */}
                                                         <span>Examples</span>
                                                     </h2>
                                                     <div className="space-y-6">
-                                                        {questionDetails?.testCases?.slice(0, 3).map((testCase: TestCase, index: number) => (
+                                                        {questionDetails?.testCases?.slice(0, 2).map((testCase: TestCase, index: number) => (
                                                             <div
                                                                 key={index}
                                                                 className="rounded-lg overflow-hidden"
@@ -465,7 +566,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                                                         Example {index + 1}
                                                                     </h4>
                                                                 </div>
-                                                                
+
                                                                 <div className="p-4 space-y-4">
                                                                     {/* Input Section */}
                                                                     <div>
@@ -507,7 +608,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                                                 </div>
                                                             </div>
                                                         ))}
-                                                        
+
                                                         {questionDetails?.testCases && questionDetails.testCases.length > 3 && (
                                                             <div className="text-left p-4 text-sm text-muted-foreground bg-muted/20 rounded-lg">
                                                                 + {questionDetails.testCases.length - 3} more test case{questionDetails.testCases.length - 3 !== 1 ? 's' : ''} available
@@ -534,7 +635,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                         <div className="bg-card-elevated border-b border-border p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
-                                                    <h3 className="font-bold text-foreground">Code Editor</h3>
+                                                    <h6 className="font-bold text-foreground">Code Editor</h6>
                                                 </div>
 
                                                 {/* Language Selector */}
@@ -569,6 +670,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                                 theme="vs"
                                                 value={currentCode}
                                                 onChange={handleEditorChange}
+
                                                 defaultValue={language || 'Please Select a language above!'}
                                                 options={{
                                                     wordWrap: 'on',
@@ -582,6 +684,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                                     renderWhitespace: 'selection',
                                                     bracketPairColorization: { enabled: true },
                                                     readOnly: isAlreadySubmitted,
+                                                    contextmenu: false,
                                                 }}
                                             />
                                         </div>
@@ -601,8 +704,8 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
                                         </div>
 
                                         {/* Output Content */}
-                                        <div 
-                                            style={{ height: 'calc(100% - 45px)' }} 
+                                        <div
+                                            style={{ height: 'calc(100% - 45px)' }}
                                             className="p-4 overflow-y-auto font-mono text-sm bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-200"
                                         >
                                             {/* Loading State */}

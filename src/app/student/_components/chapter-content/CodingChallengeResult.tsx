@@ -3,9 +3,28 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Code2, Eye, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Code2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
-import { cn } from '@/lib/utils';
+
+// Date formatting function
+function formatSubmissionDate(dateString: string) {
+  const date = new Date(dateString);
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  
+  return `${day} ${month} ${year} at ${hours}:${minutes} ${ampm}`;
+}
 
 // Simplified interfaces for clarity
 interface QuestionDetail {
@@ -19,6 +38,11 @@ interface SubmissionResult {
     result: {
         status: string; // The submission status, e.g., "Accepted"
         questionDetail: QuestionDetail;
+        createdAt: string;
+        TestCasesSubmission: Array<{
+            status: string;
+            [key: string]: any;
+        }>;
     };
 }
 
@@ -34,7 +58,7 @@ interface CodingChallengeResultProps {
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
   const router = useRouter();
   const params = useParams();
-console.log(submissionResults)
+console.log(submissionResults[0].result)
   const handleViewSolution = (questionId: number) => {
     router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}`);
   };
@@ -52,7 +76,7 @@ console.log(submissionResults)
           </div>
           <Badge
             variant="outline"
-            className="text-sm px-4 py-2 shadow-2dp bg-success text-success-foreground border-success"
+            className="bg-success text-success-foreground border-success"
           >
             Completed
           </Badge>
@@ -73,26 +97,33 @@ console.log(submissionResults)
                         {/* Metadata Section */}
                         <div className="flex flex-col gap-4 mb-4">
                             <div className='w-full flex flex-col'>
-                                <span className="text-left font-medium text-muted-foreground">Difficulty</span>
+                                <span className="text-left font-sm font-semibold text-muted-foreground">Difficulty</span>
                                 <p className="text-sm font-semibold text-foreground text-left mt-1">{result.questionDetail.difficulty}</p>
                             </div>
                             <div className='w-full text-left'>
-                                <span className="text-sm text-left font-medium text-muted-foreground">Status</span>
-                                <div className="mt-1">
-                                    <Badge
-                                        variant="outline"
-                                        className={cn('flex items-center gap-1.5 w-fit', {
-                                            'border-success/50 bg-success/10 text-success-dark': result.status === 'Accepted',
-                                            'border-destructive/50 bg-destructive/10 text-destructive-dark': result.status === 'Wrong Answer' || result.status !== 'Accepted',
-                                        })}
-                                    >
-                                        {result.status === 'Accepted' ? 
-                                            <CheckCircle2 className="w-3.5 h-3.5" /> : 
-                                            <AlertCircle className="w-3.5 h-3.5" />
-                                        }
-                                        <span>{result.status}</span>
-                                    </Badge>
-                                </div>
+                                {result.status === 'Accepted' ? (
+                                    <div className="bg-success/10 border border-success rounded-lg p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <CheckCircle2 className="w-5 h-5 text-success" />
+                                            <span className="font-semibold text-success">Problem Submitted</span>
+                                        </div>
+                                        <div className="text-sm flex items-center text-success space-x-5">
+                                            <p>Test Cases: {result.TestCasesSubmission?.filter(tc => tc.status === 'Accepted').length || 0}/{result.TestCasesSubmission?.length || 0} passed</p>
+                                            <p>Submitted on: {formatSubmissionDate(result.createdAt)}</p>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-destructive/10 border border-destructive rounded-lg p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <AlertCircle className="w-5 h-5 text-destructive" />
+                                            <span className="font-semibold text-destructive">Wrong Answer</span>
+                                        </div>
+                                        <div className="text-sm flex items-center text-destructive space-x-5">
+                                            <p>Test Cases: {result.TestCasesSubmission?.filter(tc => tc.status === 'Accepted').length || 0}/{result.TestCasesSubmission?.length || 0} passed</p>
+                                            <p>Submitted on: {formatSubmissionDate(result.createdAt)}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -104,11 +135,10 @@ console.log(submissionResults)
                         {/* Action Button */}
                         <div className="flex justify-center">
                             <Button
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium text-sm"
+                                className="bg-blue-600 font-semibold hover:bg-blue-700 text-white px-6 py-2 text-sm"
                                 onClick={() => handleViewSolution(questionId)}
                             >
-                                <Eye className="w-4 h-4 mr-2" />
-                                View Solution
+                                View Result
                             </Button>
                         </div>
                     </div>

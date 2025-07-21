@@ -16,6 +16,8 @@ import {
     Fullscreen,
     Timer,
     AlertCircle,
+    Monitor,
+    Info,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import QuizQuestions from './QuizQuestions'
@@ -65,7 +67,6 @@ function Page({
     const [disableSubmit, setDisableSubmit] = useState(false)
     const [runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
     const [runSourceCode, setRunSourceCode] = useState<string>('')
-
     const decodedParams = {
         assessmentOutSourceId: parseInt(
             decodeURIComponent(params.assessmentOutSourceId).replace(
@@ -111,6 +112,7 @@ function Page({
     const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(
         assessmentData?.copyPaste
     )
+    const [dialogIsOpen , setDialogIsOpen] = useState(false)
     const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState(null)
     const [startedAt, setStartedAt] = useState(
         new Date(assessmentData?.submission?.startedAt).getTime()
@@ -496,6 +498,7 @@ function Page({
                         <IDE
                             params={{ editor: String(selectedQuestionId) }}
                             onBack={handleBack}
+                            getCodingSubmissionsData={getCodingSubmissionsData}
                             remainingTime={remainingTime}
                             assessmentSubmitId={assessmentSubmitId}
                             selectedCodingOutsourseId={
@@ -504,6 +507,7 @@ function Page({
                             getAssessmentData={getAssessmentData}
                             runCodeLanguageId={runCodeLanguageId}
                             runSourceCode={runSourceCode}
+                            
                         />
                     </AlertProvider>
                 </>
@@ -573,7 +577,9 @@ function Page({
         requestFullScreen(element)
         setIsFullScreen(true)
     }
-
+    useEffect(() => {
+        setDialogIsOpen(true)
+    },[])
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -593,13 +599,13 @@ function Page({
                             />
                         </div>
 
-                        <div className="max-w-2xl w-full">
+                        {/* <div className="max-w-2xl w-full">
                             <div className="bg-card border border-border rounded-2xl shadow-16dp overflow-hidden">
                                 <div className="bg-card-elevated border-b border-border p-8 text-center">
                                     <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
                                         <Fullscreen className="w-8 h-8 text-primary" />
                                     </div>
-                                    <h2 className="text-2xl font-bold text-foreground mb-3">Assessment Ready</h2>
+                                    <h2 className="text-2xl font-bold text-foreground mb-3">Assessment Ready  </h2>
                                     <p className="text-muted-foreground">
                                         Enter full-screen mode to begin your assessment
                                     </p>
@@ -656,7 +662,52 @@ function Page({
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
+                        <AlertDialog open={dialogIsOpen} onOpenChange={setDialogIsOpen}>
+                            <AlertDialogContent className="max-w-md font-manrope font-semibold">
+                                <AlertDialogHeader>
+                                    <div className="flex items-center justify-center mb-4">
+                                        <div className="w-16 h-16 bg-warning-light rounded-full flex items-center justify-center">
+                                            <Monitor className="w-8 h-8 text-warning" />
+                                        </div>
+                                    </div>
+                                    <AlertDialogTitle className="text-center text-xl">
+                                        Fullscreen Mode Required
+                                    </AlertDialogTitle>
+                                </AlertDialogHeader>
+
+                                <div className="text-center space-y-4">
+                                    <p className="text-muted-foreground">
+                                        <span className="font-semibold">Assessment</span> requires fullscreen mode for proctoring purposes.
+                                    </p>
+
+                                    <div className="bg-info-light border border-info rounded-lg p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Info className="w-5 h-5 text-info" />
+                                            <p className="font-semibold text-info">Important Guidelines</p>
+                                        </div>
+                                        <ul className="text-sm text-info text-left space-y-1 text-left">
+                                            <li>• Do not switch tabs or applications</li>
+                                            <li>• Do not exit fullscreen mode</li>
+                                            <li>• Violations will be tracked and reported</li>
+                                            <li>• Keep your webcam and microphone ready</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3 pt-4">
+                                        <Button  onClick={() => {
+                                                            handleFullScreenRequest();
+                                                            getAssessmentData(true);
+                                                        }}  size="lg" className="w-full font-semibold bg-primary text-primary-foreground">
+                                            I Understand, Proceed
+                                        </Button>
+                                        <Button variant="outline" size="lg" className="w-full font-semibold bg-white hover:bg-primary-light text-black">
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </div>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>) : (
                     <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
                         <div className="fixed top-6 right-6 z-50">
@@ -676,13 +727,13 @@ function Page({
                                         <h2 className="text-2xl w-full ml-3 text-left font-bold text-foreground">{assessmentData?.ModuleAssessment.title}</h2>
                                         <p className='text-left text-muted-foreground ml-2 font-medium'>Complete all sections to submit your assessment. Read the instructions carefully before proceeding.
 
-</p>
+                                        </p>
                                     </div>
 
                                     <div className="flex items-center justify-between gap-4">                                            <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                                       <div className='flex items-center space-x-3'>
-                                       {/* <Clock className="w-5 h-5 text-accent flex-shrink-0" /> */}
-                                        {/* <div>
+                                        <div className='flex items-center space-x-3'>
+                                            {/* <Clock className="w-5 h-5 text-accent flex-shrink-0" /> */}
+                                            {/* <div>
                                             <p className="text-sm text-left text-muted-foreground font-medium">Deadline</p>
                                             <p className="text-foreground font-semibold">
                                                 {assessmentData?.endDatetime
@@ -691,7 +742,7 @@ function Page({
                                                 }
                                             </p>
                                         </div> */}
-                                       </div>
+                                        </div>
                                     </div>
                                         <div>
                                             <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
@@ -720,10 +771,10 @@ function Page({
                                     </div> */}
 
                                     <div className=" rounded-xl p-4">
-                                        <h5 className="font-bold text-warning-dark mb-3 flex items-center space-x-2">      
+                                        <h5 className="font-bold text-warning-dark mb-3 flex items-center space-x-2">
                                             <span>Proctoring Rules</span>
                                         </h5>
-                                       
+
                                         <ul className="list-disc text-left list-inside space-y-1 text-warning-dark">
                                             <li>No copy-pasting is allowed during the assessment</li>
                                             <li>Tab switching or window switching is not permitted</li>
@@ -846,10 +897,10 @@ function Page({
                                                     assessmentData?.IsQuizzSubmission === false)
                                             }
                                             className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp ${disableSubmit ||
-                                                    (assessmentData?.totalMcqQuestions > 0 &&
-                                                        assessmentData?.IsQuizzSubmission === false)
-                                                    ? 'bg-muted text-muted-foreground cursor-not-allowed'
-                                                    : 'bg-primary hover:bg-primary-dark text-primary-foreground'
+                                                (assessmentData?.totalMcqQuestions > 0 &&
+                                                    assessmentData?.IsQuizzSubmission === false)
+                                                ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                                                : 'bg-primary hover:bg-primary-dark text-primary-foreground'
                                                 }`}
                                         >
                                             Submit Assessment

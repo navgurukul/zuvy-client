@@ -16,6 +16,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLazyLoadedStudentData } from '@/store/store';
 import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
+import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
 
@@ -53,6 +54,8 @@ interface Bootcamp {
   };
   upcomingEvents: UpcomingEvent[];
 }
+
+
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -254,13 +257,13 @@ const StudentDashboard = () => {
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Course Image */}
-                  <div className="">
+                  <div className="mt-2">
                     <Image
                       src={bootcamp.coverImage || '/logo.PNG'}
                       alt={bootcamp.name}
                       width={128}
                      height={128}
-                     className="w-32 h-32 rounded-lg object-contain"
+                     className="rounded-lg object-contain"
                     />
                   </div>
 
@@ -271,18 +274,20 @@ const StudentDashboard = () => {
                         <h3 className="text-xl font-heading font-semibold mb-2">
                           {bootcamp.name}
                         </h3>
-                        <p className="text-muted-foreground mb-3 line-clamp-2">
-                          {bootcamp.description || `${bootcamp.bootcampTopic} • ${bootcamp.language} • ${bootcamp.duration}`}
-                        </p>
+                        <TruncatedDescription 
+                          text={bootcamp.description || ``}
+                          maxLength={150}
+                          className="text-muted-foreground mb-3"
+                        />
                         <div className="flex items-center gap-2 mb-4">
                           {/* <Avatar className="w-6 h-6">
                             <AvatarImage src={bootcamp.instructorDetails.profilePicture || undefined} />
                             <AvatarFallback>Instructor:-{bootcamp.instructorDetails.name[0]}</AvatarFallback>
                           </Avatar> */}
-                          <span className="text-sm font-medium capitalize ">
-                            Instructor:- {bootcamp.instructorDetails.name}
+                          <span className="text-sm  text-muted-foreground capitalize ">
+                            Instructor: {bootcamp.instructorDetails.name}
                           </span>
-                          <span className="text-sm text-muted-foreground">•</span>
+                     
                           {/* <span className="text-sm text-muted-foreground">
                             {bootcamp.batchName}
                           </span> */}

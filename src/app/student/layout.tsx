@@ -31,7 +31,7 @@ export default function StudentLayout({
     const hideHeader = pathname.includes('/assessmentResult/')  || pathname.includes('/codingChallenge');
     
     return (
-        <div className="h-screen bg-background flex flex-col">
+        <div className="h-screen bg-background flex flex-col font-manrope">
             <ThemeInitializer />
             {!hideHeader && <Header />}
             <main className="flex-1 overflow-y-auto">

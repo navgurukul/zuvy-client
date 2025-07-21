@@ -7,58 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer, ChevronDown, ChevronUp } from "lucide-react";
+import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer } from "lucide-react";
 import Image from "next/image";
 import { useBootcampProgress } from '@/hooks/useBootcampProgress';
 import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
 import { useUpcomingEvents, Event as UpcomingEvent } from '@/hooks/useUpcomingEvents';
 import { useCompletedClasses, CompletedClass } from '@/hooks/useCompletedClasses';
+import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
 import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton';
+import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Truncated Description Component
-const TruncatedDescription = ({ 
-  text, 
-  maxLength = 150, 
-  className = "" 
-}: { 
-  text: string; 
-  maxLength?: number; 
-  className?: string;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const shouldTruncate = text.length > maxLength;
-  const displayText = shouldTruncate && !isExpanded ? text.slice(0, maxLength) + "..." : text;
 
-  if (!shouldTruncate) {
-    return <p className={className}>{text}</p>;
-  }
-
-  return (
-    <div className="my-3">
-      <p className={className}>{displayText}</p>
-      <Button
-        variant="link"
-        size="sm"
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="p-0 h-auto text-primary text-sm mt-1 flex items-center gap-1"
-      >
-        {isExpanded ? (
-          <>
-            Show less
-            <ChevronUp className="w-3 h-3" />
-          </>
-        ) : (
-          <>
-            View full description
-            <ChevronDown className="w-3 h-3" />
-          </>
-        )}
-      </Button>
-    </div>
-  );
-};
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
@@ -67,9 +28,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
   const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
+  const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse();
 
   // Show loading skeleton while fetching API data
-  if (progressLoading || modulesLoading || eventsLoading || classesLoading) {
+  if (progressLoading || modulesLoading || eventsLoading || classesLoading || latestCourseLoading) {
     return (
       <CourseDashboardSkeleton />
     );
@@ -268,9 +230,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       <div className="hidden lg:block">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="link" className="p-0 h-auto text-primary mx-auto">
-              View Full Attendance
-            </Button>
+            {classes.length > 2 ? (
+              <Button variant="link" className="p-0 h-auto text-primary mx-auto">
+                View Full Attendance({classes.length})
+              </Button>
+            ) : ( // if classes length is less than 2, don't show the button    
+              <></>
+            )}
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-x-hidden overflow-y-auto">
             <DialogHeader>
@@ -320,9 +286,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       <div className="lg:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="link" className="p-0 h-auto text-primary mx-auto">
-              View Full Attendance
-            </Button>
+            {classes.length > 2 ? (
+              <Button variant="link" className="p-0 h-auto text-primary mx-auto">
+                View Full Attendance({classes.length})
+              </Button>
+            ) : ( // if classes length is less than 2, don't show the button    
+              <></>
+            )}
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
             <SheetHeader>
@@ -377,7 +347,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="link" className="p-0 h-auto text-primary mx-auto">
-              View All Events
+              View All Upcoming Events({events.length})
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -433,7 +403,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="link" className="p-0 h-auto text-primary mx-auto">
-              View All Events
+              View All Upcoming Events({events.length})
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
@@ -504,14 +474,14 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   alt={courseName}
                   width={128}
                   height={128}
-                  className="w-32 h-32 rounded-lg object-contain"
+                  className="rounded-lg object-contain"
                 />
               </div>
               <div className="flex-1">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
-                    <TruncatedDescription text={courseDescription} maxLength={150} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
+                    <TruncatedDescription text={courseDescription} maxLength={250} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
                     <div className="flex items-center gap-2 mb-4">
                         {/* <Avatar className="w-8 h-8">
                           <AvatarImage src={instructorAvatar || '/logo.PNG'} />
@@ -523,7 +493,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   {collaborator && <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
                     <Image
-                      src={collaborator}
+                            src={collaborator || '/logo.PNG'}
                       alt="Collaborator Brand"
                       width={75}
                       height={56}
@@ -556,7 +526,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               {collaborator && <div className="flex items-center gap-2 mb-4">
                 <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
                 <Image
-                  src={collaborator}
+                  src={collaborator || '/logo.PNG'}
                   alt="Collaborator Brand"
                   width={48}
                   height={48}
@@ -626,24 +596,24 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               <div>
                 <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Content</h2>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {modulesToShow.map((module: any) => {
                     const moduleProgress = getModuleProgress(module);
-                    const isCurrentModule = moduleProgress > 0 && moduleProgress < 100;
+                    const isCurrentModule = latestCourseData?.moduleId === module.id;
                     const isCompleted = moduleProgress === 100;
                     const isLocked = module.isLock;
+                    const upcomingChapterId = latestCourseData?.newChapter?.id || 1 ;
 
                     return (
-                      <Link key={module.id} href={`/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}>
-                        <Card className={`shadow-4dp ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
-                          <CardContent className="p-6">
+                        <Card className={`shadow-4dp   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
+                          <CardContent className="p-6 ">
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                               <div className="flex-1 text-left">
                                 {isCurrentModule && (
-                                  <Badge className="mb-2 bg-primary-light text-primary border-primary/20 self-start">Current Module</Badge>
+                                  <Badge className="mb-2 bg-primary-light text-primary border-primary/20 self-start hover:bg-primary-light/80">Current Module</Badge>
                                 )}
                                 {isCompleted && (
-                                  <Badge className="mb-2 bg-success-light text-success border-success/20 self-start">Completed</Badge>
+                                  <Badge className="mb-2 bg-success-light text-success border-success/20 self-start hover:bg-success-light/80">Completed</Badge>
                                 )}
                                 {isLocked && (
                                   <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
@@ -654,7 +624,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <h3 className="text-xl font-heading font-semibold mb-2 text-left">
                                   Module {module.order}: {module.name}
                                 </h3>
-                                <TruncatedDescription text={getModuleDescription(module)} maxLength={150} className="text-muted-foreground mb-3 text-sm text-left " />
+                                <TruncatedDescription text={getModuleDescription(module)} maxLength={250} className="text-muted-foreground mb-3 text-sm text-left " />
                                 {/* <div className="flex flex-wrap gap-2 mb-3">
                                 <Badge variant="outline" className="text-xs">
                                   {formatTimeAlloted(module.timeAlloted)}
@@ -668,9 +638,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                               </div>
 
                               {/* Action Button - Desktop: top right, Mobile: bottom */}
-                              <div className="hidden lg:flex flex-shrink-0">
+                              <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
+
                                 <Button
-                                  className={`px-6 ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
+                                  className={`px-6 ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : `bg-white text-primary hover:underline ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
                                   disabled={isLocked}
                                   onClick={(e) => {
                                     if (isLocked) {
@@ -680,7 +651,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 >
                                   {getModuleCTA(module, moduleProgress)}
                                 </Button>
-                              </div>
+                              </Link>
                             </div>
 
                             {/* Module Progress - Updated with primary-light background */}
@@ -719,7 +690,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             </div>
                           </CardContent>
                         </Card>
-                      </Link>
+
                     );
                   })}
 
@@ -743,10 +714,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               {/* What's Next Section */}
               <Card className="shadow-4dp text-left">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-xl">What&apos;s Next?</CardTitle>
-                  <p className="text-sm text-muted-foreground">
+                  <CardTitle className="text-xl ">What&apos;s Next?</CardTitle>
+                  {/* <p className="text-sm text-muted-foreground">
                     {formatDateRange()}
-                  </p>
+                  </p> */}
                 </CardHeader>
                 <CardContent className="pt-0">
                   {upcomingEventsData && upcomingEventsData.events.length > 0 ? (
@@ -808,9 +779,35 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       )}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
-                      <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">No upcoming items</p>
+                    <div className="flex flex-col items-center justify-center py-12  mr-3">
+                      {/* Illustration */}
+                      <div className="mb-6 max-w-[200px] w-full">
+                        <Image
+                          src="/emptyStates/emptyStateforWhatsNext.svg"
+                          alt="No upcoming events"
+                          width={200}
+                          height={120}
+                          className="w-full h-auto opacity-80"
+                        />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="text-left w-6/7 space-y-3 ">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
+                          No Upcoming Events
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Stay tuned! Your upcoming assignments, live sessions, and deadlines will appear here to help you stay on track.
+                        </p>
+                        
+                        {/* Optional CTA */}
+                        <div className="pt-2">
+                          <p className="text-xs text-left w-full text-muted-foreground flex  gap-1">
+                            <Calendar className="w-3 h-3" />
+                            Check back later for updates
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -822,52 +819,87 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   <CardTitle className="text-xl">Attendance</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <div className="text-center mb-6">
-                    <div className="text-3xl font-bold text-primary mb-2">
-                      {completedClassesData?.attendanceStats?.attendancePercentage || 0}%
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {completedClassesData?.attendanceStats?.presentCount || 0} of {completedClassesData?.totalClasses || 0} classes attended
-                    </p>
-                  </div>
+                  {(completedClassesData?.classes || []).length > 0 ? (
+                    <>
+                      <div className="text-center mb-6">
+                        <div className="text-3xl font-bold text-primary mb-2">
+                          {completedClassesData?.attendanceStats?.attendancePercentage || 0}%      
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {completedClassesData?.attendanceStats?.presentCount || 0} of {completedClassesData?.totalClasses || 0} classes attended
+                        </p>
+                      </div>
 
-                  <div className="space-y-4 mb-6">
-                    <h4 className="font-medium text-sm">Recent Classes</h4>
-                    {(completedClassesData?.classes || []).slice(0, 3).map((classItem: CompletedClass) => (
-                      <div key={classItem.id} className="flex items-center justify-between gap-4">
-                        <div className="flex-1 text-left">
-                          <p className="font-medium text-sm">{ellipsis(classItem.title, 20)}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(classItem.startTime)}
+                      <div className="space-y-4 mb-6">
+                        <h4 className="font-medium text-sm">Recent Classes</h4>
+                        {(completedClassesData?.classes || []).slice(0, 4).map((classItem: CompletedClass) => (
+                          <div key={classItem.id} className="flex items-center justify-between gap-4">
+                            <div className="flex-1 text-left">
+                              <p className="font-medium text-sm  ">{ellipsis(classItem.title, 20)}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(classItem.startTime)}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
+                              {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
+                            </Badge>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                    {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500  text-sm ">
+                                    <Video className="w-4 h-4 " />
+                                  </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary  text-sm ">
+                                    <Video className="w-4 h-4 " />
+                                  </button>}
+
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {classItem.s3Link === null || classItem.s3Link === 'not found' ? <p>Recording not found</p> : <p>Watch Recording</p>}
+                                </TooltipContent>
+                              </Tooltip>
+
+                            </TooltipProvider>
+
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex justify-center">
+                        <AttendanceModal classes={completedClassesData?.classes || []} />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12  mr-3">
+                      {/* Illustration */}
+                      <div className="mb-6 max-w-[200px] w-full">
+                        <Image
+                          src="/emptyStates/emptyStateforWhatsNext.svg"
+                          alt="No classes attended"
+                          width={200}
+                          height={120}
+                          className="w-full h-auto opacity-80"
+                        />
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="text-left w-6/7 space-y-3 ">
+                        <h3 className="text-lg font-semibold text-muted-foreground">
+                        Classes are yet to start
+                        </h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          Your attendance record will appear here once you start attending live classes. Stay engaged to track your progress!
+                        </p>
+                        
+                        {/* Optional CTA */}
+                        <div className="pt-2">
+                          <p className="text-xs text-left w-full text-muted-foreground flex  gap-1">
+                            <Calendar className="w-3 h-3" />
+                            Check back after your first class
                           </p>
                         </div>
-                        <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
-                          {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
-                        </Badge>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                                {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500  text-sm ">
-                                <Video className="w-4 h-4 " />
-                              </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary  text-sm ">
-                                <Video className="w-4 h-4 " />
-                              </button>}
-
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {classItem.s3Link === null || classItem.s3Link === 'not found' ? <p>Recording not found</p> : <p>Watch Recording</p>}
-                            </TooltipContent>
-                          </Tooltip>
-
-                        </TooltipProvider>
-
                       </div>
-                    ))}
-                  </div>
-
-                  <div className="flex justify-center">
-                    <AttendanceModal classes={completedClassesData?.classes || []} />
-                  </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

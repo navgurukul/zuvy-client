@@ -303,23 +303,23 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     const getIconComponent = () => {
       switch (type) {
         case 'live-class':
-          return <Video className="w-6 h-6" />;
+          return <Play className="w-4 h-4" />;
         case 'video':
-          return <Play className="w-6 h-6" />;
+          return <Video className="w-4 h-4" />;
         case 'article':
-          return <FileText className="w-6 h-6" />;
+          return <FileText className="w-4 h-4" />;
         case 'assignment':
-          return <FileText className="w-6 h-6" />;
+          return <FileText className="w-4 h-4" />;
         case 'assessment':
-          return <BookOpen className="w-6 h-6" />;
+          return <BookOpen className="w-4 h-4" />;
         case 'quiz':
-          return <BookOpen className="w-6 h-6" />;
+          return <BookOpen className="w-4 h-4" />;
         case 'feedback-form':
-          return <User className="w-6 h-6" />;
+          return <User className="w-4 h-4" />;
         case 'coding-challenge':
-          return <BookOpen className="w-6 h-6" />;
+          return <BookOpen className="w-4 h-4" />;
         default:
-          return <Circle className="w-6 h-6" />;
+          return <Circle className="w-4 h-4" />;
       }
     };
 
@@ -384,14 +384,14 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       {!isMobile && (
         <div className="w-80 h-screen bg-background border-r border-border flex flex-col">
           <div className="p-4 border-b text-left border-border flex-shrink-0">
-            <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto text-foreground hover:text-foreground hover:no-underline">
+            <Button variant="link" size="sm" asChild className="mb-4 p-0 h-auto font-semibold text-foreground hover:text-foreground hover:no-underline">
               <Link href={`/student/course/${courseId}`}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Course
               </Link>
             </Button>
-            <h2 className="text-base font-heading font-semibold">Module Content</h2>
-            <p className="text-xs text-muted-foreground mt-1 break-words">{enhancedModule.name}</p>
+            <h2 className="text-base font-heading font-semibold">{enhancedModule.name}</h2>
+            {/* <p className="text-xs text-muted-foreground mt-1 break-words"></p> */}
           </div>
           
           <div className="border-t border-border flex-shrink-0"></div>
@@ -440,7 +440,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                               {getItemIcon(item.type, item.status)}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium break-words whitespace-normal text-left mb-1">
+                              <div className="font-semibold text-sm break-words whitespace-normal text-left mb-1">
                                 {item.type === 'live-class' ? `Live Class: ${item.title}` :
                                  item.type === 'video' ? `Video: ${item.title}` :
                                  item.type === 'article' ? `Article: ${item.title}` :
@@ -504,7 +504,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                     <List className="w-4 h-4 mr-2" />
                     Module Content
                 </Button>
-                </SheetTrigger>                <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">
+                </SheetTrigger>                
+                   <SheetContent side="bottom" className="h-[80vh] p-0 flex flex-col">
                     <SheetHeader className="p-4 border-b">
                         <SheetTitle>Module Content</SheetTitle>
                     </SheetHeader>

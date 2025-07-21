@@ -68,9 +68,10 @@ interface IDEProps {
     getAssessmentData?: any
     runCodeLanguageId?: number
     runSourceCode?: string
+    getCodingSubmissionsData?: any
 }
 
-const IDE: React.FC<IDEProps> = ({
+const   IDE: React.FC<IDEProps> = ({
     params,
     onBack,
     remainingTime,
@@ -79,6 +80,8 @@ const IDE: React.FC<IDEProps> = ({
     getAssessmentData,
     runCodeLanguageId,
     runSourceCode,
+    getCodingSubmissionsData,
+
 }) => {
     const pathname = usePathname()
     const router = useRouter()
@@ -100,6 +103,7 @@ const IDE: React.FC<IDEProps> = ({
     const [codeResult, setCodeResult] = useState<any>([])
     const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
+    const [codingSubmissionAction, setCodingSubmissionAction] = useState<any>(null)
 
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
@@ -316,6 +320,15 @@ const IDE: React.FC<IDEProps> = ({
         }
     }, [runCodeLanguageId, runSourceCode])
 
+    useEffect(()=> {
+        const getActions = async () => {
+            const action = await getCodingSubmissionsData(selectedCodingOutsourseId,assessmentSubmitId,params.editor)
+            setCodingSubmissionAction(action)
+        }
+        getActions()
+    },[])
+
+    console.log(codingSubmissionAction)
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
@@ -376,7 +389,7 @@ const IDE: React.FC<IDEProps> = ({
                                     size="sm"
                                     variant="outline"
                                     className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
-                                    disabled={loading || isSubmitted}
+                                    disabled={(loading || isSubmitted) || codingSubmissionAction}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                                     <span className="ml-2 font-medium">Run Code</span>
@@ -385,7 +398,7 @@ const IDE: React.FC<IDEProps> = ({
                                     onClick={(e) => handleSubmit(e, 'submit')}
                                     size="sm"
                                     className="bg-primary hover:bg-primary-dark text-primary-foreground"
-                                    disabled={loading || isSubmitted}
+                                    disabled={(loading || isSubmitted) || codingSubmissionAction}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
                                     <span className="ml-2 font-medium">Submit Solution</span>
@@ -421,9 +434,7 @@ const IDE: React.FC<IDEProps> = ({
                             </>
                         ) : (
                             <>
-                                <div className="w-16 h-16 bg-destructive/10 rounded-full mx-auto mb-4 flex items-center justify-center">
-                                    <X className="w-8 h-8 text-destructive" />
-                                </div>
+                                
                                 <AlertDialogTitle className="text-destructive text-xl">
                                     ❌ Test Cases Failed
                                 </AlertDialogTitle>
@@ -571,7 +582,7 @@ const IDE: React.FC<IDEProps> = ({
                                                     {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                                         <Code className="w-4 h-4 text-primary" />
                                                     </div> */}
-                                                    <h3 className="font-bold text-foreground">Code Editor</h3>
+                                                    <h6 className="font-bold text-foreground">Code Editor</h6>
                                                 </div>
 
                                                 {/* Language Selector */}
@@ -615,6 +626,7 @@ const IDE: React.FC<IDEProps> = ({
                                                     insertSpaces: true,
                                                     renderWhitespace: 'selection',
                                                     bracketPairColorization: { enabled: true },
+                                                    contextmenu: false
                                                 }}
                                             />
                                         </div>

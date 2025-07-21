@@ -208,7 +208,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
           </div>
           <div className="space-y-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl shadow-8dp p-6">
+              <div key={i} className="bg-card rounded-2xl p-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Skeleton className="h-6 w-32" />
@@ -217,7 +217,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                   <Skeleton className="h-6 w-3/4" />
                   <div className="space-y-3">
                     {[...Array(4)].map((_, j) => (
-                      <div key={j} className="flex items-center space-x-3 p-4 rounded-xl border">
+                      <div key={j} className="flex items-center space-x-3 p-4 rounded-xl">
                         <Skeleton className="h-4 w-4 rounded-full" />
                         <Skeleton className="h-4 w-1/2" />
                       </div>
@@ -239,8 +239,8 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
     <div className="h-full bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">{chapterDetails.title}</h1>
+        <div className="flex justify-between items-center mb-8 max-w-3xl ">
+          <h5 className=" font-bold text-foreground ml-5">{chapterDetails.title}</h5>
           <Badge 
             variant="outline" 
             className={cn(
@@ -261,29 +261,30 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
         )}
         
         {quizQuestions.length === 0 ? (
-          <div className="bg-card border border-border rounded-2xl shadow-8dp p-12">
+          <div className="bg-card rounded-2xl p-12">
             <div className="text-center">
               <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground text-lg">No quiz questions have been added by the instructor.</p>
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="">
             {quizQuestions.map((q: any, index: number) => {
               const questionStatus = getQuestionStatus(q);
               const quizTrack = q.quizTrackingData?.[0];
               const isAttempted = !!quizTrack;
               
               return (
-                <div key={q.id} className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden">
+                <div key={q.id} className="rounded-2xl transition-all duration-300 overflow-hidden">
                   {/* Question Header */}
-                  <div className="bg-card-elevated border-b border-border p-6">
+                  <div className="">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                        {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                           <span className="text-sm font-bold text-primary">{index + 1}</span>
-                        </div>
-                        <h3 className="text-lg font-bold text-foreground">Question {index + 1}</h3>
+                        </div> */}
+                        {/* <h3 className="text-lg font-bold text-foreground">Question {index + 1}</h3> */}
+                   
                       </div>
                       
                       <div className="flex items-center space-x-3">
@@ -300,7 +301,26 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                             {Math.trunc(Number(q.marks))} Marks
                           </div>
                         )}
-                        {questionStatus && (
+                    
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Question Content */}
+                  <div className="p-6">
+                    <div className="mb-6 flex items-start">
+                      <h3 className="text-lg  text-foreground mr-2">{index + 1}.</h3>
+                      <div className="prose prose-neutral  max-w-none text-left">
+                        <RemirrorForm
+                          description={q.question}
+                          preview={true}
+                          bigScreen={true}
+
+                        />
+                      </div>
+                      <div>
+
+                      {questionStatus && (
                           <Badge 
                             variant="outline" 
                             className={cn(
@@ -315,19 +335,6 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                         )}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Question Content */}
-                  <div className="p-6">
-                    <div className="mb-6">
-                      <div className="prose prose-neutral  max-w-none text-left">
-                        <RemirrorForm
-                          description={q.question}
-                          preview={true}
-                          bigScreen={true}
-                        />
-                      </div>
-                    </div>
 
                     <RadioGroup
                       value={
@@ -337,7 +344,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                       }
                       onValueChange={(value) => handleSelect(q.id, value)}
                       disabled={isCompleted || isSubmitting || isCompleting}
-                      className="space-y-3"
+                      className="space-y-1"
                     >
                       {Object.entries(q.options).map(([optionId, optionText]) => {
                         const styling = getOptionStyling(q, optionId);
@@ -350,11 +357,10 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                           <div 
                             key={optionId} 
                             className={cn(
-                              "flex items-start space-x-3 p-4 rounded-xl border transition-all duration-200",
-                              !isCompleted && "cursor-pointer hover:border-primary/30 hover:bg-primary/5",
-                              isSelected && !isCompleted && "border-primary bg-primary/10",
-                              styling.borderColor,
-                              styling.bgColor
+                              "flex items-start space-x-3 p-2 rounded-xl transition-all duration-200",
+                              !isCompleted && "cursor-pointer",
+                              isSelected && !isCompleted && "",
+                              styling.borderColor
                             )}
                           >
                             <RadioGroupItem 
@@ -369,7 +375,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                             <Label 
                               htmlFor={`q${index}_option${optionId}`} 
                               className={cn(
-                                "flex-1 text-left leading-relaxed",
+                                "flex-1 text-left leading-relaxed mb-0",
                                 !isCompleted ? "cursor-pointer" : "cursor-default",
                                 styling.textColor
                               )}
@@ -395,14 +401,14 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
         
         {!isCompleted && quizQuestions.length > 0 && (
           <div className="flex justify-center pt-8 pb-6">
-            <button
+            <Button
               onClick={handleSubmitClick}
               disabled={
                 isSubmitting || isCompleting ||
                 Object.keys(selectedAnswers).length === 0
               }
               className={cn(
-                "px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp",
+                "px-3 py-4 rounded-md font-semibold  transition-all duration-200 " ,
                 isSubmitting || isCompleting
                   ? "bg-muted text-muted-foreground cursor-not-allowed"
                   : "bg-primary hover:bg-primary-dark text-primary-foreground"
@@ -415,17 +421,16 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
                 </div>
               ) : (
                 <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-5 h-5" />
                   <span>Submit Quiz</span>
                 </div>
               )}
-            </button>
+            </Button>
           </div>
         )}
 
         {/* Confirmation Dialog */}
         <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <AlertDialogContent className="bg-card border-border shadow-32dp">
+          <AlertDialogContent className="bg-card">
             <AlertDialogHeader>
               <AlertDialogTitle className="text-foreground">
                 Are you absolutely sure?
