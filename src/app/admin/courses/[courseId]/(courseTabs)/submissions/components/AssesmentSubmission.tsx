@@ -296,7 +296,8 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     </h5>
                     <Image
                         src="/emptyStates/curriculum.svg"
-                        alt="No Assessment Found"                            width={400}
+                        alt="No Assessment Found"
+                        width={400}
                         height={400}
                     />
                 </div>

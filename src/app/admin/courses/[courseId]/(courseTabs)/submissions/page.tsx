@@ -724,7 +724,7 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     ) : (
                         <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                            <h1 className="text-center font-semibold text-[1.125rem]">
+                            <h1 className="text-center font-semibold text-[1.063rem]">
                                 {appliedSearch ? `No Projects Found for "${appliedSearch}"` : 'No Projects Found'}
                             </h1>
                             <Image
@@ -762,7 +762,7 @@ const Page = ({ params }: { params: any }) => {
                             })
                         ) : (
                             <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                                <h1 className="text-center font-semibold text-[1.125rem]">
+                                <h1 className="text-center font-semibold text-[1.063rem]">
                                     {appliedSearch ? `No Forms Found for "${appliedSearch}"` : 'No Forms Found'}
                                 </h1>
                                 <Image
