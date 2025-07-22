@@ -100,7 +100,6 @@ const Page = ({ params }: any) => {
         params.assignmentData,
         params.individualStatus,
         getBootcampHandler,
-        initialContent,
     ])
 
     const dateString = individualStudentData?.completedAt
