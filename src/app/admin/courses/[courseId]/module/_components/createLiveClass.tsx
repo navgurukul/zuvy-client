@@ -518,6 +518,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                             'text-muted-foreground'
                                                     )}
                                                 >
+                                                     <span className="truncate text-left max-w-[90%]">
                                                     {field.value
                                                         ? bootcampData.find(
                                                               (bootcamp: any) =>
@@ -525,6 +526,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                                   field.value
                                                           )?.label
                                                         : 'Select batch...'}
+                                                        </span>
                                                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                 </Button>
                                             </FormControl>
@@ -565,9 +567,11 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                                                 : 'opacity-0'
                                                                         )}
                                                                     />
+                                                                    <span className="block max-w-[90%] break-words text-left">
                                                                     {
                                                                         bootcamp.label
                                                                     }
+                                                                    </span>
                                                                 </CommandItem>
                                                             )
                                                         )}
