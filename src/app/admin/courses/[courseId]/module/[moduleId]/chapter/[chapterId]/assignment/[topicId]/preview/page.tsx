@@ -43,7 +43,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
         month: 'long',
         day: 'numeric',
     }
-    const formattedDate = date.toLocaleDateString('en-US', options)
+    const formattedDate = date.toLocaleDateString('en-US', options2)
 
     useEffect(() => {
         fetchPreviewData(params, setAssignmentPreviewContent)

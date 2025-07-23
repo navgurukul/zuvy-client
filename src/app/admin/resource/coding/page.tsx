@@ -80,7 +80,7 @@ const CodingProblems = () => {
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [areOptionsLoaded, setAreOptionsLoaded] = useState(false)
     const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
-    
+
     // Only debounce for suggestions, not for confirmed search
     const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
@@ -205,7 +205,7 @@ const CodingProblems = () => {
             }
 
             setIsLoadingSuggestions(true)
-            
+
             try {
                 const response = await api.get('/Content/allCodingQuestions', {
                     params: {
@@ -218,12 +218,12 @@ const CodingProblems = () => {
 
                 // Handle different response structures
                 let questionsData = response.data;
-                
+
                 // If the response has a data property, use that
                 if (response.data.data) {
                     questionsData = response.data.data;
                 }
-                
+
                 // If the response has a questions property, use that
                 if (response.data.questions) {
                     questionsData = response.data.questions;
@@ -237,8 +237,8 @@ const CodingProblems = () => {
                 }
 
                 const suggestions = questionsData
-                    .filter((question: any) => 
-                        question.title && 
+                    .filter((question: any) =>
+                        question.title &&
                         question.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
                     )
                     .slice(0, 8)
@@ -330,7 +330,7 @@ const CodingProblems = () => {
     const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
-        
+
         // Show suggestions when typing (if there's text and input is focused)
         if (value.length > 0 && isSearchFocused) {
             setShowSuggestions(true);
@@ -380,6 +380,12 @@ const CodingProblems = () => {
         setConfirmedSearch('')
         setShowSuggestions(false)
         setCurrentPage(1)
+
+        const params = new URLSearchParams(window.location.search)
+        params.delete('search')
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`
+        router.replace(newUrl)
     }
 
     const fetchCodingQuestions = useCallback(
@@ -424,6 +430,13 @@ const CodingProblems = () => {
         return () => clearTimeout(timer)
     }, [])
 
+    useEffect(() => {
+        if (urlInitialized && searchTerm.trim() === '' && confirmedSearch !== '') {
+            // User cleared input manually (not via X), so reset search filter
+            clearOnlySearchTerm()
+        }
+    }, [searchTerm, confirmedSearch, urlInitialized])
+
     const getActiveFiltersCount = () => {
         let count = 0
         if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) count++
@@ -433,7 +446,7 @@ const CodingProblems = () => {
     }
 
     const activeFiltersCount = getActiveFiltersCount()
-    
+
     return (
         <>
             {loading ? (
@@ -473,7 +486,7 @@ const CodingProblems = () => {
                                                 <X size={16} />
                                             </button>
                                         )}
-                                        
+
                                         {/* Fixed Suggestions dropdown */}
                                         {showSuggestions && (
                                             <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg top-full mt-1">
