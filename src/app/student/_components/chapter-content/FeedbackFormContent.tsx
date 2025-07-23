@@ -89,10 +89,13 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
         try {
             const formData = {
                 section: questions.map((q) => ({
-                    ...q,
-                    answer: q.answer || null,
+                  ...q,
+                  answer:
+                    q.typeId === 1
+                      ? (parseInt(q.answer) + 1).toString()
+                      : q.answer || null,
                 })),
-            }
+              };
             await submitForm(formData)
         } catch (error) {
             console.error('Form submission error:', error)
@@ -442,7 +445,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                                 }
                                                 setQuestions(updatedQuestions)
                                             }}
-                                            className="w-[100px]"
+                                            className="w-[7rem]"
                                         />
                                     </div>
                                 ) : (
@@ -460,7 +463,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                                 }
                                                 setQuestions(updatedQuestions)
                                             }}
-                                            className="w-[100px]"
+                                            className="w-[7rem]"
                                         />
                                     </div>
                                 )}

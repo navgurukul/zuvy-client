@@ -606,7 +606,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
                     return (
                         <Card className={`shadow-4dp   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
-                          <CardContent className="p-6 ">
+                          <CardContent className={`p-6 ${isLocked ? ' cursor-not-allowed' : ''}`}>
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                               <div className="flex-1 text-left">
                                 {isCurrentModule && (
@@ -615,12 +615,12 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 {isCompleted && (
                                   <Badge className="mb-2 bg-success-light text-success border-success/20 self-start hover:bg-success-light/80">Completed</Badge>
                                 )}
-                                {isLocked && (
+                                {/* {isLocked && (
                                   <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
                                     <Lock className="w-3 h-3" />
                                     Locked
                                   </Badge>
-                                )}
+                                )} */}
                                 <h3 className="text-xl font-heading font-semibold mb-2 text-left">
                                   Module {module.order}: {module.name}
                                 </h3>
@@ -641,7 +641,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                               <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
 
                                 <Button
-                                  className={`px-6 ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : `bg-white text-primary hover:underline ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
+                                  className={`px-6 font-semibold ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : `bg-white text-primary hover:underline ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
                                   disabled={isLocked}
                                   onClick={(e) => {
                                     if (isLocked) {
@@ -873,7 +873,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       {/* Illustration */}
                       <div className="mb-6 max-w-[200px] w-full">
                         <Image
-                          src="/emptyStates/emptyStateforWhatsNext.svg"
+                          src="/emptyStates/undraw_not-found_6bgl.svg"
                           alt="No classes attended"
                           width={200}
                           height={120}

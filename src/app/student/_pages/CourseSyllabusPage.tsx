@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircle, ArrowLeft } from "lucide-react";
+import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircle, ArrowLeft, Play } from "lucide-react";
 import useCourseSyllabus from "@/hooks/useCourseSyllabus";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useState } from "react";
@@ -142,6 +142,8 @@ const CourseSyllabusPage = () => {
         return <Code className="w-4 h-4 text-purple-500" />;
       case 'form':
         return <FileText className="w-4 h-4 text-green-500" />;
+      case 'live class':
+        return <Play className="w-4 h-4 text-green-500" />;
       default:
         return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
@@ -149,15 +151,15 @@ const CourseSyllabusPage = () => {
 
   const formatDuration = (duration: string) => {
     if (duration === "Self-paced" || duration === "Timed") return duration;
-    
+
     // Convert minutes to hours if it's a number
     const minutes = parseInt(duration.replace(' min', ''));
     if (isNaN(minutes)) return duration;
-    
+
     if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-    
+
     if (remainingMinutes === 0) return `${hours}h`;
     return `${hours}h ${remainingMinutes}m`;
   };
@@ -177,10 +179,10 @@ const CourseSyllabusPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex items-center justify-start hover:text-primary cursor-pointer" onClick={() => router.back()}>
+      <div className="flex items-center justify-start hover:text-primary cursor-pointer w-fit" onClick={() => router.back()}>
 
-      <ArrowLeft className="w-4 h-4 ml-10 mt-1  inline-block text-left  "  />
-        <span className="text-sm font-medium  ml-2 mt-1 ">Back</span>
+        <ArrowLeft className="w-4 h-4 ml-10 mt-1  inline-block text-left  " />
+        <span className="text-sm font-semibold  ml-2 mt-1 ">Back</span>
       </div>
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
         {/* Course Information */}
@@ -217,7 +219,7 @@ const CourseSyllabusPage = () => {
                 </div>
               </div>
             </div> */}
-             <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+            <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
               <div className="flex-shrink-0">
                 <img
                   src={syllabusData.coverImage || '/logo.PNG'}
@@ -289,36 +291,41 @@ const CourseSyllabusPage = () => {
         <div>
           <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Syllabus</h2>
           <div className="space-y-6">
-            {syllabusData.modules.map((module, moduleIndex) => (
-              <Card key={module.moduleId} className="shadow-4dp">
-                <CardContent className="p-6">
-                  <div className="mb-4 text-left">
-                    <h3 className="text-xl font-heading font-semibold mb-2 text-left">
-                      Module {moduleIndex + 1}: {module.moduleName}
-                    </h3>
-                    {module.moduleDescription && (
-                      <TruncatedDescription text={module.moduleDescription} maxLength={150} className="text-muted-foreground mb-2 text-left" />
-                    )}
-                    <p className="text-sm text-muted-foreground text-left">
-                      Duration: {formatDuration(module.moduleDuration)} • {module.chapters.length} chapters
-                    </p>
-                  </div>
+            {syllabusData.modules.map((module, moduleIndex) => {
 
-                  <div className="space-y-3">
-                    {module.chapters
-                      .sort((a, b) => a.chapterOrder - b.chapterOrder)
-                      .map((chapter, chapterIndex) => (
-                        <div key={chapter.chapterId} className="border-l-2 flex items-start gap-3 border-border pl-2">
+              const isLock = module.isLock;
+
+              return (
+                <Card key={module.moduleId} className="shadow-4dp">
+                  <CardContent className={`p-6 ${isLock ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <div className="mb-4 text-left">
+                      <h3 className="text-xl font-heading font-semibold mb-2 text-left">
+                        Module {moduleIndex + 1}: {module.moduleName}
+                      </h3>
+                      {isLock && <span className="text-xs text-muted-foreground text-left">Locked</span>}
+                      {module.moduleDescription && (
+                        <TruncatedDescription text={module.moduleDescription} maxLength={150} className="text-muted-foreground mb-2 text-left" />
+                      )}
+                      <p className="text-sm text-muted-foreground text-left">
+                        Duration: {formatDuration(module.moduleDuration)} • {module.chapters.length} chapters
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      {module.chapters
+                        .sort((a, b) => a.chapterOrder - b.chapterOrder)
+                        .map((chapter, chapterIndex) => (
+                          <div key={chapter.chapterId} className="border-b-2 flex items-start gap-3 border-border pb-2">
                             <div className="flex-shrink-0 mt-1">
                               {getItemIcon(chapter.chapterType)}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center justify-between">
                                 <div className="text-left">
-                          <Link href={`/student/course/${courseId}/modules/${module.moduleId}?chapterId=${chapter.chapterId}`} className="hover:text-primary"   >
-                                  <h4 className="font-medium text-sm text-left">
-                                    {chapter.chapterName || `Chapter ${chapter.chapterOrder}`}
-                                  </h4>
+                                  <Link href={`/student/course/${courseId}/modules/${module.moduleId}?chapterId=${chapter.chapterId}`} className="hover:text-primary"   >
+                                    <h4 className="font-medium text-sm text-left">
+                                      {chapter.chapterName || `Chapter ${chapter.chapterOrder}`}
+                                    </h4>
                                   </Link>
                                   <p className="text-xs text-muted-foreground text-left">
                                     {getChapterTypeLabel(chapter.chapterType)}
@@ -332,12 +339,13 @@ const CourseSyllabusPage = () => {
                                 </span>
                               </div>
                             </div>
-                        </div>
-                      ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </div>

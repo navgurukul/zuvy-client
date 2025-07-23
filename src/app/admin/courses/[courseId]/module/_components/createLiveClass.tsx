@@ -592,8 +592,9 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({fetchingChapte
                                                     variant="outline"
                                                     role="combobox"
                                                     aria-expanded={formIsOpen}
+                                                    disabled={true}
                                                     className={cn(
-                                                        'w-full justify-between',
+                                                        'w-full justify-between cursor-not-allowed',
                                                         field.value.length ===
                                                             0 &&
                                                             'text-muted-foreground'

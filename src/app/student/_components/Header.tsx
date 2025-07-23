@@ -101,25 +101,25 @@ const Header = () => {
   // Don't render theme toggle until client-side
   if (!isClient) {
     return (
-      <header className="w-full h-16 px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
+      <header className="w-full h-16 px-4 sm:px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
         {/* Left - Logo and Navigation */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
             <img 
               src={'/logo.PNG'} 
               alt="Zuvy" 
-              className="h-12"
+              className="h-8 sm:h-10 md:h-12"
             />
           </div>
 
           {/* Course Navigation Buttons */}
           {isOnCoursePage && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="link"
                 size="sm"
                 onClick={handleDashboardClick}
-                className={`${ 
+                className={`text-xs font-semibold sm:text-sm ${ 
                      'text-foreground  hover:text-primary'
                 }`}
               >
@@ -129,9 +129,9 @@ const Header = () => {
                 variant="link"
                 size="sm"
                 onClick={handleSyllabusClick}
-                className={`${
+                className={` text-xs font-semibold sm:text-sm ${
                   isOnCourseSyllabus() 
-                    ? 'text-primary font-medium' 
+                    ? 'text-primary font-semibold' 
                     : 'text-foreground hover:text-primary'
                 }`}
               >
@@ -142,13 +142,13 @@ const Header = () => {
         </div>
 
         {/* Right - Theme Switch and Avatar with Dropdown */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-9 h-9"></div> {/* Placeholder for theme toggle */}
           
           {/* Student Avatar with Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+              <Avatar className="h-7 w-7 sm:h-8 sm:w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
                 <AvatarImage src={studentData?.profile_picture} alt="Student" />
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                   {getUserInitials(studentData?.name)}
@@ -203,26 +203,26 @@ const Header = () => {
   }
 
   return (
-    <header className="w-full h-16 px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
+    <header className="w-full h-16 px-4 sm:px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
       {/* Left - Logo and Navigation */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img 
             src={'/logo.PNG'} 
             alt="Zuvy" 
-            className="h-12"
+            className="h-8 sm:h-10 md:h-12"
           />
         </div>
 
         {/* Course Navigation Buttons */}
         {isOnCoursePage && (
-          <div className="flex items-center gap-2 ">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="link"
               size="sm"
               onClick={handleDashboardClick}
-              className={`${ 
-                   ' font-semibold text-foreground hover:underline hover:text-primary'
+              className={`text-xs sm:text-sm font-semibold ${ 
+                   'text-foreground hover:underline hover:text-primary'
               }`}
             >
               Dashboard
@@ -231,7 +231,7 @@ const Header = () => {
               variant="link"
               size="sm"
               onClick={handleSyllabusClick}
-              className={`font-semibold ${
+              className={`text-xs sm:text-sm font-semibold ${
                 isOnCourseSyllabus() 
                   ? 'text-primary font-medium' 
                   : 'text-foreground hover:underline hover:text-primary'
@@ -244,12 +244,12 @@ const Header = () => {
       </div>
 
       {/* Right - Theme Switch and Avatar with Dropdown */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Button
           variant="ghost"
           size="sm"
           onClick={toggleTheme}
-          className="w-9 h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           {isDark ? (
             <Sun className="h-4 w-4" />
@@ -262,7 +262,7 @@ const Header = () => {
         {(studentData as any)?.profilePicture ? 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Avatar className="h-8 w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+            <Avatar className="h-7 w-7 sm:h-8 sm:w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
               <AvatarImage src={(studentData as any)?.profilePicture || '/logo.PNG'} alt="Student" />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                 {getUserInitials(studentData?.name)}
@@ -296,7 +296,7 @@ const Header = () => {
         </DropdownMenu>
         :
         <div className="w-8 h-8">
-          <Avatar className="h-8 w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+          <Avatar className="h-7 w-7 sm:h-8 sm:w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
                 <AvatarImage src={(studentData as any)?.profilePicture || '/logo.PNG'} alt="Student" />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
                 {getUserInitials(studentData?.name)}

@@ -110,7 +110,7 @@ const StudentDashboard = () => {
     }
 
     return (
-      <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" asChild>
+      <Button className="w-full md:w-auto bg-primary font-semibold text-primary-foreground hover:bg-primary-dark" asChild>
         <Link href={`/student/course/${bootcamp.id}`}>
           <RotateCcw className="w-4 h-4 mr-2" />
           Resume Learning
@@ -228,7 +228,7 @@ const StudentDashboard = () => {
               variant={filter === 'enrolled' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setFilter('enrolled')}
-              className={`rounded-full ${filter === 'enrolled'
+              className={`rounded-full font-semibold ${filter === 'enrolled'
                 ? 'bg-primary text-primary-foreground hover:bg-primary-dark'
                 : 'hover:bg-primary-light hover:text-foreground'
                 }`}
@@ -240,7 +240,7 @@ const StudentDashboard = () => {
               size="sm"
               onClick={() => setFilter('completed')}
               disabled={!studentData?.completedBootcamps?.length}
-              className={`rounded-full ${filter === 'completed'
+              className={`rounded-full font-semibold ${filter === 'completed'
                 ? 'bg-primary text-primary-foreground hover:bg-primary-dark'
                 : 'hover:bg-primary-light hover:text-foreground'
                 }`}

@@ -626,7 +626,12 @@ const   IDE: React.FC<IDEProps> = ({
                                                     insertSpaces: true,
                                                     renderWhitespace: 'selection',
                                                     bracketPairColorization: { enabled: true },
-                                                    contextmenu: false
+                                                    contextmenu: false,
+                                                    suggestOnTriggerCharacters: false,
+                                                    quickSuggestions: false,
+                                                    parameterHints: { enabled: false },
+                                                    tabCompletion: 'off',
+                                                    acceptSuggestionOnEnter: 'off',
                                                 }}
                                             />
                                         </div>

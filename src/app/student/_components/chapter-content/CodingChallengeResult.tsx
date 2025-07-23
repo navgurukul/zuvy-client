@@ -4,7 +4,7 @@ import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Code2, CheckCircle2, AlertCircle } from 'lucide-react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 
 // Date formatting function
 function formatSubmissionDate(dateString: string) {
@@ -58,9 +58,10 @@ interface CodingChallengeResultProps {
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
   const router = useRouter();
   const params = useParams();
-console.log(submissionResults[0].result)
+  const searchParams = useSearchParams();
+  const chapterId = searchParams.get('chapterId');
   const handleViewSolution = (questionId: number) => {
-    router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}`);
+    router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}&moduleId=${params.moduleId}&chapterId=${chapterId}`);
   };
 
   return (

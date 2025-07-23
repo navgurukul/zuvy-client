@@ -126,14 +126,14 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
         {question.status === 'Completed' ? (
           <Button
             onClick={() => handleSolveChallenge(question)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium text-sm"
+            className="bg-blue-600 font-semibold hover:bg-blue-700 text-white px-6 py-2  text-sm"
           >
             View Solution
           </Button>
         ) : (
           <Button
             onClick={() => handleSolveChallenge(question)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium text-sm"
+            className="bg-blue-600 font-semibold hover:bg-blue-700 text-white px-6 py-2  text-sm"
           >
             Start Practice
           </Button>

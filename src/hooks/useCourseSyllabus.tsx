@@ -16,6 +16,7 @@ interface Module {
   moduleDescription: string;
   moduleDuration: string;
   chapters: Chapter[];
+  isLock: boolean
 }
 
 interface CourseSyllabusData {
