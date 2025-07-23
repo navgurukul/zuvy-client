@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import './remirror-editor.css'
 import { api } from '@/utils/axios.config'
+import { TextSelection } from 'prosemirror-state'
 
 export const Toolbar = () => {
     const {
@@ -104,6 +105,10 @@ export const Toolbar = () => {
         }
         
         const selectedText = state.doc.textBetween(selection.from, selection.to, '\n')
+        const hasSelectedText = selectedText.trim().length > 0
+
+        // Check if we're at the very beginning of the document
+        const isAtStart = selection.from === 1
         
         // Create code block with selected text
         const codeBlock = state.schema.nodes.codeBlock.create(
@@ -111,10 +116,37 @@ export const Toolbar = () => {
             selectedText ? state.schema.text(selectedText) : undefined
         )
         
-        // Replace selection
-        const tr = state.tr.replaceSelectionWith(codeBlock)
-        dispatch(tr)
+        let tr = state.tr
+    
+        if (isAtStart && hasSelectedText) {
+            // If at start AND has selected text, replace the selected text with paragraph + code block
+            const emptyParagraph = state.schema.nodes.paragraph.create()
+            
+            // Replace the selected text with paragraph and code block
+            tr = tr.replaceWith(selection.from, selection.to, [emptyParagraph, codeBlock])
+            
+            // Position cursor in the code block
+            const codeBlockStartPos = 1 + emptyParagraph.nodeSize + 1
+            tr = tr.setSelection(
+                TextSelection.near(tr.doc.resolve(codeBlockStartPos))
+            )
+        } else if (isAtStart && !hasSelectedText) {
+            // If at start, first insert an empty paragraph, then the code block
+            const emptyParagraph = state.schema.nodes.paragraph.create()
+            
+            // Insert both paragraph and code block
+            tr = tr.insert(1, [emptyParagraph, codeBlock])
+            // Position cursor in the code block (after the empty paragraph)
+            const codeBlockStartPos = 1 + emptyParagraph.nodeSize + 1
+            tr = tr.setSelection(
+                TextSelection.near(tr.doc.resolve(codeBlockStartPos))
+            )
+        } else {
+            // Normal code block insertion
+            tr = tr.replaceSelectionWith(codeBlock)
+        }
         
+        dispatch(tr)
         focus()
     }
 
