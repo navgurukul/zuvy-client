@@ -14,8 +14,9 @@ import useDebounce from '@/hooks/useDebounce'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
 import ClassCardSkeleton from '../../_components/classCardSkeleton'
-import { useRouter } from 'next/navigation'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { X } from 'lucide-react'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -84,62 +85,131 @@ function Page({ params }: any) {
 
     //     return () => clearInterval(interval)
     //   }, [params.courseId, isCourseDeleted])
+    const searchParams = useSearchParams()
 
+    const [searchInitialized, setSearchInitialized] = useState(false)
+    const [suggestions, setSuggestions] = useState<any[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [isSuggestionClicked, setIsSuggestionClicked] = useState(false)
+    const [searchLoading, setSearchLoading] = useState(false)
+    const [allClassesData, setAllClassesData] = useState<any[]>([]) // Store all classes
+
+       useEffect(() => {
+        const searchFromURL = searchParams.get('search') || ''
+        setSearch(searchFromURL)
+        // If there's a search term in URL, treat it as if user selected it
+        if (searchFromURL) {
+            setIsSuggestionClicked(true)
+        }
+        setSearchInitialized(true)
+    }, [searchParams])
+    
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
         setbatchValueData(value)
     }
+    
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
         localStorage.setItem('sessionTab', tab)
     }
+    
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value)
+        const value = e.target.value
+        setSearch(value)
+        setCurrentPage(1)
+        setShowSuggestions(true)
+        setSearchLoading(true)
+    
+        setIsSuggestionClicked(false) // Reset suggestion click state
+    
+        // Only update URL when user selects a suggestion or presses enter
+        // Don't update URL on every keystroke
+        if (value === '') {
+            // Clear URL when search is empty
+            const params = new URLSearchParams(window.location.search)
+            params.delete('search')
+            router.replace(`?${params.toString()}`)
+        }
     }
-
+    
+    // Add this new function to handle when user presses Enter
+    const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            const value = (e.target as HTMLInputElement).value
+            setIsSuggestionClicked(true)
+            setShowSuggestions(false)
+            
+            const params = new URLSearchParams(window.location.search)
+            if (value) {
+                params.set('search', value)
+            } else {
+                params.delete('search')
+            }
+            router.replace(`?${params.toString()}`)
+        }
+    }
+    
     const tabs = ['completed', 'upcoming', 'ongoing']
-
+    
     useEffect(() => {
         const lastUpdatedTab = localStorage.getItem('sessionTab')
         if (lastUpdatedTab) {
             setActiveTab(lastUpdatedTab)
         }
     }, [])
-
+    
     const getHandleAllClasses = useCallback(
         async (offset: number) => {
             let baseUrl = `/classes/all/${params.courseId}?limit=${position}&offset=${offset}`
-
+    
             const lastUpdatedTab = localStorage.getItem('sessionTab')
-
+    
             if (batchId) {
                 baseUrl += `&batchId=${batchId}`
             }
-
+    
             baseUrl += `&status=${lastUpdatedTab || activeTab}`
-
-            if (debouncedSearch) {
-                baseUrl += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
-            }
-
+    
             try {
                 const res = await api.get(baseUrl)
-                if (activeTab === res.data?.classes[0]?.status) {
-                    setClasses(res.data.classes)
+                let allClasses = res.data.classes
+    
+                // Store all classes data
+                setAllClassesData(allClasses)
+    
+                let filteredClasses = allClasses
+    
+                // Filter classes based on search term - fix the logic here
+                if (debouncedSearch && (isSuggestionClicked || searchParams.get('search'))) {
+                    filteredClasses = allClasses.filter(
+                        (cls: any) =>
+                            cls?.title?.toLowerCase().includes(debouncedSearch.toLowerCase())
+                    )
+                }
+    
+                // Only show classes if they match the active tab status
+                if (allClasses.length > 0 && activeTab === allClasses[0]?.status) {
+                    setClasses(filteredClasses)
                 } else {
                     setClasses([])
                 }
+    
                 setTotalStudents(res.data.total_items)
                 setPages(res.data.total_pages)
                 setLastPage(res.data.total_items)
                 setLoading(false)
+                setSearchLoading(false)
+    
             } catch (error) {
                 console.error('Error fetching classes:', error)
+                setLoading(false)
+                setSearchLoading(false)
             }
         },
-        [batchId, activeTab, debouncedSearch, params.courseId, position]
+        [batchId, activeTab, debouncedSearch, params.courseId, position, isSuggestionClicked, searchParams]
     )
-
+    
     useEffect(() => {
         const fetchStudents = async () => {
             try {
@@ -152,23 +222,22 @@ function Page({ params }: any) {
                 console.error(error)
             }
         }
-
+    
         fetchStudents()
     }, [params.courseId])
-
     useEffect(() => {
         let timeouts: NodeJS.Timeout[] = []
-
+    
         if (activeTab === 'upcoming' && classes.length > 0) {
             const currentTimes = classes.map((cls) => ({
                 date: new Date(cls.startTime),
                 time: new Date(cls.startTime).toTimeString().split(' ')[0],
             }))
-
+    
             currentTimes.forEach((item) => {
                 const now = new Date()
                 const delay = item.date.getTime() - now.getTime()
-
+    
                 if (delay > 0) {
                     const timeout = setTimeout(() => {
                         getHandleAllClasses(offset)
@@ -179,12 +248,12 @@ function Page({ params }: any) {
                 }
             })
         }
-
+    
         return () => {
             timeouts.forEach(clearTimeout)
         }
     }, [activeTab, offset, getHandleAllClasses])
-
+    
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
             await api
@@ -203,7 +272,6 @@ function Page({ params }: any) {
                 })
         }
     }, [params.courseId])
-
     const getAllModulesDetails = async () => {
         if (!params.courseId) return
 
@@ -216,16 +284,44 @@ function Page({ params }: any) {
             console.error('Failed to fetch modules data:', error)
         }
     }
-
+    
     useEffect(() => {
-        getHandleAllClasses(offset)
-    }, [getHandleAllClasses, offset])
-
+        if (searchInitialized) {
+            getHandleAllClasses(offset)
+        }
+    }, [getHandleAllClasses, offset, searchInitialized])
+    
+    const handleSuggestionClick = (title: string) => {
+        setSearch(title)
+        setShowSuggestions(false)
+        setIsSuggestionClicked(true)
+        setCurrentPage(1)
+        setSearchLoading(false)
+    
+        const params = new URLSearchParams(window.location.search)
+        params.set('search', title)
+        router.replace(`?${params.toString()}`)
+    }
+    
+    // Generate suggestions from all classes data, not just filtered classes
+    useEffect(() => {
+        if (search.trim() !== '' && allClassesData.length > 0) {
+            const filtered = allClassesData
+                .filter((cls) =>
+                    cls?.title?.toLowerCase().includes(search.toLowerCase())
+                )
+                .slice(0, 5)
+            setSuggestions(filtered)
+        } else {
+            setSuggestions([])
+        }
+    }, [search, allClassesData])
+    
     useEffect(() => {
         getHandleAllBootcampBatches()
         getAllModulesDetails()
     }, [getHandleAllBootcampBatches])
-
+    
     const onClickHandler = () => {
         if (bootcampData.length === 0) {
             toast.info({
@@ -235,7 +331,7 @@ function Page({ params }: any) {
             })
             setOpenSessionForm(false)
         }
-
+    
         if (students === 0) {
             toast.info({
                 title: 'Caution',
@@ -298,13 +394,56 @@ function Page({ params }: any) {
                         />
                     </div>
                     <div className="flex flex-col lg:flex-row justify-between items-center">
-                        <Input
-                            type="text"
-                            placeholder="Search Classes"
-                            className="lg:max-w-[500px] w-full"
-                            value={search}
-                            onChange={handleSetSearch}
-                        />
+                        <div className="relative w-full lg:max-w-[500px]">
+                            <div className="relative">
+                                <Input
+                                    type="text"
+                                    placeholder="Search Classes"
+                                    value={search}
+                                    onChange={handleSetSearch}
+                                    className="pr-10"
+                                    onFocus={() => {
+                                        if (search) setShowSuggestions(true)
+                                    }}
+                                    onKeyDown={handleSearchSubmit}
+                                />
+                                {search && (
+                                    <Button
+                                        onClick={() => {
+                                            setSearch('')
+                                            setOffset(0)
+                                            setCurrentPage(1)
+                                            setSuggestions([])
+                                            setShowSuggestions(false)
+                                            setIsSuggestionClicked(false)
+
+                                            const params = new URLSearchParams(window.location.search)
+                                            params.delete('search')
+                                            router.replace(`?${params.toString()}`)
+                                        }}
+                                        variant="ghost"
+                                        size="sm"
+                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
+                            {/* Suggestions */}
+                            {showSuggestions && suggestions.length > 0 && (
+                                <div className="absolute z-50 bg-white border border-gray-200 mt-1 rounded-md w-full max-w-[500px] shadow-md">
+                                    {suggestions.map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            onClick={() => handleSuggestionClick(item.title)}
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
+                                        >
+                                            {item.title}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="flex justify-start gap-6 my-6">
                         {tabs.map((tab) => (
@@ -335,9 +474,9 @@ function Page({ params }: any) {
                                             {classes.map(
                                                 (classData: any, index: any) =>
                                                     activeTab ===
-                                                    classData.status ? (
+                                                        classData.status ? (
                                                         activeTab ===
-                                                        'completed' ? (
+                                                            'completed' ? (
                                                             <div
                                                                 key={classData}
                                                             >
@@ -380,16 +519,11 @@ function Page({ params }: any) {
                                         </div>
                                         <DataTablePagination
                                             totalStudents={totalStudents}
-                                            position={position}
-                                            setPosition={setPosition}
-                                            pages={pages}
                                             lastPage={lastPage}
-                                            currentPage={currentPage}
-                                            setCurrentPage={setCurrentPage}
+                                            pages={pages}
                                             fetchStudentData={
                                                 getHandleAllClasses
                                             }
-                                            setOffset={setOffset}
                                         />
                                     </>
                                 ) : (

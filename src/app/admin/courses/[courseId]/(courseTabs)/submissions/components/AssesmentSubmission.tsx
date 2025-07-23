@@ -278,7 +278,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     )
                 ) : (
                     <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                        <h5 className="text-center font-semibold ">
+                        <h5 className="text-center font-semibold text-[17px]">
                             No Assessment Found
                         </h5>
                         <Image
@@ -291,12 +291,13 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 )
             ) : (
                 <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h5 className="text-center font-semibold ">
+                    <h5 className="text-center font-semibold text-[17px]">
                         No Assessment Found
                     </h5>
                     <Image
                         src="/emptyStates/curriculum.svg"
-                        alt="No Assessment Found"                            width={400}
+                        alt="No Assessment Found"
+                        width={400}
                         height={400}
                     />
                 </div>

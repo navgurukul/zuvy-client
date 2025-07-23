@@ -107,7 +107,7 @@ function ClassCard({
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <h3 className="font-semibold">
+                                        <h3 className="font-semibold text-lg">
                                             {ellipsis(classData.title, 30)}
                                         </h3>
                                     </TooltipTrigger>
@@ -227,7 +227,7 @@ function ClassCard({
                             </TooltipProvider>
 
                             <AlertDialogContent>
-                                <AlertDialogAction className="w-2 h-2 bg-white text-black ">
+                                <AlertDialogAction className="absolute top-4 right-4 w-6 h-6 bg-white text-black flex items-center justify-center">
                                     X
                                 </AlertDialogAction>
                                 <EditSessionDialog

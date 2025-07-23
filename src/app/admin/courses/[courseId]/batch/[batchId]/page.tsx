@@ -709,14 +709,9 @@ const BatchesInfo = ({
                         />
                         <DataTablePagination
                             totalStudents={totalStudents}
-                            position={position}
-                            setPosition={setPosition}
-                            pages={pages}
                             lastPage={lastPage}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
-                            fetchStudentData={fetchStudentData}
-                            setOffset={setOffset}
+                            pages={pages}
+                            fetchStudentData={fetchStudentData}                        
                         />
                     </div>
                 )}

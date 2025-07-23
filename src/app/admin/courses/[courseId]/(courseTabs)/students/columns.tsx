@@ -108,7 +108,7 @@ export const columns: ColumnDef<Task>[] = [
                             onChange={handleSingleStudent}
                         />
                     ) : (
-                        <div className="w-[150px]">{row.getValue('name')}</div>
+                        <div className="w-[150px] text-left">{row.getValue('name')}</div>
                     )}
                 </>
             )

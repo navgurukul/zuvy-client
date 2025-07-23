@@ -23,7 +23,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import CreateSessionDialog from './createLiveClass'
 import ExistingLiveClass from './existingLiveClass'
 
@@ -45,7 +45,8 @@ function ChapterModal({
     const { setTopicId } = getTopicId()
     const router = useRouter()
     const [classType, setClassType] = useState('createLiveClass')
-    const [liveDialogOpen, setLiveDialogOpen] = useState(false) // <-- Add this
+    const [liveDialogOpen, setLiveDialogOpen] = useState(false)
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null)
 
     const createChapter = async (topicId: number) => {
         setTopicId(topicId)
@@ -140,53 +141,43 @@ function ChapterModal({
                         <span>Live Classes</span>
                     </div>
                 </div>
-                {/* Live Classes Dialog as pehle */}
-                <Dialog
-                    open={liveDialogOpen}
-                    onOpenChange={(open) => {
-                        setLiveDialogOpen(open)
-                        if (!open) setClassType('createLiveClass')
-                    }}
-                >
-                    <DialogContent className="max-w-2xl w-full">
-                        <RadioGroup
-                            value={classType}
-                            className="flex flex-row items-center text-gray-600"
-                            onValueChange={setClassType}
-                            defaultValue="createLiveClass"
-                        >
-                            <div className="flex  space-x-2">
-                                <RadioGroupItem
-                                    className="!border-black !text-black"
-                                    value="createLiveClass"
-                                    id="r1"
-                                />
-                                <Label htmlFor="r1">Create Live Class</Label>
-                            </div>
-                            <div className="flex space-x-2 ">
-                                <RadioGroupItem
-                                    className="!border-black !text-black"
-                                    value="existingLiveClass"
-                                    id="r2"
-                                />
-                                <Label htmlFor="r2">
-                                    Select from Existing Classes
-                                </Label>
-                            </div>
-                        </RadioGroup>
-                        {classType === 'createLiveClass' && (
-                            <CreateSessionDialog
-                                fetchingChapters={fetchChapters}
-                                onClose={() => {
-                                    setLiveDialogOpen(false)
-                                    setClassType('createLiveClass')
-                                    onClose() // Close parent dialog
-                                }}
-                            />
-                        )}
-                        {classType === 'existingLiveClass' && (
-                            <div className="overflow-auto">
-                                <ExistingLiveClass
+                
+                {/* Dialog for users WITH CREATE access */}
+                    <Dialog
+                        open={liveDialogOpen}
+                        onOpenChange={(open) => {
+                            setLiveDialogOpen(open)
+                            if (!open) setClassType('createLiveClass')
+                        }}
+                    >
+                        <DialogContent className="max-w-2xl w-full">
+                            <RadioGroup
+                                value={classType}
+                                className="flex flex-row items-center text-gray-600"
+                                onValueChange={setClassType}
+                                defaultValue="createLiveClass"
+                            >
+                                <div className="flex  space-x-2">
+                                    <RadioGroupItem
+                                        className="!border-black !text-black"
+                                        value="createLiveClass"
+                                        id="r1"
+                                    />
+                                    <Label htmlFor="r1">Create Live Class</Label>
+                                </div>
+                                <div className="flex space-x-2 ">
+                                    <RadioGroupItem
+                                        className="!border-black !text-black"
+                                        value="existingLiveClass"
+                                        id="r2"
+                                    />
+                                    <Label htmlFor="r2">
+                                        Select from Existing Classes
+                                    </Label>
+                                </div>
+                            </RadioGroup>
+                            {classType === 'createLiveClass' && (
+                                <CreateSessionDialog
                                     fetchingChapters={fetchChapters}
                                     onClose={() => {
                                         setLiveDialogOpen(false)
@@ -194,10 +185,21 @@ function ChapterModal({
                                         onClose() // Close parent dialog
                                     }}
                                 />
-                            </div>
-                        )}
-                    </DialogContent>
-                </Dialog>
+                            )}
+                            {classType === 'existingLiveClass' && (
+                                <div className="overflow-auto">
+                                    <ExistingLiveClass
+                                        fetchingChapters={fetchChapters}
+                                        onClose={() => {
+                                            setLiveDialogOpen(false)
+                                            setClassType('createLiveClass')
+                                            onClose() // Close parent dialog
+                                        }}
+                                    />
+                                </div>
+                            )}
+                        </DialogContent>
+                    </Dialog>
             </DialogContent>
         </Dialog>
     )

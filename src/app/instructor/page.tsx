@@ -105,14 +105,9 @@ const InstructorPage = () => {
             {allSessions.length > 0 && (
                 <DataTablePagination
                     totalStudents={totalSessions}
-                    position={position}
-                    setPosition={setPosition}
                     pages={pages}
                     lastPage={lastPage}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    fetchStudentData={fetchSessions}
-                    setOffset={setOffset}
+                    fetchStudentData={fetchSessions}                
                 />
             )}
         </MaxWidthWrapper>

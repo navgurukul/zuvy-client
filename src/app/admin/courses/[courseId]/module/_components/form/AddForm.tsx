@@ -214,13 +214,13 @@ const AddForm: React.FC<AddFormProps> = ({
                 typeId: item.typeId,
                 options: item.options?.reduce<Record<number, string>>(
                     (acc, option, index) => {
-                        acc[index] = option
+                        acc[index + 1] = option
                         return acc
                     },
                     {}
                 ),
             }))
-
+        
         const editFormQuestionDto = questions
             .filter((item) => item.id && !item.id.startsWith('new-'))
             .map((item) => ({
@@ -228,12 +228,13 @@ const AddForm: React.FC<AddFormProps> = ({
                 id: item.id && Number(item.id),
                 options: item.options?.reduce<Record<number, string>>(
                     (acc, option, index) => {
-                        acc[index] = option
+                        acc[index + 1] = option
                         return acc
                     },
                     {}
                 ),
             }))
+        console.log('editFormQuestionDto',editFormQuestionDto)
 
         let payload = {}
         if (formQuestionDto.length > 0 && editFormQuestionDto.length > 0) {

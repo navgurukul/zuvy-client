@@ -390,7 +390,7 @@ const IDE: React.FC<IDEProps> = ({
                         onClick={(e) => handleSubmit(e, 'run')}
                         size="sm"
                         className="mr-2"
-                        disabled={loading || isSubmitted} // Disable buttons during loading
+                        disabled={true}
                     >
                         {loading ? <Spinner /> : <Play size={20} />}
                         <span className="ml-2 text-lg font-bold">Run</span>
@@ -398,7 +398,7 @@ const IDE: React.FC<IDEProps> = ({
                     <Button
                         onClick={(e) => handleSubmit(e, 'submit')}
                         size="sm"
-                        disabled={loading || isSubmitted} // Disable buttons during loading
+                        disabled={true}
                     >
                         {loading ? <Spinner /> : <Upload size={20} />}
                         <span className="ml-2 text-lg font-bold">Submit</span>
