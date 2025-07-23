@@ -46,16 +46,13 @@ import {
 import PreventBackNavigation from './PreventBackNavigation'
 import WarnOnLeave from './WarnOnLeave'
 import useWindowSize from '@/hooks/useHeightWidth'
+import type {PageParams,AssessmentData,AssessmentSubmissionsResponse,CodingQuestion,CodingSubmissionApiResponse} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
+
 
 function Page({
     params,
 }: {
-    params: {
-        assessmentOutSourceId: string
-        moduleID: string
-        viewcourses: string
-        chapterId: string
-    }
+    params: PageParams
 }) {
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
@@ -63,7 +60,7 @@ function Page({
     const isMobile = width < 768
 
     const [disableSubmit, setDisableSubmit] = useState(false)
-    const [runCodeLanguageId, setRunCodeLanguageId] = useState<any>(0)
+    const [runCodeLanguageId, setRunCodeLanguageId] = useState<number>(0)
     const [runSourceCode, setRunSourceCode] = useState<string>('')
 
     const decodedParams = {
@@ -86,20 +83,18 @@ function Page({
 
     const [isSolving, setIsSolving] = useState(false)
 
-    const [selectedQuestionId, setSelectedQuestionId] = useState<number | null>(
-        null
-    )
+    const [selectedQuestionId, setSelectedQuestionId] = useState <string | number | null>(null)
     const [remainingTime, setRemainingTime] = useState<number>(0)
-    const [assessmentData, setAssessmentData] = useState<any>(null)
-    const [seperateQuizQuestions, setSeperateQuizQuestions] = useState<any>()
+    const [assessmentData, setAssessmentData] = useState <AssessmentData | null>(null)
+    const [seperateQuizQuestions, setSeperateQuizQuestions] = useState<any[] | undefined>()
     const [seperateOpenEndedQuestions, setSeperateOpenEndedQuestions] =
         useState<any>()
     let interval: NodeJS.Timeout | null = null
 
-    const [assessmentSubmitId, setAssessmentSubmitId] = useState<any>()
+    const [assessmentSubmitId, setAssessmentSubmitId] = useState<any>(null)
     const [selectedCodingOutsourseId, setSelectedCodingOutsourseId] =
-        useState<any>()
-    const [chapterId, setChapterId] = useState<any>()
+        useState<number | undefined>();
+    const [chapterId, setChapterId] = useState<string | undefined>();
 
     // Check if Proctoring is set on by admin for tab switching, copy paste, etc.
     const [isTabProctorOn, setIsTabProctorOn] = useState(
@@ -113,7 +108,7 @@ function Page({
     )
     const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState(null)
     const [startedAt, setStartedAt] = useState(
-        new Date(assessmentData?.submission?.startedAt).getTime()
+        new Date(assessmentData?.submission?.startedAt ?? '').getTime()
     )
     const intervalIdRef = useRef<number | null>(null)
     const pathname = usePathname()
@@ -160,7 +155,7 @@ function Page({
     async function getAssessmentSubmissionsData() {
         const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`
         try {
-            const res = await api.get(
+            const res = await api.get<AssessmentSubmissionsResponse>(
                 `Content/students/assessmentId=${decodedParams.assessmentOutSourceId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
             )
 
@@ -196,7 +191,7 @@ function Page({
     }, [assessmentSubmitId])
 
     useEffect(() => {
-        const endTime = startedAt + assessmentData?.timeLimit * 1000
+        const endTime = startedAt + (assessmentData?.timeLimit ?? 0) * 1000
         // Start the timer
         startTimer(endTime)
 
@@ -274,12 +269,12 @@ function Page({
         questionId: any
     ) {
         try {
-            const res = await api.get(
+            const res = await api.get<CodingSubmissionApiResponse>(
                 `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
             )
             const action = res?.data?.data?.action
             setRunCodeLanguageId(res?.data?.data?.languageId || 0)
-            setRunSourceCode(res?.data?.data?.sourceCode || null)
+            setRunSourceCode(res?.data?.data?.sourceCode || '')
             return action
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
@@ -431,9 +426,9 @@ function Page({
         if (
             selectedQuesType === 'quiz' &&
             !assessmentData?.IsQuizzSubmission &&
-            assessmentData?.hardMcqQuestions +
-            assessmentData?.easyMcqQuestions +
-            assessmentData?.mediumMcqQuestions >
+            (assessmentData?.hardMcqQuestions ?? 0) +
+            (assessmentData?.easyMcqQuestions ?? 0) +
+            (assessmentData?.mediumMcqQuestions ?? 0) >
             0
         ) {
             return (
@@ -673,7 +668,7 @@ function Page({
                                         {/* <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                                             <Timer className="w-5 h-5 text-primary" />
                                         </div> */}
-                                        <h2 className="text-2xl w-full ml-3 text-left font-bold text-foreground">{assessmentData?.ModuleAssessment.title}</h2>
+                                        <h2 className="text-2xl w-full ml-3 text-left font-bold text-foreground">{assessmentData?.ModuleAssessment?.title}</h2>
                                         <p className='text-left text-muted-foreground ml-2 font-medium'>Complete all sections to submit your assessment. Read the instructions carefully before proceeding.
 
 </p>
@@ -733,7 +728,7 @@ function Page({
                                     </div>
                                 </div>
                             </div>                                {/* Coding Challenges Section */}
-                            {assessmentData?.codingQuestions?.length > 0 && (
+                            {(assessmentData?.codingQuestions?.length ?? 0) > 0 && (
                                 <div className=" mb-8 overflow-hidden">
                                     <div className=" p-6">
                                         <div className="flex items-center space-x-3 mb-4">
@@ -755,7 +750,7 @@ function Page({
 
                                     <div className="p-6">
                                         <div className="space-y-4">
-                                            {assessmentData?.codingQuestions?.map((question: any) => (
+                                            {assessmentData?.codingQuestions?.map((question: CodingQuestion) => (
                                                 <QuestionCard
                                                     isMobile={isMobile}
                                                     key={question.codingQuestionId}
@@ -782,9 +777,9 @@ function Page({
                                     </div>
                                 </div>
                             )}                                {/* MCQs Section */}
-                            {assessmentData?.hardMcqQuestions +
-                                assessmentData?.easyMcqQuestions +
-                                assessmentData?.mediumMcqQuestions >
+                            {(assessmentData?.hardMcqQuestions ?? 0)+
+                                (assessmentData?.easyMcqQuestions ?? 0) +
+                                (assessmentData?.mediumMcqQuestions ?? 0) >
                                 0 && (
                                     <div className=" mb-8 overflow-hidden">
                                         <div className=" p-6">
@@ -801,9 +796,9 @@ function Page({
                                                 id={1}
                                                 title="Quiz"
                                                 weightage={assessmentData?.weightageMcqQuestions}
-                                                description={`${assessmentData?.hardMcqQuestions +
-                                                    assessmentData?.easyMcqQuestions +
-                                                    assessmentData?.mediumMcqQuestions || 0
+                                                description={`${(assessmentData?.hardMcqQuestions || 0) +
+                                                    (assessmentData?.easyMcqQuestions || 0) +
+                                                    (assessmentData?.mediumMcqQuestions || 0)
                                                     } questions`}
                                                 onSolveChallenge={() => handleSolveChallenge('quiz')}
                                                 isQuizSubmitted={assessmentData?.IsQuizzSubmission}
@@ -842,11 +837,11 @@ function Page({
                                         <button
                                             disabled={
                                                 disableSubmit ||
-                                                (assessmentData?.totalMcqQuestions > 0 &&
+                                                ((assessmentData?.totalMcqQuestions ?? 0)> 0 &&
                                                     assessmentData?.IsQuizzSubmission === false)
                                             }
                                             className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp ${disableSubmit ||
-                                                    (assessmentData?.totalMcqQuestions > 0 &&
+                                                    ((assessmentData?.totalMcqQuestions?? 0) > 0 &&
                                                         assessmentData?.IsQuizzSubmission === false)
                                                     ? 'bg-muted text-muted-foreground cursor-not-allowed'
                                                     : 'bg-primary hover:bg-primary-dark text-primary-foreground'

@@ -4,17 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, CheckCircle, XCircle, AlertCircle, RotateCcw } from "lucide-react";
+import {AssessmentStateCardProps} from '@/app/student/_components/componentStudentTypes';
 
-interface AssessmentStateCardProps {
-  state: 'scheduled' | 'open' | 'interrupted' | 'reAttemptRequested' | 'completed' | 'expired';
-  countdown?: number;
-  endDate: Date;
-  score?: number;
-  totalMarks: number;
-  passScore: number;
-  onReAttemptRequest: () => void;
-  onBeginAssessment: () => void;
-}
 
 const AssessmentStateCard = ({ 
   state, 

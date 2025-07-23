@@ -38,37 +38,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
 
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
-
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
-
-interface questionDetails {
-    title: string
-    description: string
-    constraints?: string
-    examples: { input: number[]; output: number }
-}
-
-interface IDEProps {
-    params: { editor: string }
-    onBack?: () => void
-    remainingTime?: any
-    assessmentSubmitId?: number
-    selectedCodingOutsourseId?: number
-    getAssessmentData?: any
-    runCodeLanguageId?: number
-    runSourceCode?: string
-}
+import type {IDEProps,questionDetails,Input,TestCase,TestCasesSubmission} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -369,7 +339,7 @@ const IDE: React.FC<IDEProps> = ({
 
                         {/* Right: Timer and Action Buttons */}
                         <div className="flex items-center space-x-4">
-                            <TimerDisplay remainingTime={remainingTime} />
+                            <TimerDisplay remainingTime={remainingTime ?? 0} />
                             <div className="flex items-center space-x-2">
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'run')}
@@ -647,7 +617,7 @@ const IDE: React.FC<IDEProps> = ({
                                             )}
 
                                             {/* Error Results (Compile/Runtime) */}
-                                            {!loading && codeError && codeResult?.map((testCase: any, index: any) => (
+                                            {!loading && codeError && codeResult?.map((testCase: TestCasesSubmission, index: number) => (
                                                 <div key={index} className="mb-4">
                                                     <div className="flex items-center space-x-2 text-red-500 font-bold">
                                                         <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
@@ -690,7 +660,7 @@ const IDE: React.FC<IDEProps> = ({
                                             ))}
 
                                             {/* Success/Run Results */}
-                                            {!loading && !codeError && codeResult?.map((testCase: any, index: any) => (
+                                            {!loading && !codeError && codeResult?.map((testCase: TestCasesSubmission, index: number) => (
                                                 <div key={index} className="mb-4">
                                                     {testCase.status === 'Accepted' ? (
                                                         <div className="flex items-center space-x-2 text-green-600 font-bold">

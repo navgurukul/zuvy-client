@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { cn, difficultyColor } from '@/lib/utils'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import type {QuizQuestionsProps,QuizQuestion} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
 
 const QuizQuestions = ({
     onBack,
@@ -40,15 +41,7 @@ const QuizQuestions = ({
     assessmentSubmitId,
     getSeperateQuizQuestions,
     getAssessmentData,
-            }: {
-    onBack: () => void
-    weightage?: any
-    remainingTime: number
-    questions: any
-    assessmentSubmitId: number
-    getSeperateQuizQuestions: () => void
-    getAssessmentData: () => void
-}) => {
+}:QuizQuestionsProps ) => {
     const router = useRouter()
     const params = useParams()
     const searchParams = useSearchParams();
@@ -82,7 +75,7 @@ const QuizQuestions = ({
 
     useEffect(() => {
         const defaultValues = {
-            answers: questions?.data?.mcqs?.map((question: any) =>
+            answers: questions?.data?.mcqs?.map((question: QuizQuestion) =>
                 question.submissionsData && question.submissionsData.length > 0
                     ? question.submissionsData[0].chosenOption.toString()
                     : ''
@@ -112,13 +105,13 @@ const QuizQuestions = ({
         try {
             // Create submission data array with all answers
             const quizSubmissionData = data.answers.map(
-                (chosenOption: any, index) => {
+                (chosenOption: string | undefined, index:number) => {
                     const question = questions.data.mcqs[index]
                     return {
                         questionId: Number(question?.outsourseQuizzesId),
                         variantId: question.variantId,
                         attemptCount: 1,
-                        chosenOption: parseInt(chosenOption),
+                        chosenOption: parseInt(chosenOption|| "0"),
                     }
                 }
             )
@@ -227,7 +220,7 @@ const QuizQuestions = ({
                         onSubmit={form.handleSubmit(onSubmit)}
                         className="space-y-6"
                     >
-                        {questions?.data?.mcqs?.map((question: any, index: number) => (
+                        {questions?.data?.mcqs?.map((question:QuizQuestion, index: number) => (
                             <div
                                 key={question.id}
                                 className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden"

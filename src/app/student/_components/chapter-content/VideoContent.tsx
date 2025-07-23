@@ -4,18 +4,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Play, CheckCircle2, Youtube, Video as VideoIcon } from 'lucide-react'
 import useChapterCompletion from '@/hooks/useChapterCompletion'
+import {VideoContentProps} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
 
-interface VideoContentProps {
-    chapterDetails: {
-        id: number
-        title: string
-        description: string | null
-        status: string
-        file: string | null
-        links: string[] | null
-    }
-    onChapterComplete: () => void
-}
 
 const getEmbedLink = (link: string) => {
     if (!link) return ''

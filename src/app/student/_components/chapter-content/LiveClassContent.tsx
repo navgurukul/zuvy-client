@@ -8,30 +8,8 @@ import {
   Check
 } from "lucide-react";
 import useChapterCompletion from '@/hooks/useChapterCompletion';
+import {LiveClassContentProps,Session} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
 
-interface Session {
-  id: number;
-  meetingId: string;
-  hangoutLink: string;
-  startTime: string;
-  endTime: string;
-  title: string;
-  s3link: string;
-  status: string;
-  attendance: string;
-  duration: number;
-}
-
-interface LiveClassContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    sessions?: Session[];
-  };
-  onChapterComplete: () => void;
-}
 
 const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();
@@ -202,7 +180,8 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
 
     if (isSessionCompleted) {
       const hasRecording = Boolean(
-        item.s3link && 
+        item.s3link
+         && 
         item.s3link !== 'not found' && 
         item.s3link.trim() !== ''
       );
@@ -268,7 +247,6 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
       );
     }
   }
-
   // Fallback return
   return (
     <div className="max-w-4xl mx-auto p-8">

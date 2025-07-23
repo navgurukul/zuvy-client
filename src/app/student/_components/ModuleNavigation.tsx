@@ -1,12 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { TopicItem } from "@/lib/mockData";
+import {ModuleNavigationProps} from '@/app/student/_components/componentStudentTypes'
 
-interface ModuleNavigationProps {
-  prevItem: { item: TopicItem; topicId: string } | null;
-  nextItem: { item: TopicItem; topicId: string } | null;
-  onItemSelect: (itemId: string) => void;
-}
 
 const ModuleNavigation = ({ prevItem, nextItem, onItemSelect }: ModuleNavigationProps) => {
   return (

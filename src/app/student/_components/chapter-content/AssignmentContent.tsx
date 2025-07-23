@@ -16,11 +16,13 @@ import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
+import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+
 
 const FormSchema = z.object({
   link: z
     .string()
-    .url({ message: 'Please enter a valid URL.' })
+    .url({ message: 'Please enter a valid URL.'})
     .refine(
       (url) =>
         url.startsWith('https://github.com') ||
@@ -33,22 +35,6 @@ const FormSchema = z.object({
     ),
 });
 
-type EditorDoc = {
-  type: string;
-  content: any[];
-};
-
-interface AssignmentContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    articleContent: string | null;
-    links: string | null;
-  };
-  onChapterComplete: () => void;
-}
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();
@@ -93,7 +79,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
         setInitialContent(parsedContent.doc ? parsedContent : { doc: parsedContent });
       } catch {
         // Fallback for non-JSON content
-        setInitialContent({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: chapterDetails.articleContent }] }] });
+        setInitialContent({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: chapterDetails.articleContent}] }] });
       }
     }
   }, [chapterDetails.articleContent]);
@@ -299,5 +285,4 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     </div>
   );
 };
-
 export default AssignmentContent; 

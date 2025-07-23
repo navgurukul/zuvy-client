@@ -16,17 +16,14 @@ import { useCompletedClasses, CompletedClass } from '@/hooks/useCompletedClasses
 import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton';
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import{TruncatedDescriptionProps}from '@/app/student/_pages/pageStudentTypes'
 
 // Truncated Description Component
 const TruncatedDescription = ({ 
   text, 
   maxLength = 150, 
   className = "" 
-}: { 
-  text: string; 
-  maxLength?: number; 
-  className?: string;
-}) => {
+}:TruncatedDescriptionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const shouldTruncate = text.length > maxLength;
   const displayText = shouldTruncate && !isExpanded ? text.slice(0, maxLength) + "..." : text;
@@ -96,7 +93,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const totalStudents = progressData?.batchInfo?.totalEnrolledStudents || 0;
   const instructorName = progressData?.instructorDetails?.instructorName || '';
   const instructorAvatar = progressData?.instructorDetails?.instructorProfilePicture || '';
-  const courseName = progressData?.data?.bootcampTracking?.name || '';
+  const courseName = progressData?.data?.bootcampTracking?.name|| '';
   const courseDescription = progressData?.data?.bootcampTracking?.description || '';
   const courseCoverImage = progressData?.data?.bootcampTracking?.coverImage || '';
   const collaborator = progressData?.data?.bootcampTracking?.collaborator || '';

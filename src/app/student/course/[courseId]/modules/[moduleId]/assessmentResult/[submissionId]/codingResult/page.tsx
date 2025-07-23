@@ -5,8 +5,9 @@ import React, { useEffect } from 'react'
 import CodingSubmission from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/CodingSubmission'
 import { useSearchParams } from 'next/navigation'
 import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
+import {PageParams} from '@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/codingResult/courseModuleStudentAssesmentQuizResultTypes.ts'
 
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params: PageParams }) => {
     const { studentData } = useLazyLoadedStudentData()
     const searchParams = useSearchParams()
     

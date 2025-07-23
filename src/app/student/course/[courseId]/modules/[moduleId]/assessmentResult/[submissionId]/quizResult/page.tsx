@@ -7,12 +7,12 @@ import { cn, difficultyColor } from '@/lib/utils'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import { useQuizResults } from '@/hooks/useQuizResults'
+import {QuizResponseResult,QuizResultsProps,OptionValue,SubmissionData,QuestionResult} from '@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/quizResult/moduleQuizResultStudent'
+import { AnyARecord } from 'dns'
 
 const QuizResults = ({
     params,
-}: {
-    params: { submissionId: string }
-}) => {
+}:QuizResultsProps) => {
     const router = useRouter()
     const { width } = useWindowSize()
     const isMobile = width < 768
@@ -21,19 +21,19 @@ const QuizResults = ({
     const { data: quizResults, loading, error } = useQuizResults({
         submissionId: params.submissionId,
         enabled: true
-    })
+    }) 
 
     // Calculate statistics
     const totalQuestions = quizResults?.mcqs?.length || 0
     const correctAnswers = quizResults?.mcqs?.filter(
-        (result: any) => result.submissionsData?.status === 'passed'
+        (result) => result.submissionsData?.status === 'passed'
     )?.length || 0
     const totalMarks = quizResults?.mcqs?.reduce(
-        (sum: number, result: any) => sum + (result.submissionsData?.status === 'passed' ? Number(result.mark) : 0), 
+        (sum: number, result) => sum + (result.submissionsData?.status === 'passed' ? Number(result.mark) : 0), 
         0
     ) || 0
     const maxMarks = quizResults?.mcqs?.reduce(
-        (sum: number, result: any) => sum + Math.trunc(Number(result.mark)), 
+        (sum: number, result) => sum + Math.trunc(Number(result.mark)), 
         0
     ) || 0
     const percentage = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
@@ -187,7 +187,7 @@ const QuizResults = ({
 
                 {/* Questions */}
                 <div className="space-y-6">
-                    {quizResults?.mcqs.map((result: any, index: number) => (
+                    {quizResults?.mcqs.map((result:any, index: number) => (
                         <div
                             key={result.quizId}
                             className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden"

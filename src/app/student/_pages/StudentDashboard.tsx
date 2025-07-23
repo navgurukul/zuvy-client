@@ -18,41 +18,8 @@ import { useLazyLoadedStudentData } from '@/store/store';
 import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
+import{UpcomingEvent,Bootcamp,TrackingDataType}from '@/app/student/_pages/pageStudentTypes'
 
-interface UpcomingEvent {
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  bootcampId: number;
-  bootcampName: string;
-  batchId: number;
-  eventDate: string;
-  type: string;
-  moduleId?: number;
-  chapterId?: number;
-  hangoutLink?: string;
-}
-
-interface Bootcamp {
-  id: number;
-  name: string;
-  coverImage: string;
-  duration: string;
-  language: string;
-  bootcampTopic: string;
-  description: string | null;
-  batchId: number;
-  batchName: string;
-  progress: number;
-  instructorDetails: {
-    id: number;
-    name: string;
-    profilePicture: string | null;
-  };
-  upcomingEvents: UpcomingEvent[];
-}
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');

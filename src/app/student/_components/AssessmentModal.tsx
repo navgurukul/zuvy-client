@@ -4,13 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, X } from "lucide-react";
 import AssessmentInstructions from "./AssessmentInstructions";
+import {AssessmentModalProps} from '@/app/student/_components/componentStudentTypes';
 
-interface AssessmentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  assessmentTitle: string;
-  duration: string;
-}
 
 const AssessmentModal = ({ isOpen, onClose, assessmentTitle, duration }: AssessmentModalProps) => {
   const [showInstructions, setShowInstructions] = useState(false);
@@ -30,7 +25,7 @@ const AssessmentModal = ({ isOpen, onClose, assessmentTitle, duration }: Assessm
 
   const handleExitFullscreen = async () => {
     try {
-      if (document.fullscreenElement) {
+      if (document.fullscreenElement){
         await document.exitFullscreen();
       }
       setIsFullscreen(false);

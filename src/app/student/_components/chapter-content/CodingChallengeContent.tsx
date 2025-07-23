@@ -6,26 +6,9 @@ import { toast } from '@/components/ui/use-toast';
 import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
+import {CodingChallengeContentProps,CodingQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
 
-interface CodingQuestion {
-  id: number;
-  title: string;
-  description: string;
-  difficulty: string;
-  tagName?: string;
-  status: string;
-}
 
-interface CodingChallengeContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-  };
-  onChapterComplete: () => void;
-  fetchChapters?: () => void;
-}
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();

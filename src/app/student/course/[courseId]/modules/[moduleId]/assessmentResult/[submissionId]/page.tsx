@@ -12,24 +12,39 @@ import { getAssesmentBackgroundColorClass } from '@/lib/utils'
 import useAssessmentResult from '@/hooks/useAssessmentResult'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import{ViewAssessmentResultsParams,AssessmentViewResultsData,CodingQuestionResult} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/courseModuleAssesmentSubmissionStudentTypes"
 
-const ViewAssessmentResults = ({ params }: { params: any }) => {
+const ViewAssessmentResults = ({ params }: { params: ViewAssessmentResultsParams}) => {
     // State Variables
     const [assessmentOutsourseId, setAssessmentOutsourseId] = useState<number | null>(null)
     const { studentData } = useLazyLoadedStudentData()
     const router = useRouter()
 
     // Use the custom hook
-    const { data: viewResultsData, loading, error, refetch } = useAssessmentResult(params.submissionId)
+    // const { data: viewResultsData, loading, error, refetch } = useAssessmentResult(params.submissionId)
+
+const {
+  data: viewResultsData,
+  loading,
+  error,
+  refetch
+} = useAssessmentResult(params.submissionId) as {
+  data: AssessmentViewResultsData;
+  loading: boolean;
+  error: any;
+  refetch: () => void;
+};
+
 
     React.useEffect(() => {
+        
         if (viewResultsData && viewResultsData.assessmentOutsourseId) {
             setAssessmentOutsourseId(viewResultsData.assessmentOutsourseId)
         }
     }, [viewResultsData])
 
     const isPassed = viewResultsData?.isPassed
-    const percentage = viewResultsData?.percentage
+    const percentage = viewResultsData?.percent
     const passPercentage = viewResultsData?.submitedOutsourseAssessment?.passPercentage
 
     const formatTime = (milliseconds: number): string => {
@@ -222,7 +237,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
 
     // Render Helpers
     const renderCodingChallenges = () => {
-        const totalCodingQuestions = viewResultsData.submitedOutsourseAssessment.totalCodingQuestions;
+        const totalCodingQuestions = viewResultsData.submitedOutsourseAssessment?.totalCodingQuestions ?? 0;
         const attemptedCodingQuestions = viewResultsData.PracticeCode.length ;
         
 
@@ -237,18 +252,18 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             switch (difficulty) {
                 case 'Easy':
                     weightageCodingQuestions =
-                        viewResultsData?.submitedOutsourseAssessment
-                            ?.easyCodingMark
+                        String(viewResultsData?.submitedOutsourseAssessment
+                            ?.easyCodingMark ?? '')
                     break
                 case 'Medium':
                     weightageCodingQuestions =
-                        viewResultsData?.submitedOutsourseAssessment
-                            ?.mediumCodingMark
+                        String(viewResultsData?.submitedOutsourseAssessment
+                            ?.mediumCodingMark ?? '')
                     break
                 case 'Hard':
                     weightageCodingQuestions =
-                        viewResultsData?.submitedOutsourseAssessment
-                            ?.hardCodingMark
+                        String(viewResultsData?.submitedOutsourseAssessment
+                            ?.hardCodingMark ?? '')
                     break
                 default:
                     weightageCodingQuestions = ''
@@ -281,7 +296,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {viewResultsData.PracticeCode.map((codingQuestion: any) => {
+                        {viewResultsData.PracticeCode.map((codingQuestion: CodingQuestionResult) => {
                             const weightageCodingQuestions = getCodingQuestionWeightage(
                                 codingQuestion.questionDetail.difficulty
                             )
@@ -363,7 +378,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
             hardMcqQuestions,
             weightageMcqQuestions,
             totalMcqQuestions,
-        } = viewResultsData.submitedOutsourseAssessment
+        } = viewResultsData.submitedOutsourseAssessment ?? {}
 
         const attemptedMCQQuestions = viewResultsData.attemptedMCQQuestions;
 
@@ -375,7 +390,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
         return (
             <div className="mb-8">
                 <SectionHeading title="Multiple Choice Questions" />
-                {attemptedMCQQuestions === 0 || attemptedMCQQuestions === null ? (
+                {(attemptedMCQQuestions === 0 || attemptedMCQQuestions == null) ? (
                     <div className="bg-card border border-border rounded-lg p-8 shadow-4dp">
                         <div className="flex flex-col items-start text-left">
                             <Image

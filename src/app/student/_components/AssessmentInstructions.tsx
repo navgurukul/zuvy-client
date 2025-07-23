@@ -8,17 +8,9 @@ import CodingChallenge from "./CodingChallenge";
 import MCQQuiz from "./MCQQuiz";
 import OpenEndedQuestions from "./OpenEndedQuestions";
 import ViolationModal from "./ViolationModal";
+import{ AssessmentInstructionsProps,ViolationType}from '@/app/student/_components/componentStudentTypes'
 
-interface AssessmentInstructionsProps {
-  assessmentTitle: string;
-  duration: string;
-  onClose: () => void;
-}
 
-interface ViolationType {
-  type: 'tab-switch' | 'fullscreen-exit' | 'copy-paste';
-  count: number;
-}
 
 const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: AssessmentInstructionsProps) => {
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
@@ -268,7 +260,7 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
                         setCurrentView('mcq');
                       }}
                     >
-                      {completedSections.mcq ? 'View Answers' : 'Attempt Quiz'}
+                      {completedSections.mcq? 'View Answers' : 'Attempt Quiz'}
                     </Button>
                   </div>
                 </CardContent>

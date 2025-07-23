@@ -8,17 +8,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import type {AlertProps,AlertContextType} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
 
-type AlertProps = {
-  title: string;
-  description: string;
-  violationCount?: string;
-};
 
-type AlertContextType = {
-  showAlert: (props: AlertProps) => void;
-  hideAlert: () => void;
-};
 
 declare global {
   interface Window {

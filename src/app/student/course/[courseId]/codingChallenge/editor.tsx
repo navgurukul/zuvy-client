@@ -13,35 +13,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Spinner } from '@/components/ui/spinner';
 import { ChevronLeft, Code, Play, Upload, CheckCircle, X } from 'lucide-react';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
+import {CodeEditorProps,QuestionDetails,TestCase,Input} from '@/app/student/course/[courseId]/codingChallenge/courseCodingEditorStudentTypes'
 
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
-
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
-
-interface QuestionDetails {
-    title: string;
-    description: string;
-    constraints?: string;
-    examples: any[];
-    testCases: TestCase[];
-    templates: Record<string, { template: string }>;
-}
-
-interface CodeEditorProps {
-    questionId: string;
-    chapterId?: number;
-    onChapterComplete?: () => void;
-}
 
 const editorLanguages = [
     { lang: 'java', id: 96 },
@@ -198,7 +171,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
 
             // Check if all test cases passed
             const allTestCasesPassed = response.data.data.every(
-                (testCase: any) => testCase.status === 'Accepted'
+                (testCase: TestCase) => testCase.status === 'Accepted'
             )
 
             if (action === 'submit') {
@@ -264,7 +237,7 @@ const CodeEditorComponent = ({ questionId,  onChapterComplete }: CodeEditorProps
 
     const handleBack = () => router.back();
 
-    function handleEditorChange(value: any) {
+    function handleEditorChange(value: string | undefined) {
         setCurrentCode(value || '')
     }
 

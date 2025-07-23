@@ -6,30 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Code2, Eye, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-
-// Simplified interfaces for clarity
-interface QuestionDetail {
-    title: string;
-    description: string;
-    difficulty: string;
-}
-
-interface SubmissionResult {
-    questionId: number;
-    result: {
-        status: string; // The submission status, e.g., "Accepted"
-        questionDetail: QuestionDetail;
-    };
-}
-
-interface CodingChallengeResultProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-  };
-  submissionResults: SubmissionResult[];
-}
+import {CodingChallengeResultProps,CodingQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
 
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
   const router = useRouter();
@@ -124,5 +101,4 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
     </div>
   );
 };
-
 export default CodingChallengeResult;

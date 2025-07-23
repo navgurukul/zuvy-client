@@ -3,17 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle } from "lucide-react";
+import {ViolationModalProps, ViolationType} from '@/app/student/_components/componentStudentTypes'
 
-interface ViolationType {
-  type: 'tab-switch' | 'fullscreen-exit' | 'copy-paste';
-  count: number;
-}
-
-interface ViolationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  violation: ViolationType | null;
-}
 
 const ViolationModal = ({ isOpen, onClose, violation }: ViolationModalProps) => {
   if (!violation) return null;
@@ -73,5 +64,4 @@ const ViolationModal = ({ isOpen, onClose, violation }: ViolationModalProps) => 
     </Dialog>
   );
 };
-
 export default ViolationModal;

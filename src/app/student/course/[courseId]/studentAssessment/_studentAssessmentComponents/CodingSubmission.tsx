@@ -17,38 +17,11 @@ import {
   import { decodeBase64 } from '@/utils/students'
 import Editor from '@monaco-editor/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import type {TestCase,TestCasesSubmission,CodingSubmission} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
 
-interface TestCase {
-  inputs: Record<string, unknown> | Array<{
-    parameterName: string
-    parameterValue: unknown
-    parameterType: string
-  }>
-  expectedOutput: {
-    parameterValue: unknown
-  }
-}
 
-interface TestCasesSubmission {
-  status: string
-  testCases: TestCase
-  stdout?: string
-  stderr?: string
-  memory?: string
-  time?: string
-}
 
-interface CodingSubmissionData {
-  status?: string
-  action?: string
-  message?: string
-  data?: {
-    sourceCode: string
-    TestCasesSubmission: TestCasesSubmission[]
-  }
-}
-
-const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: CodingSubmissionData | null }) => {
+const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: CodingSubmission | null }) => {
   const router = useRouter()
   
   if (!codingSubmissionsData) {

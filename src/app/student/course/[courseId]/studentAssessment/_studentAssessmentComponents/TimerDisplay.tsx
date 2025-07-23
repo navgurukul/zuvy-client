@@ -1,11 +1,10 @@
 'use client';
+import type {TimerDisplayProps} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
 
 import React from 'react';
 import { Clock } from 'lucide-react';
 
-interface TimerDisplayProps {
-  remainingTime: number;
-}
+
 
 const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
   const formatTime = (seconds: number): string => {

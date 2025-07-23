@@ -4,17 +4,8 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import {MCQQuizProps} from '@/app/student/_components/componentStudentTypes';
 
-interface MCQQuizProps {
-  quiz: {
-    title: string;
-    difficulty: string;
-    marks: number;
-  };
-  onBack: () => void;
-  onComplete: () => void;
-  timeLeft: string;
-}
 
 const MCQQuiz = ({ quiz, onBack, onComplete, timeLeft }: MCQQuizProps) => {
   const [answers, setAnswers] = useState<string[]>(new Array(5).fill(''));

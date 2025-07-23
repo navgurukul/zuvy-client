@@ -4,11 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 
-interface OpenEndedQuestionsProps {
-  onBack: () => void;
-  onComplete: () => void;
-  timeLeft: string;
-}
+import {OpenEndedQuestionsProps } from '@/app/student/_components/componentStudentTypes'
+
+
 
 const OpenEndedQuestions = ({ onBack, onComplete, timeLeft }: OpenEndedQuestionsProps) => {
   const [answers, setAnswers] = useState(['', '']);

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {ModuleSidebarProps, Topic} from '@/app/student/_components/componentStudentTypes'
 import { 
   ArrowLeft,
   ChevronDown,
@@ -15,36 +16,6 @@ import {
   User
 } from "lucide-react";
 
-interface TopicItem {
-  id: string;
-  title: string;
-  type: string;
-  status: string;
-  duration?: string;
-  scheduledDateTime?: Date;
-}
-
-interface Topic {
-  id: string;
-  name: string;
-  description: string;
-  items: TopicItem[];
-}
-
-interface Module {
-  id: string;
-  name: string;
-  description: string;
-  topics: Topic[];
-}
-
-interface ModuleSidebarProps {
-  courseId: string;
-  moduleId: string;
-  module: Module;
-  selectedItem: string;
-  onItemSelect: (itemId: string) => void;
-}
 
 const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect }: ModuleSidebarProps) => {
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);

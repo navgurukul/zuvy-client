@@ -29,6 +29,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
+import type {OpenEndedQuestionsProps,Question} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
 
 const OpenEndedQuestions = ({
     onBack,
@@ -37,14 +38,7 @@ const OpenEndedQuestions = ({
     assessmentSubmitId,
     getSeperateOpenEndedQuestions,
     getAssessmentData
-}: {
-    onBack: () => void
-    remainingTime: number
-    questions: any[]
-    assessmentSubmitId: number
-    getSeperateOpenEndedQuestions: () => void
-    getAssessmentData: () => void
-}) => {
+}:OpenEndedQuestionsProps) => {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)

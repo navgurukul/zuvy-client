@@ -4,29 +4,8 @@ import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight, CheckCircle, Play, Award } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { ellipsis } from '@/lib/utils'
+import type {QuestionCardProps, Tag} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/courseStudentAssesmentStudentTypes';
 
-interface QuestionCardProps {
-    id: number
-    title: string
-    weightage?: number
-    easyCodingMark?: number
-    mediumCodingMark?: number
-    hardCodingMark?: number
-    description: string
-    tagId?: number
-    // assessmentOutsourseId?: number
-    assessmentSubmitId?: number
-    codingOutsourseId?: number
-    codingQuestions?: boolean
-    onSolveChallenge: (id: number) => void
-    isQuizSubmitted?: boolean
-    isMobile?: boolean
-}
-
-export type Tag = {
-    id: number
-    tagName: string
-}
 
 const QuestionCard = ({
     id,

@@ -9,17 +9,14 @@ import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircl
 import useCourseSyllabus from "@/hooks/useCourseSyllabus";
 import { useState } from "react";
 import Link from "next/link";
+import{TruncatedDescriptionProps}from '@/app/student/_pages/pageStudentTypes'
 
 // Truncated Description Component
 const TruncatedDescription = ({ 
   text, 
   maxLength = 150, 
   className = "" 
-}: { 
-  text: string; 
-  maxLength?: number; 
-  className?: string;
-}) => {
+}:TruncatedDescriptionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const shouldTruncate = text.length > maxLength;
   const displayText = shouldTruncate && !isExpanded ? text.slice(0, maxLength) + "..." : text;

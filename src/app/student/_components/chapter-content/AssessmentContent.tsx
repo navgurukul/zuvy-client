@@ -19,18 +19,8 @@ import useAssessmentDetails from "@/hooks/useAssessmentDetails";
 import useChapterDetails from "@/hooks/useChapterDetails";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
+import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
 
-interface AssessmentContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    assessmentId: number | null;
-    moduleId: number;
-  };
-  onChapterComplete?: () => void;
-}
 
 function formatToIST(dateString: string | undefined) {
   if (!dateString) return 'N/A';

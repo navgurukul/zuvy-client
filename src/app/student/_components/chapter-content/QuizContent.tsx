@@ -23,16 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {QuizContentProps,QuizQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
 
-interface QuizContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-  };
-  onChapterComplete: () => void;
-}
 
 const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();
@@ -164,7 +156,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
   };
 
   // Function to get question status
-  const getQuestionStatus = (question: any) => {
+  const getQuestionStatus = (question: QuizQuestion) => {
     if (!isCompleted) return null;
     
     const quizTrack = question.quizTrackingData?.[0];
@@ -269,7 +261,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
           </div>
         ) : (
           <div className="space-y-6">
-            {quizQuestions.map((q: any, index: number) => {
+            {quizQuestions.map((q: QuizQuestion, index: number) => {
               const questionStatus = getQuestionStatus(q);
               const quizTrack = q.quizTrackingData?.[0];
               const isAttempted = !!quizTrack;
