@@ -515,6 +515,14 @@ const Mcqs = (props: Props) => {
         }
     }, [])
     
+    useEffect(() => {
+        if (debouncedSearch.trim() === '' && searchParams.get('search')) {
+            updateURL('', selectedOptions, difficulty)
+            fetchCodingQuestions(0, '')
+        }
+    }, [debouncedSearch, searchParams, selectedOptions, difficulty])
+    
+    
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 

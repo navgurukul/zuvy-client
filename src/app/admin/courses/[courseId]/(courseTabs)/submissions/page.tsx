@@ -554,6 +554,14 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
+     // If input is manually cleared (not via X), remove search param and show all data
+    useEffect(() => {
+        if (searchInput.trim() === '' && appliedSearch !== '') {
+            setAppliedSearch('')
+            updateURL(activeTab, '')
+        }
+    }, [searchInput, appliedSearch, activeTab, updateURL])
+    
     // Filter projects based on applied search - with safe array access
     const filteredProjects = (bootcampModules || []).filter((item: any) => {
         if (!appliedSearch) return true
