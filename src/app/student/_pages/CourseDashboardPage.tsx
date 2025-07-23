@@ -605,7 +605,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     const upcomingChapterId = latestCourseData?.newChapter?.id || 1 ;
 
                     return (
-                        <Card className={`shadow-4dp   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
+                        <Card key={module.id} className={`shadow-4dp   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
                           <CardContent className={`p-6 ${isLocked ? ' cursor-not-allowed' : ''}`}>
                             <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                               <div className="flex-1 text-left">
