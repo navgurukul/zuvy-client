@@ -119,10 +119,9 @@ export function ComboboxStudent({
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
-                    variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between"
+                    className="w-[200px] justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                 >
                     <span className="truncate max-w-[200px] text-left">
                         {userId ? displaybatchName : 'Select a Batch'}

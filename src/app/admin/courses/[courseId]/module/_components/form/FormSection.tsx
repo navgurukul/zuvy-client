@@ -242,7 +242,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 render={({ field }) => (
                     <FormItem>
                         <div className="flex flex-row justify-between">
-                            <FormLabel className="flex text-left text-md font-semibold mb-1">
+                            <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
                                 Question {index + 1}
                             </FormLabel>
                             <TooltipProvider>
@@ -331,7 +331,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                         variant={'secondary'}
                         type="button"
                         onClick={addOption}
-                        className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
+                        className="gap-x-2 border-none text-[rgb(81,134,114)] hover:text-[rgb(81,134,114)] hover:bg-popover"
                     >
                         <Plus /> Add Option
                     </Button>

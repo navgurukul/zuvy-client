@@ -95,7 +95,7 @@ const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps
                         columns={existingClassColumns}
                         customTopBar={
                             selectedRows.length > 0 && (
-                                <Button onClick={() => setOpen(true)}>
+                                <Button onClick={() => setOpen(true)} className="bg-success-dark opacity-75">
                                     Create Chapters
                                 </Button>
                             )
@@ -108,10 +108,10 @@ const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps
                             </DialogTitle>
                         </DialogHeader>
                         <DialogFooter>
-                            <Button variant="outline" onClick={() => setOpen(false)}>
+                            <Button className='text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]' onClick={() => setOpen(false)}>
                                 Cancel
                             </Button>
-                            <Button onClick={handleCreateChapters}>
+                            <Button className='bg-[rgb(81,134,114)]' onClick={handleCreateChapters}>
                                 OK
                             </Button>
                         </DialogFooter>
@@ -119,14 +119,9 @@ const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps
                 </Dialog>
                 <DataTablePagination
                     totalStudents={classes?.length}
-                    position={position}
-                    setPosition={setPosition}
                     pages={pages}
                     lastPage={lastPage}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
                     fetchStudentData={getAllClasses}
-                    setOffset={setOffset}
                 />
             </div>
         </div>

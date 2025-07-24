@@ -100,7 +100,6 @@ const Page = ({ params }: any) => {
         params.assignmentData,
         params.individualStatus,
         getBootcampHandler,
-        initialContent,
     ])
 
     const dateString = individualStudentData?.completedAt
@@ -145,12 +144,12 @@ const Page = ({ params }: any) => {
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
-                            <Spinner className="text-secondary" />
+                            <Spinner className="text-[rgb(81,134,114)]" />
                         </div>
                     </div>
                 </div>
             )}
-            <MaxWidthWrapper className="flex flex-col gap-5">
+            <MaxWidthWrapper className="flex flex-col gap-5 text-gray-600">
                 <div className="flex  items-center gap-x-3">
                     <div className="flex flex-col gap-x-2">
                         <div className="flex gap-x-4 my-4 ">
@@ -162,13 +161,13 @@ const Page = ({ params }: any) => {
                                 <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
                             <div>
-                                <h1 className="text-left font-semibold text-lg">
+                                <h1 className="text-left font-semibold text-[15px]">
                                     Submission Report by :{' '}
                                     {individualStudentData
                                         ? individualStudentData?.user?.name
                                         : ''}{' '}
                                 </h1>
-                                <h1 className="text-left font-semibold text-lg">
+                                <h1 className="text-left font-semibold text-[15px]">
                                     Email:{' '}
                                     {individualStudentData
                                         ? individualStudentData?.user?.email
@@ -179,26 +178,26 @@ const Page = ({ params }: any) => {
                     </div>
                 </div>
                 <div className="px-10 mx-8">
-                    <h1 className="text-left font-semibold text-[20px]">
+                    <h1 className="text-left font-semibold text-[19px]">
                         Overview
                     </h1>
                     <div>
-                        <h1 className="text-left font-semibold">
+                        <h1 className="text-left font-semibold text-[15px]">
                             Title: {assignmentTitle}
                         </h1>
                         <div className="flex flex-col ">
                             <div className="my-2 flex flex-col gap-y-2 text-left ">
                                 <div className="flex gap-x-3">
-                                    <h1 className="font-semibold">
+                                    <h1 className="font-semibold text-[15px]">
                                         Status: {individualStudentData?.status}
                                     </h1>
                                 </div>
-                                <h1 className="text-left font-semibold">
+                                <h1 className="text-left font-semibold text-[15px]">
                                     Completed At: {formattedDate}
                                 </h1>
                             </div>
-                            <div className="text-left flex font-semibold gap-x-2">
-                                <h1>Assignment Link:</h1>
+                            <div className="text-left flex font-semibold gap-x-2 text-[15px]">
+                                <h1 className="text-[15px]">Assignment Link:</h1>
                                 <Link
                                     target="_blank"
                                     className="hover:text-blue-400 hover:underline "
@@ -207,7 +206,7 @@ const Page = ({ params }: any) => {
                                     {url}
                                 </Link>
                             </div>
-                            <h1 className="text-left my-2 font-semibold">
+                            <h1 className="text-left my-2 font-semibold text-[15px]">
                                 Assignment Description:
                             </h1>
                             <div className="mt-2 text-start">

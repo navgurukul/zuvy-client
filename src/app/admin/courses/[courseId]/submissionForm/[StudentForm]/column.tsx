@@ -92,7 +92,7 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex space-x-2">
                     <div className="max-w-[500px] truncate flex items-center gap-x-2 font-medium">
                         {isSubmitted ? (
-                            <div className="bg-secondary h-3 w-3 rounded-full" />
+                            <div className="bg-green-600 h-3 w-3 rounded-full" />
                         ) : (
                             <div className="bg-red-600 h-3 w-3 rounded-full " />
                         )}
@@ -116,7 +116,7 @@ export const columns: ColumnDef<Task>[] = [
                     >
                         <Link
                             href={`/admin/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
-                            className="max-w-[500px] text-secondary font-medium flex items-center"
+                            className="max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center"
                         >
                             <FileText size={16} />
                             <p className="text-[15px]"> View Report</p>

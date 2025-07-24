@@ -60,8 +60,6 @@ const QuizQuestions = ({
     const [isDisabled, setIsDisabled] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isAlertModal, setIsAlertModal] = useState(false)
-    console.log(assessmentOutSourceId , 'assessmentOutSourceId')
-    console.log(assessmentSubmitId , 'assessmentSubmitId')
 
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'

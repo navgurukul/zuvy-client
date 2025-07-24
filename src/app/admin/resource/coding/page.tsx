@@ -1,6 +1,6 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
-import { ChevronLeft, Search } from 'lucide-react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import { ChevronLeft, Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -42,119 +42,267 @@ import {
 import {
     getAllCodingQuestions,
     filteredCodingQuestions,
-    filterQuestions,
 } from '@/utils/admin'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
 import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
-import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-import CodingTopics from '../../courses/[courseId]/module/_components/codingChallenge/CodingTopics'
-// import { POSITION } from '@/utils/constant'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
+import useDebounce from '@/hooks/useDebounce'
 
 export type Tag = {
     id: number
     tagName: string
 }
-// interface Option {
-//     tagName: string
-//     id: number
-// }
 
 interface Option {
     label: string
     value: string
 }
+
+interface SearchSuggestion {
+    id: number
+    title: string
+    difficulty: string
+}
+
 const CodingProblems = () => {
+    const router = useRouter();
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
     const [allCodingQuestions, setAllCodingQuestions] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
-    const debouncedSearch = useDebounce(searchTerm, 500)
+    const [confirmedSearch, setConfirmedSearch] = useState('')
+    const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [isSearchFocused, setIsSearchFocused] = useState(false)
+    const [areOptionsLoaded, setAreOptionsLoaded] = useState(false)
+    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+    
+    // Only debounce for suggestions, not for confirmed search
+    const debouncedSearchTerm = useDebounce(searchTerm, 300)
+
     const {
-        setEditCodingQuestionId,
         isCodingEditDialogOpen,
         setIsCodingEditDialogOpen,
         isCodingDialogOpen,
         setIsCodingDialogOpen,
     } = getEditCodingQuestionDialogs()
     const { tags, setTags } = getCodingQuestionTags()
-    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('codingCurrentTag')
-            return storedTag !== null
-                ? JSON.parse(storedTag)
-                : { tagName: 'All Topics', id: -1 }
-        }
-        return { tagName: 'All Topics', id: -1 }
-    })
-    // const [selectedOptions, setSelectedOptions] = getSelectedOptions()
     const { selectedOptions, setSelectedOptions } = getSelectedOptions()
     const [options, setOptions] = useState<Option[]>([
         { value: '-1', label: 'All Topics' },
     ])
-    const [selectedDifficulty, setSelectedDifficulty] = useState(['None'])
     const { difficulty, setDifficulty } = getDifficulty()
 
+    // const activeFiltersCount = getActiveFiltersCount()
     const [loading, setLoading] = useState(true)
-    const [openEditDialog, setOpenEditDialog] = useState(false)
-    // const [position, setPosition] = useState(POSITION)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    // const [offset, setOffset] = useState<number>(OFFSET)
     const { offset, setOffset } = getOffset()
     const { position, setPosition } = getPosition()
     const [newTopic, setNewTopic] = useState<string>('')
+    const [urlInitialized, setUrlInitialized] = useState(false)
 
-    const selectedLanguage = ''
-    const handleTopicClick = (value: string) => {
-        const tag = tags.find((t: Tag) => t.tagName === value) || {
-            tagName: 'All Topics',
-            id: -1,
+    // First, load all tags and options
+    async function getAllTags() {
+        try {
+            const response = await api.get('Content/allTags')
+            const tagArr = [
+                { id: -1, tagName: 'All Topics' },
+                ...response.data.allTags,
+            ]
+
+            const transformedData = tagArr.map((item: { id: any; tagName: any }) => ({
+                value: item.id.toString(),
+                label: item.tagName,
+            }))
+
+            setTags(tagArr.map(item => ({ id: item.id, tagName: item.tagName })))
+            setOptions(transformedData)
+            setAreOptionsLoaded(true)
+        } catch (error) {
+            toast({
+                title: 'Error',
+                description: 'Failed to fetch tags',
+                variant: 'destructive',
+            })
         }
-        setSelectedTag(tag)
-        localStorage.setItem('codingCurrentTag', JSON.stringify(tag))
     }
+
+    // Initialize from URL - this runs ONCE when component mounts
+    const initializeFromURL = useCallback(() => {
+        if (!areOptionsLoaded || urlInitialized) return
+
+        const urlParams = new URLSearchParams(window.location.search)
+
+        // Initialize search
+        const urlSearch = urlParams.get('search') || ''
+        setSearchTerm(urlSearch)
+        setConfirmedSearch(urlSearch)
+
+        // Initialize topics
+        const urlTopics = urlParams.get('topics')
+        if (urlTopics) {
+            const topicIds = urlTopics.split(',')
+            const matchedOptions = topicIds
+                .map(id => options.find(opt => opt.value === id))
+                .filter(Boolean) as Option[]
+
+            if (matchedOptions.length > 0) {
+                setSelectedOptions(matchedOptions)
+            } else {
+                setSelectedOptions([{ value: '-1', label: 'All Topics' }])
+            }
+        } else {
+            setSelectedOptions([{ value: '-1', label: 'All Topics' }])
+        }
+
+        // Initialize difficulty
+        const urlDifficulty = urlParams.get('difficulty')
+        if (urlDifficulty) {
+            const difficultyValues = urlDifficulty.split(',')
+            const matchedDifficulties = difficultyValues
+                .map(val => difficultyOptions.find(opt => opt.value === val))
+                .filter(Boolean) as Option[]
+
+            if (matchedDifficulties.length > 0) {
+                setDifficulty(matchedDifficulties)
+            } else {
+                setDifficulty([{ value: 'None', label: 'All Difficulty' }])
+            }
+        } else {
+            setDifficulty([{ value: 'None', label: 'All Difficulty' }])
+        }
+
+        setUrlInitialized(true)
+    }, [areOptionsLoaded, options, urlInitialized])
+
+    // Initialize everything on mount
+    useEffect(() => {
+        getAllTags()
+        setIsCodingDialogOpen(false)
+        setIsCodingEditDialogOpen(false)
+    }, [])
+
+    // Initialize from URL when options are loaded
+    useEffect(() => {
+        initializeFromURL()
+    }, [initializeFromURL])
+
+    // Fetch suggestions with debouncing - FIXED VERSION
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            // Clear suggestions if search term is too short
+            if (!debouncedSearchTerm || debouncedSearchTerm.length < 2) {
+                setSearchSuggestions([])
+                setIsLoadingSuggestions(false)
+                return
+            }
+
+            setIsLoadingSuggestions(true)
+            
+            try {
+                const response = await api.get('/Content/allCodingQuestions', {
+                    params: {
+                        searchTerm: debouncedSearchTerm,
+                        limit: 8 // Add limit to get only top 8 suggestions
+                    },
+                })
+
+                console.log("Suggestions API response:", response.data)
+
+                // Handle different response structures
+                let questionsData = response.data;
+                
+                // If the response has a data property, use that
+                if (response.data.data) {
+                    questionsData = response.data.data;
+                }
+                
+                // If the response has a questions property, use that
+                if (response.data.questions) {
+                    questionsData = response.data.questions;
+                }
+
+                // Ensure questionsData is an array
+                if (!Array.isArray(questionsData)) {
+                    console.error("Expected array but got:", typeof questionsData);
+                    setSearchSuggestions([]);
+                    return;
+                }
+
+                const suggestions = questionsData
+                    .filter((question: any) => 
+                        question.title && 
+                        question.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+                    )
+                    .slice(0, 8)
+                    .map((question: any) => ({
+                        id: question.id,
+                        title: question.title,
+                        difficulty: question.difficulty || 'N/A',
+                    }));
+
+                setSearchSuggestions(suggestions)
+            } catch (error) {
+                console.error('Error fetching suggestions:', error)
+                setSearchSuggestions([])
+            } finally {
+                setIsLoadingSuggestions(false)
+            }
+        }
+
+        fetchSuggestions()
+    }, [debouncedSearchTerm])
+
+    // Update URL when filters change - but only after URL is initialized
+    useEffect(() => {
+        if (!urlInitialized) return
+
+        const params = new URLSearchParams()
+
+        // Update search
+        if (confirmedSearch) {
+            params.set('search', confirmedSearch)
+        }
+
+        // Update topics
+        if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) {
+            const topicValues = selectedOptions.map(opt => opt.value).join(',')
+            params.set('topics', topicValues)
+        }
+
+        // Update difficulty
+        if (difficulty.length > 0 && !difficulty.some(opt => opt.value === 'None')) {
+            const difficultyValues = difficulty.map(opt => opt.value).join(',')
+            params.set('difficulty', difficultyValues)
+        }
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`
+        const currentUrl = `${window.location.pathname}${window.location.search}`
+
+        if (newUrl !== currentUrl) {
+            router.replace(newUrl)
+        }
+    }, [confirmedSearch, selectedOptions, difficulty, router, urlInitialized])
 
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
-            if (selectedOptions.some((item) => item.value === option.value)) {
-                // setSelectedOptions((prev) =>
-                //     prev.filter((selected) => selected.value !== option.value)
-                // )
-                setSelectedOptions(
-                    selectedOptions.filter(
-                        (selected) => selected.value !== option.value
-                    )
-                )
-            } else {
-                setSelectedOptions([option])
-            }
+            setSelectedOptions([option])
         } else {
-            if (selectedOptions.some((item) => item.value === '-1')) {
+            if (selectedOptions.some(item => item.value === '-1')) {
                 setSelectedOptions([option])
             } else {
-                if (
-                    selectedOptions.some(
-                        (selected) => selected.value === option.value
-                    )
-                ) {
-                    // setSelectedOptions((prev) =>
-                    //     prev.filter(
-                    //         (selected) => selected.value !== option.value
-                    //     )
-                    // )
+                if (selectedOptions.some(selected => selected.value === option.value)) {
                     setSelectedOptions(
-                        selectedOptions.filter(
-                            (selected) => selected.value !== option.value
-                        )
+                        selectedOptions.filter(selected => selected.value !== option.value)
                     )
                 } else {
-                    // setSelectedOptions((prev) => [...prev, option])
                     setSelectedOptions([...selectedOptions, option])
                 }
             }
@@ -162,212 +310,232 @@ const CodingProblems = () => {
     }
 
     const handleDifficulty = (option: Option) => {
-        // When user selects All Difficulty
         if (option.value === 'None') {
-            // It will check if the user has already selected All Difficulty or not
-            if (difficulty.some((item) => item.value === option.value)) {
-                // If All Difficulty is already selected it will remove
-                const filteredDifficulty = difficulty.filter(
-                    (item) => item.value !== option.value
-                )
-                setDifficulty(filteredDifficulty)
-            } else {
-                // If user selects All Difficulty when it is not already selected,
-                // Rest other difficulties will be removed and only All Difficulty will be added in the array
-                setDifficulty([option])
-            }
+            setDifficulty([option])
         } else {
-            // When user selects other Difficulties
-            if (difficulty.some((item) => item.value === 'None')) {
-                // When All Difficulty is already selected and user selects other difficulties
-                // then All Difficulty will be removed and new difficulty will be added to the list
+            if (difficulty.some(item => item.value === 'None')) {
                 setDifficulty([option])
             } else {
-                if (difficulty.some((item) => item.value === option.value)) {
-                    // Removing other difficulty when already selected
-                    const filteredDifficulty = difficulty.filter(
-                        (item) => item.value !== option.value
+                if (difficulty.some(item => item.value === option.value)) {
+                    setDifficulty(
+                        difficulty.filter(item => item.value !== option.value)
                     )
-                    setDifficulty(filteredDifficulty)
                 } else {
-                    // Add other difficulties
-                    const filteredDifficulty = [...difficulty, option]
-                    setDifficulty(filteredDifficulty)
+                    setDifficulty([...difficulty, option])
                 }
             }
         }
     }
 
-    async function getAllTags() {
-        const response = await api.get('Content/allTags')
-        if (response) {
-            const tagArr = [
-                { id: -1, tagName: 'All Topics' },
-                ...response.data.allTags,
-            ]
-            const transformedTags = tagArr.map(
-                (item: { id: any; tagName: any }) => ({
-                    id: item.id,
-                    tagName: item.tagName,
-                })
-            )
-            const transformedData = tagArr.map(
-                (item: { id: any; tagName: any }) => ({
-                    value: item.id.toString(),
-                    label: item.tagName,
-                })
-            )
-
-            setTags(transformedTags)
-            setOptions(transformedData)
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        
+        // Show suggestions when typing (if there's text and input is focused)
+        if (value.length > 0 && isSearchFocused) {
+            setShowSuggestions(true);
+        } else {
+            setShowSuggestions(false);
         }
     }
 
-    useEffect(() => {
-        getAllTags()
-        setIsCodingDialogOpen(false)
-        setIsCodingEditDialogOpen(false)
-    }, [])
+    const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            setConfirmedSearch(searchTerm)
+            setShowSuggestions(false)
+            setCurrentPage(1)
+        }
+        // Hide suggestions on Escape
+        if (e.key === 'Escape') {
+            setShowSuggestions(false)
+        }
+    }
+
+    const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+        setSearchTerm(suggestion.title)
+        setConfirmedSearch(suggestion.title)
+        setShowSuggestions(false)
+        setCurrentPage(1)
+    }
+
+    const handleSearchFocus = () => {
+        setIsSearchFocused(true)
+        // Show suggestions if there's text and suggestions available
+        if (searchTerm.length > 1 && searchSuggestions.length > 0) {
+            setShowSuggestions(true)
+        }
+    }
+
+    const handleSearchBlur = () => {
+        setIsSearchFocused(false)
+        // Use a longer timeout to allow clicking on suggestions
+        setTimeout(() => {
+            setShowSuggestions(false)
+        }, 200)
+    }
+
+    // Clear ALL filters (search, topics, difficulty)
+    const clearOnlySearchTerm = () => {
+        setSearchTerm('')
+        setConfirmedSearch('')
+        setShowSuggestions(false)
+        setCurrentPage(1)
+    }
 
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
-            filteredCodingQuestions(
-                setCodingQuestions,
-                offset,
-                position,
-                difficulty,
-                selectedOptions,
-                setTotalCodingQuestion,
-                setLastPage,
-                setTotalPages,
-                debouncedSearch,
-                selectedLanguage
-            )
+            try {
+                await filteredCodingQuestions(
+                    setCodingQuestions,
+                    offset,
+                    position,
+                    difficulty,
+                    selectedOptions,
+                    setTotalCodingQuestion,
+                    setLastPage,
+                    setTotalPages,
+                    confirmedSearch,
+                    ''
+                )
+            } catch (error) {
+                toast({
+                    title: 'Error',
+                    description: 'Failed to fetch questions',
+                    variant: 'destructive',
+                })
+            }
         },
-        [
-            searchTerm,
-            selectedOptions,
-            difficulty,
-            setTotalCodingQuestion,
-            // selectedDifficulty,
-            debouncedSearch,
-            isCodingDialogOpen,
-            openEditDialog,
-            position,
-            offset,
-        ]
+        [confirmedSearch, selectedOptions, difficulty, position, offset]
     )
 
+    // Fetch data only after URL is initialized
     useEffect(() => {
-        getAllCodingQuestions(setAllCodingQuestions)
-        fetchCodingQuestions(offset)
-    }, [
-        searchTerm,
-        selectedOptions,
-        difficulty,
-        setTotalCodingQuestion,
-        // selectedDifficulty,
-        debouncedSearch,
-        isCodingDialogOpen,
-        openEditDialog,
-        position,
-        offset,
-    ])
+        if (!urlInitialized) return
+
+        const fetchData = async () => {
+            await getAllCodingQuestions(setAllCodingQuestions)
+            await fetchCodingQuestions(offset)
+        }
+        fetchData()
+    }, [confirmedSearch, selectedOptions, difficulty, offset, urlInitialized, fetchCodingQuestions])
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false)
-        }, 1000)
-
+        const timer = setTimeout(() => setLoading(false), 1000)
         return () => clearTimeout(timer)
     }, [])
 
-    useEffect(() => {
-        setOpenEditDialog(isCodingEditDialogOpen)
-    }, [isCodingEditDialogOpen])
-
-    const handleNewTopicChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setNewTopic(event.target.value)
+    const getActiveFiltersCount = () => {
+        let count = 0
+        if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) count++
+        if (difficulty.length > 0 && !difficulty.some(diff => diff.value === 'None')) count++
+        if (confirmedSearch) count++
+        return count
     }
 
-    const handleCreateTopic = async () => {
-        try {
-            await api
-                .post(`/Content/createTag`, { tagName: newTopic })
-                .then((res) => {
-                    toast.success({
-                        title: `${newTopic} Topic has created`,
-                        description: res.data.message,
-                    })
-                    getAllTags()
-                    setNewTopic('')
-                })
-        } catch (error) {
-            toast.error({
-                title: 'Network error',
-                description:
-                    'Unable to create session. Please try again later.',
-            })
-        }
-    }
-
-    const selectedTagCount = selectedOptions.length
-    const difficultyCount = difficulty.length
-
+    const activeFiltersCount = getActiveFiltersCount()
+    
     return (
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+                    <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
-            ) : openEditDialog ? (
+            ) : isCodingEditDialogOpen ? (
                 <EditCodingQuestionForm />
             ) : (
                 <div>
                     {allCodingQuestions.length > 0 && !isCodingDialogOpen ? (
                         <MaxWidthWrapper>
-                            <h1 className="text-left font-semibold text-2xl">
+                            <h1 className="text-left font-semibold text-2xl text-gray-600">
                                 Resource Library - Coding Problems
                             </h1>
+
                             <div className="flex justify-between">
                                 <div className="relative w-full">
-                                    <Input
-                                        placeholder="Problem Name..."
-                                        className="w-1/4 p-2 my-6 input-with-icon pl-8"
-                                        value={searchTerm}
-                                        onChange={(e) =>
-                                            setSearchTerm(e.target.value)
-                                        }
-                                    />
-                                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                        <Search
-                                            className="text-gray-400"
-                                            size={20}
+                                    <div className="relative w-1/4">
+                                        <Input
+                                            placeholder="Problem Name..."
+                                            className="w-full p-2 my-6 input-with-icon pl-8"
+                                            value={searchTerm}
+                                            onChange={handleSearchInputChange}
+                                            onFocus={handleSearchFocus}
+                                            onBlur={handleSearchBlur}
+                                            onKeyDown={handleSearchInputKeyDown}
                                         />
+                                        <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                            <Search className="text-gray-400" size={20} />
+                                        </div>
+                                        {(searchTerm || activeFiltersCount > 0) && (
+                                            <button
+                                                onClick={clearOnlySearchTerm}
+                                                className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        )}
+                                        
+                                        {/* Fixed Suggestions dropdown */}
+                                        {showSuggestions && (
+                                            <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg top-full mt-1">
+                                                {isLoadingSuggestions ? (
+                                                    <div className="px-4 py-3 text-sm text-gray-500">
+                                                        Loading suggestions...
+                                                    </div>
+                                                ) : searchSuggestions.length > 0 ? (
+                                                    searchSuggestions.map((suggestion) => (
+                                                        <div
+                                                            key={suggestion.id}
+                                                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                                            onMouseDown={(e) => {
+                                                                e.preventDefault(); // Prevent input blur
+                                                                handleSuggestionClick(suggestion);
+                                                            }}
+                                                        >
+                                                            <p className="text-sm font-medium text-gray-900 truncate text-left">
+                                                                {suggestion.title}
+                                                            </p>
+                                                        </div>
+                                                    ))
+                                                ) : debouncedSearchTerm && debouncedSearchTerm.length >= 2 ? (
+                                                    <div className="px-4 py-3 text-sm text-gray-500">
+                                                        No suggestions found
+                                                    </div>
+                                                ) : null}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
                                 <div className="flex flex-row items-center gap-2">
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button className="text-white bg-secondary lg:max-w-[150px] w-full">
+                                            <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full">
                                                 <p>Create Topic</p>
                                             </Button>
                                         </DialogTrigger>
                                         <DialogOverlay />
                                         <CreatTag
                                             newTopic={newTopic}
-                                            handleNewTopicChange={
-                                                handleNewTopicChange
-                                            }
-                                            handleCreateTopic={
-                                                handleCreateTopic
-                                            }
+                                            handleNewTopicChange={(e) => setNewTopic(e.target.value)}
+                                            handleCreateTopic={() => {
+                                                api.post(`/Content/createTag`, { tagName: newTopic })
+                                                    .then(() => {
+                                                        toast({ title: 'Success', description: `${newTopic} topic created` })
+                                                        getAllTags()
+                                                        setNewTopic('')
+                                                    })
+                                                    .catch(() => {
+                                                        toast({
+                                                            title: 'Error',
+                                                            description: 'Unable to create topic',
+                                                            variant: 'destructive',
+                                                        })
+                                                    })
+                                            }}
                                         />
                                     </Dialog>
 
-                                    <Button
+                                    <Button className='bg-success-dark opacity-75'
                                         onClick={() =>
                                             setIsCodingDialogOpen(true)
                                         }
@@ -376,43 +544,28 @@ const CodingProblems = () => {
                                     </Button>
                                 </div>
                             </div>
-                            {/* <CodingTopics
-                                setSearchTerm={setSearchTerm}
-                                searchTerm={searchTerm}
-                                tags={tags}
-                                selectedTopics={selectedOptions}
-                                setSelectedTopics={setSelectedOptions}
-                                selectedDifficulties={selectedDifficulty}
-                                setSelectedDifficulties={setSelectedDifficulty}
-                            /> */}
-                            <div className="flex items-center gap-4">
+
+                            <div className="flex items-center gap-4 mb-6">
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
-                                        selectedCount={difficultyCount}
+                                        selectedCount={difficulty.filter(d => d.value !== 'None').length}
                                         options={difficultyOptions}
                                         selectedOptions={difficulty}
                                         handleOptionClick={handleDifficulty}
-                                        type={
-                                            difficultyCount > 1
-                                                ? 'Difficulties'
-                                                : 'Difficulty'
-                                        }
+                                        type="Difficulty"
                                     />
                                 </div>
                                 <div className="w-full lg:w-[250px]">
                                     <MultiSelector
-                                        selectedCount={selectedTagCount}
+                                        selectedCount={selectedOptions.filter(o => o.value !== '-1').length}
                                         options={options}
                                         selectedOptions={selectedOptions}
                                         handleOptionClick={handleTagOption}
-                                        type={
-                                            selectedTagCount > 1
-                                                ? 'Topics'
-                                                : 'Topic'
-                                        }
+                                        type="Topic"
                                     />
                                 </div>
                             </div>
+
                             <DataTable
                                 data={codingQuestions}
                                 columns={columns}
@@ -420,85 +573,63 @@ const CodingProblems = () => {
                         </MaxWidthWrapper>
                     ) : (
                         <>
-                            {!isCodingDialogOpen &&
+                            {
+                                !isCodingDialogOpen &&
                                 !isCodingEditDialogOpen &&
-                                codingQuestions.length === 0 ? (
-                                <>
-                                    <h1 className="text-left font-semibold text-2xl">
-                                        Resource Library - Coding Problems
-                                    </h1>
-                                    <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                                        <div>
-                                            <Image
-                                                src="/resource_library_empty_state.svg"
-                                                alt="Empty State"
-                                                width={500}
-                                                height={500}
-                                            />
-                                        </div>
-                                        <h2>
-                                            No coding problems have been created
-                                            yet. Start by adding the first one
-                                        </h2>
-                                        <Button
-                                            onClick={() =>
-                                                setIsCodingDialogOpen(true)
-                                            }
-                                        >
-                                            + Create Problems
-                                        </Button>
-                                    </MaxWidthWrapper>
-                                </>
-                            ) : (
-                                <>
-                                    {isCodingDialogOpen &&
-                                        !isCodingEditDialogOpen && (
-                                            <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                                                <div
-                                                    onClick={() =>
-                                                        setIsCodingDialogOpen(
-                                                            false
-                                                        )
-                                                    }
-                                                    className="text-secondary cursor-pointer self-start flex"
-                                                >
-                                                    {' '}
-                                                    <ChevronLeft /> Coding
-                                                    Problems
-                                                </div>
-                                                <NewCodingProblemForm
-                                                    tags={tags}
-                                                    setIsDialogOpen={
-                                                        setIsCodingDialogOpen
-                                                    }
-                                                    filteredCodingQuestions={
-                                                        filteredCodingQuestions
-                                                    }
-                                                    setCodingQuestions={
-                                                        setCodingQuestions
-                                                    }
+                                codingQuestions.length === 0 && (
+                                    <>
+                                        <h1 className="text-left font-semibold text-2xl text-gray-600">
+                                            Resource Library - Coding Problems
+                                        </h1>
+                                        <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                                            <div>
+                                                <Image
+                                                    src="/resource_library_empty_state.svg"
+                                                    alt="Empty State"
+                                                    width={500}
+                                                    height={500}
                                                 />
-                                            </MaxWidthWrapper>
-                                        )}
-                                    {isCodingEditDialogOpen &&
-                                        !isCodingDialogOpen && (
-                                            <EditCodingQuestionForm />
-                                        )}
-                                </>
+                                            </div>
+                                            <h2>
+                                                No coding problems have been created
+                                                yet. Start by adding the first one
+                                            </h2>
+                                            <Button
+                                                className="bg-success-dark opacity-75"
+                                                onClick={() =>
+                                                    setIsCodingDialogOpen(true)
+                                                }
+                                            >
+                                                + Create Problems
+                                            </Button>
+                                        </MaxWidthWrapper>
+                                    </>
+                                )}
+
+                            {isCodingDialogOpen && !isCodingEditDialogOpen && (
+                                <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
+                                    <div onClick={() => setIsCodingDialogOpen(false)}
+                                        className="text-[rgb(81,134,114)] cursor-pointer self-start flex">
+                                        {' '}
+                                        <ChevronLeft /> Coding Problems
+                                    </div>
+                                    <NewCodingProblemForm
+                                        tags={tags}
+                                        setIsDialogOpen={setIsCodingDialogOpen}
+                                        filteredCodingQuestions={filteredCodingQuestions}
+                                        setCodingQuestions={setCodingQuestions}
+                                    />
+                                </MaxWidthWrapper>
                             )}
                         </>
                     )}
-                    {!isCodingDialogOpen && (
+
+                    {!isCodingDialogOpen && !isCodingEditDialogOpen && (
                         <DataTablePagination
                             totalStudents={totalCodingQuestion}
-                            position={position}
-                            setPosition={setPosition}
-                            pages={totalPages}
                             lastPage={lastPage}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
+                            pages={totalPages}
                             fetchStudentData={fetchCodingQuestions}
-                            setOffset={setOffset}
                         />
                     )}
                 </div>

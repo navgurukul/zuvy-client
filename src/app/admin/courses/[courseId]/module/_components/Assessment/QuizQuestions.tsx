@@ -65,7 +65,7 @@ const QuizQuestions = ({
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">
                                 <div className="flex items-center  justify-between gap-2">
-                                    <h2 className="font-bold">
+                                    <h2 className="font-bold text-[1rem] text-gray-600">
                                         {question?.quizVariants?.map(
                                             (ques: any) => {
                                                 return (
@@ -138,7 +138,7 @@ const QuizQuestions = ({
                                                       setIsNewQuestionAdded
                                                     );
                                                   }}
-                                                    className="text-secondary cursor-pointer"
+                                                    className="text-[rgb(81,134,114)] cursor-pointer"
                                                     size={20}
                                                 />
                                             )}

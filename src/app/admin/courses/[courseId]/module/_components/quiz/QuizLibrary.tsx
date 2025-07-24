@@ -160,7 +160,7 @@ function QuizLibrary({
                 />
             </div>
             <div className="w-full h-max-content ">
-                <h2 className="text-left text-gray-700 font-semibold">
+                <h2 className="text-left text-gray-600 text-[15px] font-semibold">
                     MCQ Library
                 </h2>
                 {renderQuizList}

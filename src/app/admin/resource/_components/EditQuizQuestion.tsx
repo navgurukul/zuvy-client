@@ -200,7 +200,7 @@ const EditQuizQuestion = ({
     return (
         <>
             {loadingState === 'formIsLoading' ? (
-                <Spinner className="text-secondary" />
+                <Spinner className="text-[rgb(81,134,114)]" />
             ) : loadingState === 'formIsLoaded' ? (
                 <main className="flex  flex-col p-3 ">
                     <Form {...form}>

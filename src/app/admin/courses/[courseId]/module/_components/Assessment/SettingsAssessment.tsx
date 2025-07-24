@@ -586,8 +586,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     onClick={() => setQuestionType('coding')}
                     className="flex items-center mb-6 cursor-pointer box-border"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-2 box-border" />
-                    <span className="font-semibold">
+                    <ChevronLeft className="w-4 h-4 mr-2 box-border text-gray-600" />
+                    <span className="font-semibold text-gray-600">
                         Back to{' '}
                         {/* {content?.ModuleAssessment?.title || 'Assessment'} */}
                         {chapterTitle}
@@ -602,7 +602,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     >
                         <div className="flex justify-between w-full items-center mb-6">
                             <div className="flex items-center">
-                                <h1 className="text-lg font-bold">
+                                <h1 className="text-lg font-bold text-gray-600">
                                     Manage Settings
                                 </h1>
                                 {currentAssessmentStatus && (
@@ -627,7 +627,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                             <Dialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>
                                 <DialogTrigger asChild>
-                                    <Button type="button" variant="default" className="w-auto px-6">
+                                    <Button type="button" variant="default" className="w-auto px-6 bg-success-dark opacity-75">
                                         Publish Options
                                     </Button>
                                 </DialogTrigger>
@@ -644,14 +644,14 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                         </div>
 
-                        <div className='flex items-center mb-6'>
+                        <div className='flex items-center mb-6 text-gray-600'>
                             <label className='font-semibold mr-2 mt-1' htmlFor="description">Description: </label>
                             <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Enter description (optional)' type="text" className='w-1/2' id="description" />
                         </div>
 
                         {/* Section 1: Choose number of questions */}
                         <section>
-                            <h2 className="font-semibold mb-2">
+                            <h2 className="font-semibold mb-2 text-gray-600 text-[15px]">
                                 Choose number of questions shown to students
                             </h2>
                             <p className="text-sm text-gray-600 mb-4">
@@ -661,7 +661,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 for each question type.
                             </p>
 
-                            <div className="flex justify-between items-start">
+                            <div className="flex justify-between items-start text-gray-600">
                                 {[
                                     {
                                         title: 'Coding Problems',
@@ -685,7 +685,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     },
                                 ].map((category, index) => (
                                     <div key={index} className="mb-4">
-                                        <h3 className="font-semibold mb-2">
+                                        <h3 className="font-semibold mb-2 text-[15px]">
                                             {category.title}
                                         </h3>
                                         {category.fields.map((field, idx) => (
@@ -828,7 +828,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 ))}
 
                                 <div className="mb-4">
-                                    <h3 className="font-semibold mb-2 mr-3">
+                                    <h3 className="font-semibold mb-2 mr-3 text-[15px]">
                                         Total Selected Questions
                                     </h3>
                                     <div className="mt-2">
@@ -862,7 +862,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         {/* Section 2: Individual Section Weightage */}
                         <div className="flex space-x-48 my-8 ">
                             <section>
-                                <h2 className="font-semibold mb-2">
+                                <h2 className="font-semibold mb-2 text-gray-600 text-[15px]">
                                     Individual Section Weightage
                                 </h2>
                                 <p className="text-sm text-gray-600 mb-4">
@@ -957,7 +957,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                             {/* Section 3: Manage Proctoring Settings */}
                             <section className="w-1/3">
-                                <h2 className="font-semibold mb-4">
+                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
                                     Manage Proctoring Settings
                                 </h2>
                                 {proctoringOptions.map((option, index) => (
@@ -1019,7 +1019,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         <div className="flex space-x-44">
                             {/* Section 1: Time Limit */}
                             <section className="w-1/4">
-                                <h2 className="font-semibold mb-4">
+                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
                                     Time limit
                                 </h2>
                                 <div className="flex flex-col space-y-4 ">
@@ -1118,7 +1118,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                             {/* Section 5: Set Pass Percentage */}
                             <section className="">
-                                <h2 className="font-semibold mb-4">
+                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
                                     Pass Percentage (Out Of 100)
                                 </h2>
                                 <FormField

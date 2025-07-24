@@ -66,7 +66,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             doc.setFont('helvetica', 'normal')
             doc.text(`Assessment Name: ${assessment.title}`, 10, 20)
             doc.text(
-                `Qualifying Criteria: ${response?.data.passPercentage}%`,
+                `Qualifying Criteria: ${response?.data.ModuleAssessment.passPercentage}%`,
                 10,
                 26
             )
@@ -278,9 +278,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     )
                 ) : (
                     <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                        <h1 className="text-center font-semibold ">
+                        <h5 className="text-center font-semibold text-[17px]">
                             No Assessment Found
-                        </h1>
+                        </h5>
                         <Image
                             src="/emptyStates/curriculum.svg"
                             alt="No Assessment Found"
@@ -290,10 +290,10 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     </div>
                 )
             ) : (
-                <div className="w-full flex justify-center items-center absolute inset-0 h-screen">
-                    <h1 className="text-center font-semibold ">
+                <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                    <h5 className="text-center font-semibold text-[17px]">
                         No Assessment Found
-                    </h1>
+                    </h5>
                     <Image
                         src="/emptyStates/curriculum.svg"
                         alt="No Assessment Found"

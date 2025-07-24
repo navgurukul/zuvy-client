@@ -52,7 +52,7 @@ const BulkUploadMcq = ({ setIsMcqModalOpen }: Props) => {
                 </div>
 
                 <div className="flex justify-end  w-full">
-                    <Button className="" type="submit">
+                    <Button className="bg-success-dark opacity-75" type="submit">
                         Add Questions
                     </Button>
                 </div>

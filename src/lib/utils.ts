@@ -31,9 +31,9 @@ export function isPlural(count: number): boolean {
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'text-secondary'
+            return 'text-[rgb(81,134,114)]'
         case 'medium':
-            return 'text-yellow-dark'
+            return 'text-secondary'
         case 'hard':
             return 'text-destructive'
         default:
@@ -111,10 +111,10 @@ export const formatDate = (dateString: string): string => {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZoneName: 'short',
+        // hour: '2-digit',
+        // minute: '2-digit',
+        // second: '2-digit',
+        // timeZoneName: 'short',
     }
 
     const date = new Date(dateString)

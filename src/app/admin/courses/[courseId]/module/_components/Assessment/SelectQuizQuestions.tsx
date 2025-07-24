@@ -60,7 +60,7 @@ const SelectQuizQuestions = ({
                                 <div className="flex justify-between items-start w-full">
                                     <div className="w-full">
                                         <div className="flex items-center gap-2">
-                                            <h2 className="font-bold">
+                                            <h2 className="font-bold text-[15px] text-gray-600">
                                                 {isQuizVariantExists ? <span
                                                     key={question}
                                                     dangerouslySetInnerHTML={{

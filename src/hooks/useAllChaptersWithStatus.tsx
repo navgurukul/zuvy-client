@@ -50,10 +50,8 @@ const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusRet
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async (isRefetch = false) => {
-    console.log('useAllChaptersWithStatus - moduleId:', moduleId);
     
     if (!moduleId) {
-      console.log('useAllChaptersWithStatus - moduleId is empty or undefined');
       setError('Module ID is required');
       setLoading(false);
       return;
@@ -67,7 +65,6 @@ const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusRet
       }
       setError(null);
       
-      console.log('useAllChaptersWithStatus - making API call to:', `/tracking/getAllChaptersWithStatus/${moduleId}`);
       const response = await api.get<AllChaptersWithStatusResponse>(`/tracking/getAllChaptersWithStatus/${moduleId}`);
       
       if (response.data.status === 'success') {

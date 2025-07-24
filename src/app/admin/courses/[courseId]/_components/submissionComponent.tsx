@@ -133,7 +133,7 @@ const SubmissionComponent = (props: Props) => {
                                 }`}
                             ></div>
                         </div>
-                        <h3>
+                        <h3 className='text-sm'>
                             {props.studentsSubmitted} / {props.totalSubmissions}
                         </h3>
 
@@ -142,12 +142,12 @@ const SubmissionComponent = (props: Props) => {
                             <Link
                                 href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}`}
                             >
-                                <h3 className="font-semibold cursor-pointer">
+                                <h3 className="font-semibold cursor-pointer text-sm">
                                     Submissions
                                 </h3>
                             </Link>
                         ) : (
-                            <h3 className="text-gray-400 font-semibold cursor-not-allowed">
+                            <h3 className="text-gray-400 font-semibold cursor-not-allowed text-sm">
                                 Submissions
                             </h3>
                         )}

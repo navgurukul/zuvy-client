@@ -15,7 +15,7 @@ function page() {
       </div>
       <p className="text-xl font-semibold my-2">
         Dashboard
-        <span className="text-secondary text-xl font-bold ml-2">
+        <span className="text-green-700 text-xl font-bold ml-2">
           Under Construction
         </span>
       </p>

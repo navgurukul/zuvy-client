@@ -868,7 +868,7 @@ const NewMcqProblemForm = ({
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Easy"
-                                                className="translate-y-[2px]"
+                                                className="translate-y-[2px] border-black"
                                             />
                                             <FormLabel className="text-lg">
                                                 Easy
@@ -895,7 +895,7 @@ const NewMcqProblemForm = ({
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Medium"
-                                                className="translate-y-[2px]"
+                                                className="translate-y-[2px] border-black"
                                             />
                                             <FormLabel className="text-lg">
                                                 Medium
@@ -921,7 +921,7 @@ const NewMcqProblemForm = ({
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Hard"
-                                                className="translate-y-[2px]"
+                                                className="translate-y-[2px] border-black"
                                             />
                                             <FormLabel className="text-lg">
                                                 Hard
@@ -1043,7 +1043,7 @@ const NewMcqProblemForm = ({
                             type="button"
                             // onClick={generateMCQUsingGemini}
                             onClick={generateQuestions}
-                            className="flex items-center"
+                            className="flex items-center bg-success-dark opacity-75"
                         >
                             {loadingAI ? (
                                 <>

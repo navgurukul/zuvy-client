@@ -108,12 +108,17 @@ const CurricullumCard = (props: Props) => {
             value={props.value}
             dragListener={false}
             dragControls={dragControls}
-            className={`select-none ${props.isStarted ? 'opacity-90' : ''}`}
+            className={`select-none ${props.isStarted ? 'opacity-90' : ''}min-h-[120px] relative z-0`}
+            whileDrag={{
+            scale: 1.02,
+            boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+            zIndex: 999,
+         }}
         >
             <div
                 className={`${
-                    props.typeId === 2 ? 'bg-yellow/50' : 'bg-muted'
-                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer`}
+                    props.typeId === 2 ? 'bg-yellow-100/80' : 'bg-muted'
+                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]`}
             >
                 <div className="w-full p-2" onClick={handleModuleRoute}>
                     <div className="flex mb-2 w-full justify-between">

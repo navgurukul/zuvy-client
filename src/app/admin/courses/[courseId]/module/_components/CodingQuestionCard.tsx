@@ -80,7 +80,7 @@ function CodingQuestionCard({
             className={`container mx-auto rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
         >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div className="flex-1 min-w-0 font-bold text-lg sm:text-xl my-2 truncate">
+                <div className="flex-1 min-w-0 font-bold text-gray-700 text-left text-lg sm:text-xl my-2 truncate">
                     {title}
                 </div>
                 <div className="flex items-center gap-4">
@@ -92,11 +92,11 @@ function CodingQuestionCard({
                     >
                         {difficulty}
                     </div>
-                    <h2 className="my-2 whitespace-nowrap">Topic: {tagName}</h2>
+                    <h2 className="my-2 whitespace-nowrap text-gray-600 text-[15px]">Topic: {tagName}</h2>
                 </div>
             </div>
 
-            <div className="text-xl mt-2 text-start truncate overflow-hidden whitespace-nowrap">
+            <div className="text-xl mt-2 text-start text-gray-600 truncate overflow-hidden whitespace-nowrap">
                 Description: {description}
             </div>
             <div className={`text-xl mt-2 text-start `}>
@@ -114,7 +114,7 @@ function CodingQuestionCard({
             {/* <div className="flex justify-between"> */}
                 <Dialog>
                     <DialogTrigger asChild>
-                        <p className="cursor-pointer mt-4 flex justify-start text-secondary font-bold">
+                        <p className="cursor-pointer mt-4 flex justify-start text-[rgb(81,134,114)] text-[16px] font-bold">
                             View Full Description
                         </p>
                     </DialogTrigger>
@@ -128,7 +128,7 @@ function CodingQuestionCard({
                 <div
                     onClick={() => handleSolveChallenge(id)}
                     // className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
-                    className="cursor-pointer mt-4 flex sm:justify-start text-secondary font-bold"
+                    className="cursor-pointer mt-4 flex sm:justify-start text-[rgb(81,134,114)] text-[16px] font-bold"
                 >
                     {isSuccess ? 'View Solution' : 'Solve Challenge'}
                     <ChevronRight />

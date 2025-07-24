@@ -134,7 +134,7 @@ function Quiz(props: any) {
 
         try {
             const res = await api.get(
-                `/Content/chapterDetailsById/${props.chapterId}`
+                `/Content/chapterDetailsById/${props.chapterId}?bootcampId=${props.courseId}&moduleId=${props.moduleId}&topicId=${props.content.topicId}`
             )
             setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
@@ -211,7 +211,7 @@ function Quiz(props: any) {
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
-                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 w-1/3 border-gray-400 border-dashed focus:outline-none"
+                                    className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 w-1/3 border-gray-400 border-dashed focus:outline-none"
                                     autoFocus
                                 />
                                 {!inputValue && (
@@ -227,7 +227,7 @@ function Quiz(props: any) {
                                 <div
                                     id="previewQuiz"
                                     onClick={previewQuiz}
-                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
+                                    className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
                                 >
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
@@ -236,7 +236,7 @@ function Quiz(props: any) {
                                     <div className="mt-5">
                                         <Button
                                             onClick={handleSaveQuiz}
-                                            className=""
+                                            className="bg-success-dark opacity-75"
                                         >
                                             Save
                                         </Button>
@@ -261,13 +261,13 @@ function Quiz(props: any) {
                         <div>
                             <div className="flex flex-col items-center justify-between">
                                 <div className="flex justify-between w-full mt-36">
-                                    <h2 className="text-left text-gray-700 w-full font-semibold">
+                                    <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
                                         Selected Question
                                     </h2>
                                 </div>
                                 <div className="text-left w-full">
                                     {addQuestion?.length === 0 && (
-                                        <h1 className="text-left italic">
+                                        <h1 className="text-left text-gray-600 text-[15px] italic">
                                             No Selected Questions
                                         </h1>
                                     )}

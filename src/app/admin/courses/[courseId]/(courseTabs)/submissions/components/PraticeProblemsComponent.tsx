@@ -46,9 +46,9 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
     if (allEmpty) {
         return (
             <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                <h1 className="text-center font-semibold ">
+                <h5 className="text-center font-semibold text-[17px]">
                     No practice problems found.
-                </h1>
+                </h5>
                 <Image
                     src="/emptyStates/curriculum.svg"
                     alt="No Assessment Found"
@@ -76,9 +76,9 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
                 )
             ) : (
                 <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h1 className="text-center font-semibold ">
+                    <h5 className="text-center font-semibold">
                         No Practice Problem Found
-                    </h1>
+                    </h5>
                     <Image
                         src="/emptyStates/curriculum.svg"
                         alt="No Assessment Found"
