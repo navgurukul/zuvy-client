@@ -121,6 +121,20 @@ export const formatDate = (dateString: string): string => {
     return date.toLocaleDateString('en-US', options)
 }
 
+export const formatDateTime = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    }
+
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', options)
+}
+
 // Assessment utility functions
 export const formatToIST = (dateString: string | null | undefined) => {
     if (!dateString) return '';

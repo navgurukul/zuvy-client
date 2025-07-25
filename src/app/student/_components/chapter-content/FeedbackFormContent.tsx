@@ -89,10 +89,13 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
         try {
             const formData = {
                 section: questions.map((q) => ({
-                    ...q,
-                    answer: q.answer || null,
+                  ...q,
+                  answer:
+                    q.typeId === 1
+                      ? (parseInt(q.answer) + 1).toString()
+                      : q.answer || null,
                 })),
-            }
+              };
             await submitForm(formData)
         } catch (error) {
             console.error('Form submission error:', error)
@@ -106,14 +109,16 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     const isCompleted = status === 'Completed'
 
     return (
-        <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-[600px] mx-auto px-6 py-8"
-        >
+        <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
+            <div className="max-w-4xl mx-auto">
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full"
+                >
             <div className="mb-6 text-left">
-                <h1 className="text-xl font-semibold mb-2">
+                <h5 className=" font-semibold mb-2">
                     {chapterDetails.title || 'Module 2 Feedback'}
-                </h1>
+                </h5>
                 {status === 'Completed' && (
                     <div className="text-md mb-4 bg-[#E5FFF3] text-[#00B37E] p-3 rounded-md">
                         Your feedback has been submitted successfully
@@ -440,7 +445,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                                 }
                                                 setQuestions(updatedQuestions)
                                             }}
-                                            className="w-[100px]"
+                                            className="w-[7rem]"
                                         />
                                     </div>
                                 ) : (
@@ -458,7 +463,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                                 }
                                                 setQuestions(updatedQuestions)
                                             }}
-                                            className="w-[100px]"
+                                            className="w-[7rem]"
                                         />
                                     </div>
                                 )}
@@ -473,7 +478,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                     <Button
                         type="submit"
                         disabled
-                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-6"
+                        className="bg-primary hover:bg-primary-dark text-primary-foreground px-6"
                     >
                         Submitted ✓
                     </Button>
@@ -482,13 +487,15 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 <div className="mt-8 mb-6">
                     <Button
                         type="submit"
-                        className="bg-[#4F46E5] hover:bg-[#4338CA] text-white px-6"
+                        className="bg-primary hover:bg-primary-dark text-primary-foreground px-6"
                     >
-                        Submit Responses
+                        Submit Feedback
                     </Button>
                 </div>
             )}
-        </form>
+                </form>
+            </div>
+        </div>
     )
 }
 

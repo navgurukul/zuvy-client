@@ -16,6 +16,8 @@ import {
     Fullscreen,
     Timer,
     AlertCircle,
+    Monitor,
+    Info,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import QuizQuestions from './QuizQuestions'
@@ -111,6 +113,7 @@ function Page({
     const [isCopyPasteProctorOn, setIsCopyPasteProctorOn] = useState(
         assessmentData?.copyPaste
     )
+    const [isOpeningdialogOpen, setIsOpeningdialogOpen] = useState(false)
     const [isEyeTrackingProctorOn, setIsEyeTrackingProctorOn] = useState(null)
     const [startedAt, setStartedAt] = useState(
         new Date(assessmentData?.submission?.startedAt).getTime()
@@ -399,6 +402,7 @@ function Page({
 
     useEffect(() => {
         getAssessmentSubmissionsData()
+        setIsOpeningdialogOpen(true)
     }, [])
 
     useEffect(() => {
@@ -504,6 +508,8 @@ function Page({
                             getAssessmentData={getAssessmentData}
                             runCodeLanguageId={runCodeLanguageId}
                             runSourceCode={runSourceCode}
+                            getCodingSubmissionsData={getCodingSubmissionsData}
+
                         />
                     </AlertProvider>
                 </>
@@ -574,6 +580,8 @@ function Page({
         setIsFullScreen(true)
     }
 
+    console.log('Hello')
+
     return (
         <div
             onPaste={(e) => handleCopyPasteAttempt(e)}
@@ -593,70 +601,51 @@ function Page({
                             />
                         </div>
 
-                        <div className="max-w-2xl w-full">
-                            <div className="bg-card border border-border rounded-2xl shadow-16dp overflow-hidden">
-                                <div className="bg-card-elevated border-b border-border p-8 text-center">
-                                    <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
-                                        <Fullscreen className="w-8 h-8 text-primary" />
-                                    </div>
-                                    <h2 className="text-2xl font-bold text-foreground mb-3">Assessment Ready</h2>
-                                    <p className="text-muted-foreground">
-                                        Enter full-screen mode to begin your assessment
-                                    </p>
-                                </div>
-
-                                <div className="p-8">
-                                    <div className="bg-warning-light border border-warning/20 rounded-xl p-6 mb-6">
-                                        <div className="flex items-start space-x-3">
-                                            <AlertCircle className="w-6 h-6 text-warning mt-0.5 flex-shrink-0" />
-                                            <div>
-                                                <h4 className="font-semibold text-warning-dark mb-2">Important Notice</h4>
-                                                <p className="text-sm text-warning-dark">
-                                                    You must stay in full-screen mode during the test.
-                                                    <strong> No tab switching, window changes, or exiting full-screen.</strong>
-                                                    {' '}These violations may lead to auto-submission.
-                                                </p>
-                                            </div>
+                        <AlertDialog open={isOpeningdialogOpen} onOpenChange={setIsOpeningdialogOpen}>
+                            <AlertDialogContent className="max-w-md font-manrope font-semibold">
+                                <AlertDialogHeader>
+                                    <div className="flex items-center justify-center mb-4">
+                                        <div className="w-16 h-16 bg-warning-light rounded-full flex items-center justify-center">
+                                            <Monitor className="w-8 h-8 text-warning" />
                                         </div>
                                     </div>
+                                    <AlertDialogTitle className="text-center text-xl">
+                                        Fullscreen Mode Required
+                                    </AlertDialogTitle>
+                                </AlertDialogHeader>
 
-                                    <div className="text-center">
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <button className="bg-primary hover:bg-primary-dark text-primary-foreground px-8 py-3 rounded-xl font-medium transition-all duration-200 shadow-8dp hover:shadow-16dp">
-                                                    Enter Full Screen
-                                                </button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent className="bg-card border-border shadow-32dp">
-                                                <AlertDialogHeader>
-                                                    <AlertDialogDescription className="text-foreground text-base">
-                                                        You must stay in full-screen mode during the test.
-                                                        <strong className="text-primary">
-                                                            {' '}No tab switching, window changes, or exiting full-screen.{' '}
-                                                        </strong>
-                                                        The above violations may lead to auto-submission.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel className="bg-muted hover:bg-muted-dark text-foreground border-border">
-                                                        Cancel
-                                                    </AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        className="bg-primary hover:bg-primary-dark text-primary-foreground"
-                                                        onClick={() => {
+                                <div className="text-center space-y-4">
+                                    <p className="text-muted-foreground">
+                                        <span className="font-semibold">Assessment</span> requires fullscreen mode for proctoring purposes.
+                                    </p>
+
+                                    <div className="bg-info-light border border-info rounded-lg p-4">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Info className="w-5 h-5 text-info" />
+                                            <p className="font-semibold text-info">Important Guidelines</p>
+                                        </div>
+                                        <ul className="text-sm text-info text-left space-y-1 text-left">
+                                            <li>• Do not switch tabs or applications</li>
+                                            <li>• Do not exit fullscreen mode</li>
+                                            <li>• Violations will be tracked and reported</li>
+                                            <li>• Keep your webcam and microphone ready</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="flex flex-col gap-3 pt-4">
+                                        <Button  onClick={() => {
                                                             handleFullScreenRequest();
                                                             getAssessmentData(true);
-                                                        }}
-                                                    >
-                                                        Proceed
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                                                        }}  size="lg" className="w-full font-semibold bg-primary text-primary-foreground">
+                                            I Understand, Proceed
+                                        </Button>
+                                        <Button onClick={()=> { window.close() }} variant="outline" size="lg" className="w-full font-semibold bg-white hover:bg-primary-light text-black">
+                                            Cancel
+                                        </Button>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>) : (
                     <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
                         <div className="fixed top-6 right-6 z-50">

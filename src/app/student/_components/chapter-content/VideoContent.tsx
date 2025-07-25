@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Play, CheckCircle2, Youtube, Video as VideoIcon } from 'lucide-react'
 import useChapterCompletion from '@/hooks/useChapterCompletion'
+import ReactPlayer from 'react-player'
+import { getEmbedLink } from '@/utils/students'
 
 interface VideoContentProps {
     chapterDetails: {
@@ -17,19 +19,7 @@ interface VideoContentProps {
     onChapterComplete: () => void
 }
 
-const getEmbedLink = (link: string) => {
-    if (!link) return ''
-    if (link.includes('youtube.com') || link.includes('youtu.be')) return link
-    if (link.includes('drive.google.com')) {
-        // Convert Google Drive link to embeddable format
-        const match = link.match(/\/d\/([\w-]+)/)
-        if (match) {
-            return `https://drive.google.com/file/d/${match[1]}/preview`
-        }
-        return link
-    }
-    return link
-}
+
 
 const VideoContent: React.FC<VideoContentProps> = ({
     chapterDetails,
@@ -60,31 +50,32 @@ const VideoContent: React.FC<VideoContentProps> = ({
             : chapterDetails.file
             ? [chapterDetails.file]
             : []
-
+    const flatLinks = videoLinks.flat();
+    const isYouTube = flatLinks.some(link => link.includes('youtube.com') || link.includes('youtu.be'));
     return (
         <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
                 <div className="flex flex-col space-y-2 mb-6">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold">
+                            <h1 className="text-2xl text-left font-extrabold">
                                 {chapterDetails.title}
                             </h1>
-                            {/* {chapterDetails.description && (
-                                <p className="text-muted-foreground text-base mb-1 text-start">
+                            {chapterDetails.description && (
+                                <p className="text-muted-foreground text-base mt-6 text-start">
                                     {chapterDetails.description}
                                 </p>
-                            )} */}
+                            )}
                         </div>
                         <Badge
                             variant="secondary"
                             className={`${
-                                chapterDetails.status === 'Completed'
+                                isCompleted
                                     ? 'bg-green-100 text-green-600 hover:bg-green-100'
                                     : 'bg-white text-slate-700 hover:bg-white border border-slate-200'
                             } text-xs font-medium px-2 py-1`}
                         >
-                            {chapterDetails.status === 'Completed'
+                            {isCompleted
                                 ? 'Watched'
                                 : 'Not Watched'}
                         </Badge>
@@ -106,12 +97,13 @@ const VideoContent: React.FC<VideoContentProps> = ({
                             >
                                 <div className="aspect-video bg-black flex items-center justify-center relative">
                                     {isYouTube ? (
-                                        <iframe
-                                            src={embedLink[0]}
-                                            title="YouTube Video"
-                                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                            allowFullScreen
-                                            className="w-full h-full border-none"
+
+                                        <ReactPlayer
+                                            url={embedLink[0]}
+                                            controls={isCompleted}
+                                            width="100%"
+                                            height="100%"
+                                            onEnded={() => completeChapter()}
                                         />
                                     ) : isDrive ? (
                                         <iframe
@@ -160,7 +152,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                 )}
 
                 {/* Mark as Watched Button */}
-                {!isCompleted && videoLinks.length > 0 && (
+                {!isCompleted && videoLinks.length > 0 && !isYouTube && (
                     <div className="flex justify-end mt-6">
                         <Button
                             onClick={completeChapter}

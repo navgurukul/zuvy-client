@@ -1,6 +1,8 @@
 
 import type { Config } from "tailwindcss";
 
+
+
 export default {
 	darkMode: ["class"],
 	content: [
@@ -23,6 +25,7 @@ export default {
 				'heading': ['Outfit', 'sans-serif'],
 				'body': ['Manrope', 'sans-serif'],
 				'code': ['Fira Code', 'monospace'],
+				'manrope': ['Manrope', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
