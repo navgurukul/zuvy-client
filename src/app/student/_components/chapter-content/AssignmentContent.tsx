@@ -226,7 +226,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
         </div>
 
         {/* Assignment Description */}
-        <div className="bg-card border border-border rounded-lg p-4 md:p-6">
+        <div className=" border border-border rounded-lg p-4 md:p-6">
           <div className="prose prose-neutral max-w-none text-left">
             {viewResource ? (
               isMobile ? (
@@ -243,7 +243,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
               ) : (
                 <iframe
                   src={resourceLink}
-                  className={`w-full border border-border rounded ${isSmallScreen ? 'h-[300px]' : 'h-[400px]'}`}
+                  className={`w-full border border-border rounded ${isSmallScreen ? 'h-[300px]' : 'h-72'}`}
                   title="Assignment Resource"
                 />
               )
@@ -254,6 +254,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                   setInitialContent={setInitialContent} 
                   preview={true} 
                   hideBorder={true}
+                  assignmentSide={true}
                 />
               </div>
             )}
