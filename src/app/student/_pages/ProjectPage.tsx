@@ -365,12 +365,12 @@ const ProjectPage = () => {
                           <div className="flex items-center space-x-2 p-3 bg-muted rounded-lg mt-2">
                             <ExternalLink className="w-4 h-4 text-muted-foreground" />
                             <a
-                              href={project.projectTrackingData[0].projectLink}
+                              href={project?.projectTrackingData[0]?.projectLink}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-primary hover:underline font-medium flex-1"
                             >
-                              {project.projectTrackingData[0].projectLink } 
+                              {project?.projectTrackingData[0]?.projectLink } 
                             </a>
                           </div>
                         </div>
