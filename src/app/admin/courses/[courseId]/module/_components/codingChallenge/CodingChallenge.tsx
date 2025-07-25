@@ -87,12 +87,9 @@ function CodingChallenge({
     const [searchTerm, setSearchTerm] = useState('')
     const debouncedSearch = useDebounce(searchTerm, 1000)
     const { tags, setTags } = getCodingQuestionTags()
-    
-    // SIMPLE FIX: Direct computation instead of useEffect
-    const codingQuestions = content?.codingQuestionDetails || []
-    const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(codingQuestions)
-    const [savedQuestions, setSavedQuestions] = useState<Question[]>(codingQuestions)
-    
+    const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(
+        content?.codingQuestionDetails || []
+    )
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
     const [selectedTag, setSelectedTag] = useState<Tag>({
         tagName: 'All Topics',
@@ -104,6 +101,8 @@ function CodingChallenge({
     const [selectedDifficulty, setSelectedDifficulty] = useState([
         'Any Difficulty',
     ])
+    // const [selectedDifficulty, setSelectedDifficulty] =
+    //     useState<string>('Any Difficulty')
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
@@ -114,27 +113,60 @@ function CodingChallenge({
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
 
-    // FORCE UPDATE: Use a key to force re-render when content changes
-    const contentKey = `${content?.id}-${content?.codingQuestionDetails?.length || 0}`
+    const [savedQuestions, setSavedQuestions] = useState<Question[]>(
+        content.codingQuestionDetails || []
+    )
 
-    const handleSaveClick = () => {
-        handleSaveChapter(
-            moduleId,
-            content.id,
-            chapterTitle
-                ? {
-                    title: chapterTitle,
+    const [initialTitle] = useState<string>(activeChapterTitle)
+    const [savedTitle, setSavedTitle] = useState<string>(activeChapterTitle)
+    const [hasTitleChanged, setHasTitleChanged] = useState(false)
+
+    const handleSaveClick = async () => {
+        try {
+            const titleToSave = chapterTitle.trim() === '' ? savedTitle : chapterTitle
+            
+            await handleSaveChapter(
+                moduleId,
+                content.id,
+                {
+                    title: titleToSave,
                     codingQuestions: selectedQuestions[0]?.id,
                 }
-                : {
-                    codingQuestions: selectedQuestions[0]?.id,
-                }
-        )
-        setIsChapterUpdated(!isChapterUpdated)
-        // Mark as saved and update saved questions
-        setIsSaved(true)
-        setSavedQuestions([...selectedQuestions])
+            )
+            
+            setIsChapterUpdated(!isChapterUpdated)
+            setIsSaved(true)
+            setSavedQuestions([...selectedQuestions])
+            setSavedTitle(titleToSave)
+            setHasTitleChanged(false)
+            
+            toast.success({
+                title:'Success',
+                description: " Chapter edited successfully",
+            })
+        } catch (error) {
+            toast.error({
+                title:'Error',
+                description: "Failed to save changes",
+            })
+        }
     }
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTitle = e.target.value
+        setChapterTitle(newTitle)
+        setHasTitleChanged(newTitle !== savedTitle)
+    }
+    useEffect(() => {
+        const newQuestions = content?.codingQuestionDetails || []
+        setSelectedQuestions(newQuestions)
+        setSavedQuestions(newQuestions)
+        setIsSaved(true)
+        
+        // Reset title changes when content changes
+        setChapterTitle(activeChapterTitle)
+        setSavedTitle(activeChapterTitle)
+        setHasTitleChanged(false)
+    }, [content?.id]) // Only depend on content.id
 
     // Function to check if current selection matches saved questions
     const checkIfSaved = () => {
@@ -151,15 +183,6 @@ function CodingChallenge({
         )
     }
 
-    // IMMEDIATE UPDATE: React to content prop changes immediately
-    useEffect(() => {
-        const newCodingQuestions = content?.codingQuestionDetails || []
-        setSelectedQuestions(newCodingQuestions)
-        setSavedQuestions(newCodingQuestions)
-        setIsSaved(true)
-        console.log('Content updated, new questions:', newCodingQuestions)
-    }, [contentKey]) // Use contentKey instead of content
-
     useEffect(() => {
         setIsSaved(checkIfSaved())
     }, [selectedQuestions, savedQuestions])
@@ -171,6 +194,17 @@ function CodingChallenge({
 
                 const queryParams = []
 
+                // if (
+                //     selectedDifficulty &&
+                //     selectedDifficulty !== 'Any Difficulty'
+                // ) {
+                //     queryParams.push(
+                //         `difficulty=${encodeURIComponent(selectedDifficulty)}`
+                //     )
+                // }
+                // if (selectedTag.id !== -1) {
+                //     queryParams.push(`tagId=${selectedTag.id}`)
+                // }
                 let selectedTagIds = ''
                 selectedOptions.forEach((topic: any) => {
                     if (topic.id !== -1 && topic.id !== 0) {
@@ -241,10 +275,12 @@ function CodingChallenge({
         getAllTags()
     }, [])
 
-    // Update chapter title when activeChapterTitle prop changes
     useEffect(() => {
+        setSelectedQuestions(content?.codingQuestionDetails || [])
+        setSavedQuestions(content?.codingQuestionDetails || [])
         setChapterTitle(activeChapterTitle)
-    }, [activeChapterTitle])
+        setIsSaved(true)
+    }, [content])
 
     function previewCodingChallenge() {
         if (!selectedQuestions || selectedQuestions.length === 0) {
@@ -281,16 +317,14 @@ function CodingChallenge({
     }
     return (
         <>
-            <div className="px-5" key={contentKey}>
+            <div className="px-5">
                 {/* SearchBar component */}
                 <div className="flex flex-col items-start mb-15">
                     <div className="flex justify-between items-center w-full">
                         <div className="w-2/6 flex justify-center align-middle items-center relative">
                             <Input
                                 required
-                                onChange={(e) => {
-                                    setChapterTitle(e.target.value)
-                                }}
+                                onChange={handleTitleChange}
                                 value={chapterTitle}
                                 placeholder="Untitled Coding Problem"
                                 className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
@@ -336,12 +370,15 @@ function CodingChallenge({
                                 setSelectedTopics={setSelectedOptions}
                                 selectedDifficulties={selectedDifficulty}
                                 setSelectedDifficulties={setSelectedDifficulty}
+                                // selectedLanguage={selectedLanguage}
+                                // setSelectedLanguage={setSelectedLanguage}
                                 tags={tags}
                             />
                         </div>
                         <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
                             Coding Library
                         </h1>
+                        {/* <ScrollArea className="h-dvh pr-4"> */}
                         <div className="">
                             <ScrollArea className="h-screen pb-80">
                                 {filteredQuestions?.map((question: any) => {
@@ -462,9 +499,7 @@ function CodingChallenge({
                         </div>
                     </div>
                     <div className="mt-36">
-                        {/* FORCE RE-RENDER: Pass contentKey as key */}
                         <SelectedProblems
-                            key={contentKey}
                             chapterTitle={chapterTitle}
                             selectedQuestions={selectedQuestions as Question[]}
                             setSelectedQuestions={
