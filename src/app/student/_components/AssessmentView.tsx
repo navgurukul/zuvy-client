@@ -51,8 +51,7 @@ const AssessmentView = ({ assessment }: AssessmentViewProps) => {
           endDate={assessment.endDate}
           duration={assessment.duration}
           totalMarks={assessment.totalMarks}
-          description={assessment.description}
-        />
+          description={assessment.description} id={""} status={""} name={""}/>
         
         <AssessmentStateCard
           state={currentState}

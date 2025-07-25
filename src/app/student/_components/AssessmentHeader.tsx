@@ -30,11 +30,11 @@ const AssessmentHeader = ({
       <div className="grid grid-cols-4 gap-4">
         <div>
           <p className="text-sm text-muted-foreground">Start Date</p>
-          <p className="font-medium">{startDate.toLocaleDateString()}</p>
+          <p className="font-medium">{startDate?.toLocaleDateString()}</p>
         </div>
         <div>
           <p className="text-sm text-muted-foreground">End Date</p>
-          <p className="font-medium">{endDate.toLocaleDateString()}</p>
+          <p className="font-medium">{endDate?.toLocaleDateString()}</p>
         </div>
         <div>
           <p className="text-sm text-muted-foreground">Duration</p>

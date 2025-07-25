@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {QuizContentProps,QuizQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {QuizContentProps,QuizQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComplete }) => {

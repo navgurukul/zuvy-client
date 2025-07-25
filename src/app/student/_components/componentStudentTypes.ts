@@ -2,21 +2,35 @@
 
 export interface BaseAssessmentDetails{
   assessmentTitle: string;
-  duration: string;
+  duration?: string;
   onClose: () => void;
 }
 
 
+// export interface BaseAssessmentInfo {
+//   title: string;
+//   id: string;
+//   startDate: Date;
+//   endDate: Date;
+//   duration: string;
+//   totalMarks: number;
+//   description: string;
+//   status: string;
+//   name: string;
+// }
+
+
+
 export interface BaseAssessmentInfo {
-  title: string;
   id: string;
-  startDate: Date;
-  endDate: Date;
-  duration: string;
-  totalMarks: number;
-  description: string;
-  status: string;
-  name: string;
+  title: string;      
+  name: string;        
+  description: string;  
+  status: string;       
+  startDate?: Date;
+  endDate?: Date;
+  duration?: string;
+  totalMarks?: number;
 }
 
 export interface AssessmentHeaderProps extends BaseAssessmentInfo {
@@ -29,7 +43,10 @@ export interface AssessmentInstructionsProps extends BaseAssessmentDetails{
   // onClose: () => void;
 }
 
-
+// export interface CodingChallengeData extends BaseAssessmentInfo {
+//   difficulty: string;
+//   marks: number;
+// }
 export type ViolationReason = 'tab-switch' | 'fullscreen-exit' | 'copy-paste';
 
 export interface ViolationType {
@@ -48,9 +65,9 @@ export interface AssessmentModalProps extends BaseAssessmentDetails{
 export interface AssessmentStateCardProps {
   state: 'scheduled' | 'open' | 'interrupted' | 'reAttemptRequested' | 'completed' | 'expired';
   countdown?: number;
-  endDate: Date;
+  endDate?: Date;
   score?: number;
-  totalMarks: number;
+  totalMarks?: number;
   passScore: number;
   onReAttemptRequest: () => void;
   onBeginAssessment: () => void;
@@ -74,15 +91,27 @@ export interface AssessmentViewProps {
 
 
 // CodingChallenge
-export interface CodingChallengeProps {
-  challenge: BaseAssessmentInfo  & {
+// export interface CodingChallengeProps extends BaseAssessmentInfo{
+//     difficulty: string;
+//     marks: number;
+//   onBack: () => void;
+//   onComplete: () => void;
+//   timeLeft: string;
+// }
+
+
+// Add your existing types above
+
+export type CodingChallengeProps = {
+  challenge: {
+    title: string;
     difficulty: string;
     marks: number;
   };
   onBack: () => void;
   onComplete: () => void;
   timeLeft: string;
-}
+};
 
 
 // CodingProblemPage
@@ -113,12 +142,22 @@ export interface MCQQuizProps {
 
 
 // ModuleSidebar
-export interface TopicItem extends BaseAssessmentInfo {
-  type: string;
-  scheduledDateTime?: Date;
-}
+// export interface TopicItem extends BaseAssessmentInfo {
+//   type: string;
+//   scheduledDateTime?: Date;
+// }
 
-export interface Topic extends BaseAssessmentInfo {
+export type TopicItem = {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  description?: string;
+  duration?: string;
+  scheduledDateTime?: Date;
+};
+
+export interface Topic extends BaseAssessmentInfo{
   items: TopicItem[];
 }
 
@@ -137,9 +176,9 @@ export interface ModuleSidebarProps {
 
 // ModalContentRender.tsx
 export interface ModuleContentRendererProps {
-  selectedItemData: { item: TopicItem; topicId: string } | null;
+  selectedItemData?: { item: TopicItem; topicId: string } | null;
   getAssessmentData: (itemId: string) => any;
-  chapterDetails: CodingQuestion;
+  // chapterDetails: CodingQuestion;
   onChapterComplete: () => void;
 }
 export interface CodingQuestion{

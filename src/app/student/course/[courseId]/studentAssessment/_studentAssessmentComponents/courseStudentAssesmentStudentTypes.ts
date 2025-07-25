@@ -21,6 +21,7 @@ export type AssessmentData = {
   mediumMcqQuestions?: number;
   hardMcqQuestions?: number;
   bootcampId?: string;
+  totalWeightage: number;
   moduleId?: string;
   chapterId?: string;
   submission?: {
@@ -40,6 +41,9 @@ export type AssessmentData = {
 
 
 export interface CodingQuestion {
+  difficulty: string;
+  codingQuestionId?: number;
+  // codingQuestionId: Key | null | undefined;
   id: number;
   title: string;
   weightage?: number;
@@ -151,7 +155,6 @@ export interface IDEProps {
 
 
 // OpenEndedQuestions
-
 export interface Question {
   id: number;
   OpenEndedQuestion: {
@@ -220,7 +223,9 @@ export interface QuizQuestionsProps {
   onBack: () => void;
   weightage?: number;
   remainingTime: number;
-  questions: { data: QuizData };  
+  questions: { 
+    data: QuizData 
+  };  
   assessmentSubmitId: number;
   getSeperateQuizQuestions: () => void;
   getAssessmentData: () => void;

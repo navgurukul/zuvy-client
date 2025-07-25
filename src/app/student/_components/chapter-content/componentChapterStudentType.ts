@@ -1,34 +1,9 @@
-
-// ArticleContent
-// type EditorContentItem = {
-//   type: string;
-//   content?: {
-//     text?: string;
-//   }[];
-// };
-
-import LiveClass from "@/app/admin/courses/[courseId]/module/_components/liveClass/LiveClass";
-import CodingChallenge from "../CodingChallenge";
-import CodingChallengeResult from "./CodingChallengeResult";
-import FeedbackFormContent from "./FeedbackFormContent";
-import LiveClassContent from "./LiveClassContent";
-import QuizContent from "./QuizContent";
-import VideoContent from "./VideoContent";
-
-
-// export type EditorDoc = {
-//   type: string;
-//   content: EditorContentItem[];
-// };
-
-
-
-type EditorInnerContentItem = {
+export type EditorInnerContentItem = {
   type: string;
   text?: string;
 };
 
-type EditorContentItem = {
+export type EditorContentItem = {
   type: string;
   content?: EditorInnerContentItem[];
 };
@@ -114,16 +89,22 @@ export interface AssignmentContentProps {
 
 
 // CodingChallengeContent.tsx
-
-
-export interface CodingQuestion extends BaseChapterDetails {
-  difficulty: string;
+export interface CodingQuestion extends BaseChapterDetails{
+  difficulty?: string;
   tagName?: string;
+}
+
+export interface SubmissionResponse {
+  isSuccess: boolean;
+  data:{
+    questionId: string;
+    status: string
+  }
 }
 
 
 export interface CodingChallengeContentProps{
-  chapterDetails: CodingQuestion
+  chapterDetails: BaseChapterDetails,
   onChapterComplete: () => void;
   fetchChapters?: () => void;
 }
@@ -132,7 +113,7 @@ export interface CodingChallengeContentProps{
 
 // CodingChallengeResult.tsx
 export interface QuestionDetail extends BaseChapterDetails {
-   difficulty: string;
+   difficulty?: string;
 }
 
 interface SubmissionResult {

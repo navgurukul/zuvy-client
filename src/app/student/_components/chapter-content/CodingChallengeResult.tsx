@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Code2, Eye, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import {CodingChallengeResultProps,CodingQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {CodingChallengeResultProps,CodingQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
   const router = useRouter();

@@ -8,7 +8,7 @@ import {
   Check
 } from "lucide-react";
 import useChapterCompletion from '@/hooks/useChapterCompletion';
-import {LiveClassContentProps,Session} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {LiveClassContentProps,Session} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onChapterComplete }) => {

@@ -12,17 +12,19 @@ export interface TruncatedDescriptionProps {
 
 export interface BaseItem {
   id: string;
-  name: string;
-  description: string;
-  status: string;
+  title: string;       
+  name: string;         
+  description: string;  
+  status: string;       
+  startDate?: Date;
+  endDate?: Date;
+  duration?: string;
+  totalMarks?: number;
 }
+
 
 export interface TopicItem extends BaseItem{
   type: string;
-//   description?: string;
-//   status: string;
-  duration?: string;
-  title:string
   scheduledDateTime?: Date;
 }
 
@@ -30,7 +32,7 @@ export interface Topic extends BaseItem{
   items: TopicItem[];
 }
 
-export interface Module extends BaseItem {
+export interface Module extends BaseItem{
   topics: Topic[];
 }
 
@@ -72,54 +74,6 @@ export interface Bootcamp extends BaseItem {
   // status: string;
   upcomingEvents: UpcomingEvent[];
 }
-
-
-
-
-
-
-
-
-// interface UpcomingEvent {
-//   id: number;
-//   title: string;
-//   startTime: string;
-//   endTime: string;
-//   status: string;
-//   bootcampId: number;
-//   bootcampName: string;
-//   batchId: number;
-//   eventDate: string;
-//   type: string;
-//   moduleId?: number;
-//   chapterId?: number;
-//   hangoutLink?: string;
-// }
-
-// interface Bootcamp {
-//   id: number;
-//   name: string;
-//   coverImage: string;
-//   duration: string;
-//   language: string;
-//   bootcampTopic: string;
-//   description: string | null;
-//   batchId: number;
-//   batchName: string;
-//   progress: number;
-//   instructorDetails: {
-//     id: number;
-//     name: string;
-//     profilePicture: string | null;
-//   };
-//   upcomingEvents: UpcomingEvent[];
-// }
-
-
-
-
-
-
 
 // type.ts
 

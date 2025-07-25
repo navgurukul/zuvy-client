@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Play, CheckCircle2, Youtube, Video as VideoIcon } from 'lucide-react'
 import useChapterCompletion from '@/hooks/useChapterCompletion'
-import {VideoContentProps} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {VideoContentProps} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 const getEmbedLink = (link: string) => {

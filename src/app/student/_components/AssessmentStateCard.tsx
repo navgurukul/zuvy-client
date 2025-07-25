@@ -23,7 +23,7 @@ const AssessmentStateCard = ({
     if (state === 'open') {
       const updateTimeLeft = () => {
         const now = new Date();
-        const timeDiff = endDate.getTime() - now.getTime();
+        const timeDiff = (endDate?.getTime() ?? now.getTime()) - now.getTime();
         
         if (timeDiff <= 0) {
           setTimeLeft("Expired");

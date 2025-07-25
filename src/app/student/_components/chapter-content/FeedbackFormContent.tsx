@@ -26,7 +26,7 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFeedbackForm, formSchema } from '@/hooks/useFeedbackForm'
-import {FeedbackFormContentProps,QuizQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {FeedbackFormContentProps,QuizQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({

@@ -8,7 +8,7 @@ import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
 import { getCleanFileName } from '@/utils/admin';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
-import {ArticleContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {ArticleContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapterComplete }) => {

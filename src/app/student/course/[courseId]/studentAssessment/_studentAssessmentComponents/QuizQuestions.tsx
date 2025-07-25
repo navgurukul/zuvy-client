@@ -272,6 +272,7 @@ const QuizQuestions = ({
                                                         onValueChange={field.onChange}
                                                         className="space-y-3"
                                                     >
+
                                                         {Object.keys(question.options).map((key) => (
                                                             <div
                                                                 key={key}
@@ -290,7 +291,7 @@ const QuizQuestions = ({
                                                                     htmlFor={key}
                                                                     className="flex-1 cursor-pointer text-foreground leading-relaxed"
                                                                 >
-                                                                    {question.options[key]}
+                                                                    {question.options[Number(key)]}
                                                                 </label>
                                                             </div>
                                                         ))}

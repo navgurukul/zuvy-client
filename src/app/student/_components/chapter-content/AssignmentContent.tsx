@@ -16,7 +16,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
-import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 const FormSchema = z.object({

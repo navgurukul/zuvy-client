@@ -8,7 +8,7 @@ import CodingChallenge from "./CodingChallenge";
 import MCQQuiz from "./MCQQuiz";
 import OpenEndedQuestions from "./OpenEndedQuestions";
 import ViolationModal from "./ViolationModal";
-import{ AssessmentInstructionsProps,ViolationType}from '@/app/student/_components/componentStudentTypes'
+import{ AssessmentInstructionsProps,ViolationType,BaseAssessmentInfo }from '@/app/student/_components/componentStudentTypes'
 
 
 

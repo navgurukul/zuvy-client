@@ -19,7 +19,7 @@ import useAssessmentDetails from "@/hooks/useAssessmentDetails";
 import useChapterDetails from "@/hooks/useChapterDetails";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
-import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
+import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 function formatToIST(dateString: string | undefined) {

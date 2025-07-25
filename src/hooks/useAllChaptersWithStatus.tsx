@@ -6,6 +6,7 @@ interface ChapterTrackingDetail {
 }
 
 interface TrackingDataItem {
+  name: any;
   id: number;
   title: string;
   topicId: number;
@@ -14,6 +15,11 @@ interface TrackingDataItem {
 }
 
 interface ModuleDetail {
+  startDate: Date;
+  endDate: Date;
+  duration: string;
+  totalMarks: number;
+  title: string;
   id: number;
   typeId: number;
   isLock: boolean;

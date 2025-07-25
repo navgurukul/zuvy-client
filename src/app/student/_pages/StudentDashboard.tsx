@@ -18,7 +18,7 @@ import { useLazyLoadedStudentData } from '@/store/store';
 import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
-import{UpcomingEvent,Bootcamp,TrackingDataType}from '@/app/student/_pages/pageStudentTypes'
+import{TrackingDataType}from '@/app/student/_pages/pageStudentTypes'
 
 
 const StudentDashboard = () => {
@@ -38,7 +38,7 @@ const StudentDashboard = () => {
     }
   }, [isStudentEnroledInOneBootcamp]);
 
-  const getActionButton = (bootcamp: Bootcamp) => {
+  const getActionButton = (bootcamp: any) => {
     if (filter === 'completed') {
       return (
         <div className="flex items-center gap-3 w-full">
@@ -93,7 +93,7 @@ const StudentDashboard = () => {
     }
   };
 
-  const formatUpcomingItem = (item: UpcomingEvent) => {
+  const formatUpcomingItem = (item: any) => {
     // Use eventDate as the source of truth for the event's timing.
     if (!item.eventDate) {
       return "Date not available";

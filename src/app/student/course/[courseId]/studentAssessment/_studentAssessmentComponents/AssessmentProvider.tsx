@@ -441,12 +441,13 @@ function Page({
                     >
                         <QuizQuestions
                             onBack={handleBack}
-                            weightage={assessmentData}
+                            weightage={assessmentData ?.totalWeightage}
                             remainingTime={remainingTime}
-                            questions={seperateQuizQuestions}
+                            questions={{ data: { mcqs: seperateQuizQuestions ?? [] } }}
                             assessmentSubmitId={assessmentSubmitId}
                             getSeperateQuizQuestions={getSeperateQuizQuestions}
                             getAssessmentData={getAssessmentData}
+
                         />
                     </AlertProvider>
                 </>
@@ -754,7 +755,7 @@ function Page({
                                                 <QuestionCard
                                                     isMobile={isMobile}
                                                     key={question.codingQuestionId}
-                                                    id={question.codingQuestionId}
+                                                    id={question.codingQuestionId ?? 0}
                                                     easyCodingMark={assessmentData?.easyCodingMark}
                                                     mediumCodingMark={assessmentData?.mediumCodingMark}
                                                     hardCodingMark={assessmentData?.hardCodingMark}
@@ -763,15 +764,12 @@ function Page({
                                                     assessmentSubmitId={assessmentSubmitId}
                                                     codingOutsourseId={question.codingOutsourseId}
                                                     codingQuestions={true}
-                                                    onSolveChallenge={(id: any) =>
-                                                        handleSolveChallenge(
-                                                            'coding',
-                                                            id,
-                                                            question.codingQuestionId,
-                                                            question.codingOutsourseId
-                                                        )
-                                                    }
-                                                />
+                                                    onSolveChallenge={(id: any) => handleSolveChallenge(
+                                                        'coding',
+                                                        id,
+                                                        question.codingQuestionId,
+                                                        question.codingOutsourseId
+                                                    )} codingQuestionId={0} difficulty={''}                                                />
                                             ))}
                                         </div>
                                     </div>
@@ -798,11 +796,9 @@ function Page({
                                                 weightage={assessmentData?.weightageMcqQuestions}
                                                 description={`${(assessmentData?.hardMcqQuestions || 0) +
                                                     (assessmentData?.easyMcqQuestions || 0) +
-                                                    (assessmentData?.mediumMcqQuestions || 0)
-                                                    } questions`}
+                                                    (assessmentData?.mediumMcqQuestions || 0)} questions`}
                                                 onSolveChallenge={() => handleSolveChallenge('quiz')}
-                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission}
-                                            />
+                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission} isMobile={false} difficulty={''}                                            />
                                         </div>
                                     </div>
                                 )}
@@ -821,11 +817,10 @@ function Page({
 
                                     <div className="p-6">
                                         <QuestionCard
-                                            id={1}
-                                            title="Open-Ended Questions"
-                                            description={`${seperateOpenEndedQuestions.length || 0} questions`}
-                                            onSolveChallenge={() => handleSolveChallenge('open-ended')}
-                                        />
+                                                id={1}
+                                                title="Open-Ended Questions"
+                                                description={`${seperateOpenEndedQuestions.length || 0} questions`}
+                                                onSolveChallenge={() => handleSolveChallenge('open-ended')} isMobile={false} difficulty={''}                                        />
                                     </div>
                                 </div>
                             )}

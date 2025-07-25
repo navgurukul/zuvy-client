@@ -6,8 +6,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
-import {CodingChallengeContentProps,CodingQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentTypes.ts';
-
+import {CodingChallengeContentProps,CodingQuestion} from '@/app/student/_components/chapter-content/componentChapterStudentType';
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -16,7 +15,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
   const [codingQuestions, setCodingQuestions] = useState<CodingQuestion[]>([]);
   const [submissionResults, setSubmissionResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isCompleted, setIsCompleted] = useState(chapterDetails.status === 'Completed');
+  const [isCompleted, setIsCompleted] = useState(chapterDetails?.status === 'Completed');
 
   const fetchCodingQuestions = useCallback(async () => {
     setLoading(true);

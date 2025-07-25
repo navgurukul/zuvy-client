@@ -11,7 +11,7 @@ import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
-import{TopicItem,Topic,Module,Course,UseAllChaptersReturn} from '@/app/student/_pages/pageStudentTypes'
+import{TopicItem,Topic,Module,Course} from '@/app/student/_pages/pageStudentTypes'
 
 
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
@@ -72,8 +72,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       
       return {
         id: item.id.toString(),
-        name: item.title, 
         title: item.title,
+        name: item.name,
         type: contentType,
         status: item.status === 'Completed' ? 'completed' : 'not-started',
         description: `${contentTypeLabel}: ${item.title} - ${item.status}`,
@@ -91,7 +91,10 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       name: 'Module Content',
       description: 'All chapters and content for this module',
       items: items,
-      status: ""
+      status: "",
+      title: "",
+      // endDate: undefined,
+      // totalMarks: 0
     };
     
     return {
@@ -143,7 +146,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
 
   const getAllItems = () => {
     if (!enhancedModule) return [];
-    const items: { item: any; topicId: string }[] = [];
+    const items: { item: TopicItem; topicId: string }[] = [];
     enhancedModule.topics.forEach(topic => {
       topic.items.forEach(item => {
         items.push({ item, topicId: topic.id });
@@ -322,7 +325,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     );
   };
 
-  const getItemDetails = (item: any) => {
+  const getItemDetails = (item: TopicItem) => {
     if (item.type === 'live-class') {
       return item.duration || '45 mins';
     }
@@ -401,7 +404,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                           variant="ghost"
                           size="sm"
                           className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${
-                            chapterId === item.id 
+                            chapterId === item.id
                               ? "bg-primary-light border-l-4 border-primary text-charcoal" 
                               : "hover:bg-primary-light hover:text-charcoal"
                           }`}
@@ -485,7 +488,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                             <ModuleSidebar
                                 courseId={courseId}
                                 moduleId={moduleId}
-                                module={enhancedModule}
+                                module={enhancedModule as Module}
                                 selectedItem={chapterId ?? ''}
                                 onItemSelect={handleItemSelect}
                             />
@@ -508,5 +511,4 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     </div>
   );
 };
-
 export default ModuleContentPage;
