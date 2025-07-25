@@ -85,6 +85,7 @@ export const Toolbar = () => {
         // Focus the editor after inserting the image
         // Use setTimeout to ensure the image insertion is complete
         setTimeout(() => {
+            commands.insertText(' ')
             focus()
         }, 100)
 
@@ -163,6 +164,10 @@ export const Toolbar = () => {
             commands.toggleHeading({ level })
         }
         commands.focus()
+        const { state, dispatch } = manager.view;
+        const { to } = state.selection;
+        const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(to)));
+        dispatch(tr);
     }
 
     const handleBulletList = () => {
@@ -186,6 +191,10 @@ export const Toolbar = () => {
             commands.toggleBulletList()
         }
         commands.focus()
+        const { state, dispatch } = manager.view;
+        const { to } = state.selection;
+        const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(to)));
+        dispatch(tr);
     }
 
     const handleOrderedList = () => {
@@ -209,6 +218,10 @@ export const Toolbar = () => {
             commands.toggleOrderedList()
         }
         commands.focus()
+        const { state, dispatch } = manager.view;
+        const { to } = state.selection;
+        const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(to)));
+        dispatch(tr);
     }
 
     return (
