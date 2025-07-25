@@ -176,7 +176,7 @@ function ChapterModal({
                                     </Label>
                                 </div>
                             </RadioGroup>
-                            {classType === 'createLiveClass' && (
+                            <div style={{ display: classType === 'createLiveClass' ? 'block' : 'none' }}>
                                 <CreateSessionDialog
                                     fetchingChapters={fetchChapters}
                                     onClose={() => {
@@ -185,9 +185,10 @@ function ChapterModal({
                                         onClose() // Close parent dialog
                                     }}
                                 />
-                            )}
-                            {classType === 'existingLiveClass' && (
-                                <div className="overflow-auto">
+                            </div>
+                            
+                            <div style={{ display: classType === 'existingLiveClass' ? 'block' : 'none' }}>
+                                 <div className="overflow-auto">
                                     <ExistingLiveClass
                                         fetchingChapters={fetchChapters}
                                         onClose={() => {
@@ -196,8 +197,8 @@ function ChapterModal({
                                             onClose() // Close parent dialog
                                         }}
                                     />
-                                </div>
-                            )}
+                                 </div>
+                             </div>
                         </DialogContent>
                     </Dialog>
             </DialogContent>
