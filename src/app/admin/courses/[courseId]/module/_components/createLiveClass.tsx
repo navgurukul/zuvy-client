@@ -76,6 +76,7 @@ const formSchema = z
         daysOfWeek: z.array(z.string()).nonempty({
             message: 'Please select at least one day',
         }),
+
         totalClasses: z.number().min(1, {
             message: 'Total Classes must be at least 1.',
         }),
@@ -586,26 +587,27 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                         />
                         <FormField
                             control={form.control}
+                    
                             name="daysOfWeek"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600">
+                                <FormItem className="text-left text-gray-600 cursor-not-allowed">
                                     <FormLabel>
                                         Days of Week
-                                        <span className="text-red-500">*</span>
+                                        {/* <span className="text-green-900">*</span> */}
                                     </FormLabel>
                                     <Dialog>
-                                        <DialogTrigger asChild>
+                                        {/* <DialogTrigger asChild> */}
                                             <FormControl>
                                                 <Button
                                                     role="combobox"
+                                                    disabled
                                                     aria-expanded={formIsOpen}
-                                                    disabled={true}
-                                                    className={cn(
-                                                        'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
-                                                        field.value.length ===
-                                                            0 &&
-                                                            'text-muted-foreground'
-                                                    )}
+                                                    className={
+                                                        'w-full justify-between text-gray-600 bg-gray-200'
+                                                        // field.value.length ===
+                                                        //     0 &&
+                                                        //     'text-muted-foreground'
+                                                    }
                                                 >
                                                     {field.value.length > 0 ? (
                                                         <>
@@ -623,10 +625,10 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                                     ) : (
                                                         'Select days...'
                                                     )}
-                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                    
                                                 </Button>
                                             </FormControl>
-                                        </DialogTrigger>
+                                        {/* </DialogTrigger> */}
                                         <DialogContent className="w-[35%] p-0">
                                             <Command>
                                                 <CommandInput placeholder="Search days..." />
