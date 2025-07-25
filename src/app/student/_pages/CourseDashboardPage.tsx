@@ -659,7 +659,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                       >
                                        {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
                                           {getModuleCTA(module, moduleProgress)}
-                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`}  className={` text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
+                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`}  className={`${isCurrentModule ? 'text-white' : ''} text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
                                       </Button>
                                       </div>
                                     </TooltipTrigger>

@@ -107,6 +107,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     }
 
     const isCompleted = status === 'Completed'
+    console.log(questions)
 
     return (
         <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
@@ -130,7 +131,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             </div>
 
             <div className="space-y-8">
-                {questions.map((item, index) => (
+                {questions?.map((item, index) => (
                     <div key={item.id} className="space-y-3">
                         <div className="flex items-start">
                             <span className="mr-2 text-sm">{index + 1}.</span>

@@ -76,10 +76,10 @@ const ProjectPage = () => {
   useEffect(() => {
     if (project?.instruction?.description) {
       try {
-        const parsedContent = JSON.parse(project.instruction.description);
+        const parsedContent = JSON.parse(project?.instruction?.description);
         setInitialContent(parsedContent.doc ? parsedContent : { doc: parsedContent });
       } catch {
-        setInitialContent({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: project.instruction.description }] }] });
+        setInitialContent({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: project?.instruction?.description }] }] });
       }
     }
   }, [project]);
@@ -180,7 +180,6 @@ const ProjectPage = () => {
       courseId as string
     );
 
-    console.log(success)
     if (success) {
       setProjectState(prev => ({
         ...prev,
@@ -215,7 +214,6 @@ const ProjectPage = () => {
   };
 
   const isDueDatePassed = new Date() > new Date(project.deadline);
-  console.log(project)
 
   return (
     <div className="min-h-screen font-semibold bg-background">
@@ -266,7 +264,7 @@ const ProjectPage = () => {
           </div>
 
           {/* Project Description */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h2 className="text-xl font-heading text-left font-semibold">Project Description</h2>
             <div className="prose prose-sm max-w-none">
               <p className="whitespace-pre-wrap text-left text-muted-foreground leading-relaxed">
@@ -292,7 +290,7 @@ const ProjectPage = () => {
                 )}
               </Button>
             )}
-          </div>
+          </div> */}
 
           {/* Project Content */}
           <div className="space-y-4">
@@ -385,7 +383,7 @@ const ProjectPage = () => {
                     <Button 
                       variant="outline" 
                       onClick={handleResubmit} 
-                      className="border-primary text-primary hover:bg-primary/10"
+                      className="border-primary text-primary hover:bg-primary/10 font-semibold"
                       disabled={isDueDatePassed}
                     >
                       Resubmit Project
