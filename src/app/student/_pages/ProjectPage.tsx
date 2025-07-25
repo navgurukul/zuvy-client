@@ -366,7 +366,7 @@ const ProjectPage = () => {
                               href={project?.projectTrackingData[0]?.projectLink}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-primary hover:underline font-medium flex-1"
+                              className="text-primary text-left hover:underline font-medium flex-1"
                             >
                               {project?.projectTrackingData[0]?.projectLink } 
                             </a>
