@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState,useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
@@ -74,6 +74,8 @@ function Page() {
         days: -1,
     })
     const dragControls = useDragControls()
+
+    const containerRef = useRef<HTMLDivElement>(null)
 
     const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
@@ -526,7 +528,7 @@ function Page() {
             )}
 
             {loading ? (
-                <div className="my-5 flex justify-center items-center">
+                <div className="my-5 flex justify-center items-center ">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
                             <Spinner className="text-[rgb(81,134,114)]" />
@@ -534,13 +536,16 @@ function Page() {
                     </div>
                 </div>
             ) : (
-                <div className="flex flex-col items-center justify-center">
+               <div className="flex flex-col items-center justify-center overflow-hidden">
+
                     {curriculum.length > 0 ? (
                         <Reorder.Group
                             className="w-1/2"
                             values={curriculum}
                             onReorder={handleReorderModules}
                             axis="y"
+                            ref={containerRef}
+                        
                         >
                             {curriculum.map((item, index) => (
                                 <CurricullumCard
@@ -565,6 +570,7 @@ function Page() {
                                     fetchCourseModules={fetchCourseModules}
                                     projectId={item.projectId}
                                     chapterId={item.ChapterId}
+                                    // containerRef={containerRef}
                                 />
                             ))}
                         </Reorder.Group>
