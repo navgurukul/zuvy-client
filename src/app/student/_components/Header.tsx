@@ -105,10 +105,10 @@ const Header = () => {
         {/* Left - Logo and Navigation */}
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-            <img 
-              src={'/logo.PNG'} 
-              alt="Zuvy" 
-              className="h-8 sm:h-10 md:h-12"
+                <img 
+                  src={'/zuvy-logo-dark.png'} 
+                  alt="Zuvy" 
+              className="h-6"
             />
           </div>
 
@@ -208,9 +208,9 @@ const Header = () => {
       <div className="flex items-center gap-2 sm:gap-4">
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img 
-            src={'/logo.PNG'} 
+            src={'/zuvy-logo-dark.png'} 
             alt="Zuvy" 
-            className="h-8 sm:h-10 md:h-12"
+            className="h-6"
           />
         </div>
 

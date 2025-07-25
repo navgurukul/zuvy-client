@@ -18,6 +18,7 @@ import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSk
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import useWindowSize from "@/hooks/useHeightWidth";
 
 
 
@@ -28,7 +29,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
   const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
-  const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse();
+  const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
+  const { width } = useWindowSize();
+  const isMobile = width < 768;
 
   // Show loading skeleton while fetching API data
   if (progressLoading || modulesLoading || eventsLoading || classesLoading || latestCourseLoading) {
@@ -257,21 +260,21 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
                       </Badge>
                       <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                                {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500    text-sm ">
-                                <Video className="w-4 h-4 " />
-                              </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary  text-sm ">
-                                <Video className="w-4 h-4 " />
-                              </button>}
+                        <Tooltip>
+                          <TooltipTrigger>
+                            {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500    text-sm ">
+                              <Video className="w-4 h-4 " />
+                            </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary  text-sm ">
+                              <Video className="w-4 h-4 " />
+                            </button>}
 
-                            </TooltipTrigger>
-                            <TooltipContent className="mr-24">
-                              {classItem.s3Link === null || classItem.s3Link === 'not found' ? <p>Recording not found</p> : <p>Watch Recording</p>}
-                            </TooltipContent>
-                          </Tooltip>
+                          </TooltipTrigger>
+                          <TooltipContent className="mr-24">
+                            {classItem.s3Link === null || classItem.s3Link === 'not found' ? <p>Recording not found</p> : <p>Watch Recording</p>}
+                          </TooltipContent>
+                        </Tooltip>
 
-                        </TooltipProvider>
+                      </TooltipProvider>
                     </div>
                   </div>
                   {index < array.length - 1 && <div className="border-t border-border"></div>}
@@ -312,22 +315,22 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
                         {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}
                       </Badge>
-                       <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                                {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500 bg-primary-light text-sm border-primary">
-                                <Video className="w-4 h-4 " />
-                              </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary bg-primary-light text-sm border-primary">
-                                <Video className="w-4 h-4 " />
-                              </button>}
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500 bg-primary-light text-sm border-primary">
+                              <Video className="w-4 h-4 " />
+                            </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary bg-primary-light text-sm border-primary">
+                              <Video className="w-4 h-4 " />
+                            </button>}
 
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {classItem.s3Link === null || classItem.s3Link === 'not found' ? <p>Recording not found</p> : <p>Watch Recording</p>}
-                            </TooltipContent>
-                          </Tooltip>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {classItem.s3Link === null || classItem.s3Link === 'not found' ? <p>Recording not found</p> : <p>Watch Recording</p>}
+                          </TooltipContent>
+                        </Tooltip>
 
-                        </TooltipProvider>
+                      </TooltipProvider>
                     </div>
                   </div>
                   {index < array.length - 1 && <div className="border-t border-border"></div>}
@@ -483,7 +486,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     <h1 className="text-2xl md:text-3xl font-heading font-bold mb-2 text-left">{courseName}</h1>
                     <TruncatedDescription text={courseDescription} maxLength={250} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
                     <div className="flex items-center gap-2 mb-4">
-                        {/* <Avatar className="w-8 h-8">
+                      {/* <Avatar className="w-8 h-8">
                           <AvatarImage src={instructorAvatar || '/logo.PNG'} />
                           <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
                         </Avatar> */}
@@ -493,7 +496,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   {collaborator && <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
                     <Image
-                            src={collaborator || '/logo.PNG'}
+                      src={collaborator || '/logo.PNG'}
                       alt="Collaborator Brand"
                       width={75}
                       height={56}
@@ -602,30 +605,30 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     const isCurrentModule = latestCourseData?.moduleId === module.id;
                     const isCompleted = moduleProgress === 100;
                     const isLocked = module.isLock;
-                    const upcomingChapterId = latestCourseData?.newChapter?.id || 1 ;
+                    const upcomingChapterId = latestCourseData?.newChapter?.id || 1;
 
                     return (
-                        <Card key={module.id} className={`shadow-4dp   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
-                          <CardContent className={`p-6 ${isLocked ? ' cursor-not-allowed' : ''}`}>
-                            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-                              <div className="flex-1 text-left">
-                                {isCurrentModule && (
-                                  <Badge className="mb-2 bg-primary-light text-primary border-primary/20 self-start hover:bg-primary-light/80">Current Module</Badge>
-                                )}
-                                {isCompleted && (
-                                  <Badge className="mb-2 bg-success-light text-success border-success/20 self-start hover:bg-success-light/80">Completed</Badge>
-                                )}
-                                {/* {isLocked && (
+                      <Card key={module.id} className={`shadow-4dp   ${isCurrentModule ? 'border-2 border-primary my-4' : 'my-4'} ${isLocked ? 'opacity-60' : ''} ${!isLocked ? 'cursor-pointer hover:shadow-8dp transition-shadow' : 'cursor-not-allowed'}`}>
+                        <CardContent className={`p-6 ${isLocked ? ' cursor-not-allowed' : ''}`}>
+                          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                            <div className="flex-1 text-left">
+                              {isCurrentModule && (
+                                <Badge className="mb-2 bg-primary-light text-primary border-primary/20 self-start hover:bg-primary-light/80">Current Module</Badge>
+                              )}
+                              {isCompleted && (
+                                <Badge className="mb-2 bg-success-light text-success border-success/20 self-start hover:bg-success-light/80">Completed</Badge>
+                              )}
+                              {/* {isLocked && (
                                   <Badge className="mb-2 bg-muted text-muted-foreground border-muted/20 self-start flex items-center gap-1">
                                     <Lock className="w-3 h-3" />
                                     Locked
                                   </Badge>
                                 )} */}
-                                <h3 className="text-xl font-heading font-semibold mb-2 text-left">
-                                  Module {module.order}: {module.name}
-                                </h3>
-                                <TruncatedDescription text={getModuleDescription(module)} maxLength={250} className="text-muted-foreground mb-3 text-sm text-left " />
-                                {/* <div className="flex flex-wrap gap-2 mb-3">
+                              <h3 className="text-xl font-heading font-semibold mb-2 text-left">
+                               {module.typeId === 2 ? 'Project' : 'Module' }  {module.order}: {module.name}
+                              </h3>
+                              <TruncatedDescription text={getModuleDescription(module)} maxLength={150} className="text-muted-foreground mb-3 text-sm text-left " />
+                              {/* <div className="flex flex-wrap gap-2 mb-3">
                                 <Badge variant="outline" className="text-xs">
                                   {formatTimeAlloted(module.timeAlloted)}
                                 </Badge>
@@ -635,61 +638,93 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   </Badge>
                                 )}
                               </div> */}
-                              </div>
-
-                              {/* Action Button - Desktop: top right, Mobile: bottom */}
-                              <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
-
-                                <Button
-                                  className={`px-6 font-semibold ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : `bg-white text-primary hover:underline ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
-                                  disabled={isLocked}
-                                  onClick={(e) => {
-                                    if (isLocked) {
-                                      e.preventDefault();
-                                    }
-                                  }}
-                                >
-                                  {getModuleCTA(module, moduleProgress)}
-                                </Button>
-                              </Link>
+                             {module.typeId === 2 && <span className="text-sm text-muted-foreground" >Due: January 20, 2025</span>}
                             </div>
 
-                            {/* Module Progress - Updated with primary-light background */}
-                            <div className="mb-4 lg:mb-0">
-                              <div className="relative bg-primary-light rounded-full h-2 w-full">
+                            {/* Action Button - Desktop: top right, Mobile: bottom */}
+                              {!isMobile && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div>
+
+                                      <Button
+                                        className={`px-6 font-semibold bg-[#f5f6fa]  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline hover:underline-offset-4 ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
+                                        disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
+                                        onClick={(e) => {
+                                          if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
+                                            e.preventDefault();
+                                          }
+                                        }}
+                                      >
+                                       {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
+                                          {getModuleCTA(module, moduleProgress)}
+                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`}  className={` text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
+                                      </Button>
+                                      </div>
+                                    </TooltipTrigger>
+                                    {!module.ChapterId && module.typeId !== 2 && (
+                                      <TooltipContent className="font-semibold" >
+                                        <p>No chapter is created inside this module yet</p>
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                          </div>
+
+                          {/* Module Progress - Updated with primary-light background */}
+                         {module.typeId !== 2 && <div className="mb-4 lg:mb-0">
+                            <div className="relative bg-primary-light rounded-full h-2 w-full">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-300 relative ${isLocked ? 'bg-muted' : 'bg-primary'}`}
+                                style={{ width: `${moduleProgress}%` }}
+                              >
                                 <div
-                                  className={`h-2 rounded-full transition-all duration-300 relative ${isLocked ? 'bg-muted' : 'bg-primary'}`}
-                                  style={{ width: `${moduleProgress}%` }}
+                                  className="absolute top-1/2 transform -translate-y-1/2 bg-card text-card-foreground px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
+                                  style={{
+                                    right: moduleProgress === 100 ? '0' : moduleProgress === 0 ? 'auto' : '-12px',
+                                    left: moduleProgress === 0 ? '0' : 'auto'
+                                  }}
                                 >
-                                  <div
-                                    className="absolute top-1/2 transform -translate-y-1/2 bg-card text-card-foreground px-2 py-0.5 rounded shadow-sm border text-xs font-medium whitespace-nowrap"
-                                    style={{
-                                      right: moduleProgress === 100 ? '0' : moduleProgress === 0 ? 'auto' : '-12px',
-                                      left: moduleProgress === 0 ? '0' : 'auto'
-                                    }}
-                                  >
-                                    {moduleProgress}%
-                                  </div>
+                                  {moduleProgress}%
                                 </div>
                               </div>
                             </div>
+                          </div>}
 
-                            {/* Action Button - Mobile: bottom */}
-                            <div className="lg:hidden mt-4">
-                              <Button
-                                className={`w-full ${isLocked ? 'bg-muted text-muted-foreground cursor-not-allowed' : 'bg-primary text-primary-foreground hover:bg-primary-dark'}`}
-                                disabled={isLocked}
-                                onClick={(e) => {
-                                  if (isLocked) {
-                                    e.preventDefault();
-                                  }
-                                }}
-                              >
-                                {getModuleCTA(module, moduleProgress)}
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
+                          {/* Action Button - Mobile: bottom */}
+                          {isMobile && (
+                            <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div>
+
+                                      <Button
+                                        className={`px-6 font-semibold bg-[#f5f6fa]  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline  ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
+                                        disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
+                                        onClick={(e) => {
+                                          if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
+                                            e.preventDefault();
+                                          }
+                                        }}
+                                      >
+                                       {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
+                                          {getModuleCTA(module, moduleProgress)}
+                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`}  className={` text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
+                                      </Button>
+                                </div>
+                              </TooltipTrigger>
+                              {!module.ChapterId && module.typeId !== 2 && (
+                                <TooltipContent className="font-semibold" >
+                                  <p>No chapter is created inside this module yet</p>
+                                </TooltipContent>
+                              )}
+                            </Tooltip>
+                          </TooltipProvider>
+                          )}
+                        </CardContent>
+                      </Card>
 
                     );
                   })}
@@ -790,7 +825,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           className="w-full h-auto opacity-80"
                         />
                       </div>
-                      
+
                       {/* Content */}
                       <div className="text-left w-6/7 space-y-3 ">
                         <h3 className="text-lg font-semibold text-muted-foreground">
@@ -799,7 +834,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           Stay tuned! Your upcoming assignments, live sessions, and deadlines will appear here to help you stay on track.
                         </p>
-                        
+
                         {/* Optional CTA */}
                         <div className="pt-2">
                           <p className="text-xs text-left w-full text-muted-foreground flex  gap-1">
@@ -823,7 +858,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     <>
                       <div className="text-center mb-6">
                         <div className="text-3xl font-bold text-primary mb-2">
-                          {completedClassesData?.attendanceStats?.attendancePercentage || 0}%      
+                          {completedClassesData?.attendanceStats?.attendancePercentage || 0}%
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {completedClassesData?.attendanceStats?.presentCount || 0} of {completedClassesData?.totalClasses || 0} classes attended
@@ -846,7 +881,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
-                                    {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500  text-sm ">
+                                  {classItem.s3Link === null || classItem.s3Link === 'not found' ? <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-red-500  text-sm ">
                                     <Video className="w-4 h-4 " />
                                   </button> : <button disabled={classItem.s3Link === null || classItem.s3Link === 'not found'} onClick={() => handleRecording(classItem.s3Link)} className="text-primary  text-sm ">
                                     <Video className="w-4 h-4 " />
@@ -880,16 +915,16 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           className="w-full h-auto opacity-80"
                         />
                       </div>
-                      
+
                       {/* Content */}
                       <div className="text-left w-6/7 space-y-3 ">
                         <h3 className="text-lg font-semibold text-muted-foreground">
-                        Classes are yet to start
+                          Classes are yet to start
                         </h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">
                           Your attendance record will appear here once you start attending live classes. Stay engaged to track your progress!
                         </p>
-                        
+
                         {/* Optional CTA */}
                         <div className="pt-2">
                           <p className="text-xs text-left w-full text-muted-foreground flex  gap-1">

@@ -24,7 +24,7 @@ interface LatestUpdatedCourseResponse {
   data: LatestUpdatedCourseData;
 }
 
-export const useLatestUpdatedCourse = () => {
+export const useLatestUpdatedCourse = (courseId: string) => {
   const [latestCourseData, setLatestCourseData] = useState<LatestUpdatedCourseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +35,7 @@ export const useLatestUpdatedCourse = () => {
         setLoading(true);
         setError(null);
         
-        const response = await api.get<LatestUpdatedCourseResponse>('/tracking/latestUpdatedCourse');
+        const response = await api.get<LatestUpdatedCourseResponse>(`/tracking/latestUpdatedCourse?bootcampId=${courseId}`);
         
         if (response.data.isSuccess) {
           setLatestCourseData(response.data.data);

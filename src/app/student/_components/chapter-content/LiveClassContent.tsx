@@ -121,11 +121,14 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
     description: chapterDetails.description,
     scheduledDateTime: session.startTime ? new Date(session.startTime) : null,
     status: session.status,
-    duration: session.duration ? `${session.duration} mins` : '45 mins',
+    duration: session.duration,
     hangoutLink: session.hangoutLink,
     s3link: session.s3link,
     attendance: session.attendance
+
   };
+
+  console.log(item.duration)
 
   if (item.type === 'live-class') {
     const isScheduled = item.scheduledDateTime && new Date() < item.scheduledDateTime;
@@ -133,6 +136,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
       new Date() >= new Date(item.scheduledDateTime.getTime() - 10 * 60 * 1000) &&
       new Date() < new Date(item.scheduledDateTime.getTime() + 60 * 60 * 1000);
     const isSessionCompleted = item.status === 'completed';
+     
 
     if (isScheduled) {
       return (
@@ -151,7 +155,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
             </div>
             <div className="text-left">
               <p className="text-sm text-muted-foreground"> Duration</p>
-              <p className="font-medium">{item.duration || '45 mins'}</p>
+              <p className="font-medium">{item.duration}</p>
             </div>
           </div>
           
@@ -183,14 +187,11 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
               <p className="text-sm text-muted-foreground">Scheduled Date & Time</p>
               <p className="font-medium">{item.scheduledDateTime ? formatDateTime(item.scheduledDateTime) : 'TBD'}</p>
             </div>
-            <div className="text-left">
-              <p className="text-sm text-muted-foreground">Duration</p>
-              <p className="font-medium">{item.duration || '45 mins'}</p>
-            </div>
+            
           </div>
           <div className="text-left">
             <Button 
-              className="mb-6 text-left bg-primary hover:bg-primary-dark text-white"
+              className="mb-6 text-left font-semibold bg-primary hover:bg-primary-dark text-white"
               onClick={() => item.hangoutLink && window.open(item.hangoutLink, '_blank')}
               disabled={!item.hangoutLink || item.hangoutLink === 'not found'}
             >
@@ -225,7 +226,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
             </div>
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Your Attendance Duration </p>
-              <p className="font-medium">{item.duration || '45 mins'}</p>
+              <p className="font-medium">{item.duration}</p>
             </div>
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Attendance</p>
