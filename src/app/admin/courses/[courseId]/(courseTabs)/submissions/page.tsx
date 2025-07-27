@@ -860,7 +860,7 @@ const Page = ({ params }: { params: any }) => {
                                         </button>
 
                                         <div className="flex flex-col w-full">
-                                            <h1 className="font-semibold text-start text-[1.5rem]">
+                                            <h1 className="font-semibold text-start text-[1.063rem] capitalize">
                                                 {item.projectData[0].title ||
                                                     'Untitled Project'}
                                             </h1>
@@ -892,7 +892,7 @@ const Page = ({ params }: { params: any }) => {
                                             ) : (
                                                 <Button
                                                     variant={'ghost'}
-                                                    className="text-secondary text-md opacity-50 cursor-not-allowed"
+                                                    className="text-green-700 text-md opacity-50 cursor-not-allowed"
                                                     disabled
                                                 >
                                                     View Submission

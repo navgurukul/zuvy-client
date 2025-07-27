@@ -1,6 +1,5 @@
 'use client'
 
-import React, { useMemo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
@@ -12,6 +11,7 @@ import {
     getSelectedOpenEndedOptions,
     getOpenEndedDifficulty,
     getOffset,
+    getPosition,
 } from '@/store/store'
 import {
     deleteOpenEndedQuestion,
@@ -22,7 +22,7 @@ import {
     handleEditOpenEndedQuestion,
 } from '@/utils/admin'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import { DELETE_OPEN_ENDED_QUESTION_CONFIRMATION, POSITION } from '@/utils/constant'
+import { DELETE_OPEN_ENDED_QUESTION_CONFIRMATION } from '@/utils/constant'
 import { cn, difficultyColor } from '@/lib/utils'
 import {
     Dialog,
@@ -33,7 +33,6 @@ import {
 } from '@/components/ui/dialog'
 import EditOpenEndedQuestionForm from '../_components/EditOpenEndedQuestionForm'
 import PreviewOpenEnded from '../_components/PreviewOpenEnded'
-import { useSearchParams } from 'next/navigation'
 
 export const columns: ColumnDef<OpenEndedQuestion>[] = [
     {
@@ -130,7 +129,6 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         ),
         accessorKey: 'Actions',
         cell: ({ row }) => {
-            const searchParams = useSearchParams()
             const openEndedQuestion = row.original
             const {
                 isDeleteModalOpen,
@@ -150,7 +148,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                 getSelectedOpenEndedOptions()
             const { difficulty, setDifficulty } = getOpenEndedDifficulty()
             const { offset, setOffset } = getOffset()
-            const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+            const { position, setPosition } = getPosition()
 
             return (
                 <>
