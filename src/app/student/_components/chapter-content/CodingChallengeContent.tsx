@@ -126,14 +126,14 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
         {question.status === 'Completed' ? (
           <Button
             onClick={() => handleSolveChallenge(question)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium text-sm"
+            className="bg-blue-600 font-semibold hover:bg-blue-700 text-white px-6 py-2  text-sm"
           >
             View Solution
           </Button>
         ) : (
           <Button
             onClick={() => handleSolveChallenge(question)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 font-medium text-sm"
+            className="bg-blue-600 font-semibold hover:bg-blue-700 text-white px-6 py-2  text-sm"
           >
             Start Practice
           </Button>
@@ -167,12 +167,12 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
           </div>
           <Badge
             variant="outline"
-            className={`text-sm px-4 py-2 shadow-2dp text-left ${
-              isCompleted ? 'bg-success text-success-foreground border-success' :
-              'bg-warning-light text-warning-foreground border-warning'
+            className={`text-xs font-medium px-3 py-1 ${
+              isCompleted ? 'bg-green-100 text-green-600 hover:bg-green-100' :
+              'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-100'
             }`}
           >
-            {isCompleted ? 'Attempted' : 'Not Attempted'}
+            {isCompleted ? 'Attempted' : 'Not Submitted'}
           </Badge>
         </div>
 

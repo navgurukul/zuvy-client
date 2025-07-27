@@ -117,12 +117,7 @@ const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-                <DataTablePagination
-                    totalStudents={classes?.length}
-                    pages={pages}
-                    lastPage={lastPage}
-                    fetchStudentData={getAllClasses}
-                />
+                
             </div>
         </div>
     )

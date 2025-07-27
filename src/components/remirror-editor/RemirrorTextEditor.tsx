@@ -32,6 +32,7 @@ interface RemirrorTextEditorProps {
     setInitialContent: (content: any) => void
     preview?: boolean
     hideBorder?: boolean
+    assignmentSide?: boolean
 }
 
 // Create empty content structure
@@ -86,6 +87,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
     setInitialContent,
     preview,
     hideBorder = false,
+    assignmentSide,
 }) => {
     // Track if we're in the middle of editing to prevent feedback loops
     const isEditingRef = useRef<boolean>(false)
@@ -252,7 +254,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                     )}
 
                     <ScrollArea
-                        className="h-[28rem]"
+                        className={`${assignmentSide ? "h-72 overflow-y-auto" : "h-[28rem]"}`}
                         type="hover"
                         style={{
                             scrollbarWidth: 'none', // Firefox

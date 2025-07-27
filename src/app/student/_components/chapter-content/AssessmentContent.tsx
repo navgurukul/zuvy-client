@@ -36,15 +36,17 @@ function formatToIST(dateString: string | undefined) {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return 'N/A';
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
+  
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
+  const day = date.getDate();
+  const month = months[date.getMonth()];
   const year = date.getFullYear();
-  let hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? 'pm' : 'am';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
-  return `${day}/${month}/${year} , ${hours}:${minutes} ${ampm}`;
+  
+  return `${day} ${month} ${year}`;
 }
 
 const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -314,6 +316,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   }
 
   const isDisabled = !hasQuestions;
+  
   return (
     <div className="h-full">
       <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-4 py-4 sm:py-6 lg:py-8 mt-4 sm:mt-6 lg:mt-8">
@@ -333,10 +336,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                   <span className="font-semibold text-sm text-muted-foreground">Start Date</span>
                   <span className="text-lg font-medium text-foreground">{formatToIST(assessmentDetails.startDatetime)}</span>
                 </span>
-                <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
+                {assessmentDetails.endDatetime &&    <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
                   <span className="font-semibold text-sm text-muted-foreground">End Date</span>
                   <span className="text-lg font-medium text-foreground">{formatToIST(assessmentDetails.endDatetime)}</span>
-                </span>
+                </span> }
+             
                 <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
                   <span className="font-semibold text-sm text-muted-foreground">Duration</span>
                   <span className="text-lg font-medium text-foreground">{formatTimeLimit(assessmentDetails.timeLimit)}</span>
@@ -484,15 +488,16 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               <div className="text-success-dark text-left w-full font-medium">
                 {assessmentDetails.endDatetime ? (
                   <>
-                    <p className="text-muted-foreground mb-4">
+                    <p className="text-muted-foreground text-center mb-4">
             The assessment is now available. Click below to begin.
           </p>
                     {/* <p className="font-semibold">{formatToIST(assessmentDetails.endDatetime)}</p> */}
                   </>
                 ) : (
-                  <p>The assessment is available now</p>
+                  <p className='text-center' >The assessment is available now</p>
                 )}
-            <Button
+                <div className='text-center' >
+                <Button
                 onClick={handleStartAssessment}
                 className="mt-4 sm:mt-5 text-left rounded-md bg-primary hover:bg-primary-dark px-4 sm:px-6 py-2 text-primary-foreground w-full sm:w-auto text-sm sm:text-base shadow-hover"
                 disabled={
@@ -505,6 +510,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                   ? 'Re-Attempt Assessment'
                   : 'Begin Assessment'}
               </Button>
+                </div>
+            
               </div>               
             </div>
             )}                     {/* Closed assessment card */}

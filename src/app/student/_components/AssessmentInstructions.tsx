@@ -231,7 +231,7 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
                   <div className="flex justify-end">
                     <Button 
                       variant="link" 
-                      className="text-primary p-0 h-auto"
+                      className="text-primary  p-0 h-auto"
                       onClick={() => {
                         setSelectedChallengeIndex(index);
                         setCurrentView('coding');

@@ -61,6 +61,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 
   const { width } = useWindowSize();
   const isMobile = width < 768;
+  const isSmallScreen = width < 1366;
   const [resourceLink, setResourceLink] = useState('');
   const [viewResource, setViewResource] = useState(false);
 
@@ -185,17 +186,17 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-8 space-y-6">
+      <div className={`mx-auto space-y-6 ${isMobile ? 'p-4' : isSmallScreen ? 'p-6 max-w-3xl' : 'p-8 max-w-4xl'}`}>
         <div className="flex justify-between items-center">
-          <Skeleton className="h-8 w-1/2" />
-          <Skeleton className="h-6 w-24" />
+          <Skeleton className={`${isMobile ? 'h-6 w-1/2' : 'h-8 w-1/2'}`} />
+          <Skeleton className={`${isMobile ? 'h-5 w-20' : 'h-6 w-24'}`} />
         </div>
-        <Skeleton className="h-4 w-1/3" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-8 w-1/4" />
-        <Skeleton className="h-10 w-full" />
+        <Skeleton className={`${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`} />
+        <Skeleton className={`${isMobile ? 'h-16' : 'h-24'} w-full`} />
+        <Skeleton className={`${isMobile ? 'h-6 w-1/3' : 'h-8 w-1/4'}`} />
+        <Skeleton className={`${isMobile ? 'h-8' : 'h-10'} w-full`} />
         <div className="flex justify-end">
-          <Skeleton className="h-10 w-32" />
+          <Skeleton className={`${isMobile ? 'h-8 w-24' : 'h-10 w-32'}`} />
         </div>
       </div>
     );
@@ -203,19 +204,21 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <div className={`mx-auto space-y-6 ${isMobile ? 'p-4' : isSmallScreen ? 'p-6 max-w-3xl' : 'p-8 max-w-4xl'}`}>
         {/* Header Section */}
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-foreground mb-2 text-left">{chapterDetails.title}</h1>
-            <p className="text-muted-foreground text-left">
+            <h1 className={`font-bold text-foreground mb-2 text-left ${isMobile ? 'text-xl' : isSmallScreen ? 'text-2xl' : 'text-3xl'}`}>
+              {chapterDetails.title}
+            </h1>
+            <p className={`text-muted-foreground text-left ${isMobile ? 'text-sm' : 'text-base'}`}>
               Due: {formatDate(deadlineDate)}
             </p>
           </div>
           <div className="flex flex-col items-end space-y-2">
             <Badge 
               variant={isCompleted ? "secondary" : "outline"}
-              className={`${isCompleted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left`}
+              className={`${isCompleted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
             >
               {getSubmissionStatus()}
             </Badge>
@@ -223,15 +226,15 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
         </div>
 
         {/* Assignment Description */}
-        <div className="bg-card border border-border rounded-lg p-6">
+        <div className=" border border-border rounded-lg p-4 md:p-6">
           <div className="prose prose-neutral max-w-none text-left">
             {viewResource ? (
               isMobile ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <p className="mb-4 text-center text-muted-foreground">
+                <div className="flex flex-col items-center justify-center py-6 md:py-8">
+                  <p className={`mb-4 text-center text-muted-foreground ${isMobile ? 'text-sm' : 'text-base'}`}>
                     This assignment includes an external resource.
                   </p>
-                  <Button asChild variant="outline">
+                  <Button asChild variant="outline" size={isMobile ? 'sm' : 'default'}>
                     <Link href={resourceLink} target="_blank" rel="noopener noreferrer">
                       View Resource
                     </Link>
@@ -240,17 +243,18 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
               ) : (
                 <iframe
                   src={resourceLink}
-                  className="w-full h-[400px] border border-border rounded"
+                  className={`w-full border border-border rounded ${isSmallScreen ? 'h-[300px]' : 'h-72'}`}
                   title="Assignment Resource"
                 />
               )
             ) : (
-              <div className="min-h-[200px] text-left">
+              <div className={`text-left ${isMobile ? 'min-h-[150px]' : isSmallScreen ? 'min-h-[180px]' : 'min-h-[200px]'}`}>
                 <RemirrorTextEditor 
                   initialContent={initialContent} 
                   setInitialContent={setInitialContent} 
                   preview={true} 
                   hideBorder={true}
+                  assignmentSide={true}
                 />
               </div>
             )}
@@ -258,8 +262,10 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
         </div>
 
         {/* Submission Section */}
-        <div className=" rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4 text-left">Make a Submission</h2>
+        <div className="rounded-lg p-4 md:p-6">
+          <h2 className={`font-semibold text-foreground mb-4 text-left ${isMobile ? 'text-lg' : isSmallScreen ? 'text-xl' : 'text-xl'}`}>
+            Make a Submission
+          </h2>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -273,7 +279,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                         placeholder="Paste your assignment link (Google Drive, GitHub, etc.)" 
                         {...field} 
                         disabled={isCompleted || isSubmitting || isCompleting}
-                        className="h-12 text-base text-left"
+                        className={`text-base text-left ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'}`}
                       />
                     </FormControl>
                     <FormMessage className="text-left" />
@@ -286,7 +292,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                   <Button 
                     type="submit" 
                     disabled={isSubmitting || isCompleting || !form.formState.isValid}
-                    className="px-6 py-2 h-12 text-left"
+                    className={`px-6 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'}`}
                   >
                     {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
                   </Button>

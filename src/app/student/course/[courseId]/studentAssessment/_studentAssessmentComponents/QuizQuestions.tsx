@@ -230,15 +230,15 @@ const QuizQuestions = ({
                         {questions?.data?.mcqs?.map((question: any, index: number) => (
                             <div
                                 key={question.id}
-                                className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden"
+                                className=" rounded-2xl  transition-all duration-300 overflow-hidden"
                             >
                                 {/* Question Header */}
-                                <div className="bg-card-elevated border-b border-border p-6">
+                                <div className="  p-6">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                                            {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                                 <span className="text-sm font-bold text-primary">{index + 1}</span>
-                                            </div>
+                                            </div> */}
                                             <h3 className="text-lg font-bold text-foreground">Question {index + 1}</h3>
                                         </div>
                                         
@@ -262,9 +262,9 @@ const QuizQuestions = ({
                                         control={form.control}
                                         name={`answers.${index}`}
                                         render={({ field }) => (
-                                            <FormItem className="space-y-4">
+                                            <FormItem className="space-y-4 text-left">
                                                 <FormLabel className="text-base">
-                                                    <div className="prose prose-neutral max-w-none">
+                                                    <div className="prose prose-neutral  max-w-none">
                                                         <RemirrorForm
                                                             description={question.question}
                                                             preview={true}
@@ -283,10 +283,7 @@ const QuizQuestions = ({
                                                             <div
                                                                 key={key}
                                                                 className={cn(
-                                                                    "flex items-start space-x-3 p-4 rounded-xl border transition-all duration-200 cursor-pointer hover:border-primary/30 hover:bg-primary/5",
-                                                                    field.value === key 
-                                                                        ? "border-primary bg-primary/10" 
-                                                                        : "border-border bg-muted/30"
+                                                                    "flex items-center space-x-3 p-1 rounded-xl  transition-all duration-200 cursor-pointer "
                                                                 )}
                                                             >
                                                                 <RadioGroupItem

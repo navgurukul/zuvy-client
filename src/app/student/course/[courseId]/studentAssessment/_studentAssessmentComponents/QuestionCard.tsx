@@ -60,6 +60,7 @@ const QuestionCard = ({
     // useEffect(() => {
     //     getAllTags()
     // }, [])
+    console.log("Question Card")
 
     function codingQuestionMarks(difficulty: string) {
         if (difficulty === 'Easy') {
