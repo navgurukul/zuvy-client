@@ -214,7 +214,6 @@ const CodingProblems = () => {
                     },
                 })
 
-                console.log("Suggestions API response:", response.data)
 
                 // Handle different response structures
                 let questionsData = response.data;
