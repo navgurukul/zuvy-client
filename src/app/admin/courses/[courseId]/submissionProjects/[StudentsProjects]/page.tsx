@@ -290,7 +290,7 @@ const Page = ({ params }: any) => {
                             </div>
                         )}
                     </div>
-                    <DataTable data={projectStudentData} columns={columns} />
+                    <DataTable data={filteredData} columns={columns} />
                 </div>
             </MaxWidthWrapper>
 
