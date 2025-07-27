@@ -21,7 +21,13 @@ import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 interface SearchSuggestion {
     id: string
     title: string
-    type: 'practice' | 'assessments' | 'projects' | 'form' | 'assignments' | 'video'
+    type:
+        | 'practice'
+        | 'assessments'
+        | 'projects'
+        | 'form'
+        | 'assignments'
+        | 'video'
 }
 const Page = ({ params }: { params: any }) => {
     const router = useRouter()
@@ -44,13 +50,14 @@ const Page = ({ params }: { params: any }) => {
     const [appliedSearch, setAppliedSearch] = useState(initialSearch)
     const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
-    const [suggestionTimeout, setSuggestionTimeout] = useState<NodeJS.Timeout | null>(null)
+    const [suggestionTimeout, setSuggestionTimeout] =
+        useState<NodeJS.Timeout | null>(null)
     const [allData, setAllData] = useState<{
-        practice: any[],
-        assessments: any[],
-        projects: any[],
-        form: any[],
-        assignments: any[],
+        practice: any[]
+        assessments: any[]
+        projects: any[]
+        form: any[]
+        assignments: any[]
         video: any[]
     }>({
         practice: [],
@@ -58,33 +65,38 @@ const Page = ({ params }: { params: any }) => {
         projects: [],
         form: [],
         assignments: [],
-        video: []
+        video: [],
     })
 
     const searchInputRef = useRef<HTMLInputElement>(null)
     const suggestionsRef = useRef<HTMLDivElement>(null)
 
     // Update URL when tab or search changes
-    const updateURL = useCallback((newTab: string, newSearch: string) => {
-        const params = new URLSearchParams(searchParams.toString())
+    const updateURL = useCallback(
+        (newTab: string, newSearch: string) => {
+            const params = new URLSearchParams(searchParams.toString())
 
-        // Set tab only if it's not the default 'practice'
-        if (newTab !== 'practice') {
-            params.set('tab', newTab)
-        } else {
-            params.delete('tab')
-        }
+            // Set tab only if it's not the default 'practice'
+            if (newTab !== 'practice') {
+                params.set('tab', newTab)
+            } else {
+                params.delete('tab')
+            }
 
-        // Set search only if it's not empty
-        if (newSearch.trim()) {
-            params.set('search', newSearch.trim())
-        } else {
-            params.delete('search')
-        }
+            // Set search only if it's not empty
+            if (newSearch.trim()) {
+                params.set('search', newSearch.trim())
+            } else {
+                params.delete('search')
+            }
 
-        const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`
-        router.replace(newURL, { scroll: false })
-    }, [router, searchParams])
+            const newURL = `${window.location.pathname}${
+                params.toString() ? '?' + params.toString() : ''
+            }`
+            router.replace(newURL, { scroll: false })
+        },
+        [router, searchParams]
+    )
 
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
@@ -145,183 +157,300 @@ const Page = ({ params }: { params: any }) => {
     }
 
     // Generate search suggestions based on current search term AND active tab
-    const generateSuggestions = useCallback(async (searchTerm: string) => {
-        if (!searchTerm.trim() || searchTerm.length < 1) {
-            setSuggestions([])
-            return
-        }
-
-        const term = searchTerm.toLowerCase()
-        const newSuggestions: SearchSuggestion[] = []
-
-        try {
-            // Only search for suggestions relevant to the current active tab
-            switch (activeTab) {
-                case 'practice':
-                    // Search through practice problems only
-                    try {
-                        const practiceRes = await api.get(`/submission/submissionsOfPractiseProblems/${params.courseId}?searchPractiseProblem=${encodeURIComponent(searchTerm)}`)
-                        if (practiceRes.data.trackingData) {
-                            practiceRes.data.trackingData.forEach((item: any) => {
-                                if (item.moduleChapterData) {
-                                    item.moduleChapterData.forEach((chapter: any) => {
-                                        if (chapter.codingQuestionDetails) {
-                                            const title = chapter.codingQuestionDetails.title || ''
-                                            if (title.toLowerCase().includes(term)) {
-                                                newSuggestions.push({
-                                                    id: chapter.codingQuestionDetails.id,
-                                                    title: title,
-                                                    type: 'practice'
-                                                })
-                                            }
-                                        }
-                                    })
-                                }
-                            })
-                        }
-                    } catch (error) {
-                        console.error('Error fetching practice problems for suggestions:', error)
-                    }
-                    break
-
-                case 'assessments':
-                    // Search through assessments only
-                    try {
-                        const assessmentRes = await api.get(`/admin/bootcampAssessment/bootcamp_id${params.courseId}?searchAssessment=${encodeURIComponent(searchTerm)}`)
-                        if (assessmentRes.data) {
-                            Object.values(assessmentRes.data).forEach((assessmentGroup: any) => {
-                                if (Array.isArray(assessmentGroup)) {
-                                    assessmentGroup.forEach((assessment: any) => {
-                                        const title = assessment.title || ''
-                                        if (title.toLowerCase().includes(term)) {
-                                            newSuggestions.push({
-                                                id: assessment.id,
-                                                title: title,
-                                                type: 'assessments'
-                                            })
-                                        }
-                                    })
-                                }
-                            })
-                        }
-                    } catch (error) {
-                        console.error('Error fetching assessments for suggestions:', error)
-                    }
-                    break
-
-                case 'projects':
-                    // Search through projects only
-                    if (bootcampModules && bootcampModules.length > 0) {
-                        bootcampModules.forEach((item: any) => {
-                            if (item.projectData && item.projectData[0]) {
-                                const title = item.projectData[0].title || ''
-                                if (title.toLowerCase().includes(term)) {
-                                    newSuggestions.push({
-                                        id: item.projectData[0].id,
-                                        title: title,
-                                        type: 'projects'
-                                    })
-                                }
-                            }
-                        })
-                    }
-                    break
-                case 'form':
-                    // Search through forms only (but skip module name)
-                    if (formData && formData.length > 0) {
-                        formData.forEach((item: any) => {
-                            // Only check moduleChapterData
-                            if (item.moduleChapterData) {
-                                item.moduleChapterData.forEach((chapter: any) => {
-                                    const chapterTitle = chapter.title || chapter.name || ''
-                                    if (chapterTitle.toLowerCase().includes(term)) {
-                                        newSuggestions.push({
-                                            id: chapter.id,
-                                            title: chapterTitle,
-                                            type: 'form'
-                                        })
-                                    }
-                                })
-                            }
-                        })
-                    }
-                    break
-
-                case 'assignments':
-                    // Fixed assignment API endpoint and data handling
-                    try {
-                        const assignmentRes = await api.get(`/submission/submissionsOfAssignment/${params.courseId}?searchAssignment=${encodeURIComponent(searchTerm)}`)
-                        if (assignmentRes.data && assignmentRes.data.data && assignmentRes.data.data.trackingData) {
-                            // Handle the response structure properly
-                            assignmentRes.data.data.trackingData.forEach((module: any) => {
-                                if (module.moduleChapterData && Array.isArray(module.moduleChapterData)) {
-                                    module.moduleChapterData.forEach((assignment: any) => {
-                                        const title = assignment.title || ''
-                                        if (title.toLowerCase().includes(term)) {
-                                            newSuggestions.push({
-                                                id: assignment.id,
-                                                title: title,
-                                                type: 'assignments'
-                                            })
-                                        }
-                                    })
-                                }
-                            })
-                        }
-                    } catch (error) {
-                        console.error('Error fetching assignments for suggestions:', error)
-                    }
-                    break
-
-                case 'video':
-                    try {
-                        const videoRes = await api.get(`/admin/bootcampModuleCompletion/bootcamp_id${params.courseId}?searchAssessment=${encodeURIComponent(searchTerm)}`)
-                        if (videoRes.data) {
-                            // Handle the response structure - modules are keys in the response
-                            Object.keys(videoRes.data).forEach((moduleKey) => {
-                                // Skip non-module keys like totalStudents, totalRows, etc.
-                                if (moduleKey !== 'totalStudents' && moduleKey !== 'totalRows' && moduleKey !== 'message') {
-                                    const moduleChapters = videoRes.data[moduleKey]
-                                    if (Array.isArray(moduleChapters)) {
-                                        moduleChapters.forEach((video: any) => {
-                                            const title = video.title || video.name || ''
-                                            if (title.toLowerCase().includes(term)) {
-                                                newSuggestions.push({
-                                                    id: video.id,
-                                                    title: title,
-                                                    type: 'video'
-                                                })
-                                            }
-                                        })
-                                    }
-                                }
-                            })
-                        }
-                    } catch (error) {
-                        console.error('Error fetching videos for suggestions:', error)
-                    }
-                    break
+    const generateSuggestions = useCallback(
+        async (searchTerm: string) => {
+            if (!searchTerm.trim() || searchTerm.length < 1) {
+                setSuggestions([])
+                return
             }
 
-            // Limit suggestions to 8 items and remove duplicates
-            const uniqueSuggestions = newSuggestions.filter((suggestion, index, self) =>
-                index === self.findIndex(s => s.id === suggestion.id && s.type === suggestion.type)
-            )
+            const term = searchTerm.toLowerCase()
+            const newSuggestions: SearchSuggestion[] = []
 
-            setSuggestions(uniqueSuggestions.slice(0, 8))
-        } catch (error) {
-            console.error('Error generating suggestions:', error)
-            setSuggestions([])
-        }
-    }, [bootcampModules, formData, params.courseId, activeTab]) // Added activeTab to dependencies
+            try {
+                // Only search for suggestions relevant to the current active tab
+                switch (activeTab) {
+                    case 'practice':
+                        // Search through practice problems only
+                        try {
+                            const practiceRes = await api.get(
+                                `/submission/submissionsOfPractiseProblems/${
+                                    params.courseId
+                                }?searchPractiseProblem=${encodeURIComponent(
+                                    searchTerm
+                                )}`
+                            )
+                            if (practiceRes.data.trackingData) {
+                                practiceRes.data.trackingData.forEach(
+                                    (item: any) => {
+                                        if (item.moduleChapterData) {
+                                            item.moduleChapterData.forEach(
+                                                (chapter: any) => {
+                                                    if (
+                                                        chapter.codingQuestionDetails
+                                                    ) {
+                                                        const title =
+                                                            chapter
+                                                                .codingQuestionDetails
+                                                                .title || ''
+                                                        if (
+                                                            title
+                                                                .toLowerCase()
+                                                                .includes(term)
+                                                        ) {
+                                                            newSuggestions.push(
+                                                                {
+                                                                    id: chapter
+                                                                        .codingQuestionDetails
+                                                                        .id,
+                                                                    title: title,
+                                                                    type: 'practice',
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        } catch (error) {
+                            console.error(
+                                'Error fetching practice problems for suggestions:',
+                                error
+                            )
+                        }
+                        break
+
+                    case 'assessments':
+                        // Search through assessments only
+                        try {
+                            const assessmentRes = await api.get(
+                                `/admin/bootcampAssessment/bootcamp_id${
+                                    params.courseId
+                                }?searchAssessment=${encodeURIComponent(
+                                    searchTerm
+                                )}`
+                            )
+                            if (assessmentRes.data) {
+                                Object.values(assessmentRes.data).forEach(
+                                    (assessmentGroup: any) => {
+                                        if (Array.isArray(assessmentGroup)) {
+                                            assessmentGroup.forEach(
+                                                (assessment: any) => {
+                                                    const title =
+                                                        assessment.title || ''
+                                                    if (
+                                                        title
+                                                            .toLowerCase()
+                                                            .includes(term)
+                                                    ) {
+                                                        newSuggestions.push({
+                                                            id: assessment.id,
+                                                            title: title,
+                                                            type: 'assessments',
+                                                        })
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        } catch (error) {
+                            console.error(
+                                'Error fetching assessments for suggestions:',
+                                error
+                            )
+                        }
+                        break
+
+                    case 'projects':
+                        // Search through projects only
+                        if (bootcampModules && bootcampModules.length > 0) {
+                            bootcampModules.forEach((item: any) => {
+                                if (item.projectData && item.projectData[0]) {
+                                    const title =
+                                        item.projectData[0].title || ''
+                                    if (title.toLowerCase().includes(term)) {
+                                        newSuggestions.push({
+                                            id: item.projectData[0].id,
+                                            title: title,
+                                            type: 'projects',
+                                        })
+                                    }
+                                }
+                            })
+                        }
+                        break
+                    case 'form':
+                        // Search through forms only (but skip module name)
+                        if (formData && formData.length > 0) {
+                            formData.forEach((item: any) => {
+                                // Only check moduleChapterData
+                                if (item.moduleChapterData) {
+                                    item.moduleChapterData.forEach(
+                                        (chapter: any) => {
+                                            const chapterTitle =
+                                                chapter.title ||
+                                                chapter.name ||
+                                                ''
+                                            if (
+                                                chapterTitle
+                                                    .toLowerCase()
+                                                    .includes(term)
+                                            ) {
+                                                newSuggestions.push({
+                                                    id: chapter.id,
+                                                    title: chapterTitle,
+                                                    type: 'form',
+                                                })
+                                            }
+                                        }
+                                    )
+                                }
+                            })
+                        }
+                        break
+
+                    case 'assignments':
+                        // Fixed assignment API endpoint and data handling
+                        try {
+                            const assignmentRes = await api.get(
+                                `/submission/submissionsOfAssignment/${
+                                    params.courseId
+                                }?searchAssignment=${encodeURIComponent(
+                                    searchTerm
+                                )}`
+                            )
+                            if (
+                                assignmentRes.data &&
+                                assignmentRes.data.data &&
+                                assignmentRes.data.data.trackingData
+                            ) {
+                                // Handle the response structure properly
+                                assignmentRes.data.data.trackingData.forEach(
+                                    (module: any) => {
+                                        if (
+                                            module.moduleChapterData &&
+                                            Array.isArray(
+                                                module.moduleChapterData
+                                            )
+                                        ) {
+                                            module.moduleChapterData.forEach(
+                                                (assignment: any) => {
+                                                    const title =
+                                                        assignment.title || ''
+                                                    if (
+                                                        title
+                                                            .toLowerCase()
+                                                            .includes(term)
+                                                    ) {
+                                                        newSuggestions.push({
+                                                            id: assignment.id,
+                                                            title: title,
+                                                            type: 'assignments',
+                                                        })
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                )
+                            }
+                        } catch (error) {
+                            console.error(
+                                'Error fetching assignments for suggestions:',
+                                error
+                            )
+                        }
+                        break
+
+                    case 'video':
+                        try {
+                            const videoRes = await api.get(
+                                `/admin/bootcampModuleCompletion/bootcamp_id${
+                                    params.courseId
+                                }?searchAssessment=${encodeURIComponent(
+                                    searchTerm
+                                )}`
+                            )
+                            if (videoRes.data) {
+                                // Handle the response structure - modules are keys in the response
+                                Object.keys(videoRes.data).forEach(
+                                    (moduleKey) => {
+                                        // Skip non-module keys like totalStudents, totalRows, etc.
+                                        if (
+                                            moduleKey !== 'totalStudents' &&
+                                            moduleKey !== 'totalRows' &&
+                                            moduleKey !== 'message'
+                                        ) {
+                                            const moduleChapters =
+                                                videoRes.data[moduleKey]
+                                            if (Array.isArray(moduleChapters)) {
+                                                moduleChapters.forEach(
+                                                    (video: any) => {
+                                                        const title =
+                                                            video.title ||
+                                                            video.name ||
+                                                            ''
+                                                        if (
+                                                            title
+                                                                .toLowerCase()
+                                                                .includes(term)
+                                                        ) {
+                                                            newSuggestions.push(
+                                                                {
+                                                                    id: video.id,
+                                                                    title: title,
+                                                                    type: 'video',
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+                        } catch (error) {
+                            console.error(
+                                'Error fetching videos for suggestions:',
+                                error
+                            )
+                        }
+                        break
+                }
+
+                // Limit suggestions to 8 items and remove duplicates
+                const uniqueSuggestions = newSuggestions.filter(
+                    (suggestion, index, self) =>
+                        index ===
+                        self.findIndex(
+                            (s) =>
+                                s.id === suggestion.id &&
+                                s.type === suggestion.type
+                        )
+                )
+
+                setSuggestions(uniqueSuggestions.slice(0, 8))
+            } catch (error) {
+                console.error('Error generating suggestions:', error)
+                setSuggestions([])
+            }
+        },
+        [bootcampModules, formData, params.courseId, activeTab]
+    ) // Added activeTab to dependencies
 
     // Load all data for suggestions
     const loadAllData = useCallback(async () => {
         try {
-            setAllData(prevData => ({
+            setAllData((prevData) => ({
                 ...prevData,
                 projects: bootcampModules || [],
-                form: formData || []
+                form: formData || [],
             }))
         } catch (error) {
             console.error('Error loading data for suggestions:', error)
@@ -374,7 +503,7 @@ const Page = ({ params }: { params: any }) => {
             // Safe access to data with fallback to empty array
             const projectsData = res.data?.data?.bootcampModules || []
             setBootcampModules(projectsData)
-            setTotalStudents(res.data?.totalStudents || 0)
+            setTotalStudents(res.data?.totalStudents)
         } catch (error) {
             setBootcampModules([]) // Set to empty array on error
             setTotalStudents(0)
@@ -392,7 +521,8 @@ const Page = ({ params }: { params: any }) => {
             // Safe access to data with fallback to empty array
             const formsData = res.data?.trackingData || []
             setFormData(formsData)
-            setTotalStudents(res.data?.totalStudents || 0)
+            console.log('res.data?.totalStudents', res.data?.totalStudents)
+            setTotalStudents(res.data?.totalStudents)
         } catch (error) {
             setFormData([]) // Set to empty array on error
             setTotalStudents(0)
@@ -409,7 +539,7 @@ const Page = ({ params }: { params: any }) => {
             getProjectsData()
             getFormData()
         }
-    }, [params.courseId, getProjectsData, getFormData])
+    }, [params.courseId, getProjectsData, getFormData, activeTab])
 
     // Update suggestions when data changes
     useEffect(() => {
@@ -452,7 +582,9 @@ const Page = ({ params }: { params: any }) => {
         // Check chapter names - with safe array access
         return item.moduleChapterData?.some((chapter: any) => {
             const chapterTitle = chapter.title || chapter.name || ''
-            return chapterTitle.toLowerCase().includes(appliedSearch.toLowerCase())
+            return chapterTitle
+                .toLowerCase()
+                .includes(appliedSearch.toLowerCase())
         })
     })
 
@@ -470,55 +602,61 @@ const Page = ({ params }: { params: any }) => {
                 <div className="flex justify-start overflow-x-auto overflow-y-hidden items-start gap-x-3">
                     <Button
                         onClick={() => handleTabChange('practice')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'practice'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'practice'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                        }`}
                     >
                         Practice Problems
                     </Button>
                     <Button
                         onClick={() => handleTabChange('assessments')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'assessments'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'assessments'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                        }`}
                     >
                         Assessments
                     </Button>
                     <Button
                         onClick={() => handleTabChange('projects')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'projects'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'projects'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                        }`}
                     >
                         Projects
                     </Button>
                     <Button
                         onClick={() => handleTabChange('form')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'form'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'form'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                        }`}
                     >
                         Form
                     </Button>
                     <Button
                         onClick={() => handleTabChange('assignments')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'assignments'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'assignments'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                        }`}
                     >
                         Assignments
                     </Button>
                     <Button
                         onClick={() => handleTabChange('video')}
-                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${activeTab === 'video'
+                        className={`px-4 py-2 rounded-full font-semibold focus:outline-none ${
+                            activeTab === 'video'
                                 ? 'bg-success-dark opacity-75  text-white'
                                 : 'bg-gray-200 text-gray-800'
-                            }`}
+                        }`}
                     >
                         Video
                     </Button>
@@ -529,15 +667,19 @@ const Page = ({ params }: { params: any }) => {
                     <div className="relative w-full lg:w-1/3">
                         <Input
                             ref={searchInputRef}
-                            placeholder={`${activeTab === 'practice'
-                                ? 'Search for practice problems by name'
-                                : `Search for ${activeTab} by name`
-                                }`}
+                            placeholder={`${
+                                activeTab === 'practice'
+                                    ? 'Search for practice problems by name'
+                                    : `Search for ${activeTab} by name`
+                            }`}
                             className="w-full my-6 pl-10 pr-10"
                             value={searchInput}
                             onChange={handleInputChange}
                             onKeyDown={handleKeyDown}
-                            onFocus={() => searchInput.length >= 1 && setShowSuggestions(true)}
+                            onFocus={() =>
+                                searchInput.length >= 1 &&
+                                setShowSuggestions(true)
+                            }
                         />
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <Search className="text-gray-400" size={20} />
@@ -557,22 +699,25 @@ const Page = ({ params }: { params: any }) => {
                             className="absolute z-50 w-full lg:w-1/3 bg-white border border-gray-200 rounded-md shadow-lg"
                             style={{ top: '100%', marginTop: '-1rem' }}
                         >
-                            {suggestions.slice(0, 7).map((suggestion, index) => (
-                                <div
-                                    key={`${suggestion.type}-${suggestion.id}-${index}`}
-                                    className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
-                                    onClick={() => handleSuggestionClick(suggestion)}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-900 truncate">
-                                            {suggestion.title}
-                                        </span>
+                            {suggestions
+                                .slice(0, 7)
+                                .map((suggestion, index) => (
+                                    <div
+                                        key={`${suggestion.type}-${suggestion.id}-${index}`}
+                                        className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                                        onClick={() =>
+                                            handleSuggestionClick(suggestion)
+                                        }
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm font-medium text-gray-900 truncate">
+                                                {suggestion.title}
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     )}
-
                 </div>
             </div>
 
@@ -593,7 +738,8 @@ const Page = ({ params }: { params: any }) => {
                     (filteredProjects.length > 0 ? (
                         <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
                             {filteredProjects.map((item: any) => {
-                                const submissions = item.projectData?.[0]?.submitStudents || 0
+                                const submissions =
+                                    item.projectData?.[0]?.submitStudents || 0
 
                                 const handleDownloadPdf = async (id: any) => {
                                     const projectId = item.projectData?.[0]?.id
@@ -603,8 +749,13 @@ const Page = ({ params }: { params: any }) => {
 
                                     async function fetchData() {
                                         try {
-                                            const response = await api.get(apiUrl)
-                                            const assessments = response.data?.projectSubmissionData?.projectTrackingData || []
+                                            const response = await api.get(
+                                                apiUrl
+                                            )
+                                            const assessments =
+                                                response.data
+                                                    ?.projectSubmissionData
+                                                    ?.projectTrackingData || []
 
                                             const doc = new jsPDF()
 
@@ -612,7 +763,11 @@ const Page = ({ params }: { params: any }) => {
                                             doc.setFont('Regular', 'normal')
                                             doc.setFontSize(15)
                                             doc.setFont('Regular', 'normal')
-                                            doc.text('List of Students-:', 14, 23)
+                                            doc.text(
+                                                'List of Students-:',
+                                                14,
+                                                23
+                                            )
 
                                             const columns = [
                                                 {
@@ -655,18 +810,32 @@ const Page = ({ params }: { params: any }) => {
                                                 ), // Ensure status is used here
                                                 startY: 25,
                                                 margin: { horizontal: 10 },
-                                                styles: { overflow: 'linebreak', halign: 'center' },
-                                                headStyles: { fillColor: [22, 160, 133] },
+                                                styles: {
+                                                    overflow: 'linebreak',
+                                                    halign: 'center',
+                                                },
+                                                headStyles: {
+                                                    fillColor: [22, 160, 133],
+                                                },
                                                 theme: 'grid',
                                             })
 
-                                            doc.save(`${item.projectData?.[0]?.title || 'project'}.pdf`)
+                                            doc.save(
+                                                `${
+                                                    item.projectData?.[0]
+                                                        ?.title || 'project'
+                                                }.pdf`
+                                            )
                                         } catch (error) {
-                                            console.error('Error generating PDF:', error)
+                                            console.error(
+                                                'Error generating PDF:',
+                                                error
+                                            )
                                             toast({
                                                 title: 'Error',
-                                                description: 'Failed to generate PDF',
-                                                variant: 'destructive'
+                                                description:
+                                                    'Failed to generate PDF',
+                                                variant: 'destructive',
                                             })
                                         }
                                     }
@@ -679,23 +848,35 @@ const Page = ({ params }: { params: any }) => {
                                         className="relative lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4 text-gray-600"
                                     >
                                         <button
-                                            onClick={submissions > 0 ? handleDownloadPdf : undefined}
-                                            className={`absolute top-2 right-2 z-10 transform cursor-pointer ${submissions > 0 ? 'hover:text-gray-700' : 'text-gray-400'
-                                                }`}
+                                            onClick={
+                                                submissions > 0
+                                                    ? handleDownloadPdf
+                                                    : undefined
+                                            }
+                                            className={`absolute top-2 right-2 z-10 transform cursor-pointer ${
+                                                submissions > 0
+                                                    ? 'hover:text-gray-700'
+                                                    : 'text-gray-400'
+                                            }`}
                                             title="Download Report"
                                             disabled={submissions === 0}
                                         >
-                                            <ArrowDownToLine size={20} className="text-gray-500" />
+                                            <ArrowDownToLine
+                                                size={20}
+                                                className="text-gray-500"
+                                            />
                                         </button>
 
                                         <div className="flex flex-col w-full">
-                                            <h1 className="font-semibold text-start test-sm">
-                                                {item.projectData[0].title || 'Untitled Project'}
+                                            <h1 className="font-semibold text-start text-[1.5rem]">
+                                                {item.projectData[0].title ||
+                                                    'Untitled Project'}
                                             </h1>
                                             <div className="flex items-center gap-2">
                                                 <div className="bg-yellow h-2 w-2 rounded-full" />
                                                 <p className="text-start">
-                                                    {submissions}/{totalStudents} Submission
+                                                    {submissions}/
+                                                    {totalStudents} Submission
                                                 </p>
                                             </div>
                                         </div>
@@ -732,8 +913,10 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     ) : (
                         <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                            <h1 className="text-center font-semibold">
-                                {appliedSearch ? `No Projects Found for "${appliedSearch}"` : 'No Projects Found'}
+                            <h1 className="text-center font-semibold text-[1.063rem]">
+                                {appliedSearch
+                                    ? `No Projects Found for "${appliedSearch}"`
+                                    : 'No Projects Found'}
                             </h1>
                             <Image
                                 src="/emptyStates/curriculum.svg"
@@ -749,29 +932,48 @@ const Page = ({ params }: { params: any }) => {
                             filteredForms.map((item: any) => {
                                 // Filter chapters based on search if there's a search term - with safe array access
                                 const filteredChapters = appliedSearch
-                                    ? (item.moduleChapterData || []).filter((chapter: any) => {
-                                        const chapterTitle = chapter.title || chapter.name || ''
-                                        const formName = item.name || ''
-                                        return chapterTitle.toLowerCase().includes(appliedSearch.toLowerCase()) ||
-                                            formName.toLowerCase().includes(appliedSearch.toLowerCase())
-                                    })
-                                    : (item.moduleChapterData || [])
+                                    ? (item.moduleChapterData || []).filter(
+                                          (chapter: any) => {
+                                              const chapterTitle =
+                                                  chapter.title ||
+                                                  chapter.name ||
+                                                  ''
+                                              const formName = item.name || ''
+                                              return (
+                                                  chapterTitle
+                                                      .toLowerCase()
+                                                      .includes(
+                                                          appliedSearch.toLowerCase()
+                                                      ) ||
+                                                  formName
+                                                      .toLowerCase()
+                                                      .includes(
+                                                          appliedSearch.toLowerCase()
+                                                      )
+                                              )
+                                          }
+                                      )
+                                    : item.moduleChapterData || []
 
-                                return filteredChapters.map((data: any, index: any) => (
-                                    <FormComponent
-                                        key={`${item.id}-${index}`}
-                                        moduleName={item.name}
-                                        moduleId={item.id}
-                                        bootcampId={item.bootcampId}
-                                        data={data}
-                                        totalStudents={totalStudents}
-                                    />
-                                ))
+                                return filteredChapters.map(
+                                    (data: any, index: any) => (
+                                        <FormComponent
+                                            key={`${item.id}-${index}`}
+                                            moduleName={item.name}
+                                            moduleId={item.id}
+                                            bootcampId={item.bootcampId}
+                                            data={data}
+                                            debouncedSearch={appliedSearch}
+                                        />
+                                    )
+                                )
                             })
                         ) : (
                             <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                                <h1 className="text-center font-semibold">
-                                    {appliedSearch ? `No Forms Found for "${appliedSearch}"` : 'No Forms Found'}
+                                <h1 className="text-center font-semibold text-[1.063rem]">
+                                    {appliedSearch
+                                        ? `No Forms Found for "${appliedSearch}"`
+                                        : 'No Forms Found'}
                                 </h1>
                                 <Image
                                     src="/emptyStates/curriculum.svg"

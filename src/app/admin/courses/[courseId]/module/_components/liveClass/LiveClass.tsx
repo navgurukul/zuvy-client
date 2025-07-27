@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,6 @@ import { Calendar, Clock, Video, Users, ExternalLink } from 'lucide-react';
 type Props = {
     chapterData: any
     content: any
-    // fetchChapterContent={fetchChapterContent}
     moduleId: any
     courseId: any
 }
@@ -41,55 +40,134 @@ interface LiveClassCardProps {
 }
 
 const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
-    // Get the first session from sessionDetails
     const session = content?.sessionDetails?.[0];
-  
+
+    const [isJoinDisabled, setIsJoinDisabled] = useState(true);
+    const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session?.status);
+
+
+  useEffect(() => {
+  if (!session) return;
+
+  const startTime = new Date(session.startTime).getTime();
+  const now = new Date().getTime();
+  const endTime = new Date(session.endTime).getTime();
+  const THIRTY_MIN = 30 * 60 * 1000;
+
+  const timeUntil30MinBefore = startTime - now - THIRTY_MIN;
+
+  if (timeUntil30MinBefore > 0) {
+    // Still more than 30 min left → wait until 30 min before
+    setIsJoinDisabled(true);
+    setCurrentStatus('upcoming');
+
+    const waitUntil30Min = setTimeout(() => {
+      setCurrentStatus('upcoming');
+      const enableAtStart = setTimeout(() => {
+        setIsJoinDisabled(false);
+        setCurrentStatus('ongoing');
+
+        //Schedule session end
+        const endTimeout = setTimeout(() => {
+          setIsJoinDisabled(true);
+          setCurrentStatus('completed');
+        }, endTime - startTime);
+
+        return () => clearTimeout(endTimeout);
+      }, THIRTY_MIN);
+
+      return () => clearTimeout(enableAtStart);
+    }, timeUntil30MinBefore);
+
+    return () => clearTimeout(waitUntil30Min);
+  }
+
+  if (now < startTime) {
+    // We're already in 30-min window → wait until session start
+    setIsJoinDisabled(true);
+    setCurrentStatus('upcoming');
+
+    const waitUntilStart = setTimeout(() => {
+      setIsJoinDisabled(false);
+      setCurrentStatus('ongoing');
+
+      // Schedule session end
+      const endTimeout = setTimeout(() => {
+        setIsJoinDisabled(true);
+        setCurrentStatus('completed');
+      }, endTime - startTime);
+
+      return () => clearTimeout(endTimeout);
+    }, startTime - now);
+
+    return () => clearTimeout(waitUntilStart);
+  }
+
+  // Session already started
+  if (now < endTime) {
+    // Ongoing
+    setIsJoinDisabled(false);
+    setCurrentStatus('ongoing');
+
+    const endTimeout = setTimeout(() => {
+      setIsJoinDisabled(true);
+      setCurrentStatus('completed');
+    }, endTime - now);
+
+    return () => clearTimeout(endTimeout);
+  } else {
+    // Completed
+    setIsJoinDisabled(true);
+    setCurrentStatus('completed');
+  }
+}, [session]);
+
+
     const formatDate = (dateString: string) => {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    };
-    
-    const formatTime = (dateString: string) => {
-      const date = new Date(dateString);
-      return date.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
-      });
-    };
-    
-    const getStatusColor = (status: string) => {
-      switch (status) {
-        case 'upcoming':
-          return 'bg-blue-100 text-blue-800 border-blue-200';
-        case 'ongoing':
-          return 'bg-green-100 text-green-800 border-green-200';
-        case 'completed':
-          return 'bg-gray-100 text-gray-800 border-gray-200';
-        default:
-          return 'bg-gray-100 text-gray-800 border-gray-200';
-      }
-    };
-    
-    const getStatusIcon = (status: string) => {
-      switch (status) {
-        case 'upcoming':
-          return <Clock className="w-3 h-3" />;
-        case 'ongoing':
-          return <Video className="w-3 h-3" />;
-        case 'completed':
-          return <Users className="w-3 h-3" />;
-        default:
-          return <Clock className="w-3 h-3" />;
-      }
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
     };
 
-    // Return early if no content or session data
+    const formatTime = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'upcoming':
+                return 'bg-blue-100 text-blue-800 border-blue-200';
+            case 'ongoing':
+                return 'bg-green-100 text-green-800 border-green-200';
+            case 'completed':
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+            default:
+                return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
+    const getStatusIcon = (status: string) => {
+        switch (status) {
+            case 'upcoming':
+                return <Clock className="w-3 h-3" />;
+            case 'ongoing':
+                return <Video className="w-3 h-3" />;
+            case 'completed':
+                return <Users className="w-3 h-3" />;
+            default:
+                return <Clock className="w-3 h-3" />;
+        }
+    };
+
     if (!content || !session) {
         return (
             <div className="w-3/4 mx-auto p-4">
@@ -120,12 +198,12 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
                                 <Badge
                                     variant="secondary"
                                     className={`${getStatusColor(
-                                        session.status
+                                        currentStatus
                                     )} font-medium px-3 py-1 flex items-center gap-1`}
                                 >
-                                    {getStatusIcon(session.status)}
-                                    {session.status.charAt(0).toUpperCase() +
-                                        session.status.slice(1)}
+                                    {getStatusIcon(currentStatus)}
+                                    {currentStatus.charAt(0).toUpperCase() +
+                                        currentStatus.slice(1)}
                                 </Badge>
                             </div>
                         </div>
@@ -159,8 +237,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
 
                     {/* Meeting Action Section */}
                     <div className="pt-4 border-t border-border">
-                        {session.status === 'completed' && session.s3link && session.s3link !== 'not found' ? (
-                            // Show recording if meeting is completed and recording is available
+                        {currentStatus === 'completed' && session.s3link && session.s3link !== 'not found' ? (
                             <div className="space-y-3">
                                 <h4 className="text-sm font-medium text-primary flex items-center gap-2">
                                     <Video className="w-4 h-4" />
@@ -177,40 +254,37 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
                                 </div>
                             </div>
                         ) : (
-                            // Show join button for upcoming/ongoing meetings or completed without recording
                             <Button
-                                className="w-full bg-success-dark opacity-75 font-medium py-2.5 transition-all duration-200"
-                                onClick={() =>
-                                    window.open(session.hangoutLink, '_blank')
-                                }
-                                disabled={session.status === 'completed' && (!session.s3link || session.s3link === 'not found')}
+                              className={`w-full font-medium py-2.5 transition-all duration-200 bg-success-dark text-white ${
+                                ((currentStatus === 'upcoming' && isJoinDisabled) ||
+                                (currentStatus === 'completed' && (!session.s3link || session.s3link === 'not found')))
+                                ? 'opacity-50 cursor-not-allowed'
+                                : ''
+                            }`}
+                            onClick={() => {
+                            if ((isJoinDisabled && currentStatus === 'upcoming') ||
+                               (currentStatus === 'completed' && (!session.s3link || session.s3link === 'not found'))) return;
+                               window.open(session.hangoutLink, '_blank');
+                            }}
                             >
                                 <Video className="w-4 h-4 mr-2 text-white" />
                                 <span className='text-white'>
-                                    {session.status === 'completed' 
-                                        ? 'Recording Not Available' 
-                                        : session.status === 'ongoing'
-                                        ? 'Join Live Meeting'
-                                        : 'Join Meeting'
-                                    }
+                                    {currentStatus === 'completed'
+                                        ? 'Recording Not Available'
+                                        : currentStatus === 'ongoing'
+                                            ? 'Join Live Meeting'
+                                            : 'Join Meeting'}
                                 </span>
-                                {session.status !== 'completed' && (
+                                {currentStatus !== 'completed' && (
                                     <ExternalLink className="w-3 h-3 ml-2" />
                                 )}
                             </Button>
                         )}
                     </div>
-
-                    {/* <div className="flex justify-between items-center text-xs text-muted-foreground pt-2">
-                        <span>
-                            Module {content.moduleId}
-                        </span>
-                        <span>Order {content.order}</span>
-                    </div> */}
                 </CardContent>
             </Card>
         </div>
     )
 }
 
-export default LiveClass
+export default LiveClass;

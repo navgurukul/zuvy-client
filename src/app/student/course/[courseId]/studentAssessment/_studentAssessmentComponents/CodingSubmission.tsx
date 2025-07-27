@@ -250,7 +250,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
                     <MemoryStick size={24} className="text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Memory Usage</h3>
+                    <h6 className="font-semibold text-foreground">Memory Usage</h6>
                     <p className="text-sm text-left text-muted-foreground">Peak consumption</p>
                   </div>
                 </div>
@@ -267,7 +267,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
                     <Clock size={24} className="text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Execution Time</h3>
+                    <h6 className="font-semibold text-foreground">Execution Time</h6>
                     <p className="text-sm text-left  text-muted-foreground">Total runtime</p>
                   </div>
                 </div>

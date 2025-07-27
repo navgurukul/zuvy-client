@@ -28,15 +28,45 @@ const PreviewAssignment = ({ params }: { params: any }) => {
     const timestamp = assignmentPreviewContent?.completionDate
     const date = new Date(timestamp)
 
-    const options: any = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'UTC',
-        timeZoneName: 'short',
+    // Improved date formatting function with better error handling
+    const formatDeadlineDate = (timestamp?: string) => {
+        if (!timestamp) return 'No deadline set';
+        
+        try {
+            const date = new Date(timestamp)
+            // Validate date
+            if (isNaN(date.getTime())) {
+                console.error('Invalid date:', timestamp);
+                return 'Invalid deadline date';
+            }
+            
+            const options: Intl.DateTimeFormatOptions = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'UTC' // Ensure consistent date display
+            };
+            
+            return new Intl.DateTimeFormat('en-US', options).format(date);
+        } catch (error) {
+            console.error('Error formatting date:', error, 'Timestamp:', timestamp);
+            return 'Error showing deadline';
+        }
+    }
+
+    // Get formatted date - now checking both possible locations for the date
+    const getDeadlineDate = () => {
+        // Try getting date from assignmentPreviewContent first
+        if (assignmentPreviewContent?.completionDate) {
+            return formatDeadlineDate(assignmentPreviewContent.completionDate);
+        }
+        
+        // If not found, try getting from contentDetails (for PDF case)
+        if (assignmentPreviewContent?.contentDetails?.[0]?.completionDate) {
+            return formatDeadlineDate(assignmentPreviewContent.contentDetails[0].completionDate);
+        }
+        
+        return 'No deadline set';
     }
     const options2: any = {
         year: 'numeric',
@@ -44,6 +74,8 @@ const PreviewAssignment = ({ params }: { params: any }) => {
         day: 'numeric',
     }
     const formattedDate = date.toLocaleDateString('en-US', options2)
+
+    const deadlineDate = getDeadlineDate();
 
     useEffect(() => {
         fetchPreviewData(params, setAssignmentPreviewContent)
@@ -117,7 +149,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                                     : 'No Title yet'}
                             </h1>
                             <h1 className="font-semibold text-[15px]">
-                                Deadline: {formattedDate}
+                                Deadline: {deadlineDate}
                             </h1>
                         </div>
                         <div className="mt-2 text-end">
@@ -125,17 +157,32 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                         </div>
                     </div>
 
-                    {/* PDF Preview */}
-                    {isPdfPreview && pdfLink ? (
-                        <div className="mt-2 text-start">
-                            <iframe
-                                src={pdfLink}
-                                width="100%"
-                                height="800"
-                                title="PDF Preview"
-                                className="border rounded"
-                            />
-                        </div>
+                    {/* Conditional rendering based on preview type */}
+                    {isPdfPreview ? (
+                        <>
+                            {pdfLink ? (
+                                <div className="mt-2 text-start">
+                                    <iframe
+                                        src={pdfLink}
+                                        width="100%"
+                                        height="800"
+                                        title="PDF Preview"
+                                        className="border rounded"
+                                    />
+                                    <div className="mt-4 p-4 border rounded bg-gray-50">
+                                        <p className="font-medium">PDF Assignment Details:</p>
+                                        <p>Deadline: {deadlineDate}</p>
+                                        {assignmentPreviewContent?.description && (
+                                            <p>Description: {assignmentPreviewContent.description}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mt-4 p-4 border rounded bg-gray-50">
+                                    <p>No PDF available for preview</p>
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <div className="mt-2 text-start">
                             <RemirrorTextEditor
@@ -143,8 +190,16 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                                 setInitialContent={setInitialContent}
                                 preview={true}
                             />
+                            <div className="mt-4 p-4 border rounded bg-gray-50">
+                                <p className="font-medium">Assignment Details:</p>
+                                <p>Deadline: {deadlineDate}</p>
+                                {assignmentPreviewContent?.description && (
+                                    <p>Description: {assignmentPreviewContent.description}</p>
+                                )}
+                            </div>
                         </div>
                     )}
+                    
                     <div className="mt-2">
                         <div className="flex items-center">
                             <Link className="mr-2 h-4 w-4" />

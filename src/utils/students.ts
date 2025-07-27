@@ -452,6 +452,22 @@ export const handleAssessmentStateTransitions = (
 
 // --------------------------------------------
 
+export const getEmbedLink = (link: string) => {
+    if (!link) return ''
+    if (link.includes('youtube.com') || link.includes('youtu.be')) return link
+    if (link.includes('drive.google.com')) {
+        // Convert Google Drive link to embeddable format
+        const match = link.match(/\/d\/([\w-]+)/)
+        if (match) {
+            return `https://drive.google.com/file/d/${match[1]}/preview`
+        }
+        return link
+    }
+    return link
+}
+
+// --------------------------------------------
+
 export const formatToIST = (dateString: string | null | undefined) => {
         if (!dateString) return '';
         const date = new Date(dateString);
