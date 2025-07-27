@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo  } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { ROWS_PER_PAGE } from '@/utils/constant'
+import { ROWS_PER_PAGE, POSITION  } from '@/utils/constant'
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
 
 interface DataTablePaginationProps<TData> {
@@ -31,9 +31,9 @@ export function DataTablePagination<TData>({
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const currentPage = parseInt(searchParams.get('page') || '1')
-    const position = searchParams.get('limit') || ROWS_PER_PAGE[1]
-    const offset = (currentPage - 1) * +position
+    const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => (currentPage - 1) * +position, [currentPage, position])
 
     const updateURLParams = (page: number, limit: string = position) => {
         const newParams = new URLSearchParams(searchParams.toString())

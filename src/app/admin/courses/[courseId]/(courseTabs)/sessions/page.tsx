@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo  } from 'react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -40,11 +40,15 @@ interface State {
 
 function Page({ params }: any) {
     const router = useRouter()
+    const searchParams = useSearchParams()
     // const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const [classes, setClasses] = useState<any[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()
-    const [position, setPosition] = useState(POSITION)
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const [bootcampData, setBootcampData] = useState<any>([])
     const [batchId, setBatchId] = useState<any>()
     const [activeTab, setActiveTab] = useState('upcoming')
@@ -85,7 +89,6 @@ function Page({ params }: any) {
 
     //     return () => clearInterval(interval)
     //   }, [params.courseId, isCourseDeleted])
-    const searchParams = useSearchParams()
 
     const [searchInitialized, setSearchInitialized] = useState(false)
     const [suggestions, setSuggestions] = useState<any[]>([])

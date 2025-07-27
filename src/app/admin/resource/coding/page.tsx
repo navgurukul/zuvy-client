@@ -28,7 +28,7 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { OFFSET, POSITION } from '@/utils/constant'
+import { POSITION } from '@/utils/constant'
 
 import {
     getCodingQuestionTags,
@@ -37,7 +37,6 @@ import {
     getSelectedOptions,
     getDifficulty,
     getOffset,
-    getPosition,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -50,7 +49,7 @@ import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import useDebounce from '@/hooks/useDebounce'
 
 export type Tag = {
@@ -71,6 +70,7 @@ interface SearchSuggestion {
 
 const CodingProblems = () => {
     const router = useRouter();
+    const searchParams = useSearchParams()
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
     const [allCodingQuestions, setAllCodingQuestions] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
@@ -104,7 +104,7 @@ const CodingProblems = () => {
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     const { offset, setOffset } = getOffset()
-    const { position, setPosition } = getPosition()
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const [newTopic, setNewTopic] = useState<string>('')
     const [urlInitialized, setUrlInitialized] = useState(false)
 

@@ -1,10 +1,11 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
 
 // Internal imports
+import { useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -13,9 +14,10 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import useDebounce from '@/hooks/useDebounce'
-import { getIsReattemptApproved, getOffset, getPosition } from '@/store/store'
+import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { fetchStudentAssessments } from '@/utils/admin'
+import { POSITION } from '@/utils/constant'
 
 type Props = {}
 
@@ -25,12 +27,16 @@ interface PageParams {
 }
 
 const Page = ({ params }: any) => {
+    const searchParams = useSearchParams()
     const [assesmentData, setAssessmentData] = useState<any>()
     const [searchStudentAssessment, setSearchStudentAssessment] =
         useState<any>('')
 
     const { isReattemptApproved } = getIsReattemptApproved()
-    const { position, setPosition } = getPosition()
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const { offset, setOffset } = getOffset()
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
