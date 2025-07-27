@@ -177,6 +177,7 @@ const Page = ({ params }: { params: any }) => {
                                             key={i}
                                             className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
                                             onClick={() => {
+                                                handleSetSearch(student.name)
                                                 commitSearch(student.name)
                                                 setShowSuggestions(false)
                                             }}
