@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -40,11 +40,15 @@ interface State {
 
 function Page({ params }: any) {
     const router = useRouter()
+    const searchParams = useSearchParams()
     // const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const [classes, setClasses] = useState<any[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()
-    const [position, setPosition] = useState(POSITION)
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const [bootcampData, setBootcampData] = useState<any>([])
     const [batchId, setBatchId] = useState<any>()
     const [activeTab, setActiveTab] = useState('upcoming')
@@ -85,7 +89,6 @@ function Page({ params }: any) {
 
     //     return () => clearInterval(interval)
     //   }, [params.courseId, isCourseDeleted])
-    const searchParams = useSearchParams()
 
     const [searchInitialized, setSearchInitialized] = useState(false)
     const [suggestions, setSuggestions] = useState<any[]>([])
@@ -94,7 +97,7 @@ function Page({ params }: any) {
     const [searchLoading, setSearchLoading] = useState(false)
     const [allClassesData, setAllClassesData] = useState<any[]>([]) // Store all classes
 
-       useEffect(() => {
+    useEffect(() => {
         const searchFromURL = searchParams.get('search') || ''
         setSearch(searchFromURL)
         // If there's a search term in URL, treat it as if user selected it
@@ -103,26 +106,26 @@ function Page({ params }: any) {
         }
         setSearchInitialized(true)
     }, [searchParams])
-    
+
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
         setbatchValueData(value)
     }
-    
+
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
         localStorage.setItem('sessionTab', tab)
     }
-    
+
     const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         setSearch(value)
         setCurrentPage(1)
         setShowSuggestions(true)
         setSearchLoading(true)
-    
+
         setIsSuggestionClicked(false) // Reset suggestion click state
-    
+
         // Only update URL when user selects a suggestion or presses enter
         // Don't update URL on every keystroke
         if (value === '') {
@@ -132,14 +135,14 @@ function Page({ params }: any) {
             router.replace(`?${params.toString()}`)
         }
     }
-    
+
     // Add this new function to handle when user presses Enter
     const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             const value = (e.target as HTMLInputElement).value
             setIsSuggestionClicked(true)
             setShowSuggestions(false)
-            
+
             const params = new URLSearchParams(window.location.search)
             if (value) {
                 params.set('search', value)
@@ -149,67 +152,81 @@ function Page({ params }: any) {
             router.replace(`?${params.toString()}`)
         }
     }
-    
+
     const tabs = ['completed', 'upcoming', 'ongoing']
-    
+
     useEffect(() => {
         const lastUpdatedTab = localStorage.getItem('sessionTab')
         if (lastUpdatedTab) {
             setActiveTab(lastUpdatedTab)
         }
     }, [])
-    
+
     const getHandleAllClasses = useCallback(
         async (offset: number) => {
             let baseUrl = `/classes/all/${params.courseId}?limit=${position}&offset=${offset}`
-    
+
             const lastUpdatedTab = localStorage.getItem('sessionTab')
-    
+
             if (batchId) {
                 baseUrl += `&batchId=${batchId}`
             }
-    
+
             baseUrl += `&status=${lastUpdatedTab || activeTab}`
-    
+
             try {
                 const res = await api.get(baseUrl)
                 let allClasses = res.data.classes
-    
+
                 // Store all classes data
                 setAllClassesData(allClasses)
-    
+
                 let filteredClasses = allClasses
-    
+
                 // Filter classes based on search term - fix the logic here
-                if (debouncedSearch && (isSuggestionClicked || searchParams.get('search'))) {
-                    filteredClasses = allClasses.filter(
-                        (cls: any) =>
-                            cls?.title?.toLowerCase().includes(debouncedSearch.toLowerCase())
+                if (
+                    debouncedSearch &&
+                    (isSuggestionClicked || searchParams.get('search'))
+                ) {
+                    filteredClasses = allClasses.filter((cls: any) =>
+                        cls?.title
+                            ?.toLowerCase()
+                            .includes(debouncedSearch.toLowerCase())
                     )
                 }
-    
+
                 // Only show classes if they match the active tab status
-                if (allClasses.length > 0 && activeTab === allClasses[0]?.status) {
+                if (
+                    allClasses.length > 0 &&
+                    activeTab === allClasses[0]?.status
+                ) {
                     setClasses(filteredClasses)
                 } else {
                     setClasses([])
                 }
-    
+
                 setTotalStudents(res.data.total_items)
                 setPages(res.data.total_pages)
                 setLastPage(res.data.total_items)
                 setLoading(false)
                 setSearchLoading(false)
-    
             } catch (error) {
                 console.error('Error fetching classes:', error)
                 setLoading(false)
                 setSearchLoading(false)
             }
         },
-        [batchId, activeTab, debouncedSearch, params.courseId, position, isSuggestionClicked, searchParams]
+        [
+            batchId,
+            activeTab,
+            debouncedSearch,
+            params.courseId,
+            position,
+            isSuggestionClicked,
+            searchParams,
+        ]
     )
-    
+
     useEffect(() => {
         const fetchStudents = async () => {
             try {
@@ -222,22 +239,22 @@ function Page({ params }: any) {
                 console.error(error)
             }
         }
-    
+
         fetchStudents()
     }, [params.courseId])
     useEffect(() => {
         let timeouts: NodeJS.Timeout[] = []
-    
+
         if (activeTab === 'upcoming' && classes.length > 0) {
             const currentTimes = classes.map((cls) => ({
                 date: new Date(cls.startTime),
                 time: new Date(cls.startTime).toTimeString().split(' ')[0],
             }))
-    
+
             currentTimes.forEach((item) => {
                 const now = new Date()
                 const delay = item.date.getTime() - now.getTime()
-    
+
                 if (delay > 0) {
                     const timeout = setTimeout(() => {
                         getHandleAllClasses(offset)
@@ -248,12 +265,12 @@ function Page({ params }: any) {
                 }
             })
         }
-    
+
         return () => {
             timeouts.forEach(clearTimeout)
         }
     }, [activeTab, offset, getHandleAllClasses])
-    
+
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
             await api
@@ -284,25 +301,25 @@ function Page({ params }: any) {
             console.error('Failed to fetch modules data:', error)
         }
     }
-    
+
     useEffect(() => {
         if (searchInitialized) {
             getHandleAllClasses(offset)
         }
     }, [getHandleAllClasses, offset, searchInitialized])
-    
+
     const handleSuggestionClick = (title: string) => {
         setSearch(title)
         setShowSuggestions(false)
         setIsSuggestionClicked(true)
         setCurrentPage(1)
         setSearchLoading(false)
-    
+
         const params = new URLSearchParams(window.location.search)
         params.set('search', title)
         router.replace(`?${params.toString()}`)
     }
-    
+
     // Generate suggestions from all classes data, not just filtered classes
     useEffect(() => {
         if (search.trim() !== '' && allClassesData.length > 0) {
@@ -316,12 +333,12 @@ function Page({ params }: any) {
             setSuggestions([])
         }
     }, [search, allClassesData])
-    
+
     useEffect(() => {
         getHandleAllBootcampBatches()
         getAllModulesDetails()
     }, [getHandleAllBootcampBatches])
-    
+
     const onClickHandler = () => {
         if (bootcampData.length === 0) {
             toast.info({
@@ -331,7 +348,7 @@ function Page({ params }: any) {
             })
             setOpenSessionForm(false)
         }
-    
+
         if (students === 0) {
             toast.info({
                 title: 'Caution',
@@ -417,9 +434,13 @@ function Page({ params }: any) {
                                             setShowSuggestions(false)
                                             setIsSuggestionClicked(false)
 
-                                            const params = new URLSearchParams(window.location.search)
+                                            const params = new URLSearchParams(
+                                                window.location.search
+                                            )
                                             params.delete('search')
-                                            router.replace(`?${params.toString()}`)
+                                            router.replace(
+                                                `?${params.toString()}`
+                                            )
                                         }}
                                         variant="ghost"
                                         size="sm"
@@ -435,7 +456,11 @@ function Page({ params }: any) {
                                     {suggestions.map((item, idx) => (
                                         <div
                                             key={idx}
-                                            onClick={() => handleSuggestionClick(item.title)}
+                                            onClick={() =>
+                                                handleSuggestionClick(
+                                                    item.title
+                                                )
+                                            }
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
                                         >
                                             {item.title}
@@ -474,9 +499,9 @@ function Page({ params }: any) {
                                             {classes.map(
                                                 (classData: any, index: any) =>
                                                     activeTab ===
-                                                        classData.status ? (
+                                                    classData.status ? (
                                                         activeTab ===
-                                                            'completed' ? (
+                                                        'completed' ? (
                                                             <div
                                                                 key={classData}
                                                             >

@@ -28,7 +28,7 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { OFFSET, POSITION } from '@/utils/constant'
+import { POSITION } from '@/utils/constant'
 
 import {
     getCodingQuestionTags,
@@ -37,7 +37,6 @@ import {
     getSelectedOptions,
     getDifficulty,
     getOffset,
-    getPosition,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -50,8 +49,9 @@ import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import useDebounce from '@/hooks/useDebounce'
+import { ROWS_PER_PAGE } from '@/utils/constant'
 
 export type Tag = {
     id: number
@@ -90,6 +90,7 @@ const CodingProblems = () => {
         isCodingDialogOpen,
         setIsCodingDialogOpen,
     } = getEditCodingQuestionDialogs()
+    const searchParams = useSearchParams()
     const { tags, setTags } = getCodingQuestionTags()
     const { selectedOptions, setSelectedOptions } = getSelectedOptions()
     const [options, setOptions] = useState<Option[]>([
@@ -104,7 +105,7 @@ const CodingProblems = () => {
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     const { offset, setOffset } = getOffset()
-    const { position, setPosition } = getPosition()
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const [newTopic, setNewTopic] = useState<string>('')
     const [urlInitialized, setUrlInitialized] = useState(false)
 

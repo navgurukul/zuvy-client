@@ -8,21 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { Table } from '@tanstack/react-table'
 import { ROWS_PER_PAGE } from '@/utils/constant'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { columns } from './columns'
-import { getCourseData, getBatchData } from '@/store/store'
-import { useParams, useRouter } from 'next/navigation'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuLabel,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { getBatchData } from '@/store/store'
+import { useRouter } from 'next/navigation'
 import { useStudentData } from './components/useStudentData'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'

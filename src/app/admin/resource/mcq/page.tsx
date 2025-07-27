@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo} from 'react'
 import { ChevronLeft, Search, X } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -21,7 +21,6 @@ import {
     getmcqdifficulty,
     getMcqSearch,
     getOffset,
-    getPosition,
     getSelectedMCQOptions,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
@@ -29,7 +28,7 @@ import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import { OFFSET, POSITION } from '@/utils/constant'
+import { POSITION } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import BulkUploadMcq from '../_components/BulkMcqForm'
@@ -88,7 +87,7 @@ const Mcqs = (props: Props) => {
     const suggestionsRef = useRef<HTMLDivElement>(null)
 
     // Zustand stores
-    const { position, setPosition } = getPosition()
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const { offset, setOffset } = getOffset()
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()

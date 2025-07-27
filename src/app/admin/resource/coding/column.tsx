@@ -1,11 +1,12 @@
 'use client'
 
+import React, { useMemo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
 import { Pencil, Trash2, Eye } from 'lucide-react'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
-import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
+import { DELETE_CODING_QUESTION_CONFIRMATION, POSITION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import {
     getDeleteCodingQuestion,
@@ -14,9 +15,9 @@ import {
     getSelectedOptions,
     getDifficulty,
     getOffset,
-    getPosition,
 } from '@/store/store'
 import { cn, difficultyColor } from '@/lib/utils'
+import { useSearchParams } from 'next/navigation'
 
 import {
     handleConfirm,
@@ -129,6 +130,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         id: 'actions',
         // cell: ({ row }) => <DataTableRowActions row={row} />,
         cell: ({ row }) => {
+            const searchParams = useSearchParams()
             const codingQuestion = row.original
             const {
                 isDeleteModalOpen,
@@ -149,7 +151,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             const { selectedOptions, setSelectedOptions } = getSelectedOptions()
             const { difficulty, setDifficulty } = getDifficulty()
             const { offset, setOffset } = getOffset()
-            const { position, setPosition } = getPosition()
+            const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
 
             return (
                 <>

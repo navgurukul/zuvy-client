@@ -1,10 +1,11 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
 
 // Internal imports
+import { useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -13,24 +14,29 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import useDebounce from '@/hooks/useDebounce'
-import { getIsReattemptApproved, getOffset, getPosition } from '@/store/store'
+import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { fetchStudentAssessments } from '@/utils/admin'
+import { POSITION } from '@/utils/constant'
 
 type Props = {}
 
 interface PageParams {
-    courseId: string;
-    assessment_Id: string;
+    courseId: string
+    assessment_Id: string
 }
 
 const Page = ({ params }: any) => {
+    const searchParams = useSearchParams()
     const [assesmentData, setAssessmentData] = useState<any>()
     const [searchStudentAssessment, setSearchStudentAssessment] =
         useState<any>('')
 
     const { isReattemptApproved } = getIsReattemptApproved()
-    const { position, setPosition } = getPosition()
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const { offset, setOffset } = getOffset()
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
@@ -77,21 +83,21 @@ const Page = ({ params }: any) => {
     const getStudentAssesmentDataHandler = useCallback(
         async (offset: number) => {
             if (offset >= 0) {
-                const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
-                    params?.assessment_Id,
-                    params?.courseId,
-                    offset,
-                    position,
-                    debouncedSearch,
-                    setTotalPages,
-                    setLastPage
-                )
+                const { assessments, moduleAssessment, passPercentage } =
+                    await fetchStudentAssessments(
+                        params?.assessment_Id,
+                        params?.courseId,
+                        offset,
+                        position,
+                        debouncedSearch,
+                        setTotalPages,
+                        setLastPage
+                    )
                 setDataTableAssessments(assessments)
                 setAssessmentData(moduleAssessment)
                 setPassPercentage(passPercentage)
                 setTotalStudents(moduleAssessment?.totalStudents)
             }
-
         },
         [params.assessment_Id, position, debouncedSearch]
     )
@@ -113,13 +119,14 @@ const Page = ({ params }: any) => {
 
     useEffect(() => {
         getStudentAssesmentDataHandler(offset)
-    }, [offset, getStudentAssesmentDataHandler,
+    }, [
+        offset,
+        getStudentAssesmentDataHandler,
         position,
         setLastPage,
         setTotalPages,
-        debouncedSearch])
-
-
+        debouncedSearch,
+    ])
 
     return (
         <>
@@ -169,7 +176,9 @@ const Page = ({ params }: any) => {
                                 <h1 className="text-gray-600 font-semibold text-xl">
                                     {assesmentData?.totalQualifiedStudents}
                                 </h1>
-                                <p className="text-gray-500 ">Total Qualified Students</p>
+                                <p className="text-gray-500 ">
+                                    Total Qualified Students
+                                </p>
                             </div>
                         </div>
                     }

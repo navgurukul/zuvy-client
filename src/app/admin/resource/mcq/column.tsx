@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useMemo } from 'react'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { ellipsis } from '@/lib/utils'
@@ -8,7 +9,6 @@ import {
     getCodingQuestionTags,
     getmcqdifficulty,
     getOffset,
-    getPosition,
     getSelectedMCQOptions,
     quiz,
 } from '@/store/store'
@@ -40,6 +40,7 @@ import {
 import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
 import { Checkbox } from '@/components/ui/checkbox'
 import PreviewMCQ from '../_components/PreviewMcq'
+import { useSearchParams } from 'next/navigation'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -228,6 +229,7 @@ export const columns: ColumnDef<quiz>[] = [
         id: 'actions3',
 
         cell: ({ row }) => {
+            const searchParams = useSearchParams()
             const quizQuestion = row.original
             const {
                 isDeleteModalOpen,
@@ -243,7 +245,7 @@ export const columns: ColumnDef<quiz>[] = [
                 setMcqDifficulty: setDifficulty,
             } = getmcqdifficulty()
             const { offset, setOffset } = getOffset()
-            const { position, setPosition } = getPosition()
+            const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
             const selectedRows = row.getIsSelected()
 
             return (
