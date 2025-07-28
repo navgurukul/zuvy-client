@@ -1,7 +1,7 @@
 'use client';
 
 import React, { Suspense, useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/ui/spinner';
@@ -16,7 +16,8 @@ import {
   AlertTriangle,
   FileText,
   TestTube2,
-  Terminal
+  Terminal,
+  X
 } from 'lucide-react';
 import { decodeBase64 } from '@/utils/students';
 import Editor from '@monaco-editor/react';
@@ -59,7 +60,11 @@ const CodingResultContent = () => {
     const questionId = searchParams.get('questionId');
     const [submissionData, setSubmissionData] = useState<CodingSubmissionData | null>(null);
     const [loading, setLoading] = useState(true);
+    const moduleId = searchParams.get('moduleId');
+    const params = useParams();
+    const chapterId = searchParams.get('chapterId');
 
+    console.log(moduleId , chapterId)
     useEffect(() => {
         if (questionId) {
             const fetchSubmission = async () => {
@@ -208,15 +213,17 @@ const CodingResultContent = () => {
       </div>
     );
   };
+  const handleBacktoChapters = () => {
+    router.push(`/student/course/${params.courseId}/modules/${moduleId}?chapterId=${chapterId}`);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
       <div
-          onClick={() => router.back()}
-          className="inline-flex text-left w-full  items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group mb-6"
-      >
-          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-          <span className="font-medium">Back to Results</span>
+          onClick={handleBacktoChapters}
+          className="inline-flex text-left w-full items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group mb-6"
+      >                <X size={18} />
+               
       </div>
       <div className="max-w-7xl mx-auto">
         <div className="bg-card border border-border rounded-2xl p-8 mb-8 shadow-lg">
@@ -256,7 +263,7 @@ const CodingResultContent = () => {
                     <MemoryStick size={24} className="text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Memory Usage</h3>
+                    <h6 className="font-semibold text-foreground">Memory Usage</h6>
                     <p className="text-sm text-left text-muted-foreground">Peak consumption</p>
                   </div>
                 </div>
@@ -270,7 +277,7 @@ const CodingResultContent = () => {
                     <Clock size={24} className="text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">Execution Time</h3>
+                    <h6 className="font-semibold text-foreground">Execution Time</h6>
                     <p className="text-sm text-left  text-muted-foreground">Total runtime</p>
                   </div>
                 </div>

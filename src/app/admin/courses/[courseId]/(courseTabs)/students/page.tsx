@@ -24,8 +24,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useStudentData } from './components/useStudentData'
-import useAttendanceData from './components/studentAttendanceAnalytics'
-import AttandanceRefreshComp from './components/AttandanceRefreshComp'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'
 import AlertDialogDemo from './components/deleteModalNew'
@@ -68,9 +66,8 @@ const Page = ({ params }: { params: any }) => {
         debouncedInternalSearch,
         fetchStudentData,
     } = useStudentData(params.courseId)
-    
+
     const { batchData } = getBatchData()
-    const { attendanceData } = useAttendanceData(params.courseId)
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [isOpen, setIsOpen] = useState(false)
@@ -81,7 +78,9 @@ const Page = ({ params }: { params: any }) => {
         .filter(
             (student: StudentData) =>
                 student.name &&
-                student.name.toLowerCase().includes(debouncedInternalSearch.toLowerCase()) &&
+                student.name
+                    .toLowerCase()
+                    .includes(debouncedInternalSearch.toLowerCase()) &&
                 debouncedInternalSearch.trim() !== ''
         )
         .slice(0, 6) // Show up to 6 suggestions
@@ -98,18 +97,21 @@ const Page = ({ params }: { params: any }) => {
         }
     })
 
-    const fetchStudentDataForBatch = useCallback(async (offsetValue: number) => {
-        try {
-            const res = await api.get(
-                `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offsetValue}`
-            )
-            setSelectedRows([])
-            setStudents(res.data.modifiedStudentInfo)
-        } catch (error: any) {
-            console.error(error)
-        }
-    }, [params.courseId, limit, setStudents])
-    
+    const fetchStudentDataForBatch = useCallback(
+        async (offsetValue: number) => {
+            try {
+                const res = await api.get(
+                    `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offsetValue}`
+                )
+                setSelectedRows([])
+                setStudents(res.data.modifiedStudentInfo)
+            } catch (error: any) {
+                console.error(error)
+            }
+        },
+        [params.courseId, limit, setStudents]
+    )
+
     const userIds = selectedRows.map((item: any) => item.userId)
 
     //     if (loadingCourseCheck) {
@@ -153,29 +155,37 @@ const Page = ({ params }: { params: any }) => {
                                 }
                             }}
                             onKeyDown={(e) => {
-                                if (e.key === 'Enter' && internalSearch.trim()) {
+                                if (
+                                    e.key === 'Enter' &&
+                                    internalSearch.trim()
+                                ) {
                                     commitSearch(internalSearch.trim())
                                     setShowSuggestions(false)
                                 }
                             }}
                             onFocus={() => setShowSuggestions(true)}
-                            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                            onBlur={() =>
+                                setTimeout(() => setShowSuggestions(false), 200)
+                            }
                         />
 
                         {showSuggestions && filteredSuggestions.length > 0 && (
                             <div className="absolute z-50 w-full bg-white border border-border rounded-md mt-1 shadow-lg">
-                                {filteredSuggestions.map((student: StudentData, i: number) => (
-                                    <div
-                                        key={i}
-                                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
-                                        onClick={() => {
-                                            commitSearch(student.name)
-                                            setShowSuggestions(false)
-                                        }}
-                                    >
-                                        {student.name}
-                                    </div>
-                                ))}
+                                {filteredSuggestions.map(
+                                    (student: StudentData, i: number) => (
+                                        <div
+                                            key={i}
+                                            className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
+                                            onClick={() => {
+                                                handleSetSearch(student.name)
+                                                commitSearch(student.name)
+                                                setShowSuggestions(false)
+                                            }}
+                                        >
+                                            {student.name}
+                                        </div>
+                                    )
+                                )}
                             </div>
                         )}
                     </div>
@@ -223,11 +233,6 @@ const Page = ({ params }: { params: any }) => {
                                 studentData={studentData}
                             />
                         </Dialog>
-                        {attendanceData?.length > 0 && (
-                            <AttandanceRefreshComp
-                                attendanceData={attendanceData}
-                            />
-                        )}
                     </div>
                 </div>
 
@@ -239,7 +244,7 @@ const Page = ({ params }: { params: any }) => {
                             setSelectedRows={setSelectedRows}
                         />
                     </div>
-                    
+
                     {/* Use the imported DataTablePagination component */}
                     <DataTablePagination
                         totalStudents={totalStudents}

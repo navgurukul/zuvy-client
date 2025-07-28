@@ -117,24 +117,56 @@ function CodingChallenge({
     // FORCE UPDATE: Use a key to force re-render when content changes
     const contentKey = `${content?.id}-${content?.codingQuestionDetails?.length || 0}`
 
-    const handleSaveClick = () => {
-        handleSaveChapter(
-            moduleId,
-            content.id,
-            chapterTitle
-                ? {
-                    title: chapterTitle,
+    const [initialTitle] = useState<string>(activeChapterTitle)
+    const [savedTitle, setSavedTitle] = useState<string>(activeChapterTitle)
+    const [hasTitleChanged, setHasTitleChanged] = useState(false)
+
+    const handleSaveClick = async () => {
+        try {
+            const titleToSave = chapterTitle.trim() === '' ? savedTitle : chapterTitle
+            
+            await handleSaveChapter(
+                moduleId,
+                content.id,
+                {
+                    title: titleToSave,
                     codingQuestions: selectedQuestions[0]?.id,
                 }
-                : {
-                    codingQuestions: selectedQuestions[0]?.id,
-                }
-        )
-        setIsChapterUpdated(!isChapterUpdated)
-        // Mark as saved and update saved questions
-        setIsSaved(true)
-        setSavedQuestions([...selectedQuestions])
+            )
+            
+            setIsChapterUpdated(!isChapterUpdated)
+            setIsSaved(true)
+            setSavedQuestions([...selectedQuestions])
+            setSavedTitle(titleToSave)
+            setHasTitleChanged(false)
+            
+            toast.success({
+                title:'Success',
+                description: " Chapter edited successfully",
+            })
+        } catch (error) {
+            toast.error({
+                title:'Error',
+                description: "Failed to save changes",
+            })
+        }
     }
+    const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTitle = e.target.value
+        setChapterTitle(newTitle)
+        setHasTitleChanged(newTitle !== savedTitle)
+    }
+    useEffect(() => {
+        const newQuestions = content?.codingQuestionDetails || []
+        setSelectedQuestions(newQuestions)
+        setSavedQuestions(newQuestions)
+        setIsSaved(true)
+        
+        // Reset title changes when content changes
+        setChapterTitle(activeChapterTitle)
+        setSavedTitle(activeChapterTitle)
+        setHasTitleChanged(false)
+    }, [content?.id]) // Only depend on content.id
 
     // Function to check if current selection matches saved questions
     const checkIfSaved = () => {
@@ -288,9 +320,7 @@ function CodingChallenge({
                         <div className="w-2/6 flex justify-center align-middle items-center relative">
                             <Input
                                 required
-                                onChange={(e) => {
-                                    setChapterTitle(e.target.value)
-                                }}
+                                onChange={handleTitleChange}
                                 value={chapterTitle}
                                 placeholder="Untitled Coding Problem"
                                 className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
