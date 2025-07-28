@@ -521,7 +521,6 @@ const Page = ({ params }: { params: any }) => {
             // Safe access to data with fallback to empty array
             const formsData = res.data?.trackingData || []
             setFormData(formsData)
-            console.log('res.data?.totalStudents', res.data?.totalStudents)
             setTotalStudents(res.data?.totalStudents)
         } catch (error) {
             setFormData([]) // Set to empty array on error
@@ -868,7 +867,7 @@ const Page = ({ params }: { params: any }) => {
                                         </button>
 
                                         <div className="flex flex-col w-full">
-                                            <h1 className="font-semibold text-start text-[1.5rem]">
+                                            <h1 className="font-semibold text-start text-[1.063rem] capitalize">
                                                 {item.projectData[0].title ||
                                                     'Untitled Project'}
                                             </h1>
@@ -900,7 +899,7 @@ const Page = ({ params }: { params: any }) => {
                                             ) : (
                                                 <Button
                                                     variant={'ghost'}
-                                                    className="text-secondary text-md opacity-50 cursor-not-allowed"
+                                                    className="text-green-700 text-md opacity-50 cursor-not-allowed"
                                                     disabled
                                                 >
                                                     View Submission

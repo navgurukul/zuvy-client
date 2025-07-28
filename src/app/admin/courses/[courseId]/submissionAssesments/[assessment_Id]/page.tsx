@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
@@ -14,15 +14,16 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import useDebounce from '@/hooks/useDebounce'
-import { getIsReattemptApproved, getOffset, getPosition } from '@/store/store'
+import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { fetchStudentAssessments } from '@/utils/admin'
+import { POSITION } from '@/utils/constant'
 
 type Props = {}
 
 interface PageParams {
-    courseId: string;
-    assessment_Id: string;
+    courseId: string
+    assessment_Id: string
 }
 
 interface Suggestion {
@@ -46,7 +47,10 @@ const Page = ({ params }: any) => {
     const inputRef = useRef<HTMLInputElement>(null)
 
     const { isReattemptApproved } = getIsReattemptApproved()
-    const { position, setPosition } = getPosition()
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const { offset, setOffset } = getOffset()
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
@@ -202,7 +206,9 @@ const Page = ({ params }: any) => {
 
     useEffect(() => {
         getStudentAssesmentDataHandler(offset)
-    }, [offset, getStudentAssesmentDataHandler,
+    }, [
+        offset,
+        getStudentAssesmentDataHandler,
         position,
         setLastPage,
         setTotalPages,
@@ -383,7 +389,9 @@ const Page = ({ params }: any) => {
                                 <h1 className="text-gray-600 font-semibold text-xl">
                                     {assesmentData?.totalQualifiedStudents}
                                 </h1>
-                                <p className="text-gray-500 ">Total Qualified Students</p>
+                                <p className="text-gray-500 ">
+                                    Total Qualified Students
+                                </p>
                             </div>
                         </div>
                     }

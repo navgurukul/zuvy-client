@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { AlertCircle, ChevronDown, GraduationCap, Plus, Search, X } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -72,7 +72,7 @@ const Courses: React.FC = () => {
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState<number>(-1)
 
-    const [position, setPosition] = useState(POSITION)
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const [currentPage, setCurrentPage] = useState(1)
     const [totalBootcamps, setTotalBootcamps] = useState(0)
     const [pages, setPages] = useState(0)

@@ -181,7 +181,7 @@ function Chapter() {
         // Update UI immediately
         setChapterData(newOrderChapters)
         
-        // Clear existing timeout
+       // Clear existing timeout
         if (dragTimeoutRef.current) {
             clearTimeout(dragTimeoutRef.current)
         }
@@ -190,8 +190,20 @@ function Chapter() {
         if (!isDragActiveRef.current) {
             dragTimeoutRef.current = setTimeout(async () => {
                 await handleReorder(newOrderChapters)
-            }, 200) // Very short delay for final drop
-        }
+            }, 1200) // Very short delay for final drop
+
+
+        // const currentOrder = newOrderChapters.map(item => item.chapterId)
+        // const lastOrder = lastOrderRef.current
+
+        // const orderChanged = !lastOrder.every((id, idx) => id === currentOrder[idx])
+
+        // if (orderChanged) {
+        //     dragTimeoutRef.current = setTimeout(() => {
+        //         handleReorder(newOrderChapters)
+        //     }, 1000)
+        // }
+    }
     }, [])
 
   // Handle actual reorder API call - Only called after drag ends
@@ -257,27 +269,30 @@ function Chapter() {
         }
     }
 
-       // Handle drag start
-    const handleDragStart = useCallback(() => {
-        setIsDragging(true)
-        isDragActiveRef.current = true
-        
-        // Clear any pending API calls
-        if (dragTimeoutRef.current) {
-            clearTimeout(dragTimeoutRef.current)
-        }
-    }, [])
+    //    // Handle drag start
+    // const handleDragStart = useCallback(() => {
 
-    // Handle drag end - This is when we actually want to make the API call
-    const handleDragEnd = useCallback(() => {
-        setIsDragging(false)
-        isDragActiveRef.current = false
+    //     setIsDragging(true)
+    //     isDragActiveRef.current = true
         
-        // Now trigger the API call with current chapter data
-        setTimeout(() => {
-            handleReorder(chapterData)
-        }, 1500) // Small delay to ensure state is updated
-    }, [chapterData])
+    //     // Clear any pending API calls
+    //     if (dragTimeoutRef.current) {
+    //         clearTimeout(dragTimeoutRef.current)
+    //     }
+    //     console.log("darg start")
+    // }, [])
+
+    // // Handle drag end - This is when we actually want to make the API call
+    // const handleDragEnd = useCallback(() => {
+    //     console.log("darg end")
+    //     setIsDragging(false)
+    //     isDragActiveRef.current = false
+        
+    //     // Now trigger the API call with current chapter data
+    //     setTimeout(() => {
+    //         handleReorder(chapterData)
+    //     }, 1500) // Small delay to ensure state is updated
+    // }, [])
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -338,8 +353,8 @@ function Chapter() {
                     <Reorder.Group
                         values={chapterData}
                         onReorder={handleReorderWithDebounce}
-                        onDragStart={handleDragStart}
-                        onDragEnd={handleDragEnd}
+                        // onDragStart={handleDragStart}
+                        // onDragEnd={handleDragEnd}
                         // Disable pointer events during drag to prevent intermediate updates
                         style={{ pointerEvents: 'auto',
                             listStyle: 'none',

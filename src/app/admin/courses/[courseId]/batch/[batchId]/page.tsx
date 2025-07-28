@@ -1,6 +1,6 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useParams, useRouter, usePathname, notFound } from 'next/navigation'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import { useParams, useRouter, usePathname, useSearchParams } from 'next/navigation'
 import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
@@ -50,6 +50,7 @@ import AddStudentsModal from '../../_components/addStudentsmodal'
 import { ComboboxStudent } from '../../(courseTabs)/students/components/comboboxStudentDataTable'
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
+import { POSITION } from '@/utils/constant'
 
 interface Student {
     email: string
@@ -64,6 +65,7 @@ const BatchesInfo = ({
     params: { courseId: string; batchId: string }
 }) => {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const param = useParams()
     const location = usePathname()
     const { students, setStudents } = useStudentData(params.courseId)
@@ -75,7 +77,7 @@ const BatchesInfo = ({
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
     const [instructorsInfo, setInstructorInfo] = useState<any>([])
     const [pages, setPages] = useState<number>()
-    const [position, setPosition] = useState('10')
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const [offset, setOffset] = useState<number>(0)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)

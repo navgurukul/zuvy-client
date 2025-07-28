@@ -1,6 +1,6 @@
 'use client'
-import React, { useState } from 'react'
-
+import React, { useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import InstructorCard from './_components/instructorCard'
 import RadioCheckbox from './_components/radioCheckbox'
@@ -11,11 +11,12 @@ import { useLazyLoadedStudentData } from '@/store/store'
 import Image from 'next/image'
 
 const InstructorPage = () => {
+    const searchParams = useSearchParams()
     const { studentData } = useLazyLoadedStudentData()
     const [ongoingSessions, setOngoingSessions] = useState<any[]>([])
     const [upcomingSessions, setUpcomingSessions] = useState<any[]>([])
     const [allSessions, setAllSessions] = useState<any[]>([])
-    const [position, setPosition] = useState(POSITION)
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const [pages, setPages] = useState<number>()
     const [offset, setOffset] = useState<number>(OFFSET)
     const [currentPage, setCurrentPage] = useState<number>(1)
