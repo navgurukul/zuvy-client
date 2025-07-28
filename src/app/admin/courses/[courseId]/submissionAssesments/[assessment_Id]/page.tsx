@@ -450,7 +450,7 @@ const Page = ({ params }: any) => {
                                         ))
                                     ) : searchInputValue.length >= 2 && !isLoadingSuggestions ? (
                                         <div className="p-3 text-center text-gray-500">
-                                            No {searchInputValue.includes('@') ? 'email' : 'name'} matches found for "{searchInputValue}"
+                                            No {searchInputValue.includes('@') ? 'email' : 'name'} matches found for {searchInputValue}
                                         </div>
                                     ) : null}
                             </div>
