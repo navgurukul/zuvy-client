@@ -521,7 +521,6 @@ const Page = ({ params }: { params: any }) => {
             // Safe access to data with fallback to empty array
             const formsData = res.data?.trackingData || []
             setFormData(formsData)
-            console.log('res.data?.totalStudents', res.data?.totalStudents)
             setTotalStudents(res.data?.totalStudents)
         } catch (error) {
             setFormData([]) // Set to empty array on error
