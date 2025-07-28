@@ -1,5 +1,6 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import { columns } from './column'
@@ -9,19 +10,32 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import { OFFSET, POSITION } from '@/utils/constant'
 
 type Props = {}
 
 const Page = ({ params }: any) => {
+    const searchParams = useSearchParams()
     const moduleId =
         typeof window !== 'undefined' &&
         new URLSearchParams(window.location.search).get('moduleId')
+    
     const [assesmentData, setAssesmentData] = useState<any>()
     const [studentStatus, setStudentStatus] = useState<any>()
     const [totalSubmission, setTotalSubmission] = useState<any>()
     const [notSubmitted, setNotSubmitted] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
     const [bootcampData, setBootcampData] = useState<any>()
+    const [totalStudents, setTotalStudents] = useState(0)
+    const [pages, setPages] = useState(0)
+    const [lastPage, setLastPage] = useState(0)
+    const [loading, setLoading] = useState(false)
+
+    // Get pagination params from URL
+    const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => (currentPage - 1) * +position, [currentPage, position])
 
     const crumbs = [
         {
@@ -58,58 +72,76 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
-    const getStudentFormDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}`
+    const getChapterDetails = useCallback(async () => {
+        try {
+            const res = await api.get(`/tracking/getChapterDetailsWithStatus/${params.StudentForm}`)
+            setChapterDetails(res.data.trackingData)
+        } catch (error) {
+            toast.error({
+                title: 'Error',
+                description: 'Error fetching Chapter details:',
+            })
+        }
+    }, [params.StudentForm])
+
+    const getStudentFormDataHandler = useCallback(async (customOffset?: number) => {
+        if (!moduleId) return
+        
+        setLoading(true)
+        const currentOffset = customOffset !== undefined ? customOffset : offset
+        
+        // Fix URL construction - remove the "1" before position
+        let url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=${position}&offset=${currentOffset}`
+        
+        try {
+            const response = await api.get(url)
+            const data = response.data.combinedData.map((student: any) => {
+                return {
+                    ...student,
+                    bootcampId: params.courseId,
+                    moduleId: response.data.moduleId,
+                    chapterId: response.data.chapterId,
+                    userId: student.id,
+                    email: student.emailId,
+                }
+            })
+            
+            const submitted = response.data.combinedData.filter(
+                (student: any) => student.status === 'Submitted'
             )
-            .then((res) => {
-                const data = res.data.combinedData.map((student: any) => {
-                    return {
-                        ...student,
-                        bootcampId: params.courseId,
-                        moduleId: res.data.moduleId,
-                        chapterId: res.data.chapterId,
-                        userId: student.id,
-                        email: student.emailId,
-                    }
-                })
-                const submitted = res.data.combinedData.filter(
-                    (student: any) => student.status === 'Submitted'
-                )
-                const notSubmitted = res.data.combinedData.filter(
-                    (student: any) => student.status !== 'Submitted'
-                )
-                setStudentStatus(data)
-                setTotalSubmission(submitted)
-                setNotSubmitted(notSubmitted)
+            const notSubmitted = response.data.combinedData.filter(
+                (student: any) => student.status !== 'Submitted'
+            )
+            
+            setStudentStatus(data)
+            setTotalSubmission(submitted)
+            setNotSubmitted(notSubmitted)
+            setTotalStudents(response.data.totalStudentsCount)
+            setPages(response.data.totalPages)
+            setLastPage(response.data.totalPages)            
+        } catch (error) {
+            console.error('Error fetching courses:', error)
+            toast.error({
+                title: 'Error',
+                description: 'Error fetching student data',
             })
-            .catch((err) => {
-                // toast({
-                //     title: 'Error',
-                //     description: 'Error fetching Submissions:',
-                //     className:
-                //         'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                // })
-            })
+        } finally {
+            setLoading(false)
+        }
+    }, [params.courseId, params.StudentForm, moduleId, position, offset])
 
-        await api
-            .get(`/tracking/getChapterDetailsWithStatus/${params.StudentForm}`)
-            .then((res) => {
-                setChapterDetails(res.data.trackingData)
-            })
-            .catch((err) => {
-                toast.error({
-                    title: 'Error',
-                    description: 'Error fetching Chapter details:',
-                })
-            })
-    }, [params.StudentAssesmentData, moduleId])
-
+    // Separate useEffect for initial data that doesn't depend on pagination
     useEffect(() => {
-        getStudentFormDataHandler()
         getBootcampHandler()
-    }, [getStudentFormDataHandler, getBootcampHandler])
+        getChapterDetails()
+    }, [getBootcampHandler, getChapterDetails])
+
+    // Separate useEffect for pagination-dependent data
+    useEffect(() => {
+        if (moduleId) {
+            getStudentFormDataHandler()
+        }
+    }, [currentPage, position, moduleId]) // Remove getStudentFormDataHandler from deps
 
     return (
         <>
@@ -124,7 +156,7 @@ const Page = ({ params }: any) => {
                         {chapterDetails?.title}
                     </h1>
 
-                    {studentStatus ? (
+                    {studentStatus && !loading ? (
                         <div className="text-start flex gap-x-3">
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
@@ -162,7 +194,7 @@ const Page = ({ params }: any) => {
                     <div className="relative">
                         <Input
                             placeholder="Search for Name, Email"
-                            className="w-1/3 my-6 input-with-icon pl-8" // Add left padding for the icon
+                            className="w-1/3 my-6 input-with-icon pl-8"
                         />
                         <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                             <Search className="text-gray-400" size={20} />
@@ -172,6 +204,12 @@ const Page = ({ params }: any) => {
                         <DataTable data={studentStatus} columns={columns} />
                     )}
                 </div>
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    lastPage={lastPage}
+                    pages={pages}
+                    fetchStudentData={getStudentFormDataHandler}
+                />
             </MaxWidthWrapper>
         </>
     )
