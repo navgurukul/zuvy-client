@@ -397,6 +397,21 @@ const OpenEndedQuestions = (props: Props) => {
         }
     }, [])
     
+    useEffect(() => {
+        if (!filtersInitialized) return
+    
+        if (searchTerm.trim() === '' && confirmedSearch !== '') {
+            setConfirmedSearch('')
+            setCurrentPage(1)
+    
+            // Remove `search` from URL
+            const params = new URLSearchParams(window.location.search)
+            params.delete('search')
+            const newUrl = `?${params.toString()}`
+            router.replace(newUrl)
+        }
+    }, [searchTerm, filtersInitialized, confirmedSearch, router])
+    
     return (
         <>
             {loading ? (

@@ -86,22 +86,42 @@ export const columns: ColumnDef<quiz>[] = [
 
         cell: ({ row }) => {
             const question = row.original?.quizVariants[0]?.question
-            const truncatedQuestion = ellipsis(question, 70)
-            return (
-                <div
-                    className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
-                    style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                    }}
-                >
-                    <span
-                        dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
-                    />
-                    {/* {question} */}
-                </div>
-            )
+            
+            // Check if question contains code blocks
+            const hasCodeBlock = question && (question.includes('<pre') && question.includes('<code'))
+            
+            if (hasCodeBlock) {
+                // For code questions, extract text and show preview
+                const tempDiv = document.createElement('div')
+                tempDiv.innerHTML = question
+                const textContent = tempDiv.textContent || tempDiv.innerText || ''
+                const preview = textContent.length > 50 ? textContent.substring(0, 50) + '...' : textContent
+                return (
+                    <div className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150">
+                        <div className="p-2 text-sm text-gray-700">
+                            {preview}
+                        </div>
+                    </div>
+                )
+            } else {
+                // For regular questions, use your original logic
+                const truncatedQuestion = ellipsis(question, 70)
+                return (
+                    <div
+                        className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                        style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                        }}
+                    >
+                        <span
+                            dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
+                        />
+                        {/* {question} */}
+                    </div>
+                )
+            }
         },
         enableSorting: false,
         enableHiding: true,

@@ -203,7 +203,7 @@ function Quiz(props: any) {
                     <div className="w-full flex flex-col items-start gap-3">
                         {/* Input Field */}
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-full relative">
+                            <div className="w-2/6 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -211,7 +211,8 @@ function Quiz(props: any) {
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
-                                    className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 w-1/3 border-gray-400 border-dashed focus:outline-none"
+                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+
                                     autoFocus
                                 />
                                 {!inputValue && (
@@ -219,7 +220,7 @@ function Quiz(props: any) {
                                         fill="true"
                                         fillOpacity={0.4}
                                         size={20}
-                                        className="absolute text-gray-100 pointer-events-none top-1/2 right-5 transform -translate-y-1/2"
+                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                                     />
                                 )}
                             </div>

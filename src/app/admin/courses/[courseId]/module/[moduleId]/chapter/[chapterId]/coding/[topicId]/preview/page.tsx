@@ -5,7 +5,6 @@ import { getCodingPreviewStore, getCodingQuestionTags } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { requestFullScreen } from '@/utils/students'
 import IDE from '@/app/admin/courses/[courseId]/module/_components/IDE'
 import CodingQuestionCard from '@/app/admin/courses/[courseId]/module/_components/CodingQuestionCard'
 
@@ -31,9 +30,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
               )
             : null
 
-    useEffect(() => {
-        if (showCodePanel) requestFullScreen(document.documentElement)
-    }, [showCodePanel])
+    
 
     const remainingTime = null
     const assessmentSubmitId = 1

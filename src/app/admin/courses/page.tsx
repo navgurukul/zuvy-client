@@ -258,6 +258,7 @@ const Courses: React.FC = () => {
 
     // Clear search
     const clearSearch = () => {
+        if (!activeSearchTerm) return // already cleared, avoid unnecessary reset
         setSearchQuery('')
         setActiveSearchTerm('') // This will trigger fetching all courses
         setShowSuggestions(false)
@@ -296,6 +297,13 @@ const Courses: React.FC = () => {
         getBootcamp(offset)
     }, [getBootcamp, offset])
 
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            // If user manually clears input, reset everything
+            clearSearch()
+        }
+    }, [searchQuery])
+    
     // Initialize all courses
     useEffect(() => {
         getAllCourses()
