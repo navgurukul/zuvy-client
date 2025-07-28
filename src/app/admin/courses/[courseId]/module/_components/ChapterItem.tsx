@@ -161,13 +161,13 @@ function ChapterItem({
                 cursor: 'grabbing',
                 backgroundColor: 'rgba(255, 255, 255, 0.95)'
             }}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+            // onDragStart={handleDragStart}
+            // onDragEnd={handleDragEnd}
             transition={{ 
                 type: "spring",
-                stiffness: 500,
-                damping: 35,
-                mass: 0.8
+                stiffness: 150,
+                damping: 28,
+                mass: 0.4
             }}
             // Improved drag styling
             style={{
