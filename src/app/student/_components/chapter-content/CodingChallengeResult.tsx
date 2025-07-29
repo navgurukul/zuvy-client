@@ -78,7 +78,7 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
           </div>
           <Badge
             variant="outline"
-            className="bg-success text-success-foreground border-success"
+            className="bg-success text-success-foreground border-success dark:text-gray-700"
           >
             Completed
           </Badge>

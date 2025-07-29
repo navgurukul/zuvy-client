@@ -1,7 +1,7 @@
 'use client';
 import Header from './_components/Header'
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useThemeStore } from '@/store/store';
 
 // Theme Initializer Component
@@ -22,16 +22,16 @@ const ThemeInitializer = () => {
     return null;
 };
 
-export default function StudentLayout({
+function StudentLayoutContent({
     children,
 }: {
     children: React.ReactNode
 }) {
     const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const chapterId = searchParams.get('chapterId');
     const hideHeader = pathname.includes('/assessmentResult/')  || pathname.includes('/codingChallenge') || pathname.includes('/projects')  ;
-const searchParams = useSearchParams()
-const chapterId = searchParams.get('chapterId')
-const isOnCourseModulePage = pathname.includes('/student/course/') && chapterId;
+    const isOnCourseModulePage = pathname.includes('/student/course/') && chapterId;
 
     return (
         <div className="h-screen bg-background flex flex-col font-manrope">
@@ -41,5 +41,30 @@ const isOnCourseModulePage = pathname.includes('/student/course/') && chapterId;
                 {children}
             </main>
         </div>
+    )
+}
+
+export default function StudentLayout({
+    children,
+}: {
+    children: React.ReactNode
+}) {
+    return (
+        <Suspense fallback={
+            <div className="h-screen bg-background flex flex-col font-manrope">
+                <main className="flex-1 overflow-y-auto">
+                    <div className="flex items-center justify-center h-full">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                            <p className="text-muted-foreground">Loading...</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        }>
+            <StudentLayoutContent>
+                {children}
+            </StudentLayoutContent>
+        </Suspense>
     )
 }
