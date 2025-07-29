@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { getBatchData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { getStoreStudentDataNew } from '@/store/store'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { api } from '@/utils/axios.config'
+import { POSITION, OFFSET } from '@/utils/constant'
 
 export const useStudentData = (courseId: any) => {
     const {
@@ -14,13 +15,13 @@ export const useStudentData = (courseId: any) => {
         setTotalPages,
         loading,
         setLoading,
-        offset,
+        // offset,
         setOffset,
         totalStudents,
         setTotalStudents,
         currentPage,
         setCurrentPage,
-        limit,
+        // limit,
         setLimit,
         search,
         setSearch,
@@ -30,7 +31,11 @@ export const useStudentData = (courseId: any) => {
     const searchParams = useSearchParams()
     const router = useRouter()
     const prevCourseId = useRef<any>(null)
-
+    const position = useMemo(() => parseInt(searchParams.get('limit') || POSITION), [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+    }, [searchParams]);
     const [internalSearch, setInternalSearch] = useState('') // for suggestions
     const [suggestions, setSuggestions] = useState<any[]>([]) // separate state for suggestions
     const [isInitialized, setIsInitialized] = useState(false) // Track if we've initialized from URL
@@ -79,7 +84,7 @@ export const useStudentData = (courseId: any) => {
             // Then fetch new data with the correct search term
             fetchStudentsHandler({
                 courseId,
-                limit,
+                position,
                 offset: 0, // Always start from 0 when initializing
                 searchTerm: search, // Use the search term from URL
                 setLoading,
@@ -90,7 +95,7 @@ export const useStudentData = (courseId: any) => {
                 showError: false,
             })
         }
-    }, [courseId, isInitialized, search, limit, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
+    }, [courseId, isInitialized, search, position, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     // Fetch suggestions separately from main data
     useEffect(() => {
@@ -116,7 +121,7 @@ export const useStudentData = (courseId: any) => {
     const fetchData = useCallback(() => {
         fetchStudentsHandler({
             courseId,
-            limit,
+            position,
             offset,
             searchTerm: search,
             setLoading,
@@ -126,7 +131,7 @@ export const useStudentData = (courseId: any) => {
             setCurrentPage,
             showError: false,
         })
-    }, [courseId, limit, offset, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
+    }, [courseId, position, offset, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     useEffect(() => {
         fetchBatches(courseId)
@@ -134,23 +139,23 @@ export const useStudentData = (courseId: any) => {
 
     const nextPageHandler = useCallback(() => {
         if (currentPage < totalPages) {
-            setOffset((prev) => prev + limit)
+            setOffset((prev) => prev + position)
         }
-    }, [currentPage, totalPages, limit])
+    }, [currentPage, totalPages, position])
 
     const previousPageHandler = useCallback(() => {
         if (currentPage > 1) {
-            setOffset((prev) => prev - limit)
+            setOffset((prev) => prev - position)
         }
-    }, [currentPage, limit])
+    }, [currentPage, position])
 
     const firstPageHandler = useCallback(() => {
         setOffset(0)
     }, [])
 
     const lastPageHandler = useCallback(() => {
-        setOffset((totalPages - 1) * limit)
-    }, [totalPages, limit])
+        setOffset((totalPages - 1) * position)
+    }, [totalPages, position])
 
     const onLimitChange = useCallback((newLimit: any) => {
         setLimit(Number(newLimit))
@@ -183,7 +188,7 @@ export const useStudentData = (courseId: any) => {
     const fetchStudentData = useCallback((offsetValue: number) => {
         fetchStudentsHandler({
             courseId,
-            limit,
+            position,
             offset: offsetValue,
             searchTerm: search,
             setLoading,
@@ -192,7 +197,7 @@ export const useStudentData = (courseId: any) => {
             setTotalStudents,
             setCurrentPage,
         })
-    }, [courseId, limit, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
+    }, [courseId, position, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     return {
         students,
@@ -201,7 +206,7 @@ export const useStudentData = (courseId: any) => {
         offset,
         totalStudents,
         currentPage,
-        limit,
+        position,
         search,
         batchData,
         suggestions, // return suggestions instead of students for autocomplete
