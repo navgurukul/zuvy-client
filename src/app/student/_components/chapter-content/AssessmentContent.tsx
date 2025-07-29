@@ -62,6 +62,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   const [reattemptDialogOpen, setReattemptDialogOpen] = useState(false);
   const [isStartingAssessment, setIsStartingAssessment] = useState(false);
   const [isTimeOver, setIsTimeOver] = useState(false);
+  const [chapterStatus, setChapterStatus] = useState(chapterDetails.status);
   // Memoize IDs to prevent unnecessary API calls
   const moduleId = useMemo(
     () => chapterDetails.moduleId?.toString() || moduleIdParam?.toString() || null,
@@ -252,6 +253,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
       if (event.data === 'assessment_submitted') {
         refetch();
         refetchChapter();
+        // Update chapter status to completed
+        if (chapterStatus === 'Pending') {
+          setChapterStatus('Completed');
+        }
         if (typeof onChapterComplete === 'function') {
           onChapterComplete();
         }
@@ -273,13 +278,19 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     return () => {
       channel.close();
     };
-  }, [refetch, refetchChapter, onChapterComplete]);
+  }, [refetch, refetchChapter, onChapterComplete, chapterStatus]);
 
   // Assessment state transitions effect
   useEffect(() => {
     const cleanup = handleAssessmentStateTransitions();
     return cleanup;
   }, [assessmentDetails]);
+
+  useEffect(()=> {
+    if(chapterStatus === 'Completed'){
+      onChapterComplete?.()
+    }
+  },[chapterStatus])
 
   if (loading) {
     return (
@@ -317,6 +328,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
 
   const isDisabled = !hasQuestions;
   
+  
   return (
     <div className="h-full">
       <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-4 py-4 sm:py-6 lg:py-8 mt-4 sm:mt-6 lg:mt-8">
@@ -328,7 +340,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 <h1 className="text-3xl font-heading font-bold text-foreground break-words">
                   {assessmentDetails.ModuleAssessment?.title}
                 </h1>
-                <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterDetails.status === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterDetails.status === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
+                <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
               </div>
               {/* Meta Info Row */}
               <div className="flex flex-wrap gap-x-12 gap-y-2 mb-8">
@@ -470,7 +482,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                   <Button
                     variant="ghost" className="text-primary hover:text-primary-dark font-semibold md:text-lg text-sm"
                     onClick={handleViewResults}
-                    disabled={chapterDetails.status === 'Pending' && !isSubmitedAt}
+                    disabled={chapterStatus === 'Pending' && !isSubmitedAt}
                   >
                     View Results
                   </Button>

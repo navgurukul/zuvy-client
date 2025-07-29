@@ -60,7 +60,6 @@ const QuestionCard = ({
     // useEffect(() => {
     //     getAllTags()
     // }, [])
-    console.log("Question Card")
 
     function codingQuestionMarks(difficulty: string) {
         if (difficulty === 'Easy') {
@@ -96,17 +95,17 @@ const QuestionCard = ({
     }, [codingOutsourseId, assessmentSubmitId, id])
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+        <div className="bg-card  rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
             <div className="p-6">
                 {/* Header Section */}
                 <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 flex-1 dark:text-white">
                         {isMobile ? ellipsis(title, 30) : title}
                     </h3>
                     <div className="flex items-center gap-3 ml-4">
                         <span
                             className={cn(
-                                'px-3 py-1 rounded-full text-sm font-medium border',
+                                'px-3 py-1 rounded-full text-sm font-medium font-semibold border',
                                 description === 'Easy' && 'bg-green-50 text-green-700 border-green-200',
                                 description === 'Medium' && 'bg-orange-50 text-orange-700 border-orange-200',
                                 description === 'Hard' && 'bg-red-50 text-red-700 border-red-200',
@@ -116,7 +115,7 @@ const QuestionCard = ({
                             {description}
                         </span>
                         {title !== 'Open-Ended Questions' && (
-                            <span className="text-sm font-semibold text-gray-900">
+                            <span className="text-sm font-semibold dark:bg-gray-600  px-1 rounded-lg text-gray-900 dark:text-white">
                                 {`${
                                     codingQuestions
                                         ? Math.trunc(
@@ -151,7 +150,7 @@ const QuestionCard = ({
                                 //     className="flex items-center  space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm"
                                 // >
                                 // </Button>
-                                    <span onClick={() => onSolveChallenge(id)} className="text-primary cursor-pointer text-sm font-medium ">Solve Challenge</span>
+                                    <span onClick={() => onSolveChallenge(id)} className="text-primary font-semibold cursor-pointer text-sm font-medium ">Solve Challenge</span>
                             )}
                         </>
                     )}

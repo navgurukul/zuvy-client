@@ -8,7 +8,7 @@ import {
     ResizableHandle,
 } from '@/components/ui/resizable'
 import { ChevronLeft, Code, Lock, Play, Upload, CheckCircle } from 'lucide-react'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { useLazyLoadedStudentData, useThemeStore } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowLeft } from 'lucide-react'
@@ -111,6 +111,8 @@ const   IDE: React.FC<IDEProps> = ({
     const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [modalType, setModalType] = useState<'success' | 'error'>('success')
+     const isDarkMode = useThemeStore((state) => state.isDark)
+    const theme = isDarkMode ? 'vs-dark' : 'vs'
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -327,8 +329,8 @@ const   IDE: React.FC<IDEProps> = ({
         }
         getActions()
     },[])
+    console.log(isSubmitted , loading)
 
-    console.log(codingSubmissionAction)
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
@@ -388,20 +390,20 @@ const   IDE: React.FC<IDEProps> = ({
                                     onClick={(e) => handleSubmit(e, 'run')}
                                     size="sm"
                                     variant="outline"
-                                    className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                                    className="text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 dark:text-white"
                                     disabled={(loading || isSubmitted) || codingSubmissionAction}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium">Run Code</span>
+                                    <span className="ml-2 font-medium font-semibold">Run Code</span>
                                 </Button>
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'submit')}
                                     size="sm"
-                                    className="bg-primary hover:bg-primary-dark text-primary-foreground"
+                                    className="bg-primary-dark hover:bg-primary text-primary-foreground"
                                     disabled={(loading || isSubmitted) || codingSubmissionAction}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium">Submit Solution</span>
+                                    <span className="ml-2 font-medium font-semibold">Submit Solution</span>
                                 </Button>
                             </div>
                         </div>
@@ -611,7 +613,7 @@ const   IDE: React.FC<IDEProps> = ({
                                             <Editor
                                                 height="100%"
                                                 language={language}
-                                                theme="vs"
+                                                theme={theme}
                                                 value={currentCode}
                                                 onChange={handleEditorChange}
                                                 defaultValue={language || 'Please Select a language above!'}

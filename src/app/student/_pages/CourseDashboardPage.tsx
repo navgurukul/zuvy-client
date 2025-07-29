@@ -870,10 +870,12 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         {(completedClassesData?.classes || []).slice(0, 4).map((classItem: CompletedClass) => (
                           <div key={classItem.id} className="flex items-center justify-between gap-4">
                             <div className="flex-1 text-left">
-                              <p className="font-medium text-sm  ">{ellipsis(classItem.title, 20)}</p>
+                              <Link className=" hover:text-primary"  href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`} >
+                              <p className="font-medium text-sm ">{ellipsis(classItem.title, 20)}</p>
                               <p className="text-xs text-muted-foreground">
                                 {formatDate(classItem.startTime)}
                               </p>
+                              </Link>
                             </div>
                             <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
                               {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}

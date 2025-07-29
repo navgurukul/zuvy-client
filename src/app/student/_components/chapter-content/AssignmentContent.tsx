@@ -243,7 +243,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
               ) : (
                 <iframe
                   src={resourceLink}
-                  className={`w-full border border-border rounded ${isSmallScreen ? 'h-[300px]' : 'h-72'}`}
+                  className={`w-full border border-border rounded ${isSmallScreen ? 'h-[300px]' : 'h-[500px]'}`}
                   title="Assignment Resource"
                 />
               )

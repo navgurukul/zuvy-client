@@ -6,6 +6,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
+import { getDifficultyColor } from '@/lib/utils';
 
 interface CodingQuestion {
   id: number;
@@ -87,7 +88,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
     <div className=" p-6 mb-6">
       {/* Header Section */}
       <div className="flex items-start justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4  flex-1">
+        <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 dark:text-white flex-1">
           {question.title}
         </h3>
         {/* <Badge 
@@ -104,9 +105,9 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
 
       {/* Metadata Section */}
       <div className="flex flex-col gap-4 mb-4">
-        <div className='w-full flex flex-col' >
-          <span className="text-left font-medium text-muted-foreground">Difficulty</span>
-          <p className="text-sm font-semibold text-foreground text-left mt-1">{question.difficulty}</p>
+        <div className='w-full flex items-center gap-2' >
+          <span className="text-left font-medium text-muted-foreground">Difficulty -</span>
+          <p className={`text-sm font-semibold rounded-md p-1 text-left mt-1 ${getDifficultyColor(question.difficulty)}`}>{question.difficulty}</p>
         </div>
         {question.tagName && (
           <div>
