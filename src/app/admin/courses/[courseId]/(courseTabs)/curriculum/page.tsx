@@ -380,12 +380,18 @@ function Page() {
         setIsReordering(true)
         const oldOrder = originalCurriculum.map((item) => item.id)
         const newOrder = newOrderModules.map((item) => item.id)
-        const isSameOrder = JSON.stringify(oldOrder) === JSON.stringify(newOrder)
+        
+        // Check if order actually changed
+        if (JSON.stringify(oldOrder) === JSON.stringify(newOrder)) {
+            setIsReordering(false)
+            return
+        }
 
         let movedModuleId: number | null = null
 
-        for (let i = 0; i < oldOrder.length; i++) {
-            if (oldOrder[i] !== newOrder[i]) {
+        // Find the moved module
+        for (let i = 0; i < newOrder.length; i++) {
+            if (oldOrder.indexOf(newOrder[i]) !== i) {
                 movedModuleId = newOrder[i]
                 break
             }
@@ -396,14 +402,11 @@ function Page() {
             return
         }
 
-        const newPosition =
-            newOrderModules.findIndex((item) => item.id === movedModuleId) + 1
+        const newPosition = newOrder.indexOf(movedModuleId) + 1
         const updatedModules = newOrderModules.map((item, index) => ({
             ...item,
             order: index + 1,
         }))
-
-        setCurriculum(updatedModules)
 
         try {
             const response = await api.put(
@@ -413,47 +416,61 @@ function Page() {
                 }
             )
             // setOriginalCurriculum([...updatedModules])
-             const warningMsg = response.data?.[0]?.message ?? ""
+            const warningMsg = response.data?.[0]?.message ?? ""
 
             if (warningMsg.includes("started by")) {
-            toast.warning({
-            title: "Warning",
-            description: warningMsg,
-        })
+                toast.warning({
+                    title: "Warning",
+                    description: warningMsg,
+                })
 
-         const updatedOriginal = originalCurriculum.map(item =>
-            item.id === movedModuleId ? { ...item, isStarted: true } : item
-        )
-            setOriginalCurriculum(updatedOriginal)
-            setCurriculum(updatedOriginal)
-        }else {
-           setOriginalCurriculum([...updatedModules])
-        }
+                const updatedOriginal = originalCurriculum.map(item =>
+                    item.id === movedModuleId ? { ...item, isStarted: true } : item
+                )
+                setOriginalCurriculum(updatedOriginal)
+                setCurriculum(updatedOriginal)
+            }else {
+                setOriginalCurriculum([...updatedModules])
+            }
 
+            setIsReordering(false)
         } catch (error) {
+            // Revert to original order on error
             setCurriculum([...originalCurriculum])
             toast.error({
-            title: "Error",
-            description: "Error updating module order"
+                title: "Error",
+                description: "Error updating module order"
             })
-        } 
+            setIsReordering(false)
+        }
     }
 
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
-         //handleReorder(newOrderModules)
-        if (reorderTimeout) clearTimeout(reorderTimeout)
+        // Clear any existing timeout
+        if (reorderTimeout) {
+            clearTimeout(reorderTimeout)
+            setReorderTimeout(null)
+        }
 
-        setPendingOrder(newOrderModules)
+        // Update curriculum immediately for smooth UI
+        setCurriculum(newOrderModules)
+        
+        // Set up debounced API call
+        const timeout = setTimeout(() => {
+            handleReorder(newOrderModules)
+        }, 300) // Reduced timeout for better responsiveness
 
-       const timeout = setTimeout(() => {
-        if (pendingOrder) {
-         handleReorder(pendingOrder)
-         setPendingOrder(null)
-       }
-       }, 500) // wait for 300ms after drag stops
-
-       setReorderTimeout(timeout)
+        setReorderTimeout(timeout)
     }
+
+    // Add cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (reorderTimeout) {
+                clearTimeout(reorderTimeout)
+            }
+        }
+    }, [reorderTimeout])
 
     if (isCourseDeleted) {
         return (
