@@ -28,7 +28,7 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 
 import {
     getCodingQuestionTags,
@@ -36,7 +36,6 @@ import {
     getcodingQuestionState,
     getSelectedOptions,
     getDifficulty,
-    getOffset,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -104,8 +103,11 @@ const CodingProblems = () => {
     const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset } = getOffset()
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+    }, [searchParams]);
     const [newTopic, setNewTopic] = useState<string>('')
     const [urlInitialized, setUrlInitialized] = useState(false)
 
@@ -261,36 +263,17 @@ const CodingProblems = () => {
         fetchSuggestions()
     }, [debouncedSearchTerm])
 
-    // Update URL when filters change - but only after URL is initialized
     useEffect(() => {
-        if (!urlInitialized) return
+        const timer = setTimeout(() => setLoading(false), 1000)
+        return () => clearTimeout(timer)
+    }, [])
 
-        const params = new URLSearchParams()
-
-        // Update search
-        if (confirmedSearch) {
-            params.set('search', confirmedSearch)
+    useEffect(() => {
+        if (urlInitialized && searchTerm.trim() === '' && confirmedSearch !== '') {
+            // User cleared input manually (not via X), so reset search filter
+            clearOnlySearchTerm()
         }
-
-        // Update topics
-        if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) {
-            const topicValues = selectedOptions.map(opt => opt.value).join(',')
-            params.set('topics', topicValues)
-        }
-
-        // Update difficulty
-        if (difficulty.length > 0 && !difficulty.some(opt => opt.value === 'None')) {
-            const difficultyValues = difficulty.map(opt => opt.value).join(',')
-            params.set('difficulty', difficultyValues)
-        }
-
-        const newUrl = `${window.location.pathname}?${params.toString()}`
-        const currentUrl = `${window.location.pathname}${window.location.search}`
-
-        if (newUrl !== currentUrl) {
-            router.replace(newUrl)
-        }
-    }, [confirmedSearch, selectedOptions, difficulty, router, urlInitialized])
+    }, [searchTerm, confirmedSearch, urlInitialized])
 
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
@@ -426,17 +409,52 @@ const CodingProblems = () => {
         fetchData()
     }, [confirmedSearch, selectedOptions, difficulty, offset, urlInitialized, fetchCodingQuestions])
 
+    // Add this effect to preserve URL parameters including pagination
     useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
+        if (!urlInitialized) return
 
-    useEffect(() => {
-        if (urlInitialized && searchTerm.trim() === '' && confirmedSearch !== '') {
-            // User cleared input manually (not via X), so reset search filter
-            clearOnlySearchTerm()
+        const params = new URLSearchParams(window.location.search)
+        
+        // Preserve existing URL parameters that are not handled by other effects
+        const currentParams = new URLSearchParams(window.location.search)
+        
+        // Keep pagination related parameters (limit, page, offset etc.) that might be set by DataTablePagination
+        currentParams.forEach((value, key) => {
+            if (!['search', 'topics', 'difficulty'].includes(key)) {
+                params.set(key, value)
+            }
+        })
+
+        // Update search
+        if (confirmedSearch) {
+            params.set('search', confirmedSearch)
+        } else {
+            params.delete('search')
         }
-    }, [searchTerm, confirmedSearch, urlInitialized])
+
+        // Update topics
+        if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) {
+            const topicValues = selectedOptions.map(opt => opt.value).join(',')
+            params.set('topics', topicValues)
+        } else {
+            params.delete('topics')
+        }
+
+        // Update difficulty
+        if (difficulty.length > 0 && !difficulty.some(opt => opt.value === 'None')) {
+            const difficultyValues = difficulty.map(opt => opt.value).join(',')
+            params.set('difficulty', difficultyValues)
+        } else {
+            params.delete('difficulty')
+        }
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`
+        const currentUrl = `${window.location.pathname}${window.location.search}`
+
+        if (newUrl !== currentUrl) {
+            router.replace(newUrl)
+        }
+    }, [confirmedSearch, selectedOptions, difficulty, router, urlInitialized])
 
     const getActiveFiltersCount = () => {
         let count = 0

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { getBatchData } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { getStoreStudentDataNew } from '@/store/store'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { api } from '@/utils/axios.config'
+import { POSITION, OFFSET } from '@/utils/constant'
 
 export const useStudentData = (courseId: any) => {
     const {
@@ -14,13 +15,13 @@ export const useStudentData = (courseId: any) => {
         setTotalPages,
         loading,
         setLoading,
-        offset,
+        // offset,
         setOffset,
         totalStudents,
         setTotalStudents,
         currentPage,
         setCurrentPage,
-        limit,
+        // limit,
         setLimit,
         search,
         setSearch,
@@ -30,7 +31,11 @@ export const useStudentData = (courseId: any) => {
     const searchParams = useSearchParams()
     const router = useRouter()
     const prevCourseId = useRef<any>(null)
-
+    const limit = useMemo(() => parseInt(searchParams.get('limit') || POSITION), [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+    }, [searchParams]);
     const [internalSearch, setInternalSearch] = useState('') // for suggestions
     const [suggestions, setSuggestions] = useState<any[]>([]) // separate state for suggestions
     const [isInitialized, setIsInitialized] = useState(false) // Track if we've initialized from URL

@@ -189,7 +189,6 @@ function CodingChallenge({
         setSelectedQuestions(newCodingQuestions)
         setSavedQuestions(newCodingQuestions)
         setIsSaved(true)
-        console.log('Content updated, new questions:', newCodingQuestions)
     }, [contentKey]) // Use contentKey instead of content
 
     useEffect(() => {

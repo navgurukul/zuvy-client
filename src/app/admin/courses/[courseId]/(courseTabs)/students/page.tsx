@@ -91,7 +91,7 @@ const Page = ({ params }: { params: any }) => {
         async (offsetValue: number) => {
             try {
                 const res = await api.get(
-                    `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offsetValue}`
+                    `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
                 )
                 setSelectedRows([])
                 setStudents(res.data.modifiedStudentInfo)

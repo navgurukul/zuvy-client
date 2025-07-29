@@ -20,7 +20,6 @@ import {
     getEditQuizQuestion,
     getmcqdifficulty,
     getMcqSearch,
-    getOffset,
     getSelectedMCQOptions,
 } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
@@ -28,7 +27,7 @@ import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import { POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import BulkUploadMcq from '../_components/BulkMcqForm'
@@ -88,7 +87,10 @@ const Mcqs = (props: Props) => {
 
     // Zustand stores
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
-    const { offset, setOffset } = getOffset()
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+        }, [searchParams]);
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
