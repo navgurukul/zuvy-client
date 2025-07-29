@@ -544,7 +544,7 @@ const BatchesInfo = ({
                                         className="flex"
                                         onClick={toggleForm}
                                     >
-                                        <Pencil size={18} className="mx-4" />
+                                        <Pencil size={18} className="mx-1" />
                                         Edit Batch
                                     </button>
                                 </DialogTrigger>
@@ -655,7 +655,7 @@ const BatchesInfo = ({
                                 </DialogContent>
                             </Dialog>
                         </div>
-                        <div className="flex items-center gap-x-5 text-sm">
+                        <div className="flex items-center gap-x-1 text-sm">
                             <Trash2
                                 onClick={() => setDeleteModalOpen(true)}
                                 className="text-destructive cursor-pointer"
@@ -663,7 +663,7 @@ const BatchesInfo = ({
                             ></Trash2>
                             <span
                                 onClick={() => setDeleteModalOpen(true)}
-                                className=" cursor-pointer ml-1"
+                                className=" cursor-pointer mr-2"
                             >
                                 Delete
                             </span>
