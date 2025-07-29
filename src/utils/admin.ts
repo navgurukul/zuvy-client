@@ -663,7 +663,7 @@ export async function filterQuestions(
 
 interface FetchStudentsParams {
     courseId: string
-    position: number
+    limit: number
     offset: number
     searchTerm: string
     setLoading: (loading: boolean) => void
@@ -676,7 +676,7 @@ interface FetchStudentsParams {
 
 export const fetchStudentsHandler = async ({
     courseId,
-    position,
+    limit,
     offset,
     searchTerm,
     setLoading,
@@ -690,7 +690,7 @@ export const fetchStudentsHandler = async ({
 
     const endpoint = searchTerm
         ? `/bootcamp/students/${courseId}?searchTerm=${searchTerm}`
-        : `/bootcamp/students/${courseId}?limit=${position}&offset=${offset}`
+        : `/bootcamp/students/${courseId}?limit=${limit}&offset=${offset}`
 
     try {
         const res = await api.get(endpoint)
