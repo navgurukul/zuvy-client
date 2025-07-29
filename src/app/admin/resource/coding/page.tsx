@@ -28,7 +28,7 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 
 import {
     getCodingQuestionTags,
@@ -36,7 +36,6 @@ import {
     getcodingQuestionState,
     getSelectedOptions,
     getDifficulty,
-    getOffset,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -104,8 +103,11 @@ const CodingProblems = () => {
     const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset } = getOffset()
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+    }, [searchParams]);
     const [newTopic, setNewTopic] = useState<string>('')
     const [urlInitialized, setUrlInitialized] = useState(false)
 

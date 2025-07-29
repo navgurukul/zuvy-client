@@ -46,7 +46,7 @@ import { Spinner } from '@/components/ui/spinner'
 import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-import { POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
@@ -102,8 +102,11 @@ const OpenEndedQuestions = (props: Props) => {
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset } = getOffset()
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+        }, [searchParams]);
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
     const [suggestions, setSuggestions] = useState<OpenEndedQuestionType[]>([])
