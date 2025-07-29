@@ -44,7 +44,7 @@ const Page = ({ params }: { params: any }) => {
         students,
         totalPages,
         currentPage,
-        position,
+        limit,
         offset,
         search,
         totalStudents,
@@ -91,7 +91,7 @@ const Page = ({ params }: { params: any }) => {
         async (offsetValue: number) => {
             try {
                 const res = await api.get(
-                    `/bootcamp/students/${params.courseId}?limit=${position}&offset=${offset}`
+                    `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
                 )
                 setSelectedRows([])
                 setStudents(res.data.modifiedStudentInfo)
@@ -99,7 +99,7 @@ const Page = ({ params }: { params: any }) => {
                 console.error(error)
             }
         },
-        [params.courseId, position, setStudents]
+        [params.courseId, limit, setStudents]
     )
 
     const userIds = selectedRows.map((item: any) => item.userId)

@@ -31,7 +31,7 @@ export const useStudentData = (courseId: any) => {
     const searchParams = useSearchParams()
     const router = useRouter()
     const prevCourseId = useRef<any>(null)
-    const position = useMemo(() => parseInt(searchParams.get('limit') || POSITION), [searchParams])
+    const limit = useMemo(() => parseInt(searchParams.get('limit') || POSITION), [searchParams])
     const offset = useMemo(() => {
         const page = searchParams.get('page');
         return page ? parseInt(page) : OFFSET;
@@ -84,7 +84,7 @@ export const useStudentData = (courseId: any) => {
             // Then fetch new data with the correct search term
             fetchStudentsHandler({
                 courseId,
-                position,
+                limit,
                 offset: 0, // Always start from 0 when initializing
                 searchTerm: search, // Use the search term from URL
                 setLoading,
@@ -95,7 +95,7 @@ export const useStudentData = (courseId: any) => {
                 showError: false,
             })
         }
-    }, [courseId, isInitialized, search, position, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
+    }, [courseId, isInitialized, search, limit, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     // Fetch suggestions separately from main data
     useEffect(() => {
@@ -121,7 +121,7 @@ export const useStudentData = (courseId: any) => {
     const fetchData = useCallback(() => {
         fetchStudentsHandler({
             courseId,
-            position,
+            limit,
             offset,
             searchTerm: search,
             setLoading,
@@ -131,7 +131,7 @@ export const useStudentData = (courseId: any) => {
             setCurrentPage,
             showError: false,
         })
-    }, [courseId, position, offset, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
+    }, [courseId, limit, offset, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     useEffect(() => {
         fetchBatches(courseId)
@@ -139,23 +139,23 @@ export const useStudentData = (courseId: any) => {
 
     const nextPageHandler = useCallback(() => {
         if (currentPage < totalPages) {
-            setOffset((prev) => prev + position)
+            setOffset((prev) => prev + limit)
         }
-    }, [currentPage, totalPages, position])
+    }, [currentPage, totalPages, limit])
 
     const previousPageHandler = useCallback(() => {
         if (currentPage > 1) {
-            setOffset((prev) => prev - position)
+            setOffset((prev) => prev - limit)
         }
-    }, [currentPage, position])
+    }, [currentPage, limit])
 
     const firstPageHandler = useCallback(() => {
         setOffset(0)
     }, [])
 
     const lastPageHandler = useCallback(() => {
-        setOffset((totalPages - 1) * position)
-    }, [totalPages, position])
+        setOffset((totalPages - 1) * limit)
+    }, [totalPages, limit])
 
     const onLimitChange = useCallback((newLimit: any) => {
         setLimit(Number(newLimit))
@@ -188,7 +188,7 @@ export const useStudentData = (courseId: any) => {
     const fetchStudentData = useCallback((offsetValue: number) => {
         fetchStudentsHandler({
             courseId,
-            position,
+            limit,
             offset: offsetValue,
             searchTerm: search,
             setLoading,
@@ -197,7 +197,7 @@ export const useStudentData = (courseId: any) => {
             setTotalStudents,
             setCurrentPage,
         })
-    }, [courseId, position, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
+    }, [courseId, limit, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     return {
         students,
@@ -206,7 +206,7 @@ export const useStudentData = (courseId: any) => {
         offset,
         totalStudents,
         currentPage,
-        position,
+        limit,
         search,
         batchData,
         suggestions, // return suggestions instead of students for autocomplete
