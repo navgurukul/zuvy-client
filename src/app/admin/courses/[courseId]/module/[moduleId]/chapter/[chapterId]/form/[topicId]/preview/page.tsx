@@ -178,7 +178,7 @@ const PreviewForm = ({ params }: { params: any }) => {
                                 </div>
                             )
                         )}
-                        <Button type="submit" className="mt-7 w-2/5 bg-success-dark opacity-75" disabled>
+                        <Button type="submit" className="mt-7 w-2/5 bg-success-dark opacity-75 disabled:pointer-events-auto disabled:cursor-not-allowed" disabled >
                             Submit Responses
                         </Button>
                     </div>

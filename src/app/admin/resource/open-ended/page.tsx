@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -34,7 +34,6 @@ import {
     getCodingQuestionTags,
     getopenEndedQuestionstate,
     getOffset,
-    getPosition,
     getSelectedOpenEndedOptions,
     getOpenEndedDifficulty,
 } from '@/store/store'
@@ -47,7 +46,7 @@ import { Spinner } from '@/components/ui/spinner'
 import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-import { OFFSET, POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
@@ -73,6 +72,9 @@ interface OpenEndedQuestionType {
 }
 
 const OpenEndedQuestions = (props: Props) => {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+
     const [selectedTag, setSelectedTag] = useState<Tag>(() => {
         if (typeof window !== 'undefined') {
             const storedTag = localStorage.getItem('openEndedCurrentTag')
@@ -100,8 +102,11 @@ const OpenEndedQuestions = (props: Props) => {
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset } = getOffset()
-    const { position, setPosition } = getPosition()
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+        }, [searchParams]);
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
     const [suggestions, setSuggestions] = useState<OpenEndedQuestionType[]>([])
@@ -110,9 +115,6 @@ const OpenEndedQuestions = (props: Props) => {
     const searchInputRef = useRef<HTMLInputElement>(null)
     const [filtersInitialized, setFiltersInitialized] = useState(false)
     const [hasSetInitialTopicsFromURL, setHasSetInitialTopicsFromURL] = useState(false)
-
-    const router = useRouter()
-    const searchParams = useSearchParams()
 
     // Debounced value for suggestions
     const debouncedSearchForSuggestions = useDebounce(searchTerm, 300)
@@ -397,6 +399,21 @@ const OpenEndedQuestions = (props: Props) => {
             window.removeEventListener('beforeunload', handleRouteChange)
         }
     }, [])
+    
+    useEffect(() => {
+        if (!filtersInitialized) return
+    
+        if (searchTerm.trim() === '' && confirmedSearch !== '') {
+            setConfirmedSearch('')
+            setCurrentPage(1)
+    
+            // Remove `search` from URL
+            const params = new URLSearchParams(window.location.search)
+            params.delete('search')
+            const newUrl = `?${params.toString()}`
+            router.replace(newUrl)
+        }
+    }, [searchTerm, filtersInitialized, confirmedSearch, router])
     
     return (
         <>

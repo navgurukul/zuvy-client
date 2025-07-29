@@ -251,3 +251,23 @@ code {
 .h-26 .ProseMirror:not(.remirror-form-bigscreen .ProseMirror) {
     min-height: 20px !important;
 }
+
+/* Disable ProseMirror's native scrolling */
+.ProseMirror {
+    overflow: hidden !important; /* Remove editor's own scrollbar */
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+}
+
+/* Ensure only ScrollArea handles scrolling */
+[data-radix-scroll-area-viewport] {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Make sure content fills the ScrollArea properly */
+.ProseMirror {
+    padding: 1rem;
+    min-height: 28rem; /* Match ScrollArea height */
+}

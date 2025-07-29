@@ -28,7 +28,7 @@ import { columns } from '@/app/admin/resource/coding/column'
 import NewCodingProblemForm from '@/app/admin/resource/_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { OFFSET, POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 
 import {
     getCodingQuestionTags,
@@ -36,8 +36,6 @@ import {
     getcodingQuestionState,
     getSelectedOptions,
     getDifficulty,
-    getOffset,
-    getPosition,
 } from '@/store/store'
 import {
     getAllCodingQuestions,
@@ -50,8 +48,9 @@ import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
-import { useRouter } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import useDebounce from '@/hooks/useDebounce'
+import { ROWS_PER_PAGE } from '@/utils/constant'
 
 export type Tag = {
     id: number
@@ -80,7 +79,7 @@ const CodingProblems = () => {
     const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [areOptionsLoaded, setAreOptionsLoaded] = useState(false)
     const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
-    
+
     // Only debounce for suggestions, not for confirmed search
     const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
@@ -90,6 +89,7 @@ const CodingProblems = () => {
         isCodingDialogOpen,
         setIsCodingDialogOpen,
     } = getEditCodingQuestionDialogs()
+    const searchParams = useSearchParams()
     const { tags, setTags } = getCodingQuestionTags()
     const { selectedOptions, setSelectedOptions } = getSelectedOptions()
     const [options, setOptions] = useState<Option[]>([
@@ -103,8 +103,11 @@ const CodingProblems = () => {
     const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset } = getOffset()
-    const { position, setPosition } = getPosition()
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+    }, [searchParams]);
     const [newTopic, setNewTopic] = useState<string>('')
     const [urlInitialized, setUrlInitialized] = useState(false)
 
@@ -205,7 +208,7 @@ const CodingProblems = () => {
             }
 
             setIsLoadingSuggestions(true)
-            
+
             try {
                 const response = await api.get('/Content/allCodingQuestions', {
                     params: {
@@ -218,12 +221,12 @@ const CodingProblems = () => {
 
                 // Handle different response structures
                 let questionsData = response.data;
-                
+
                 // If the response has a data property, use that
                 if (response.data.data) {
                     questionsData = response.data.data;
                 }
-                
+
                 // If the response has a questions property, use that
                 if (response.data.questions) {
                     questionsData = response.data.questions;
@@ -237,8 +240,8 @@ const CodingProblems = () => {
                 }
 
                 const suggestions = questionsData
-                    .filter((question: any) => 
-                        question.title && 
+                    .filter((question: any) =>
+                        question.title &&
                         question.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
                     )
                     .slice(0, 8)
@@ -260,36 +263,17 @@ const CodingProblems = () => {
         fetchSuggestions()
     }, [debouncedSearchTerm])
 
-    // Update URL when filters change - but only after URL is initialized
     useEffect(() => {
-        if (!urlInitialized) return
+        const timer = setTimeout(() => setLoading(false), 1000)
+        return () => clearTimeout(timer)
+    }, [])
 
-        const params = new URLSearchParams()
-
-        // Update search
-        if (confirmedSearch) {
-            params.set('search', confirmedSearch)
+    useEffect(() => {
+        if (urlInitialized && searchTerm.trim() === '' && confirmedSearch !== '') {
+            // User cleared input manually (not via X), so reset search filter
+            clearOnlySearchTerm()
         }
-
-        // Update topics
-        if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) {
-            const topicValues = selectedOptions.map(opt => opt.value).join(',')
-            params.set('topics', topicValues)
-        }
-
-        // Update difficulty
-        if (difficulty.length > 0 && !difficulty.some(opt => opt.value === 'None')) {
-            const difficultyValues = difficulty.map(opt => opt.value).join(',')
-            params.set('difficulty', difficultyValues)
-        }
-
-        const newUrl = `${window.location.pathname}?${params.toString()}`
-        const currentUrl = `${window.location.pathname}${window.location.search}`
-
-        if (newUrl !== currentUrl) {
-            router.replace(newUrl)
-        }
-    }, [confirmedSearch, selectedOptions, difficulty, router, urlInitialized])
+    }, [searchTerm, confirmedSearch, urlInitialized])
 
     const handleTagOption = (option: Option) => {
         if (option.value === '-1') {
@@ -330,7 +314,7 @@ const CodingProblems = () => {
     const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setSearchTerm(value);
-        
+
         // Show suggestions when typing (if there's text and input is focused)
         if (value.length > 0 && isSearchFocused) {
             setShowSuggestions(true);
@@ -380,6 +364,12 @@ const CodingProblems = () => {
         setConfirmedSearch('')
         setShowSuggestions(false)
         setCurrentPage(1)
+
+        const params = new URLSearchParams(window.location.search)
+        params.delete('search')
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`
+        router.replace(newUrl)
     }
 
     const fetchCodingQuestions = useCallback(
@@ -419,10 +409,52 @@ const CodingProblems = () => {
         fetchData()
     }, [confirmedSearch, selectedOptions, difficulty, offset, urlInitialized, fetchCodingQuestions])
 
+    // Add this effect to preserve URL parameters including pagination
     useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
+        if (!urlInitialized) return
+
+        const params = new URLSearchParams(window.location.search)
+        
+        // Preserve existing URL parameters that are not handled by other effects
+        const currentParams = new URLSearchParams(window.location.search)
+        
+        // Keep pagination related parameters (limit, page, offset etc.) that might be set by DataTablePagination
+        currentParams.forEach((value, key) => {
+            if (!['search', 'topics', 'difficulty'].includes(key)) {
+                params.set(key, value)
+            }
+        })
+
+        // Update search
+        if (confirmedSearch) {
+            params.set('search', confirmedSearch)
+        } else {
+            params.delete('search')
+        }
+
+        // Update topics
+        if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) {
+            const topicValues = selectedOptions.map(opt => opt.value).join(',')
+            params.set('topics', topicValues)
+        } else {
+            params.delete('topics')
+        }
+
+        // Update difficulty
+        if (difficulty.length > 0 && !difficulty.some(opt => opt.value === 'None')) {
+            const difficultyValues = difficulty.map(opt => opt.value).join(',')
+            params.set('difficulty', difficultyValues)
+        } else {
+            params.delete('difficulty')
+        }
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`
+        const currentUrl = `${window.location.pathname}${window.location.search}`
+
+        if (newUrl !== currentUrl) {
+            router.replace(newUrl)
+        }
+    }, [confirmedSearch, selectedOptions, difficulty, router, urlInitialized])
 
     const getActiveFiltersCount = () => {
         let count = 0
@@ -433,7 +465,7 @@ const CodingProblems = () => {
     }
 
     const activeFiltersCount = getActiveFiltersCount()
-    
+
     return (
         <>
             {loading ? (
@@ -473,7 +505,7 @@ const CodingProblems = () => {
                                                 <X size={16} />
                                             </button>
                                         )}
-                                        
+
                                         {/* Fixed Suggestions dropdown */}
                                         {showSuggestions && (
                                             <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg top-full mt-1">
