@@ -143,13 +143,13 @@ const SubmissionComponent = (props: Props) => {
                                 href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}`}
                             >
                                 <h3 className="font-semibold cursor-pointer text-sm">
-                                    Submissions
+                                    View Submissions
                                 </h3>
                             </Link>
                         ) : (
                             <h3 className="text-gray-400 font-semibold cursor-not-allowed text-sm">
-                                Submissions
-                            </h3>
+                                View Submissions
+                            </h3> 
                         )}
                     </div>
                 </div>

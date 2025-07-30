@@ -73,24 +73,6 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'noOfAttempts',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="No of Attemps" />
-        ),
-        cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
-            const attempts = row?.original?.reattemptCount
-            return (
-                <div className="flex space-x-2 ml-8">
-                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px]  truncate font-medium">
-                        {attempts ? attempts : 0}
-                    </span>
-                </div>
-            )
-        },
-    },
-    {
         accessorKey: 'status',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />
