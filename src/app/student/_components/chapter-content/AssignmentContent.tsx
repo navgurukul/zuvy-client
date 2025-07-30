@@ -16,6 +16,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
+import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
 
 const FormSchema = z.object({
   link: z
@@ -33,22 +34,7 @@ const FormSchema = z.object({
     ),
 });
 
-type EditorDoc = {
-  type: string;
-  content: any[];
-};
 
-interface AssignmentContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    articleContent: string | null;
-    links: string | null;
-  };
-  onChapterComplete: () => void;
-}
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();

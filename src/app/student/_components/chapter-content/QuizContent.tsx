@@ -23,16 +23,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {QuizContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
-interface QuizContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-  };
-  onChapterComplete: () => void;
-}
 
 const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();

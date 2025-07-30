@@ -26,17 +26,9 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFeedbackForm, formSchema } from '@/hooks/useFeedbackForm'
+import {FeedbackFormContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
-interface FeedbackFormContentProps {
-    chapterDetails: {
-        id: number
-        title: string
-        description: string | null
-        status: string
-        moduleId: number
-    }
-    onChapterComplete: () => void
-}
+
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     chapterDetails,
