@@ -35,6 +35,8 @@ function ChapterItem({
     chapterData,
     isLastItem,
     isDragging,
+    onDragStart,
+    onDragEnd,
 }: {
     title: string
     topicId: number
@@ -48,7 +50,9 @@ function ChapterItem({
     isChapterClickedRef: any
     chapterData: any
     isLastItem?: boolean
-     isDragging?: boolean
+    isDragging?: boolean
+    onDragStart: () => void
+    onDragEnd: () => void
 }) {
     // states and variables
     const { courseId } = useParams()
@@ -161,8 +165,8 @@ function ChapterItem({
                 cursor: 'grabbing',
                 backgroundColor: 'rgba(255, 255, 255, 0.95)'
             }}
-            // onDragStart={handleDragStart}
-            // onDragEnd={handleDragEnd}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
             transition={{ 
                 type: "spring",
                 stiffness: 150,

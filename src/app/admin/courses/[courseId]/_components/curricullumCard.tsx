@@ -36,6 +36,7 @@ type Props = {
     fetchCourseModules: () => void
     projectId: number
     chapterId: number
+    setDraggedModuleId: React.Dispatch<React.SetStateAction<number | null>>
 }
 
 const CurricullumCard = (props: Props) => {
@@ -115,8 +116,14 @@ const CurricullumCard = (props: Props) => {
             zIndex: 999,
             x: 0,
             }}
-            onDragStart={() => setIsDragging(true)}
-            onDragEnd={() => setIsDragging(false)}
+            onDragStart={() => {
+                setIsDragging(true)
+                props.setDraggedModuleId(props.moduleId) // moduleId parent ko bhejna
+            }}
+            onDragEnd={() => {
+                setIsDragging(false)
+                props.setDraggedModuleId(null) // drag end pe reset karna
+            }}
             transition={{ duration: 0.2 }}
         >
             <div

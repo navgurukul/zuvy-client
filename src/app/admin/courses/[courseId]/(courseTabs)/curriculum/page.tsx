@@ -64,6 +64,7 @@ function Page() {
         useState<ModuleData | null>(null)
     const [pendingOrder, setPendingOrder] = useState<CurriculumItem[] | null>(null)
     const [reorderTimeout, setReorderTimeout] = useState<NodeJS.Timeout | null>(null)
+    const [draggedModuleId, setDraggedModuleId] = useState<number | null>(null)
     const [moduleData, setModuleData] = useState({
         name: '',
         description: '',
@@ -369,40 +370,14 @@ function Page() {
     }, [courseData?.id])
 
     async function handleReorder(newOrderModules: CurriculumItem[]) {
-        if (!courseData?.id) {
-            toast.error({
-                title: 'Error',
-                description: 'Course ID is missing',
-            })
-            return
-        }
+        if (!courseData?.id || !draggedModuleId) return
 
         setIsReordering(true)
-        const oldOrder = originalCurriculum.map((item) => item.id)
-        const newOrder = newOrderModules.map((item) => item.id)
-        
-        // Check if order actually changed
-        if (JSON.stringify(oldOrder) === JSON.stringify(newOrder)) {
-            setIsReordering(false)
-            return
-        }
 
-        let movedModuleId: number | null = null
+        const newPosition = newOrderModules.findIndex(
+            (item) => item.id === draggedModuleId
+        ) + 1
 
-        // Find the moved module
-        for (let i = 0; i < newOrder.length; i++) {
-            if (oldOrder.indexOf(newOrder[i]) !== i) {
-                movedModuleId = newOrder[i]
-                break
-            }
-        }
-
-        if (!movedModuleId) {
-            setIsReordering(false)
-            return
-        }
-
-        const newPosition = newOrder.indexOf(movedModuleId) + 1
         const updatedModules = newOrderModules.map((item, index) => ({
             ...item,
             order: index + 1,
@@ -410,8 +385,8 @@ function Page() {
 
         try {
             const response = await api.put(
-                `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${movedModuleId}`,
-                {
+                `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${draggedModuleId}`,
+                { 
                     reOrderDto: { newOrder: newPosition },
                 }
             )
@@ -424,8 +399,8 @@ function Page() {
                     description: warningMsg,
                 })
 
-                const updatedOriginal = originalCurriculum.map(item =>
-                    item.id === movedModuleId ? { ...item, isStarted: true } : item
+                const updatedOriginal = originalCurriculum.map((item) =>
+                    item.id === draggedModuleId ? { ...item, isStarted: true } : item
                 )
                 setOriginalCurriculum(updatedOriginal)
                 setCurriculum(updatedOriginal)
@@ -446,18 +421,22 @@ function Page() {
     }
 
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
+        // Update curriculum immediately for smooth UI
+        const updatedModules = newOrderModules.map((item, index) => ({
+            ...item,
+            order: index + 1,
+        }));
+        setCurriculum(updatedModules);
+
         // Clear any existing timeout
         if (reorderTimeout) {
-            clearTimeout(reorderTimeout)
-            setReorderTimeout(null)
+            clearTimeout(reorderTimeout);
+            setReorderTimeout(null);
         }
 
-        // Update curriculum immediately for smooth UI
-        setCurriculum(newOrderModules)
-        
         // Set up debounced API call
         const timeout = setTimeout(() => {
-            handleReorder(newOrderModules)
+            handleReorder(updatedModules)
         }, 300) // Reduced timeout for better responsiveness
 
         setReorderTimeout(timeout)
@@ -588,6 +567,7 @@ function Page() {
                                     projectId={item.projectId}
                                     chapterId={item.ChapterId}
                                     // containerRef={containerRef}
+                                    setDraggedModuleId={setDraggedModuleId}
                                 />
                             ))}
                         </Reorder.Group>
