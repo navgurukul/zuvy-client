@@ -65,6 +65,7 @@ export default function NewMcqForm({
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [codeSnippet, setCodeSnippet] = useState<any>()
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
+    const [isContentValid, setIsContentValid] = useState<boolean>(true) // New state
     const [selectedTag, setSelectedTag] = useState<{
         id: number
         tagName: String
@@ -316,6 +317,7 @@ export default function NewMcqForm({
                                             <RemirrorForForm
                                                 description={field.value}
                                                 onChange={field.onChange}
+                                                onValidationChange={setIsContentValid} // Pass validation callback
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -422,7 +424,11 @@ export default function NewMcqForm({
                     )}
                 </div>
                 <div className="flex flex-col justify-end items-end w-[550px]">
-                    <Button className="bg-success-dark opacity-75" type="submit">
+                    <Button 
+                        className="bg-success-dark opacity-75" 
+                        type="submit"
+                        disabled={!isContentValid} // Disable button if content is invalid
+                    >
                         Add Question
                     </Button>
                 </div>
