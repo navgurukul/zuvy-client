@@ -36,6 +36,9 @@ type Props = {
     fetchCourseModules: () => void
     projectId: number
     chapterId: number
+    setDraggedModuleId: React.Dispatch<React.SetStateAction<number | null>>
+    onDragStart?: () => void
+    onDragEnd?: () => void
 }
 
 const CurricullumCard = (props: Props) => {
@@ -57,6 +60,8 @@ const CurricullumCard = (props: Props) => {
         projectId,
         chapterId,
         isStarted,
+        onDragStart,
+        onDragEnd,
     } = props
 
     const router = useRouter()
@@ -114,8 +119,18 @@ const CurricullumCard = (props: Props) => {
             boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
             zIndex: 999,
             x: 0,
-         }}
-         drag="y"
+            }}
+            onDragStart={() => {
+                setIsDragging(true)
+                props.setDraggedModuleId(props.moduleId) // moduleId parent ko bhejna
+                onDragStart?.() // Call parent's drag start
+            }}
+            onDragEnd={() => {
+                setIsDragging(false)
+                props.setDraggedModuleId(null) // drag end pe reset karna
+                onDragEnd?.() // Call parent's drag end 
+            }}
+            transition={{ duration: 0.2 }}
         >
             <div
                 className={`${
@@ -159,8 +174,8 @@ const CurricullumCard = (props: Props) => {
                                           }
                                         : undefined
                                 }
-                                onPointerUp={() => setIsDragging(false)}
-                                onPointerLeave={() => setIsDragging(false)}
+                                // onPointerUp={() => setIsDragging(false)}
+                                // onPointerLeave={() => setIsDragging(false)}
                                 onClick={(e) => e.stopPropagation()}
                             />
                         </div>
