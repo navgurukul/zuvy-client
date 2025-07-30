@@ -3,12 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
+import{OpenEndedQuestionsProps} from '@/app/student/_components/componentStudentType'
 
-interface OpenEndedQuestionsProps {
-  onBack: () => void;
-  onComplete: () => void;
-  timeLeft: string;
-}
 
 const OpenEndedQuestions = ({ onBack, onComplete, timeLeft }: OpenEndedQuestionsProps) => {
   const [answers, setAnswers] = useState(['', '']);

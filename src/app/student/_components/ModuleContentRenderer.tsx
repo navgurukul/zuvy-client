@@ -26,12 +26,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Play, Check, Calendar as CalendarIcon, Clock } from "lucide-react";
 import AssessmentView from "./AssessmentView";
 import CodingProblemPage from "./CodingProblemPage";
+import{ModuleContentRendererProps } from '@/app/student/_components/componentStudentType'
 
-interface ModuleContentRendererProps {
-  selectedItemData: { item: any; topicId: string } | null;
-  getAssessmentData: (itemId: string) => any;
-  onChapterComplete: () => void;
-}
+
 
 const ModuleContentRenderer = ({ selectedItemData, getAssessmentData, onChapterComplete }: ModuleContentRendererProps) => {
   // States for fallback functionality
