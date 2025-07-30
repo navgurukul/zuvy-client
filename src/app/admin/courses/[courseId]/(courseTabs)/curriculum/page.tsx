@@ -406,6 +406,10 @@ function Page() {
                 setCurriculum(updatedOriginal)
             }else {
                 setOriginalCurriculum([...updatedModules])
+                toast.success({              // ✅ Success toast here
+                    title: "Success",
+                    description: "Module order updated successfully",
+                })
             }
 
             setIsReordering(false)
