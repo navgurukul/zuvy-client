@@ -20,7 +20,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
 import { Reorder, useDragControls } from 'framer-motion'
 
-
 function ChapterItem({
     title,
     topicId,
@@ -48,7 +47,7 @@ function ChapterItem({
     isChapterClickedRef: any
     chapterData: any
     isLastItem?: boolean
-     isDragging?: boolean
+    isDragging?: boolean
 }) {
     // states and variables
     const { courseId } = useParams()
@@ -73,8 +72,8 @@ function ChapterItem({
                 return <PencilLine />
             case 6:
                 return <BookOpenCheck />
-            case 8: 
-                 return <Play />    
+            case 8:
+                return <Play />
             default:
                 return <StickyNote />
         }
@@ -87,12 +86,12 @@ function ChapterItem({
     }
 
     const handleClick = () => {
-         // Prevent click during drag
+        // Prevent click during drag
         if (isBeingDragged || isDragging) {
             console.log('Click prevented during drag')
             return
         }
-        
+
         setActiveChapter(chapterId)
         if (topicId) {
             setTopicId(topicId)
@@ -114,7 +113,14 @@ function ChapterItem({
                         description: res.data.message,
                     })
                     fetchChapters()
-                    if (chapterId === activeChapter) {
+                    console.log('chapterData', chapterData)
+                    if (chapterData[0].chapterId === chapterId) {
+                        console.log('Comes on if')
+                        router.push(
+                            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[1].chapterId}`
+                        )
+                    } else if (chapterId === activeChapter) {
+                        console.log('Comes on else')
                         router.push(
                             `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[0].chapterId}`
                         )
@@ -147,34 +153,33 @@ function ChapterItem({
         }, 300)
     }
 
-
     return (
         <Reorder.Item
             value={chapterData.find((c: any) => c.chapterId === chapterId)}
             id={isLastItem ? 'last-chapter' : `chapter-${chapterId}`}
             dragListener={false}
             dragControls={dragControls}
-            whileDrag={{ 
+            whileDrag={{
                 scale: 1.02,
-                boxShadow: "0 10px 25px rgba(0,0,0,0.15)",
+                boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
                 zIndex: 1000,
                 cursor: 'grabbing',
-                backgroundColor: 'rgba(255, 255, 255, 0.95)'
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
             }}
             // onDragStart={handleDragStart}
             // onDragEnd={handleDragEnd}
-            transition={{ 
-                type: "spring",
+            transition={{
+                type: 'spring',
                 stiffness: 150,
                 damping: 28,
-                mass: 0.4
+                mass: 0.4,
             }}
             // Improved drag styling
             style={{
                 listStyle: 'none',
                 margin: 0,
                 padding: 0,
-                marginBottom: '4px'
+                marginBottom: '4px',
             }}
         >
             <div ref={chapterId === activeChapter ? activeChapterRef : null}>
@@ -182,13 +187,15 @@ function ChapterItem({
                     className={cn(
                         'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center select-none transition-all duration-200',
                         setActiveChapterItem(),
-                        isBeingDragged ? 'opacity-90 cursor-grabbing' : 'opacity-100 cursor-pointer'
+                        isBeingDragged
+                            ? 'opacity-90 cursor-grabbing'
+                            : 'opacity-100 cursor-pointer'
                     )}
                     onClick={handleClick}
                     style={{
                         pointerEvents: isBeingDragged ? 'none' : 'auto',
                         userSelect: 'none', // Prevent text selection during drag
-                        WebkitUserSelect: 'none'
+                        WebkitUserSelect: 'none',
                     }}
                 >
                     <div className="flex gap-2 capitalize">
@@ -198,20 +205,20 @@ function ChapterItem({
                     <div className="flex items-center gap-2">
                         <Trash2
                             onClick={(e) => {
-                                  if (!isBeingDragged && !isDragging) {
+                                if (!isBeingDragged && !isDragging) {
                                     handleDeleteModal()
                                 }
                             }}
                             className="hover:text-destructive cursor-pointer transition-colors"
                             size={15}
                             style={{
-                                pointerEvents: isBeingDragged ? 'none' : 'auto'
+                                pointerEvents: isBeingDragged ? 'none' : 'auto',
                             }}
                         />
                         <GripVertical
                             style={{
                                 cursor: isBeingDragged ? 'grabbing' : 'grab',
-                                pointerEvents: 'auto'
+                                pointerEvents: 'auto',
                             }}
                             className="text-gray-600 hover:text-gray-600 transition-colors"
                             onPointerDown={(e) => {
