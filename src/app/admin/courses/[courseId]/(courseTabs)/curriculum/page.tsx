@@ -65,6 +65,8 @@ function Page() {
     const [pendingOrder, setPendingOrder] = useState<CurriculumItem[] | null>(null)
     const [reorderTimeout, setReorderTimeout] = useState<NodeJS.Timeout | null>(null)
     const [draggedModuleId, setDraggedModuleId] = useState<number | null>(null)
+    const [isDragging, setIsDragging] = useState(false)
+    const [hasOrderChanged, setHasOrderChanged] = useState(false)
     const [moduleData, setModuleData] = useState({
         name: '',
         description: '',
@@ -423,27 +425,57 @@ function Page() {
             setIsReordering(false)
         }
     }
-
+    
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
         // Update curriculum immediately for smooth UI
         const updatedModules = newOrderModules.map((item, index) => ({
             ...item,
             order: index + 1,
         }));
-        setCurriculum(updatedModules);
+        setCurriculum(updatedModules)
 
+        const oldOrder = originalCurriculum.map(item => item.id)
+        const newOrder = updatedModules.map(item => item.id)
+        
+        if (JSON.stringify(oldOrder) !== JSON.stringify(newOrder)) {
+            setHasOrderChanged(true)
+        }
+        
         // Clear any existing timeout
         if (reorderTimeout) {
-            clearTimeout(reorderTimeout);
-            setReorderTimeout(null);
+            clearTimeout(reorderTimeout)
+            setReorderTimeout(null)
         }
 
-        // Set up debounced API call
-        const timeout = setTimeout(() => {
-            handleReorder(updatedModules)
-        }, 300) // Reduced timeout for better responsiveness
+        if (!isDragging) {
+            // Only set timeout if drag is not active (this means it's the final drop)
+            const timeout = setTimeout(() => {
+                if (hasOrderChanged) {
+                    handleReorder(updatedModules)
+                    setHasOrderChanged(false)
+                }
+            }, 200) // Reduced timeout since it's only for final drop
 
-        setReorderTimeout(timeout)
+            setReorderTimeout(timeout)
+        }
+    }
+
+
+    const handleDragStart = () => {
+        setIsDragging(true)
+        setHasOrderChanged(false)
+    }
+
+    const handleDragEnd = () => {
+        setIsDragging(false)
+        
+        // After drag ends, check if we need to save
+        setTimeout(() => {
+            if (hasOrderChanged) {
+                handleReorder(curriculum)
+                setHasOrderChanged(false)
+            }
+        }, 100)
     }
 
     // Add cleanup on unmount
@@ -572,6 +604,8 @@ function Page() {
                                     chapterId={item.ChapterId}
                                     // containerRef={containerRef}
                                     setDraggedModuleId={setDraggedModuleId}
+                                    onDragStart={handleDragStart}
+                                    onDragEnd={handleDragEnd}
                                 />
                             ))}
                         </Reorder.Group>
