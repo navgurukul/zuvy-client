@@ -59,7 +59,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             15,
             40
         )
-        doc.text(`Total Marks: ${reportData.marks || 0}`, 15, 45)
+        doc.text(`Total Marks: 100`, 15, 45)
         doc.text(
             `Percentage: ${Math.trunc(reportData.percentage || 0)}%`,
             15,
@@ -125,12 +125,18 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
         autoTable(doc, {
             head: [[`MCQ Details`, 'Score']],
             body: [
+                  [
+                      'Total MCQ Attempted',
+                    `${Math.round(reportData.attemptedMCQQuestions) || 0} / ${
+                        reportData?.submitedOutsourseAssessment?.totalMcqQuestions || 0
+                    }`
+                ],
                 [
                     'MCQ Score',
-                    `${reportData.mcqScore || 0} / ${
-                        reportData.requiredMCQScore || 0
-                    }`,
-                ],
+                    `${Math.round(reportData.mcqScore) || 0} / ${
+                        reportData?.submitedOutsourseAssessment?.weightageMcqQuestions || 0
+                    }`
+                ]
             ],
             theme: 'grid',
             headStyles: {

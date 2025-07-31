@@ -598,7 +598,7 @@ const Mcqs = (props: Props) => {
             {isMcqModalOpen && (
                 <div className=" ">
                     <div
-                        className="flex cursor-pointer p-5 text-[rgb(81,134,114)]"
+                        className="flex cursor-pointer items-center text-[rgb(81,134,114)]"
                         onClick={() =>
                             setIsMcqModalOpen((prevState) => !prevState)
                         }
