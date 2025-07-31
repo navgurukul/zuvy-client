@@ -62,6 +62,7 @@ function Page({
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const { width } = useWindowSize()
+    
     const isMobile = width < 768
 
     const [disableSubmit, setDisableSubmit] = useState(false)
@@ -102,6 +103,7 @@ function Page({
     const [selectedCodingOutsourseId, setSelectedCodingOutsourseId] =
         useState<any>()
     const [chapterId, setChapterId] = useState<any>()
+    const [isCodingSubmitted , setIsCodingSubmitted] = useState(false)
 
     // Check if Proctoring is set on by admin for tab switching, copy paste, etc.
     const [isTabProctorOn, setIsTabProctorOn] = useState(
@@ -405,6 +407,8 @@ function Page({
         setIsOpeningdialogOpen(true)
     }, [])
 
+
+
     useEffect(() => {
         const navEntries = performance.getEntriesByType(
             'navigation'
@@ -447,6 +451,7 @@ function Page({
                     <AlertProvider
                         requestFullScreen={handleFullScreenRequest}
                         setIsFullScreen={setIsFullScreen}
+
                     >
                         <QuizQuestions
                             onBack={handleBack}
@@ -719,6 +724,7 @@ function Page({
                                         <div className="space-y-4">
                                             {assessmentData?.codingQuestions?.map((question: any) => (
                                                 <QuestionCard
+                                                    setIsCodingSubmitted = {setIsCodingSubmitted}
                                                     isMobile={isMobile}
                                                     key={question.codingQuestionId}
                                                     id={question.codingQuestionId}

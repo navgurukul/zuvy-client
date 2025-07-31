@@ -224,8 +224,8 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-heading font-bold mb-2">Module Not Found</h1>
-          <Button asChild>
+          <h1 className="text-2xl text-primary font-heading font-bold mb-2">Module Not Found</h1>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground"  asChild>
             <Link href={`/student/course/${courseId}`}>Back to Course</Link>
           </Button>
         </div>

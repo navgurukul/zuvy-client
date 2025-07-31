@@ -212,7 +212,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
         <div className="max-w-4xl mx-auto p-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-heading font-bold">{item.title}</h1>
-           {chapterDetails.status=== 'Completed' ? <Badge variant="outline" className="text-success border-success">
+           {chapterDetails.status=== 'Completed' || localIsCompleted ? <Badge variant="outline" className="text-success border-success">
               Viewed
             </Badge> : <Badge variant="outline" className="text-warning border-warning">
               Not Viewed

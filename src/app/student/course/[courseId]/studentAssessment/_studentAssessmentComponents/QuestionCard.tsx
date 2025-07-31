@@ -4,6 +4,7 @@ import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight, CheckCircle, Play, Award } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { ellipsis } from '@/lib/utils'
+import { useCodingSubmissionStore } from '@/store/store'
 
 interface QuestionCardProps {
     id: number
@@ -21,6 +22,7 @@ interface QuestionCardProps {
     onSolveChallenge: (id: number) => void
     isQuizSubmitted?: boolean
     isMobile?: boolean
+    setIsCodingSubmitted?: any
 }
 
 export type Tag = {
@@ -43,10 +45,11 @@ const QuestionCard = ({
     onSolveChallenge,
     isQuizSubmitted,
     isMobile,
+    setIsCodingSubmitted,
 }: QuestionCardProps) => {
     // const [tag, setTag] = useState<Tag>()
     const [action, setAction] = useState<string | null>(null)
-
+    const { setCodingSubmissionAction} = useCodingSubmissionStore()
     // async function getAllTags() {
     //     const response = await api.get('/content/allTags')
     //     if (response) {
@@ -82,6 +85,8 @@ const QuestionCard = ({
             )
             const action = res.data.data.action
             setAction(action)
+            setCodingSubmissionAction(action)
+            setIsCodingSubmitted(true)
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
             return null
