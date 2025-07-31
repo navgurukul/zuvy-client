@@ -13,7 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const heightClass = useResponsiveHeight()
 
     return (
-        <div className="h-screen">
+        <div className="min-h-screen">
             {projectID || adminAssessmentPreviewRoute ? (
                 <div>{children}</div>
             ) : (

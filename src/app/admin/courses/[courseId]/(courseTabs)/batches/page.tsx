@@ -408,6 +408,7 @@ const Page = ({ params }: { params: any }) => {
                     title: res.data.status,
                     description: res.data.message,
                 })
+                getUnAssignedStudents()
                 return true
             }
         } catch (error: any) {
@@ -439,7 +440,6 @@ const Page = ({ params }: { params: any }) => {
     }, [])
 
     const getUnAssignedStudents = useCallback(async () => {
-        if (!debouncedSearchStudent.trim()) return // ⛔ prevent API call if search term is empty
     
         try {
             const res = await api.get(

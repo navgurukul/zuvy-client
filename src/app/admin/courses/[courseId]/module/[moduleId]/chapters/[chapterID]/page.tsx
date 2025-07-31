@@ -97,10 +97,16 @@ export default function Page({
     )
 
     useEffect(() => {
-        if (chapterData.length > 0 && topicId != null) {
-            fetchChapterContent(chapter_id, topicId)
-            // fetchChapterContent(activeChapter, topicId)
-        } else {
+        // if (chapterData.length > 0 && topicId != null) {
+        //     fetchChapterContent(chapter_id, topicId)
+        //     // fetchChapterContent(activeChapter, topicId)
+        // } 
+        
+         if (chapterData.length > 0 && topicId != null && chapter_id > 0) {
+            // Check if we actually need to fetch (chapter changed)
+            if (chapterId !== chapter_id) {
+                fetchChapterContent(chapter_id, topicId)
+            } } else {
             setActiveChapter(0)
             setChapterContent([])
             setActiveChapterTitle('')
@@ -109,12 +115,12 @@ export default function Page({
             }, 1000)
         }
     }, [
-        chapterData,
+        // chapterData,
         fetchChapterContent,
         articleUpdateOnPreview,
         assignmentUpdateOnPreview,
-        // topicId,
-        // chapter_id,
+        topicId,
+        chapter_id,
     ])
 
     const renderChapterContent = () => {

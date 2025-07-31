@@ -86,22 +86,59 @@ export const columns: ColumnDef<quiz>[] = [
 
         cell: ({ row }) => {
             const question = row.original?.quizVariants[0]?.question
-            const truncatedQuestion = ellipsis(question, 70)
-            return (
-                <div
-                    className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
-                    style={{
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                    }}
-                >
-                    <span
-                        dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
-                    />
-                    {/* {question} */}
-                </div>
-            )
+            
+            // Check if question contains code blocks
+            const hasCodeBlock = question && (question.includes('<pre') && question.includes('<code'))
+            
+            if (hasCodeBlock) {
+                // For code questions, extract text and show preview
+                const tempDiv = document.createElement('div')
+                tempDiv.innerHTML = question
+                const textContent = tempDiv.textContent || tempDiv.innerText || ''
+                const preview = textContent.length > 50 ? textContent.substring(0, 50) + '...' : textContent
+                return (
+                    <div className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150">
+                        <div className="p-2 text-sm text-gray-700">
+                            {preview}
+                        </div>
+                    </div>
+                )
+            } else {
+                // For regular questions, handle cases where the first content is an image
+                const tempDiv = document.createElement('div')
+                tempDiv.innerHTML = question
+
+                // Remove all <img> tags
+                tempDiv.querySelectorAll('img').forEach((img) => img.remove())
+
+                // Convert heading tags (e.g., <h1>, <h2>, etc.) to plain text
+                tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading) => {
+                    const textNode = document.createTextNode(heading.textContent || '');
+                    heading.replaceWith(textNode);
+                });
+
+                // Extract the remaining HTML content
+                const sanitizedHTML = tempDiv.innerHTML
+
+                // Truncate the content if it's too long
+                const truncatedQuestion = ellipsis(sanitizedHTML, 70)
+
+                return (
+                    <div
+                        className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                        style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                        }}
+                    >
+                        <span
+                            dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
+                        />
+                        {/* {question} */}
+                    </div>
+                )
+            }
         },
         enableSorting: false,
         enableHiding: true,

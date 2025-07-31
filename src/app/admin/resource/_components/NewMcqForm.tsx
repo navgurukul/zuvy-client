@@ -28,6 +28,12 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
 import RemirrorForForm from '@/app/admin/resource/_components/RemirrorForForm'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),
@@ -65,6 +71,7 @@ export default function NewMcqForm({
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [codeSnippet, setCodeSnippet] = useState<any>()
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
+    const [isContentValid, setIsContentValid] = useState<boolean>(true) // New state
     const [selectedTag, setSelectedTag] = useState<{
         id: number
         tagName: String
@@ -268,11 +275,10 @@ export default function NewMcqForm({
                         {fields.map((field, index) => (
                             <Button
                                 key={field.id}
-                                className={`${
-                                    activeVariantIndex === index
+                                className={`${activeVariantIndex === index
                                         ? 'border-b-4 border-[rgb(81,134,114)] text-[rgb(81,134,114)] text-md'
                                         : ''
-                                } rounded-none`}
+                                    } rounded-none`}
                                 variant="ghost"
                                 type="button"
                                 onClick={() => setActiveVariantIndex(index)}
@@ -316,6 +322,7 @@ export default function NewMcqForm({
                                             <RemirrorForForm
                                                 description={field.value}
                                                 onChange={field.onChange}
+                                                onValidationChange={setIsContentValid} // Pass validation callback
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -385,19 +392,19 @@ export default function NewMcqForm({
 
                                                         {optionFields.length >
                                                             2 && (
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                className="text-red-500"
-                                                                onClick={() =>
-                                                                    removeOption(
-                                                                        optionIndex
-                                                                    )
-                                                                }
-                                                            >
-                                                                X
-                                                            </Button>
-                                                        )}
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    className="text-red-500"
+                                                                    onClick={() =>
+                                                                        removeOption(
+                                                                            optionIndex
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    X
+                                                                </Button>
+                                                            )}
                                                     </div>
                                                 )
                                             )}
@@ -421,11 +428,36 @@ export default function NewMcqForm({
                         </>
                     )}
                 </div>
-                <div className="flex flex-col justify-end items-end w-[550px]">
-                    <Button className="bg-success-dark opacity-75" type="submit">
-                        Add Question
-                    </Button>
-                </div>
+                {!isContentValid ? (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex flex-col justify-end items-end w-[550px] cursor-not-allowed opacity-50">
+                                    <Button
+                                        className="bg-success-dark opacity-75"
+                                        type="submit"
+                                        disabled
+                                    >
+                                        Add Question
+                                    </Button>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                         Question content is required. Also image-only questions are not allowed — please include text as well.
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                ) : (
+                    <div className="flex flex-col justify-end items-end w-[550px]">
+                        <Button
+                            className="bg-success-dark opacity-75"
+                            type="submit"
+                        >
+                            Add Question
+                        </Button>
+                    </div>
+                )}
+
             </form>
         </Form>
     )

@@ -87,13 +87,13 @@ const Page = ({ params }: any) => {
                 <div>
                     <BreadcrumbComponent crumbs={crumbs} />
                     <div className="p-4">
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        <h6 className="text-left font-semibold flex gap-x-3 m-3">
                             <span>Title:-</span>
                             <span>
                                 {codingSubmissiondata?.questionDetail?.title}
                             </span>
-                        </h1>
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        </h6>
+                        <h6 className="text-left font-semibold flex gap-x-3 m-3">
                             <span>Description:-</span>
                             <span>
                                 {
@@ -101,8 +101,8 @@ const Page = ({ params }: any) => {
                                         ?.description
                                 }
                             </span>
-                        </h1>
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        </h6>
+                        <h6 className="text-left font-semibold flex gap-x-3 m-3">
                             <span>Difficulty:-</span>
                             <span
                                 className={cn(
@@ -118,8 +118,8 @@ const Page = ({ params }: any) => {
                                         ?.difficulty
                                 }
                             </span>
-                        </h1>
-                        <h1 className="text-left font-semibold flex gap-x-3 m-3">
+                        </h6>
+                        <h6 className="text-left font-semibold flex gap-x-3 m-3">
                             <span>Constraints:-</span>
                             <span>
                                 {
@@ -127,7 +127,7 @@ const Page = ({ params }: any) => {
                                         ?.constraints
                                 }
                             </span>
-                        </h1>
+                        </h6>
                     </div>
                     <div className="flex flex-col items-center md:flex-row w-full">
                         <div className="w-full md:w-1/2 p-4">

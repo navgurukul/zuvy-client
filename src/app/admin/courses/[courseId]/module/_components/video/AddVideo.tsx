@@ -29,8 +29,22 @@ import { useRouter } from 'next/navigation'
 // Helper function to convert links to embed-friendly format
 
 const isLinkValid = (link: string) => {
-    const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
-    return urlRegex.test(link)
+    // const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
+    // return urlRegex.test(link)
+
+    try {
+        const url = new URL(link.trim())
+
+        const isYouTube =
+            url.hostname.includes('youtube.com') ||
+            url.hostname.includes('youtu.be')
+
+        const isGoogleDrive = url.hostname.includes('drive.google.com')
+
+        return isYouTube || isGoogleDrive
+    } catch {
+        return false // If it's not a valid URL at all
+    }
 }
 const getEmbedLink = (url: string) => {
     if (!url) return ''
@@ -97,7 +111,7 @@ const formSchema = z.object({
             return links.every((link) => isLinkValid(link))
         },
         {
-            message: 'One or more links are invalid.',
+            message: 'Only YouTube and Google Drive links are allowed.',
         }
     ),
 })
@@ -145,6 +159,7 @@ const AddVideo = ({
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        mode: 'onChange',
         defaultValues: {
             videoTitle: '',
             description: '',
@@ -297,7 +312,7 @@ const AddVideo = ({
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
                                         <FormControl>
-                                            <div className="w-[450px] flex justify-center items-center relative">
+                                            <div className="w-[450px] gap-[40%] flex justify-center items-center relative">
                                                 <Input
                                                     required
                                                     {...field} // Spread the field props (e.g., value, name, etc.)
@@ -322,7 +337,16 @@ const AddVideo = ({
                                                     // Adjusted right positioning
                                                     />
                                                 )}
+                                                   
+                                                    <Button
+                                                      type="submit"
+                                                      className="w-3/3 bg-success-dark opacity-75"
+                                                       >
+                                                           Save
+                                                    </Button>
+                                                
                                             </div>
+                                            
                                         </FormControl>
 
                                         {/* <Button
@@ -390,8 +414,11 @@ const AddVideo = ({
                                 name="links"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className=" flex text-left text-xl font-semibold">
+                                        <FormLabel className=" flex items-center gap-1 text-left text-xl font-semibold w-full">
                                             Embed Link
+                                            <span className="text-sm font-normal text-muted-foreground ml-2">
+                                                 (Accepted: YouTube and Google Drive links only.)
+                                           </span>
                                         </FormLabel>
                                         <FormControl>
                                             <Input
@@ -404,12 +431,7 @@ const AddVideo = ({
                                     </FormItem>
                                 )}
                             />
-                            <Button
-                                type="submit"
-                                className=" flex flex-start w-[450px] bg-success-dark opacity-75 text-white font-bold py-2 px-4 rounded"
-                            >
-                                Save
-                            </Button>
+                           
                         </form>
                     </Form>
                 </>
