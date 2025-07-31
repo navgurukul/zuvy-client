@@ -52,11 +52,6 @@ const Page = ({ params }: any) => {
             isLast: false,
         },
         {
-            crumb: 'Video Chapter Completed',
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
             crumb: videoData?.title || 'Loading...',
             // href: '',
             isLast: true,

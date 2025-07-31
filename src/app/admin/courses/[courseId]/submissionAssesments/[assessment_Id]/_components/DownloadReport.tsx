@@ -73,6 +73,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             body: [
                 ['Copy Paste', `${reportData.copyPaste || 0} times`],
                 ['Tab Change', `${reportData.tabChange || 0} times`],
+                ['Exit Full Screen', `${reportData.fullScreenExit || 0} times`],
             ],
             startY: 60,
             theme: 'grid',
@@ -95,14 +96,14 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             body: [
                 [
                     'Coding Questions Attempted',
-                    `${reportData.attemptedCodingQuestions || 0} / ${
-                        reportData.codingQuestionCount || 0
+                    `${reportData.PracticeCode.length || 0} / ${
+                        reportData.submitedOutsourseAssessment.totalCodingQuestions || 0
                     }`,
                 ],
                 [
                     'Coding Score',
                     `${reportData.codingScore || 0} / ${
-                        reportData.requiredCodingScore || 0
+                        reportData.submitedOutsourseAssessment.weightageCodingQuestions || 0
                     }`,
                 ],
             ],
