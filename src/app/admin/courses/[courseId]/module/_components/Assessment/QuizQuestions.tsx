@@ -118,7 +118,7 @@ const QuizQuestions = ({
                                         {question?.quizVariants?.map(
                                             (ques: any) => {
                                                 return (
-                                                    <div className="text-[#4A4A4A] mt-1 overflow-hidden text-ellipsis font-semibold"
+                                                    <div key={ques.id} className="text-[#4A4A4A] mt-1 overflow-hidden text-ellipsis font-semibold"
                                                         style={{
                                                             display: '-webkit-box',
                                                             WebkitLineClamp: 3,
