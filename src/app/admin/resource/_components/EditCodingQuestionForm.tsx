@@ -177,17 +177,17 @@ export default function EditCodingQuestionForm() {
                 }
                 break;
             }
-            case 'str': {
-                if (value.includes(' ')) {
-                    toast.error({
-                        title: "Invalid Output Format",
-                        description: "You can only add one string as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-                break;
-            }
+            // case 'str': {
+            //     if (value.includes(' ')) {
+            //         toast.error({
+            //             title: "Invalid Output Format",
+            //             description: "You can only add one string as output",
+            //             className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+            //         });
+            //         return false;
+            //     }
+            //     break;
+            // }
         }
         return true;
     };
