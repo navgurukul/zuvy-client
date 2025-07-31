@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { PlusCircle } from 'lucide-react'
 import Link from 'next/link'
@@ -48,7 +49,55 @@ const QuizQuestions = ({
           setSelectedQuestions([...selectedQuestions, question]);
         }
         setIsNewQuestionAdded(true);
-      };
+    };
+
+    const renderQuestionContent = (question: MCQQuestion) => {
+        const questionText = question?.quizVariants?.[0]?.question || question.question;
+
+        console.log('questionText', questionText)
+        
+        // Check if question contains code blocks
+        const hasCodeBlock = questionText && (questionText.includes('<pre') && questionText.includes('<code'));
+        
+        if (hasCodeBlock) {
+            // For code questions, extract text and show preview
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = questionText;
+            const textContent = tempDiv.textContent || tempDiv.innerText || '';
+            const preview = textContent.length > 50 ? textContent.substring(0, 50) + '...' : textContent;
+            
+            return (
+                <div className="p-2 text-sm text-gray-700">
+                    {preview}
+                </div>
+            );
+        } else {
+            // For regular questions, handle cases where the first content is an image
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = questionText;
+
+            // Remove all <img> tags
+            tempDiv.querySelectorAll('img').forEach((img) => img.remove());
+
+            // Convert heading tags (e.g., <h1>, <h2>, etc.) to plain text
+            tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading) => {
+                const textNode = document.createTextNode(heading.textContent || '');
+                heading.replaceWith(textNode);
+            });
+
+            // Extract the remaining HTML content
+            const sanitizedHTML = tempDiv.innerHTML;
+
+            // Truncate the content if it's too long
+            const truncatedQuestion = ellipsis(sanitizedHTML, 40);
+
+            return (
+                <span
+                    dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
+                />
+            );
+        }
+    };
 
     return (
         <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
@@ -69,15 +118,14 @@ const QuizQuestions = ({
                                         {question?.quizVariants?.map(
                                             (ques: any) => {
                                                 return (
-                                                    <span
-                                                        key={ques}
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: ellipsis(
-                                                                ques.question,
-                                                                40
-                                                            ),
-                                                        }}
-                                                    ></span>
+                                                    <div key={ques.id} className="text-[#4A4A4A] mt-1 overflow-hidden text-ellipsis font-semibold"
+                                                        style={{
+                                                            display: '-webkit-box',
+                                                            WebkitLineClamp: 3,
+                                                            WebkitBoxOrient: 'vertical',
+                                                        }}>
+                                                        {renderQuestionContent(question)}
+                                                    </div>
                                                 )
                                             }
                                         )}
@@ -145,11 +193,19 @@ const QuizQuestions = ({
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-full">
+                                {/* <div className="w-full">
                                     <p className="text-[#4A4A4A] mt-1 font-[14px">
                                         {ellipsis(question.question, 60)}
                                     </p>
-                                </div>
+                                    <div className="text-[#4A4A4A] mt-1 font-[14px] overflow-hidden text-ellipsis font-semibold"
+                                        style={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 3,
+                                            WebkitBoxOrient: 'vertical',
+                                        }}>
+                                        {renderQuestionContent(question)}
+                                    </div>
+                                </div> */}
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
