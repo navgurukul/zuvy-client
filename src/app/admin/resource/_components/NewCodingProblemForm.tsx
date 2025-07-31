@@ -28,6 +28,10 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
+import React from 'react';
+
+const GEMINI_API_KEY = 'AIzaSyBpFQeiF31PiM-IVmCwzwt_gSdzQh3au34';
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -71,6 +75,7 @@ const formSchema = z.object({
     ),
 })
 
+type TestCaseError = { index: number; message: string };
 
 export default function NewCodingProblemForm({
     tags,
@@ -100,6 +105,10 @@ export default function NewCodingProblemForm({
     ])
 
     const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
+    const [testCaseErrors, setTestCaseErrors] = useState<TestCaseError[]>([]); // [{index, message}]
+
+    // Add refs for scrolling to error test case
+    const testCaseRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     let outputObjectRef = useRef('' as any);
 
@@ -246,8 +255,6 @@ export default function NewCodingProblemForm({
                         <SelectItem
                             key={type}
                             value={type}
-
-
                         >
                             {type} {!isCurrentType && isUsed}
                         </SelectItem>
@@ -418,13 +425,140 @@ export default function NewCodingProblemForm({
         return true;
     };
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    // 1. Real AI validation API call to Gemini
+    async function validateTestCasesWithAI(testCases: any[], problemData: any): Promise<{ success: boolean; errors: TestCaseError[] }> {
+        let prompt = `You are an expert coding assistant. Given the following coding problem and its test cases, validate each test case for correctness.\n` +
+            `A valid test case is one which satisfies the constraints and whose output is correct as per the given inputs and the problem defined.\n` +
+            `Consider the problem name, description, constraints, and all test cases.\n` +
+            `Return a JSON object in this format: {\"results\": [{\"index\": <testcase_index>, \"valid\": true/false, \"message\": \"error or success message\"}, ...]}. If a test case is valid, set message to 'OK'. Only reply with the JSON.\n` +
+            `Example:\n` +
+            `Input:\nProblem Name: Sum of Two Numbers\nDescription: Given two integers, return their sum.\nConstraints: -1000 <= a, b <= 1000\nTest Cases:\nTest Case 1:\n  Inputs: int: 2, int: 3\n  Output: int: 5\nTest Case 2:\n  Inputs: int: 1001, int: 2\n  Output: int: 1003\n\nOutput:\n{\"results\": [{\"index\": 0, \"valid\": true, \"message\": \"OK\"}, {\"index\": 1, \"valid\": false, \"message\": \"Input 1001 violates the constraint -1000 <= a <= 1000\"}]}\n` +
+            `\nNow validate the following:\n` +
+            `Problem Name: ${problemData.title}\n` +
+            `Description: ${problemData.description}\n` +
+            `Constraints: ${problemData.constraints}\n` +
+            `Test Cases (inputs and expected outputs):\n`;
+        // @ts-ignore
+        prompt += testCases.map((tc: any, idx: number) => {
+            // @ts-ignore
+            return `Test Case ${idx + 1}:\n  Inputs: ${tc.inputs.map((input, inputIndex) => `${input.type}: ${input.value}`).join(', ')}\n  Output: ${tc.output.type}: ${tc.output.value}`;
+        }).join('\n');
 
-      let hasErrors =  showSyntaxErrors(testCases);
+        const body = {
+            contents: [
+                {
+                    parts: [
+                        { text: prompt }
+                    ]
+                }
+            ]
+        };
+
+        try {
+            const response = await fetch(GEMINI_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+            const data = await response.json();
+            let aiText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            console.log('Gemini raw AI response:', aiText);
+            if (!aiText) {
+                console.error('No response text from Gemini:', data);
+                toast.error({
+                    title: 'AI Validation Error',
+                    description: 'No response from Gemini AI. Please try again later.'
+                });
+                // Show a generic error under each test case
+                return { success: false, errors: testCases.map((_: any, idx: number) => ({ index: idx, message: 'No response from AI' })) };
+            }
+            // Strip code block markers if present
+            let cleanedText = aiText.trim();
+            if (cleanedText.startsWith('```')) {
+                cleanedText = cleanedText.replace(/^```json\s*|^```\s*|```$/gim, '');
+                cleanedText = cleanedText.replace(/```$/g, '');
+            }
+            let aiResult;
+            try {
+                aiResult = JSON.parse(cleanedText);
+            } catch (e) {
+                console.error('Failed to parse AI response as JSON:', aiText);
+                toast.error({
+                    title: 'AI Validation Error',
+                    description: 'AI response not in expected format. Please try again.'
+                });
+                // Show a generic error under each test case
+                return { success: false, errors: testCases.map((_: any, idx: number) => ({ index: idx, message: 'AI response not in expected format' })) };
+            }
+            if (!aiResult.results || !Array.isArray(aiResult.results)) {
+                console.error('AI response missing results array:', aiResult);
+                toast.error({
+                    title: 'AI Validation Error',
+                    description: 'AI response missing results array. Please try again.'
+                });
+                // Show a generic error under each test case
+                return { success: false, errors: testCases.map((_: any, idx: number) => ({ index: idx, message: 'AI response missing results array' })) };
+            }
+            // If all test cases are valid, return success
+            const errors = aiResult.results.filter((r: any) => !r.valid);
+            if (errors.length > 0) {
+                return { success: false, errors };
+            }
+            return { success: true, errors: [] };
+        } catch (err) {
+            console.error('Error contacting Gemini API:', err);
+            toast.error({
+                title: 'AI Validation Error',
+                description: 'Failed to contact AI validation service. Please check your network or try again later.'
+            });
+            // Show a generic error under each test case
+            return { success: false, errors: testCases.map((_: any, idx: number) => ({ index: idx, message: 'Failed to contact AI validation service' })) };
+        }
+    }
+
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+
+        setTestCaseErrors([]); // Clear previous errors
+        let hasErrors = showSyntaxErrors(testCases);
 
         // If there are validation errors, return early and don't submit
         if (hasErrors) {
             return
+        }
+
+        // 2. AI validation step before formatting data
+        const aiValidationResult = await validateTestCasesWithAI(testCases, {
+            title: values.title,
+            description: values.problemStatement,
+            constraints: values.constraints,
+            difficulty: values.difficulty,
+            tagId: values.topics,
+        });
+        if (!aiValidationResult.success) {
+            setTestCaseErrors(aiValidationResult.errors);
+
+            // Set Zod-style error for testCases (shows under test case section)
+            form.setError("testCases", {
+                type: "manual",
+                message: "Please fix the highlighted test cases.",
+            });
+
+            // Scroll to the first test case with error
+            if (aiValidationResult.errors.length > 0) {
+                const firstErrorIndex = aiValidationResult.errors[0].index;
+                const ref = testCaseRefs.current[firstErrorIndex];
+                if (ref) {
+                    ref.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            return;
+        } else {
+            toast.success({
+                title: 'Test Case Validation Successful',
+                description: 'All test cases passed AI validation.',
+            });
         }
 
         const formattedData = {
@@ -724,151 +858,165 @@ export default function NewCodingProblemForm({
 
                     <div className="text-left">
                         <FormLabel className=''>Test Cases</FormLabel>
-                        {testCases.map((testCase, testCaseIndex) => (
-                            <div key={testCase.id} className="my-4 p-3 border rounded border-green-100 bg-green-50">
-                                {/* Input Section */}
-                                <div className="mb-4">
-                                    <h2 className='text-sm font-semibold mb-2'>Input</h2>
-                                    <div className="space-y-2">
-                                        {testCase.inputs.map((input, inputIndex) => (
-                                            <div key={input.id} className="flex items-center gap-2">
-                                                <InputTypeSelect
-                                                    testCaseIndex={testCaseIndex}
-                                                    inputIndex={inputIndex}
-                                                    currentType={input.type}
-                                                />
+                        {testCases.map((testCase: any, testCaseIndex: number) => {
+                            const errorObj: TestCaseError | undefined = testCaseErrors.find((e: TestCaseError) => e.index === testCaseIndex);
+                            return (
+                                <div
+                                    key={testCase.id}
+                                    ref={el => testCaseRefs.current[testCaseIndex] = el}
+                                    className={`my-4 p-3 border rounded border-green-100 bg-green-50 ${errorObj ? 'border-red-500' : ''}`}>
+                                    {/* Input Section */}
+                                    <div className="mb-4">
+                                        <h2 className='text-sm font-semibold mb-2'>Input</h2>
+                                        <div className="space-y-2">
+                                            {testCase.inputs.map((input, inputIndex) => (
+                                                <div key={input.id} className="flex items-center gap-2">
+                                                    <InputTypeSelect
+                                                        testCaseIndex={testCaseIndex}
+                                                        inputIndex={inputIndex}
+                                                        currentType={input.type}
+                                                    />
 
-                                                <Input
-                                                    placeholder={getPlaceholder(input.type)}
-                                                    value={input.value}
-                                                    onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
-                                                    className={input.type === 'jsonType' ? 'hidden' : ''} // Hide regular input for JSON type
-                                                />
-                                                {input.type === 'jsonType' && (
-                                                    <Textarea
-                                                        required
-                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                    <Input
+                                                        placeholder={getPlaceholder(input.type)}
                                                         value={input.value}
                                                         onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
-                                                        className="mt-2 overflow-auto"
+                                                        className={input.type === 'jsonType' ? 'hidden' : ''} // Hide regular input for JSON type
                                                     />
-                                                )}
+                                                    {input.type === 'jsonType' && (
+                                                        <Textarea
+                                                            required
+                                                            placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                            value={input.value}
+                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
+                                                            className="mt-2 overflow-auto"
+                                                        />
+                                                    )}
 
-                                                {testCase.inputs.length > 1 && testCaseIndex === 0 && (
-                                                    <X
-                                                        className="cursor-pointer"
-                                                        onClick={() => {
-                                                            if (testCaseIndex === 0) {
-                                                                const newTestCases = testCases.map(tc => ({
-                                                                    ...tc,
-                                                                    inputs: tc.inputs.filter((_, idx) => idx !== inputIndex)
-                                                                }));
-                                                                setTestCases(newTestCases);
-                                                            } else {
-                                                                handleRemoveInput(testCase.id, input.id);
-                                                            }
-                                                        }}
-                                                    />
-                                                )}
-                                            </div>
-                                        ))}
-                                        {testCaseIndex === 0 && (
-                                            <Button
-                                                type="button"
-                                                onClick={() => handleAddInputType(testCase.id)}
-                                                className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
-                                                disabled={testCase.inputs.length >= inputTypes.length}
-                                            >
-                                                <Plus size={16} className="mr-2" />
-                                                Add Input
-                                            </Button>
-                                        )}
+                                                    {testCase.inputs.length > 1 && testCaseIndex === 0 && (
+                                                        <X
+                                                            className="cursor-pointer"
+                                                            onClick={() => {
+                                                                if (testCaseIndex === 0) {
+                                                                    const newTestCases = testCases.map(tc => ({
+                                                                        ...tc,
+                                                                        inputs: tc.inputs.filter((_, idx) => idx !== inputIndex)
+                                                                    }));
+                                                                    setTestCases(newTestCases);
+                                                                } else {
+                                                                    handleRemoveInput(testCase.id, input.id);
+                                                                }
+                                                            }}
+                                                        />
+                                                    )}
+                                                </div>
+                                            ))}
+                                            {testCaseIndex === 0 && (
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => handleAddInputType(testCase.id)}
+                                                    className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
+                                                    disabled={testCase.inputs.length >= inputTypes.length}
+                                                >
+                                                    <Plus size={16} className="mr-2" />
+                                                    Add Input
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Output Section */}
-                                <div>
-                                    <h2 className='text-sm font-semibold mb-2'>Output</h2>
-                                    <div className="flex items-center gap-2">
-                                        <Select
-                                            value={testCase.output.type}
-                                            onValueChange={(newType) => {
-                                                if (testCaseIndex === 0) {
-                                                    const newTestCases = testCases.map(tc => ({
-                                                        ...tc,
-                                                        output: { ...tc.output, type: newType, value: '' }
-                                                    }));
-                                                    setTestCases(newTestCases);
-                                                }
-                                            }}
-                                            disabled={testCaseIndex !== 0}
-                                        >
-                                            <SelectTrigger className="w-[180px]">
-                                                <SelectValue placeholder="Output Type" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {outputTypes.map(type => (
-                                                    <SelectItem key={type} value={type}>
-                                                        {type}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-
-                                        {testCase.output.type === 'jsonType' ? (
-                                            <Textarea
-                                                required
-                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
-                                                value={testCase.output.value}
-                                                onChange={(e) => {
-                                                    const newValue = e.target.value;
-                                                    if (!validateFieldValue(newValue, testCase.output.type)) {
-                                                        return;
+                                    {/* Output Section */}
+                                    <div>
+                                        <h2 className='text-sm font-semibold mb-2'>Output</h2>
+                                        <div className="flex items-center gap-2">
+                                            <Select
+                                                value={testCase.output.type}
+                                                onValueChange={(newType) => {
+                                                    if (testCaseIndex === 0) {
+                                                        const newTestCases = testCases.map(tc => ({
+                                                            ...tc,
+                                                            output: { ...tc.output, type: newType, value: '' }
+                                                        }));
+                                                        setTestCases(newTestCases);
                                                     }
-                                                    const newTestCases = [...testCases];
-                                                    newTestCases[testCaseIndex].output.value = newValue;
-                                                    setTestCases(newTestCases);
                                                 }}
-                                                className="flex-grow overflow-auto"
-                                            />
-                                        ) : (
-                                            <Input
-                                                placeholder={getPlaceholder(testCase.output.type)}
-                                                value={testCase.output.value}
-                                                onChange={(e) => {
-                                                    const newValue = e.target.value;
-                                                    // First check if it's a single value type (int, float, str)
-                                                    if (['int', 'float', 'str'].includes(testCase.output.type)) {
-                                                        if (!validateOutputValue(newValue, testCase.output.type)) {
+                                                disabled={testCaseIndex !== 0}
+                                            >
+                                                <SelectTrigger className="w-[180px]">
+                                                    <SelectValue placeholder="Output Type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {outputTypes.map(type => (
+                                                        <SelectItem key={type} value={type}>
+                                                            {type}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+
+                                            {testCase.output.type === 'jsonType' ? (
+                                                <Textarea
+                                                    required
+                                                    placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                    value={testCase.output.value}
+                                                    onChange={(e) => {
+                                                        const newValue = e.target.value;
+                                                        if (!validateFieldValue(newValue, testCase.output.type)) {
                                                             return;
                                                         }
-                                                    }
-                                                    // Then check the general format
-                                                    else if (!validateFieldValue(newValue, testCase.output.type)) {
-                                                        return;
-                                                    }
-                                                    const newTestCases = [...testCases];
-                                                    newTestCases[testCaseIndex].output.value = newValue;
-                                                    setTestCases(newTestCases);
-                                                }}
-                                                className="flex-grow"
-                                            />
-                                        )}
+                                                        const newTestCases = [...testCases];
+                                                        newTestCases[testCaseIndex].output.value = newValue;
+                                                        setTestCases(newTestCases);
+                                                    }}
+                                                    className="flex-grow overflow-auto"
+                                                />
+                                            ) : (
+                                                <Input
+                                                    placeholder={getPlaceholder(testCase.output.type)}
+                                                    value={testCase.output.value}
+                                                    onChange={(e) => {
+                                                        const newValue = e.target.value;
+                                                        // First check if it's a single value type (int, float, str)
+                                                        if (['int', 'float', 'str'].includes(testCase.output.type)) {
+                                                            if (!validateOutputValue(newValue, testCase.output.type)) {
+                                                                return;
+                                                            }
+                                                        }
+                                                        // Then check the general format
+                                                        else if (!validateFieldValue(newValue, testCase.output.type)) {
+                                                            return;
+                                                        }
+                                                        const newTestCases = [...testCases];
+                                                        newTestCases[testCaseIndex].output.value = newValue;
+                                                        setTestCases(newTestCases);
+                                                    }}
+                                                    className="flex-grow"
+                                                />
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
 
-                                {testCases.length > 1 && (
-                                    <Button
-                                        variant="ghost"
-                                        className="mt-4 text-destructive hover:text-destructive"
-                                        onClick={() => handleRemoveTestCase(testCase.id)}
-                                    >
-                                        <X size={16} className="mr-2" />
-                                        Remove Test Case
-                                    </Button>
-                                )}
-                            </div>
-                        ))}
+                                    {errorObj && (
+                                        <div className="mt-2 text-red-600 text-sm border-t pt-2 border-red-200">
+                                            {errorObj.message}
+                                        </div>
+                                    )}
+                                    {testCases.length > 1 && (
+                                        <Button
+                                            variant="ghost"
+                                            className="mt-4 text-destructive hover:text-destructive"
+                                            onClick={() => handleRemoveTestCase(testCase.id)}
+                                        >
+                                            <X size={16} className="mr-2" />
+                                            Remove Test Case
+                                        </Button>
+                                    )}
+                                </div>
+                            );
+                        })}
+
+                        {/* Show Zod error message below test cases */}
+                        <FormMessage />
 
                         <Button
                             type="button"
