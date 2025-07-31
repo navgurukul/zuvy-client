@@ -104,8 +104,25 @@ export const columns: ColumnDef<quiz>[] = [
                     </div>
                 )
             } else {
-                // For regular questions, use your original logic
-                const truncatedQuestion = ellipsis(question, 70)
+                // For regular questions, handle cases where the first content is an image
+                const tempDiv = document.createElement('div')
+                tempDiv.innerHTML = question
+
+                // Remove all <img> tags
+                tempDiv.querySelectorAll('img').forEach((img) => img.remove())
+
+                // Convert heading tags (e.g., <h1>, <h2>, etc.) to plain text
+                tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading) => {
+                    const textNode = document.createTextNode(heading.textContent || '');
+                    heading.replaceWith(textNode);
+                });
+
+                // Extract the remaining HTML content
+                const sanitizedHTML = tempDiv.innerHTML
+
+                // Truncate the content if it's too long
+                const truncatedQuestion = ellipsis(sanitizedHTML, 70)
+
                 return (
                     <div
                         className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
