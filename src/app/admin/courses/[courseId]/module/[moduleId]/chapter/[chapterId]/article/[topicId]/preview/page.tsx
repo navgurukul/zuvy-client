@@ -55,6 +55,9 @@ const PreviewArticle = ({ params }: { params: any }) => {
         }
     }, [articlePreviewContent])
 
+    const pdfLink =
+        articlePreviewContent?.contentDetails?.[0]?.links?.[0] || null
+
     return (
         <div className="">
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
@@ -95,7 +98,9 @@ const PreviewArticle = ({ params }: { params: any }) => {
                             />
                         </div>
                         <div className="mt-2 text-end">
-                            <Button className='bg-[#518672]' disabled>Mark as Done </Button>
+                            <Button className="bg-[#518672]" disabled>
+                                Mark as Done{' '}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -110,11 +115,19 @@ const PreviewArticle = ({ params }: { params: any }) => {
                             Go back
                         </p>
                     </Link>
-
-                    <iframe
-                        className="h-screen w-full "
-                        src={articlePreviewContent?.contentDetails[0]?.links[0]}
-                    />
+                    {pdfLink ? (
+                        <iframe
+                            src={pdfLink}
+                            width="100%"
+                            height="800"
+                            title="PDF Preview"
+                            className="border rounded"
+                        />
+                    ) : (
+                        <div className="mt-4 p-4 border rounded bg-gray-50">
+                            <p>No PDF available for preview</p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

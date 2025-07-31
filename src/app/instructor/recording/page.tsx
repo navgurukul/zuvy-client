@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { OFFSET, POSITION } from '@/utils/constant'
 import useDebounce from '@/hooks/useDebounce'
 import { Input } from '@/components/ui/input'
@@ -10,8 +11,10 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import Image from 'next/image'
 
 const Recordings = () => {
+    const searchParams = useSearchParams()
     const [classRecordings, setClassRecordings] = useState<any[]>([])
-    const [position, setPosition] = useState(POSITION)
+    // const [position, setPosition] = useState(POSITION)
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const [pages, setPages] = useState<number>()
     const [offset, setOffset] = useState<number>(OFFSET)
     const [currentPage, setCurrentPage] = useState<number>(1)

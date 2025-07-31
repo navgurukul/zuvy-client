@@ -106,9 +106,9 @@ const Header = () => {
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
                 <img 
-                  src={'/zuvy-logo-dark.png'} 
+                  src={'/logo.PNG'}     
                   alt="Zuvy" 
-              className="h-6"
+              className="h-12"
             />
           </div>
 
@@ -203,14 +203,14 @@ const Header = () => {
   }
 
   return (
-    <header className="w-full h-16 px-4 sm:px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
+    <header className="w-screen h-16 px-4 sm:px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
       {/* Left - Logo and Navigation */}
       <div className="flex items-center gap-2 sm:gap-4">
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
           <img 
-            src={'/zuvy-logo-dark.png'} 
+            src={'/logo.PNG'} 
             alt="Zuvy" 
-            className="h-6"
+            className="h-12"
           />
         </div>
 
@@ -288,9 +288,8 @@ const Header = () => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogoutClick} className="text-red-600 focus:text-red-600">
-              {/* <LogOut className="mr-2 h-4 w-4" /> */}
-              <span>Logout</span>
+            <DropdownMenuItem onClick={handleLogoutClick} className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600">
+            Logout            
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

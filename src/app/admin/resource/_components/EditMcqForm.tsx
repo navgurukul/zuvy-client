@@ -80,6 +80,7 @@ const EditMcqForm = ({
 
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
+    const [isContentValid, setIsContentValid] = useState<boolean>(true) // New state
     const [selectedTag, setSelectedTag] = useState<{
         id: number
         tagName: String
@@ -458,6 +459,7 @@ const EditMcqForm = ({
                                             <RemirrorForForm
                                                 description={field.value}
                                                 onChange={field.onChange}
+                                                onValidationChange={setIsContentValid} // Pass validation callback
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -607,7 +609,11 @@ const EditMcqForm = ({
                             />
                         </>
                     )}
-                    <Button className="bg-success-dark opacity-75" type="submit">
+                    <Button 
+                        className="bg-success-dark opacity-75" 
+                        type="submit"
+                        disabled={!isContentValid} // Disable button if content is invalid
+                    >
                         {isVariantAdded ? 'Add Variant' : 'Save Question'}
                     </Button>
                 </div>

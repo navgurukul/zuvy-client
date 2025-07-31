@@ -1,12 +1,19 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { AlertCircle, ChevronDown, GraduationCap, Plus, Search, X } from 'lucide-react'
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import {
+    AlertCircle,
+    ChevronDown,
+    GraduationCap,
+    Plus,
+    Search,
+    X,
+} from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card} from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import Heading from '../_components/header'
@@ -57,10 +64,10 @@ const Courses: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState<string>(
         searchParams.get('search') || ''
     )
-    
+
     // Separate debounced search only for suggestions
     const debouncedSearchForSuggestions = useDebounce(searchQuery, 100)
-    
+
     // Track the actual search term that should trigger course fetching
     const [activeSearchTerm, setActiveSearchTerm] = useState<string>(
         searchParams.get('search') || ''
@@ -70,9 +77,13 @@ const Courses: React.FC = () => {
     const [allCourses, setAllCourses] = useState<Course[]>([]) // Store all courses for search suggestions
     const [filteredSuggestions, setFilteredSuggestions] = useState<Course[]>([])
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
-    const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState<number>(-1)
+    const [selectedSuggestionIndex, setSelectedSuggestionIndex] =
+        useState<number>(-1)
 
-    const [position, setPosition] = useState(POSITION)
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const [currentPage, setCurrentPage] = useState(1)
     const [totalBootcamps, setTotalBootcamps] = useState(0)
     const [pages, setPages] = useState(0)
@@ -84,18 +95,21 @@ const Courses: React.FC = () => {
     const [hasAccess, setHasAccess] = useState<boolean>(true)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-     // func
+    // func
     // const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
     //     setActiveFilter(filter)
     // }
 
     // Improved search filtering function for suggestions
-    const filterCoursesByRelevance = (courses: Course[], searchTerm: string): Course[] => {
+    const filterCoursesByRelevance = (
+        courses: Course[],
+        searchTerm: string
+    ): Course[] => {
         const lowerSearchTerm = searchTerm.toLowerCase().trim()
-        
+
         if (!lowerSearchTerm) return []
 
-        const scoredCourses = courses.map(course => {
+        const scoredCourses = courses.map((course) => {
             const courseName = course.name.toLowerCase()
             let score = 0
 
@@ -108,9 +122,11 @@ const Courses: React.FC = () => {
                 score = 80
             }
             // Word boundary match gets medium score
-            else if (courseName.includes(` ${lowerSearchTerm} `) || 
-                     courseName.includes(` ${lowerSearchTerm}`) ||
-                     courseName.includes(`${lowerSearchTerm} `)) {
+            else if (
+                courseName.includes(` ${lowerSearchTerm} `) ||
+                courseName.includes(` ${lowerSearchTerm}`) ||
+                courseName.includes(`${lowerSearchTerm} `)
+            ) {
                 score = 60
             }
             // Contains search term gets lower score
@@ -127,24 +143,27 @@ const Courses: React.FC = () => {
 
         // Filter out courses with no match and sort by score (descending)
         return scoredCourses
-            .filter(item => item.score > 0)
+            .filter((item) => item.score > 0)
             .sort((a, b) => b.score - a.score)
-            .map(item => item.course)
+            .map((item) => item.course)
             .slice(0, 6) // Limit to 6 suggestions to avoid scrolling
     }
 
     // Update URL when search query changes
-    const updateURL = useCallback((searchTerm: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        if (searchTerm) {
-            params.set('search', searchTerm)
-        } else {
-            params.delete('search')
-        }
+    const updateURL = useCallback(
+        (searchTerm: string) => {
+            const params = new URLSearchParams(searchParams.toString())
+            if (searchTerm) {
+                params.set('search', searchTerm)
+            } else {
+                params.delete('search')
+            }
 
-        const newURL = `${window.location.pathname}?${params.toString()}`
-        router.replace(newURL, { scroll: false })
-    }, [router, searchParams])
+            const newURL = `${window.location.pathname}?${params.toString()}`
+            router.replace(newURL, { scroll: false })
+        },
+        [router, searchParams]
+    )
 
     // Fetch all courses for search suggestions
     const getAllCourses = useCallback(async () => {
@@ -160,11 +179,13 @@ const Courses: React.FC = () => {
     const getBootcamp = useCallback(
         async (offset: number) => {
             let url = `/bootcamp?limit=${position}&offset=${offset}`
-            
+
             if (activeSearchTerm) {
-                url = `/bootcamp?limit=${position}&searchTerm=${encodeURIComponent(activeSearchTerm)}`
+                url = `/bootcamp?limit=${position}&searchTerm=${encodeURIComponent(
+                    activeSearchTerm
+                )}`
             }
-            
+
             try {
                 const response = await api.get(url)
                 setCourses(response.data.data)
@@ -230,20 +251,22 @@ const Courses: React.FC = () => {
         switch (event.key) {
             case 'ArrowDown':
                 event.preventDefault()
-                setSelectedSuggestionIndex(prev =>
+                setSelectedSuggestionIndex((prev) =>
                     prev < filteredSuggestions.length - 1 ? prev + 1 : 0
                 )
                 break
             case 'ArrowUp':
                 event.preventDefault()
-                setSelectedSuggestionIndex(prev =>
+                setSelectedSuggestionIndex((prev) =>
                     prev > 0 ? prev - 1 : filteredSuggestions.length - 1
                 )
                 break
             case 'Enter':
                 event.preventDefault()
                 if (selectedSuggestionIndex >= 0) {
-                    handleSuggestionClick(filteredSuggestions[selectedSuggestionIndex])
+                    handleSuggestionClick(
+                        filteredSuggestions[selectedSuggestionIndex]
+                    )
                 } else if (searchQuery.trim()) {
                     // Manual search - trigger course fetching
                     handleManualSearch(searchQuery.trim())
@@ -258,6 +281,7 @@ const Courses: React.FC = () => {
 
     // Clear search
     const clearSearch = () => {
+        if (!activeSearchTerm) return // already cleared, avoid unnecessary reset
         setSearchQuery('')
         setActiveSearchTerm('') // This will trigger fetching all courses
         setShowSuggestions(false)
@@ -271,20 +295,30 @@ const Courses: React.FC = () => {
     // Close suggestions when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+            if (
+                searchContainerRef.current &&
+                !searchContainerRef.current.contains(event.target as Node)
+            ) {
                 setShowSuggestions(false)
                 setSelectedSuggestionIndex(-1)
             }
         }
 
         document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
+        return () =>
+            document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
     // Update suggestions based on debounced search (only for suggestions)
     useEffect(() => {
-        if (debouncedSearchForSuggestions.trim() && debouncedSearchForSuggestions.length > 0) {
-            const filtered = filterCoursesByRelevance(allCourses, debouncedSearchForSuggestions)
+        if (
+            debouncedSearchForSuggestions.trim() &&
+            debouncedSearchForSuggestions.length > 0
+        ) {
+            const filtered = filterCoursesByRelevance(
+                allCourses,
+                debouncedSearchForSuggestions
+            )
             setFilteredSuggestions(filtered)
         } else {
             setFilteredSuggestions([])
@@ -295,6 +329,13 @@ const Courses: React.FC = () => {
     useEffect(() => {
         getBootcamp(offset)
     }, [getBootcamp, offset])
+
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            // If user manually clears input, reset everything
+            clearSearch()
+        }
+    }, [searchQuery])
 
     // Initialize all courses
     useEffect(() => {
@@ -330,7 +371,6 @@ const Courses: React.FC = () => {
         } else {
             try {
                 const response = await api.post('/bootcamp', courseData)
-
                 toast.success({
                     title: response.data.status,
                     description: response.data.message,
@@ -341,6 +381,9 @@ const Courses: React.FC = () => {
                 getBootcamp(offset)
                 // Refresh all courses for suggestions
                 getAllCourses()
+                router.push(
+                    `/admin/courses/${response.data.bootcamp.id}/details`
+                )
             } catch (error: any) {
                 toast.error({
                     title: error?.data?.status || 'Error',
@@ -402,14 +445,20 @@ const Courses: React.FC = () => {
                                     Your calendar access has expired. Please log
                                     in again to gain access to the courses
                                 </AlertDescription>
-                                <Button onClick={calendarAccess} className='bg-success-dark opacity-75 font-semibold'>
+                                <Button
+                                    onClick={calendarAccess}
+                                    className="bg-success-dark opacity-75 font-semibold"
+                                >
                                     Give access
                                 </Button>
                             </Alert>
                         ) : null}
                         <div className="flex flex-col lg:flex-row justify-between items-center mt-6 gap-4">
                             {/* Enhanced Search Input with Suggestions */}
-                            <div className="relative w-full lg:max-w-[500px]" ref={searchContainerRef}>
+                            <div
+                                className="relative w-full lg:max-w-[500px]"
+                                ref={searchContainerRef}
+                            >
                                 <div className="relative">
                                     <Input
                                         ref={searchInputRef}
@@ -420,7 +469,10 @@ const Courses: React.FC = () => {
                                         onChange={handleSearchChange}
                                         onKeyDown={handleKeyDown}
                                         onFocus={() => {
-                                            if (searchQuery.trim() && filteredSuggestions.length > 0) {
+                                            if (
+                                                searchQuery.trim() &&
+                                                filteredSuggestions.length > 0
+                                            ) {
                                                 setShowSuggestions(true)
                                             }
                                         }}
@@ -438,29 +490,44 @@ const Courses: React.FC = () => {
                                 </div>
 
                                 {/* Clean Search Suggestions Dropdown */}
-                                {showSuggestions && filteredSuggestions.length > 0 && (
-                                    <div className="absolute top-full left-0 right-0 z-50 mt-1">
-                                        <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
-                                            {filteredSuggestions.map((course, index) => (
-                                                <div
-                                                    key={course.id}
-                                                    className={cn(
-                                                        "px-3 py-2.5 cursor-pointer text-sm transition-colors",
-                                                        "hover:bg-muted/50",
-                                                        index === selectedSuggestionIndex && "bg-muted",
-                                                        index !== filteredSuggestions.length - 1 
-                                                    )}
-                                                    onClick={() => handleSuggestionClick(course)}
-                                                    onMouseEnter={() => setSelectedSuggestionIndex(index)}
-                                                >
-                                                    <div className="capitalize font-medium text-foreground text-left">
-                                                        {course.name}
-                                                    </div>
-                                                </div>
-                                            ))}
+                                {showSuggestions &&
+                                    filteredSuggestions.length > 0 && (
+                                        <div className="absolute top-full left-0 right-0 z-50 mt-1">
+                                            <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
+                                                {filteredSuggestions.map(
+                                                    (course, index) => (
+                                                        <div
+                                                            key={course.id}
+                                                            className={cn(
+                                                                'px-3 py-2.5 cursor-pointer text-sm transition-colors',
+                                                                'hover:bg-muted/50',
+                                                                index ===
+                                                                    selectedSuggestionIndex &&
+                                                                    'bg-muted',
+                                                                index !==
+                                                                    filteredSuggestions.length -
+                                                                        1
+                                                            )}
+                                                            onClick={() =>
+                                                                handleSuggestionClick(
+                                                                    course
+                                                                )
+                                                            }
+                                                            onMouseEnter={() =>
+                                                                setSelectedSuggestionIndex(
+                                                                    index
+                                                                )
+                                                            }
+                                                        >
+                                                            <div className="capitalize font-medium text-foreground text-left">
+                                                                {course.name}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
                             </div>
 
                             <Dialog>

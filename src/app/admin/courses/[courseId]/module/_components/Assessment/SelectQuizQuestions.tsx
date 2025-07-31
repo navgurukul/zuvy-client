@@ -45,6 +45,44 @@ const SelectQuizQuestions = ({
         setIsNewQuestionAdded(true);
     };
 
+    const renderQuestionContent = (question: any) => {
+        const questionText = question?.quizVariants?.[0]?.question || question.question;
+        
+        // Check if question contains code blocks
+        const hasCodeBlock = questionText && (questionText.includes('<pre') && questionText.includes('<code'));
+        
+        if (hasCodeBlock) {
+            // For code questions, extract text and show preview
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = questionText;
+            const textContent = tempDiv.textContent || tempDiv.innerText || '';
+            const preview = textContent.length > 50 ? textContent.substring(0, 50) + '...' : textContent;
+            
+            return preview;
+        } else {
+            // For regular questions, handle cases where the first content is an image
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = questionText;
+
+            // Remove all <img> tags
+            tempDiv.querySelectorAll('img').forEach((img) => img.remove());
+
+            // Convert heading tags (e.g., <h1>, <h2>, etc.) to plain text
+            tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading) => {
+                const textNode = document.createTextNode(heading.textContent || '');
+                heading.replaceWith(textNode);
+            });
+
+            // Extract the remaining HTML content
+            const sanitizedHTML = tempDiv.innerHTML;
+
+            // Truncate the content if it's too long
+            const truncatedQuestion = ellipsis(sanitizedHTML, 40);
+
+            return truncatedQuestion;
+        }
+    };
+
     return (
         <>
             <div className="w-full">
@@ -61,15 +99,14 @@ const SelectQuizQuestions = ({
                                     <div className="w-full">
                                         <div className="flex items-center gap-2">
                                             <h2 className="font-bold text-[15px] text-gray-600">
-                                                {isQuizVariantExists ? <span
-                                                    key={question}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: ellipsis(
-                                                            question?.quizVariants[0].question,
-                                                            40
-                                                        ),
-                                                    }}
-                                                ></span> : ''}
+                                                {isQuizVariantExists ? (
+                                                    <span
+                                                        key={question}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: renderQuestionContent(question),
+                                                        }}
+                                                    ></span>
+                                                ) : ''}
 
                                                 {/* {ellipsis(question.question, 35)} */}
                                             </h2>

@@ -114,7 +114,7 @@ const AddAssignent = ({
     const [isSaving, setIsSaving] = useState(false)
     const [previousContentHash, setPreviousContentHash] = useState('')
     const hasLoaded = useRef(false)
-    
+
     // NEW: Track user interactions and manual saves
     const [hasUserManuallySaved, setHasUserManuallySaved] = useState(false)
     const [isUserInteracting, setIsUserInteracting] = useState(false)
@@ -209,7 +209,7 @@ const AddAssignent = ({
     }
 
     const getAssignmentContent = async () => {
-        setIsDataLoading(true) 
+        setIsDataLoading(true)
         try {
             const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
@@ -320,7 +320,7 @@ const AddAssignent = ({
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true)
-            
+
             // IMPORTANT: Mark that user has manually saved
             setHasUserManuallySaved(true)
 
@@ -344,14 +344,14 @@ const AddAssignent = ({
     useEffect(() => {
         // Don't run auto-save during initial load
         if (!initialLoadComplete) return
-        
+
         if (defaultValue === 'editor' && initialContent) {
             const isEmpty = isEditorContentEmpty(initialContent)
             const currentHash = generateContentHash(initialContent)
 
             setHasEditorContent(!isEmpty)
-            if (isEmpty && 
-                hasUserManuallySaved && 
+            if (isEmpty &&
+                hasUserManuallySaved &&
                 previousContentHash !== currentHash &&
                 isUserInteracting &&
                 previousContentHash !== '' // Ensure previous content existed
@@ -384,14 +384,14 @@ const AddAssignent = ({
     const previewAssignment = () => {
         if (defaultValue === 'editor') {
             const isEmpty = isEditorContentEmpty(initialContent)
-    
+
             if (isEmpty) {
                 return toast.error({
                     title: 'Cannot Preview',
                     description: 'Editor content is empty. Please add some content.',
                 })
             }
-    
+
             if (!isEditorSaved) {
                 return toast.error({
                     title: 'Unsaved Changes',
@@ -404,7 +404,7 @@ const AddAssignent = ({
             )
         }
     }
-    
+
 
     const onFileUpload = async () => {
         if (file) {
@@ -498,7 +498,7 @@ const AddAssignent = ({
             })
         setIsLoading(false)
     }
-    
+
     if (isDataLoading) {
         return (
             <div className="px-5">
@@ -564,8 +564,7 @@ const AddAssignent = ({
                                                             <div
                                                                 id="previewAssignment"
                                                                 onClick={previewPdf}
-                                                                className={`flex hover:bg-gray-300 rounded-md p-1 cursor-pointer ${
-                                                                    !ispdfUploaded
+                                                                className={`flex hover:bg-gray-300 rounded-md p-1 cursor-pointer ${!ispdfUploaded
                                                                     ? 'opacity-50 pointer-events-none'
                                                                     : ''
                                                                     }`}
@@ -630,42 +629,41 @@ const AddAssignent = ({
                                                     *
                                                 </span>{' '}
                                             </FormLabel>
+
                                             <Popover>
                                                 <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button
-                                                            className={`w-1/6  text-left font-normal border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)] ${
-                                                                !field.value &&
-                                                                'text-muted-foreground'
-                                                                }`}
+                                                    <div className="w-1/6">
+                                                        <div
+                                                            className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-1.5 text-sm text-gray-700 hover:border-[rgb(81,134,114)] ${!field.value && 'text-muted-foreground'}`}
+                                                            onClick={(e) => {
+                                                                const target = e.target as HTMLElement
+                                                                const isText = target.closest('.date-text')
+                                                                const isIcon = target.closest('.calendar-icon')
+                                                                if (!isText && !isIcon) e.stopPropagation()
+                                                            }}
                                                         >
-                                                            {dateValue
-                                                                ? format(
-                                                                    dateValue,
-                                                                    'EEEE, MMMM d, yyyy'
-                                                                )
-                                                                : 'Pick a date'}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
+                                                            <span className="date-text cursor-pointer truncate">
+                                                                {dateValue
+                                                                    ? format(dateValue, 'EEE, MMM d, yyyy')
+                                                                    : 'Pick a date'}
+                                                            </span>
+
+                                                            <CalendarIcon className="calendar-icon h-5 w-5 opacity-60 ml-2 cursor-pointer" />
+                                                        </div>
+                                                    </div>
                                                 </PopoverTrigger>
-                                                <PopoverContent
-                                                    className="w-auto p-0"
-                                                    align="start"
-                                                >
+
+                                                <PopoverContent className="w-auto p-0 mt-1" align="start">
                                                     <Calendar
                                                         mode="single"
                                                         selected={field.value}
-                                                        onSelect={
-                                                            field.onChange
-                                                        }
-                                                        disabled={(date: any) =>
-                                                            date <=
-                                                            addDays(
-                                                                new Date(),
-                                                                -1
-                                                            )
-                                                        } // Disable past dates
+                                                        onSelect={(date) => {
+                                                            if (date) {
+                                                                field.onChange(date);
+                                                                setDeadline(date); // Keep both states in sync
+                                                            }
+                                                        }}
+                                                        disabled={(date: any) => date <= addDays(new Date(), -1)}
                                                         initialFocus
                                                     />
                                                 </PopoverContent>

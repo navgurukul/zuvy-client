@@ -221,3 +221,13 @@ export const stopPolling = (pollIntervalRef: React.MutableRefObject<NodeJS.Timeo
         pollIntervalRef.current = null;
     }
 };
+
+export const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'bg-success-light text-success';
+      case 'Medium': return 'bg-warning-light text-warning';
+      case 'Hard': return 'bg-destructive-light text-destructive';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+  

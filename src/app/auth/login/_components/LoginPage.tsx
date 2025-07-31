@@ -137,7 +137,7 @@ function LoginPage({}: Props) {
     )
 
     // Handle successful Google Sign-In
-    const handleGoogleSuccess = async (
+const handleGoogleSuccess = async (
         credentialResponse: CredentialResponse
     ) => {
         if (!credentialResponse.credential) {
@@ -201,12 +201,9 @@ function LoginPage({}: Props) {
         } catch (err: any) {
             console.error('Google login error:', err)
             toast({
-                title: 'Error while logging in Zuvy. Please try again!',
-                description:
-                    err.response?.data?.message ||
-                    'An error occurred during login.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+                title: 'Login Error',
+                description: `${err.response?.data?.message}. Please contact zuvy support team` || 'Please try again later.',
+                className: `fixed bottom-4 left-1/2 transform -translate-x-1/2 text-start capitalize border border-destructive max-w-lg box-border`,
             })
         } finally {
             setLoading(false)

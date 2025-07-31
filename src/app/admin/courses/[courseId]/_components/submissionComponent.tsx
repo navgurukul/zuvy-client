@@ -12,11 +12,13 @@ type Props = {
     courseId: number
     id: string
     moduleId: any
+    chapterId: number
+    questionId: number
 }
 
 const SubmissionComponent = (props: Props) => {
     const handleDownloadPdf = async (id: any) => {
-        const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=365&questionId=102`
+        const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`
 
         async function fetchData() {
             try {
@@ -143,13 +145,13 @@ const SubmissionComponent = (props: Props) => {
                                 href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}`}
                             >
                                 <h3 className="font-semibold cursor-pointer text-sm">
-                                    Submissions
+                                    View Submissions
                                 </h3>
                             </Link>
                         ) : (
                             <h3 className="text-gray-400 font-semibold cursor-not-allowed text-sm">
-                                Submissions
-                            </h3>
+                                View Submissions
+                            </h3> 
                         )}
                     </div>
                 </div>

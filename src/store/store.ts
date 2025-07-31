@@ -1110,3 +1110,13 @@ export const useThemeStore = create<ThemeStore>()(
         }
     )
 )
+
+interface CodingSubmissionStore {
+    codingSubmissionAction: any;
+    setCodingSubmissionAction: (action: any) => void;
+  }
+  
+  export const useCodingSubmissionStore = create<CodingSubmissionStore>((set) => ({
+    codingSubmissionAction: null,
+    setCodingSubmissionAction: (action) => set({ codingSubmissionAction: action }),
+  }));

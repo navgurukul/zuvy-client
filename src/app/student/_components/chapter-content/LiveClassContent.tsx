@@ -128,14 +128,12 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
 
   };
 
-  console.log(item.duration)
 
   if (item.type === 'live-class') {
-    const isScheduled = item.scheduledDateTime && new Date() < item.scheduledDateTime;
-    const isInProgress = item.scheduledDateTime && 
-      new Date() >= new Date(item.scheduledDateTime.getTime() - 10 * 60 * 1000) &&
-      new Date() < new Date(item.scheduledDateTime.getTime() + 60 * 60 * 1000);
+    const isScheduled = item.status === 'upcoming'
+    const isInProgress = item.status === 'ongoing'
     const isSessionCompleted = item.status === 'completed';
+
      
 
     if (isScheduled) {
@@ -155,7 +153,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
             </div>
             <div className="text-left">
               <p className="text-sm text-muted-foreground"> Duration</p>
-              <p className="font-medium">{item.duration}</p>
+              <p className="font-medium">{item.duration} mins</p>
             </div>
           </div>
           
@@ -214,9 +212,11 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
         <div className="max-w-4xl mx-auto p-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-3xl font-heading font-bold">{item.title}</h1>
-            <Badge variant="outline" className="text-success border-success">
-              Completed
-            </Badge>
+           {chapterDetails.status=== 'Completed' || localIsCompleted ? <Badge variant="outline" className="text-success border-success">
+              Viewed
+            </Badge> : <Badge variant="outline" className="text-warning border-warning">
+              Not Viewed
+            </Badge>}
           </div>
           <p className="text-muted-foreground text-left mb-6">{item.description || "This live class has been completed."}</p>
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -224,16 +224,21 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
               <p className="text-sm text-muted-foreground">Date & Time</p>
               <p className="font-medium">{item.scheduledDateTime ? formatDateTime(item.scheduledDateTime) : 'TBD'}</p>
             </div>
+            {
+              item.s3link && 
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Your Attendance Duration </p>
-              <p className="font-medium">{item.duration}</p>
+              <p className="font-medium">{item.duration} mins</p>
             </div>
+            }
+            {item.s3link && 
             <div className="text-left">
               <p className="text-sm text-muted-foreground">Attendance</p>
               <p className={`font-medium ${item.attendance === 'present' ? 'text-success' : 'text-destructive'}`}>
-                {item.attendance === 'present' ? 'Present' : 'Absent'}
+                { item.attendance === 'present' ? 'Present' : 'Absent'}
               </p>
             </div>
+            }
           </div>
           <p className="text-success mb-6 flex items-center gap-2">
             <Check className="w-5 h-5" />

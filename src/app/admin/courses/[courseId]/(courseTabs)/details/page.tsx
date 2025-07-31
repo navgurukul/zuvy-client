@@ -83,6 +83,9 @@ function Page({ params }: { params: any }) {
         string | null
     >(null)
 
+    // New state for collaborator type
+    const [collaboratorType, setCollaboratorType] = useState<'text' | 'image'>('text')
+
     const { courseData, setCourseData } = getCourseData()
     const { setStoreStudentData } = getStoreStudentData()
     // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
@@ -129,10 +132,12 @@ function Page({ params }: { params: any }) {
                     : undefined,
             })
 
-            // Set preview image if it's a URL
+            // Set collaborator type and preview image based on existing data
             if (isImageUrl(courseData.collaborator)) {
+                setCollaboratorType('image')
                 setCroppedCollaboratorImage(courseData.collaborator)
             } else {
+                setCollaboratorType('text')
                 setCroppedCollaboratorImage(null)
             }
 
@@ -140,6 +145,31 @@ function Page({ params }: { params: any }) {
             setIsCollaboratorCropping(false)
         }
     }, [courseData, form])
+
+    // Handle collaborator type change
+    const handleCollaboratorTypeChange = (type: 'text' | 'image') => {
+        setCollaboratorType(type)
+
+        // Clear collaborator field when switching types
+        form.setValue('collaborator', '')
+
+        // Reset image states when switching away from image
+        if (type === 'text') {
+            setCroppedCollaboratorImage(null)
+            setCollaboratorImage(null)
+            setIsCollaboratorCropping(false)
+        }
+    }
+
+    // Check if switching should be allowed
+    const canSwitchToText = () => {
+        return !croppedCollaboratorImage && !form.getValues('collaborator')
+    }
+
+    const canSwitchToImage = () => {
+        const currentValue = form.getValues('collaborator')
+        return !currentValue || currentValue.trim() === ''
+    }
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         try {
@@ -169,7 +199,9 @@ function Page({ params }: { params: any }) {
                 coverImage = res.data.file.url
             }
 
+            // Handle collaborator image upload (only if type is image and there's a cropped image)
             if (
+                collaboratorType === 'image' &&
                 croppedCollaboratorImage &&
                 croppedCollaboratorImage !== courseData?.collaborator
             ) {
@@ -448,90 +480,122 @@ function Page({ params }: { params: any }) {
                         )}
                     />
 
-                    {/* Updated Collaborator Section */}
-
+                    {/* Updated Collaborator Section with Radio Buttons */}
                     <FormField
                         control={form.control}
                         name="collaborator"
-                        render={({ field }) => {
-                            const isUrl = isImageUrl(field.value || '')
+                        render={({ field }) => (
+                            <FormItem className="text-start">
+                                <FormLabel>Collaborator</FormLabel>
 
-                            return (
-                                <FormItem className="text-start">
-                                    <FormLabel>Collaborator</FormLabel>
-
-                                    {/* ✅ CASE 1: Image (URL or Cropped) */}
-                                    {isUrl ? (
-                                        <>
-                                            <div className="mb-3">
-                                                <div className="w-full h-[200px] overflow-hidden border rounded-md">
-                                                    {croppedCollaboratorImage ? (
-                                                        <img
-                                                            src={
-                                                                croppedCollaboratorImage
-                                                            }
-                                                            alt="Collaborator"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full object-cover">
-                                                            <OptimizedImageWithFallback
-                                                                src={
-                                                                    field.value ||
-                                                                    ''
-                                                                }
-                                                                alt="Collaborator"
-                                                                fallBackSrc="/default-avatar.png"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* File input (hidden) */}
-                                            <Input
-                                                id="collaborator-picture"
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={
-                                                    handleCollaboratorFileChange
-                                                }
-                                                className="hidden"
-                                                ref={collaboratorFileInputRef}
+                                {/* Radio buttons for collaborator type */}
+                                <div className="mb-3">
+                                    <RadioGroup
+                                        value={collaboratorType}
+                                        onValueChange={(value: 'text' | 'image') =>
+                                            handleCollaboratorTypeChange(value)
+                                        }
+                                        className="flex gap-4"
+                                    >
+                                        <div className="flex flex-row items-center space-x-2">
+                                            <RadioGroupItem
+                                                value="text"
+                                                className="text-black border-black"
+                                                disabled={!canSwitchToText() && collaboratorType !== 'text'}
                                             />
+                                            <label
+                                                className={`text-sm font-medium ${!canSwitchToText() && collaboratorType !== 'text'
+                                                        ? 'text-gray-400 cursor-not-allowed'
+                                                        : 'cursor-pointer'
+                                                    }`}
+                                            >
+                                                Text
+                                            </label>
+                                        </div>
+                                        <div className="flex flex-row items-center space-x-2">
+                                            <RadioGroupItem
+                                                value="image"
+                                                className="text-black border-black"
+                                                disabled={!canSwitchToImage() && collaboratorType !== 'image'}
+                                            />
+                                            <label
+                                                className={`text-sm font-medium ${!canSwitchToImage() && collaboratorType !== 'image'
+                                                        ? 'text-gray-400 cursor-not-allowed'
+                                                        : 'cursor-pointer'
+                                                    }`}
+                                            >
+                                                Image
+                                            </label>
+                                        </div>
+                                    </RadioGroup>
+                                </div>
 
-                                            {/* Cropper */}
-                                            {collaboratorImage &&
-                                            isCollaboratorCropping ? (
-                                                <div className="my-3">
-                                                    <Cropper
-                                                        src={collaboratorImage}
-                                                        style={{
-                                                            height: 150,
-                                                            width: 150,
-                                                        }}
-                                                        aspectRatio={1}
-                                                        onInitialized={(
-                                                            instance
-                                                        ) =>
-                                                            setCollaboratorCropper(
-                                                                instance
-                                                            )
+                                {/* Render based on selected type */}
+                                {collaboratorType === 'image' ? (
+                                    <>
+                                        <div className="mb-3">
+                                            <div className="w-full h-[200px] overflow-hidden border rounded-md">
+                                                {croppedCollaboratorImage ? (
+                                                    <img
+                                                        src={
+                                                            croppedCollaboratorImage
                                                         }
+                                                        alt="Collaborator"
+                                                        className="w-full h-full object-cover"
                                                     />
-                                                    <Button
-                                                        onClick={
-                                                            handleCollaboratorCrop
-                                                        }
-                                                        type="button"
-                                                        variant="outline"
-                                                        className="mt-2"
-                                                        size="sm"
-                                                    >
-                                                        Crop Image
-                                                    </Button>
-                                                </div>
-                                            ) : (
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
+                                                        No image selected
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* File input (hidden) */}
+                                        <Input
+                                            id="collaborator-picture"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={
+                                                handleCollaboratorFileChange
+                                            }
+                                            className="hidden"
+                                            ref={collaboratorFileInputRef}
+                                        />
+
+                                        {/* Cropper */}
+                                        {collaboratorImage && 
+                                        isCollaboratorCropping ? (
+                                            <div className="my-3">
+                                                <Cropper
+                                                    src={collaboratorImage}
+                                                    style={{
+                                                        height: 150,
+                                                        width: 150,
+                                                    }}
+                                                    aspectRatio={1}
+                                                    onInitialized={(
+                                                        instance
+                                                    ) =>
+                                                        setCollaboratorCropper(
+                                                            instance
+                                                        )
+                                                    }
+                                                />
+                                                <Button
+                                                    onClick={
+                                                        handleCollaboratorCrop
+                                                    }
+                                                    type="button"
+                                                    variant="outline"
+                                                    className="mt-2"
+                                                    size="sm"
+                                                >
+                                                    Crop Image
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-2">
                                                 <Button
                                                     variant="outline"
                                                     type="button"
@@ -540,25 +604,45 @@ function Page({ params }: { params: any }) {
                                                     }
                                                     size="sm"
                                                 >
-                                                    Change Image
+                                                    {croppedCollaboratorImage ? 'Change Image' : 'Upload Image'}
                                                 </Button>
-                                            )}
-                                        </>
-                                    ) : (
-                                        // ✅ CASE 2: Text value
+
+                                                {/* Remove Image Button */}
+                                                {croppedCollaboratorImage && (
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setCroppedCollaboratorImage(null)
+                                                            setCollaboratorImage(null)
+                                                            setIsCollaboratorCropping(false)
+                                                            form.setValue('collaborator', '')
+                                                        }}
+                                                        size="sm"
+                                                        className="ml-2 border border-gray-400 text-gray-500 bg-transparent hover:text-red-600 hover:border-red-600 hover:bg-transparent transition-colors"
+                                                    >
+                                                        Remove Image
+                                                    </Button>
+
+                                                )}
+                                            </div>
+                                        )}
+                                    </>
+                                ) : (
+                                    // Text input
+                                    <div className="space-y-2">
                                         <FormControl>
                                             <Input
-                                                placeholder="Enter a text"
+                                                placeholder="Enter collaborator text"
                                                 {...field}
                                                 value={field.value || ''}
                                             />
                                         </FormControl>
-                                    )}
+                                    </div>
+                                )}
 
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
                     <FormField
                         control={form.control}
@@ -576,7 +660,7 @@ function Page({ params }: { params: any }) {
                                                 className={cn(
                                                     'pl-3 text-left font-normal w-full text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
                                                     !field.value &&
-                                                        'text-muted-foreground'
+                                                    'text-muted-foreground'
                                                 )}
                                             >
                                                 {field.value

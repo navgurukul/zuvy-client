@@ -59,8 +59,9 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         setCollaboratorInputType('text')
         setSelectedFiles(null)
         setUploadedImageUrls([])
-        // const pdfInput = document.getElementById('collaborator-file-input') as HTMLInputElement
-        // if (pdfInput) pdfInput.value = ''
+        // Reset file input
+        const fileInput = document.getElementById('collaborator-file-input') as HTMLInputElement
+        if (fileInput) fileInput.value = ''
     }
 
     useEffect(() => {
@@ -68,6 +69,23 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
             resetForm()
         }
     }, [isDialogOpen])
+
+    const removeUploadedImage = (indexToRemove: number) => {
+        const updatedUrls = uploadedImageUrls.filter((_, index) => index !== indexToRemove)
+        setUploadedImageUrls(updatedUrls)
+        
+        // If no images left, reset file input and selected files
+        if (updatedUrls.length === 0) {
+            setSelectedFiles(null)
+            const fileInput = document.getElementById('collaborator-file-input') as HTMLInputElement
+            if (fileInput) fileInput.value = ''
+        }
+        
+        toast.success({
+            title: 'Removed',
+            description: 'Image removed successfully',
+        })
+    }
 
     const handleCreateCourseWithUpload = async () => {
         try {
@@ -83,50 +101,9 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             if (
                 collaboratorInputType === 'file' &&
-                selectedFiles &&
-                selectedFiles.length > 0
+                uploadedImageUrls.length > 0
             ) {
-                const formData = new FormData()
-                Array.from(selectedFiles).forEach((file) => {
-                    formData.append('images', file)
-                })
-
-                setIsUploading(true)
-
-                try {
-                    const { data } = await api.post(
-                        '/Content/curriculum/upload-images',
-                        formData,
-                        {
-                            headers: {
-                                'Content-Type': 'multipart/form-data',
-                            },
-                        }
-                    )
-
-                    const uploadedUrls = Array.isArray(data?.urls)
-                        ? data.urls
-                        : []
-                    if (uploadedUrls.length === 0) {
-                        toast.error({
-                            title: 'error',
-                            description: 'File uploaded but no URLs returned',
-                        })
-                        return
-                    }
-
-                    collaboratorValue = uploadedUrls[0]
-                    setUploadedImageUrls(uploadedUrls)
-                } catch (error) {
-                    console.error('File upload failed:', error)
-                    toast.error({
-                        title: 'error',
-                        description: 'Failed to upload file. Please try again.',
-                    })
-                    return
-                } finally {
-                    setIsUploading(false)
-                }
+                collaboratorValue = uploadedImageUrls[0]
             } else {
                 collaboratorValue = collaborator.trim()
             }
@@ -152,6 +129,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
             )
         }
     }
+    
     const handleCollaboratorFileChange = async (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -239,8 +217,8 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         value={collaboratorInputType}
                         onValueChange={(value: 'text' | 'file') => {
                             const hasText = collaborator.trim().length > 0
-                            const hasFiles =
-                                selectedFiles && selectedFiles.length > 0
+                            const hasFiles = 
+                                uploadedImageUrls.length > 0
 
                             if (value === 'file' && hasText) return
                             if (value === 'text' && hasFiles) return
@@ -257,7 +235,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                                 value="text"
                                 id="text"
                                 className="m-0 p-0 scale-95 text-black border-black"
-                                disabled={!!(selectedFiles && selectedFiles.length > 0)}
+                                disabled={uploadedImageUrls.length > 0}
                             />
                             Text Input
                         </Label>
@@ -336,58 +314,87 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                     )}
                 </div>
                 {uploadedImageUrls.length > 0 && (
-                    <div className="text-left border border-gray-300 rounded-md px-3 py-1 hover:bg-gray-50 w-fit">
-                        <Label className="text-left">Uploaded Files:</Label>
-                        <div className="flex flex-col gap-1 mt-2">
-                            {uploadedImageUrls.map((url, index) => {
-                                const fileName = decodeURIComponent(
-                                    url.split('/').pop() || `File-${index + 1}`
-                                )
-                                const isImage =
-                                    /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName)
-                                // const isPDF = /\.pdf$/i.test(fileName)
+                    <div className="text-left border border-gray-300 rounded-md hover:bg-gray-50 relative">
+                        <button
+                            onClick={() => {
+                                setUploadedImageUrls([])
+                                setSelectedFiles(null)
+                                const fileInput = document.getElementById('collaborator-file-input') as HTMLInputElement
+                                if (fileInput) fileInput.value = ''
+                                toast.success({
+                                    title: 'Removed',
+                                    description: 'All images removed successfully',
+                                })
+                            }}
+                            className="absolute -top-2 -right-2 z-10 text-red-500 hover:text-red-700 transition-colors p-1 rounded-full hover:bg-red-50 bg-white border border-gray-200 shadow-sm"
+                            title="Remove all images"
+                            type="button"
+                        >
+                            <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
+                        <div className="px-3 py-2">
+                            <Label className="text-left">Uploaded Files:</Label>
+                            <div className="flex flex-col gap-1 mt-2">
+                                {uploadedImageUrls.map((url, index) => {
+                                    const fileName = decodeURIComponent(
+                                        url.split('/').pop() || `File-${index + 1}`
+                                    )
+                                    const isImage =
+                                        /\.(jpg|jpeg|png|gif|webp)$/i.test(fileName)
+                                    return (
+                                        <a
+                                            key={index}
+                                            href="#"
+                                            onClick={(e) => {
+                                                e.preventDefault()
 
-                                return (
-                                    <a
-                                        key={index}
-                                        href="#"
-                                        onClick={(e) => {
-                                            e.preventDefault()
-
-                                            if (isImage) {
-                                                const imgTab = window.open()
-                                                if (imgTab) {
-                                                    imgTab.document.write(
-                                                        `<img src="${url}" style="max-width:100%;height:auto;" />`
-                                                    )
-                                                    imgTab.document.title =
-                                                        fileName
-                                                } else {
-                                                    toast.error({
-                                                        title: 'Popup Blocked',
-                                                        description:
-                                                            'Please allow popups in your browser.',
-                                                    })
-                                                }
+                                                if (isImage) {
+                                                    const imgTab = window.open()
+                                                    if (imgTab) {
+                                                        imgTab.document.write(
+                                                            `<img src="${url}" style="max-width:100%;height:auto;" />`
+                                                        )
+                                                        imgTab.document.title =
+                                                            fileName
+                                                    } else {
+                                                        toast.error({
+                                                            title: 'Popup Blocked',
+                                                            description:
+                                                                'Please allow popups in your browser.',
+                                                        })
+                                                    }
                                                 // }
                                                 // else if (isPDF) {
                                                 //     window.open(
                                                 //         `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`,
                                                 //         '_blank'
                                                 //     )
-                                            } else {
-                                                toast.error({
-                                                    title: 'Unsupported file type',
-                                                    description: fileName,
-                                                })
-                                            }
-                                        }}
-                                        className="text-blue-600 text-sm truncate overflow-hidden whitespace-nowrap w-full max-w-[23rem]"
-                                    >
-                                        {fileName}
-                                    </a>
-                                )
-                            })}
+                                                } else {
+                                                    toast.error({
+                                                        title: 'Unsupported file type',
+                                                        description: fileName,
+                                                    })
+                                                }
+                                            }}
+                                            className="text-blue-600 text-sm truncate overflow-hidden whitespace-nowrap block max-w-[20rem]"
+                                        >
+                                            {fileName}
+                                        </a>
+                                    )
+                                })}
+                            </div>
                         </div>
                     </div>
                 )}

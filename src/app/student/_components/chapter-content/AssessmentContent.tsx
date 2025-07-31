@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useSearchParams, useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Timer, AlertOctagon } from "lucide-react";
+import { CheckCircle, Timer, AlertOctagon, Check, X, RotateCcw, XCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -36,16 +36,16 @@ function formatToIST(dateString: string | undefined) {
   if (!dateString) return 'N/A';
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return 'N/A';
-  
+
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
-  
+
   const day = date.getDate();
   const month = months[date.getMonth()];
   const year = date.getFullYear();
-  
+
   return `${day} ${month} ${year}`;
 }
 
@@ -62,6 +62,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   const [reattemptDialogOpen, setReattemptDialogOpen] = useState(false);
   const [isStartingAssessment, setIsStartingAssessment] = useState(false);
   const [isTimeOver, setIsTimeOver] = useState(false);
+  const [chapterStatus, setChapterStatus] = useState(chapterDetails.status);
   // Memoize IDs to prevent unnecessary API calls
   const moduleId = useMemo(
     () => chapterDetails.moduleId?.toString() || moduleIdParam?.toString() || null,
@@ -252,6 +253,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
       if (event.data === 'assessment_submitted') {
         refetch();
         refetchChapter();
+        // Update chapter status to completed
+        if (chapterStatus === 'Pending') {
+          setChapterStatus('Completed');
+        }
         if (typeof onChapterComplete === 'function') {
           onChapterComplete();
         }
@@ -273,13 +278,19 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     return () => {
       channel.close();
     };
-  }, [refetch, refetchChapter, onChapterComplete]);
+  }, [refetch, refetchChapter, onChapterComplete, chapterStatus]);
 
   // Assessment state transitions effect
   useEffect(() => {
     const cleanup = handleAssessmentStateTransitions();
     return cleanup;
   }, [assessmentDetails]);
+
+  useEffect(() => {
+    if (chapterStatus === 'Completed') {
+      onChapterComplete?.()
+    }
+  }, [chapterStatus])
 
   if (loading) {
     return (
@@ -316,7 +327,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   }
 
   const isDisabled = !hasQuestions;
-  
+
+
   return (
     <div className="h-full">
       <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-4 py-4 sm:py-6 lg:py-8 mt-4 sm:mt-6 lg:mt-8">
@@ -328,7 +340,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 <h1 className="text-3xl font-heading font-bold text-foreground break-words">
                   {assessmentDetails.ModuleAssessment?.title}
                 </h1>
-                <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterDetails.status === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterDetails.status === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
+                <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
               </div>
               {/* Meta Info Row */}
               <div className="flex flex-wrap gap-x-12 gap-y-2 mb-8">
@@ -336,11 +348,11 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                   <span className="font-semibold text-sm text-muted-foreground">Start Date</span>
                   <span className="text-lg font-medium text-foreground">{formatToIST(assessmentDetails.startDatetime)}</span>
                 </span>
-                {assessmentDetails.endDatetime &&    <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
+                {assessmentDetails.endDatetime && <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
                   <span className="font-semibold text-sm text-muted-foreground">End Date</span>
                   <span className="text-lg font-medium text-foreground">{formatToIST(assessmentDetails.endDatetime)}</span>
-                </span> }
-             
+                </span>}
+
                 <span className="flex flex-col items-start gap-y-1 min-w-[120px]">
                   <span className="font-semibold text-sm text-muted-foreground">Duration</span>
                   <span className="text-lg font-medium text-foreground">{formatTimeLimit(assessmentDetails.timeLimit)}</span>
@@ -387,7 +399,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
           {assessmentDetails.assessmentState?.toUpperCase() !== 'CLOSED' &&
             assessmentDetails.assessmentState?.toUpperCase() !== 'PUBLISHED' &&
             ((isAssessmentStarted && !reattemptRequested && !reattemptApproved) ||
-              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (<div className="flex flex-col items-center justify-center w-full max-w-lg sm:max-w-xl lg:max-w-4xl p-5 bg-card border border-border rounded-lg shadow-2dp">
+              (isTimeOver && isAssessmentStarted && !reattemptRequested && !reattemptApproved)) && (<div className="flex bg-warning/15 flex-col items-center justify-center w-full max-w-lg sm:max-w-xl lg:max-w-4xl p-5 bg-card border border-border rounded-lg shadow-2dp">
                 <h2 className="mt-4 text-lg text-foreground flex items-center gap-x-2">
                   <div className="relative w-6 h-6">
                     <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] border-l-transparent border-r-transparent border-b-warning"></div>
@@ -403,7 +415,9 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 </h2>
                 <Dialog open={reattemptDialogOpen} onOpenChange={setReattemptDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="mt-4 bg-primary hover:bg-primary-dark text-primary-foreground">Request Re-Attempt</Button>
+                    <Button className="mt-4 bg-warning hover:bg-warning/50 text-black font-semibold">
+                    <RotateCcw className=" h-3.5 mx-2" />
+                    Request Re-Attempt</Button>
                   </DialogTrigger>
                   <DialogOverlay />                  <DialogContent className="mx-4 sm:mx-0 max-w-md sm:max-w-lg">
                     <DialogHeader>                      <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
@@ -445,37 +459,49 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
           {isAssessmentStarted &&
             isSubmitedAt &&
             !(reattemptApproved && reattemptRequested && assessmentDetails.submitedOutsourseAssessments?.length > 0) && (
-              <div>                <div
-                className={`${isPassed
-                  ? 'bg-success-light border-success'
-                  : 'bg-destructive-light border-destructive'
-                  } flex justify-between max-w-lg sm:max-w-xl lg:max-w-4xl p-5 rounded-lg border shadow-4dp`}
+              <div
+                className=''
               >
-                <div className="flex gap-3">
-                  <div className="mt-2">
-                    <Image src="/flag.svg" alt="Result Flag" width={40} height={40} />
+                <div
+                  className={`  ${isPassed
+                    ? 'bg-success-light border-success'
+                    : 'bg-destructive-light border-destructive'
+                    } flex flex-col items-center justify-between max-w-lg sm:max-w-xl lg:max-w-4xl py-8 rounded-lg border shadow-4dp`}
+                >
+                  <div className="flex gap-2 items-center">
+
+                    <div className="md:text-lg text-sm space-y-2">
+
+
+                      <p className={`${isPassed ? 'text-success' : 'text-destructive'} font-semibold flex items-center gap-3`}>
+                        {isPassed ? (
+                          <>
+                            <CheckCircle size={20} className="text-success" />
+                            You passed this assessment successfully
+                          </>
+                        ) : (
+                          <>
+                            <X size={20} className="text-destructive" />
+                            You needed at least {passPercentage}% to pass
+                          </>
+                        )}
+                      </p>
+
+                      <p className="font-semibold text-center">
+                        Your Score: {Math.trunc(percentage) || 0}/100
+                      </p>
+                    </div>
                   </div>
-                  <div className="md:text-lg text-sm">
-                    <p className="font-semibold">
-                      Your Score: {Math.trunc(percentage) || 0}/100
-                    </p>
-                    <p>
-                      {isPassed
-                        ? 'Congratulations, you passed!'
-                        : `You needed at least ${passPercentage}% to pass`}
-                    </p>
+                  <div>
+                    <Button
+                      className={`${isPassed ? 'text-success bg-success text-white' : 'text-destructive bg-destructive text-white'} font-semibold mt-3 `}
+                      onClick={handleViewResults}
+                      disabled={chapterStatus === 'Pending' && !isSubmitedAt}
+                    >
+                      View Results
+                    </Button>
                   </div>
                 </div>
-                <div>
-                  <Button
-                    variant="ghost" className="text-primary hover:text-primary-dark font-semibold md:text-lg text-sm"
-                    onClick={handleViewResults}
-                    disabled={chapterDetails.status === 'Pending' && !isSubmitedAt}
-                  >
-                    View Results
-                  </Button>
-                </div>
-              </div>
               </div>
             )}
 
@@ -488,39 +514,42 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               <div className="text-success-dark text-left w-full font-medium">
                 {assessmentDetails.endDatetime ? (
                   <>
-                    <p className="text-muted-foreground text-center mb-4">
-            The assessment is now available. Click below to begin.
-          </p>
+                    <p className="font-bold text-accent text-center mb-4">
+                      Assessment is open. Please attempt it before end date
+                    </p>
                     {/* <p className="font-semibold">{formatToIST(assessmentDetails.endDatetime)}</p> */}
                   </>
                 ) : (
-                  <p className='text-center' >The assessment is available now</p>
+                  <p className='text-center text-accent font-semibold ' >The assessment is available now</p>
                 )}
                 <div className='text-center' >
-                <Button
-                onClick={handleStartAssessment}
-                className="mt-4 sm:mt-5 text-left rounded-md bg-primary hover:bg-primary-dark px-4 sm:px-6 py-2 text-primary-foreground w-full sm:w-auto text-sm sm:text-base shadow-hover"
-                disabled={
-                  isDisabled ||
-                  (isAssessmentStarted && (!reattemptApproved || !reattemptRequested)) ||
-                  isStartingAssessment
-                }
-              >
-                {reattemptApproved && reattemptRequested && assessmentDetails.submitedOutsourseAssessments?.length > 0
-                  ? 'Re-Attempt Assessment'
-                  : 'Begin Assessment'}
-              </Button>
+                  <Button
+                    onClick={handleStartAssessment}
+                    className="mt-4 sm:mt-5 text-left rounded-md bg-primary hover:bg-primary-dark px-4 sm:px-6 py-2 text-primary-foreground w-full sm:w-auto text-sm sm:text-base shadow-hover"
+                    disabled={
+                      isDisabled ||
+                      (isAssessmentStarted && (!reattemptApproved || !reattemptRequested)) ||
+                      isStartingAssessment
+                    }
+                  >
+                    {reattemptApproved && reattemptRequested && assessmentDetails.submitedOutsourseAssessments?.length > 0
+                      ? 'Re-Attempt Assessment'
+                      : 'Begin Assessment'}
+                  </Button>
                 </div>
-            
-              </div>               
+
+              </div>
             </div>
             )}                     {/* Closed assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'CLOSED' && (
-            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all duration-[1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all duration-[1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
-              <AlertOctagon size={18} className="flex-shrink-0 sm:w-5 sm:h-5" />
-              <span className="break-words">Assessment is closed. You cannot attempt it anymore.</span>
+              
+              <div className='flex flex-col items-center space-y-5' >
+                <span className=" text-destructive flex items-center gap-x-2 font-semibold"><XCircle size={20} className='text-destructive' />Assessment expired and cannot be submitted.</span>
+                <span className='text-destructive font-medium text-sm'>End Date: {formatToIST(assessmentDetails.endDatetime)}</span>
+              </div>
             </div>
           )}
 
@@ -531,9 +560,9 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             >
               <div className="flex flex-col sm:flex-row w-full items-center gap-2 sm:gap-x-3 text-foreground">
                 <Timer size={20} className="animate-pulse text-primary sm:w-6 sm:h-6" />
-                 <p className="text-muted-foreground text-left">
-            The Assessment Begins In
-          </p>
+                <p className="text-muted-foreground text-left">
+                  The Assessment Begins In
+                </p>
               </div>
               <div className="text-2xl sm:text-3xl text-left w-full lg:text-4xl font-semibold text-primary tracking-widest break-all">
                 {countdown}

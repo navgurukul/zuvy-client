@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const PreventBackNavigation = () => {
+const   PreventBackNavigation = () => {
   const router = useRouter();
   const [currentPath, setCurrentPath] = useState('');
 

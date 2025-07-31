@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Code2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import { getDifficultyColor } from '@/lib/utils';
 
 // Date formatting function
 function formatSubmissionDate(dateString: string) {
@@ -77,7 +78,7 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
           </div>
           <Badge
             variant="outline"
-            className="bg-success text-success-foreground border-success"
+            className="bg-success text-success-foreground border-success dark:text-gray-700"
           >
             Completed
           </Badge>
@@ -90,16 +91,16 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
                     <div key={questionId} className="p-6 mb-6">
                         {/* Header Section */}
                         <div className="flex items-start justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 flex-1">
+                            <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 flex-1 dark:text-white">
                                 {result.questionDetail.title}
                             </h3>
                         </div>
 
                         {/* Metadata Section */}
                         <div className="flex flex-col gap-4 mb-4">
-                            <div className='w-full flex flex-col'>
-                                <span className="text-left font-sm font-semibold text-muted-foreground">Difficulty</span>
-                                <p className="text-sm font-semibold text-foreground text-left mt-1">{result.questionDetail.difficulty}</p>
+                            <div className='w-full flex items-center gap-2' >
+                                <span className="text-left font-sm font-semibold text-muted-foreground">Difficulty -</span>
+                                <p className={`text-sm font-semibold rounded-md p-1 text-left mt-1 ${getDifficultyColor(result.questionDetail.difficulty)}`}>{result.questionDetail.difficulty}</p>
                             </div>
                             <div className='w-full text-left'>
                                 {result.status === 'Accepted' ? (
