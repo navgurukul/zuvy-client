@@ -11,6 +11,7 @@
     "dependencies": {
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.0",
+        "@google/generative-ai": "^0.24.1",
         "@headlessui/react": "^1.7.18",
         "@hookform/resolvers": "^3.3.4",
         "@monaco-editor/react": "^4.6.0",
@@ -74,6 +75,7 @@
         "dotenv": "^16.4.0",
         "draft-js": "^0.11.7",
         "embla-carousel-react": "^8.6.0",
+        "formidable": "^3.5.4",
         "framer-motion": "^11.1.9",
         "gapi": "^0.0.3",
         "gapi-script": "^1.2.0",
@@ -112,6 +114,7 @@
     },
     "devDependencies": {
         "@tailwindcss/typography": "^0.5.13",
+        "@types/formidable": "^3.4.5",
         "@types/node": "^20",
         "@types/papaparse": "^5.3.14",
         "@types/react": "^18",

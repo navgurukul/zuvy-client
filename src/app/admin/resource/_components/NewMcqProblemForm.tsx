@@ -34,7 +34,6 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import axios from 'axios'
-// import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
 import { AIQuestionCard } from './AIQuestionCard'
 import { getGeneratedQuestions, getRequestBody } from '@/store/store'
 import LottieLoader from '@/components/ui/lottie-loader'
@@ -109,12 +108,10 @@ const NewMcqProblemForm = ({
     const [saving, setSaving] = useState<boolean>(false)
     const [bulkDifficulties, setBulkDifficulties] = useState<string[]>([])
     const [bulkTopicIds, setBulkTopicIds] = useState<number[]>([])
-    const [bulkQuantity, setBulkQuantity] = useState<number>(50) // Default to 50
+    const [bulkQuantity, setBulkQuantity] = useState<number>(50)
     const [bulkLoading, setBulkLoading] = useState<boolean>(false)
     const { requestBody, setRequestBody } = getRequestBody()
-    const { generatedQuestions, setGeneratedQuestions } =
-        getGeneratedQuestions()
-    // **New State Variables for Progress Tracking**
+    const { generatedQuestions, setGeneratedQuestions } = getGeneratedQuestions()
     const [generatedCount, setGeneratedCount] = useState<number>(0)
     const [totalToGenerate, setTotalToGenerate] = useState<number>(0)
     const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -122,8 +119,7 @@ const NewMcqProblemForm = ({
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            difficulty: [], // Starts with no difficulties selected
-            // topics: [0],
+            difficulty: [],
             topics: [{ value: 0 }],
             numbersOfQuestions: [{ value: '' }],
             questionText: '',
@@ -151,9 +147,89 @@ const NewMcqProblemForm = ({
         appendNumQuestions({ value: '' })
     }
 
-    // Utility function to pause execution for given milliseconds
     const sleep = (ms: number) =>
         new Promise((resolve) => setTimeout(resolve, ms))
+
+    const validateMCQWithAI = async (mcqData: {
+        questionText: string
+        options: { value: string }[]
+        selectedOption: number
+        difficulty: string
+        topicName: string
+    }) => {
+        const { questionText, options, selectedOption, difficulty, topicName } = mcqData
+        const correctOptionText = options[selectedOption]?.value
+
+        const prompt = `
+            You are an expert in multiple-choice questions, especially in Data Structures and Algorithms (DSA).
+            Please validate the following MCQ for a DSA test.
+
+            Question:
+            ${questionText}
+
+            Options:
+            ${options.map((opt, i) => `${String.fromCharCode(65 + i)}. "${opt.value}"`).join('\n')}
+            Correct Answer: "${correctOptionText}" (Option ${String.fromCharCode(65 + selectedOption)})
+
+            Difficulty: ${difficulty}
+            Topic: ${topicName || 'Not specified'}
+
+            Evaluate the following:
+            1. Is the designated "Correct Answer" truly correct for the given question?
+            2. Are the other options clearly incorrect?
+            3. Is there only one correct answer among all provided options?
+            4. Is the question appropriate for the selected difficulty and topic?
+
+            Your response MUST be ONLY the JSON object, with no additional text or formatting.
+            Provide your response in a JSON format with:
+            {
+                "isValid": boolean,
+                "reason": string,
+                "issues": []
+            }
+        `;
+
+        const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY';
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await axios.post(apiUrl, {
+                contents: [{
+                    parts: [{ text: prompt }]
+                }]
+            }, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const responseData = response.data;
+            const generatedText = responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
+            if (generatedText) {
+                try {
+                    return JSON.parse(generatedText);
+                } catch (error) {
+                    console.error('Error parsing AI response:', error);
+                    return {
+                        isValid: false,
+                        reason: 'Invalid response format from AI',
+                        issues: ['Failed to parse validation response']
+                    };
+                }
+            }
+            return {
+                isValid: false,
+                reason: 'Empty response from AI',
+                issues: ['No validation response received']
+            };
+        } catch (error) {
+            console.error('Error calling Gemini API:', error);
+            return {
+                isValid: false,
+                reason: 'AI service unavailable',
+                issues: ['Failed to connect to validation service']
+            };
+        }
+    };
 
     const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
@@ -188,6 +264,27 @@ const NewMcqProblemForm = ({
             })
             return
         }
+
+        const topic = tags.find(t => t.id === values.topics[0].value)?.tagName || 'General';
+    
+        setLoadingAI(true);
+        const validationResult = await validateMCQWithAI({
+            questionText: values.questionText,
+            options: values.options,
+            selectedOption: values.selectedOption,
+            difficulty: values.difficulty[0],
+            topicName: topic
+        });
+
+        if (!validationResult.isValid) {
+            setLoadingAI(false);
+            toast.error({
+                title: 'Validation Failed',
+                description: validationResult.reason || 'Question validation failed',
+            });
+            return;
+        }
+        setLoadingAI(false);
 
         const optionsObject: { [key: number]: string } = values.options.reduce(
             (acc, option, index) => {
@@ -349,6 +446,29 @@ const NewMcqProblemForm = ({
                     return
                 }
 
+                // Validate the generated question
+                const validationResult = await validateMCQWithAI({
+                    questionText: question,
+                    options: [
+                        { value: opt1 },
+                        { value: opt2 },
+                        { value: opt3 },
+                        { value: opt4 }
+                    ],
+                    selectedOption: correctAnswer,
+                    difficulty: difficulty[0],
+                    topicName: topic
+                });
+
+                if (!validationResult.isValid) {
+                    toast.error({
+                        title: 'Validation Failed',
+                        description: validationResult.reason || 'Generated question failed validation',
+                    });
+                    setLoadingAI(false);
+                    return;
+                }
+
                 const newOptions = [
                     { value: opt1 },
                     { value: opt2 },
@@ -408,9 +528,7 @@ const NewMcqProblemForm = ({
                         ],
                     }
                     setGeneratedQuestions(generatedQuestions)
-
                     setRequestBody(requestBody)
-                    // await handleCreateQuizQuestion(requestBody)
                     await getAllQuizQuesiton(setStoreQuizData)
                     closeModal()
                 }
@@ -440,7 +558,7 @@ const NewMcqProblemForm = ({
     const bulkGenerateMCQUsingGemini = async () => {
         setBulkLoading(true)
         setLoadingAI(true)
-        setGeneratedCount(0) // Reset generated count
+        setGeneratedCount(0)
         try {
             const difficulties = form.getValues('difficulty')
             const topicId = form.getValues('topics')
@@ -460,7 +578,7 @@ const NewMcqProblemForm = ({
                 })
             )
 
-            setTotalToGenerate(totalNumbersOfQuestions) // Set total to generate
+            setTotalToGenerate(totalNumbersOfQuestions)
 
             const apiKey =
                 process.env.NEXT_PUBLIC_GEMINI_API_KEY ||
@@ -507,7 +625,7 @@ const NewMcqProblemForm = ({
             const generatedQuestions: any[] = []
 
             for (const topicReq of topicRequirements) {
-                const maxAttemptsPerTopic = topicReq.requiredCount * 5 // Allow up to 5 attempts per required question
+                const maxAttemptsPerTopic = topicReq.requiredCount * 5
                 let attempts = 0
                 let questionsGeneratedForTopic = 0
 
@@ -568,7 +686,6 @@ const NewMcqProblemForm = ({
                         )
 
                         const responseData = response.data
-
                         const generatedText =
                             responseData?.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
 
@@ -639,6 +756,25 @@ const NewMcqProblemForm = ({
                                 continue
                             }
 
+                            // Validate the generated question
+                            const validationResult = await validateMCQWithAI({
+                                questionText: question,
+                                options: [
+                                    { value: opt1 },
+                                    { value: opt2 },
+                                    { value: opt3 },
+                                    { value: opt4 }
+                                ],
+                                selectedOption: correctAnswer,
+                                difficulty: difficulty,
+                                topicName: topic
+                            });
+
+                            if (!validationResult.isValid) {
+                                console.warn('AI validation failed:', validationResult.reason);
+                                continue;
+                            }
+
                             // Check for uniqueness
                             const isDuplicate = existingQuestions.some(
                                 (existingQ) =>
@@ -688,7 +824,7 @@ const NewMcqProblemForm = ({
                             })
 
                             existingQuestions.push(question.toLowerCase())
-                            setGeneratedCount(generatedQuestions.length) // **Update Generated Count**
+                            setGeneratedCount(generatedQuestions.length)
                         } else {
                             console.warn(
                                 'Unexpected response structure:',
@@ -701,7 +837,6 @@ const NewMcqProblemForm = ({
                         continue
                     }
 
-                    // **Change Delay from 5-10 seconds to 3-4 seconds**
                     const randomDelay = Math.floor(Math.random() * 1000) + 3000
                     await sleep(randomDelay)
                 }
@@ -724,7 +859,7 @@ const NewMcqProblemForm = ({
                     description: `Only ${generatedQuestions.length} unique MCQs were generated.`,
                 })
             } else {
-                toast.error({
+                toast.success({
                     title: 'Success',
                     description: `${generatedQuestions.length} MCQs generated and saved successfully.`,
                 })
