@@ -29,11 +29,10 @@ import CodingProblemPage from "./CodingProblemPage";
 
 interface ModuleContentRendererProps {
   selectedItemData: { item: any; topicId: string } | null;
-  getAssessmentData: (itemId: string) => any;
   onChapterComplete: () => void;
 }
 
-const ModuleContentRenderer = ({ selectedItemData, getAssessmentData, onChapterComplete }: ModuleContentRendererProps) => {
+const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleContentRendererProps) => {
   // States for fallback functionality
   const [showCodingProblem, setShowCodingProblem] = useState(false);
   const [quizSubmitted, setQuizSubmitted] = useState(false);

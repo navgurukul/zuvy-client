@@ -10,6 +10,7 @@ import useCourseSyllabus from "@/hooks/useCourseSyllabus";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 
 
@@ -221,10 +222,11 @@ const CourseSyllabusPage = () => {
             </div> */}
             <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
               <div className="flex-shrink-0">
-                <img
+                <Image
+                  width={128}
+                  height={128}
                   src={syllabusData.coverImage || '/logo.PNG'}
                   alt={syllabusData.bootcampName}
-                  className="w-full md:w-32 h-28 rounded-lg"
                 />
               </div>
               <div className="flex-1">
