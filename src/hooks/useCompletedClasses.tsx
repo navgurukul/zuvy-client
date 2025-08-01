@@ -10,6 +10,8 @@ export interface CompletedClass {
   attendanceStatus: 'present' | 'absent';
   duration: number;
   s3Link: string;
+  moduleId: number;
+  chapterId: number;
 }
 
 export interface AttendanceStats {

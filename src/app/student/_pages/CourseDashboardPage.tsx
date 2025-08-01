@@ -61,10 +61,17 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
   const totalStudents = progressData?.batchInfo?.totalEnrolledStudents || 0;
   const instructorName = progressData?.instructorDetails?.instructorName || '';
   const instructorAvatar = progressData?.instructorDetails?.instructorProfilePicture || '';
+  const isValidImageUrl = (url: string) => {
+    if (!url) return false;
+    return url.startsWith('/') || url.startsWith('http://') || url.startsWith('https://');
+  };
+  const validInstructorAvatar = isValidImageUrl(instructorAvatar) ? instructorAvatar : '';
   const courseName = progressData?.data?.bootcampTracking?.name || '';
   const courseDescription = progressData?.data?.bootcampTracking?.description || '';
   const courseCoverImage = progressData?.data?.bootcampTracking?.coverImage || '';
+  const validCourseCoverImage = isValidImageUrl(courseCoverImage) ? courseCoverImage : '/logo.PNG';
   const collaborator = progressData?.data?.bootcampTracking?.collaborator || '';
+  const validCollaborator = isValidImageUrl(collaborator) ? collaborator : '';
   const duration = progressData?.data?.bootcampTracking?.duration || 0;
 
   // Use API modules if available, otherwise fall back to mock modules
@@ -115,25 +122,25 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     switch (getEventType(type)) {
       case 'Live Class':
         return (
-          <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-primary-light flex items-center justify-center">
             <Video className="w-5 h-5 text-primary" />
           </div>
         );
       case 'Assessment':
         return (
-          <div className="w-10 h-10 rounded-full bg-warning-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-warning-light flex items-center justify-center">
             <BookOpen className="w-5 h-5 text-warning" />
           </div>
         );
       case 'Assignment':
         return (
-          <div className="w-10 h-10 rounded-full bg-info-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-info-light flex items-center justify-center">
             <FileText className="w-5 h-5 text-info" />
           </div>
         );
       default:
         return (
-          <div className="w-10 h-10 rounded-full bg-muted-light flex items-center justify-center">
+          <div className="w-5 h-5 rounded-full bg-muted-light flex items-center justify-center">
             <Clock className="w-5 h-5 text-muted-foreground" />
           </div>
         );
@@ -473,7 +480,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             <div className="hidden md:flex flex-col md:flex-row items-start gap-6 mb-6">
               <div className="flex-shrink-0">
                 <Image
-                  src={courseCoverImage || '/logo.PNG'}
+                  src={validCourseCoverImage}
                   alt={courseName}
                   width={128}
                   height={128}
@@ -487,23 +494,26 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                     <TruncatedDescription text={courseDescription} maxLength={250} className="text-base md:text-lg text-muted-foreground mb-4 text-left" />
                     <div className="flex items-center gap-2 mb-4">
                       {/* <Avatar className="w-8 h-8">
-                          <AvatarImage src={instructorAvatar || '/logo.PNG'} />
+                          <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
                           <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
                         </Avatar> */}
                       <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
                     </div>
                   </div>
-                  {collaborator && <div className="flex items-center gap-2">
+                  {validCollaborator ? <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
                     <Image
-                      src={collaborator || '/logo.PNG'}
+                      src={validCollaborator}
                       alt="Collaborator Brand"
                       width={75}
                       height={56}
                       className="h-12"
                     />
-                  </div>}
-
+                  </div> : collaborator ?
+                    <div className="flex  items-center gap-2">
+                      <p className="text-sm font-bold text-muted-foreground ">In Collaboration With</p>
+                      <p className="text-sm font-bold text-primary">{collaborator}</p>
+                    </div> : ''}
                 </div>
               </div>
             </div>
@@ -511,7 +521,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             {/* Mobile Layout */}
             <div className="md:hidden mb-6">
               <Image
-                src={courseCoverImage || '/logo.PNG'}
+                src={validCourseCoverImage}
                 alt={courseName}
                 width={400}
                 height={160}
@@ -521,15 +531,15 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               <TruncatedDescription text={courseDescription} maxLength={150} className="text-base text-muted-foreground mb-4 text-left" />
               <div className="flex items-center gap-2 mb-4">
                 {/* <Avatar className="w-8 h-8">
-                  <AvatarImage src={instructorAvatar || '/logo.PNG'} />
+                  <AvatarImage src={validInstructorAvatar || '/logo.PNG'} />
                   <AvatarFallback>{instructorName ? instructorName[0] : 'U'}</AvatarFallback>
                 </Avatar> */}
                 <span className="font-medium capitalize text-sm ">Instructor:- {instructorName}</span>
               </div>
-              {collaborator && <div className="flex items-center gap-2 mb-4">
+              {validCollaborator && <div className="flex items-center gap-2 mb-4">
                 <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
                 <Image
-                  src={collaborator || '/logo.PNG'}
+                  src={validCollaborator}
                   alt="Collaborator Brand"
                   width={48}
                   height={48}
@@ -625,7 +635,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   </Badge>
                                 )} */}
                               <h3 className="text-xl font-heading font-semibold mb-2 text-left">
-                               {module.typeId === 2 ? 'Project' : 'Module' }  {module.order}: {module.name}
+                                {module.typeId === 2 ? 'Project' : 'Module'}  {module.order}: {module.name}
                               </h3>
                               <TruncatedDescription text={getModuleDescription(module)} maxLength={150} className="text-muted-foreground mb-3 text-sm text-left " />
                               {/* <div className="flex flex-wrap gap-2 mb-3">
@@ -638,18 +648,18 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   </Badge>
                                 )}
                               </div> */}
-                             {module.typeId === 2 && <span className="text-sm text-muted-foreground" >Due: January 20, 2025</span>}
+                              {module.typeId === 2 && <span className="text-sm text-muted-foreground" >Due: January 20, 2025</span>}
                             </div>
 
                             {/* Action Button - Desktop: top right, Mobile: bottom */}
-                              {!isMobile && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div>
+                            {!isMobile && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div>
 
                                       <Button
-                                        className={`px-6 font-semibold bg-[#f5f6fa]  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline hover:underline-offset-4 ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
+                                        className={`px-6 font-semibold bg-  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline hover:underline-offset-4 ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
                                         disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
                                         onClick={(e) => {
                                           if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
@@ -657,24 +667,24 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                           }
                                         }}
                                       >
-                                       {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
+                                        {module.typeId !== 2 ? <Link key={module.id} className="" href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
                                           {getModuleCTA(module, moduleProgress)}
-                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`}  className={`${isCurrentModule ? 'text-white' : ''} text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
+                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={`${isCurrentModule ? 'text-white' : ''} text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
                                       </Button>
-                                      </div>
-                                    </TooltipTrigger>
-                                    {!module.ChapterId && module.typeId !== 2 && (
-                                      <TooltipContent className="font-semibold" >
-                                        <p>No chapter is created inside this module yet</p>
-                                      </TooltipContent>
-                                    )}
-                                  </Tooltip>
-                                </TooltipProvider>
-                              )}
+                                    </div>
+                                  </TooltipTrigger>
+                                  {!module.ChapterId && module.typeId !== 2 && (
+                                    <TooltipContent className="font-semibold" >
+                                      <p>No chapter is created inside this module yet</p>
+                                    </TooltipContent>
+                                  )}
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
                           </div>
 
                           {/* Module Progress - Updated with primary-light background */}
-                         {module.typeId !== 2 && <div className="mb-4 lg:mb-0">
+                          {module.typeId !== 2 && <div className="mb-4 lg:mb-0">
                             <div className="relative bg-primary-light rounded-full h-2 w-full">
                               <div
                                 className={`h-2 rounded-full transition-all duration-300 relative ${isLocked ? 'bg-muted' : 'bg-primary'}`}
@@ -696,32 +706,32 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           {/* Action Button - Mobile: bottom */}
                           {isMobile && (
                             <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div>
 
-                                      <Button
-                                        className={`px-6 font-semibold bg-[#f5f6fa]  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline  ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
-                                        disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
-                                        onClick={(e) => {
-                                          if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
-                                            e.preventDefault();
-                                          }
-                                        }}
-                                      >
-                                       {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
-                                          {getModuleCTA(module, moduleProgress)}
-                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`}  className={` text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
-                                      </Button>
-                                </div>
-                              </TooltipTrigger>
-                              {!module.ChapterId && module.typeId !== 2 && (
-                                <TooltipContent className="font-semibold" >
-                                  <p>No chapter is created inside this module yet</p>
-                                </TooltipContent>
-                              )}
-                            </Tooltip>
-                          </TooltipProvider>
+                                    <Button
+                                      className={`px-6 font-semibold bg-[#f5f6fa]  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline  ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
+                                      disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
+                                      onClick={(e) => {
+                                        if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
+                                          e.preventDefault();
+                                        }
+                                      }}
+                                    >
+                                      {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
+                                        {getModuleCTA(module, moduleProgress)}
+                                      </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={` text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
+                                    </Button>
+                                  </div>
+                                </TooltipTrigger>
+                                {!module.ChapterId && module.typeId !== 2 && (
+                                  <TooltipContent className="font-semibold" >
+                                    <p>No chapter is created inside this module yet</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </CardContent>
                       </Card>
@@ -870,10 +880,12 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         {(completedClassesData?.classes || []).slice(0, 4).map((classItem: CompletedClass) => (
                           <div key={classItem.id} className="flex items-center justify-between gap-4">
                             <div className="flex-1 text-left">
-                              <p className="font-medium text-sm  ">{ellipsis(classItem.title, 20)}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {formatDate(classItem.startTime)}
-                              </p>
+                              <Link className=" hover:text-primary" href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`} >
+                                <p className="font-medium text-sm ">{ellipsis(classItem.title, 20)}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatDate(classItem.startTime)}
+                                </p>
+                              </Link>
                             </div>
                             <Badge variant="outline" className={classItem.attendanceStatus === 'present' ? "text-success border-success" : "text-destructive border-destructive"}>
                               {classItem.attendanceStatus === 'present' ? 'Present' : 'Absent'}

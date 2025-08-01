@@ -4,7 +4,31 @@ import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight, CheckCircle, Play, Award } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { ellipsis } from '@/lib/utils'
-import {QuestionCardProps}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+import { useCodingSubmissionStore } from '@/store/store'
+
+interface QuestionCardProps {
+    id: number
+    title: string
+    weightage?: number
+    easyCodingMark?: number
+    mediumCodingMark?: number
+    hardCodingMark?: number
+    description: string
+    tagId?: number
+    // assessmentOutsourseId?: number
+    assessmentSubmitId?: number
+    codingOutsourseId?: number
+    codingQuestions?: boolean
+    onSolveChallenge: (id: number) => void
+    isQuizSubmitted?: boolean
+    isMobile?: boolean
+    setIsCodingSubmitted?: any
+}
+
+export type Tag = {
+    id: number
+    tagName: string
+}
 
 const QuestionCard = ({
     id,
@@ -21,10 +45,11 @@ const QuestionCard = ({
     onSolveChallenge,
     isQuizSubmitted,
     isMobile,
+    setIsCodingSubmitted,
 }: QuestionCardProps) => {
     // const [tag, setTag] = useState<Tag>()
     const [action, setAction] = useState<string | null>(null)
-
+    const { setCodingSubmissionAction} = useCodingSubmissionStore()
     // async function getAllTags() {
     //     const response = await api.get('/content/allTags')
     //     if (response) {
@@ -38,7 +63,6 @@ const QuestionCard = ({
     // useEffect(() => {
     //     getAllTags()
     // }, [])
-    console.log("Question Card")
 
     function codingQuestionMarks(difficulty: string) {
         if (difficulty === 'Easy') {
@@ -61,6 +85,8 @@ const QuestionCard = ({
             )
             const action = res.data.data.action
             setAction(action)
+            setCodingSubmissionAction(action)
+            setIsCodingSubmitted(true)
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
             return null
@@ -74,17 +100,17 @@ const QuestionCard = ({
     }, [codingOutsourseId, assessmentSubmitId, id])
 
     return (
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+        <div className="bg-card  rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
             <div className="p-6">
                 {/* Header Section */}
                 <div className="flex items-start justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 text-left capitalize pr-4 flex-1 dark:text-white">
                         {isMobile ? ellipsis(title, 30) : title}
                     </h3>
                     <div className="flex items-center gap-3 ml-4">
                         <span
                             className={cn(
-                                'px-3 py-1 rounded-full text-sm font-medium border',
+                                'px-3 py-1 rounded-full text-sm font-medium font-semibold border',
                                 description === 'Easy' && 'bg-green-50 text-green-700 border-green-200',
                                 description === 'Medium' && 'bg-orange-50 text-orange-700 border-orange-200',
                                 description === 'Hard' && 'bg-red-50 text-red-700 border-red-200',
@@ -94,7 +120,7 @@ const QuestionCard = ({
                             {description}
                         </span>
                         {title !== 'Open-Ended Questions' && (
-                            <span className="text-sm font-semibold text-gray-900">
+                            <span className="text-sm font-semibold dark:bg-gray-600  px-1 rounded-lg text-gray-900 dark:text-white">
                                 {`${
                                     codingQuestions
                                         ? Math.trunc(
@@ -129,7 +155,7 @@ const QuestionCard = ({
                                 //     className="flex items-center  space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm"
                                 // >
                                 // </Button>
-                                    <span onClick={() => onSolveChallenge(id)} className="text-primary cursor-pointer text-sm font-medium ">Solve Challenge</span>
+                                    <span onClick={() => onSolveChallenge(id)} className="text-primary font-semibold cursor-pointer text-sm font-medium ">Solve Challenge</span>
                             )}
                         </>
                     )}

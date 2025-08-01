@@ -8,7 +8,7 @@ import {
     ResizableHandle,
 } from '@/components/ui/resizable'
 import { ChevronLeft, Code, Lock, Play, Upload, CheckCircle } from 'lucide-react'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { useCodingSubmissionStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowLeft } from 'lucide-react'
@@ -72,7 +72,7 @@ const IDE: React.FC<IDEProps> = ({
     const [codeResult, setCodeResult] = useState<any>([])
     const [languageId, setLanguageId] = useState(runCodeLanguageId)
     const [codeError, setCodeError] = useState('')
-    const [codingSubmissionAction, setCodingSubmissionAction] = useState<any>(null)
+    const {codingSubmissionAction, setCodingSubmissionAction} = useCodingSubmissionStore()
 
     const [testCases, setTestCases] = useState<any>([])
     const [templates, setTemplates] = useState<any>([])
@@ -80,6 +80,8 @@ const IDE: React.FC<IDEProps> = ({
     const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [modalType, setModalType] = useState<'success' | 'error'>('success')
+    const isDarkMode = useThemeStore((state) => state.isDark)
+    const theme = isDarkMode ? 'vs-dark' : 'vs'
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
@@ -95,7 +97,7 @@ const IDE: React.FC<IDEProps> = ({
     const [language, setLanguage] = useState(
         runCodeLanguageId
             ? editorLanguages.find((lang) => lang.id === runCodeLanguageId)
-                  ?.lang || ''
+                ?.lang || ''
             : ''
     )
 
@@ -206,12 +208,12 @@ const IDE: React.FC<IDEProps> = ({
             } else if (allTestCasesPassed && action === 'run') {
                 toast.success({
                     title: 'Success',
-                    description:'Test Cases Passed'
+                    description: 'Test Cases Passed'
                 })
             } else {
                 toast({
                     title: 'Failed',
-                    description:'Test Cases Failed'
+                    description: 'Test Cases Failed'
                 })
             }
 
@@ -220,8 +222,8 @@ const IDE: React.FC<IDEProps> = ({
             // Trigger re-render for the output window
             setResult(
                 response.data.data[0].stdOut ||
-                    response.data.data[0].stdout ||
-                    'No Output Available'
+                response.data.data[0].stdout ||
+                'No Output Available'
             )
             setLoading(false)
 
@@ -239,7 +241,7 @@ const IDE: React.FC<IDEProps> = ({
             })
             setCodeError(
                 error.response?.data?.data?.[0]?.stderr || error.response?.data?.data?.[0]?.stdErr ||
-                    'Error occurred during submission. Network connection lost.'
+                'Error occurred during submission. Network connection lost.'
             )
         }
     }
@@ -289,15 +291,21 @@ const IDE: React.FC<IDEProps> = ({
         }
     }, [runCodeLanguageId, runSourceCode])
 
-    useEffect(()=> {
+    useEffect(() => {
         const getActions = async () => {
-            const action = await getCodingSubmissionsData(selectedCodingOutsourseId,assessmentSubmitId,params.editor)
+            const action = await getCodingSubmissionsData(selectedCodingOutsourseId, assessmentSubmitId, params.editor)
             setCodingSubmissionAction(action)
+            if (action === 'submit') {
+                setIsSubmitted(true)
+            }
         }
         getActions()
-    },[])
+    }, [])
 
-    console.log(codingSubmissionAction)
+
+
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
@@ -306,36 +314,43 @@ const IDE: React.FC<IDEProps> = ({
                     <div className="flex items-center justify-between">
                         {/* Left: Back Button and Question Title */}
                         <div className="flex items-center space-x-4">
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
-                                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                        <span className="font-medium">Back to Assessment</span>
-                                    </button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent className="bg-card border-border shadow-32dp">
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle className="text-foreground">
-                                            Are you absolutely sure?
-                                        </AlertDialogTitle>
-                                        <AlertDialogDescription className="text-muted-foreground">
-                                            This action cannot be undone. If you have not
-                                            submitted your solution, it will be lost.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel className="bg-muted hover:bg-muted-dark text-foreground border-border">
-                                            Cancel
-                                        </AlertDialogCancel>
-                                        <AlertDialogAction
-                                            className="bg-destructive hover:bg-destructive-dark text-destructive-foreground"
-                                            onClick={onBack}
-                                        >
-                                            Go Back
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                            {isSubmitted ? <button onClick={onBack} className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
+                                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                                <span className="font-medium">Back to Assessment</span>
+                            </button> :
+
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
+                                            <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                                            <span className="font-medium">Back to Assessment</span>
+                                        </button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent className="bg-card border-border shadow-32dp">
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle className="text-foreground">
+                                                Are you absolutely sure?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription className="text-muted-foreground">
+                                                This action cannot be undone. If you have not
+                                                submitted your solution, it will be lost.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel className="bg-muted hover:bg-muted-dark text-foreground border-border">
+                                                Cancel
+                                            </AlertDialogCancel>
+                                            <AlertDialogAction
+                                                className="bg-destructive hover:bg-destructive-dark text-destructive-foreground"
+                                                onClick={onBack}
+                                            >
+                                                Go Back
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            }
+
 
                             {questionDetails && (
                                 <div className="flex items-center space-x-3">
@@ -357,20 +372,20 @@ const IDE: React.FC<IDEProps> = ({
                                     onClick={(e) => handleSubmit(e, 'run')}
                                     size="sm"
                                     variant="outline"
-                                    className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                                    className="text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 dark:text-white"
                                     disabled={(loading || isSubmitted) || codingSubmissionAction}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium">Run Code</span>
+                                    <span className="ml-2 font-medium font-semibold">Run Code</span>
                                 </Button>
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'submit')}
                                     size="sm"
-                                    className="bg-primary hover:bg-primary-dark text-primary-foreground"
+                                    className="bg-primary-dark hover:bg-primary text-primary-foreground"
                                     disabled={(loading || isSubmitted) || codingSubmissionAction}
                                 >
                                     {loading ? <Spinner className="w-4 h-4" /> : <Upload className="w-4 h-4" />}
-                                    <span className="ml-2 font-medium">Submit Solution</span>
+                                    <span className="ml-2 font-medium font-semibold">Submit Solution</span>
                                 </Button>
                             </div>
                         </div>
@@ -403,7 +418,7 @@ const IDE: React.FC<IDEProps> = ({
                             </>
                         ) : (
                             <>
-                                
+
                                 <AlertDialogTitle className="text-destructive text-xl">
                                     ❌ Test Cases Failed
                                 </AlertDialogTitle>
@@ -481,7 +496,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                         Example {index + 1}
                                                                     </h4>
                                                                 </div>
-                                                                
+
                                                                 <div className="p-4 space-y-4">
                                                                     {/* Input Section */}
                                                                     <div>
@@ -523,7 +538,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                 </div>
                                                             </div>
                                                         ))}
-                                                        
+
                                                         {testCases && testCases.length > 3 && (
                                                             <div className="text-left p-4 text-sm text-muted-foreground bg-muted/20 rounded-lg">
                                                                 + {testCases.length - 3} more test case{testCases.length - 3 !== 1 ? 's' : ''} available
@@ -580,7 +595,7 @@ const IDE: React.FC<IDEProps> = ({
                                             <Editor
                                                 height="100%"
                                                 language={language}
-                                                theme="vs"
+                                                theme={theme}
                                                 value={currentCode}
                                                 onChange={handleEditorChange}
                                                 defaultValue={language || 'Please Select a language above!'}
@@ -620,8 +635,8 @@ const IDE: React.FC<IDEProps> = ({
                                         </div>
 
                                         {/* Output Content */}
-                                        <div 
-                                            style={{ height: 'calc(100% - 45px)' }} 
+                                        <div
+                                            style={{ height: 'calc(100% - 45px)' }}
                                             className="p-4 overflow-y-auto font-mono text-sm bg-white dark:bg-gray-950 text-gray-800 dark:text-gray-200"
                                         >
                                             {/* Loading State */}

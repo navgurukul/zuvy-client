@@ -657,7 +657,12 @@ const AddAssignent = ({
                                                     <Calendar
                                                         mode="single"
                                                         selected={field.value}
-                                                        onSelect={field.onChange}
+                                                        onSelect={(date) => {
+                                                            if (date) {
+                                                                field.onChange(date);
+                                                                setDeadline(date); // Keep both states in sync
+                                                            }
+                                                        }}
                                                         disabled={(date: any) => date <= addDays(new Date(), -1)}
                                                         initialFocus
                                                     />

@@ -357,7 +357,7 @@ const StudentDashboard = () => {
                                         </span>
                                         <span>
 
-                                        {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[16px] mr-8 ">Join</span>}
+                                        {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[14px] font-semibold mr-8 ">Join</span>}
                                         </span>
 
                                       </p>

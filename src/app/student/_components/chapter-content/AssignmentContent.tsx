@@ -229,7 +229,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
               ) : (
                 <iframe
                   src={resourceLink}
-                  className={`w-full border border-border rounded ${isSmallScreen ? 'h-[300px]' : 'h-72'}`}
+                  className={`w-full border border-border rounded ${isSmallScreen ? 'h-[300px]' : 'h-96'}`}
                   title="Assignment Resource"
                 />
               )
@@ -248,7 +248,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
         </div>
 
         {/* Submission Section */}
-        <div className="rounded-lg p-4 md:p-6">
+        <div className="rounded-lg ">
           <h2 className={`font-semibold text-foreground mb-4 text-left ${isMobile ? 'text-lg' : isSmallScreen ? 'text-xl' : 'text-xl'}`}>
             Make a Submission
           </h2>
@@ -278,7 +278,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                   <Button 
                     type="submit" 
                     disabled={isSubmitting || isCompleting || !form.formState.isValid}
-                    className={`px-6 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'}`}
+                    className={`px-4 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-5' : 'h-8'}`}
                   >
                     {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
                   </Button>

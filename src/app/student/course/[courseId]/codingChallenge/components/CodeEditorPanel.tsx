@@ -2,8 +2,16 @@ import React from 'react';
 import Editor from '@monaco-editor/react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CodingLanguage } from '@/utils/types/coding-challenge';
-import{CodeEditorPanelProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
+import { useThemeStore } from '@/store/store';
 
+interface CodeEditorPanelProps {
+    currentCode: string;
+    language: string;
+    isAlreadySubmitted: boolean;
+    editorLanguages: CodingLanguage[];
+    onCodeChange: (value: string | undefined) => void;
+    onLanguageChange: (language: string) => void;
+}
 
 export function CodeEditorPanel({
     currentCode,
@@ -13,6 +21,10 @@ export function CodeEditorPanel({
     onCodeChange,
     onLanguageChange,
 }: CodeEditorPanelProps) {
+
+    const isDarkMode = useThemeStore((state) => state.isDark)
+    const theme = isDarkMode ? 'vs-dark' : 'vs'
+
     return (
         <div className="h-full bg-card">
             {/* Editor Header */}
@@ -51,7 +63,7 @@ export function CodeEditorPanel({
                 <Editor
                     height="100%"
                     language={language}
-                    theme="vs"
+                    theme={theme}
                     value={currentCode}
                     onChange={onCodeChange}
                     defaultValue={language || 'Please Select a language above!'}

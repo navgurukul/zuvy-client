@@ -62,6 +62,7 @@ function Page({
     const [isFullScreen, setIsFullScreen] = useState(false)
     const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
     const { width } = useWindowSize()
+    
     const isMobile = width < 768
 
     const [disableSubmit, setDisableSubmit] = useState(false)
@@ -102,6 +103,7 @@ function Page({
     const [selectedCodingOutsourseId, setSelectedCodingOutsourseId] =
         useState<any>()
     const [chapterId, setChapterId] = useState<any>()
+    const [isCodingSubmitted , setIsCodingSubmitted] = useState(false)
 
     // Check if Proctoring is set on by admin for tab switching, copy paste, etc.
     const [isTabProctorOn, setIsTabProctorOn] = useState(
@@ -405,6 +407,8 @@ function Page({
         setIsOpeningdialogOpen(true)
     }, [])
 
+
+
     useEffect(() => {
         const navEntries = performance.getEntriesByType(
             'navigation'
@@ -447,6 +451,7 @@ function Page({
                     <AlertProvider
                         requestFullScreen={handleFullScreenRequest}
                         setIsFullScreen={setIsFullScreen}
+
                     >
                         <QuizQuestions
                             onBack={handleBack}
@@ -580,7 +585,6 @@ function Page({
         setIsFullScreen(true)
     }
 
-    console.log('Hello')
 
     return (
         <div
@@ -656,7 +660,7 @@ function Page({
 
                         <div className="max-w-4xl mx-auto p-6 pt-20">
                             {/* Assessment Info Section */}
-                            <div className=" rounded-2xl shadow-16dp mb-8 overflow-hidden">
+                            <div className=" rounded-2xl  mb-8 overflow-hidden">
                                 <div className=" p-6">
                                     <div className="flex items-center flex-col w-full items-start text-left gap-5 mb-4">
                                         {/* <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -668,33 +672,7 @@ function Page({
 </p>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-4">                                            <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                                       <div className='flex items-center space-x-3'>
-                                       {/* <Clock className="w-5 h-5 text-accent flex-shrink-0" /> */}
-                                        {/* <div>
-                                            <p className="text-sm text-left text-muted-foreground font-medium">Deadline</p>
-                                            <p className="text-foreground font-semibold">
-                                                {assessmentData?.endDatetime
-                                                    ? formatToIST(assessmentData.endDatetime)
-                                                    : 'No Deadline For This Assessment'
-                                                }
-                                            </p>
-                                        </div> */}
-                                       </div>
-                                    </div>
-                                        <div>
-                                            <div className="flex items-center space-x-3 p-3 bg-muted/30 rounded-lg">
-                                                {/* <Timer className="w-5 h-5 text-secondary flex-shrink-0" /> */}
-                                                {/* <div>
-                                                    <p className="text-sm text-left text-muted-foreground font-medium">Test Time</p>
-                                                    <p className="text-foreground font-semibold">
-                                                        {Math.floor(assessmentData?.timeLimit / 3600)} Hours{' '}
-                                                        {Math.floor((assessmentData?.timeLimit % 3600) / 60)} Minutes
-                                                    </p>
-                                                </div> */}
-                                            </div>
-                                        </div>
-                                    </div>
+                                   
                                 </div>
 
                                 <div className="p-6">
@@ -746,6 +724,7 @@ function Page({
                                         <div className="space-y-4">
                                             {assessmentData?.codingQuestions?.map((question: any) => (
                                                 <QuestionCard
+                                                    setIsCodingSubmitted = {setIsCodingSubmitted}
                                                     isMobile={isMobile}
                                                     key={question.codingQuestionId}
                                                     id={question.codingQuestionId}

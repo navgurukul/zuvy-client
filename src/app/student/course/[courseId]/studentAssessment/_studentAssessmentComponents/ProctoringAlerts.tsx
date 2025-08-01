@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
+
+
 import {AlertContextType,AlertProps}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 const AlertContext = createContext<AlertContextType | null>(null);
 
@@ -23,7 +25,7 @@ const AlertIcon = () => (
 export const AlertProvider = ({ 
   children, 
   requestFullScreen,
-  setIsFullScreen 
+  setIsFullScreen ,
 }: { 
   children: React.ReactNode;
   requestFullScreen: (element: Element) => void;
@@ -31,6 +33,8 @@ export const AlertProvider = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
+ 
+
 
   const showAlert = (props: AlertProps) => {
     setAlertContent(props);
@@ -42,6 +46,7 @@ export const AlertProvider = ({
     setAlertContent(null);
     requestFullScreen(document.documentElement);
     setIsFullScreen(true);
+   
   };
 
   React.useEffect(() => {
@@ -50,6 +55,9 @@ export const AlertProvider = ({
       window.alertSystem = undefined;
     };
   }, []);
+
+
+
 
   return (
     <AlertContext.Provider value={{ showAlert, hideAlert }}>

@@ -64,6 +64,9 @@ function Page() {
         useState<ModuleData | null>(null)
     const [pendingOrder, setPendingOrder] = useState<CurriculumItem[] | null>(null)
     const [reorderTimeout, setReorderTimeout] = useState<NodeJS.Timeout | null>(null)
+    const [draggedModuleId, setDraggedModuleId] = useState<number | null>(null)
+    const [isDragging, setIsDragging] = useState(false)
+    const [hasOrderChanged, setHasOrderChanged] = useState(false)
     const [moduleData, setModuleData] = useState({
         name: '',
         description: '',
@@ -369,91 +372,120 @@ function Page() {
     }, [courseData?.id])
 
     async function handleReorder(newOrderModules: CurriculumItem[]) {
-        if (!courseData?.id) {
-            toast.error({
-                title: 'Error',
-                description: 'Course ID is missing',
-            })
-            return
-        }
+        if (!courseData?.id || !draggedModuleId) return
 
         setIsReordering(true)
-        const oldOrder = originalCurriculum.map((item) => item.id)
-        const newOrder = newOrderModules.map((item) => item.id)
-        const isSameOrder = JSON.stringify(oldOrder) === JSON.stringify(newOrder)
 
-        let movedModuleId: number | null = null
+        const newPosition = newOrderModules.findIndex(
+            (item) => item.id === draggedModuleId
+        ) + 1
 
-        for (let i = 0; i < oldOrder.length; i++) {
-            if (oldOrder[i] !== newOrder[i]) {
-                movedModuleId = newOrder[i]
-                break
-            }
-        }
-
-        if (!movedModuleId) {
-            setIsReordering(false)
-            return
-        }
-
-        const newPosition =
-            newOrderModules.findIndex((item) => item.id === movedModuleId) + 1
         const updatedModules = newOrderModules.map((item, index) => ({
             ...item,
             order: index + 1,
         }))
 
-        setCurriculum(updatedModules)
-
         try {
             const response = await api.put(
-                `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${movedModuleId}`,
-                {
+                `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${draggedModuleId}`,
+                { 
                     reOrderDto: { newOrder: newPosition },
                 }
             )
             // setOriginalCurriculum([...updatedModules])
-             const warningMsg = response.data?.[0]?.message ?? ""
+            const warningMsg = response.data?.[0]?.message ?? ""
 
             if (warningMsg.includes("started by")) {
-            toast.warning({
-            title: "Warning",
-            description: warningMsg,
-        })
+                toast.warning({
+                    title: "Warning",
+                    description: warningMsg,
+                })
 
-         const updatedOriginal = originalCurriculum.map(item =>
-            item.id === movedModuleId ? { ...item, isStarted: true } : item
-        )
-            setOriginalCurriculum(updatedOriginal)
-            setCurriculum(updatedOriginal)
-        }else {
-           setOriginalCurriculum([...updatedModules])
-        }
+                const updatedOriginal = originalCurriculum.map((item) =>
+                    item.id === draggedModuleId ? { ...item, isStarted: true } : item
+                )
+                setOriginalCurriculum(updatedOriginal)
+                setCurriculum(updatedOriginal)
+            }else {
+                setOriginalCurriculum([...updatedModules])
+                toast.success({              // ✅ Success toast here
+                    title: "Success",
+                    description: "Module order updated successfully",
+                })
+            }
 
+            setIsReordering(false)
         } catch (error) {
+            // Revert to original order on error
             setCurriculum([...originalCurriculum])
             toast.error({
-            title: "Error",
-            description: "Error updating module order"
+                title: "Error",
+                description: "Error updating module order"
             })
-        } 
+            setIsReordering(false)
+        }
     }
-
+    
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
-         //handleReorder(newOrderModules)
-        if (reorderTimeout) clearTimeout(reorderTimeout)
+        // Update curriculum immediately for smooth UI
+        const updatedModules = newOrderModules.map((item, index) => ({
+            ...item,
+            order: index + 1,
+        }));
+        setCurriculum(updatedModules)
 
-        setPendingOrder(newOrderModules)
+        const oldOrder = originalCurriculum.map(item => item.id)
+        const newOrder = updatedModules.map(item => item.id)
+        
+        if (JSON.stringify(oldOrder) !== JSON.stringify(newOrder)) {
+            setHasOrderChanged(true)
+        }
+        
+        // Clear any existing timeout
+        if (reorderTimeout) {
+            clearTimeout(reorderTimeout)
+            setReorderTimeout(null)
+        }
 
-       const timeout = setTimeout(() => {
-        if (pendingOrder) {
-         handleReorder(pendingOrder)
-         setPendingOrder(null)
-       }
-       }, 500) // wait for 300ms after drag stops
+        if (!isDragging) {
+            // Only set timeout if drag is not active (this means it's the final drop)
+            const timeout = setTimeout(() => {
+                if (hasOrderChanged) {
+                    handleReorder(updatedModules)
+                    setHasOrderChanged(false)
+                }
+            }, 200) // Reduced timeout since it's only for final drop
 
-       setReorderTimeout(timeout)
+            setReorderTimeout(timeout)
+        }
     }
+
+
+    const handleDragStart = () => {
+        setIsDragging(true)
+        setHasOrderChanged(false)
+    }
+
+    const handleDragEnd = () => {
+        setIsDragging(false)
+        
+        // After drag ends, check if we need to save
+        setTimeout(() => {
+            if (hasOrderChanged) {
+                handleReorder(curriculum)
+                setHasOrderChanged(false)
+            }
+        }, 100)
+    }
+
+    // Add cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (reorderTimeout) {
+                clearTimeout(reorderTimeout)
+            }
+        }
+    }, [reorderTimeout])
 
     if (isCourseDeleted) {
         return (
@@ -571,6 +603,9 @@ function Page() {
                                     projectId={item.projectId}
                                     chapterId={item.ChapterId}
                                     // containerRef={containerRef}
+                                    setDraggedModuleId={setDraggedModuleId}
+                                    onDragStart={handleDragStart}
+                                    onDragEnd={handleDragEnd}
                                 />
                             ))}
                         </Reorder.Group>

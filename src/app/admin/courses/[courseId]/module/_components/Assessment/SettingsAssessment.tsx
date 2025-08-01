@@ -1003,8 +1003,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                             <ToggleSwitch
                                                                 isChecked={field.value as boolean}
                                                                 onToggle={field.onChange}
+                                                                className={field.value ? 'bg-green-500' : 'bg-gray-300'} 
                                                             />
-
                                                         </FormControl>
                                                     </div>
                                                 </div>

@@ -87,6 +87,15 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config
 
+          // :no_entry_sign: Skip token refresh if on login route or calling login/refresh endpoints
+        const isLoginOrRefresh =
+            originalRequest.url.includes('/auth/login') ||
+            originalRequest.url.includes('/auth/refresh')
+
+        if (isLoginOrRefresh) {
+            return Promise.reject(error)
+        }
+
         if (error.response?.status === 401 && !originalRequest._retry) {
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
