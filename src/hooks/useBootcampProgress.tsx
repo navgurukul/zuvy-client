@@ -1,50 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from "@/utils/axios.config";
+import{BootcampProgressResponse} from '@/hooks/hookType'
 
-interface BootcampTracking {
-  id: number;
-  name: string;
-  description: string | null;
-  collaborator: string | null;
-  coverImage: string;
-  bootcampTopic: string;
-  startTime: string;
-  duration: string;
-  language: string;
-  createdAt: string;
-  updatedAt: string;
-  version: string | null;
-}
-
-interface InstructorDetails {
-  instructorId: number;
-  instructorName: string;
-  instructorProfilePicture: string | null;
-}
-
-interface BatchInfo {
-  batchName: string;
-  totalEnrolledStudents: number;
-}
-
-interface BootcampProgressData {
-  id: number;
-  userId: number;
-  progress: number;
-  bootcampId: number;
-  createdAt: string;
-  updatedAt: string;
-  version: string | null;
-  bootcampTracking: BootcampTracking;
-}
-
-interface BootcampProgressResponse {
-  status: string;
-  message: string;
-  data: BootcampProgressData;
-  instructorDetails: InstructorDetails;
-  batchInfo: BatchInfo;
-}
 
 export const useBootcampProgress = (courseId: string) => {
   const [progressData, setProgressData] = useState<BootcampProgressResponse | null>(null);

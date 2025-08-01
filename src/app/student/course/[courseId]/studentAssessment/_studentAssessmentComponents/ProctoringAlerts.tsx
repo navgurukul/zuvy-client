@@ -9,23 +9,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-type AlertProps = {
-  title: string;
-  description: string;
-  violationCount?: string;
-};
-
-type AlertContextType = {
-  showAlert: (props: AlertProps) => void;
-  hideAlert: () => void;
-};
-
-declare global {
-  interface Window {
-    alertSystem?: AlertContextType;
-  }
-}
-
+import {AlertContextType,AlertProps}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 const AlertContext = createContext<AlertContextType | null>(null);
 
 // Custom Alert Icon Component

@@ -2,15 +2,8 @@ import React from 'react';
 import Editor from '@monaco-editor/react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CodingLanguage } from '@/utils/types/coding-challenge';
+import{CodeEditorPanelProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
-interface CodeEditorPanelProps {
-    currentCode: string;
-    language: string;
-    isAlreadySubmitted: boolean;
-    editorLanguages: CodingLanguage[];
-    onCodeChange: (value: string | undefined) => void;
-    onLanguageChange: (language: string) => void;
-}
 
 export function CodeEditorPanel({
     currentCode,

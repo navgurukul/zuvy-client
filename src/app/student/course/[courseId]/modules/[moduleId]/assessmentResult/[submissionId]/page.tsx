@@ -12,8 +12,9 @@ import { getAssesmentBackgroundColorClass } from '@/lib/utils'
 import useAssessmentResult from '@/hooks/useAssessmentResult'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import {AssessmentParams} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"
 
-const ViewAssessmentResults = ({ params }: { params: any }) => {
+const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
     // State Variables
     const [assessmentOutsourseId, setAssessmentOutsourseId] = useState<number | null>(null)
     const { studentData } = useLazyLoadedStudentData()
@@ -21,6 +22,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
 
     // Use the custom hook
     const { data: viewResultsData, loading, error, refetch } = useAssessmentResult(params.submissionId)
+   
 
     React.useEffect(() => {
         if (viewResultsData && viewResultsData.assessmentOutsourseId) {

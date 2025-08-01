@@ -19,7 +19,7 @@ import TruncatedDescription from "@/app/student/_components/TruncatedDescription
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
-
+import {Module,ModuleContentCounts} from '@/app/student/_pages/pageStudentType'
 
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
@@ -39,6 +39,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       <CourseDashboardSkeleton />
     );
   }
+  
 
   // Show error state if API fails
   if (progressError || modulesError || eventsError || classesError) {
@@ -54,7 +55,6 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       </div>
     );
   }
-
   // Use real progress data if available, otherwise fall back to mock data
   const currentProgress = progressData?.data?.progress || 0;
   const batchName = progressData?.batchInfo?.batchName || '';
@@ -199,7 +199,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     return module.progress || 0;
   };
 
-  const getModuleDescription = (module: any) => {
+  const getModuleDescription = (module:Module) => {
     return module.description || "Learn essential concepts and build practical skills.";
   };
 
@@ -216,7 +216,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     }
   };
 
-  const getContentCount = (module: any) => {
+  const getContentCount = (module: ModuleContentCounts) => {
     const counts = [];
     if (module.quizCount > 0) counts.push(`${module.quizCount} Quiz${module.quizCount > 1 ? 'zes' : ''}`);
     if (module.assignmentCount > 0) counts.push(`${module.assignmentCount} Assignment${module.assignmentCount > 1 ? 's' : ''}`);

@@ -1,12 +1,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { getCodingQuestionTags } from '@/store/store'
-
-type Props = {
-    id: number
-    tags?: any
-    assesmentSide?: boolean
-}
+import{Props} from '@/hooks/hookType'
 
 const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
     const [quizData, setQuizData] = useState<any>(null)

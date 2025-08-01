@@ -23,13 +23,8 @@ import { formatDate, formatDateTime } from "@/lib/utils";
 import useProjectDetails from "@/hooks/useProjectDetails";
 import useProjectSubmission from "@/hooks/useProjectSubmission";
 import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor";
+import {ProjectState,ParagraphContentItem} from '@/app/student/_pages/pageStudentType'
 
-interface ProjectState {
-  submissionLink: string;
-  isSubmitted: boolean;
-  submittedAt?: Date;
-  validationError?: string;
-}
 
 const ProjectPage = () => {
   const searchParams = useSearchParams();
@@ -400,12 +395,11 @@ const ProjectPage = () => {
 };
 
 // Helper function to extract text from the JSON content structure
-const extractTextFromContent = (content: any[]): string => {
+const extractTextFromContent = (content: ParagraphContentItem[]): string => {
   let text = '';
-  
-  content.forEach((item: any) => {
+  content.forEach((item) => {
     if (item.type === 'paragraph' && item.content) {
-      item.content.forEach((textItem: any) => {
+      item.content.forEach((textItem) => {
         if (textItem.type === 'text') {
           text += textItem.text + ' ';
         }

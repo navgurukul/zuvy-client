@@ -1,29 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from "@/utils/axios.config";
+import{Module,UseAllModulesForStudentsReturn} from '@/hooks/hookType'
 
-interface Module {
-  id: number;
-  name: string;
-  description: string;
-  typeId: number;
-  order: number;
-  projectId: number | null;
-  isLock: boolean;
-  timeAlloted: number;
-  progress: number;
-  ChapterId: number;
-  quizCount: number;
-  assignmentCount: number;
-  codingProblemsCount: number;
-  articlesCount: number;
-  formCount: number;
-}
-
-interface UseAllModulesForStudentsReturn {
-  modules: Module[];
-  loading: boolean;
-  error: string | null;
-}
 
 export const useAllModulesForStudents = (courseId: string): UseAllModulesForStudentsReturn => {
   const [modules, setModules] = useState<Module[]>([]);

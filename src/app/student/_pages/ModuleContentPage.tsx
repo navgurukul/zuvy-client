@@ -11,36 +11,8 @@ import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
 import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
+import { TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
 
-interface TopicItem {
-  id: string;
-  title: string;
-  type: string;
-  status: string;
-  description?: string;
-  duration?: string;
-  scheduledDateTime?: Date;
-}
-
-interface Topic {
-  id: string;
-  name: string;
-  description: string;
-  items: TopicItem[];
-}
-
-interface Module {
-  id: string;
-  name: string;
-  description: string;
-  topics: Topic[];
-}
-
-interface Course {
-  id: string;
-  name: string;
-  modules: Module[];
-}
 
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
   const router = useRouter();

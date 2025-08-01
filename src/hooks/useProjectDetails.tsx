@@ -1,49 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-
-interface ProjectInstruction {
-  description: string;
-}
-
-interface ProjectTrackingData {
-  // Add tracking data properties as needed
-  projectLink: string;
-}
-
-interface ProjectData {
-  id: number;
-  title: string;
-  instruction: ProjectInstruction;
-  isLock: boolean;
-  deadline: string;
-  version: number | null;
-  projectTrackingData: ProjectTrackingData[];
-}
-
-interface ProjectDetailsResponse {
-  message: string;
-  code: number;
-  isSuccess: boolean;
-  data: {
-    moduleId: number;
-    bootcampId: number;
-    typeId: number;
-    projectData: ProjectData[];
-    status: 'Pending' | 'Completed';
-  };
-}
-
-interface UseProjectDetailsReturn {
-  projectData: ProjectData[];
-  moduleId: number;
-  bootcampId: number;
-  typeId: number;
-  status: 'Pending' | 'Completed';
-  loading: boolean;
-  isRefetching: boolean;
-  error: string | null;
-  refetch: () => Promise<void>;
-}
+import{UseProjectDetailsReturn,ProjectDetailsResponse,ProjectData} from '@/hooks/hookType'
 
 const useProjectDetails = (projectId: string, moduleId: string): UseProjectDetailsReturn => {
   const [projectData, setProjectData] = useState<ProjectData[]>([]);
