@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from "@/utils/axios.config";
 import{BootcampProgressResponse} from '@/hooks/hookType'
 
-
 export const useBootcampProgress = (courseId: string) => {
   const [progressData, setProgressData] = useState<BootcampProgressResponse | null>(null);
   const [loading, setLoading] = useState(true);

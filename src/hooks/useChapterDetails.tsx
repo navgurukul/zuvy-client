@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 import{ChapterDetails,UseChapterDetailsResponse} from '@/hooks/hookType'
 
-
 const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse => {
   const [chapterDetails, setChapterDetails] = useState<ChapterDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(false);

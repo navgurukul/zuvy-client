@@ -1,10 +1,6 @@
+import { QuestionDetails } from "@/utils/types/coding-challenge";
+import { QuestionPanel } from "./QuestionPanel";
 
-
-// CodeEditorPanel
-// export interface CodingLanguage {
-//   id: string;
-//   lang: string;
-// }
 export interface CodeEditorPanelProps {
     currentCode: string;
     language: string;
@@ -42,6 +38,7 @@ export interface OutputPanelProps {
     codeResult: any[];
 }
 
+
 // SubmissionModal
 export interface SubmissionModalProps {
     isOpen: boolean;
@@ -51,4 +48,11 @@ export interface SubmissionModalProps {
     codeResult: any[];
     onViewSolution: () => void;
     onReturnToCourse: () => void;
+}
+
+
+
+// QuestionPanel
+export interface QuestionPanelProps {
+    questionDetails: QuestionDetails;
 }

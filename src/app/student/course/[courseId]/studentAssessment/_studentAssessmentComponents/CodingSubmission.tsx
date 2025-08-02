@@ -19,8 +19,6 @@ import Editor from '@monaco-editor/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {CodingSubmissionData,TestCase}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
-
-
 const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: CodingSubmissionData | null }) => {
   const router = useRouter()
   

@@ -23,7 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {QuizContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
+import {QuizContentProps,Question} from '@/app/student/_components/chapter-content/componentChapterType'
 
 
 const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -109,7 +109,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
   };
 
   // Function to get option styling based on completion status
-  const getOptionStyling = (question: any, optionId: string) => {
+  const getOptionStyling = (question: Question, optionId: string) => {
     if (!isCompleted) {
       // For incomplete quiz, show normal styling
       return {
@@ -156,7 +156,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
   };
 
   // Function to get question status
-  const getQuestionStatus = (question: any) => {
+  const getQuestionStatus = (question: Question) => {
     if (!isCompleted) return null;
     
     const quizTrack = question.quizTrackingData?.[0];
@@ -261,7 +261,7 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
           </div>
         ) : (
           <div className="">
-            {quizQuestions.map((q: any, index: number) => {
+            {quizQuestions.map((q: Question, index: number) => {
               const questionStatus = getQuestionStatus(q);
               const quizTrack = q.quizTrackingData?.[0];
               const isAttempted = !!quizTrack;

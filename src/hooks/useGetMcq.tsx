@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { getCodingQuestionTags } from '@/store/store'
-import{Props} from '@/hooks/hookType'
+import{Props, Tag,QuizApiResponse  } from '@/hooks/hookType'
 
 const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
     const [quizData, setQuizData] = useState<any>(null)
@@ -10,11 +10,11 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
     const [tagName, setTagName] = useState<string | null>(null)
     const { tags } = getCodingQuestionTags()
 
-    const newTags = assesmentSide ? tag : tags
+    const newTags = (assesmentSide ? tag : tags) || []
 
     const fetchQuizHandler = useCallback(async () => {
         try {
-            const res = await api.get(`/Content/quiz/${id}`)
+            const res = await api.get<QuizApiResponse>(`/Content/quiz/${id}`)
             const quiz = res.data.data[0]
 
             setQuizData(quiz)
@@ -23,7 +23,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
 
             // Find the tag name based on the `tagId`
             const matchingTag = newTags.find(
-                (tag: any) => tag.id === quiz.tagId
+                (tag:  Tag ) => tag.id === quiz.tagId
             )
             setTagName(matchingTag ? matchingTag.tagName : null)
         } catch (error: any) {
@@ -47,5 +47,4 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
         refetch: fetchQuizHandler,
     }
 }
-
 export default useGetMCQs

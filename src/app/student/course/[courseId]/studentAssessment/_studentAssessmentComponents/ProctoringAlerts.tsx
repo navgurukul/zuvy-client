@@ -9,8 +9,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-
-
 import {AlertContextType,AlertProps}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 const AlertContext = createContext<AlertContextType | null>(null);
 
@@ -20,7 +18,6 @@ const AlertIcon = () => (
     <span className="text-destructive-foreground text-xl font-bold">!</span>
   </div>
 );
-
 
 export const AlertProvider = ({ 
   children, 
@@ -56,13 +53,10 @@ export const AlertProvider = ({
     };
   }, []);
 
-
-
-
   return (
     <AlertContext.Provider value={{ showAlert, hideAlert }}>
       {children}
-      {alertContent && (        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      {alertContent && (<AlertDialog open={isOpen} onOpenChange={setIsOpen}>
           <AlertDialogContent className="max-w-md rounded-lg p-0 overflow-hidden bg-background border-border shadow-4dp">
             <div className="flex flex-col items-center px-6 pt-8 pb-6 gap-4">
               <AlertIcon />

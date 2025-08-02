@@ -9,9 +9,6 @@ import { getEmbedLink } from '@/utils/students'
 import {VideoContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
 
-
-
-
 const VideoContent: React.FC<VideoContentProps> = ({
     chapterDetails,
     onChapterComplete,

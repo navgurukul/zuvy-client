@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 
+
+
 export interface Event {
   type: "Live Class" | "Assessment" | "Assignment";
   id: number;
@@ -21,12 +23,12 @@ export interface UpcomingEventsData {
   totalEvents: number;
   totalPages: number;
 }
-
 export interface UseUpcomingEventsReturn {
   upcomingEventsData: UpcomingEventsData | null;
   loading: boolean;
   error: string | null;
 }
+
 
 export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
   const [upcomingEventsData, setUpcomingEventsData] = useState<UpcomingEventsData | null>(null);

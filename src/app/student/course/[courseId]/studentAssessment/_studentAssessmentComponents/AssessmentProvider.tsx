@@ -771,11 +771,11 @@ function Page({
                                                 weightage={assessmentData?.weightageMcqQuestions}
                                                 description={`${assessmentData?.hardMcqQuestions +
                                                     assessmentData?.easyMcqQuestions +
-                                                    assessmentData?.mediumMcqQuestions || 0
-                                                    } questions`}
+                                                    assessmentData?.mediumMcqQuestions || 0} questions`}
                                                 onSolveChallenge={() => handleSolveChallenge('quiz')}
-                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission}
-                                            />
+                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission} setIsCodingSubmitted={function (value: React.SetStateAction<boolean>): void {
+                                                    throw new Error('Function not implemented.')
+                                                } }                                            />
                                         </div>
                                     </div>
                                 )}
@@ -794,11 +794,12 @@ function Page({
 
                                     <div className="p-6">
                                         <QuestionCard
-                                            id={1}
-                                            title="Open-Ended Questions"
-                                            description={`${seperateOpenEndedQuestions.length || 0} questions`}
-                                            onSolveChallenge={() => handleSolveChallenge('open-ended')}
-                                        />
+                                                id={1}
+                                                title="Open-Ended Questions"
+                                                description={`${seperateOpenEndedQuestions.length || 0} questions`}
+                                                onSolveChallenge={() => handleSolveChallenge('open-ended')} setIsCodingSubmitted={function (value: React.SetStateAction<boolean>): void {
+                                                    throw new Error('Function not implemented.')
+                                                } }                                        />
                                     </div>
                                 </div>
                             )}

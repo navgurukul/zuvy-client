@@ -74,9 +74,6 @@ export interface CodingSubmissionData {
 }
 
 
-
-
-
 export interface Input {
     parameterName: string
     parameterType: string
@@ -150,8 +147,9 @@ export interface QuestionCardProps {
     onSolveChallenge: (id: number) => void
     isQuizSubmitted?: boolean
     isMobile?: boolean
-}
+    setIsCodingSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
 
+}
 export type Tag = {
     id: number
     tagName: string

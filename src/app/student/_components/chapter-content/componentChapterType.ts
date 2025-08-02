@@ -152,6 +152,23 @@ export interface QuizContentProps {
   onChapterComplete: () => void;
 }
 
+export interface QuizTrackingData {
+  chosenOption: number;
+}
+
+export interface Question {
+  id: number;
+  question: string;
+  typeId: number;
+  options: Record<string, string>;
+  correctOption: number;
+  answer?: string;
+  marks?:number
+  difficulty:string
+  quizTrackingData?: QuizTrackingData[];
+}
+
+
 
 
 // VideoContentProps 

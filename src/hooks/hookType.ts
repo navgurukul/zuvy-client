@@ -397,19 +397,63 @@ export interface UseFeedbackFormProps {
     onSuccess?: () => void
 }
 
-export interface FeedbackFormResponse {
-    questions: any[]
-    trackedData: any[]
-    status: string
+type QuestionType = 'mcq' | 'checkbox' | 'text' | 'date' | 'time';
+
+export interface FeedbackQuestion {
+  id: string;
+  question: string;
+  type: QuestionType;
+  options?: { id: string; label: string }[]; 
+  required: boolean;
 }
+
+export interface FeedbackTracking {
+  questionId: string;
+  selectedOptions?: string[];
+  answerText?: string;
+  answerDate?: string;
+  answerTime?: string;
+}
+
+export interface FeedbackFormResponse {
+  questions: FeedbackQuestion[];
+  trackedData: FeedbackTracking[];
+  status: string;
+}
+
 
 
 // useGetMCQs
-export type Props = {
-    id: number
-    tags?: any
-    assesmentSide?: boolean
+
+export interface QuizVariant {
+  id: number;
+  text: string;
 }
+
+export interface QuizData {
+  id: number;
+  question: string;
+  difficulty: string;
+  tagId: number;
+  quizVariants: QuizVariant[];
+}
+
+export interface QuizApiResponse {
+  data: QuizData[];
+}
+
+export interface Tag {
+  id: number;
+  tagName: string;
+}
+
+export interface Props {
+  id: number;
+  tags?: Tag[];
+  assesmentSide?: boolean;
+}
+
+
 
 
 // useLatestUpdatedCourse

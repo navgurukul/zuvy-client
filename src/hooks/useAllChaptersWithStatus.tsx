@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 import{AllChaptersWithStatusResponse,UseAllChaptersWithStatusReturn,ModuleDetail,TrackingDataItem} from '@/hooks/hookType'
-
 const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusReturn => {
   const [trackingData, setTrackingData] = useState<TrackingDataItem[]>([]);
   const [moduleDetails, setModuleDetails] = useState<ModuleDetail[]>([]);

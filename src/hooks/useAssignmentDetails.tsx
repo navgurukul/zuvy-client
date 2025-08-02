@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 import{AssignmentDetailsData,ApiResponse,UseAssignmentDetailsReturn} from '@/hooks/hookType'
 
-
 const useAssignmentDetails = (chapterId: string | null): UseAssignmentDetailsReturn => {
   const [assignmentData, setAssignmentData] = useState<AssignmentDetailsData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
