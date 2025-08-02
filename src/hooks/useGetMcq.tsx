@@ -25,7 +25,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
             const matchingTag = newTags.find(
                 (tag:  Tag ) => tag.id === quiz.tagId
             )
-            setTagName(matchingTag ? matchingTag.tagName : null)
+            setTagName(matchingTag ? matchingTag.tagId : null)
         } catch (error: any) {
             console.error(
                 error?.response?.data?.message || 'Error fetching quiz data'

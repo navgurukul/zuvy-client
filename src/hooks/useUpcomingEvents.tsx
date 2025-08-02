@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-
-
+// import{UpcomingEventsData } from '@/hooks/hookType'
 
 export interface Event {
   type: "Live Class" | "Assessment" | "Assignment";

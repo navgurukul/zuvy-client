@@ -7,18 +7,8 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Copy } from 'lucide-react'
-
-type Props = {
-    batchName: string
-    topicTitle: string
-    startTime: string
-    endTime: string
-    typeClass: string
-    classLink: string
-    status: string
-}
-
-const InstructorCard: React.FC<Props> = ({
+import{InstructorCardProps}from '@/app/instructor/_components/componentInstructorTypes'
+const InstructorCard: React.FC<InstructorCardProps> = ({
     batchName,
     topicTitle,
     startTime,
@@ -26,7 +16,7 @@ const InstructorCard: React.FC<Props> = ({
     typeClass,
     classLink,
     status,
-}: Props) => {
+}: InstructorCardProps) => {
     const pathname = usePathname()
     const classRecordings = pathname?.includes('/recording')
     const handleCopyToClipboard = (link: string) => {
