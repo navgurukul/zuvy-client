@@ -148,21 +148,17 @@ const CourseSyllabusPage = () => {
       default:
         return <Clock className="w-4 h-4 text-muted-foreground" />;
     }
-  };
+  };  
 
-  const formatDuration = (duration: string) => {
+    const formatDuration = (duration: string) => {
     if (duration === "Self-paced" || duration === "Timed") return duration;
-
-    // Convert minutes to hours if it's a number
     const minutes = parseInt(duration.replace(' min', ''));
     if (isNaN(minutes)) return duration;
-
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-
-    if (remainingMinutes === 0) return `${hours}h`;
-    return `${hours}h ${remainingMinutes}m`;
+    // Convert minutes to weeks
+    const weeks = minutes / (60 * 24 * 7); // 60 min/hour * 24 hours/day * 7 days/week
+    // Anything less than 1 week should be considered as 1 week
+    const wholeWeeks = Math.max(1, Math.floor(weeks));
+    return `${wholeWeeks} week${wholeWeeks !== 1 ? 's' : ''}`;
   };
 
   const getChapterTypeLabel = (type: string) => {
@@ -273,7 +269,7 @@ const CourseSyllabusPage = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-sm text-muted-foreground">Duration</p>
-                  <p className="font-medium">{syllabusData.courseDuration}</p>
+                  <p className="font-medium">{+syllabusData.courseDuration > 1 ? `${syllabusData?.courseDuration} weeks` : `${syllabusData?.courseDuration} week`}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">

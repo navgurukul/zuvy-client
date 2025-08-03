@@ -261,7 +261,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                             msOverflowStyle: 'none', // IE and Edge
                         }}
                     >
-                        <div className="px-1 h-full pb-1" data-gramm="false">
+                       <div className="px-1 h-full pb-1 max-w-xs break-words whitespace-pre-wrap" data-gramm="false">
                             <EditorComponent />
                         </div>
                         {!preview && <CodeBlockHelper />}
