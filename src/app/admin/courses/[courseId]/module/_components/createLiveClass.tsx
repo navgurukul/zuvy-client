@@ -73,16 +73,9 @@ const formSchema = z
         batch: z.string({
             required_error: 'Please select a Batch.',
         }),
-        daysOfWeek: z.array(z.string()).nonempty({
-            message: 'Please select at least one day',
+        platform: z.string({
+            required_error: 'Please select a Platform.',
         }),
-
-        totalClasses: z.number().min(1, {
-            message: 'Total Classes must be at least 1.',
-        }),
-        // modulesId: z.number().min(1, {
-        //     message: 'Total Selected Modules must be at least 1.',
-        // }),
     })
     .refine((data) => data.startTime <= data.endTime, {
         message: 'Start Time cannot be after end Time',
@@ -114,11 +107,6 @@ const formSchema = z
             path: ['startTime'],
         }
     )
-    .refine((data) => data.totalClasses >= data.daysOfWeek.length, {
-        message:
-            'Total Classes must be at least equal to the number of selected days of week.',
-        path: ['totalClasses'],
-    })
 type CreateSessionDialogProps = {
     fetchingChapters: () => void
     onClose: () => void // <-- Add this
@@ -133,6 +121,12 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
     const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     const [isCalendarOpen, setCalendarOpen] = useState(false)
     const [bootcampData, setBootcampData] = useState<any>([])
+    
+    // Platform options
+    const platformOptions = [
+        { value: 'zoom', label: 'Zoom' },
+        { value: 'google-meet', label: 'Google Meet' },
+    ]
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
             await api
@@ -155,15 +149,6 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
 
-    // Mock data for batches
-    // const [bootcampData] = useState([
-    //     { value: '1', label: 'Web Development Bootcamp' },
-    //     { value: '2', label: 'Data Science Bootcamp' },
-    //     { value: '3', label: 'Mobile App Development' },
-    //     { value: '4', label: 'AI/ML Bootcamp' },
-    //     { value: '5', label: 'Full Stack Development' },
-    // ]);
-
     const toggleForm = () => {
         setFormIsOpen(!formIsOpen)
         form.clearErrors()
@@ -178,30 +163,10 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
             startTime: '',
             endTime: '',
             batch: '',
-            daysOfWeek: [],
-            totalClasses: 1,
-            // modulesId: 0,
+            platform: 'zoom',
         },
         mode: 'onChange',
     })
-
-    useEffect(() => {
-        const daysCount = form.watch('daysOfWeek').length
-        form.setValue('totalClasses', daysCount)
-    }, [form.watch('daysOfWeek')])
-
-    const weekDays = useMemo(
-        () => [
-            { value: 'Sunday', label: 'Sunday' },
-            { value: 'Monday', label: 'Monday' },
-            { value: 'Tuesday', label: 'Tuesday' },
-            { value: 'Wednesday', label: 'Wednesday' },
-            { value: 'Thursday', label: 'Thursday' },
-            { value: 'Friday', label: 'Friday' },
-            { value: 'Saturday', label: 'Saturday' },
-        ],
-        []
-    )
 
     useEffect(() => {
         form.setValue('sessionTitle', '')
@@ -210,21 +175,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
         form.setValue('startTime', '')
         form.setValue('endTime', '')
         form.setValue('batch', '')
-        form.setValue('daysOfWeek', [''])
-        form.setValue('totalClasses', 1)
+        form.setValue('platform', 'zoom')
     }, [formIsOpen, form])
-
-    useEffect(() => {
-        const selectedDate = form.watch('startDate')
-        if (selectedDate) {
-            const dayOfWeek = format(selectedDate, 'EEEE')
-            const dayValue =
-                weekDays.find((day) => day.label === dayOfWeek)?.value || ''
-            if (dayValue) {
-                form.setValue('daysOfWeek', [dayValue])
-            }
-        }
-    }, [form.watch('startDate')])
 
     const {
         sessionTitle,
@@ -232,8 +184,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
         startTime,
         endTime,
         batch,
-        daysOfWeek,
-        totalClasses,
+        platform,
     } = form.watch()
 
     const isSubmitDisabled = !(
@@ -242,8 +193,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
         startTime &&
         endTime &&
         batch &&
-        (daysOfWeek?.length || 0) > 0 &&
-        totalClasses
+        platform
     )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -270,9 +220,6 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
             values.startTime
         )
         const endDateTime = combineDateTime(values.startDate, values.endTime)
-        let daysWeek = values.daysOfWeek.filter((day) => {
-            return day !== ''
-        })
 
         const transformedData = {
             title: values.sessionTitle,
@@ -282,8 +229,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
             startDateTime: startDateTime,
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
-            daysOfWeek: daysWeek,
-            totalClasses: values.totalClasses,
+            isZoomMeet: values.platform === 'zoom'
         }
 
         try {
@@ -587,104 +533,84 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                         />
                         <FormField
                             control={form.control}
-                    
-                            name="daysOfWeek"
+                            name="platform"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600 cursor-not-allowed">
+                                <FormItem className="text-left text-gray-600">
                                     <FormLabel>
-                                        Days of Week
-                                        {/* <span className="text-green-900">*</span> */}
+                                        Platform
+                                        <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <Dialog>
-                                        {/* <DialogTrigger asChild> */}
+                                        <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
                                                     role="combobox"
-                                                    disabled
                                                     aria-expanded={formIsOpen}
-                                                    className={
-                                                        'w-full justify-between text-gray-600 bg-gray-200'
-                                                        // field.value.length ===
-                                                        //     0 &&
-                                                        //     'text-muted-foreground'
-                                                    }
-                                                >
-                                                    {field.value.length > 0 ? (
-                                                        <>
-                                                            {field.value
-                                                                .slice(0, 2)
-                                                                .join(', ')}
-                                                            {field.value
-                                                                .length > 2 &&
-                                                                ` + ${
-                                                                    field.value
-                                                                        .length -
-                                                                    2
-                                                                } more`}
-                                                        </>
-                                                    ) : (
-                                                        'Select days...'
+                                                    className={cn(
+                                                        'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
+                                                        !field.value &&
+                                                            'text-muted-foreground'
                                                     )}
-                                                    
+                                                >
+                                                    <span className="truncate text-left max-w-[90%]">
+                                                        {field.value
+                                                            ? platformOptions.find(
+                                                                  (platform) =>
+                                                                      platform.value ===
+                                                                      field.value
+                                                              )?.label
+                                                            : 'Select platform...'}
+                                                    </span>
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                                 </Button>
                                             </FormControl>
-                                        {/* </DialogTrigger> */}
-                                        <DialogContent className="w-[35%] p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Search days..." />
-                                                <CommandEmpty>
-                                                    No day found.
-                                                </CommandEmpty>
-                                                <CommandGroup>
-                                                    {weekDays.map(
-                                                        (day: any) => (
-                                                            <CommandItem
-                                                                value={
-                                                                    day.value
-                                                                }
-                                                                key={day.value}
-                                                                onSelect={() => {
-                                                                    const newValue: any =
-                                                                        field.value.includes(
-                                                                            day.value
+                                        </DialogTrigger>
+                                        <DialogClose asChild>
+                                            <DialogContent className="w-[300px] p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="Search platform..." />
+                                                    <CommandEmpty>
+                                                        No platform found.
+                                                    </CommandEmpty>
+                                                    <CommandGroup>
+                                                        {platformOptions.map(
+                                                            (platform) => (
+                                                                <CommandItem
+                                                                    value={
+                                                                        platform.value
+                                                                    }
+                                                                    key={
+                                                                        platform.value
+                                                                    }
+                                                                    onSelect={() => {
+                                                                        form.setValue(
+                                                                            'platform',
+                                                                            platform.value
                                                                         )
-                                                                            ? field.value.filter(
-                                                                                  (
-                                                                                      value
-                                                                                  ) =>
-                                                                                      value !==
-                                                                                      day.value
-                                                                              )
-                                                                            : [
-                                                                                  ...field.value,
-                                                                                  day.value,
-                                                                              ]
-                                                                    form.setValue(
-                                                                        'daysOfWeek',
-                                                                        newValue
-                                                                    )
-                                                                    form.clearErrors(
-                                                                        'daysOfWeek'
-                                                                    )
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn(
-                                                                        'mr-2 h-4 w-4',
-                                                                        field.value.includes(
-                                                                            day.value
+                                                                        form.clearErrors(
+                                                                            'platform'
                                                                         )
-                                                                            ? 'opacity-100'
-                                                                            : 'opacity-0'
-                                                                    )}
-                                                                />
-                                                                {day.label}
-                                                            </CommandItem>
-                                                        )
-                                                    )}
-                                                </CommandGroup>
-                                            </Command>
-                                        </DialogContent>
+                                                                    }}
+                                                                >
+                                                                    <Check
+                                                                        className={cn(
+                                                                            'mr-2 h-4 w-4',
+                                                                            platform.value ===
+                                                                                field.value
+                                                                                ? 'opacity-100'
+                                                                                : 'opacity-0'
+                                                                        )}
+                                                                    />
+                                                                    <span className="block max-w-[90%] break-words text-left">
+                                                                        {platform.label}
+                                                                    </span>
+                                                                </CommandItem>
+                                                            )
+                                                        )}
+                                                    </CommandGroup>
+                                                </Command>
+                                            </DialogContent>
+                                        </DialogClose>
                                     </Dialog>
                                     <FormMessage />
                                 </FormItem>
