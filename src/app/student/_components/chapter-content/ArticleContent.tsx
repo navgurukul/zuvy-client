@@ -23,10 +23,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   const [initialContent, setInitialContent] = useState<{ doc: EditorDoc } | undefined>(
     chapterDetails?.articleContent === null
       ? undefined
-      : Array.isArray(chapterDetails?.articleContent) && chapterDetails.articleContent.length > 0
-      ? typeof chapterDetails.articleContent[0] === 'string'
-        ? JSON.parse(chapterDetails.articleContent[0])
-        : { doc: chapterDetails.articleContent[0] }
+      : Array.isArray(chapterDetails?.articleContent) && chapterDetails?.articleContent?.length > 0
+      ? typeof chapterDetails?.articleContent[0] === 'string'
+        ? JSON.parse(chapterDetails?.articleContent[0])
+        : { doc: chapterDetails?.articleContent[0] }
       : undefined
   );
 
@@ -51,28 +51,28 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
     // Handle article content
     if (
       chapterDetails?.articleContent &&
-      Array.isArray(chapterDetails.articleContent) &&
-      chapterDetails.articleContent.length > 0
+      Array.isArray(chapterDetails?.articleContent) &&
+      chapterDetails?.articleContent?.length > 0
     ) {
-      if (typeof chapterDetails.articleContent[0] === 'string') {
-        setInitialContent(JSON.parse(chapterDetails.articleContent[0]));
+      if (typeof chapterDetails?.articleContent[0] === 'string') {
+        setInitialContent(JSON.parse(chapterDetails?.articleContent[0]));
       } else {
-        const jsonData = { doc: chapterDetails.articleContent[0] };
+        const jsonData = { doc: chapterDetails?.articleContent[0] };
         setInitialContent(jsonData);
       }
     }
 
     // Handle PDF links
-    if (chapterDetails?.links && Array.isArray(chapterDetails.links) && chapterDetails.links.length > 0) {
-      setPdfLink(chapterDetails.links[0]);
+    if (chapterDetails?.links && Array.isArray(chapterDetails?.links) && chapterDetails?.links.length > 0) {
+      setPdfLink(chapterDetails?.links[0]);
       setViewPdf(true);
-      const cleanFileName = getCleanFileName(chapterDetails.links[0]);
+      const cleanFileName = getCleanFileName(chapterDetails?.links[0]);
       setFileName(cleanFileName);
-    } else if (typeof chapterDetails?.links === 'string' && chapterDetails.links) {
+    } else if (typeof chapterDetails?.links === 'string' && chapterDetails?.links) {
       // Handle single link as string
-      setPdfLink(chapterDetails.links);
+      setPdfLink(chapterDetails?.links);
       setViewPdf(true);
-      const cleanFileName = getCleanFileName(chapterDetails.links);
+      const cleanFileName = getCleanFileName(chapterDetails?.links);
       setFileName(cleanFileName);
     } else {
       setPdfLink('');
@@ -81,10 +81,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   }, [chapterDetails]);
 
   // Check if content is meaningful (matches reference logic)
+<<<<<<< HEAD
   const action:EditorDoc = initialContent && (
     initialContent?.doc.content?.length > 1 ||
     (initialContent?.doc.content?.[0]?.content?.[0]?.text &&
      initialContent.doc.content[0].content[0].text !== 'No content has been added yet')
+=======
+  const action = initialContent && (
+    initialContent?.doc?.content?.length > 1 ||
+    (initialContent?.doc?.content?.[0]?.content?.[0]?.text &&
+     initialContent?.doc?.content[0]?.content[0]?.text !== 'No content has been added yet')
+>>>>>>> 3917e71f71d6eef90d107c3d73a750f27caaaa1f
   );
 
   return (
@@ -94,9 +101,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-extrabold">{chapterDetails?.title}</h1>
-            {chapterDetails.description && (
+            {chapterDetails?.description && (
               <p className="text-muted-foreground text-base mt-6 text-start">
-                {chapterDetails.description}
+                {chapterDetails?.description}
               </p>
             )}
           </div>

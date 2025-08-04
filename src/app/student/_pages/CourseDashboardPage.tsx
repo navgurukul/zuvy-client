@@ -202,7 +202,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     }
   };
 
-  const getModuleProgress = (module: any) => {
+  const getModuleProgress = (module:any) => {
     return module.progress || 0;
   };
 
@@ -594,7 +594,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 </Badge>
                 <div>
                   <p className="text-sm text-muted-foreground text-left">Duration</p>
-                  <p className="font-medium text-left">{duration}</p>
+                  <p className="font-medium text-left">{(+duration) > 1 ? `${duration} weeks` : `${duration} week`}</p>
                 </div>
               </div>
             </div>
