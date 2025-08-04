@@ -16,6 +16,7 @@ export interface ArticleContentProps {
 }
 
 
+
 // AssessmentContent
 export interface AssessmentContentProps {
   chapterDetails: {
@@ -28,6 +29,7 @@ export interface AssessmentContentProps {
   };
   onChapterComplete?: () => void;
 }
+
 
 
 // AssignmentContent
@@ -47,7 +49,7 @@ export interface AssignmentContentProps {
 
 
 // CodingChallengeContent
-export interface CodingQuestion {
+export interface CodingQuestions {
   id: number;
   title: string;
   description: string;
@@ -110,6 +112,17 @@ export interface FeedbackFormContentProps {
         moduleId: number
     }
     onChapterComplete: () => void
+}
+
+export interface FeedbackQuestion {
+  id: number;
+  question: string;
+  typeId: number; 
+  options: Record<string, string>;
+  answer?: string;
+  formTrackingData?: {
+    chosenOptions?: string[];
+  }[];
 }
 
 

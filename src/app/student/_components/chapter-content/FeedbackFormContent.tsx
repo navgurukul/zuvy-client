@@ -26,9 +26,7 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFeedbackForm, formSchema } from '@/hooks/useFeedbackForm'
-import {FeedbackFormContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
-
-
+import {FeedbackFormContentProps,FeedbackQuestion} from '@/app/student/_components/chapter-content/componentChapterType'
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     chapterDetails,
@@ -59,7 +57,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             chapterId: chapterId ? Number(chapterId) : 0,
             bootcampId: bootcampId ? Number(bootcampId) : 0,
             onSuccess: () => {
-                onChapterComplete() // Refetch the chapter list in the background
+                onChapterComplete() 
             },
         })
 

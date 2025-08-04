@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from "@/utils/axios.config";
 import{Module,UseAllModulesForStudentsReturn} from '@/hooks/hookType'
 
-
 export const useAllModulesForStudents = (courseId: string): UseAllModulesForStudentsReturn => {
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);

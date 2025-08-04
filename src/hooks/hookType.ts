@@ -1,4 +1,5 @@
 import useChapterDetails from "./useChapterDetails";
+import { useCodingChallenge } from "./useCodingChallenge";
 import useCodingSubmissions from "./useCodingSubmissions";
 import useCourseSyllabus from "./useCourseSyllabus";
 import useGetMCQs from "./useGetMcq";
@@ -279,7 +280,17 @@ export interface UseChapterDetailsResponse {
   refetch: () => void;
 }
 
+export interface ChapterDetailsResponse {
+  status: 'success' | 'error';
+  trackingData: ChapterDetails;
+}
 
+
+// useCodingChallenge
+export interface UseCodingChallengeProps {
+    questionId: string;
+    onChapterComplete?: () => void;
+}
 
 // useCodingSubmissions
 export interface CodingSubmissionsResponse {
@@ -379,6 +390,8 @@ export interface ApiResponses {
   isSuccess: boolean;
   data: CourseSyllabusData;
 }
+
+
 
 export interface UseCourseSyllabusReturn {
   syllabusData: CourseSyllabusData | null;
@@ -553,6 +566,7 @@ export interface QuizOption {
   [key: string]: string;
 }
 
+
 export interface SubmissionData {
   status: string;
   chosenOption?: number;
@@ -622,35 +636,3 @@ export interface StudentData {
   totalInProgress: number;
   totalPages: number;
 }
-
-
-
-
-
-// UseUpcomingEventsReturn
-// export interface Event {
-//   type: "Live Class" | "Assessment" | "Assignment";
-//   id: number;
-//   title: string;
-//   startTime: string;
-//   endTime: string;
-//   status: string;
-//   bootcampId: number;
-//   bootcampName: string;
-//   batchId: number;
-//   eventDate: string;
-//   moduleId: number;
-//   chapterId: number;
-// }
-
-// export interface UpcomingEventsData {
-//   events: Event[];
-//   totalEvents: number;
-//   totalPages: number;
-// }
-
-// export interface UseUpcomingEventsReturn {
-//   upcomingEventsData: UpcomingEventsData | null;
-//   loading: boolean;
-//   error: string | null;
-// }

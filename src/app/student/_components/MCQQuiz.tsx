@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
 import{MCQQuizProps} from '@/app/student/_components/componentStudentType'
 
-
 const MCQQuiz = ({ quiz, onBack, onComplete, timeLeft }: MCQQuizProps) => {
   const [answers, setAnswers] = useState<string[]>(new Array(5).fill(''));
   const [isSubmitted, setIsSubmitted] = useState(false);

@@ -14,10 +14,6 @@ import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
 import Header from "../_components/Header";
 import {TopicItem,Module,Course,Topic} from '@/app/student/_pages/pageStudentType'
 
-
-
-
-
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
   const router = useRouter();
   const searchParams = useSearchParams();

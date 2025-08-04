@@ -28,12 +28,10 @@ import AssessmentView from "./AssessmentView";
 import CodingProblemPage from "./CodingProblemPage";
 // import {ModuleContentRendererProps} from "@/app/student/_components/componentStudentType"
 
-
 interface ModuleContentRendererProps {
   selectedItemData: { item: any; topicId: string } | null;
   onChapterComplete: () => void;
 }
-
 
 const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleContentRendererProps) => {
   // States for fallback functionality

@@ -172,5 +172,4 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
     </div>
   );
 };
-
 export default ArticleContent; 

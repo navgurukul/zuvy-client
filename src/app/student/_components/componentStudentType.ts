@@ -139,11 +139,11 @@ export interface ModuleSidebarProps {
 }
 
 // ModuleContentRenderer
-export interface ModuleContentRendererProps {
-  selectedItemData: { item: any; topicId: string } | null;
-  getAssessmentData: (itemId: string) => any;
-  onChapterComplete: () => void;
-}
+// export interface ModuleContentRendererProps {
+//   selectedItemData: { item: TopicItem; topicId: string } | null;
+//   getAssessmentData: (itemId: string) => any;
+//   onChapterComplete: () => void;
+// }
 
 
 

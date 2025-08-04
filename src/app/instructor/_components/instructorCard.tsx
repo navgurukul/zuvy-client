@@ -97,5 +97,4 @@ const InstructorCard: React.FC<InstructorCardProps> = ({
         </div>
     )
 }
-
 export default InstructorCard

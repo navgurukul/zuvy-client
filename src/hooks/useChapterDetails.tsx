@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-import{ChapterDetails,UseChapterDetailsResponse} from '@/hooks/hookType'
+import{ChapterDetails,UseChapterDetailsResponse,ChapterDetailsResponse} from '@/hooks/hookType'
 
 const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse => {
   const [chapterDetails, setChapterDetails] = useState<ChapterDetails | null>(null);
@@ -14,13 +14,11 @@ const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse 
       setError(null);
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
       
-      const response = await api.get(`/tracking/getChapterDetailsWithStatus/${chapterId}`);
-      
+      const response = await api.get<ChapterDetailsResponse>(`/tracking/getChapterDetailsWithStatus/${chapterId}`);
       if (response.data.status === 'success') {
         setChapterDetails(response.data.trackingData);
       } else {

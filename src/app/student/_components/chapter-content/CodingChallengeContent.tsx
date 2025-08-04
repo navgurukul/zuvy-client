@@ -7,31 +7,13 @@ import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
+import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
 
-interface CodingQuestion {
-  id: number;
-  title: string;
-  description: string;
-  difficulty: string;
-  tagName?: string;
-  status: string;
-}
-
-interface CodingChallengeContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-  };
-  onChapterComplete: () => void;
-  fetchChapters?: () => void;
-}
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();
   const params = useParams();
-  const [codingQuestions, setCodingQuestions] = useState<CodingQuestion[]>([]);
+  const [codingQuestions, setCodingQuestions] = useState<CodingQuestions[]>([]);
   const [submissionResults, setSubmissionResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(chapterDetails.status === 'Completed');
@@ -45,7 +27,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
 
       if (chapterDetails.status === 'Completed' && questions.length > 0) {
         // Fetch submission results for each question
-        const resultsPromises = questions.map((q: CodingQuestion) =>
+        const resultsPromises = questions.map((q: CodingQuestions) =>
           api.get(`/codingPlatform/submissions/questionId=${q.id}`).catch(err => {
             console.error(`Failed to fetch submission for question ${q.id}`, err);
             return null; // Return null on error to not break Promise.all
@@ -80,11 +62,11 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
     setIsCompleted(chapterDetails.status === 'Completed');
   }, [chapterDetails.status]);
 
-  const handleSolveChallenge = (question: CodingQuestion) => {
+  const handleSolveChallenge = (question: CodingQuestions) => {
     router.push(`/student/course/${params.courseId}/codingChallenge?questionId=${question.id}&chapterId=${chapterDetails.id}&moduleId=${params.moduleId}`);
   };
 
-  const CodingQuestionCard = ({ question }: { question: CodingQuestion }) => (
+  const CodingQuestionCard = ({ question }: { question: CodingQuestions }) => (
     <div className=" p-6 mb-6">
       {/* Header Section */}
       <div className="flex items-start justify-between mb-4">

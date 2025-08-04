@@ -14,7 +14,7 @@ import {
   Circle,
   User
 } from "lucide-react";
-import{Topic,ModuleSidebarProps} from '@/app/student/_components/componentStudentType'
+import{Topic,ModuleSidebarProps,TopicItem} from '@/app/student/_components/componentStudentType'
 
 const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect }: ModuleSidebarProps) => {
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
@@ -82,7 +82,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
     );
   };
 
-  const getItemDetails = (item: any) => {
+  const getItemDetails = (item: TopicItem) => {
     if (item.type === 'live-class') {
       return item.duration || '45 mins';
     }
@@ -160,7 +160,7 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
               
               {expandedTopics.includes(topic.id) && (
                 <div className="space-y-1 pl-0">
-                  {topic.items.map((item: any) => {
+                  {topic.items.map((item: TopicItem) => {
                     const isSecondTopicLiveClass = topic.id === module.topics[1]?.id && item.type === 'live-class';
                     const adjustedItem = isSecondTopicLiveClass ? {
                       ...item,

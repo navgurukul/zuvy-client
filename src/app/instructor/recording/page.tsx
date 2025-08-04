@@ -9,10 +9,11 @@ import RadioCheckbox from '../_components/radioCheckbox'
 import InstructorCard from '../_components/instructorCard'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import Image from 'next/image'
+import {ClassRecording} from "@/app/instructor/recording/instructorRecordingType"
 
 const Recordings = () => {
     const searchParams = useSearchParams()
-    const [classRecordings, setClassRecordings] = useState<any[]>([])
+    const [classRecordings, setClassRecordings] = useState<ClassRecording[]>([])
     // const [position, setPosition] = useState(POSITION)
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const [pages, setPages] = useState<number>()
@@ -23,7 +24,7 @@ const Recordings = () => {
     const [search, setSearch] = useState('')
     const debouncedSearch = useDebounce(search, 1000)
 
-    const fetchSessions = (data: any) => {
+    const fetchSessions = (data:any) => {
         setClassRecordings(data)
     }
 

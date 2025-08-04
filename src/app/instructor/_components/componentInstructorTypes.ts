@@ -11,6 +11,9 @@ export interface Chapter {
 export interface GetChaptersResponse {
   trackingData: Chapter[];
 }
+
+
+
 export interface CourseModule {
   id: number;
   order: number;

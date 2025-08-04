@@ -52,7 +52,6 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
             })
         }
     }, [])
-
     const getSessions = useCallback(
         async (offset: number) => {
             try {
@@ -61,11 +60,10 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 const response = await api.get<{ data: UpcomingClassResponse }>(
                     `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}${ids}`
                 )
-
                 fetchSessions(response.data.data.responses)
                 setTotalSessions(response.data.data.totalUpcomingClasses)
                 setPages(response.data.data.totalUpcomingPages)
-                setLastPage(response.data.data.totalUpcomingPages)
+                setLastPage(response.data.data.totalUpcomingClasses)
             } catch (error) {
                 let errorMessage = 'An unknown error occurred'
                 // Type checking for error
