@@ -190,7 +190,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     }
   }
 
-  const getModuleCTA = (module: any, progress: number) => {
+  const getModuleCTA = (module: Module, progress: number) => {
     if (module.isLock) {
       return "Module Locked";
     } else if (progress === 0) {
@@ -202,7 +202,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     }
   };
 
-  const getModuleProgress = (module:any) => {
+  const getModuleProgress = (module:Module) => {
     return module.progress || 0;
   };
 

@@ -81,17 +81,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   }, [chapterDetails]);
 
   // Check if content is meaningful (matches reference logic)
-<<<<<<< HEAD
   const action:EditorDoc = initialContent && (
     initialContent?.doc.content?.length > 1 ||
     (initialContent?.doc.content?.[0]?.content?.[0]?.text &&
      initialContent.doc.content[0].content[0].text !== 'No content has been added yet')
-=======
-  const action = initialContent && (
-    initialContent?.doc?.content?.length > 1 ||
-    (initialContent?.doc?.content?.[0]?.content?.[0]?.text &&
-     initialContent?.doc?.content[0]?.content[0]?.text !== 'No content has been added yet')
->>>>>>> 3917e71f71d6eef90d107c3d73a750f27caaaa1f
   );
 
   return (

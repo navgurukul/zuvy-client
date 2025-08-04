@@ -19,10 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
+import {DataTableRowActionsProps} from "@/app/_components/datatable/componentDatatable"
 
-interface DataTableRowActionsProps<TData> {
-  row: Row<TData>;
-}
 
 export function DataTableRowActions<TData>({
   row,

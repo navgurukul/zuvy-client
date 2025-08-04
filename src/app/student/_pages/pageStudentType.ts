@@ -29,6 +29,8 @@ export interface Module {
   id: string;
   name: string;
   description: string;
+   isLock: boolean;
+  progress: number;
   topics: Topic[];
 }
 

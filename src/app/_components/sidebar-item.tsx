@@ -9,14 +9,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { cn } from '@/lib/utils'
 import { SheetClose } from '@/components/ui/sheet'
+import{SidebarItemProps} from "@/app/_components/componentType"
 
-interface SidebarItemProps {
-    icon?: LucideIcon
-    label: string
-    href?: string
-    onClick?: () => void
-    subtabs?: SidebarItemProps[]
-}
 
 export const SidebarItem = ({
     icon: Icon,
