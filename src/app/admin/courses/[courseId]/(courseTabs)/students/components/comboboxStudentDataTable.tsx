@@ -55,7 +55,12 @@ export function ComboboxStudent({
         setValue: any,
         setOpen: any
     ) => {
-        const [selectedValue, label] = currentValue.split('-')
+        const [selectedValue] = currentValue.split('-')
+        const selectedBatch = batchData.find(
+            (batch: any) => batch.value == selectedValue
+        )
+        const label = selectedBatch ? selectedBatch.label : ''
+        
         if (selectedValue !== value) {
             setValue(selectedValue)
         }
