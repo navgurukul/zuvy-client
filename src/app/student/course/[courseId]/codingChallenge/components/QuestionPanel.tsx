@@ -1,9 +1,9 @@
 import React from 'react';
 import { QuestionDetails, TestCase, Input } from '@/utils/types/coding-challenge';
+import{QuestionPanelProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
-interface QuestionPanelProps {
-    questionDetails: QuestionDetails;
-}
+
+
 
 const formatValue = (value: any, type: string): string => {
     if (type === 'jsonType') {

@@ -18,25 +18,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-
-interface newCourseDialogProps {
-    newCourseName: string
-    newCourseDescription: string
-    handleNewCourseNameChange: (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => void
-    handleNewCourseDescriptionChange: (
-        event: React.ChangeEvent<HTMLTextAreaElement>
-    ) => void
-    handleCreateCourse: (courseData: CourseData) => void
-    isDialogOpen: boolean
-}
-
-interface CourseData {
-    name: string
-    description?: string
-    collaborator?: string
-}
+import {newCourseDialogProps,CourseData} from "@/app/admin/courses/_components/courseComponentType"
 
 const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     newCourseName,

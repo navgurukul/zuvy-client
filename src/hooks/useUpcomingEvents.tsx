@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
+// import{UpcomingEventsData } from '@/hooks/hookType'
 
 export interface Event {
   type: "Live Class" | "Assessment" | "Assignment";
@@ -16,17 +17,17 @@ export interface Event {
   chapterId: number;
 }
 
-interface UpcomingEventsData {
+export interface UpcomingEventsData {
   events: Event[];
   totalEvents: number;
   totalPages: number;
 }
-
-interface UseUpcomingEventsReturn {
+export interface UseUpcomingEventsReturn {
   upcomingEventsData: UpcomingEventsData | null;
   loading: boolean;
   error: string | null;
 }
+
 
 export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
   const [upcomingEventsData, setUpcomingEventsData] = useState<UpcomingEventsData | null>(null);

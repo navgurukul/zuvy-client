@@ -1,0 +1,163 @@
+// export interface AssessmentData {
+//   submission: {
+//     startedAt: string
+//   }
+//   timeLimit: number
+//   tabChange: boolean
+//   screenRecord: boolean
+//   copyPaste: boolean
+//   IsQuizzSubmission: boolean
+//   // add other fields...
+// }
+
+// AssessmentProvider
+export interface SubmittedAssessment {
+  submitedAt?: string
+  startedAt?: string
+  reattemptApproved?: boolean
+}
+
+export interface AssessmentSubmissionResponse {
+  submitedOutsourseAssessments: SubmittedAssessment[]
+}
+export interface CodingSubmissionDatas {
+  action: string
+  languageId: number
+  sourceCode: string
+}
+
+export interface CodingSubmissionResponse {
+  data: CodingSubmissionDatas
+}
+
+export interface AssessmentResponse{
+  submission: {
+    id: number
+    startedAt: string
+  }
+  chapterId: number
+  canTabChange: boolean
+  canScreenExit: boolean
+  canCopyPaste: boolean
+  canEyeTrack: boolean
+}
+
+
+export interface TestCase {
+  inputs: Record<string, unknown> | Array<{
+    parameterName: string
+    parameterValue: unknown
+    parameterType: string
+  }>
+  expectedOutput: {
+    parameterValue: unknown
+  }
+}
+
+export interface TestCasesSubmission {
+  status: string
+  testCases: TestCase
+  stdout?: string
+  stderr?: string
+  memory?: string
+  time?: string
+}
+
+export interface CodingSubmissionData {
+  status?: string
+  action?: string
+  message?: string
+  data?: {
+    sourceCode: string
+    TestCasesSubmission: TestCasesSubmission[]
+  }
+}
+
+
+export interface Input {
+    parameterName: string
+    parameterType: string
+    parameterValue: [] | {}
+}
+
+export interface TestCases {
+    inputs: Input[] | Record<string, unknown>
+    expectedOutput: {
+        parameterType: string
+        parameterValue: [] | {}
+    }
+}
+
+export interface questionDetails {
+    title: string
+    description: string
+    constraints?: string
+    examples: { input: number[]; output: number }
+}
+
+export interface IDEProps {
+    params: { editor: string }
+    onBack?: () => void
+    remainingTime?: any
+    assessmentSubmitId?: number
+    selectedCodingOutsourseId?: number
+    getAssessmentData?: any
+    runCodeLanguageId?: number
+    runSourceCode?: string
+    getCodingSubmissionsData?: any
+}
+
+
+
+// showProctoringAlert
+export type AlertProps = {
+  title: string;
+  description: string;
+  violationCount?: string;
+};
+
+export type AlertContextType = {
+  showAlert: (props: AlertProps) => void;
+  hideAlert: () => void;
+};
+
+declare global {
+  interface Window {
+    alertSystem?: AlertContextType;
+  }
+}
+
+
+
+
+// QuestionCard
+export interface QuestionCardProps {
+    id: number
+    title: string
+    weightage?: number
+    easyCodingMark?: number
+    mediumCodingMark?: number
+    hardCodingMark?: number
+    description: string
+    tagId?: number
+    // assessmentOutsourseId?: number
+    assessmentSubmitId?: number
+    codingOutsourseId?: number
+    codingQuestions?: boolean
+    onSolveChallenge: (id: number) => void
+    isQuizSubmitted?: boolean
+    isMobile?: boolean
+    setIsCodingSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
+
+}
+export type Tag = {
+    id: number
+    tagName: string
+}
+
+
+
+// TimerDisplay
+export interface TimerDisplayProps {
+  remainingTime: number;
+}

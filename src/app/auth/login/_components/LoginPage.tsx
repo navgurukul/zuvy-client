@@ -1,12 +1,10 @@
 'use client'
-
 // Add global declaration for window.google to fix TypeScript error
 declare global {
     interface Window {
         google: any
     }
 }
-
 import React, { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
@@ -22,23 +20,9 @@ import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import Image from 'next/image'
+import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 
 type Props = {}
-
-interface DecodedGoogleToken {
-    iss: string
-    azp: string
-    aud: string
-    sub: string
-    email: string
-    email_verified: boolean
-    name: string
-    picture: string
-    given_name: string
-    family_name: string
-    iat: number
-    exp: number
-}
 
 function LoginPage({}: Props) {
     const [loading, setLoading] = useState(false)
@@ -162,7 +146,7 @@ const handleGoogleSuccess = async (
                 googleIdToken: credentialResponse.credential,
             }
 
-            const response = await api.post(`/auth/login`, googleData)
+            const response = await api.post<AuthResponse>(`/auth/login`, googleData)
 
             // Handle your backend response
             if (response.data.access_token) {

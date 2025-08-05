@@ -6,19 +6,7 @@ import { Play, CheckCircle2, Youtube, Video as VideoIcon } from 'lucide-react'
 import useChapterCompletion from '@/hooks/useChapterCompletion'
 import ReactPlayer from 'react-player'
 import { getEmbedLink } from '@/utils/students'
-
-interface VideoContentProps {
-    chapterDetails: {
-        id: number
-        title: string
-        description: string | null
-        status: string
-        file: string | null
-        links: string[] | null
-    }
-    onChapterComplete: () => void
-}
-
+import {VideoContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
 
 const VideoContent: React.FC<VideoContentProps> = ({

@@ -38,38 +38,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
 
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
-
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
-
-interface questionDetails {
-    title: string
-    description: string
-    constraints?: string
-    examples: { input: number[]; output: number }
-}
-
-interface IDEProps {
-    params: { editor: string }
-    onBack?: () => void
-    remainingTime?: any
-    assessmentSubmitId?: number
-    selectedCodingOutsourseId?: number
-    getAssessmentData?: any
-    runCodeLanguageId?: number
-    runSourceCode?: string
-    getCodingSubmissionsData?: any
-}
+import {IDEProps,questionDetails,TestCases,Input}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -517,7 +486,7 @@ const IDE: React.FC<IDEProps> = ({
                                                         <span>Examples</span>
                                                     </h2>
                                                     <div className="space-y-6">
-                                                        {testCases?.slice(0, 3).map((testCase: TestCase, index: number) => (
+                                                        {testCases?.slice(0, 3).map((testCase: TestCases, index: number) => (
                                                             <div
                                                                 key={index}
                                                                 className="rounded-lg overflow-hidden"

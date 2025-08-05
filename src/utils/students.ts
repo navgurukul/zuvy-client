@@ -206,8 +206,6 @@ export async function handleVisibilityChange(
         }
     }
 }
-
-
 // Request full screen as full screen is only allowed by user click
 
 export async function handleFullScreenChange(

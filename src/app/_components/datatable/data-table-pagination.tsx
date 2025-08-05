@@ -14,13 +14,7 @@ import {
 
 import { ROWS_PER_PAGE, POSITION } from '@/utils/constant'
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
-
-interface DataTablePaginationProps<TData> {
-    totalStudents: number
-    lastPage: number
-    pages: number | undefined
-    fetchStudentData: (offset: number) => void
-}
+import {DataTablePaginationProps} from "@/app/_components/datatable/componentDatatable"
 
 export function DataTablePagination<TData>({
     totalStudents,

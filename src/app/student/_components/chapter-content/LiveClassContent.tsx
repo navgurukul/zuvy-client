@@ -9,30 +9,9 @@ import {
 } from "lucide-react";
 import useChapterCompletion from '@/hooks/useChapterCompletion';
 import { getEmbedLink } from '@/utils/students';
+import {Session,LiveClassContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
-interface Session {
-  id: number;
-  meetingId: string;
-  hangoutLink: string;
-  startTime: string;
-  endTime: string;
-  title: string;
-  s3link: string;
-  status: string;
-  attendance: string;
-  duration: number;
-}
 
-interface LiveClassContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    sessions?: Session[];
-  };
-  onChapterComplete: () => void;
-}
 
 const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();

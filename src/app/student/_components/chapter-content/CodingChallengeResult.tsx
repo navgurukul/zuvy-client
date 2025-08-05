@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Code2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import {CodingChallengeResultProps} from '@/app/student/_components/chapter-content/componentChapterType'
 import { getDifficultyColor } from '@/lib/utils';
 
 // Date formatting function
@@ -28,33 +29,6 @@ function formatSubmissionDate(dateString: string) {
 }
 
 // Simplified interfaces for clarity
-interface QuestionDetail {
-    title: string;
-    description: string;
-    difficulty: string;
-}
-
-interface SubmissionResult {
-    questionId: number;
-    result: {
-        status: string; // The submission status, e.g., "Accepted"
-        questionDetail: QuestionDetail;
-        createdAt: string;
-        TestCasesSubmission: Array<{
-            status: string;
-            [key: string]: any;
-        }>;
-    };
-}
-
-interface CodingChallengeResultProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-  };
-  submissionResults: SubmissionResult[];
-}
 
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
   const router = useRouter();

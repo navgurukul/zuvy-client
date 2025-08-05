@@ -48,7 +48,7 @@ import {
 import PreventBackNavigation from './PreventBackNavigation'
 import WarnOnLeave from './WarnOnLeave'
 import useWindowSize from '@/hooks/useHeightWidth'
-
+import {AssessmentSubmissionResponse,CodingSubmissionResponse}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 function Page({
     params,
 }: {
@@ -165,7 +165,7 @@ function Page({
     async function getAssessmentSubmissionsData() {
         const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`
         try {
-            const res = await api.get(
+            const res = await api.get<AssessmentSubmissionResponse>(
                 `Content/students/assessmentId=${decodedParams.assessmentOutSourceId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
             )
 
@@ -279,12 +279,12 @@ function Page({
         questionId: any
     ) {
         try {
-            const res = await api.get(
+            const res = await api.get<CodingSubmissionResponse>(
                 `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
             )
             const action = res?.data?.data?.action
             setRunCodeLanguageId(res?.data?.data?.languageId || 0)
-            setRunSourceCode(res?.data?.data?.sourceCode || null)
+            setRunSourceCode(res?.data?.data?.sourceCode || '')
             return action
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
@@ -771,11 +771,11 @@ function Page({
                                                 weightage={assessmentData?.weightageMcqQuestions}
                                                 description={`${assessmentData?.hardMcqQuestions +
                                                     assessmentData?.easyMcqQuestions +
-                                                    assessmentData?.mediumMcqQuestions || 0
-                                                    } questions`}
+                                                    assessmentData?.mediumMcqQuestions || 0} questions`}
                                                 onSolveChallenge={() => handleSolveChallenge('quiz')}
-                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission}
-                                            />
+                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission} setIsCodingSubmitted={function (value: React.SetStateAction<boolean>): void {
+                                                    throw new Error('Function not implemented.')
+                                                } }                                            />
                                         </div>
                                     </div>
                                 )}
@@ -794,11 +794,12 @@ function Page({
 
                                     <div className="p-6">
                                         <QuestionCard
-                                            id={1}
-                                            title="Open-Ended Questions"
-                                            description={`${seperateOpenEndedQuestions.length || 0} questions`}
-                                            onSolveChallenge={() => handleSolveChallenge('open-ended')}
-                                        />
+                                                id={1}
+                                                title="Open-Ended Questions"
+                                                description={`${seperateOpenEndedQuestions.length || 0} questions`}
+                                                onSolveChallenge={() => handleSolveChallenge('open-ended')} setIsCodingSubmitted={function (value: React.SetStateAction<boolean>): void {
+                                                    throw new Error('Function not implemented.')
+                                                } }                                        />
                                     </div>
                                 </div>
                             )}

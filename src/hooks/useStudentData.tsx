@@ -1,47 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from "@/utils/axios.config";
-
-interface InstructorDetails {
-  id: number;
-  name: string;
-  profilePicture: string | null;
-}
-
-interface UpcomingEvent {
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  bootcampId: number;
-  bootcampName: string;
-  batchId: number;
-  eventDate: string;
-  type: string;
-}
-
-interface Bootcamp {
-  id: number;
-  name: string;
-  coverImage: string;
-  duration: string;
-  language: string;
-  bootcampTopic: string;
-  description: string | null;
-  batchId: number;
-  batchName: string;
-  progress: number;
-  instructorDetails: InstructorDetails;
-  upcomingEvents: UpcomingEvent[];
-}
-
-interface StudentData {
-  completedBootcamps: Bootcamp[];
-  inProgressBootcamps: Bootcamp[];
-  totalCompleted: number;
-  totalInProgress: number;
-  totalPages: number;
-}
+import{StudentData} from '@/hooks/hookType'
 
 export const useStudentData = () => {
   const [studentData, setStudentData] = useState<StudentData | null>(null);

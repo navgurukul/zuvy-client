@@ -8,23 +8,7 @@ import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
 import { getCleanFileName } from '@/utils/admin';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
-
-type EditorDoc = {
-  type: string;
-  content: any[];
-};
-
-interface ArticleContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    articleContent: string | null;
-    links: string | null;
-  };
-  onChapterComplete: () => void;
-}
+import {EditorDoc,ArticleContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
 const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId: courseIdParam, moduleId: moduleIdParam } = useParams();
@@ -97,10 +81,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   }, [chapterDetails]);
 
   // Check if content is meaningful (matches reference logic)
-  const action = initialContent && (
-    initialContent?.doc?.content?.length > 1 ||
-    (initialContent?.doc?.content?.[0]?.content?.[0]?.text &&
-     initialContent?.doc?.content[0]?.content[0]?.text !== 'No content has been added yet')
+  const action:EditorDoc = initialContent && (
+    initialContent?.doc.content?.length > 1 ||
+    (initialContent?.doc.content?.[0]?.content?.[0]?.text &&
+     initialContent.doc.content[0].content[0].text !== 'No content has been added yet')
   );
 
   return (
@@ -188,5 +172,4 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
     </div>
   );
 };
-
 export default ArticleContent; 

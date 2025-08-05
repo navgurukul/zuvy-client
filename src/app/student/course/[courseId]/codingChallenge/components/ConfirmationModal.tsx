@@ -1,12 +1,6 @@
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-
-interface ConfirmationModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onConfirm: () => void;
-    loading: boolean;
-}
+import{ConfirmationModalProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
 export function ConfirmationModal({ isOpen, onClose, onConfirm, loading }: ConfirmationModalProps) {
     return (

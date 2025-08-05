@@ -22,38 +22,9 @@ import {
 import { decodeBase64 } from '@/utils/students';
 import Editor from '@monaco-editor/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import{TestCase,TestCasesSubmission,CodingSubmissionData} from '@/app/student/course/[courseId]/codingChallengeResult/studentCourseCodingChallengesResultType'
 
 // Re-using interfaces from CodingSubmission.tsx for consistency
-interface TestCase {
-  inputs: Record<string, unknown> | Array<{
-    parameterName: string;
-    parameterValue: unknown;
-    parameterType: string;
-  }>;
-  expectedOutput: {
-    parameterValue: unknown;
-  };
-}
-
-interface TestCasesSubmission {
-  status: string;
-  testCases: TestCase;
-  stdout?: string;
-  stderr?: string;
-  memory?: string;
-  time?: string;
-}
-
-interface CodingSubmissionData {
-  status?: string;
-  action?: string;
-  message?: string;
-  data?: {
-    sourceCode: string;
-    TestCasesSubmission: TestCasesSubmission[];
-  };
-}
-
 const CodingResultContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();

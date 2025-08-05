@@ -3,16 +3,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { Play, Upload, X } from 'lucide-react';
-
-interface HeaderBarProps {
-    isAlreadySubmitted: boolean;
-    loading: boolean;
-    isSubmitting: boolean;
-    isCompleting: boolean;
-    onBack: () => void;
-    onRunCode: () => void;
-    onOpenSubmitModal: () => void;
-}
+import{HeaderBarProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
 export function HeaderBar({
     isAlreadySubmitted,
