@@ -16,17 +16,18 @@ import { getDeleteQuizQuestion } from '@/store/store'
 import { DELETE_AI_QUESTION_CONFIRMATION } from '@/utils/constant'
 import { handleDeleteQuizModal } from '@/utils/admin'
 import EditAIQuestion from './EditAIQuestion'
+import {QuestionCardProps,Tag} from "@/app/admin/resource/_components/adminResourceComponentType"
 
-interface QuestionCardProps {
-    questionId: any
-    question: string
-    options: { [key: string]: string }
-    correctOption: number
-    difficulty: string
-    tagId: any
-    tags: any
-    handleQuestionConfirm: (questionId: any, setDeleteModalOpen: any) => void
-}
+// interface QuestionCardProps {
+//     questionId: any
+//     question: string
+//     options: { [key: string]: string }
+//     correctOption: number
+//     difficulty: string
+//     tagId: any
+//     tags: any
+//     handleQuestionConfirm: (questionId: any, setDeleteModalOpen: any) => void
+// }
 
 export const AIQuestionCard = ({
     questionId,
@@ -51,7 +52,7 @@ export const AIQuestionCard = ({
                 {/* <CardBody className="px-6 py-4"> */}
                 <div className="flex flex-row gap-4">
                     <Badge className="mb-3 text-white">
-                        {tags.find((t: any) => t.id === tagId)?.tagName}
+                        {tags.find((t: Tag) => t.id === tagId)?.tagName}
                     </Badge>
                     <Badge
                         variant="yellow"
