@@ -27,7 +27,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { Tag } from '../mcq/page'
+import {PageTag} from '../mcq/adminResourceMcqType'
 import { DialogFooter } from '@/components/ui/dialog'
 import { getAllQuizQuestion } from '@/utils/admin'
 import {

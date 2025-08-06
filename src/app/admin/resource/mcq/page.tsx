@@ -37,26 +37,9 @@ import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
+import {PageSearchSuggestion,PageOption} from "@/app/admin/resource/mcq/adminResourceMcqType"
 
 type Props = {}
-export type Tag = {
-    label: string
-    value: string
-    id: number
-    tagName: string
-}
-
-interface Option {
-    label: string
-    value: string
-}
-
-interface SearchSuggestion {
-    id: string
-    question: string
-    topic: string
-    type: 'question' | 'topic'
-}
 
 const Mcqs = (props: Props) => {
     const router = useRouter()
@@ -72,13 +55,13 @@ const Mcqs = (props: Props) => {
     const [search, setSearch] = useState('')
     const [mcqType, setMcqType] = useState<string>('')
     const [newTopic, setNewTopic] = useState<string>('')
-    const [options, setOptions] = useState<Option[]>([
+    const [options, setOptions] = useState<PageOption[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const [loading, setLoading] = useState(true)
 
     // New search enhancement states
-    const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([])
+    const [searchSuggestions, setSearchSuggestions] = useState< PageSearchSuggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
     const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -106,7 +89,7 @@ const Mcqs = (props: Props) => {
         setmcqSearch(debouncedSearch)
     }, [debouncedSearch, setmcqSearch])
 
-    const updateURL = useCallback((searchTerm: string, topics: Option[], difficulties: Option[]) => {
+    const updateURL = useCallback((searchTerm: string, topics: PageOption[], difficulties: PageOption[]) => {
         let query = ''
 
         // Always follow this order: difficulty > topic > search
@@ -228,8 +211,8 @@ const Mcqs = (props: Props) => {
         fetchCodingQuestions(0, search.trim())
     }
 
-    const handleTagOption = (option: Option) => {
-        let newSelectedOptions: Option[] = []
+    const handleTagOption = (option: PageOption ) => {
+        let newSelectedOptions: PageOption[] = []
         
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
@@ -260,8 +243,8 @@ const Mcqs = (props: Props) => {
         fetchCodingQuestions(0, search)
     }
 
-    const handleDifficulty = (option: Option) => {
-        let newDifficulty: Option[] = []
+    const handleDifficulty = (option: PageOption) => {
+        let newDifficulty: PageOption[] = []
         
         // When user selects All Difficulty
         if (option.value === 'None') {
@@ -317,7 +300,7 @@ const Mcqs = (props: Props) => {
         }, 200)
     }
 
-    const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+    const handleSuggestionClick = (suggestion: PageSearchSuggestion) => {
         if (suggestion.type === 'question') {
             const trimmed = suggestion.question.trim()
             setSearch(trimmed)
@@ -328,7 +311,7 @@ const Mcqs = (props: Props) => {
             // Topic click
             const topicOption = options.find(opt => opt.label === suggestion.topic)
             if (topicOption) {
-                let newSelectedOptions: Option[] = []
+                let newSelectedOptions: PageOption[] = []
                 
                 if (topicOption.value === '-1') {
                     newSelectedOptions = [topicOption]

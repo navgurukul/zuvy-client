@@ -1,6 +1,3 @@
-// import { Dispatch, SetStateAction } from "react";
-
-import { AnyARecord } from "dns";
 
 // AIQuestionCard
 export interface Tag{
@@ -47,19 +44,6 @@ acceptedFiles?: string
   setMcqData: React.Dispatch<React.SetStateAction<any>>
 }
 
-
-// EditAIQuestion
-// export type Question = {
-//     questionId: string | number;
-//     question: string;
-//     options: { [key: number]: string };
-//     correctOption: number;
-//     tagId: string;
-//     difficulty: string;
-// }
-
-
-
 // EditCodingQuestionForm
 export type ParameterType = 'str' | 'int' | 'float' | 'arrayOfnum' | 'arrayOfStr' | 'bool' | 'jsonType';
 
@@ -89,9 +73,6 @@ export interface TestCases {
 
 }
 
-
-
-
 // EditMcqForm
 
 export type QuizVariantOption = {
@@ -100,6 +81,7 @@ export type QuizVariantOption = {
 
 export type QuizVariant = {
   variantId?: number;
+  id:string,
   questionText: string;
   selectedOption: number;
   options: QuizVariantOption[];
@@ -110,9 +92,6 @@ export type QuizDataType = {
   topics: number;
   variants: QuizVariant[];
 };
-
-
-
 
 
 export type OpenEndedQuestion = {
@@ -151,37 +130,8 @@ export type EditQuizQuestionProps = {
 };
 
 
-
-
-// McqDeleteComponent
-// export type DeleteQuizRequestBody = {
-//   questionIds: {
-//     id: number | string;
-//     type: 'main' | 'variant';
-//   }[];
-// };
-
-
-// export interface SelectedRow {
-//   original: {
-//     id: number | string;
-//   };
-// }
-
-// export interface TableType {
-//   toggleAllPageRowsSelected: (selected: boolean) => void;
-// }
-
-// export type MacqDeletedProps = {
-//   logSelectedRows: () => SelectedRow[];
-//   table: TableType;
-// }
-
-
-
-
 // NewCodingProblem
-export interface Tags {
+export interface Tags{
   id: number;
   name: string;
   tagName: string;
@@ -272,9 +222,6 @@ export interface NewOpenEndedQuestionFormProps {
   position?: string;
 }
 
-
-
-
 export interface DialogBoxProps {
     show: boolean
     onClose: () => void
@@ -293,4 +240,39 @@ export interface PreviewBoxQuizVariantData {
   quizVariants: PreviewBoxQuizVariant[]
   difficulty: string
   tagName: string
+}
+
+
+
+// PreviewCodeBlock
+export interface MyEditorProps {
+    question: string
+}
+
+
+
+export type PreviewMcqProps = {
+    quizQuestionId: number
+    tags?: Tags[]
+    assesmentSide?: boolean
+    tagId?: number
+}
+
+
+// PreviewOpenEnded
+
+export interface OpenEndedQuestions {
+    id: number
+    difficulty: string
+    question: string
+    tagId: number
+    marks: number
+    usage: number
+}
+
+export type Question = OpenEndedQuestions
+
+export type OpenEndedQuestionProps = {
+    question: Question
+    tag?: Tags[]
 }

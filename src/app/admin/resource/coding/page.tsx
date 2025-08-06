@@ -51,22 +51,8 @@ import { toast } from '@/components/ui/use-toast'
 import { useSearchParams, useRouter } from 'next/navigation'
 import useDebounce from '@/hooks/useDebounce'
 import { ROWS_PER_PAGE } from '@/utils/constant'
+import {Tag,SearchSuggestion,Option} from "@/app/admin/resource/coding/adminResourceCodinType"
 
-export type Tag = {
-    id: number
-    tagName: string
-}
-
-interface Option {
-    label: string
-    value: string
-}
-
-interface SearchSuggestion {
-    id: number
-    title: string
-    difficulty: string
-}
 
 const CodingProblems = () => {
     const router = useRouter();
@@ -240,12 +226,12 @@ const CodingProblems = () => {
                 }
 
                 const suggestions = questionsData
-                    .filter((question: any) =>
+                    .filter((question: SearchSuggestion) =>
                         question.title &&
                         question.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
                     )
                     .slice(0, 8)
-                    .map((question: any) => ({
+                    .map((question: SearchSuggestion) => ({
                         id: question.id,
                         title: question.title,
                         difficulty: question.difficulty || 'N/A',
