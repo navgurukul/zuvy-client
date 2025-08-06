@@ -18,17 +18,6 @@ import { handleDeleteQuizModal } from '@/utils/admin'
 import EditAIQuestion from './EditAIQuestion'
 import {QuestionCardProps,Tag} from "@/app/admin/resource/_components/adminResourceComponentType"
 
-// interface QuestionCardProps {
-//     questionId: any
-//     question: string
-//     options: { [key: string]: string }
-//     correctOption: number
-//     difficulty: string
-//     tagId: any
-//     tags: any
-//     handleQuestionConfirm: (questionId: any, setDeleteModalOpen: any) => void
-// }
-
 export const AIQuestionCard = ({
     questionId,
     question,

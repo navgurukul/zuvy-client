@@ -39,9 +39,7 @@ import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
 import {PageSearchSuggestion,PageOption} from "@/app/admin/resource/mcq/adminResourceMcqType"
 
-type Props = {}
-
-const Mcqs = (props: Props) => {
+const Mcqs = () => {
     const router = useRouter()
     const searchParams = useSearchParams()
 
