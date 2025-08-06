@@ -37,17 +37,10 @@ import {
 } from '@/store/store'
 import { error } from 'console'
 import { Spinner } from '@/components/ui/spinner'
+import {RequestBodyType,QuizQuestions,EditQuizQuestionProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
-export type RequestBodyType = {
-    questions: {
-        question: string
-        options: { [key: number]: string }
-        correctOption: number
-        tagId: number
-        difficulty: string
-    }[]
-}
+
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty  type.',
@@ -65,14 +58,11 @@ const formSchema = z.object({
 const EditQuizQuestion = ({
     setStoreQuizData,
     quizId,
-}: {
-    setStoreQuizData: any
-    quizId: number
-}) => {
+}: EditQuizQuestionProps) => {
     const [difficulty, setDifficulty] = useState<string>('Easy')
-    const [selectedOption, setSelectedOption] = useState<any>('')
+    const [selectedOption, setSelectedOption] = useState<string>('0')
     const [options, setOptions] = useState<string[]>(['', ''])
-    const [quizQuestionById, setQuizQuestionById] = useState<any>()
+    const [quizQuestionById, setQuizQuestionById] = useState<QuizQuestions | null>(null);
     const [loadingState, setLoadingState] = useState<string>('')
     const { tags } = getCodingQuestionTags()
     const { mcqDifficulty } = getmcqdifficulty()
@@ -117,7 +107,7 @@ const EditQuizQuestion = ({
     useEffect(() => {
         const selectedQuizQuestion = quizQuestionById
         if (selectedQuizQuestion) {
-            setOptions(Object.values(selectedQuizQuestion.options))
+        setOptions(Object.values(selectedQuizQuestion.options) as string[])
             setSelectedOption(
                 (selectedQuizQuestion.correctOption - 1).toString()
             )

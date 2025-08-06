@@ -27,6 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {NewOpenEndedQuestionFormProps,Tags} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const formSchema = z.object({
     questionDescription: z.string().min(5, {
@@ -46,16 +47,7 @@ function NewOpenEndedQuestionForm({
     difficulty,
     offset,
     position
-}: {
-    tags: any
-    setIsDialogOpen: any
-    setOpenEndedQuestions: any
-    filteredOpenEndedQuestions: any
-    selectedOptions?:any,
-    difficulty?:any,
-    offset?:number,
-    position?:String
-}) {
+}:NewOpenEndedQuestionFormProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -160,7 +152,7 @@ function NewOpenEndedQuestionForm({
                                     <Select
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
-                                                (tag: any) =>
+                                                (tag: Tags) =>
                                                     tag?.tagName === value
                                             )
                                             if (selectedTag) {
@@ -174,7 +166,7 @@ function NewOpenEndedQuestionForm({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {tags.map((tag: any) => (
+                                            {tags.map((tag: Tags) => (
                                                 <SelectItem
                                                     key={tag.id}
                                                     value={tag?.tagName}
