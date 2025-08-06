@@ -188,7 +188,7 @@ const Page = ({ params }: { params: any }) => {
                                     userId={userIds}
                                     bootcampId={batchData && params.courseId}
                                     title="Are you absolutely sure?"
-                                    description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                    description="This action cannot be undone. This will permanently remove the students from the bootcamp"
                                 />
                                 <ComboboxStudent
                                     batchData={newBatchData || []}

@@ -121,14 +121,22 @@ const BatchesInfo = ({
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const capEnrollmentValue = parseInt(capEnrollment)
-                return (
-                    !isNaN(capEnrollmentValue) &&
-                    capEnrollmentValue >= studentsData.length &&
-                    capEnrollmentValue <= 100000
-                )
+                if (studentsData === undefined) {
+                    return true
+                }
+                return capEnrollmentValue >= studentsData.length
             },
             {
                 message: `Cap enrollment cannot be less than the current number of students (${studentsData?.length}).`,
+            }
+        )
+        .refine(
+            (capEnrollment) => {
+                const capEnrollmentValue = parseInt(capEnrollment)
+                return capEnrollmentValue <= 100000
+            },
+            {
+                message: 'Cap Enrollment cannot be more than 100000',
             }
         ),
     })

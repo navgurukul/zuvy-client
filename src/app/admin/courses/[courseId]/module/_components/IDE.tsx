@@ -318,8 +318,8 @@ const IDE: React.FC<IDEProps> = ({
 
     return (
         <div>
-            <div className="flex justify-between mb-2">
-                <AlertDialog>
+            <div className="flex justify-end mb-2">
+                {/* <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">
                             <ChevronLeft fontSize={24} />
@@ -345,7 +345,7 @@ const IDE: React.FC<IDEProps> = ({
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
-                </AlertDialog>
+                </AlertDialog> */}
 
                 <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                     <AlertDialogContent className="max-w-[350px]">
@@ -382,9 +382,9 @@ const IDE: React.FC<IDEProps> = ({
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <div className="font-bold text-xl">
+                {/* <div className="font-bold text-xl">
                     <TimerDisplay remainingTime={remainingTime} />
-                </div>
+                </div> */}
                 <div>
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
