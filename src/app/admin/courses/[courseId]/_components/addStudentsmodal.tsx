@@ -23,6 +23,7 @@ import useDebounce from '@/hooks/useDebounce'
 import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
+import {AddStudentsModalProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const AddStudentsModal = ({
     id,
@@ -33,16 +34,7 @@ const AddStudentsModal = ({
     batchData,
     studentData,
     setStudentData,
-}: {
-    id: number
-    message: boolean
-    batch: boolean
-    batchId: any
-    fetchBatchesData?: any
-    batchData?: boolean
-    studentData: { name: string; email: string }
-    setStudentData: (data: { name: string; email: string }) => void
-}) => {
+}:AddStudentsModalProps) => {
     // misc
     // interface Student {
     //     email: string
@@ -75,7 +67,7 @@ const AddStudentsModal = ({
         setSelectedOption(value)
     }
 
-    const courseId: any = id
+    const courseId:  string = id.toString();
 
     // async
     const handleSubmit = async () => {

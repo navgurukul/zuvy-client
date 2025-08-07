@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/tooltip'
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import RemirrorForForm from '@/app/admin/resource/_components/RemirrorForForm'
+import {Tag,QuizDataType} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
 
@@ -65,9 +66,9 @@ const EditMcqForm = ({
     setStoreQuizData,
     getAllQuizQuesiton,
 }: {
-    tags: any[]
+    tags: Tag[]
     closeModal: () => void
-    setStoreQuizData: any
+    setStoreQuizData:any;
     getAllQuizQuesiton: any
 }) => {
     const { quizQuestionId } = getEditQuizQuestion()

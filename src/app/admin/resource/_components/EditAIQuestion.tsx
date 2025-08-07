@@ -33,10 +33,10 @@ const EditAIQuestion = ({
     questionId,
     setEditModalOpen,
 }: {
-    questionId: any
-    setEditModalOpen: any
+    questionId: string | number;
+    setEditModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-    const [selectedOption, setSelectedOption] = useState<any>('')
+    const [selectedOption, setSelectedOption] = useState<string>('')
     const [options, setOptions] = useState<string[]>(['', ''])
     const { generatedQuestions, setGeneratedQuestions } =
         getGeneratedQuestions()

@@ -1,9 +1,6 @@
 // components/ShowMore.tsx
 import React, { useState } from 'react'
-
-interface ShowMoreProps {
-    description?: string // Make description optional
-}
+import {ShowMoreProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const ShowMore: React.FC<ShowMoreProps> = ({ description = '' }) => {
     // Provide a default value

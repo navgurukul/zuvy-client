@@ -5,21 +5,14 @@ import { getAssesmentBackgroundColorClass } from '@/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
-
-type Props = {
-    bootcampId: number
-    moduleId: number
-    data: any
-    moduleName: string
-    debouncedSearch: string
-}
+import {FormComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const FormComponent = ({
     bootcampId,
     moduleId,
     data,
     moduleName,
-}: Props) => {
+}:FormComponentProps) => {
     const [totalStudents, setTotalStudents] = useState(0)
 
     useEffect(() => {

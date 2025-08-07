@@ -6,15 +6,9 @@ import useGetMCQs from '@/hooks/useGetMcq'
 import DOMPurify from 'dompurify'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import {PreviewMcqProps,Tags,QuizVariant} from "@/app/admin/resource/_components/adminResourceComponentType"
 
-type Props = {
-    quizQuestionId: number
-    tags?: any
-    assesmentSide?: boolean
-    tagId?: number
-}
-
-const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
+const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: PreviewMcqProps) => {
     const { quizData, difficulty, tagName } = useGetMCQs({
         id: quizQuestionId,
         tags,
@@ -58,10 +52,10 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
 
     if (!quizData) return null
 
-    const handleTabChange = (variantId: any) => {
+    const handleTabChange = (variantId: QuizVariant) => {
         setActiveTab(variantId.toString())
         const selectedVariant = quizData.quizVariants.find(
-            (variant: any) => variant.id.toString() === variantId.toString()
+            (variant: QuizVariant) => variant.id.toString() === variantId.toString()
         )
         if (selectedVariant) {
             updateCodeSnippet(selectedVariant.question)
@@ -86,7 +80,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
         return updatedHtml
     }
 
-    const newTagName = tags.filter((tag: any) => tag.id == tagId)
+    const newTagName = tags?.filter((tag:Tags) => tag.id == tagId)
 
     return (
         <div className="w-full max-h-[500px] flex flex-col">
@@ -95,7 +89,8 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                     Question Preview{' '}
                     <div className="flex gap-x-3 items-center">
                         <span className="font-md text-[14px] text-[rgb(81,134,114)] bg-green-200 px-2  py-0.5 my-0.5 rounded-md">
-                            {assesmentSide ? tagName : newTagName[0].tagName}
+                            {assesmentSide ? tagName : newTagName?.[0]?.tagName}
+
                         </span>
                         <span
                             className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(

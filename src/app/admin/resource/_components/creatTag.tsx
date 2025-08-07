@@ -13,12 +13,7 @@ import {
 import styles from './cources.module.css'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-
-interface newTopicDialogProps {
-    newTopic: string
-    handleNewTopicChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    handleCreateTopic: () => void
-}
+import {newTopicDialogProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const CreatTag: React.FC<newTopicDialogProps> = ({
     newTopic,

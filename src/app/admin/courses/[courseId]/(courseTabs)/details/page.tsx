@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
 import { getCourseData, getStoreStudentData } from '@/store/store'
 import { api} from '@/utils/axios.config'
+import{CourseData} from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
 
 const FormSchema = z.object({
     name: z.string().min(1, 'Please enter the course name.'),
@@ -51,19 +52,6 @@ const FormSchema = z.object({
     collaborator: z.string().optional(),
 })
 
-interface CourseData {
-    id: number
-    name: string
-    bootcampTopic: string
-    description?: string
-    coverImage?: string
-    collaborator?: string
-    duration?: number
-    language: string
-    startTime?: string
-    unassigned_students?: number
-}
-
 function Page({ params }: { params: any }) {
     const router = useRouter()
     const [image, setImage] = useState<string | null>(null)
@@ -76,12 +64,14 @@ function Page({ params }: { params: any }) {
     const [collaboratorImage, setCollaboratorImage] = useState<string | null>(
         null
     )
+
     const [collaboratorCropper, setCollaboratorCropper] =
         useState<Cropper | null>(null)
     const [isCollaboratorCropping, setIsCollaboratorCropping] = useState(false)
     const [croppedCollaboratorImage, setCroppedCollaboratorImage] = useState<
         string | null
     >(null)
+    
 
     // New state for collaborator type
     const [collaboratorType, setCollaboratorType] = useState<'text' | 'image'>('text')
