@@ -17,6 +17,7 @@ import ClassCardSkeleton from '../../_components/classCardSkeleton'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { X } from 'lucide-react'
+import axios from 'axios'
 
 type ClassType = 'active' | 'upcoming' | 'complete'
 
@@ -298,6 +299,16 @@ function Page({ params }: any) {
             )
             setModulesData(response.data)
         } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error?.response?.data.message === 'Bootcamp not found!') {
+                    router.push(`/admin/courses`)
+                    toast.info({
+                        title: 'Caution',
+                        description:
+                            'The Course has been deleted by another Admin',
+                    })
+                }
+            }
             console.error('Failed to fetch modules data:', error)
         }
     }

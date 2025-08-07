@@ -26,6 +26,7 @@ import {
     getChapterUpdateStatus,
     getCourseData,
 } from '@/store/store'
+import { useRouter } from 'next/navigation'
 
 type Chapter = {
     chapterId: number
@@ -53,6 +54,7 @@ interface QuizQuestionDetails {
 }
 
 function Chapter() {
+    const router = useRouter()
     const { courseId, moduleId, chapterID } = useParams()
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
@@ -136,6 +138,14 @@ function Chapter() {
             // Initialize last order reference
             lastOrderRef.current = response.data.chapterWithTopic.map((item: any) => item.chapterId)
         } catch (error) {
+            router.replace(
+                `/admin/courses/${courseId}/curriculum`
+            )
+            toast.info({
+                title: 'Caution',
+                description:
+                    'The Module has been deleted by another Admin'            
+            })
             console.error('Error fetching chapters:', error)
         }
     }, [moduleId, chapter_id, isChapterUpdated])

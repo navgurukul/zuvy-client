@@ -1,6 +1,11 @@
 'use client'
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
-import { useParams, useRouter, usePathname, useSearchParams } from 'next/navigation'
+import {
+    useParams,
+    useRouter,
+    usePathname,
+    useSearchParams,
+} from 'next/navigation'
 import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
@@ -51,6 +56,7 @@ import { ComboboxStudent } from '../../(courseTabs)/students/components/combobox
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 import { POSITION } from '@/utils/constant'
+import axios from 'axios'
 
 interface Student {
     email: string
@@ -77,7 +83,10 @@ const BatchesInfo = ({
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
     const [instructorsInfo, setInstructorInfo] = useState<any>([])
     const [pages, setPages] = useState<number>()
-    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const [offset, setOffset] = useState<number>(0)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
@@ -173,6 +182,18 @@ const BatchesInfo = ({
                 })
                 setAllBatches(batchData)
             } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    if (
+                        error?.response?.data.message === 'Bootcamp not found!'
+                    ) {
+                        router.push(`/admin/courses`)
+                        toast.info({
+                            title: 'Caution',
+                            description:
+                                'The Course has been deleted by another Admin',
+                        })
+                    }
+                }
                 console.error('Error fetching batches', error)
             }
         },
@@ -713,7 +734,7 @@ const BatchesInfo = ({
                             totalStudents={totalStudents}
                             lastPage={lastPage}
                             pages={pages}
-                            fetchStudentData={fetchStudentData}                        
+                            fetchStudentData={fetchStudentData}
                         />
                     </div>
                 )}
