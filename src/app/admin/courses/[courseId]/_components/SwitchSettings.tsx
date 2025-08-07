@@ -34,17 +34,8 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         try {
             await api.put(`/bootcamp/bootcampSetting/${bootcampId}`, {
                 type,
-            })
-            toast.success({
-                title: "Success!",
-                description: `Bootcamp type updated to ${type}`
-              })
+            })  
         } catch (error) {
-            toast.error({
-                title: 'Error',
-                description:
-                    'Error updating bootcamp settings. Please try again.',
-            })
         }
     }
 
