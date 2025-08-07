@@ -72,6 +72,17 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     }
 
     useEffect(() => {
+        if (isOpen) {
+            const event = {
+                target: {
+                    value: 'learning-material',
+                },
+            } as React.ChangeEvent<HTMLInputElement>
+            handleTypeChange(event)
+        }
+    }, [isOpen])
+
+    useEffect(() => {
         if (!isOpen) {
             form.reset() // Reset form state and errors when the dialog is closed
         }
