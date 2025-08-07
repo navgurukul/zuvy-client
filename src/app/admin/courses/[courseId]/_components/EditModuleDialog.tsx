@@ -22,26 +22,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-
-interface editModuleDialogProps {
-    moduleData: {
-        name: string
-        description: string
-    }
-    timeData: {
-        days: number
-        months: number
-        weeks: number
-    }
-    editMode: any
-    handleModuleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    editModule: () => void
-    createModule: () => void
-    handleTimeAllotedChange: (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => void
-    typeId: number
-}
+import {editModuleDialogProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const moduleSchema = z.object({
     name: z.string().min(2, { message: 'Module Name must be at least 2 characters.' }),

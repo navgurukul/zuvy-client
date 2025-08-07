@@ -37,6 +37,7 @@ import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
 import { getCourseData, getStoreStudentData } from '@/store/store'
 import { api, apiMeraki } from '@/utils/axios.config'
+import{CourseData} from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
 
 const FormSchema = z.object({
     name: z.string().min(1, 'Please enter the course name.'),
@@ -50,19 +51,6 @@ const FormSchema = z.object({
     coverImage: z.string().optional(),
     collaborator: z.string().optional(),
 })
-
-interface CourseData {
-    id: number
-    name: string
-    bootcampTopic: string
-    description?: string
-    coverImage?: string
-    collaborator?: string
-    duration?: number
-    language: string
-    startTime?: string
-    unassigned_students?: number
-}
 
 function Page({ params }: { params: any }) {
     const router = useRouter()

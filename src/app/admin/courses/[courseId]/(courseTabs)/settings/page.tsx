@@ -151,7 +151,9 @@ const Page = ({ params }: { params: any }) => {
                         </p>
                     </div>
                     <h1 className="text-lg font-semibold mt-5 text-left">Modules Lock Status</h1>
-                    <ModulesLockToggleSwitch bootcampId={params.courseId} />
+                    <ModulesLockToggleSwitch bootcampId={String(params.courseId)} onToggle={function (isChecked: boolean): void {
+                            throw new Error('Function not implemented.')
+                        } }/>
 
                     <div className="w-full text-start my-5">
                         <div className="mb-3 text-start">

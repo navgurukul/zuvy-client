@@ -34,6 +34,7 @@ import {
     AlertDialogContent,
 } from '@/components/ui/alert-dialog'
 import { ellipsis } from '@/lib/utils'
+import {ClassCardProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 function ClassCard({
     classData,
@@ -41,13 +42,7 @@ function ClassCard({
     getClasses,
     activeTab,
     studentSide,
-}: {
-    classData: any
-    classType: any
-    getClasses: any
-    activeTab: any
-    studentSide: any
-}) {
+}:ClassCardProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [loading, setLoading] = useState(false)

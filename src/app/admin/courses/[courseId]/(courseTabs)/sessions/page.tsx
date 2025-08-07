@@ -17,26 +17,8 @@ import ClassCardSkeleton from '../../_components/classCardSkeleton'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { X } from 'lucide-react'
+import{State,ClassType} from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
 
-type ClassType = 'active' | 'upcoming' | 'complete'
-
-interface State {
-    classType: ClassType
-    position: typeof POSITION
-    allClasses: any[]
-    bootcampData: { value: string; label: string }[]
-    batchId: number
-    upcomingClasses: any[]
-    pages: number
-    offset: number
-    currentPage: number
-    totalStudents: number
-    ongoingClasses: any[]
-    completedClasses: any[]
-    selectedDate: Date | null
-    lastPage: number
-    limit: number
-}
 
 function Page({ params }: any) {
     const router = useRouter()

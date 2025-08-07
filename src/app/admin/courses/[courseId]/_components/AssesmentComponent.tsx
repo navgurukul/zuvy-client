@@ -10,22 +10,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {AssesmentComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    title: string
-    codingChallenges: number
-    mcq: number
-    openEnded: number
-    studentsSubmitted: number
-    totalSubmissions: number
-    id: any
-    bootcampId: number
-    qualifiedStudents: number
-    onDownloadPdf: () => void
-    onDownloadCsv: () => void
-}
 
-const AssesmentComponent = (props: Props) => {
+const AssesmentComponent = (props: AssesmentComponentProps) => {
     const printRef = useRef<HTMLDivElement | null>(null)
     const [isOpen, setIsOpen] = useState(false)
 

@@ -3,16 +3,9 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import SubmissionComponent from './submissionComponent'
 import { api } from '@/utils/axios.config'
+import {PraticeProblemProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    courseId: number
-    name: string
-    totalStudents: number
-    submission: any[]
-    moduleId: number
-}
-
-export default function PracticeProblems({ submission, courseId, totalStudents, moduleId, name }: Props) {
+export default function PracticeProblems({ submission, courseId, totalStudents, moduleId, name }: PraticeProblemProps) {
     return (
         <div className="w-full mb-10">
             <h1 className=" text-start text-lg font-semibold">{name}</h1>
