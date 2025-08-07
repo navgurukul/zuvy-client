@@ -191,7 +191,7 @@ const Page = ({ params }: { params: any }) => {
                                     description="This action cannot be undone. This will permanently the student from the bootcamp"
                                 />
                                 <ComboboxStudent
-                                    batchData={newBatchData}
+                                    batchData={newBatchData || []}
                                     bootcampId={batchData && params.courseId}
                                     selectedRows={selectedRows}
                                     fetchStudentData={fetchStudentDataForBatch}

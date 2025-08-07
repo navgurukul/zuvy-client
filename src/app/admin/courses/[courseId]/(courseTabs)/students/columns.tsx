@@ -170,12 +170,11 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <div className="flex">
                     <ComboboxStudent
-                        batchData={newBatchData}
+                        batchData={newBatchData || []}
                         batchName={batchName}
                         userId={userId}
                         bootcampId={bootcampId}
-                        batchId={batchId}
-                    />
+                        batchId={batchId} fetchStudentData={undefined}                    />
                 </div>
             )
         },

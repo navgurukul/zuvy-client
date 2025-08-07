@@ -33,3 +33,19 @@ export interface State {
     lastPage: number
     limit: number
 }
+export interface ParamsType {
+  params: {
+    courseId: string;
+  };
+}
+
+
+export interface CourseClassItem {
+  id: number;
+  name: string;
+  isActive: boolean;
+  deadline: string; 
+  startTime:string
+  status:string
+  title:string
+}

@@ -14,8 +14,9 @@ import { Spinner } from '@/components/ui/spinner'
 import ModulesLockToggleSwitch from '@/app/admin/courses/[courseId]/_components/ModulesLockToggleSwitch'
 import Image from 'next/image'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import{PageProps} from "@/app/admin/courses/[courseId]/(courseTabs)/settings/courseSettingType"
 
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params: PageProps}) => {
     // misc
     const router = useRouter()
     // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
@@ -31,7 +32,7 @@ const Page = ({ params }: { params: any }) => {
     // async
     const fetchBootCampSettings = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<PageProps>(
                 `/bootcamp/bootcampSetting/${params.courseId}`
             )
             const type = response.data.bootcampSetting[0].type
