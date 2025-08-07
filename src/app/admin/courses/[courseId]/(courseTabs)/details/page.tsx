@@ -64,12 +64,14 @@ function Page({ params }: { params: any }) {
     const [collaboratorImage, setCollaboratorImage] = useState<string | null>(
         null
     )
+
     const [collaboratorCropper, setCollaboratorCropper] =
         useState<Cropper | null>(null)
     const [isCollaboratorCropping, setIsCollaboratorCropping] = useState(false)
     const [croppedCollaboratorImage, setCroppedCollaboratorImage] = useState<
         string | null
     >(null)
+    
 
     // New state for collaborator type
     const [collaboratorType, setCollaboratorType] = useState<'text' | 'image'>('text')
