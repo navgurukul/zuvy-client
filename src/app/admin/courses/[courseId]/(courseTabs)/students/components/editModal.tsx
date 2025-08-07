@@ -64,7 +64,6 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
-            setIsOpen(false)
         }
     }
 
