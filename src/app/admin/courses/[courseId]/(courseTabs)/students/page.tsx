@@ -18,26 +18,9 @@ import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'
 import AlertDialogDemo from './components/deleteModalNew'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import{StudentDataPage,StudentDataState} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 
-export type StudentData = {
-    email: string
-    name: string
-    userId: number
-    bootcampId: number
-    batchName: string
-    batchId: number
-    progress: number
-    profilePicture: string
-}
-
-interface Student {
-    email: string
-    name: string
-}
-
-type StudentDataState = Student[]
-
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params: any}) => {
     const router = useRouter()
     // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
     const {
@@ -58,7 +41,7 @@ const Page = ({ params }: { params: any }) => {
     } = useStudentData(params.courseId)
 
     const { batchData } = getBatchData()
-    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+    const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [isOpen, setIsOpen] = useState(false)
     const [showSuggestions, setShowSuggestions] = useState(false)
@@ -66,7 +49,7 @@ const Page = ({ params }: { params: any }) => {
     // Use suggestions from the hook instead of filtering students
     const filteredSuggestions = suggestions
         .filter(
-            (student: StudentData) =>
+            (student: StudentDataPage) =>
                 student.name &&
                 student.name
                     .toLowerCase()
@@ -162,7 +145,7 @@ const Page = ({ params }: { params: any }) => {
                         {showSuggestions && filteredSuggestions.length > 0 && (
                             <div className="absolute z-50 w-full bg-white border border-border rounded-md mt-1 shadow-lg">
                                 {filteredSuggestions.map(
-                                    (student: StudentData, i: number) => (
+                                    (student: StudentDataPage, i: number) => (
                                         <div
                                             key={i}
                                             className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"

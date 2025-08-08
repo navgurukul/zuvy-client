@@ -17,18 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
-
-type Props = {
-    className?: string
-    file: File
-    setFile: any
-    isPdfUploaded: boolean
-    pdfLink: any
-    loading: boolean
-    setIsPdfUploaded: any
-    onDeletePdfhandler: () => void
-    setDisableButton: any
-}
+import {UploadProps} from "@/app/admin/courses/[courseId]/module/_components/Article/courseModuleArticleType"
 
 const Dropzone = ({
     className = '',
@@ -40,7 +29,7 @@ const Dropzone = ({
     setIsPdfUploaded,
     onDeletePdfhandler,
     setDisableButton,
-}: Props) => {
+}: UploadProps) => {
     const [previewPdfLink, setPreviewPdfLink] = useState<string | null>(null)
     const [open, setIsOpen] = useState(false)
 

@@ -20,17 +20,9 @@ import {
     getStoreStudentData,
     getIsRowSelected,
 } from '@/store/store'
+import{DeleteAlertDialogProps} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 
-interface AlertDialogProps {
-    title: string
-    description: string
-    userId: any
-    bootcampId: number
-    fetchStudentData?: any
-    setSelectedRows?: any
-}
-
-export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
+export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     title,
     description,
     userId,
