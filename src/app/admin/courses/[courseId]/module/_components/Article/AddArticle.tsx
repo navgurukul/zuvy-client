@@ -462,6 +462,11 @@ const AddArticle = ({
                                                         setTitle(e.target.value)
                                                         field.onChange(e)
                                                     }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                          e.preventDefault() 
+                                                        }
+                                                    }}
                                                     placeholder={
                                                         defaultValue === 'editor'
                                                             ? "Untitled Article"

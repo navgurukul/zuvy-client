@@ -50,6 +50,11 @@ function Page() {
     const [draggedModuleId, setDraggedModuleId] = useState<number | null>(null)
     const [isDragging, setIsDragging] = useState(false)
     const [hasOrderChanged, setHasOrderChanged] = useState(false)
+    
+    // New states for border flash functionality
+    const [flashingModuleId, setFlashingModuleId] = useState<number | null>(null)
+    const [borderFlashTimeout, setBorderFlashTimeout] = useState<NodeJS.Timeout | null>(null)
+    
     const [moduleData, setModuleData] = useState({
         name: '',
         description: '',
@@ -134,6 +139,8 @@ function Page() {
                 weeks: -1,
                 days: -1,
             })
+
+            setTypeId(1)
         }
     }, [isOpen])
 
@@ -365,19 +372,51 @@ function Page() {
         }
     }, [courseData?.id])
 
+    // New function to trigger border flash for specific module
+    const triggerBorderFlash = (moduleId: number) => {
+        setFlashingModuleId(moduleId)
+        
+        // Clear existing timeout if any
+        if (borderFlashTimeout) {
+            clearTimeout(borderFlashTimeout)
+        }
+        
+        // Set new timeout to hide border flash
+        const timeout = setTimeout(() => {
+            setFlashingModuleId(null)
+        }, 1500) // Flash duration - 600ms
+        
+        setBorderFlashTimeout(timeout)
+    }
+
     async function handleReorder(newOrderModules: CurriculumItem[]) {
         if (!courseData?.id || !draggedModuleId) return
 
-        setIsReordering(true)
+        // setIsReordering(true)
 
         const newPosition =
             newOrderModules.findIndex((item) => item.id === draggedModuleId) + 1
 
-        const updatedModules = newOrderModules.map((item, index) => ({
-            ...item,
-            order: index + 1,
-        }))
+       
+        // Check if order actually changed by comparing with original
+        const originalPosition = originalCurriculum.findIndex(
+            (item) => item.id === draggedModuleId
+        ) + 1
 
+        const hasActuallyChanged = originalPosition !== newPosition
+
+         // If position hasn't changed, don't make API call
+        if (!hasActuallyChanged) {
+        setIsReordering(false)
+        return // Early return - no API call, no toast
+        }
+
+    setIsReordering(true)
+
+    const updatedModules = newOrderModules.map((item, index) => ({
+        ...item,
+        order: index + 1,
+    }))
         try {
             const response = await api.put(
                 `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${draggedModuleId}`,
@@ -407,6 +446,9 @@ function Page() {
                     title: 'Success',
                     description: 'Module order updated successfully',
                 })
+                
+                
+                triggerBorderFlash(draggedModuleId)
             }
 
             setIsReordering(false)
@@ -429,13 +471,16 @@ function Page() {
         }))
         setCurriculum(updatedModules)
 
-        const oldOrder = originalCurriculum.map((item) => item.id)
-        const newOrder = updatedModules.map((item) => item.id)
+        const oldOrder = originalCurriculum.map(item => item.id)
+        const newOrder = updatedModules.map(item => item.id)
 
-        if (JSON.stringify(oldOrder) !== JSON.stringify(newOrder)) {
-            setHasOrderChanged(true)
+        const orderChanged = JSON.stringify(oldOrder) !== JSON.stringify(newOrder)
+    
+        if (orderChanged) {
+        setHasOrderChanged(true)
         }
-
+    
+        
         // Clear any existing timeout
         if (reorderTimeout) {
             clearTimeout(reorderTimeout)
@@ -466,8 +511,16 @@ function Page() {
         // After drag ends, check if we need to save
         setTimeout(() => {
             if (hasOrderChanged) {
+                // handleReorder(curriculum)
+                // setHasOrderChanged(false)
+
+            const currentOrder = curriculum.map(item => item.id)
+            const originalOrder = originalCurriculum.map(item => item.id)
+            
+            if (JSON.stringify(currentOrder) !== JSON.stringify(originalOrder)) {
                 handleReorder(curriculum)
-                setHasOrderChanged(false)
+            }
+            setHasOrderChanged(false)
             }
         }, 100)
     }
@@ -478,8 +531,11 @@ function Page() {
             if (reorderTimeout) {
                 clearTimeout(reorderTimeout)
             }
+            if (borderFlashTimeout) {
+                clearTimeout(borderFlashTimeout)
+            }
         }
-    }, [reorderTimeout])
+    }, [reorderTimeout, borderFlashTimeout])
 
     if (isCourseDeleted) {
         return (
@@ -594,10 +650,10 @@ function Page() {
                                     fetchCourseModules={fetchCourseModules}
                                     projectId={item.projectId}
                                     chapterId={item.ChapterId}
-                                    // containerRef={containerRef}
                                     setDraggedModuleId={setDraggedModuleId}
                                     onDragStart={handleDragStart}
                                     onDragEnd={handleDragEnd}
+                                    showBorderFlash={flashingModuleId === item.id}
                                 />
                             ))}
                         </Reorder.Group>

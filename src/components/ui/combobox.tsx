@@ -16,6 +16,13 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 
+import {
+    Tooltip,
+    TooltipTrigger,
+    TooltipContent,
+    TooltipProvider,
+} from '@/components/ui/tooltip'
+
 export interface ComboboxProps {
     data: any
     title: string
@@ -50,14 +57,39 @@ export function Combobox({
                     className="w-full justify-between"
                     disabled={isDisabled}
                 >
-                    {batch
+                    {/* {batch
+                        ? batchChangeData?.label
+                        : value
+                        ? data.find((item: any) => item.value === value)
+                              ?.label ?? 'No Batch is Assigned'
+                        : 'No Batch is Assigned'} */}
+
+                <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                         <div className="truncate max-w-[150px] text-left cursor-pointer">
+                          {batch
+                           ? batchChangeData?.label
+                           : value
+                           ? data.find((item: any) => item.value === value)
+                           ?.label ?? 'No Batch is Assigned'
+                           : 'No Batch is Assigned'}
+                        </div>
+                    </TooltipTrigger>
+                   <TooltipContent>
+                       <p>
+                        {batch
                         ? batchChangeData?.label
                         : value
                         ? data.find((item: any) => item.value === value)
                               ?.label ?? 'No Batch is Assigned'
                         : 'No Batch is Assigned'}
+                      </p>
+                  </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
 
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0">
