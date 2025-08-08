@@ -34,6 +34,7 @@ import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
+import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 
 
 const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
@@ -96,7 +97,7 @@ const Mcqs = (props: Props) => {
     const [loading, setLoading] = useState(true)
 
     // New search enhancement states
-    const [searchSuggestions, setSearchSuggestions] = useState< PageSearchSuggestion[]>([])
+    const [searchSuggestions, setSearchSuggestions] = useState<PageSearchSuggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
     const [isSearchFocused, setIsSearchFocused] = useState(false)
