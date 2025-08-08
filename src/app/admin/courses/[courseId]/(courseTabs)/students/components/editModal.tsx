@@ -58,7 +58,6 @@ export const EditModal: React.FC<ComboxAlertDialogProps> = ({
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
-            setIsOpen(false)
         }
     }
 

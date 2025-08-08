@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+import { ChevronLeft, Clock, CheckCircle, AlertCircle, Sun, Moon } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { cn, difficultyColor } from '@/lib/utils'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import { useThemeStore } from '@/store/store'
 
 const QuizQuestions = ({
     onBack,
@@ -53,6 +54,8 @@ const QuizQuestions = ({
     const params = useParams()
     const searchParams = useSearchParams();
     const assessmentOutSourceId = searchParams.get('assessmentId');
+    const { isDark, toggleTheme } = useThemeStore();
+
 
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
         undefined
@@ -216,7 +219,19 @@ const QuizQuestions = ({
                         </AlertDialogContent>
                     </AlertDialog>
 
-                    <div className="fixed top-6 right-6 z-50">
+                    <div className="fixed flex items-center top-6 right-6 z-50 space-x-2">
+                    <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleTheme}
+                            className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        >
+                            {isDark ? (
+                                <Sun className="h-4 w-4" />
+                            ) : (
+                                <Moon className="h-4 w-4" />
+                            )}
+                        </Button>
                         <TimerDisplay remainingTime={remainingTime} />
                     </div>
                 </div>

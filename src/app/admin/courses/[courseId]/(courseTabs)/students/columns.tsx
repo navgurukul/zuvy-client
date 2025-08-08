@@ -317,7 +317,7 @@ export const columns: ColumnDef<Task>[] = [
                             userId={[userId]}
                             bootcampId={bootcampId}
                             title="Are you absolutely sure?"
-                            description="This action cannot be undone. This will permanently the student from the bootcamp"
+                            description="This action cannot be undone. This will permanently remove the student from the bootcamp"
                         />
                     </div>
                 </>

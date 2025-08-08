@@ -18,7 +18,7 @@ const Page = ({ params }: { params: any }) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    
+
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>({})
     const [assignmentTitle, setAssignmentTitle] = useState<string>('')
@@ -53,34 +53,31 @@ const Page = ({ params }: { params: any }) => {
     // Get search suggestions from existing data - use searchQuery for suggestions
     const searchSuggestions = useMemo(() => {
         if (!searchQuery.trim() || !assignmentData.length) return []
-        
-        const suggestions = new Set<string>()
+
         const query = searchQuery.toLowerCase()
-        const hasAtSymbol = query.includes('@')
-        
+        const suggestions: { name: string; email: string }[] = []
+
+        const seen = new Set()
+
         assignmentData.forEach((student: any) => {
-            if (hasAtSymbol) {
-                // Show email suggestions only if @ is present
-                if (student.emailId && student.emailId.toLowerCase().includes(query)) {
-                    suggestions.add(student.emailId)
-                }
-            } else {
-                // Show only name suggestions if no @ symbol
-                if (student.name && student.name.toLowerCase().includes(query)) {
-                    suggestions.add(student.name)
-                }
+            const nameMatch = student.name?.toLowerCase().includes(query)
+            const emailMatch = student.emailId?.toLowerCase().includes(query)
+
+            if ((nameMatch || emailMatch) && !seen.has(student.emailId)) {
+                suggestions.push({ name: student.name, email: student.emailId })
+                seen.add(student.emailId)
             }
         })
-        
-        return Array.from(suggestions).slice(0, 5)
+
+        return suggestions.slice(0, 5)
     }, [searchQuery, assignmentData])
 
     // Filter data based on appliedSearchQuery, not searchQuery
     const filteredData = useMemo(() => {
         if (!appliedSearchQuery.trim()) return assignmentData;
-        
+
         const searchTerm = appliedSearchQuery.toLowerCase();
-        return assignmentData.filter((student: any) => 
+        return assignmentData.filter((student: any) =>
             student.name?.toLowerCase().includes(searchTerm) ||
             student.emailId?.toLowerCase().includes(searchTerm)
         );
@@ -89,13 +86,13 @@ const Page = ({ params }: { params: any }) => {
     // Update URL with search parameter
     const updateSearchInURL = useCallback((query: string) => {
         const params = new URLSearchParams(searchParams.toString())
-        
+
         if (query.trim()) {
             params.set('search', query)
         } else {
             params.delete('search')
         }
-        
+
         router.push(pathname + '?' + params.toString())
     }, [searchParams, router, pathname])
 
@@ -103,10 +100,10 @@ const Page = ({ params }: { params: any }) => {
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         setSearchQuery(value)
-        
+
         // Show suggestions only if there's actual content and it's more than 0 characters
         setShowSuggestions(value.trim().length > 0)
-        
+
         // If input is empty, clear search from URL and hide suggestions
         if (!value.trim()) {
             setShowSuggestions(false)
@@ -269,22 +266,25 @@ const Page = ({ params }: { params: any }) => {
                             )}
                         </div>
 
-                        {/* Search Suggestions Dropdown */}
                         {showSuggestions && searchSuggestions.length > 0 && (
                             <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg mt-1">
                                 {searchSuggestions.map((suggestion, index) => (
                                     <button
                                         key={index}
-                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700"
-                                        onClick={() => handleSuggestionClick(suggestion)}
-                                        onMouseDown={(e) => e.preventDefault()} // Prevents onBlur from firing before onClick
+                                        className={`w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700 ${index !== searchSuggestions.length - 1 ? 'border-b border-gray-200' : ''
+                                            }`}
+                                        onClick={() => handleSuggestionClick(suggestion.name)}
+                                        onMouseDown={(e) => e.preventDefault()} // To prevent blur before click
                                         type="button"
                                     >
-                                        {suggestion}
+                                        <div className="font-medium">{suggestion.name}</div>
+                                        <div className="text-xs text-gray-500">{suggestion.email}</div>
                                     </button>
                                 ))}
                             </div>
                         )}
+
+
                     </div>
                     <DataTable data={filteredData} columns={columns} />
                 </div>

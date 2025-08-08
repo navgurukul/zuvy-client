@@ -36,6 +36,7 @@ function ChapterItem({
     isDragging,
     onDragStart,
     onDragEnd,
+    showBorderFlash,
 }: {
     title: string
     topicId: number
@@ -52,6 +53,7 @@ function ChapterItem({
     isDragging?: boolean
     onDragStart: () => void
     onDragEnd: () => void
+    showBorderFlash?: boolean
 }) {
     // states and variables
     const { courseId } = useParams()
@@ -145,17 +147,21 @@ function ChapterItem({
         setDeleteModalOpen(true)
     }
 
-    const handleDragStart = () => {
-        setIsBeingDragged(true)
-        // Don't show any toast during drag
-    }
+    // const handleDragStart = () => {
+    //     setIsBeingDragged(true)
+    //     onDragStart()
+    //     // Don't show any toast during drag
+    // }
 
-    const handleDragEnd = () => {
-        // Add small delay to prevent click after drag
-        setTimeout(() => {
-            setIsBeingDragged(false)
-        }, 300)
-    }
+    // const handleDragEnd = () => {
+    //     // Add small delay to prevent click after drag
+    //     // setTimeout(() => {
+    //     //     setIsBeingDragged(false)
+    //     // }, 300)
+
+    //     setIsBeingDragged(false)
+    //     onDragEnd()
+    // }
 
     return (
         <Reorder.Item
@@ -193,7 +199,10 @@ function ChapterItem({
                         setActiveChapterItem(),
                         isBeingDragged
                             ? 'opacity-90 cursor-grabbing'
-                            : 'opacity-100 cursor-pointer'
+                            : 'opacity-100 cursor-pointer',
+                        showBorderFlash 
+                            ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
+                            : ''
                     )}
                     onClick={handleClick}
                     style={{

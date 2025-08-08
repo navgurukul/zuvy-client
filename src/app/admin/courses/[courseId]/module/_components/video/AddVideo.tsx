@@ -172,6 +172,10 @@ const AddVideo = ({
         },
     })
 
+    const {
+        formState: { isDirty },
+    } = form
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const modifiedLink = getEmbedLink(values.links)
 
@@ -192,6 +196,7 @@ const AddVideo = ({
                         title: res.data.status,
                         description: res.data.message,
                     })
+                    form.reset(values) // to reset the dirty state
                     setShowVideoBox(true)
                     fetchChapterContent(content.id, content.topicId)
                     setIsChapterUpdated(!isChapterUpdated)
@@ -266,6 +271,14 @@ const AddVideo = ({
     }
 
     function previewVideo() {
+        if (isDirty) {
+            toast.info({
+                title: 'Unsaved Changes',
+                description: 'Please Save the chapter to preview.',
+            })
+            return
+        }
+
         if (content?.contentDetails[0]?.links) {
             setVideoPreviewContent(content)
             router.push(

@@ -92,7 +92,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
         type: contentType,
         status: item.status === 'Completed' ? 'completed' : 'not-started',
         description: `${contentTypeLabel}: ${item.title} - ${item.status}`,
-        duration: contentType === 'video' || contentType === 'live-class' ? '45 mins' :
+        duration: contentType === 'video' || contentType === 'live-class' ? '' :
           contentType === 'article' ? '5 mins read' :
             contentType === 'assessment' ? '2 hours' :
               contentType === 'quiz' ? '30 mins' : undefined,
@@ -421,7 +421,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
                             variant="ghost"
                             size="sm"
                             className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${chapterId === item.id
-                              ? "bg-primary-light border-l-4 border-primary text-charcoal"
+                              ? "bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
                               : "hover:bg-primary-light hover:text-charcoal"
                               }`}
                             onClick={() => handleItemSelect(item.id)}
@@ -471,9 +471,17 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
       {/* Main Content Area */}
       <div className={`flex-1 h-screen flex flex-col ${!isMobile ? '' : 'pb-20'}`}>
         {isMobile && <Header />}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full p-10">
+        <div className="flex w-full flex-start" >
 
+              <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
+                <Link href={`/student/course/${courseId}`}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Course
+                </Link>
+              </Button>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <div className={`h-full  ${isMobile ? 'p-2.5' : 'p-10'}`}>
             <ModuleContentRenderer
               selectedItemData={selectedItemData}
               onChapterComplete={refetch}

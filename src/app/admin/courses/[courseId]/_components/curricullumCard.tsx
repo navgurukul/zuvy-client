@@ -39,6 +39,7 @@ const CurricullumCard = (props:CurricullamCardProps) => {
         isStarted,
         onDragStart,
         onDragEnd,
+        showBorderFlash,
     } = props
 
     const router = useRouter()
@@ -112,7 +113,10 @@ const CurricullumCard = (props:CurricullamCardProps) => {
             <div
                 className={`${
                     props.typeId === 2 ? 'bg-yellow-100/80' : 'bg-muted'
-                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]`}
+                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]  transition-all duration-300 ${
+                    showBorderFlash 
+                        ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
+                        : ''}`}
             >
                 <div className="w-full p-2" onClick={handleModuleRoute}>
                     <div className="flex mb-2 w-full justify-between">

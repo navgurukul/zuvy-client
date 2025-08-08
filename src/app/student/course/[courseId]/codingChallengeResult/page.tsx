@@ -17,12 +17,16 @@ import {
   FileText,
   TestTube2,
   Terminal,
-  X
+  X,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { decodeBase64 } from '@/utils/students';
 import Editor from '@monaco-editor/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import{TestCase,TestCasesSubmission,CodingSubmissionData} from '@/app/student/course/[courseId]/codingChallengeResult/studentCourseCodingChallengesResultType'
+import { Button } from '@/components/ui/button';
+import { useThemeStore } from '@/store/store';
 
 // Re-using interfaces from CodingSubmission.tsx for consistency
 const CodingResultContent = () => {
@@ -34,6 +38,8 @@ const CodingResultContent = () => {
     const moduleId = searchParams.get('moduleId');
     const params = useParams();
     const chapterId = searchParams.get('chapterId');
+    const { isDark, toggleTheme } = useThemeStore();
+
 
     console.log(moduleId , chapterId)
     useEffect(() => {
@@ -190,37 +196,52 @@ const CodingResultContent = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
+      <div className='flex items-center justify-between '>
       <div
           onClick={handleBacktoChapters}
-          className="inline-flex text-left w-full items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group mb-6"
+          className="inline-flex text-left  items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group "
       >                <X size={18} />
                
+      </div>
+      <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          className="w-8 h-8 sm:w-9 sm:h-9 p-0  text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          {isDark ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+        </Button>
+
       </div>
       <div className="max-w-7xl mx-auto">
         <div className="bg-card border border-border rounded-2xl p-8 mb-8 shadow-lg">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center space-x-4">
-              <div className={`p-4 rounded-2xl ${overallSuccess ? 'bg-success/10' : 'bg-destructive/10'}`}>
+              {/* <div className={`p-4 rounded-2xl ${overallSuccess ? 'bg-success/10' : 'bg-destructive/10'}`}>
                 <Code2 size={32} className={overallSuccess ? 'text-success' : 'text-destructive'} />
-              </div>
+              </div> */}
               <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">Coding Submission Result</h1>
+                <h1 className="text-2xl text-left font-bold text-foreground mb-2">Coding Submission Result</h1>
                 <p className="text-muted-foreground text-left">Detailed analysis of your solution</p>
               </div>
             </div>
-            <div className={`flex items-center space-x-2 px-4 py-2 rounded-full ${overallSuccess ? 'bg-success/10 border border-success/20' : 'bg-destructive/10 border border-destructive/20'}`}>
-              <span className={`text-lg font-bold ${overallSuccess ? 'text-success' : 'text-destructive'}`}>{passedTestCases}/{totalTestCases}</span>
+            <div className={`flex items-center space-x-2 px-2 py-1 rounded-full ${overallSuccess ? 'bg-success/10 border border-success/20' : 'bg-destructive/10 border border-destructive/20'}`}>
+              <span className={`text-md font-bold ${overallSuccess ? 'text-success' : 'text-destructive'}`}>{passedTestCases}/{totalTestCases}</span>
               <span className="text-sm text-muted-foreground">tests passed</span>
             </div>
           </div>
           <div className={`rounded-xl p-6 border-2 ${overallSuccess ? 'bg-gradient-to-r from-success/5 to-success/10 border-success/20' : 'bg-gradient-to-r from-destructive/5 to-destructive/10 border-destructive/20'}`}>
             <div className="flex items-center space-x-4">
-              <div className={`p-3 rounded-full ${overallSuccess ? 'bg-success/20' : 'bg-destructive/20'}`}>
+              {/* <div className={`p-3 rounded-full ${overallSuccess ? 'bg-success/20' : 'bg-destructive/20'}`}>
                 {overallSuccess ? <CheckCircle2 size={24} className="text-success" /> : <XCircle size={24} className="text-destructive" />}
-              </div>
+              </div> */}
               <div>
-                <h3 className={`text-xl font-bold text-left ${overallSuccess ? 'text-success' : 'text-destructive'}`}>{overallSuccess ? '🎉 All Tests Passed!' : '❌ Some Tests Failed'}</h3>
-                <p className="text-muted-foreground mt-1 text-left">{overallSuccess ? 'Congratulations! Your solution works perfectly.' : 'Review the failed test cases below and try again.'}</p>
+                <h3 className={`text-xl font-bold text-left ${overallSuccess ? 'text-success' : 'text-destructive'}`}>{overallSuccess ? 'All Tests Passed!' : 'Some Tests Failed'}</h3>
+                <p className="text-muted-foreground mt-1 text-left">{overallSuccess ? 'Congratulations! Your solution works perfectly.' : 'You can review your test case results below.'}</p>
               </div>
             </div>
           </div>

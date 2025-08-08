@@ -49,35 +49,35 @@ const Page = ({ params }: any) => {
 
     // Get search suggestions from existing data - use searchQuery for suggestions
     const searchSuggestions = useMemo(() => {
-        if (!searchQuery.trim() || !projectStudentData.length) return []
-
-        const suggestions = new Set<string>()
+        // Fixed: Add null/undefined check for searchQuery
+        if (!searchQuery?.trim() || !projectStudentData?.length) return []
+    
         const query = searchQuery.toLowerCase()
-        const hasAtSymbol = query.includes('@')
-
+        const suggestions: { name: string; email: string }[] = []
+    
+        const seen = new Set()
+    
         projectStudentData.forEach((student: any) => {
-            if (hasAtSymbol) {
-                // Show email suggestions only if @ is present
-                if (student.userEmail && student.userEmail.toLowerCase().includes(query)) {
-                    suggestions.add(student.userEmail)
-                }
-            } else {
-                // Show only name suggestions if no @ symbol
-                if (student.userName && student.userName.toLowerCase().includes(query)) {
-                    suggestions.add(student.userName)
-                }
+            // Fixed: Use consistent property names (userName and userEmail)
+            const nameMatch = student.userName?.toLowerCase().includes(query)
+            const emailMatch = student.userEmail?.toLowerCase().includes(query)
+    
+            if ((nameMatch || emailMatch) && !seen.has(student.userEmail)) {
+                suggestions.push({ 
+                    name: student.userName || '', 
+                    email: student.userEmail || '' 
+                })
+                seen.add(student.userEmail)
             }
         })
-
-        return Array.from(suggestions).slice(0, 5)
+    
+        return suggestions.slice(0, 5)
     }, [searchQuery, projectStudentData])
 
-    // Filter data based on appliedSearchQuery, not searchQuery
+   // Filter data based on appliedSearchQuery, not searchQuery
     const filteredData = useMemo(() => {
-        console.log('Filtering data with applied query:', appliedSearchQuery)
-        console.log('Project student data:', projectStudentData)
-
-        if (!appliedSearchQuery.trim()) {
+        // Fixed: Add null/undefined check for appliedSearchQuery
+        if (!appliedSearchQuery?.trim()) {
             return projectStudentData
         }
 
@@ -94,7 +94,7 @@ const Page = ({ params }: any) => {
     const updateSearchInURL = useCallback((query: string) => {
         const params = new URLSearchParams(searchParams.toString())
 
-        if (query.trim()) {
+        if (query?.trim()) {
             params.set('search', query)
         } else {
             params.delete('search')
@@ -105,12 +105,12 @@ const Page = ({ params }: any) => {
 
     // Handle search input change - only update searchQuery, not appliedSearchQuery
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
+        const value = e.target.value || '' // Ensure it's never undefined
         setSearchQuery(value)
-        setShowSuggestions(value.trim().length > 0)
+        setShowSuggestions(value?.trim()?.length > 0)
 
         // If input is empty, clear search from URL and applied query
-        if (!value.trim()) {
+        if (!value?.trim()) {
             setAppliedSearchQuery('') // Clear applied search when input is empty
             updateSearchInURL('')
         }
@@ -118,19 +118,20 @@ const Page = ({ params }: any) => {
 
     // Handle search submission - apply the search query
     const handleSearchSubmit = (query?: string) => {
-        const searchTerm = query || searchQuery
+        const searchTerm = (query || searchQuery || '').trim() // Safe fallback
         setAppliedSearchQuery(searchTerm) // Apply the search to filter data
         setShowSuggestions(false)
         updateSearchInURL(searchTerm)
     }
 
-    // Handle suggestion click - apply the selected suggestion
-    const handleSuggestionClick = (suggestion: string) => {
+    // Fixed: Handle suggestion click - apply the selected suggestion
+    const handleSuggestionClick = (suggestion: { name: string; email: string }) => {
         console.log('Suggestion clicked:', suggestion)
-        setSearchQuery(suggestion)
-        setAppliedSearchQuery(suggestion) // Apply the selected suggestion to filter data
+        const searchTerm = suggestion.name // You can use suggestion.name or suggestion.email
+        setSearchQuery(searchTerm)
+        setAppliedSearchQuery(searchTerm) // Apply the selected suggestion to filter data
         setShowSuggestions(false)
-        updateSearchInURL(suggestion)
+        updateSearchInURL(searchTerm)
     }
 
     // Handle clear search - clear both search queries
@@ -179,7 +180,9 @@ const Page = ({ params }: any) => {
             setProjectStudentData(
                 res.data.projectSubmissionData.projectTrackingData
             )
-        } catch (error) {}
+        } catch (error) {
+            console.error('Error fetching project student data:', error)
+        }
     }, [params.courseId, params.StudentsProjects])
 
     // Initialize search from URL on component mount
@@ -189,6 +192,9 @@ const Page = ({ params }: any) => {
         if (searchFromURL) {
             setSearchQuery(searchFromURL)
             setAppliedSearchQuery(searchFromURL) // Also apply it to filter data
+        } else {
+            setSearchQuery('')
+            setAppliedSearchQuery('')
         }
     }, [searchParams])
 
@@ -197,6 +203,7 @@ const Page = ({ params }: any) => {
         getProjectsStudentData()
         getBootcampHandler()
     }, [getProjectsData, getProjectsStudentData, getBootcampHandler])
+
     return (
         <>
             {data ? (
@@ -280,11 +287,12 @@ const Page = ({ params }: any) => {
                                     <button
                                         key={index}
                                         className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700"
-                                        onClick={() => handleSuggestionClick(suggestion)}
+                                        onClick={() => handleSuggestionClick(suggestion)} // Fixed: Pass whole suggestion object
                                         onMouseDown={(e) => e.preventDefault()} // Prevents onBlur from firing before onClick
                                         type="button"
                                     >
-                                        {suggestion}
+                                       <div className="font-medium">{suggestion.name}</div>
+                                       <div className="text-xs text-gray-500">{suggestion.email}</div>
                                     </button>
                                 ))}
                             </div>
