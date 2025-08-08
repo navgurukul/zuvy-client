@@ -39,6 +39,7 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
   return (
     <div className={`flex items-center gap-2 font-mono text-xl font-semibold ${getColorClass()} bg-card border border-border rounded-lg px-3 py-2 shadow-4dp`}>
       <Clock size={20} />
+      
       <span>{formatTime(remainingTime)}</span>
     </div>
   );

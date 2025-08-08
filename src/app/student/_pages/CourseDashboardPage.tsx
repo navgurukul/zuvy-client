@@ -1,5 +1,5 @@
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,35 +19,45 @@ import TruncatedDescription from "@/app/student/_components/TruncatedDescription
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
+import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
 import {Module,ModuleContentCounts} from '@/app/student/_pages/pageStudentType'
 
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   const [showAllModules, setShowAllModules] = useState(false);
+  const {setIsStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
-  const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
+  const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents(courseId);
   const { completedClassesData, loading: classesLoading, error: classesError } = useCompletedClasses(courseId);
   const { latestCourseData, loading: latestCourseLoading, error: latestCourseError } = useLatestUpdatedCourse(courseId);
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
-  // Show loading skeleton while fetching API data
-  if (progressLoading || modulesLoading || eventsLoading || classesLoading || latestCourseLoading) {
+
+
+
+  useEffect(()=> {
+    setIsStudentEnrolledInOneCourse(false)
+  },[])
+
+
+  // Show loading skeleton while fetching essential API data (excluding events)
+  if (progressLoading || modulesLoading || classesLoading || latestCourseLoading) {
     return (
       <CourseDashboardSkeleton />
     );
   }
-  
 
-  // Show error state if API fails
-  if (progressError || modulesError || eventsError || classesError) {
+
+  // Show error state if essential APIs fail (excluding events)
+  if (progressError || modulesError || classesError || latestCourseError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-heading font-bold mb-2">Failed to Load Course Data</h1>
-          <p className="text-muted-foreground mb-4">{progressError || modulesError || eventsError || classesError}</p>
+          <p className="text-muted-foreground mb-4">{progressError || modulesError || classesError || latestCourseError}</p>
           <Button onClick={() => window.location.reload()}>
             Try Again
           </Button>
@@ -610,7 +620,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Content</h2>
 
                 <div className="space-y-6">
-                  {modulesToShow.map((module: any) => {
+                  { modulesToShow.length > 0 ? modulesToShow.map((module: any) => {
                     const moduleProgress = getModuleProgress(module);
                     const isCurrentModule = latestCourseData?.moduleId === module.id;
                     const isCompleted = moduleProgress === 100;
@@ -703,7 +713,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             </div>
                           </div>}
 
-                          {/* Action Button - Mobile: bottom */}
+                          {/* A
+                          
+                          tion Button - Mobile: bottom */}
                           {isMobile && (
                             <TooltipProvider>
                               <Tooltip>
@@ -711,7 +723,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   <div>
 
                                     <Button
-                                      className={`px-6 font-semibold bg-[#f5f6fa]  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline  ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
+                                      className={`px-6 mb-2 font-semibold bg- ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline  ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline w-full' : ''} `}`}
                                       disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
                                       onClick={(e) => {
                                         if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
@@ -737,7 +749,23 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       </Card>
 
                     );
-                  })}
+                  }) : 
+                <div className="mb-6 text-left flex flex-col justify-end w-full items-center">
+                    <Image
+                      src="/emptyStates/modulesNotFound.svg"
+                      alt="No upcoming events"
+                      width={50}
+                      height={50}
+                      className="w-1/2 h-auto opacity-80"
+                    />
+                    <h3 className="text-lg text-left w-full font-semibold text-muted-foreground">
+                      No Modules Found
+                    </h3>
+                    <p className="text-sm text-left w-full text-muted-foreground leading-relaxed">
+                      No modules created for this course yet, Please check back later.
+                    </p>
+               
+                </div>}
 
                   {modulesToDisplay.length > 7 && !showAllModules && (
                     <div className="flex justify-center">
@@ -765,7 +793,34 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   </p> */}
                 </CardHeader>
                 <CardContent className="pt-0">
-                  {upcomingEventsData && upcomingEventsData.events.length > 0 ? (
+                  {eventsLoading ? (
+                    // Loading state for events
+                    <div className="space-y-4">
+                      {[1, 2, 3].map((index) => (
+                        <div key={index} className="animate-pulse">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 mt-1">
+                              <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-start justify-between gap-4 mb-2">
+                                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                              </div>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                              </div>
+                              <div className="flex justify-end">
+                                <div className="h-4 bg-gray-200 rounded w-20"></div>
+                              </div>
+                            </div>
+                          </div>
+                          {index < 3 && (
+                            <div className="border-t border-border mt-4"></div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : upcomingEventsData && upcomingEventsData.events.length > 0 ? (
                     <div className="space-y-4">
                       {upcomingEventsData.events.slice(0, 3).map((item: UpcomingEvent, index: number) => {
                         const eventType = getEventType(item.type);
@@ -780,10 +835,10 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-start justify-between gap-4 mb-2">
-                                    <h4 className="font-medium text-base">{item.title}
-
+                                    <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">{item.title}
                                     </h4>
                                   </div>
+                                    <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
                                   <div className="flex items-center justify-between mb-3">
                                     <p className="text-sm font-medium">
                                       {eventType === 'Live Class' && `Scheduled on ${formatDate(item.eventDate)}`}

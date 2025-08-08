@@ -87,7 +87,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
   if (!session) {
     return (
       <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-3xl font-heading font-bold mb-4">{chapterDetails.title}</h1>
+        <h1 className="text-xl font-heading font-bold mb-4">{chapterDetails.title}</h1>
         <p className="text-muted-foreground">No session has been scheduled yet</p>
       </div>
     );
@@ -153,7 +153,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
       return (
         <div className="max-w-4xl mx-auto p-8">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-heading text-left font-bold">{item.title}</h1>
+            <h1 className="text-xl font-heading text-left font-bold">{item.title}</h1>
             <Badge variant="outline" className="text-success border-success">
               Live Now
             </Badge>
@@ -190,7 +190,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
       return (
         <div className="max-w-4xl mx-auto p-8">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-heading font-bold">{item.title}</h1>
+            <h1 className="text-xl font-heading font-bold">{item.title}</h1>
            {chapterDetails.status=== 'Completed' || localIsCompleted ? <Badge variant="outline" className="text-success border-success">
               Viewed
             </Badge> : <Badge variant="outline" className="text-warning border-warning">
@@ -262,7 +262,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
   // Fallback return
   return (
     <div className="max-w-4xl mx-auto p-8">
-      <h1 className="text-3xl font-heading font-bold">{chapterDetails.title}</h1>
+      <h1 className="text-xl font-heading font-bold">{chapterDetails.title}</h1>
       <p className="text-muted-foreground">Live class content</p>
     </div>
   );

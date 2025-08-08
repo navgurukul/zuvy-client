@@ -42,14 +42,14 @@ const Header = () => {
   // Generate user initials from name
   const getUserInitials = (name: string | undefined): string => {
     if (!name) return 'JD'; // fallback
-    
+
     const words = name.trim().split(' ');
     if (words.length >= 2) {
       // First and last name initials
       return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
     } else if (words.length === 1) {
       // Just first name, take first two characters or duplicate first character
-      return words[0].length >= 2 
+      return words[0].length >= 2
         ? (words[0].charAt(0) + words[0].charAt(1)).toUpperCase()
         : (words[0].charAt(0) + words[0].charAt(0)).toUpperCase();
     }
@@ -66,7 +66,7 @@ const Header = () => {
   };
 
   const handleDashboardClick = () => {
-     router.push(`/student`);
+    router.push(`/student`);
 
   };
 
@@ -92,7 +92,7 @@ const Header = () => {
   const isOnCoursePage = pathname.includes('/course/');
 
   // Check active page states
- 
+
 
   const isOnCourseSyllabus = () => {
     return pathname.includes('/courseSyllabus');
@@ -105,9 +105,9 @@ const Header = () => {
         {/* Left - Logo and Navigation */}
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-                <img 
-                  src={'/logo.PNG'}     
-                  alt="Zuvy" 
+            <img
+              src={'/logo.PNG'}
+              alt="Zuvy"
               className="h-12"
             />
           </div>
@@ -119,9 +119,8 @@ const Header = () => {
                 variant="link"
                 size="sm"
                 onClick={handleDashboardClick}
-                className={`text-xs font-semibold sm:text-sm ${ 
-                     'text-foreground  hover:text-primary'
-                }`}
+                className={`text-xs font-semibold sm:text-sm ${'text-foreground  hover:text-primary'
+                  }`}
               >
                 Dashboard
               </Button>
@@ -129,11 +128,10 @@ const Header = () => {
                 variant="link"
                 size="sm"
                 onClick={handleSyllabusClick}
-                className={` text-xs font-semibold sm:text-sm ${
-                  isOnCourseSyllabus() 
-                    ? 'text-primary font-semibold' 
+                className={` text-xs font-semibold sm:text-sm ${isOnCourseSyllabus()
+                    ? 'text-primary font-semibold'
                     : 'text-foreground hover:text-primary'
-                }`}
+                  }`}
               >
                 Course Syllabus
               </Button>
@@ -144,7 +142,7 @@ const Header = () => {
         {/* Right - Theme Switch and Avatar with Dropdown */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div className="w-9 h-9"></div> {/* Placeholder for theme toggle */}
-          
+
           {/* Student Avatar with Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -207,9 +205,9 @@ const Header = () => {
       {/* Left - Logo and Navigation */}
       <div className="flex items-center gap-2 sm:gap-4">
         <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
-          <img 
-            src={'/logo.PNG'} 
-            alt="Zuvy" 
+          <img
+            src={'/logo.PNG'}
+            alt="Zuvy"
             className="h-12"
           />
         </div>
@@ -221,9 +219,8 @@ const Header = () => {
               variant="link"
               size="sm"
               onClick={handleDashboardClick}
-              className={`text-xs sm:text-sm font-semibold ${ 
-                   'text-foreground hover:underline hover:text-primary'
-              }`}
+              className={`text-xs sm:text-sm font-semibold ${'text-foreground hover:underline hover:text-primary'
+                }`}
             >
               Dashboard
             </Button>
@@ -231,11 +228,10 @@ const Header = () => {
               variant="link"
               size="sm"
               onClick={handleSyllabusClick}
-              className={`text-xs sm:text-sm font-semibold ${
-                isOnCourseSyllabus() 
-                  ? 'text-primary font-medium' 
+              className={`text-xs sm:text-sm font-semibold ${isOnCourseSyllabus()
+                  ? 'text-primary font-medium'
                   : 'text-foreground hover:underline hover:text-primary'
-              }`}
+                }`}
             >
               Course Syllabus
             </Button>
@@ -257,16 +253,16 @@ const Header = () => {
             <Moon className="h-4 w-4" />
           )}
         </Button>
-        
+
         {/* Student Avatar with Dropdown */}
-        {(studentData as any)?.profilePicture ? 
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="h-7 w-7 sm:h-8 sm:w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-              <AvatarImage src={(studentData as any)?.profilePicture || '/logo.PNG'} alt="Student" />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
+              {studentData?.profile_picture ? <AvatarImage src={(studentData as any)?.profilePicture || '/logo.PNG'} alt="Student" /> : <AvatarFallback className="font-medium">
                 {getUserInitials(studentData?.name)}
-              </AvatarFallback>
+              </AvatarFallback>}
+
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 text-left" align="end">
@@ -289,20 +285,12 @@ const Header = () => {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogoutClick} className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600">
-            Logout            
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        :
-        <div className="w-8 h-8">
-          <Avatar className="h-7 w-7 sm:h-8 sm:w-8 text-left cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                <AvatarImage src={(studentData as any)?.profilePicture || '/logo.PNG'} alt="Student" />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">
-                {getUserInitials(studentData?.name)}
-              </AvatarFallback>
-            </Avatar>
-        </div>
-        }
+
+
 
         <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
           <AlertDialogContent>

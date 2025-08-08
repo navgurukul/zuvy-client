@@ -29,7 +29,7 @@ export interface UseUpcomingEventsReturn {
 }
 
 
-export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
+export const useUpcomingEvents = (courseId?: string): UseUpcomingEventsReturn => {
   const [upcomingEventsData, setUpcomingEventsData] = useState<UpcomingEventsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,15 +39,27 @@ export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await api.get('/student/UpcomingEvents');
-        
-        if (response.data && response.data.isSuccess) {
-          setUpcomingEventsData(response.data.data);
+        if(courseId) {
+          
+          const response = await api.get(`/student/UpcomingEvents?bootcampId=${courseId}`);
+          
+          if (response.data && response.data.isSuccess) {
+            setUpcomingEventsData(response.data.data);
+          } else {
+            setUpcomingEventsData(null);
+            setError(response.data.message || 'Failed to fetch upcoming events');
+          }
         } else {
-          setUpcomingEventsData(null);
-          setError(response.data.message || 'Failed to fetch upcoming events');
+          const response = await api.get('/student/UpcomingEvents');
+          
+          if (response.data && response.data.isSuccess) {
+            setUpcomingEventsData(response.data.data);
+          } else {
+            setUpcomingEventsData(null);
+            setError(response.data.message || 'Failed to fetch upcoming events');
+          }
         }
+        
       } catch (err: any) {
         console.error('Error fetching upcoming events:', err);
         setError(err.response?.data?.message || 'Failed to fetch upcoming events');

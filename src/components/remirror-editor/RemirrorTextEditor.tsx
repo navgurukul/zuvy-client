@@ -26,6 +26,8 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Toolbar } from './Toolbar'
 import './remirror-editor.css'
+import useWindowSize from '@/hooks/useHeightWidth'
+import { useThemeStore } from '@/store/store'
 
 interface RemirrorTextEditorProps {
     initialContent: any
@@ -91,6 +93,10 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
 }) => {
     // Track if we're in the middle of editing to prevent feedback loops
     const isEditingRef = useRef<boolean>(false)
+    const { width } = useWindowSize();
+    const isMobile = width < 768;
+    const {isDark} = useThemeStore()
+
 
     // Reference to compare content changes
     const contentRef = useRef<string>('')
@@ -231,6 +237,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                 color: {
                     primary: '#3b82f6', // Tailwind's blue-500
                     // border: '#d1d5db', // Tailwind's gray-300
+                    text: isDark ? '#f9fafb' : '#000',
                     border: 'none',
                     background: '#f9fafb', // Tailwind's gray-50
                     // active: { border: '#2563eb', primary: '#1d4ed8' }, // blue-600, blue-700
@@ -261,7 +268,7 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                             msOverflowStyle: 'none', // IE and Edge
                         }}
                     >
-                       <div className="px-1 h-full pb-1" data-gramm="false">
+                       <div className={`${isMobile && 'px-1 h-full pb-1 max-w-xs break-words whitespace-pre-wrap' } `} data-gramm="false">
                             <EditorComponent />
                         </div>
                         {!preview && <CodeBlockHelper />}

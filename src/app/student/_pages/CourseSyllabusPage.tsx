@@ -3,12 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Video, BookOpen, FileText, Clock, Users, Code, ClipboardList, HelpCircle, ArrowLeft, Play } from "lucide-react";
 import useCourseSyllabus from "@/hooks/useCourseSyllabus";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -240,14 +238,14 @@ const CourseSyllabusPage = () => {
                       <span className="font-medium capitalize text-sm ">Instructor:- {syllabusData.instructorName}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-muted-foreground">In Collaboration With</p>
                     <img
                       src={syllabusData.collaboratorName || '/logo.PNG'}
                       alt="AFE Brand"
                       className="h-12"
                     />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
