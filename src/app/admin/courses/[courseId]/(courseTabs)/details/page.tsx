@@ -820,7 +820,7 @@ function Page({ params }: { params: any }) {
                         className="bg-success-dark opacity-75"
                         type="submit"
                     >
-                        Submit
+                        Save
                     </Button>
                 </form>
             </Form>

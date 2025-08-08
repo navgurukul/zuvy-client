@@ -29,7 +29,7 @@ interface PageParams {
 interface Suggestion {
     id: string;
     name: string;
-    email?: string;
+    email: string;
 }
 
 const Page = ({ params }: any) => {
@@ -95,8 +95,8 @@ const Page = ({ params }: any) => {
         setSearchInputValue(searchQuery)
     }, [searchQuery])
 
-    // Generate suggestions from existing data - MODIFIED to show names by default and emails when @ is present
-    const generateSuggestions = useCallback((query: string) => {
+    // Fetch suggestions from API based on search query
+    const fetchSuggestionsFromAPI = useCallback(async (query: string) => {
         if (!query.trim() || query.length < 2) {
             setSuggestions([])
             setShowSuggestions(false)
@@ -111,53 +111,52 @@ const Page = ({ params }: any) => {
 
         setIsLoadingSuggestions(true)
 
-        const hasAtSymbol = query.includes('@')
+        try {
+            // Call the same API that fetches student assessments but with search query
+            const { assessments } = await fetchStudentAssessments(
+                params?.assessment_Id,
+                params?.courseId,
+                0, // Start from first page for suggestions
+                5, // Limit to 5 results for suggestions
+                query, // Use the search query
+                () => {}, // Empty function for setTotalPages
+                () => {}  // Empty function for setLastPage
+            )
 
-        // Filter from existing table data
-        const filteredSuggestions = dataTableAssesment
-            .filter((student: any) => {
-                const name = student.name || student.studentName || student.student?.name || ''
-                const email = student.email || student.studentEmail || student.student?.email || ''
+            const fetchedSuggestions = assessments
+                .map((student: any) => ({
+                    id: student.id || student.studentId || student.student?.id || Math.random().toString(),
+                    name: student.name || student.studentName || student.student?.name || '',
+                    email: student.email || student.studentEmail || student.student?.email || ''
+                }))
+                .filter((suggestion: Suggestion) => suggestion.name && suggestion.email) // Only show if both name and email exist
 
-                if (hasAtSymbol) {
-                    // Only search emails when @ is present
-                    return email.toLowerCase().includes(query.toLowerCase())
-                } else {
-                    // Search names by default
-                    return name.toLowerCase().includes(query.toLowerCase())
-                }
-            })
-            .slice(0, 5) // Limit to 10 suggestions
-            .map((student: any) => ({
-                id: student.id || student.studentId || student.student?.id || Math.random().toString(),
-                name: student.name || student.studentName || student.student?.name || '',
-                email: student.email || student.studentEmail || student.student?.email || ''
-            }))
-            .filter((suggestion: Suggestion) =>
-                hasAtSymbol ? suggestion.email : suggestion.name
-            ) // Filter based on search type
+            setSuggestions(fetchedSuggestions)
 
-        setSuggestions(filteredSuggestions)
-
-        // Show suggestions if we have results and input is focused
-        if (filteredSuggestions.length > 0 && document.activeElement === inputRef.current) {
-            setShowSuggestions(true)
-        } else {
+            // Show suggestions if we have results and input is focused
+            if (fetchedSuggestions.length > 0 && document.activeElement === inputRef.current) {
+                setShowSuggestions(true)
+            } else {
+                setShowSuggestions(false)
+            }
+        } catch (error) {
+            console.error('Error fetching suggestions:', error)
+            setSuggestions([])
             setShowSuggestions(false)
+        } finally {
+            setIsLoadingSuggestions(false)
         }
+    }, [params.assessment_Id, params.courseId, searchQuery])
 
-        setIsLoadingSuggestions(false)
-    }, [dataTableAssesment, searchQuery])
-
-    // Generate suggestions when debounced input changes
+    // Fetch suggestions when debounced input changes
     useEffect(() => {
         if (debouncedInputValue && debouncedInputValue.length >= 2) {
-            generateSuggestions(debouncedInputValue)
+            fetchSuggestionsFromAPI(debouncedInputValue)
         } else {
             setSuggestions([])
             setShowSuggestions(false)
         }
-    }, [debouncedInputValue, generateSuggestions])
+    }, [debouncedInputValue, fetchSuggestionsFromAPI])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -269,9 +268,9 @@ const Page = ({ params }: any) => {
         }
     }
 
-    // Handle suggestion click
+    // Handle suggestion click - always use name for search
     const handleSuggestionClick = (suggestion: Suggestion) => {
-        const searchTerm = searchInputValue.includes('@') ? suggestion.email || '' : suggestion.name
+        const searchTerm = suggestion.name // Always use name for search
         setSearchInputValue(searchTerm || '')
         setShowSuggestions(false)
         setSuggestions([])
@@ -311,8 +310,8 @@ const Page = ({ params }: any) => {
         if (searchInputValue.length >= 2 && suggestions.length > 0) {
             setShowSuggestions(true)
         } else if (searchInputValue.length >= 2) {
-            // Generate suggestions if input has content but no suggestions
-            generateSuggestions(searchInputValue)
+            // Fetch suggestions from API if input has content but no suggestions
+            fetchSuggestionsFromAPI(searchInputValue)
         }
     }
 
@@ -445,20 +444,17 @@ const Page = ({ params }: any) => {
                                                 }}
                                                 className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-gray-100 transition-colors"
                                             >
-                                                {searchInputValue.includes('@') ? (
-                                                    <div className="font-medium text-sm">
-                                                        {suggestion.email}
-                                                    </div>
-                                                ) : (
-                                                    <div className="font-medium text-sm">
-                                                        {suggestion.name}
-                                                    </div>
-                                                )}
+                                                <div className="font-medium text-sm">
+                                                    {suggestion.name}
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {suggestion.email}
+                                                </div>
                                             </button>
                                         ))
                                     ) : searchInputValue.length >= 2 && !isLoadingSuggestions ? (
                                         <div className="p-3 text-center text-gray-500">
-                                            No {searchInputValue.includes('@') ? 'email' : 'name'} matches found for {searchInputValue}
+                                            No matches found for {searchInputValue}
                                         </div>
                                     ) : null}
                             </div>
