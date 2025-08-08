@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState,useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
@@ -15,6 +15,7 @@ import EditModuleDialog from '../../_components/EditModuleDialog'
 import { X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
+import axios from 'axios'
 import{CurriculumItem,ModuleData} from "@/app/admin/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType"
 
 
@@ -40,8 +41,12 @@ function Page() {
     const [isReordering, setIsReordering] = useState(false)
     const [selectedModuleData, setSelectedModuleData] =
         useState<ModuleData | null>(null)
-    const [pendingOrder, setPendingOrder] = useState<CurriculumItem[] | null>(null)
-    const [reorderTimeout, setReorderTimeout] = useState<NodeJS.Timeout | null>(null)
+    const [pendingOrder, setPendingOrder] = useState<CurriculumItem[] | null>(
+        null
+    )
+    const [reorderTimeout, setReorderTimeout] = useState<NodeJS.Timeout | null>(
+        null
+    )
     const [draggedModuleId, setDraggedModuleId] = useState<number | null>(null)
     const [isDragging, setIsDragging] = useState(false)
     const [hasOrderChanged, setHasOrderChanged] = useState(false)
@@ -84,7 +89,7 @@ function Page() {
                     )
                     setSelectedModuleData(data)
                 })
-                .catch(() => {
+                .catch((error) => {
                     toast.error({
                         title: 'Error',
                         description: 'Failed to fetch module data',
@@ -182,7 +187,7 @@ function Page() {
                         months: result.months,
                     })
                 })
-                .catch(() => {
+                .catch((error) => {
                     toast.error({
                         title: 'Error',
                         description: 'Failed to fetch module data',
@@ -335,10 +340,21 @@ function Page() {
             setOriginalCurriculum([...modulesWithStartedFlag])
             setLoading(false)
         } catch (error) {
-            toast.error({
-                title: 'Error',
-                description: 'Failed to fetch course Modules',
-            })
+            if (axios.isAxiosError(error)) {
+                if (error?.response?.data.message === 'Bootcamp not found!') {
+                    router.push(`/admin/courses`)
+                    toast.info({
+                        title: 'Caution',
+                        description:
+                            'The Course has been deleted by another Admin',
+                    })
+                } else {
+                    toast.error({
+                        title: 'Error',
+                        description: 'Failed to fetch course Modules',
+                    })
+                }
+            }
             setLoading(false)
         }
     }
@@ -354,9 +370,8 @@ function Page() {
 
         setIsReordering(true)
 
-        const newPosition = newOrderModules.findIndex(
-            (item) => item.id === draggedModuleId
-        ) + 1
+        const newPosition =
+            newOrderModules.findIndex((item) => item.id === draggedModuleId) + 1
 
         const updatedModules = newOrderModules.map((item, index) => ({
             ...item,
@@ -366,29 +381,31 @@ function Page() {
         try {
             const response = await api.put(
                 `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${draggedModuleId}`,
-                { 
+                {
                     reOrderDto: { newOrder: newPosition },
                 }
             )
             // setOriginalCurriculum([...updatedModules])
-            const warningMsg = response.data?.[0]?.message ?? ""
+            const warningMsg = response.data?.[0]?.message ?? ''
 
-            if (warningMsg.includes("started by")) {
+            if (warningMsg.includes('started by')) {
                 toast.warning({
-                    title: "Warning",
+                    title: 'Warning',
                     description: warningMsg,
                 })
 
                 const updatedOriginal = originalCurriculum.map((item) =>
-                    item.id === draggedModuleId ? { ...item, isStarted: true } : item
+                    item.id === draggedModuleId
+                        ? { ...item, isStarted: true }
+                        : item
                 )
                 setOriginalCurriculum(updatedOriginal)
                 setCurriculum(updatedOriginal)
-            }else {
+            } else {
                 setOriginalCurriculum([...updatedModules])
-                toast.success({              // ✅ Success toast here
-                    title: "Success",
-                    description: "Module order updated successfully",
+                toast.success({
+                    title: 'Success',
+                    description: 'Module order updated successfully',
                 })
             }
 
@@ -397,28 +414,28 @@ function Page() {
             // Revert to original order on error
             setCurriculum([...originalCurriculum])
             toast.error({
-                title: "Error",
-                description: "Error updating module order"
+                title: 'Error',
+                description: 'Error updating module order',
             })
             setIsReordering(false)
         }
     }
-    
+
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
         // Update curriculum immediately for smooth UI
         const updatedModules = newOrderModules.map((item, index) => ({
             ...item,
             order: index + 1,
-        }));
+        }))
         setCurriculum(updatedModules)
 
-        const oldOrder = originalCurriculum.map(item => item.id)
-        const newOrder = updatedModules.map(item => item.id)
-        
+        const oldOrder = originalCurriculum.map((item) => item.id)
+        const newOrder = updatedModules.map((item) => item.id)
+
         if (JSON.stringify(oldOrder) !== JSON.stringify(newOrder)) {
             setHasOrderChanged(true)
         }
-        
+
         // Clear any existing timeout
         if (reorderTimeout) {
             clearTimeout(reorderTimeout)
@@ -438,7 +455,6 @@ function Page() {
         }
     }
 
-
     const handleDragStart = () => {
         setIsDragging(true)
         setHasOrderChanged(false)
@@ -446,7 +462,7 @@ function Page() {
 
     const handleDragEnd = () => {
         setIsDragging(false)
-        
+
         // After drag ends, check if we need to save
         setTimeout(() => {
             if (hasOrderChanged) {
@@ -546,8 +562,7 @@ function Page() {
                     </div>
                 </div>
             ) : (
-               <div className="flex flex-col items-center justify-center overflow-hidden">
-
+                <div className="flex flex-col items-center justify-center overflow-hidden">
                     {curriculum.length > 0 ? (
                         <Reorder.Group
                             className="w-1/2"
@@ -555,7 +570,6 @@ function Page() {
                             onReorder={handleReorderModules}
                             axis="y"
                             ref={containerRef}
-                        
                         >
                             {curriculum.map((item, index) => (
                                 <CurricullumCard
