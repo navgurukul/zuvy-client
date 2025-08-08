@@ -1,12 +1,14 @@
 'use client'
 
 import React from 'react'
-import { ChevronLeft, Check, X, Circle, Award, Target, Clock, AlertCircle } from 'lucide-react'
+import { ChevronLeft, Check, X, Circle, Award, Target, Clock, AlertCircle, Sun, Moon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cn, difficultyColor } from '@/lib/utils'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import { useQuizResults } from '@/hooks/useQuizResults'
+import { useThemeStore } from '@/store/store'
+import { Button } from '@/components/ui/button'
 
 const QuizResults = ({
     params,
@@ -14,6 +16,8 @@ const QuizResults = ({
     params: { submissionId: string }
 }) => {
     const router = useRouter()
+    const { isDark, toggleTheme } = useThemeStore();
+
     const { width } = useWindowSize()
     const isMobile = width < 768
 
@@ -117,6 +121,7 @@ const QuizResults = ({
         )
     }    return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
+            <div className='flex items-center justify-between mr-4'>
                     <div
                         onClick={() => router.back()}
                         className="inline-flex text-left w-full m-3 items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
@@ -124,6 +129,20 @@ const QuizResults = ({
                         <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
                         <span className="font-medium">Back to Results</span>
                     </div>
+                    <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          className="w-8 h-8 sm:w-9 sm:h-9 p-0 mt-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          {isDark ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+        </Button>   
+
+            </div>
             <div className="max-w-6xl mx-auto p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">

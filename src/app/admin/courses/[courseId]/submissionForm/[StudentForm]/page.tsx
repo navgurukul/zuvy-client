@@ -29,7 +29,7 @@ const Page = ({ params }: any) => {
     const [notSubmitted, setNotSubmitted] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
     const [bootcampData, setBootcampData] = useState<any>()
-    
+
     const [searchQuery, setSearchQuery] = useState<string>('') // What user types
     const [appliedSearchQuery, setAppliedSearchQuery] = useState<string>('') // What actually filters the data
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
@@ -69,28 +69,25 @@ const Page = ({ params }: any) => {
     // Get search suggestions from existing data - use searchQuery for suggestions
     const searchSuggestions = useMemo(() => {
         if (!searchQuery.trim() || !studentStatus?.length) return []
-
-        const suggestions = new Set<string>()
+    
         const query = searchQuery.toLowerCase()
-        const hasAtSymbol = query.includes('@')
-
+        const suggestions: { name: string; email: string }[] = []
+    
+        const seen = new Set()
+    
         studentStatus.forEach((student: any) => {
-            if (hasAtSymbol) {
-                // Show email suggestions only if @ is present
-                if (student.email && student.email.toLowerCase().includes(query)) {
-                    suggestions.add(student.email)
-                }
-            } else {
-                // Show only name suggestions if no @ symbol
-                if (student.name && student.name.toLowerCase().includes(query)) {
-                    suggestions.add(student.name)
-                }
+            const nameMatch = student.name?.toLowerCase().includes(query)
+            const emailMatch = student.emailId?.toLowerCase().includes(query)
+    
+            if ((nameMatch || emailMatch) && !seen.has(student.emailId)) {
+                suggestions.push({ name: student.name, email: student.emailId })
+                seen.add(student.emailId)
             }
         })
-
-        return Array.from(suggestions).slice(0, 5)
+    
+        return suggestions.slice(0, 5)
     }, [searchQuery, studentStatus])
-
+    
     // Filter data based on appliedSearchQuery, not searchQuery
     const filteredData = useMemo(() => {
         if (!appliedSearchQuery.trim() || !studentStatus) {
@@ -199,13 +196,13 @@ const Page = ({ params }: any) => {
 
     const getStudentFormDataHandler = useCallback(async (customOffset?: number) => {
         if (!moduleId) return
-        
+
         setLoading(true)
         const currentOffset = customOffset !== undefined ? customOffset : offset
-        
+
         // Fix URL construction - remove the "1" before position
         let url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=${position}&offset=${currentOffset}`
-        
+
         try {
             const response = await api.get(url)
             const data = response.data.combinedData.map((student: any) => {
@@ -218,20 +215,20 @@ const Page = ({ params }: any) => {
                     email: student.emailId,
                 }
             })
-            
+
             const submitted = response.data.combinedData.filter(
                 (student: any) => student.status === 'Submitted'
             )
             const notSubmitted = response.data.combinedData.filter(
                 (student: any) => student.status !== 'Submitted'
             )
-            
+
             setStudentStatus(data)
             setTotalSubmission(submitted)
             setNotSubmitted(notSubmitted)
             setTotalStudents(response.data.totalStudentsCount)
             setPages(response.data.totalPages)
-            setLastPage(response.data.totalPages)            
+            setLastPage(response.data.totalPages)
         } catch (error) {
             console.error('Error fetching courses:', error)
             toast.error({
@@ -283,7 +280,7 @@ const Page = ({ params }: any) => {
                                 </h1>
                                 <p className="text-gray-500 ">
                                     Submissions Received
-                                    </p>
+                                </p>
                             </div>
                             <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
@@ -345,11 +342,12 @@ const Page = ({ params }: any) => {
                                     <button
                                         key={index}
                                         className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700"
-                                        onClick={() => handleSuggestionClick(suggestion)}
+                                        onClick={() => handleSuggestionClick(suggestion.name)}
                                         onMouseDown={(e) => e.preventDefault()} // Prevents onBlur from firing before onClick
                                         type="button"
                                     >
-                                        {suggestion}
+                                        <div className="font-medium">{suggestion.name}</div>
+                                        <div className="text-xs text-gray-500">{suggestion.email}</div>
                                     </button>
                                 ))}
                             </div>
