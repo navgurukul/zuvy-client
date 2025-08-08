@@ -1,17 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CodingLanguage } from '@/utils/types/coding-challenge';
 import { useThemeStore } from '@/store/store';
+import{CodeEditorPanelProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
-interface CodeEditorPanelProps {
-    currentCode: string;
-    language: string;
-    isAlreadySubmitted: boolean;
-    editorLanguages: CodingLanguage[];
-    onCodeChange: (value: string | undefined) => void;
-    onLanguageChange: (language: string) => void;
-}
 
 export function CodeEditorPanel({
     currentCode,
@@ -26,9 +19,9 @@ export function CodeEditorPanel({
     const theme = isDarkMode ? 'vs-dark' : 'vs'
 
     return (
-        <div className="h-full bg-card">
+        <div className="h-full ">
             {/* Editor Header */}
-            <div className="bg-card-elevated border-b border-border p-4">
+            <div className=" border-b border-border p-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <h6 className="font-bold text-foreground">Code Editor</h6>
@@ -40,10 +33,10 @@ export function CodeEditorPanel({
                         onValueChange={onLanguageChange}
                         disabled={isAlreadySubmitted}
                     >
-                        <SelectTrigger className="w-48 border-border bg-muted">
+                        <SelectTrigger className="w-48 border-border ">
                             <SelectValue placeholder="Select Language" />
                         </SelectTrigger>
-                        <SelectContent className="bg-card border-border">
+                        <SelectContent className=" border-border">
                             {editorLanguages.map((lang) => (
                                 <SelectItem
                                     key={lang.id}

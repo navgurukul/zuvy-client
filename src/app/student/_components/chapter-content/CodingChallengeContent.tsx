@@ -7,31 +7,13 @@ import { Play, Code2, Sparkles, Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
+import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
 
-interface CodingQuestion {
-  id: number;
-  title: string;
-  description: string;
-  difficulty: string;
-  tagName?: string;
-  status: string;
-}
-
-interface CodingChallengeContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-  };
-  onChapterComplete: () => void;
-  fetchChapters?: () => void;
-}
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const router = useRouter();
   const params = useParams();
-  const [codingQuestions, setCodingQuestions] = useState<CodingQuestion[]>([]);
+  const [codingQuestions, setCodingQuestions] = useState<CodingQuestions[]>([]);
   const [submissionResults, setSubmissionResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(chapterDetails.status === 'Completed');
@@ -45,7 +27,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
 
       if (chapterDetails.status === 'Completed' && questions.length > 0) {
         // Fetch submission results for each question
-        const resultsPromises = questions.map((q: CodingQuestion) =>
+        const resultsPromises = questions.map((q: CodingQuestions) =>
           api.get(`/codingPlatform/submissions/questionId=${q.id}`).catch(err => {
             console.error(`Failed to fetch submission for question ${q.id}`, err);
             return null; // Return null on error to not break Promise.all
@@ -80,11 +62,11 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
     setIsCompleted(chapterDetails.status === 'Completed');
   }, [chapterDetails.status]);
 
-  const handleSolveChallenge = (question: CodingQuestion) => {
+  const handleSolveChallenge = (question: CodingQuestions) => {
     router.push(`/student/course/${params.courseId}/codingChallenge?questionId=${question.id}&chapterId=${chapterDetails.id}&moduleId=${params.moduleId}`);
   };
 
-  const CodingQuestionCard = ({ question }: { question: CodingQuestion }) => (
+  const CodingQuestionCard = ({ question }: { question: CodingQuestions }) => (
     <div className=" p-6 mb-6">
       {/* Header Section */}
       <div className="flex items-start justify-between mb-4">
@@ -136,7 +118,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
             onClick={() => handleSolveChallenge(question)}
             className="bg-blue-600 font-semibold hover:bg-blue-700 text-white px-6 py-2  text-sm"
           >
-            Start Practice
+            Start Challenge
           </Button>
         )}
       </div>
@@ -160,12 +142,11 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
     <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
+          <div className='flex justify-between items-center w-full' >
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
             {chapterDetails.description && (
               <p className="text-muted-foreground text-base mb-1 text-left">{chapterDetails.description}</p>
             )}
-          </div>
           <Badge
             variant="outline"
             className={`text-xs font-medium px-3 py-1 ${
@@ -175,6 +156,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
           >
             {isCompleted ? 'Attempted' : 'Not Submitted'}
           </Badge>
+          </div>
         </div>
 
         {codingQuestions.length > 0 ? (

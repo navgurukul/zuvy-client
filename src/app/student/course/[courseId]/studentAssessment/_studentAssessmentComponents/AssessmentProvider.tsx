@@ -18,6 +18,8 @@ import {
     AlertCircle,
     Monitor,
     Info,
+    Moon,
+    Sun,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import QuizQuestions from './QuizQuestions'
@@ -29,7 +31,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { getAssessmentStore } from '@/store/store'
+import { getAssessmentStore, useThemeStore } from '@/store/store'
 import TimerDisplay from './TimerDisplay'
 import { start } from 'repl'
 import { AlertProvider } from './ProctoringAlerts';
@@ -48,7 +50,7 @@ import {
 import PreventBackNavigation from './PreventBackNavigation'
 import WarnOnLeave from './WarnOnLeave'
 import useWindowSize from '@/hooks/useHeightWidth'
-
+import {AssessmentSubmissionResponse,CodingSubmissionResponse}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 function Page({
     params,
 }: {
@@ -120,6 +122,8 @@ function Page({
     const [startedAt, setStartedAt] = useState(
         new Date(assessmentData?.submission?.startedAt).getTime()
     )
+    const { isDark, toggleTheme } = useThemeStore();
+
     const intervalIdRef = useRef<number | null>(null)
     const pathname = usePathname()
 
@@ -165,7 +169,7 @@ function Page({
     async function getAssessmentSubmissionsData() {
         const startPageUrl = `/student/courses/${params.viewcourses}/modules/${params.moduleID}/chapters/${params.chapterId}`
         try {
-            const res = await api.get(
+            const res = await api.get<AssessmentSubmissionResponse>(
                 `Content/students/assessmentId=${decodedParams.assessmentOutSourceId}?moduleId=${params.moduleID}&bootcampId=${params.viewcourses}&chapterId=${params.chapterId}`
             )
 
@@ -279,12 +283,12 @@ function Page({
         questionId: any
     ) {
         try {
-            const res = await api.get(
+            const res = await api.get<CodingSubmissionResponse>(
                 `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
             )
             const action = res?.data?.data?.action
             setRunCodeLanguageId(res?.data?.data?.languageId || 0)
-            setRunSourceCode(res?.data?.data?.sourceCode || null)
+            setRunSourceCode(res?.data?.data?.sourceCode || '')
             return action
         } catch (error) {
             console.error('Error fetching coding submissions data:', error)
@@ -652,7 +656,19 @@ function Page({
                         </AlertDialog>
                     </div>) : (
                     <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
-                        <div className="fixed top-6 right-6 z-50">
+                        <div className="fixed flex items-center top-6 right-6 z-50 space-x-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleTheme}
+                            className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        >
+                            {isDark ? (
+                                <Sun className="h-4 w-4" />
+                            ) : (
+                                <Moon className="h-4 w-4" />
+                            )}
+                        </Button>   
                             <TimerDisplay
                                 remainingTime={remainingTime}
                             />
@@ -667,7 +683,7 @@ function Page({
                                             <Timer className="w-5 h-5 text-primary" />
                                         </div> */}
                                         <h2 className="text-2xl w-full ml-3 text-left font-bold text-foreground">{assessmentData?.ModuleAssessment.title}</h2>
-                                        <p className='text-left text-muted-foreground ml-2 font-medium'>Complete all sections to submit your assessment. Read the instructions carefully before proceeding.
+                                        <p className='text-left text-muted-foreground ml-2 font-medium'>Complete all sections to submit your assessment. Read the instructions carefully before proceeding. 
 
 </p>
                                     </div>
@@ -771,11 +787,11 @@ function Page({
                                                 weightage={assessmentData?.weightageMcqQuestions}
                                                 description={`${assessmentData?.hardMcqQuestions +
                                                     assessmentData?.easyMcqQuestions +
-                                                    assessmentData?.mediumMcqQuestions || 0
-                                                    } questions`}
+                                                    assessmentData?.mediumMcqQuestions || 0} questions`}
                                                 onSolveChallenge={() => handleSolveChallenge('quiz')}
-                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission}
-                                            />
+                                                isQuizSubmitted={assessmentData?.IsQuizzSubmission} setIsCodingSubmitted={function (value: React.SetStateAction<boolean>): void {
+                                                    throw new Error('Function not implemented.')
+                                                } }                                            />
                                         </div>
                                     </div>
                                 )}
@@ -794,11 +810,12 @@ function Page({
 
                                     <div className="p-6">
                                         <QuestionCard
-                                            id={1}
-                                            title="Open-Ended Questions"
-                                            description={`${seperateOpenEndedQuestions.length || 0} questions`}
-                                            onSolveChallenge={() => handleSolveChallenge('open-ended')}
-                                        />
+                                                id={1}
+                                                title="Open-Ended Questions"
+                                                description={`${seperateOpenEndedQuestions.length || 0} questions`}
+                                                onSolveChallenge={() => handleSolveChallenge('open-ended')} setIsCodingSubmitted={function (value: React.SetStateAction<boolean>): void {
+                                                    throw new Error('Function not implemented.')
+                                                } }                                        />
                                     </div>
                                 </div>
                             )}

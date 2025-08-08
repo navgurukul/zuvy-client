@@ -1,17 +1,6 @@
 import { useState } from 'react';
 import { api } from '@/utils/axios.config';
-
-interface ProjectSubmissionResponse {
-  message: string;
-  status: string;
-  data?: any;
-}
-
-interface UseProjectSubmissionReturn {
-  submitProject: (projectLink: string, projectId: string, moduleId: string, courseId: string) => Promise<boolean>;
-  isSubmitting: boolean;
-  error: string | null;
-}
+import{UseProjectSubmissionReturn,ProjectSubmissionResponse} from '@/hooks/hookType'
 
 const useProjectSubmission = (): UseProjectSubmissionReturn => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);

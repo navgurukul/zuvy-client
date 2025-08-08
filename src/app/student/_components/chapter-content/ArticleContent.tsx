@@ -8,23 +8,7 @@ import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
 import { getCleanFileName } from '@/utils/admin';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
-
-type EditorDoc = {
-  type: string;
-  content: any[];
-};
-
-interface ArticleContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    articleContent: string | null;
-    links: string | null;
-  };
-  onChapterComplete: () => void;
-}
+import {EditorDoc,ArticleContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
 const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId: courseIdParam, moduleId: moduleIdParam } = useParams();
@@ -100,16 +84,18 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   const action = initialContent && (
     initialContent?.doc?.content?.length > 1 ||
     (initialContent?.doc?.content?.[0]?.content?.[0]?.text &&
-     initialContent?.doc?.content[0]?.content[0]?.text !== 'No content has been added yet')
+     initialContent.doc?.content[0].content[0].text !== 'No content has been added yet')
   );
 
   return (
-    <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
-      <div className="max-w-4xl mx-auto">
+    <div className={` bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0`}>
+       <ScrollArea className={`${isMobile ? 'h-[70vh]' : 'h-[80vh]'}`}  >
+
+      <div className={`${isMobile ? 'max-w-xs' : 'max-w-4xl'} mx-auto`}>
         {/* Header with Badge */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-extrabold">{chapterDetails?.title}</h1>
+            <h1 className="text-xl font-extrabold text-left">{chapterDetails?.title}</h1>
             {chapterDetails?.description && (
               <p className="text-muted-foreground text-base mt-6 text-start">
                 {chapterDetails?.description}
@@ -128,10 +114,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
           {viewPdf ? (
             /* PDF Content */
             <div className="flex items-start h-[36rem] flex-col gap-2 justify-start">
-              <h4 className=" text-black mb-2">
+              <h4 className="text-black mb-2 dark:text-white text-[24px]">
                 Here is your learning material:
               </h4>
               {isMobile ? (
+                <>
+               
                 <Link
                   target="_blank"
                   href={pdfLink}
@@ -140,6 +128,16 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
                 >
                   View Learning Material: {fileName}
                 </Link>
+                 <div className="mt-6 flex justify-end w-full">
+                 <Button
+                   disabled={!pdfLink || isCompleting}
+                   onClick={completeChapter}
+                   className='bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg'
+                 >
+                   {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
+                 </Button>
+               </div>
+               </>
               ) : (
                 <>
                 <iframe
@@ -152,6 +150,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
                   <Button
                     disabled={!pdfLink || isCompleting}
                     onClick={completeChapter}
+                    className='bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg'
                   >
                     {isCompleting ? 'Marking as Done...' : 'Mark as Done'}
                   </Button>
@@ -163,13 +162,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
           ) : (
             /* Article Content */
             <div>
-              <div className="text-start">
+              <div className={`${isMobile ? 'flex flex-col justify-center' : ''}`}>
                 <RemirrorTextEditor
                   initialContent={initialContent}
                   setInitialContent={setInitialContent}
                   preview={true}
                 />
-              </div>
               {!isCompleted && (
                 <div className="mt-6 text-end">
                   <Button
@@ -181,12 +179,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
                   </Button>
                 </div>
               )}
+              </div>
             </div>
           )}
         </div>
       </div>
+       </ScrollArea>
     </div>
   );
 };
-
 export default ArticleContent; 

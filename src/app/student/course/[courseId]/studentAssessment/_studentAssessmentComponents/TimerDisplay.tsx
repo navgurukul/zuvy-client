@@ -3,9 +3,7 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 
-interface TimerDisplayProps {
-  remainingTime: number;
-}
+import {TimerDisplayProps}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
   const formatTime = (seconds: number): string => {
@@ -41,6 +39,7 @@ const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
   return (
     <div className={`flex items-center gap-2 font-mono text-xl font-semibold ${getColorClass()} bg-card border border-border rounded-lg px-3 py-2 shadow-4dp`}>
       <Clock size={20} />
+      
       <span>{formatTime(remainingTime)}</span>
     </div>
   );

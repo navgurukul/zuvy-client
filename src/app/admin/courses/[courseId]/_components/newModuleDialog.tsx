@@ -27,28 +27,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import {newModuleDialogProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-interface newModuleDialogProps {
-    moduleData: {
-        name: string
-        description: string
-    }
-    timeData: {
-        days: number
-        months: number
-        weeks: number
-    }
-    handleModuleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    createModule: () => void
-    handleTimeAllotedChange: (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => void
-    handleTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    typeId: number
-    isOpen: any
-    setIsLoading: (loading: boolean) => void
-    isLoading: boolean
-}
 
 const moduleSchema = z.object({
     moduleType: z.enum(['learning-material', 'project']),
@@ -90,6 +70,17 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
         setIsLoading(true)
         createModule()
     }
+
+    useEffect(() => {
+        if (isOpen) {
+            const event = {
+                target: {
+                    value: 'learning-material',
+                },
+            } as React.ChangeEvent<HTMLInputElement>
+            handleTypeChange(event)
+        }
+    }, [isOpen])
 
     useEffect(() => {
         if (!isOpen) {

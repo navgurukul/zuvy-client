@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
+// import{UseCompletedClassesReturn,AttendanceStats,CompletedClassesData} from '@/hooks/hookType'
 
 export interface CompletedClass {
   id: number;

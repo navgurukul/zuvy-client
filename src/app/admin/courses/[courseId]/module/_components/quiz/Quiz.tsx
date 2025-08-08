@@ -10,7 +10,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizModal'
 import { api } from '@/utils/axios.config'
-import { Tag } from '@/app/admin/resource/mcq/page'
+import {PageTag} from '@/app/admin/resource/mcq/adminResourceMcqType'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import {
@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation'
 
 function Quiz(props: any) {
     const router = useRouter()
-    const [tags, setTags] = useState<Tag[]>([])
+    const [tags, setTags] = useState<PageTag[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [addQuestion, setAddQuestion] = useState<quizData[]>([])
     const [questionId, setQuestionId] = useState()

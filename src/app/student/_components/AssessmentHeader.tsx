@@ -1,15 +1,6 @@
 
 import { Badge } from "@/components/ui/badge";
-
-interface AssessmentHeaderProps {
-  title: string;
-  attemptStatus: string;
-  startDate: Date;
-  endDate: Date;
-  duration: string;
-  totalMarks: number;
-  description: string;
-}
+import{AssessmentHeaderProps} from '@/app/student/_components/componentStudentType'
 
 const AssessmentHeader = ({ 
   title, 

@@ -3,12 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-interface TruncatedDescriptionProps {
-  text: string;
-  maxLength?: number;
-  className?: string;
-}
+import{TruncatedDescriptionProps} from '@/app/student/_components/componentStudentType'
 
 const TruncatedDescription = ({ 
   text, 
