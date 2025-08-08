@@ -18,6 +18,8 @@ import {
     AlertCircle,
     Monitor,
     Info,
+    Moon,
+    Sun,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import QuizQuestions from './QuizQuestions'
@@ -29,7 +31,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
-import { getAssessmentStore } from '@/store/store'
+import { getAssessmentStore, useThemeStore } from '@/store/store'
 import TimerDisplay from './TimerDisplay'
 import { start } from 'repl'
 import { AlertProvider } from './ProctoringAlerts';
@@ -120,6 +122,8 @@ function Page({
     const [startedAt, setStartedAt] = useState(
         new Date(assessmentData?.submission?.startedAt).getTime()
     )
+    const { isDark, toggleTheme } = useThemeStore();
+
     const intervalIdRef = useRef<number | null>(null)
     const pathname = usePathname()
 
@@ -652,7 +656,19 @@ function Page({
                         </AlertDialog>
                     </div>) : (
                     <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
-                        <div className="fixed top-6 right-6 z-50">
+                        <div className="fixed flex items-center top-6 right-6 z-50 space-x-2">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleTheme}
+                            className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        >
+                            {isDark ? (
+                                <Sun className="h-4 w-4" />
+                            ) : (
+                                <Moon className="h-4 w-4" />
+                            )}
+                        </Button>   
                             <TimerDisplay
                                 remainingTime={remainingTime}
                             />
@@ -667,7 +683,7 @@ function Page({
                                             <Timer className="w-5 h-5 text-primary" />
                                         </div> */}
                                         <h2 className="text-2xl w-full ml-3 text-left font-bold text-foreground">{assessmentData?.ModuleAssessment.title}</h2>
-                                        <p className='text-left text-muted-foreground ml-2 font-medium'>Complete all sections to submit your assessment. Read the instructions carefully before proceeding.
+                                        <p className='text-left text-muted-foreground ml-2 font-medium'>Complete all sections to submit your assessment. Read the instructions carefully before proceeding. 
 
 </p>
                                     </div>

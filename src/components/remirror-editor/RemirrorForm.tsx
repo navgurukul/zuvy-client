@@ -73,6 +73,15 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
 
     const validateContent = useCallback(
         (htmlContent: string) => {
+            // Check if we're on the client side
+            if (typeof window === 'undefined' || typeof document === 'undefined') {
+                // Fallback for SSR - simple text validation
+                const plainText = htmlContent.replace(/<[^>]*>/g, '')
+                const isValid = plainText.trim().length > 0
+                onValidationChange?.(isValid)
+                return
+            }
+
             const tempDiv = document.createElement('div')
             tempDiv.innerHTML = htmlContent
 

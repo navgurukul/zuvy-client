@@ -198,12 +198,12 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
               </div>
               <div>
                 <h3 className={`text-xl font-bold text-left ${overallSuccess ? 'text-success' : 'text-destructive'}`}>
-                  {overallSuccess ? '🎉 All Tests Passed!' : '❌ Some Tests Failed'}
+                  {overallSuccess ? 'All Tests Passed!' : 'Some Tests Failed'}
                 </h3>
                 <p className="text-muted-foreground mt-1 text-left">
                   {overallSuccess 
                     ? 'Congratulations! Your solution works perfectly.' 
-                    : 'Review the failed test cases below and try again.'
+                    : 'You can review your test case results below.'
                   }
                 </p>
               </div>

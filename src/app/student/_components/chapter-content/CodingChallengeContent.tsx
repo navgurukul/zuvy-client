@@ -118,7 +118,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
             onClick={() => handleSolveChallenge(question)}
             className="bg-blue-600 font-semibold hover:bg-blue-700 text-white px-6 py-2  text-sm"
           >
-            Start Practice
+            Start Challenge
           </Button>
         )}
       </div>
@@ -142,12 +142,11 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
     <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
       <div className="max-w-3xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
+          <div className='flex justify-between items-center w-full' >
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 ml-6 text-left">{chapterDetails.title}</h1>
             {chapterDetails.description && (
               <p className="text-muted-foreground text-base mb-1 text-left">{chapterDetails.description}</p>
             )}
-          </div>
           <Badge
             variant="outline"
             className={`text-xs font-medium px-3 py-1 ${
@@ -157,6 +156,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
           >
             {isCompleted ? 'Attempted' : 'Not Submitted'}
           </Badge>
+          </div>
         </div>
 
         {codingQuestions.length > 0 ? (

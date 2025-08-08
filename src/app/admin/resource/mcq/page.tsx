@@ -1,5 +1,4 @@
 'use client'
-
 // External imports
 import React, { useState, useEffect, useCallback, useRef, useMemo} from 'react'
 import { ChevronLeft, Search, X } from 'lucide-react'
@@ -12,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
-import NewMcqProblemForm from '../_components/NewMcqProblemForm'
+import dynamic from 'next/dynamic'
 import { api } from '@/utils/axios.config'
 import {
     getAllQuizData,
@@ -30,13 +29,32 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { POSITION, OFFSET } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import BulkUploadMcq from '../_components/BulkMcqForm'
-import NewMcqForm from '../_components/NewMcqForm'
-import EditMcqForm from '../_components/EditMcqForm'
+
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
+
+
+const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
+
+const BulkUploadMcq = dynamic(() => import('../_components/BulkMcqForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
+
+const NewMcqForm = dynamic(() => import('../_components/NewMcqForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
+
+const EditMcqForm = dynamic(() => import('../_components/EditMcqForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
 
 type Props = {}
 export type Tag = {
@@ -164,6 +182,11 @@ const Mcqs = (props: Props) => {
             return
         }
 
+        // Check if we're on the client side
+        if (typeof window === 'undefined' || typeof document === 'undefined') {
+            return
+        }
+
         // Fallback: create suggestions from existing data
         const questionSuggestions = quizData
             .filter(item => {
@@ -198,6 +221,7 @@ const Mcqs = (props: Props) => {
                     type: 'question' as const,
                 }
             })
+
 
         const topicSuggestions = tags
             .filter(tag => tag.tagName.toLowerCase().includes(query.toLowerCase()))

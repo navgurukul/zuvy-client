@@ -87,6 +87,20 @@ export const columns: ColumnDef<quiz>[] = [
         cell: ({ row }) => {
             const question = row.original?.quizVariants[0]?.question
             
+            // Check if we're on the client side
+            if (typeof window === 'undefined' || typeof document === 'undefined') {
+                // Fallback for SSR - just show a simple preview
+                const plainText = question?.replace(/<[^>]*>/g, '') || ''
+                const preview = plainText.length > 50 ? plainText.substring(0, 50) + '...' : plainText
+                return (
+                    <div className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150">
+                        <div className="p-2 text-sm text-gray-700">
+                            {preview}
+                        </div>
+                    </div>
+                )
+            }
+
             // Check if question contains code blocks
             const hasCodeBlock = question && (question.includes('<pre') && question.includes('<code'))
             
