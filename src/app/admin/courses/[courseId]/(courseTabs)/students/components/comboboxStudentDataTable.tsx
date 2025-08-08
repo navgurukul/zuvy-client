@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/popover'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-
+import{ComboboxStudentProps,CourseStudentBatchItem} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 export function ComboboxStudent({
     batchData,
     batchName,
@@ -28,15 +28,7 @@ export function ComboboxStudent({
     batchId,
     selectedRows,
     fetchStudentData,
-}: {
-    batchData: any
-    batchName?: any
-    userId?: any
-    bootcampId: any
-    batchId?: any
-    selectedRows?: any[]
-    fetchStudentData?: any
-}) {
+}:ComboboxStudentProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
     const [displaybatchName, setDisplayBatchName] = React.useState(
@@ -46,7 +38,7 @@ export function ComboboxStudent({
 
     React.useEffect(() => {
         setDisplayBatchName(batchName || 'Unassigned')
-        setValue(batchId)
+        setValue(batchId?.toString() || '')
     }, [batchName, batchId])
 
     const handleSelectBatchChange = async (
@@ -57,7 +49,7 @@ export function ComboboxStudent({
     ) => {
         const [selectedValue] = currentValue.split('-')
         const selectedBatch = batchData.find(
-            (batch: any) => batch.value == selectedValue
+            (batch: CourseStudentBatchItem) => batch.value == selectedValue
         )
         const label = selectedBatch ? selectedBatch.label : ''
         
@@ -139,7 +131,7 @@ export function ComboboxStudent({
                     <CommandInput placeholder="Search batch..." />
                     <CommandEmpty>No batch found.</CommandEmpty>
                     <CommandGroup>
-                        {batchData.map((batch: any) => (
+                        {batchData.map((batch: CourseStudentBatchItem) => (
                             <CommandItem
                                 key={batch.value}
                                 disabled={value == batch.value && !batchisFull}

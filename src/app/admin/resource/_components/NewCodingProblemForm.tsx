@@ -28,6 +28,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
+import {NewCodingProblemFormProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -81,16 +82,7 @@ export default function NewCodingProblemForm({
     difficulty,
     offset,
     position,
-}: {
-    tags: any
-    setIsDialogOpen: any
-    setCodingQuestions: any
-    filteredCodingQuestions?: any
-    selectedOptions?: any
-    difficulty?: any
-    offset?: number
-    position?: String
-}) {
+}:NewCodingProblemFormProps) {
     const [testCases, setTestCases] = useState([
         {
             id: 1,
@@ -103,10 +95,11 @@ export default function NewCodingProblemForm({
 
     let outputObjectRef = useRef('' as any);
 
-    function formatFloat(num: any) {
-        num = parseFloat(num);
-        return num % 1 === 0 ? num.toFixed(1) : num;
-    }
+    function formatFloat(num: string | number): string | number {
+    const parsed = parseFloat(num as string);
+    return parsed % 1 === 0 ? parsed.toFixed(1) : parsed;
+}
+
 
     const getAvailableInputTypes = (testCaseIndex: number) => {
         const usedTypes = testCases[testCaseIndex].inputs.map(input => input.type);
@@ -203,7 +196,7 @@ export default function NewCodingProblemForm({
         e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
         testCaseIndex: number,
         inputIndex: number,
-        testCases: any[],
+        testCases: any,
         setTestCases: React.Dispatch<React.SetStateAction<any[]>>
     ) => {
         const newValue = e.target.value;

@@ -172,7 +172,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                                 </div>
                                 {!preview && <CodeBlockHelper />}
                             </div>
-                        ) : description.length < 300 && preview ? (
+                        ) : description.length < 525 && preview ? (
                             <div className="min-h-auto remirror-form-bigscreen-content">
                                 <div className="px-2 pb-2" data-gramm="false">
                                     <EditorComponent />

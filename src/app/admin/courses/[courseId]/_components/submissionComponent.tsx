@@ -5,18 +5,10 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { toast } from 'react-toastify'
 import { api } from '@/utils/axios.config'
-type Props = {
-    title: string
-    studentsSubmitted: number
-    totalSubmissions: number
-    courseId: number
-    id: string
-    moduleId: any
-    chapterId: number
-    questionId: number
-}
+import {SubmissionComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-const SubmissionComponent = (props: Props) => {
+
+const SubmissionComponent = (props: SubmissionComponentProps) => {
     const handleDownloadPdf = async (id: any) => {
         const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`
 

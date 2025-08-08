@@ -38,26 +38,9 @@ import axios from 'axios'
 import { AIQuestionCard } from './AIQuestionCard'
 import { getGeneratedQuestions, getRequestBody } from '@/store/store'
 import LottieLoader from '@/components/ui/lottie-loader'
-
-export type Tag = {
-    label: string
-    value: string
-    id: number
-    tagName: string
-}
+import {NewMcqRequestBodyType,NewMcqProblemFormProps } from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
-
-export type RequestBodyType = {
-    quizzes: {
-        tagId: number
-        difficulty: string
-        variantMCQs: {
-            question: string
-            options: { 1: string; 2: string; 3: string; 4: string }
-        }[]
-    }[]
-}
 
 const formSchema = z.object({
     difficulty: z
@@ -97,14 +80,7 @@ const NewMcqProblemForm = ({
     getAllQuizQuesiton,
     setIsMcqModalOpen,
     setMcqType,
-}: {
-    tags: Tag[]
-    closeModal: () => void
-    setStoreQuizData: any
-    getAllQuizQuesiton: any
-    setIsMcqModalOpen: any
-    setMcqType: any
-}) => {
+}:NewMcqProblemFormProps ) => {
     const [loadingAI, setLoadingAI] = useState<boolean>(false)
     const [saving, setSaving] = useState<boolean>(false)
     const [bulkDifficulties, setBulkDifficulties] = useState<string[]>([])
@@ -155,7 +131,7 @@ const NewMcqProblemForm = ({
     const sleep = (ms: number) =>
         new Promise((resolve) => setTimeout(resolve, ms))
 
-    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
+    const handleCreateQuizQuestion = async (requestBody:NewMcqRequestBodyType) => {
         try {
             const res = await api.post(`/Content/quiz`, requestBody)
             setIsMcqModalOpen(false)
@@ -207,7 +183,9 @@ const NewMcqProblemForm = ({
         }
 
         setSaving(true)
-        await getAllQuizQuesiton(setStoreQuizData)
+        // await getAllQuizQuesiton(setStoreQuizData)
+        const quizData = await getAllQuizQuesiton(); // ✅ No arguments here
+        setStoreQuizData(quizData); 
         setSaving(false)
         closeModal()
     }
@@ -411,7 +389,9 @@ const NewMcqProblemForm = ({
 
                     setRequestBody(requestBody)
                     // await handleCreateQuizQuestion(requestBody)
-                    await getAllQuizQuesiton(setStoreQuizData)
+                    const quizData = await getAllQuizQuesiton(); // ✅ No arguments here
+setStoreQuizData(quizData); 
+                    // await getAllQuizQuesiton(setStoreQuizData)
                     closeModal()
                 }
 
@@ -751,7 +731,9 @@ const NewMcqProblemForm = ({
 
                 setGeneratedQuestions(generatedQuestions)
                 setRequestBody(requestBody)
-                await getAllQuizQuesiton(setStoreQuizData)
+                const quizData = await getAllQuizQuesiton();
+                setStoreQuizData(quizData); 
+                // await getAllQuizQuesiton(setStoreQuizData)
                 closeModal()
             }
         } catch (error: any) {

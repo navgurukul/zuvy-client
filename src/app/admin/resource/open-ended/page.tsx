@@ -51,31 +51,15 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
+import {OpenEndedQuestionType,OpenPageTag, OpenOption} from "@/app/admin/resource/open-ended/adminResourceOpenType"
 
 type Props = {}
-export type Tag = {
-    id: number
-    tagName: string
-}
-
-interface Option {
-    label: string
-    value: string
-}
-interface OpenEndedQuestionType {
-    id: number
-    question: string
-    difficulty: string
-    tagId: number
-    marks: number | null
-    usage: number
-}
 
 const OpenEndedQuestions = (props: Props) => {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
+    const [selectedTag, setSelectedTag] = useState<OpenPageTag>(() => {
         if (typeof window !== 'undefined') {
             const storedTag = localStorage.getItem('openEndedCurrentTag')
             return storedTag !== null
@@ -86,7 +70,7 @@ const OpenEndedQuestions = (props: Props) => {
     })
 
     const { selectedOptions, setSelectedOptions } = getSelectedOpenEndedOptions()
-    const [options, setOptions] = useState<Option[]>([
+    const [options, setOptions] = useState<OpenOption[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const { tags, setTags } = getCodingQuestionTags()
@@ -134,7 +118,7 @@ const OpenEndedQuestions = (props: Props) => {
             const topicValues = topicsParam.split(',')
             const selectedTopics = topicValues
                 .map(value => options.find(opt => opt.value === value))
-                .filter(Boolean) as Option[]
+                .filter(Boolean) as  OpenOption[]
             setSelectedOptions(selectedTopics.length > 0
                 ? selectedTopics
                 : [{ value: '-1', label: 'All Topics' }]
@@ -147,7 +131,7 @@ const OpenEndedQuestions = (props: Props) => {
             const difficultyValues = difficultyParam.split(',')
             const selectedDifficulties = difficultyValues
                 .map(value => difficultyOptions.find(opt => opt.value === value))
-                .filter(Boolean) as Option[]
+                .filter(Boolean) as  OpenOption[]
             setDifficulty(selectedDifficulties.length > 0
                 ? selectedDifficulties
                 : [{ value: 'None', label: 'All Difficulty' }]
@@ -285,7 +269,7 @@ const OpenEndedQuestions = (props: Props) => {
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 
-    const handleTagOption = (option: Option) => {
+    const handleTagOption = (option:OpenOption) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
                 setSelectedOptions(
@@ -317,7 +301,7 @@ const OpenEndedQuestions = (props: Props) => {
         }
     }
 
-    const handleDifficulty = (option: Option) => {
+    const handleDifficulty = (option: OpenOption) => {
         if (option.value === 'None') {
             if (difficulty.some((item) => item.value === option.value)) {
                 const filteredDifficulty = difficulty.filter(

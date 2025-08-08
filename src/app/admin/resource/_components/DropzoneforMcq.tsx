@@ -7,7 +7,15 @@ import { Upload } from 'lucide-react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 import { removeNulls, transformQuizzes } from '@/utils/admin'
+// import {DropzoneforMcqProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
+// export interface DropzoneforMcqProps {
+//   className?: string
+// acceptedFiles?: string
+//   mcqSide: boolean
+//   mcqData: any // replace with actual type if known
+//   setMcqData: React.Dispatch<React.SetStateAction<any>>
+// }
 const DropzoneforMcq = ({
     className,
     acceptedFiles = 'text/csv',

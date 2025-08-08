@@ -36,7 +36,8 @@ import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
 import { getCourseData, getStoreStudentData } from '@/store/store'
-import { api, apiMeraki } from '@/utils/axios.config'
+import { api} from '@/utils/axios.config'
+import{CourseData} from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
 
 const FormSchema = z.object({
     name: z.string().min(1, 'Please enter the course name.'),
@@ -51,19 +52,6 @@ const FormSchema = z.object({
     collaborator: z.string().optional(),
 })
 
-interface CourseData {
-    id: number
-    name: string
-    bootcampTopic: string
-    description?: string
-    coverImage?: string
-    collaborator?: string
-    duration?: number
-    language: string
-    startTime?: string
-    unassigned_students?: number
-}
-
 function Page({ params }: { params: any }) {
     const router = useRouter()
     const [image, setImage] = useState<string | null>(null)
@@ -76,12 +64,14 @@ function Page({ params }: { params: any }) {
     const [collaboratorImage, setCollaboratorImage] = useState<string | null>(
         null
     )
+
     const [collaboratorCropper, setCollaboratorCropper] =
         useState<Cropper | null>(null)
     const [isCollaboratorCropping, setIsCollaboratorCropping] = useState(false)
     const [croppedCollaboratorImage, setCroppedCollaboratorImage] = useState<
         string | null
     >(null)
+    
 
     // New state for collaborator type
     const [collaboratorType, setCollaboratorType] = useState<'text' | 'image'>('text')
@@ -117,8 +107,50 @@ function Page({ params }: { params: any }) {
         return imageExtensions.test(str) || isUrl
     }
 
+    // Reset all image states function
+    const resetImageStates = () => {
+        // Cover image states
+        setImage(null)
+        setCropper(null)
+        setIsCropping(false)
+        setCroppedImage(null)
+        
+        // Collaborator image states
+        setCollaboratorImage(null)
+        setCollaboratorCropper(null)
+        setIsCollaboratorCropping(false)
+        setCroppedCollaboratorImage(null)
+        setCollaboratorType('text')
+    }
+
+    // Reset states on component mount/unmount
+    useEffect(() => {
+        return () => {
+            // Cleanup function to reset states when component unmounts
+            resetImageStates()
+        }
+    }, [])
+
+    // Reset states when navigating away from this page
+    useEffect(() => {
+        const handleRouteChange = () => {
+            resetImageStates()
+        }
+
+        // Listen for route changes
+        window.addEventListener('beforeunload', handleRouteChange)
+        
+        return () => {
+            window.removeEventListener('beforeunload', handleRouteChange)
+            resetImageStates()
+        }
+    }, [])
+
     useEffect(() => {
         if (courseData) {
+            // Reset image states first to ensure clean slate
+            resetImageStates()
+            
             form.reset({
                 name: courseData.name || '',
                 bootcampTopic: courseData.bootcampTopic || '',
@@ -132,6 +164,11 @@ function Page({ params }: { params: any }) {
                     : undefined,
             })
 
+            // Set cover image if exists
+            if (courseData.coverImage) {
+                setCroppedImage(courseData.coverImage)
+            }
+
             // Set collaborator type and preview image based on existing data
             if (isImageUrl(courseData.collaborator)) {
                 setCollaboratorType('image')
@@ -140,9 +177,6 @@ function Page({ params }: { params: any }) {
                 setCollaboratorType('text')
                 setCroppedCollaboratorImage(null)
             }
-
-            setCollaboratorImage(null)
-            setIsCollaboratorCropping(false)
         }
     }, [courseData, form])
 
@@ -177,7 +211,7 @@ function Page({ params }: { params: any }) {
             let collaborator = data.collaborator || ''
 
             // Handle cover image upload
-            if (croppedImage) {
+            if (croppedImage && croppedImage !== courseData?.coverImage) {
                 const response = await fetch(croppedImage)
                 const blob = await response.blob()
                 const file = new File([blob], 'cropped-cover-image.png', {
@@ -185,10 +219,10 @@ function Page({ params }: { params: any }) {
                 })
 
                 const formData = new FormData()
-                formData.append('image', file)
+                formData.append('images', file) // Changed from 'image' to 'images' to match first file
 
-                const res = await apiMeraki.post(
-                    '/courseEditor/ImageUploadS3',
+                const res = await api.post(
+                    '/Content/curriculum/upload-images',
                     formData,
                     {
                         headers: {
@@ -196,7 +230,19 @@ function Page({ params }: { params: any }) {
                         },
                     }
                 )
-                coverImage = res.data.file.url
+                
+                // Updated to match response structure from first file
+                const uploadedUrls = Array.isArray(res.data?.urls) ? res.data.urls : []
+                if (uploadedUrls.length === 0) {
+                    toast.error({
+                        title: 'error',
+                        description: 'File uploaded but no URLs returned',
+                    })
+                    return
+                }
+                coverImage = uploadedUrls[0]
+            } else if (croppedImage) {
+                coverImage = croppedImage
             }
 
             // Handle collaborator image upload (only if type is image and there's a cropped image)
@@ -216,10 +262,10 @@ function Page({ params }: { params: any }) {
                 )
 
                 const formData = new FormData()
-                formData.append('image', file)
+                formData.append('images', file) // Changed from 'image' to 'images' to match first file
 
-                const res = await apiMeraki.post(
-                    '/courseEditor/ImageUploadS3',
+                const res = await api.post(
+                    '/Content/curriculum/upload-images',
                     formData,
                     {
                         headers: {
@@ -227,7 +273,19 @@ function Page({ params }: { params: any }) {
                         },
                     }
                 )
-                collaborator = res.data.file.url
+                
+                // Updated to match response structure from first file
+                const uploadedUrls = Array.isArray(res.data?.urls) ? res.data.urls : []
+                if (uploadedUrls.length === 0) {
+                    toast.error({
+                        title: 'error',
+                        description: 'File uploaded but no URLs returned',
+                    })
+                    return
+                }
+                collaborator = uploadedUrls[0]
+            } else if (collaboratorType === 'image' && croppedCollaboratorImage) {
+                collaborator = croppedCollaboratorImage
             }
 
             await api
@@ -301,6 +359,7 @@ function Page({ params }: { params: any }) {
             reader.onloadend = () => {
                 setImage(reader.result as string)
                 setIsCropping(true)
+                setCroppedImage(null) // Reset cropped image when new image is selected
             }
             reader.readAsDataURL(file)
         }
@@ -315,6 +374,7 @@ function Page({ params }: { params: any }) {
             reader.onloadend = () => {
                 setCollaboratorImage(reader.result as string)
                 setIsCollaboratorCropping(true)
+                setCroppedCollaboratorImage(null) // Reset cropped image when new image is selected
             }
             reader.readAsDataURL(file)
         }
@@ -328,27 +388,19 @@ function Page({ params }: { params: any }) {
             })
             setCroppedImage(croppedCanvas.toDataURL())
             setIsCropping(false)
-            // toast.success({
-            //     title: 'Success',
-            //     description:
-            //         'Cover image cropped successfully. You can now upload it.',
-            // })
+            setImage(null) // Clear the original image after cropping
         }
     }
 
     const handleCollaboratorCrop = () => {
         if (collaboratorCropper) {
             const croppedCanvas = collaboratorCropper.getCroppedCanvas({
-                width: 200,
-                height: 200,
+                width: 800,
+                height: 400,
             })
             setCroppedCollaboratorImage(croppedCanvas.toDataURL())
             setIsCollaboratorCropping(false)
-            // toast.success({
-            //     title: 'Success',
-            //     description:
-            //         'Collaborator image cropped successfully. You can now upload it.',
-            // })
+            setCollaboratorImage(null) // Clear the original image after cropping
         }
     }
 
@@ -383,9 +435,7 @@ function Page({ params }: { params: any }) {
                         className="image-container bg-muted flex justify-center items-center rounded-sm my-3 overflow-hidden"
                         style={{ height: '200px', width: '400px' }}
                     >
-                        {!isCropping && croppedImage ? (
-                            <img src={croppedImage} alt="Cropped Preview" />
-                        ) : image ? (
+                        {isCropping && image ? (
                             <Cropper
                                 src={image}
                                 style={{ height: 200, width: '100%' }}
@@ -394,6 +444,8 @@ function Page({ params }: { params: any }) {
                                     setCropper(instance)
                                 }
                             />
+                        ) : croppedImage ? (
+                            <img src={croppedImage} alt="Cropped Preview" className="w-full h-full object-cover" />
                         ) : (
                             <OptimizedImageWithFallback
                                 src={
@@ -407,26 +459,29 @@ function Page({ params }: { params: any }) {
                     <Input
                         id="picture"
                         type="file"
+                        accept="image/*"
                         onChange={handleFileChange}
                         className="hidden"
                         ref={fileInputRef}
                     />
-                    <Button
-                        className="text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
-                        type="button"
-                        onClick={handleButtonClick}
-                    >
-                        Upload Course Image
-                    </Button>
-                    {image && (
+                    <div className="flex gap-2">
                         <Button
-                            onClick={handleCrop}
-                            variant={'outline'}
+                            className="text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                             type="button"
+                            onClick={handleButtonClick}
                         >
-                            Crop Image
+                            {croppedImage ? 'Change Course Image' : 'Upload Course Image'}
                         </Button>
-                    )}
+                        {isCropping && image && (
+                            <Button
+                                onClick={handleCrop}
+                                variant={'outline'}
+                                type="button"
+                            >
+                                Crop Image
+                            </Button>
+                        )}
+                    </div>
 
                     <FormField
                         control={form.control}
@@ -534,13 +589,23 @@ function Page({ params }: { params: any }) {
                                 {collaboratorType === 'image' ? (
                                     <>
                                         <div className="mb-3">
-                                            <div className="w-full h-[200px] overflow-hidden border rounded-md">
-                                                {croppedCollaboratorImage ? (
-                                                    <img
-                                                        src={
-                                                            croppedCollaboratorImage
+                                            <div 
+                                                className="image-container bg-muted flex justify-center items-center rounded-sm overflow-hidden"
+                                                style={{ height: '200px', width: '400px' }}
+                                            >
+                                                {isCollaboratorCropping && collaboratorImage ? (
+                                                    <Cropper
+                                                        src={collaboratorImage}
+                                                        style={{ height: 200, width: '100%' }}
+                                                        aspectRatio={16 / 9}
+                                                        onInitialized={(instance) =>
+                                                            setCollaboratorCropper(instance)
                                                         }
-                                                        alt="Collaborator"
+                                                    />
+                                                ) : croppedCollaboratorImage ? (
+                                                    <img
+                                                        src={croppedCollaboratorImage}
+                                                        alt="Collaborator Preview"
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
@@ -563,39 +628,8 @@ function Page({ params }: { params: any }) {
                                             ref={collaboratorFileInputRef}
                                         />
 
-                                        {/* Cropper */}
-                                        {collaboratorImage && 
-                                        isCollaboratorCropping ? (
-                                            <div className="my-3">
-                                                <Cropper
-                                                    src={collaboratorImage}
-                                                    style={{
-                                                        height: 150,
-                                                        width: 150,
-                                                    }}
-                                                    aspectRatio={1}
-                                                    onInitialized={(
-                                                        instance
-                                                    ) =>
-                                                        setCollaboratorCropper(
-                                                            instance
-                                                        )
-                                                    }
-                                                />
-                                                <Button
-                                                    onClick={
-                                                        handleCollaboratorCrop
-                                                    }
-                                                    type="button"
-                                                    variant="outline"
-                                                    className="mt-2"
-                                                    size="sm"
-                                                >
-                                                    Crop Image
-                                                </Button>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-2">
+                                        <div className="space-y-2">
+                                            <div className="flex gap-2">
                                                 <Button
                                                     variant="outline"
                                                     type="button"
@@ -603,12 +637,26 @@ function Page({ params }: { params: any }) {
                                                         handleCollaboratorButtonClick
                                                     }
                                                     size="sm"
+                                                    disabled={isCollaboratorCropping}
                                                 >
                                                     {croppedCollaboratorImage ? 'Change Image' : 'Upload Image'}
                                                 </Button>
 
+                                                {isCollaboratorCropping && collaboratorImage && (
+                                                    <Button
+                                                        onClick={
+                                                            handleCollaboratorCrop
+                                                        }
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                    >
+                                                        Crop Image
+                                                    </Button>
+                                                )}
+
                                                 {/* Remove Image Button */}
-                                                {croppedCollaboratorImage && (
+                                                {croppedCollaboratorImage && !isCollaboratorCropping && (
                                                     <Button
                                                         type="button"
                                                         onClick={() => {
@@ -618,14 +666,14 @@ function Page({ params }: { params: any }) {
                                                             form.setValue('collaborator', '')
                                                         }}
                                                         size="sm"
-                                                        className="ml-2 border border-gray-400 text-gray-500 bg-transparent hover:text-red-600 hover:border-red-600 hover:bg-transparent transition-colors"
+                                                        variant="outline"
+                                                        className="border-red-300 text-red-600 hover:text-red-700 hover:border-red-400 hover:bg-red-50 transition-colors"
                                                     >
                                                         Remove Image
                                                     </Button>
-
                                                 )}
                                             </div>
-                                        )}
+                                        </div>
                                     </>
                                 ) : (
                                     // Text input
