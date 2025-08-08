@@ -130,41 +130,17 @@ const BatchesInfo = ({
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const capEnrollmentValue = parseInt(capEnrollment)
-                    return capEnrollmentValue !== 0
-                },
-                {
-                    message: 'Cap Enrollment cannot be 0',
-                }
-            )
-            .refine(
-                (capEnrollment) => {
-                    const capEnrollmentValue = parseInt(capEnrollment)
-                    if (studentsData === undefined) {
-                        return true
-                    }
-                    return capEnrollmentValue >= studentsData.length
-                },
-                {
-                    message: `Cap enrollment cannot be less than the current number of students (${studentsData?.length}).`,
-                }
-            )
-            .refine(
-                (capEnrollment) => {
-                    const capEnrollmentValue = parseInt(capEnrollment)
-                    return capEnrollmentValue <= 100000
-                },
-                {
-                    message: 'Cap Enrollment cannot be more than 100000',
-                }
-            ).refine(
-                (capEnrollment) => {
-                    const capEnrollmentValue = parseInt(capEnrollment)
-                    return capEnrollmentValue !== 0
-                },
-                {
-                    message: 'Cap Enrollment cannot be 0',
-                }
-            ),
+                return (
+                    !isNaN(capEnrollmentValue) &&
+                    capEnrollmentValue >= 1 &&
+                    capEnrollmentValue >= studentsData.length &&
+                    capEnrollmentValue <= 100000
+                )
+            },
+            {
+                message: `Cap Enrollment must be at least 1 and not less than the number of current students(${studentsData?.length}).`,
+            }
+        ),
     })
 
     const form = useForm<z.infer<typeof formSchema>>({

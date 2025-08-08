@@ -534,6 +534,11 @@ const AddAssignent = ({
                                                             )
                                                             field.onChange(e)
                                                         }}
+                                                        onKeyDown={(e) => {
+                                                         if (e.key === 'Enter') {
+                                                          e.preventDefault() 
+                                                         }
+                                                        }}
                                                         placeholder="Untitled Assignment"
                                                         className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
