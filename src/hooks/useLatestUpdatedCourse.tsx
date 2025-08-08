@@ -1,28 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-
-interface NewChapter {
-  id: number;
-  title: string;
-  topicId: number;
-  chapterTrackingDetails: any[];
-}
-
-interface LatestUpdatedCourseData {
-  moduleId: number;
-  moduleName: string;
-  typeId: number;
-  bootcampId: number;
-  bootcampName: string;
-  newChapter: NewChapter;
-}
-
-interface LatestUpdatedCourseResponse {
-  message: string;
-  code: number;
-  isSuccess: boolean;
-  data: LatestUpdatedCourseData;
-}
+import{LatestUpdatedCourseResponse,LatestUpdatedCourseData} from '@/hooks/hookType'
 
 export const useLatestUpdatedCourse = (courseId: string) => {
   const [latestCourseData, setLatestCourseData] = useState<LatestUpdatedCourseData | null>(null);

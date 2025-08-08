@@ -26,24 +26,14 @@ import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
+import {ClassDatas,DisplayAttendance} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-interface StudentsInfo {
-    total_students: number
-    present: number
-    s3link: string
-}
-
-interface DisplayAttendance {
-    status: string
-    message: string
-    studentsInfo: StudentsInfo
-}
 
 function RecordingCard({
     classData,
     isAdmin,
 }: {
-    classData: any
+    classData: ClassDatas
     isAdmin: Boolean
 }) {
     // misc

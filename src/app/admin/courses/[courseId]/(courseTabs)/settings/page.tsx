@@ -15,8 +15,9 @@ import ModulesLockToggleSwitch from '@/app/admin/courses/[courseId]/_components/
 import Image from 'next/image'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import axios from 'axios'
+import{PageProps} from "@/app/admin/courses/[courseId]/(courseTabs)/settings/courseSettingType"
 
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params: PageProps}) => {
     // misc
     const router = useRouter()
     // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
@@ -32,7 +33,7 @@ const Page = ({ params }: { params: any }) => {
     // async
     const fetchBootCampSettings = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<PageProps>(
                 `/bootcamp/bootcampSetting/${params.courseId}`
             )
             const type = response.data.bootcampSetting[0].type
@@ -166,10 +167,10 @@ const Page = ({ params }: { params: any }) => {
                             have to be stopped
                         </p>
                     </div>
-                    <h1 className="text-lg font-semibold mt-5 text-left">
-                        Modules Lock Status
-                    </h1>
-                    <ModulesLockToggleSwitch bootcampId={params.courseId} />
+                    <h1 className="text-lg font-semibold mt-5 text-left">Modules Lock Status</h1>
+                    <ModulesLockToggleSwitch bootcampId={String(params.courseId)} onToggle={function (isChecked: boolean): void {
+                            throw new Error('Function not implemented.')
+                        } }/>
 
                     <div className="w-full text-start my-5">
                         <div className="mb-3 text-start">

@@ -16,30 +16,8 @@ import { X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
+import{CurriculumItem,ModuleData} from "@/app/admin/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType"
 
-interface CurriculumItem {
-    id: number
-    name: string
-    description: string
-    order: number
-    timeAlloted: number
-    quizCount: number
-    assignmentCount: number
-    codingProblemsCount: number
-    articlesCount: number
-    typeId: number
-    projectId: number
-    ChapterId: number
-    isStarted?: boolean
-}
-
-interface ModuleData {
-    name: string
-    description: string
-    type: string
-    timeAlloted: number
-    typeId: number
-}
 
 function Page() {
     const router = useRouter()

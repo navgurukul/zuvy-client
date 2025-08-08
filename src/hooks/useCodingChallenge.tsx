@@ -2,6 +2,7 @@ import { useReducer, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/utils/axios.config';
 import { b64EncodeUnicode, b64DecodeUnicode } from '@/utils/base64';
+import{UseCodingChallengeProps} from '@/hooks/hookType'
 import {
     CodingChallengeState,
     CodingChallengeAction,
@@ -74,12 +75,6 @@ function codingChallengeReducer(
             return state;
     }
 }
-
-interface UseCodingChallengeProps {
-    questionId: string;
-    onChapterComplete?: () => void;
-}
-
 export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingChallengeProps) {
     const [state, dispatch] = useReducer(codingChallengeReducer, initialState);
     const { toast } = useToast();

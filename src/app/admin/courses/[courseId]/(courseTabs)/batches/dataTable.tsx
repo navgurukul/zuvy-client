@@ -26,23 +26,13 @@ import {
 } from '@/components/ui/table'
 import { getBatchData } from '@/store/store'
 import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
+import{StudentData} from "@/app/admin/courses/[courseId]/(courseTabs)/batches/courseBatchesType"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     setSelectedRows?: any
     mcqSide?: boolean
-}
-
-type StudentData = {
-    email: string
-    name: string
-    userId: number
-    bootcampId: number
-    batchName: string
-    batchId: number
-    progress: number
-    profilePicture: string
 }
 
 export function DataTable<TData, TValue>({

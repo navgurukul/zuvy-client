@@ -3,20 +3,15 @@ import Link from 'next/link'
 import React from 'react'
 import AssesmentComponent from './AssesmentComponent'
 import { Button } from '@/components/ui/button'
+import {ModuleProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    courseId: number
-    name: string
-    moduleAssessments: any
-}
-
-const Assesments = (props: Props) => {
+const Assesments = (props: ModuleProps) => {
     return (
         <div className="w-full">
             <section className="bg-white dark:bg-gray-900">
                 <div className="px-6 py-5 mx-auto">
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2">
-                        {props.moduleAssessments.map((module: any) => (
+                        {props.moduleAssessments.map((module) => (
                             <Link
                                 key={module.id}
                                 href={`/admin/courses/${props.courseId}/submissions/${module.id}`}

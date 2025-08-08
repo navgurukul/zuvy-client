@@ -32,20 +32,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-
-interface EditSessionProps {
-    meetingId: string
-    initialData: {
-        sessionTitle: string
-        description: string
-        startTime: string
-        endTime: string
-    }
-    getClasses: () => void
-    open: boolean // Controlled state
-    onClose: () => void // Function to handle dialog close
-    setIsDialogOpen: any
-}
+import{EditSessionProps} from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
 
 const formSchema = z
     .object({

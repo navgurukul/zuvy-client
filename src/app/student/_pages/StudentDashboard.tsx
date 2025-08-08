@@ -14,53 +14,21 @@ import {
 import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useLazyLoadedStudentData } from '@/store/store';
+import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '@/store/store';
 import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
-
-interface UpcomingEvent {
-  id: number;
-  title: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  bootcampId: number;
-  bootcampName: string;
-  batchId: number;
-  eventDate: string;
-  type: string;
-  moduleId?: number;
-  chapterId?: number;
-  hangoutLink?: string;
-}
-
-interface Bootcamp {
-  id: number;
-  name: string;
-  coverImage: string;
-  duration: string;
-  language: string;
-  bootcampTopic: string;
-  description: string | null;
-  batchId: number;
-  batchName: string;
-  progress: number;
-  instructorDetails: {
-    id: number;
-    name: string;
-    profilePicture: string | null;
-  };
-  upcomingEvents: UpcomingEvent[];
-}
-
-
+import {UpcomingEvent,Bootcamp} from '@/app/student/_pages/pageStudentType'
+import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const { studentData, loading, error, refetch } = useStudentData();
+  const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
+
   const { studentData: studentProfile } = useLazyLoadedStudentData();
+  const {isStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const router = useRouter();
   const filteredBootcamps = filter === 'enrolled'
     ? studentData?.inProgressBootcamps || []
@@ -69,7 +37,7 @@ const StudentDashboard = () => {
   const isStudentEnroledInOneBootcamp = studentData?.inProgressBootcamps?.length === 1;
 
   useEffect(() => {
-    if (isStudentEnroledInOneBootcamp) {
+    if (isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
       router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}`);
     }
   }, [isStudentEnroledInOneBootcamp]);
@@ -205,6 +173,8 @@ const StudentDashboard = () => {
     );
   }
 
+
+
   return (
     <div className="mb-12">
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-6xl">
@@ -328,86 +298,115 @@ const StudentDashboard = () => {
                 </div>
 
                 {/* Separator and Upcoming Items - Only for enrolled courses */}
-                {filter === 'enrolled' && bootcamp.upcomingEvents.length > 0 && (
+                {filter === 'enrolled' && (
                   <>
                     <div className="border-t border-border mt-6 mb-6"></div>
 
                     {/* Upcoming Items */}
-                    <Carousel className="w-full group">
-                      <CarouselContent className="-ml-2">
-                        {bootcamp.upcomingEvents.map((item) => {
-                          const eventType = mapEventType(item.type);
-                          const liveClassStatus = item.status;
-                          return (
-                            <CarouselItem key={item.id} className="pl-2 md:basis-1/3">
-                              <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
-                                <div className="w-full border rounded-lg p-3 h-full">
-                                  <div className="flex items-start gap-3">
-                                    <div className="flex-shrink-0 mt-1">
-                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType === 'Live Class'
-                                        ? 'bg-primary-light'
-                                        : eventType === 'Assessment'
-                                          ? 'bg-warning-light'
-                                          : 'bg-info-light'
-                                        }`}>
-                                        {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
-                                        {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
-                                        {eventType === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
-                                      </div>
+                    {eventsLoading ? (
+                      <Carousel className="w-full group ">
+                        <CarouselContent className="-ml-2">
+                          {[1, 2 ,3].map((index) => (
+                            <CarouselItem key={index} className="pl-2 md:basis-1/3 ">
+                              <div className="w-full border rounded-lg p-3 h-full bg-primary-light animate-pulse">
+                                <div className="flex items-start gap-3">
+                                  <div className="flex-shrink-0 mt-1">
+                                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-start justify-between gap-2 mb-1">
+                                      <div className="h-4 bg-muted rounded animate-pulse flex-1"></div>
+                                      <div className="h-5 w-16 bg-muted rounded animate-pulse"></div>
                                     </div>
-                                    <div className="flex-1">
-                                      <div className="flex items-start justify-between gap-2 mb-1">
-                                        <h4 className="text-sm font-medium text-left line-clamp-1">
-                                          {item.title}
-                                        </h4>
-                                        <div>
-                                          <div className="flex flex-col" >
-
-                                            <Badge
-                                              variant="outline"
-                                              className={` text-xs px-2 py-0.5 whitespace-nowrap ${eventType === 'Live Class'
-                                                ? 'bg-primary-light text-foreground border-primary-light'
-                                                : eventType === 'Assessment'
-                                                  ? 'bg-warning-light text-foreground border-warning-light'
-                                                  : 'bg-info-light text-foreground border-info-light'
-                                                }`}
-                                            >
-                                              {eventType}
-                                              <span>
-                                                {liveClassStatus === 'ongoing' && <div className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
-                                              </span>
-                                              <span>
-                                              </span>
-                                            </Badge>
-                                            <p>
-
-                                            </p>
-                                          </div>
-                                        </div>
-
-                                      </div>
-                                      <p className="text-xs text-left flex justify-between w-full text-muted-foreground mb-2">
-                                        <span>
-
-                                        {eventType === 'Assignment' ? 'Due in' : eventType === 'Live Class' ? '' : 'Due in'}  {formatUpcomingItem(item)}
-                                        </span>
-                                        <span>
-
-                                        {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[14px] font-semibold mr-8 ">Join</span>}
-                                        </span>
-
-                                      </p>
-                                    </div>
+                                    <div className="h-3 bg-muted rounded animate-pulse w-3/4 mb-2"></div>
                                   </div>
                                 </div>
-                              </a>
+                              </div>
                             </CarouselItem>
-                          );
-                        })}
-                      </CarouselContent>
-                      <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </Carousel>
+                          ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Carousel>
+                                         ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
+                      <Carousel className="w-full group">
+                        <CarouselContent className="-ml-2">
+                          {upcomingEventsData?.events
+                            .filter((item) => item.bootcampId === bootcamp.id)
+                            .map((item) => {
+                            const eventType = mapEventType(item.type);
+                            const liveClassStatus = item.status;
+                            return (
+                              <CarouselItem key={item.id} className="pl-2 md:basis-1/3  ">
+                                <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
+                                  <div className="w-full border rounded-lg p-3 h-full">
+                                    <div className="flex items-start gap-3">
+                                      <div className="flex-shrink-0 mt-1">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType === 'Live Class'
+                                          ? 'bg-primary-light'
+                                          : eventType === 'Assessment'
+                                            ? 'bg-warning-light'
+                                            : 'bg-info-light'
+                                          }`}>
+                                          {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
+                                          {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
+                                          {eventType === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
+                                        </div>
+                                      </div>
+                                      <div className="flex-1">
+                                        <div className="flex items-start justify-between gap-2 mb-1">
+                                          <h4 className="text-sm font-medium text-left line-clamp-1">
+                                            {item.title}
+                                          </h4>
+                                          <div>
+                                            <div className="flex flex-col" >
+
+                                              <Badge
+                                                variant="outline"
+                                                className={` text-xs px-2 py-0.5 whitespace-nowrap ${eventType === 'Live Class'
+                                                  ? 'bg-primary-light text-foreground border-primary-light'
+                                                  : eventType === 'Assessment'
+                                                    ? 'bg-warning-light text-foreground border-warning-light'
+                                                    : 'bg-info-light text-foreground border-info-light'
+                                                  }`}
+                                              >
+                                                {eventType}
+                                                <span>
+                                                  {liveClassStatus === 'ongoing' && <div className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
+                                                </span>
+                                                <span>
+                                                </span>
+                                              </Badge>
+                                              <p>
+
+                                              </p>
+                                            </div>
+                                          </div>
+
+                                        </div>
+                                        <p className="text-xs text-left flex justify-between w-full text-muted-foreground mb-2">
+                                          <span>
+
+                                          {eventType === 'Assignment' ? 'Due in' : eventType === 'Live Class' ? '' : 'Due in'}  {formatUpcomingItem(item)}
+                                          </span>
+                                          <span>
+
+                                          {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[14px] font-semibold mr-8 ">Join</span>}
+                                          </span>
+
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a>
+                              </CarouselItem>
+                            );
+                          })}
+                        </CarouselContent>
+                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </Carousel>
+                    ) : null}
                   </>
                 )}
               </CardContent>

@@ -1,22 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-
-interface CodingSubmissionsResponse {
-  status?: string;
-  action?: string;
-  message?: string;
-  data?: {
-    sourceCode: string;
-    TestCasesSubmission: any[];
-  };
-}
-
-interface UseCodingSubmissionsParams {
-  codingOutsourseId: string | null;
-  assessmentSubmissionId: string | null;
-  questionId: string | null;
-  enabled?: boolean;
-}
+import{CodingSubmissionsResponse,UseCodingSubmissionsParams,} from '@/hooks/hookType'
 
 export const useCodingSubmissions = ({
   codingOutsourseId,

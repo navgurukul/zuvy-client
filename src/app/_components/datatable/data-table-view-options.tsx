@@ -11,10 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Table } from "@tanstack/react-table";
 import { View } from "lucide-react";
-
-interface DataTableViewOptionsProps<TData> {
-  table: Table<TData>;
-}
+import { Cross } from "lucide-react";
+import {DataTableViewOptionsProps} from "@/app/_components/datatable/componentDatatable"
 
 export function DataTableViewOptions<TData>({
   table,

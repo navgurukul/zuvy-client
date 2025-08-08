@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Code2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
+import {CodingChallengeResultProps} from '@/app/student/_components/chapter-content/componentChapterType'
 import { getDifficultyColor } from '@/lib/utils';
 
 // Date formatting function
@@ -28,33 +29,6 @@ function formatSubmissionDate(dateString: string) {
 }
 
 // Simplified interfaces for clarity
-interface QuestionDetail {
-    title: string;
-    description: string;
-    difficulty: string;
-}
-
-interface SubmissionResult {
-    questionId: number;
-    result: {
-        status: string; // The submission status, e.g., "Accepted"
-        questionDetail: QuestionDetail;
-        createdAt: string;
-        TestCasesSubmission: Array<{
-            status: string;
-            [key: string]: any;
-        }>;
-    };
-}
-
-interface CodingChallengeResultProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-  };
-  submissionResults: SubmissionResult[];
-}
 
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
   const router = useRouter();
@@ -70,18 +44,18 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl ml-6 font-bold text-foreground mb-1">{chapterDetails.title}</h1>
+          <div className='flex flex-row justify-between items-center gap-x-10' >
+            <h1 className="text-2xl sm:text-3xl ml-6 font-bold text-left text-foreground mb-1">{chapterDetails.title}</h1>
             {chapterDetails.description && (
               <p className="text-muted-foreground text-base mb-1">{chapterDetails.description}</p>
             )}
-          </div>
           <Badge
             variant="outline"
             className="bg-success text-success-foreground border-success dark:text-gray-700"
           >
             Completed
           </Badge>
+          </div>
         </div>
 
         {/* List of completed challenges */}

@@ -34,6 +34,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import {NewMcqFormProps,TransformedMCQ} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),
@@ -61,13 +62,7 @@ export default function NewMcqForm({
     setStoreQuizData,
     getAllQuizQuesiton,
     setIsMcqModalOpen,
-}: {
-    tags: any[]
-    closeModal: () => void
-    setStoreQuizData: any
-    getAllQuizQuesiton: any
-    setIsMcqModalOpen: any
-}) {
+}:NewMcqFormProps) {
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [codeSnippet, setCodeSnippet] = useState<any>()
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
@@ -127,7 +122,7 @@ export default function NewMcqForm({
     })
 
     const onSubmitHandler = async (values: z.infer<typeof formSchema>) => {
-        const transformedObj: any = {
+        const transformedObj: TransformedMCQ = {
             title: 'Introduction to Quantum Physics',
             difficulty: values.difficulty,
             tagId: values.topics,
@@ -136,7 +131,7 @@ export default function NewMcqForm({
             isRandomOptions: false,
             variantMCQs: values.variants.map((variant, index) => ({
                 question: variant.questionText,
-                options: variant.options.reduce((acc: any, option, idx) => {
+                options: variant.options.reduce((acc: Record<number, string>, option, idx) => {
                     acc[idx + 1] = option.optionText
                     return acc
                 }, {}),

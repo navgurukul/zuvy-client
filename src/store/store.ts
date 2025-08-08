@@ -1121,14 +1121,24 @@ export const useThemeStore = create<ThemeStore>()(
 )
 
 interface CodingSubmissionStore {
-    codingSubmissionAction: any
-    setCodingSubmissionAction: (action: any) => void
-}
+    codingSubmissionAction: any;
+    setCodingSubmissionAction: (action: any) => void;
+  }
+  
+  export const useCodingSubmissionStore = create<CodingSubmissionStore>((set) => ({
+    codingSubmissionAction: null,
+    setCodingSubmissionAction: (action) => set({ codingSubmissionAction: action }),
+  }));
 
-export const useCodingSubmissionStore = create<CodingSubmissionStore>(
-    (set) => ({
-        codingSubmissionAction: null,
-        setCodingSubmissionAction: (action) =>
-            set({ codingSubmissionAction: action }),
-    })
-)
+
+interface isStudentEnrolledInOneCourseStore {
+    isStudentEnrolledInOneCourse : boolean;
+    setIsStudentEnrolledInOneCourse : (newValue: boolean) => void;
+}  
+
+export const useIsStudentEnrolledInOneCourseStore = create<isStudentEnrolledInOneCourseStore>((set) => ({
+    isStudentEnrolledInOneCourse : true,
+    setIsStudentEnrolledInOneCourse : (newValue: boolean) => {
+        set({ isStudentEnrolledInOneCourse : newValue })
+    }
+}))

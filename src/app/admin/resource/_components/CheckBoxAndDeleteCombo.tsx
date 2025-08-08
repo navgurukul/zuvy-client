@@ -1,7 +1,4 @@
-type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
-    checked: boolean
-    onCheckedChange: (checked: boolean) => void
-}
+import {CheckboxProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const CheckboxAndDeleteHandler: React.FC<CheckboxProps> = ({
     checked,

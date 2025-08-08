@@ -26,17 +26,8 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFeedbackForm, formSchema } from '@/hooks/useFeedbackForm'
-
-interface FeedbackFormContentProps {
-    chapterDetails: {
-        id: number
-        title: string
-        description: string | null
-        status: string
-        moduleId: number
-    }
-    onChapterComplete: () => void
-}
+import {FeedbackFormContentProps,FeedbackQuestion} from '@/app/student/_components/chapter-content/componentChapterType'
+import useWindowSize from '@/hooks/useHeightWidth'
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     chapterDetails,
@@ -44,6 +35,8 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
 }) => {
     const { courseId: courseIdParam, moduleId: moduleIdParam } = useParams()
     const router = useRouter()
+    const { width } = useWindowSize();
+    const isMobile = width < 768;
 
     const moduleId = useMemo(
         () =>
@@ -67,7 +60,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             chapterId: chapterId ? Number(chapterId) : 0,
             bootcampId: bootcampId ? Number(bootcampId) : 0,
             onSuccess: () => {
-                onChapterComplete() // Refetch the chapter list in the background
+                onChapterComplete() 
             },
         })
 
@@ -107,11 +100,11 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     }
 
     const isCompleted = status === 'Completed'
-    console.log(questions)
 
     return (
-        <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
+        <div className={`${isMobile ? '' : 'pt-10'} min-h-full bg-gradient-to-br from-background via-card-light to-background  px-2 sm:px-0`}>
             <div className="max-w-4xl mx-auto">
+                <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}  >
                 <form
                     onSubmit={handleSubmit}
                     className="w-full"
@@ -130,7 +123,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-8 ">
                 {questions?.map((item, index) => (
                     <div key={item.id} className="space-y-3">
                         <div className="flex items-start">
@@ -495,6 +488,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 </div>
             )}
                 </form>
+                </ScrollArea>
             </div>
         </div>
     )

@@ -6,20 +6,14 @@ import Papa from 'papaparse'
 import { Upload } from 'lucide-react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
-
-type Props = {
-    studentData?: any
-    className: string
-    setStudentData?: any
-    acceptedFiles?: any
-}
+import {DropzoneProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const Dropzone = ({
     className,
     studentData,
     setStudentData,
     acceptedFiles = 'text/csv',
-}: Props) => {
+}: DropzoneProps) => {
     // misc
 
     // state and variables

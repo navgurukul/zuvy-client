@@ -52,29 +52,9 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
+import{StudentData,BatchSuggestion,StudentDataState,ParamsType} from "@/app/admin/courses/[courseId]/(courseTabs)/batches/courseBatchesType"
 
-export type StudentData = {
-    id: any
-    userId: any
-    email: string
-    name: string
-    profilePicture: string
-}
-
-interface BatchSuggestion {
-    id: number
-    name: string
-    students_enrolled: number
-}
-
-interface Student {
-    email: string
-    name: string
-}
-
-type StudentDataState = Student[]
-
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params: ParamsType}) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { students } = useStudentData(params.courseId)

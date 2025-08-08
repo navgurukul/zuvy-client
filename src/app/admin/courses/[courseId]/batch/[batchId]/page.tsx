@@ -130,16 +130,41 @@ const BatchesInfo = ({
         capEnrollment: z.string().refine(
             (capEnrollment) => {
                 const capEnrollmentValue = parseInt(capEnrollment)
-                return (
-                    !isNaN(capEnrollmentValue) &&
-                    capEnrollmentValue >= studentsData.length &&
-                    capEnrollmentValue <= 100000
-                )
-            },
-            {
-                message: `Cap enrollment cannot be less than the current number of students (${studentsData?.length}).`,
-            }
-        ),
+                    return capEnrollmentValue !== 0
+                },
+                {
+                    message: 'Cap Enrollment cannot be 0',
+                }
+            )
+            .refine(
+                (capEnrollment) => {
+                    const capEnrollmentValue = parseInt(capEnrollment)
+                    if (studentsData === undefined) {
+                        return true
+                    }
+                    return capEnrollmentValue >= studentsData.length
+                },
+                {
+                    message: `Cap enrollment cannot be less than the current number of students (${studentsData?.length}).`,
+                }
+            )
+            .refine(
+                (capEnrollment) => {
+                    const capEnrollmentValue = parseInt(capEnrollment)
+                    return capEnrollmentValue <= 100000
+                },
+                {
+                    message: 'Cap Enrollment cannot be more than 100000',
+                }
+            ).refine(
+                (capEnrollment) => {
+                    const capEnrollmentValue = parseInt(capEnrollment)
+                    return capEnrollmentValue !== 0
+                },
+                {
+                    message: 'Cap Enrollment cannot be 0',
+                }
+            ),
     })
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -546,7 +571,7 @@ const BatchesInfo = ({
                                         userId={userIds}
                                         bootcampId={parseInt(params.courseId)}
                                         title="Are you absolutely sure?"
-                                        description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                        description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
                                         fetchStudentData={fetchStudentData}
                                     />
                                     <ComboboxStudent

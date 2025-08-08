@@ -13,12 +13,7 @@ import {
     ConfirmationModal,
     HeaderBar
 } from './components';
-
-interface CodeEditorProps {
-    questionId: string;
-    chapterId?: number;
-    onChapterComplete?: () => void;
-}
+import{CodeEditorProps} from '@/app/student/course/[courseId]/codingChallenge/courseCodingType'
 
 const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps) => {
     const router = useRouter();

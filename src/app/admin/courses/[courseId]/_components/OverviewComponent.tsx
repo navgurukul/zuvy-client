@@ -1,26 +1,9 @@
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import {OverviewComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    totalCodingChallenges: number
-    correctedCodingChallenges: number
-    correctedMcqs: number
-    totalCorrectedMcqs: number
-    openEndedCorrect: number
-    totalOpenEnded: number
-    totalScore: number
-    score: number
-    copyPaste: any
-    tabchanges: number
-    embeddedSearch: number
-    submissionType: string
-    proctoringData: any
-    eyeMomentCount: number
-    fullScreenExit: number
-}
-
-const OverviewComponent = (props: any) => {
+const OverviewComponent = (props: OverviewComponentProps) => {
     return (
         <div className="my-8 px-4 md:px-12">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 justify-center">

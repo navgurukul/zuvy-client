@@ -18,32 +18,14 @@ import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { X } from 'lucide-react'
 import axios from 'axios'
+import{State,ClassType,ParamsType,CourseClassItem} from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
 
-type ClassType = 'active' | 'upcoming' | 'complete'
 
-interface State {
-    classType: ClassType
-    position: typeof POSITION
-    allClasses: any[]
-    bootcampData: { value: string; label: string }[]
-    batchId: number
-    upcomingClasses: any[]
-    pages: number
-    offset: number
-    currentPage: number
-    totalStudents: number
-    ongoingClasses: any[]
-    completedClasses: any[]
-    selectedDate: Date | null
-    lastPage: number
-    limit: number
-}
-
-function Page({ params }: any) {
+function Page({ params }: ParamsType) {
     const router = useRouter()
     const searchParams = useSearchParams()
     // const [isCourseDeleted, setIsCourseDeleted] = useState(false)
-    const [classes, setClasses] = useState<any[]>([])
+    const [classes, setClasses] = useState<CourseClassItem[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()
     const position = useMemo(
@@ -189,7 +171,7 @@ function Page({ params }: any) {
                     debouncedSearch &&
                     (isSuggestionClicked || searchParams.get('search'))
                 ) {
-                    filteredClasses = allClasses.filter((cls: any) =>
+                    filteredClasses = allClasses.filter((cls: CourseClassItem) =>
                         cls?.title
                             ?.toLowerCase()
                             .includes(debouncedSearch.toLowerCase())
@@ -278,7 +260,7 @@ function Page({ params }: any) {
                 .get(`/bootcamp/batches/${params.courseId}`)
                 .then((response) => {
                     const transformedData = response.data.data.map(
-                        (item: { id: any; name: any }) => ({
+                        (item: { id: number; name: string}) => ({
                             value: item.id.toString(),
                             label: item.name,
                         })
@@ -508,7 +490,7 @@ function Page({ params }: any) {
                                     <>
                                         <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
                                             {classes.map(
-                                                (classData: any, index: any) =>
+                                                (classData:any, index: any) =>
                                                     activeTab ===
                                                     classData.status ? (
                                                         activeTab ===
