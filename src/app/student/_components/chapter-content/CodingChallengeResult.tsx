@@ -44,18 +44,18 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl ml-6 font-bold text-foreground mb-1">{chapterDetails.title}</h1>
+          <div className='flex flex-row justify-between items-center gap-x-10' >
+            <h1 className="text-2xl sm:text-3xl ml-6 font-bold text-left text-foreground mb-1">{chapterDetails.title}</h1>
             {chapterDetails.description && (
               <p className="text-muted-foreground text-base mb-1">{chapterDetails.description}</p>
             )}
-          </div>
           <Badge
             variant="outline"
             className="bg-success text-success-foreground border-success dark:text-gray-700"
           >
             Completed
           </Badge>
+          </div>
         </div>
 
         {/* List of completed challenges */}

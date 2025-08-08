@@ -681,6 +681,7 @@ function Page({ params }: { params: any }) {
                                         <FormControl>
                                             <Input
                                                 placeholder="Enter collaborator text"
+                                                maxLength={80}
                                                 {...field}
                                                 value={field.value || ''}
                                             />
@@ -820,7 +821,7 @@ function Page({ params }: { params: any }) {
                         className="bg-success-dark opacity-75"
                         type="submit"
                     >
-                        Submit
+                        Save
                     </Button>
                 </form>
             </Form>
