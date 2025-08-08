@@ -1,0 +1,23 @@
+export interface CurriculumItem {
+    id: number
+    name: string
+    description: string
+    order: number
+    timeAlloted: number
+    quizCount: number
+    assignmentCount: number
+    codingProblemsCount: number
+    articlesCount: number
+    typeId: number
+    projectId: number
+    ChapterId: number
+    isStarted?: boolean
+}
+
+export interface ModuleData {
+    name: string
+    description: string
+    type: string
+    timeAlloted: number
+    typeId: number
+}

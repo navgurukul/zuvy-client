@@ -5,19 +5,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
-
-interface DeleteConfirmationModalProps {
-    isOpen: boolean
-    onClose: () => void
-    onConfirm: () => void
-    modalTitle?: string
-    modalText?: string
-    buttonText?: string
-    input: boolean
-    modalText2?: string
-    instructorInfo?: any
-    loading?: boolean
-}
+import {DeleteConfirmationModalProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     isOpen,

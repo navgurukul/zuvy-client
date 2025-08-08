@@ -3,16 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { CheckCircle, X } from 'lucide-react';
 import { CodeResult } from '@/utils/types/coding-challenge';
+import{SubmissionModalProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
-interface SubmissionModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    modalType: 'success' | 'error';
-    questionTitle: string;
-    codeResult: CodeResult[];
-    onViewSolution: () => void;
-    onReturnToCourse: () => void;
-}
 
 export function SubmissionModal({
     isOpen,

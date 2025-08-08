@@ -7,7 +7,7 @@ import {
     ResizablePanel,
     ResizableHandle,
 } from '@/components/ui/resizable'
-import { ChevronLeft, Code, Lock, Play, Upload, CheckCircle } from 'lucide-react'
+import { ChevronLeft, Code, Lock, Play, Upload, CheckCircle, Sun, Moon } from 'lucide-react'
 import { useCodingSubmissionStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
@@ -38,38 +38,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
 
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
-
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
-
-interface questionDetails {
-    title: string
-    description: string
-    constraints?: string
-    examples: { input: number[]; output: number }
-}
-
-interface IDEProps {
-    params: { editor: string }
-    onBack?: () => void
-    remainingTime?: any
-    assessmentSubmitId?: number
-    selectedCodingOutsourseId?: number
-    getAssessmentData?: any
-    runCodeLanguageId?: number
-    runSourceCode?: string
-    getCodingSubmissionsData?: any
-}
+import {IDEProps,questionDetails,TestCases,Input}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -116,6 +85,8 @@ const IDE: React.FC<IDEProps> = ({
 
     const { studentData } = useLazyLoadedStudentData()
     const userID = studentData?.id && studentData?.id
+        const { isDark, toggleTheme } = useThemeStore();
+
 
     const editorLanguages = [
         { lang: 'java', id: 96 },
@@ -340,7 +311,7 @@ const IDE: React.FC<IDEProps> = ({
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
-            <div className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border shadow-4dp">
+            <div className="sticky top-0 z-50  backdrop-blur-sm border-b border-border shadow-4dp">
                 <div className="w-full px-6 py-4">
                     <div className="flex items-center justify-between">
                         {/* Left: Back Button and Question Title */}
@@ -399,6 +370,18 @@ const IDE: React.FC<IDEProps> = ({
                         <div className="flex items-center space-x-4">
                             <TimerDisplay remainingTime={remainingTime} />
                             <div className="flex items-center space-x-2">
+                            <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleTheme}
+                            className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        >
+                            {isDark ? (
+                                <Sun className="h-4 w-4" />
+                            ) : (
+                                <Moon className="h-4 w-4" />
+                            )}
+                        </Button>
                                 <Button
                                     onClick={(e) => handleSubmit(e, 'run')}
                                     size="sm"
@@ -440,7 +423,7 @@ const IDE: React.FC<IDEProps> = ({
                                     <CheckCircle className="w-8 h-8 text-success" />
                                 </div>
                                 <AlertDialogTitle className="text-success text-xl">
-                                    🎉 Test Cases Passed!
+                                    Test Cases Passed!
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground">
                                     Great job! You have successfully submitted the question. You can
@@ -451,7 +434,7 @@ const IDE: React.FC<IDEProps> = ({
                             <>
 
                                 <AlertDialogTitle className="text-destructive text-xl">
-                                    ❌ Test Cases Failed
+                                    Test Cases Failed
                                 </AlertDialogTitle>
                                 <AlertDialogDescription className="text-muted-foreground">
                                     Your solution didn&apos;t pass all test cases. You have submitted the question. You can
@@ -471,111 +454,103 @@ const IDE: React.FC<IDEProps> = ({
                         className="w-full h-full"
                     >                        {/* Left Panel: Problem Description */}
                         <ResizablePanel defaultSize={50} minSize={25} maxSize={75}>
-                            <div className="h-full bg-card border-r border-border">
+                            <div className="h-full text-left border-r border-border">
                                 <div className="h-full overflow-y-auto scrollbar-hide">
-                                    <div className="p-6">
-                                        <div className="bg-card border border-border rounded-xl shadow-sm">
-                                            <div className="p-6 space-y-8">
-                                                {/* Problem Description */}
+                                    <div className="p-4">
+                                        <div className="space-y-6">
+                                            {/* Problem Title */}
+                                            <div>
+                                                <h1 className="text-xl font-semibold text-foreground mb-4">
+                                                    {questionDetails.title}
+                                                </h1>
+                                            </div>
+
+                                            {/* Problem Description */}
+                                            <div>
+                                                <h2 className="text-base font-semibold text-foreground mb-3">
+                                                    Description
+                                                </h2>
+                                                <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                                                    {questionDetails.description}
+                                                </div>
+                                            </div>
+
+                                            {/* Constraints */}
+                                            {questionDetails.constraints && (
                                                 <div>
-                                                    <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
-                                                        {/* <div className="w-5 h-5 bg-primary/10 rounded flex items-center justify-center">
-                                                            <div className="w-2 h-2 bg-primary rounded-full"></div>
-                                                        </div> */}
-                                                        <span>Description</span>
+                                                    <h2 className="text-base font-semibold text-foreground mb-3">
+                                                        Constraints
                                                     </h2>
-                                                    <div className="text-left">
-                                                        <div className="text-foreground leading-relaxed whitespace-pre-wrap text-[15px] text-left">
-                                                            {questionDetails.description}
-                                                        </div>
+                                                    <div className="text-sm leading-relaxed whitespace-pre-wrap font-mono text-foreground">
+                                                        {questionDetails.constraints}
                                                     </div>
                                                 </div>
+                                            )}
 
-                                                {/* Constraints */}
-                                                {questionDetails.constraints && (
-                                                    <div>
-                                                        <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
-                                                            {/* <div className="w-5 h-5 bg-blue-100 dark:bg-blue-900 rounded flex items-center justify-center">
-                                                                <Code className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                                                            </div> */}
-                                                            <span>Constraints</span>
-                                                        </h2>
-                                                        <div className=" rounded-lg p-4">
-                                                            <div className="text-sm  leading-relaxed whitespace-pre-wrap font-mono text-left">
-                                                                {questionDetails.constraints}
+                                            {/* Test Cases */}
+                                            <div>
+                                                <h2 className="text-base font-semibold text-foreground mb-3">
+                                                    Examples
+                                                </h2>
+                                                <div className="space-y-4">
+                                                    {testCases?.slice(0, 2).map((testCase: TestCases, index: number) => (
+                                                        <div
+                                                            key={index}
+                                                            className="border border-border rounded-lg overflow-hidden"
+                                                        >
+                                                            <div className="bg-muted/50 px-4 py-2">
+                                                                <h4 className="font-medium text-foreground text-sm">
+                                                                    Example {index + 1}
+                                                                </h4>
+                                                            </div>
+
+                                                            <div className="p-4 space-y-3">
+                                                                {/* Input Section */}
+                                                                <div>
+                                                                    <div className="text-sm font-medium text-muted-foreground mb-2">
+                                                                        Input:
+                                                                    </div>
+                                                                    <div className="bg-muted/30 rounded-md p-3 border">
+                                                                        <pre className="text-sm font-mono text-foreground whitespace-pre-wrap">
+                                                                            {Array.isArray(testCase.inputs)
+                                                                                ? testCase.inputs.map((input: Input, idx: number) => (
+                                                                                    <div key={idx}>
+                                                                                        {input.parameterName || `param${idx + 1}`} = {formatValue(input.parameterValue, input.parameterType)}
+                                                                                    </div>
+                                                                                ))
+                                                                                : Object.entries(testCase.inputs).map(([key, value]) => (
+                                                                                    <div key={key}>
+                                                                                        {key} = {formatValue(value, typeof value === 'number' ? 'int' : 'str')}
+                                                                                    </div>
+                                                                                ))
+                                                                            }
+                                                                        </pre>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Output Section */}
+                                                                <div>
+                                                                    <div className="text-sm font-medium text-muted-foreground mb-2">
+                                                                        Output:
+                                                                    </div>
+                                                                    <div className="bg-muted/30 rounded-md p-3 border">
+                                                                        <pre className="text-sm font-mono text-foreground">
+                                                                            {formatValue(
+                                                                                testCase.expectedOutput.parameterValue,
+                                                                                testCase.expectedOutput.parameterType
+                                                                            )}
+                                                                        </pre>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                )}
+                                                    ))}
 
-                                                {/* Test Cases */}
-                                                <div>
-                                                    <h2 className="text-lg font-semibold text-foreground mb-4 text-left flex items-center space-x-2">
-                                                        {/* <div className="w-5 h-5 bg-green-100 dark:bg-green-900 rounded flex items-center justify-center">
-                                                            <Play className="w-3 h-3 text-green-600 dark:text-green-400" />
-                                                        </div> */}
-                                                        <span>Examples</span>
-                                                    </h2>
-                                                    <div className="space-y-6">
-                                                        {testCases?.slice(0, 3).map((testCase: TestCase, index: number) => (
-                                                            <div
-                                                                key={index}
-                                                                className="rounded-lg overflow-hidden"
-                                                            >
-                                                                <div className="bg-muted/30 px-4 py-3">
-                                                                    <h4 className="font-semibold text-foreground text-sm text-left">
-                                                                        Example {index + 1}
-                                                                    </h4>
-                                                                </div>
-
-                                                                <div className="p-4 space-y-4">
-                                                                    {/* Input Section */}
-                                                                    <div>
-                                                                        <div className="text-sm font-medium text-muted-foreground mb-2 text-left">
-                                                                            Input:
-                                                                        </div>
-                                                                        <div className="bg-gray-50 dark:bg-gray-900 rounded-md p-3">
-                                                                            <pre className="text-sm font-mono text-foreground whitespace-pre-wrap text-left">
-                                                                                {Array.isArray(testCase.inputs)
-                                                                                    ? testCase.inputs.map((input: Input, idx: number) => (
-                                                                                        <div key={idx}>
-                                                                                            {input.parameterName || `param${idx + 1}`} = {formatValue(input.parameterValue, input.parameterType)}
-                                                                                        </div>
-                                                                                    ))
-                                                                                    : Object.entries(testCase.inputs).map(([key, value]) => (
-                                                                                        <div key={key}>
-                                                                                            {key} = {formatValue(value, typeof value === 'number' ? 'int' : 'str')}
-                                                                                        </div>
-                                                                                    ))
-                                                                                }
-                                                                            </pre>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {/* Output Section */}
-                                                                    <div>
-                                                                        <div className="text-sm font-medium text-muted-foreground mb-2 text-left">
-                                                                            Output:
-                                                                        </div>
-                                                                        <div className="bg-gray-50 dark:bg-gray-900 rounded-md p-3">
-                                                                            <pre className="text-sm font-mono text-foreground text-left">
-                                                                                {formatValue(
-                                                                                    testCase.expectedOutput.parameterValue,
-                                                                                    testCase.expectedOutput.parameterType
-                                                                                )}
-                                                                            </pre>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-
-                                                        {testCases && testCases.length > 3 && (
-                                                            <div className="text-left p-4 text-sm text-muted-foreground bg-muted/20 rounded-lg">
-                                                                + {testCases.length - 3} more test case{testCases.length - 3 !== 1 ? 's' : ''} available
-                                                            </div>
-                                                        )}
-                                                    </div>
+                                                    {testCases && testCases.length > 2 && (
+                                                        <div className="text-sm text-muted-foreground bg-muted/20 rounded-lg p-3 text-center">
+                                                            + {testCases.length - 2} more test case{testCases.length - 2 !== 1 ? 's' : ''} available
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -589,9 +564,9 @@ const IDE: React.FC<IDEProps> = ({
                             <ResizablePanelGroup direction="vertical">
                                 {/* Code Editor Panel */}
                                 <ResizablePanel defaultSize={65} minSize={30}>
-                                    <div className="h-full bg-card">
+                                    <div className="h-full ">
                                         {/* Editor Header */}
-                                        <div className="bg-card-elevated border-b border-border p-4">
+                                        <div className=" border-b border-border p-4">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-3">
                                                     {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -605,10 +580,10 @@ const IDE: React.FC<IDEProps> = ({
                                                     value={language}
                                                     onValueChange={(e: any) => handleLanguageChange(e)}
                                                 >
-                                                    <SelectTrigger className="w-48 border-border bg-muted">
+                                                    <SelectTrigger className="w-48 border-border">
                                                         <SelectValue placeholder="Select Language" />
                                                     </SelectTrigger>
-                                                    <SelectContent className="bg-card border-border">
+                                                    <SelectContent className=" border-border">
                                                         {editorLanguages.map((lang) => (
                                                             <SelectItem
                                                                 key={lang.id}

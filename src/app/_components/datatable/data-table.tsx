@@ -29,27 +29,8 @@ import {
 import { getBatchData, getIsRowSelected } from '@/store/store'
 import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
 import AddLiveClasstoChapter from '@/app/admin/courses/[courseId]/module/_components/AddLiveClasstoChapter'
+import {DataTableProps,StudentData} from "@/app/_components/datatable/componentDatatable"
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[]
-    setSelectedRows?: any
-    mcqSide?: boolean
-    assignStudents?: string
-    adminMcqSide?: boolean
-    customTopBar?: React.ReactNode
-}
-
-type StudentData = {
-    email: string
-    name: string
-    userId: number
-    bootcampId: number
-    batchName: string
-    batchId: number
-    progress: number
-    profilePicture: string
-}
 
 export function DataTable<TData, TValue>({
     columns,

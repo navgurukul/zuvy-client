@@ -33,16 +33,19 @@ import {
 import { cleanUpValues, getAllCodingQuestions, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { create } from 'domain'
+import {TestCaseInput,TestCases} from "@/app/admin/resource/_components/adminResourceComponentType"
+import { Input as PostcssInput} from 'postcss'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
 const inputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
 const outputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
 
-function formatFloat(num: any) {
-    num = parseFloat(num);
-    return num % 1 === 0 ? num.toFixed(1) : num;
+function formatFloat(num: string | number): string {
+    num = parseFloat(num as string);
+    return num % 1 === 0 ? num.toFixed(1) : num.toString();
 }
+
 
 const formSchema = z.object({
   title: z
@@ -457,7 +460,7 @@ export default function EditCodingQuestionForm() {
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
                     id: testCase.id, // Ensure this is correctly mapped
                     input: JSON.stringify(
-                        testCase.inputs.map((input: any) =>
+                        testCase.inputs.map((input: TestCaseInput) =>
                             String(input.parameterValue)
                         )
                     ),
@@ -494,9 +497,9 @@ export default function EditCodingQuestionForm() {
         if (selectCodingQuestion.length > 0) {
           const question = selectCodingQuestion[0];
           
-          const mappedTestCases = question.testCases.map((testCase: any) => ({
+          const mappedTestCases = question.testCases.map((testCase: TestCases) => ({
             id: testCase.id,
-            inputs: testCase.inputs.map((input: any) => ({
+            inputs: testCase.inputs.map((input: TestCaseInput ) => ({
               id: Date.now() + Math.random(),
               type: input.parameterType,
               value: input.parameterType === 'jsonType'
@@ -547,13 +550,13 @@ export default function EditCodingQuestionForm() {
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: testCases.map((testCase: any) => {
+            testCases: testCases.map((testCase:any) => {
                 let parameterNameCounter = 0;
 
                 // Group JSON inputs together
                 const jsonInputs = testCase.inputs
-                    .filter((input: any) => input.type === 'jsonType')
-                    .map((input: any) => {
+                    .filter((input: TestCaseInput) => input.type === 'jsonType')
+                    .map((input: TestCaseInput) => {
                         try {
                             return JSON.parse(input.value);
                         } catch (e) {
@@ -565,8 +568,8 @@ export default function EditCodingQuestionForm() {
 
                 // Process non-JSON inputs
                 const otherInputs = testCase.inputs
-                    .filter((input: any) => input.type !== 'jsonType')
-                    .flatMap((input: any) => {
+                    .filter((input: TestCaseInput) => input.type !== 'jsonType')
+                    .flatMap((input: TestCaseInput) => {
                         const processedValue = processInput(input.value, input.type);
 
                         if (processedValue === null) {

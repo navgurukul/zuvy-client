@@ -16,32 +16,9 @@ import { useRouter } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { Reorder, useDragControls } from 'framer-motion'
+import {CurricullamCardProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    value: any
-    isStarted?: boolean
-    editHandle: any
-    index: number
-    moduleId: any
-    courseId: number
-    name: string
-    order: number
-    description: string
-    quizCount: number
-    assignmentCount: number
-    timeAlloted: number
-    codingProblemsCount: number
-    articlesCount: number
-    typeId: number
-    fetchCourseModules: () => void
-    projectId: number
-    chapterId: number
-    setDraggedModuleId: React.Dispatch<React.SetStateAction<number | null>>
-    onDragStart?: () => void
-    onDragEnd?: () => void
-}
-
-const CurricullumCard = (props: Props) => {
+const CurricullumCard = (props:CurricullamCardProps) => {
     const {
         editHandle,
         index,

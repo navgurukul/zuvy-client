@@ -19,18 +19,8 @@ import useAssessmentDetails from "@/hooks/useAssessmentDetails";
 import useChapterDetails from "@/hooks/useChapterDetails";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
+import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
 
-interface AssessmentContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    assessmentId: number | null;
-    moduleId: number;
-  };
-  onChapterComplete?: () => void;
-}
 
 function formatToIST(dateString: string | undefined) {
   if (!dateString) return 'N/A';
@@ -330,16 +320,16 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
 
 
   return (
-    <div className="h-full">
+    <div className="h-full overflow-y-auto">
       <div className="flex flex-col items-center justify-center px-4 sm:px-6 lg:px-4 py-4 sm:py-6 lg:py-8 mt-4 sm:mt-6 lg:mt-8">
         <div className="flex flex-col gap-y-4 text-left w-full max-w-lg sm:max-w-xl lg:max-w-4xl">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 lg:pr-10 mb-8">
             <div className="min-w-0 flex-1">
               <div className="flex w-full justify-between items-center mb-6">
-                <h1 className="text-3xl font-heading font-bold text-foreground break-words">
+                <h5 className=" font-bold text-foreground break-words">
                   {assessmentDetails.ModuleAssessment?.title}
-                </h1>
+                </h5>
                 <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
               </div>
               {/* Meta Info Row */}

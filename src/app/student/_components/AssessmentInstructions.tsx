@@ -9,16 +9,7 @@ import MCQQuiz from "./MCQQuiz";
 import OpenEndedQuestions from "./OpenEndedQuestions";
 import ViolationModal from "./ViolationModal";
 
-interface AssessmentInstructionsProps {
-  assessmentTitle: string;
-  duration: string;
-  onClose: () => void;
-}
-
-interface ViolationType {
-  type: 'tab-switch' | 'fullscreen-exit' | 'copy-paste';
-  count: number;
-}
+import{AssessmentInstructionsProps,ViolationType} from '@/app/student/_components/componentStudentType'
 
 const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: AssessmentInstructionsProps) => {
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds

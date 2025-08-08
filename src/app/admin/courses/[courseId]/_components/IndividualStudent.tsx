@@ -2,17 +2,9 @@
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import {IndividuleStudentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    title: string
-    studentsSubmitted: number
-    totalSubmissions: number
-    timetaken: number
-    copyPaste: string
-    tabChanges: string
-}
-
-const IndividualStudent = (props: Props) => {
+const IndividualStudent = (props: IndividuleStudentProps) => {
     const [color, setColor] = useState('#ff0000')
     const handleClick = () => {
         const randomColor =

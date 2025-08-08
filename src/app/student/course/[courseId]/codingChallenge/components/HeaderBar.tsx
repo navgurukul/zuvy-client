@@ -1,18 +1,11 @@
+'use client';
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { Play, Upload, X } from 'lucide-react';
-
-interface HeaderBarProps {
-    isAlreadySubmitted: boolean;
-    loading: boolean;
-    isSubmitting: boolean;
-    isCompleting: boolean;
-    onBack: () => void;
-    onRunCode: () => void;
-    onOpenSubmitModal: () => void;
-}
+import { Moon, Sun, Play, Upload, X } from 'lucide-react';
+import { HeaderBarProps } from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
+import { useThemeStore } from '@/store/store';
 
 export function HeaderBar({
     isAlreadySubmitted,
@@ -23,15 +16,19 @@ export function HeaderBar({
     onRunCode,
     onOpenSubmitModal,
 }: HeaderBarProps) {
+
+    const { isDark, toggleTheme } = useThemeStore();
+
+
     return (
-        <div className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b border-border shadow-4dp">
+        <div className="sticky top-0 z-50  backdrop-blur-sm border-b border-border shadow-4dp">
             <div className="w-full px-6 py-4">
                 <div className="flex items-center justify-between">
                     {/* Left: Back Button and Question Title */}
                     <div className="flex items-center space-x-4">
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
-                                <button 
+                                <button
                                     className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg cursor-pointer"
                                     style={{ pointerEvents: 'auto' }}
                                 >
@@ -74,10 +71,22 @@ export function HeaderBar({
                     {/* Right: Action Buttons */}
                     <div className="flex items-center space-x-2">
                         <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={toggleTheme}
+                            className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        >
+                            {isDark ? (
+                                <Sun className="h-4 w-4" />
+                            ) : (
+                                <Moon className="h-4 w-4" />
+                            )}
+                        </Button>
+                        <Button
                             onClick={onRunCode}
                             size="sm"
                             variant="outline"
-                            className="border-accent text-accent hover:bg-accent hover:text-accent-foreground font-semibold"
+                            className="text-black hover:text-black border-primary hover:border-primary hover:bg-primary/10 dark:text-white"
                             disabled={loading || isSubmitting || isAlreadySubmitted}
                         >
                             {loading ? <Spinner className="w-4 h-4" /> : <Play className="w-4 h-4" />}

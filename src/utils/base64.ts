@@ -10,7 +10,6 @@ export function b64EncodeUnicode(str: string) {
 }
 
 // Decoding base64 ⇢ UTF-8
-
 export function b64DecodeUnicode(str: string) {
     return decodeURIComponent(
         Array.prototype.map

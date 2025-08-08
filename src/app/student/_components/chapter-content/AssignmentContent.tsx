@@ -16,6 +16,7 @@ import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
+import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
 
 const FormSchema = z.object({
   link: z
@@ -33,22 +34,7 @@ const FormSchema = z.object({
     ),
 });
 
-type EditorDoc = {
-  type: string;
-  content: any[];
-};
 
-interface AssignmentContentProps {
-  chapterDetails: {
-    id: number;
-    title: string;
-    description: string | null;
-    status: string;
-    articleContent: string | null;
-    links: string | null;
-  };
-  onChapterComplete: () => void;
-}
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId, moduleId } = useParams();
@@ -204,11 +190,13 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 
   return (
     <div className="min-h-screen bg-background">
+       <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}  >
+
       <div className={`mx-auto space-y-6 ${isMobile ? 'p-4' : isSmallScreen ? 'p-6 max-w-3xl' : 'p-8 max-w-4xl'}`}>
         {/* Header Section */}
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h1 className={`font-bold text-foreground mb-2 text-left ${isMobile ? 'text-xl' : isSmallScreen ? 'text-2xl' : 'text-3xl'}`}>
+            <h1 className={`font-bold text-foreground mb-2 text-left ${isMobile ? 'text-xl' : isSmallScreen ? 'text-2xl' : 'text-xl'}`}>
               {chapterDetails.title}
             </h1>
             <p className={`text-muted-foreground text-left ${isMobile ? 'text-sm' : 'text-base'}`}>
@@ -292,7 +280,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
                   <Button 
                     type="submit" 
                     disabled={isSubmitting || isCompleting || !form.formState.isValid}
-                    className={`px-4 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-5' : 'h-8'}`}
+                    className={`px-4 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover `}
                   >
                     {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
                   </Button>
@@ -302,6 +290,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
           </Form>
         </div>
       </div>
+       </ScrollArea>
     </div>
   );
 };

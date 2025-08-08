@@ -4,14 +4,9 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { api } from '@/utils/axios.config'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import Link from 'next/link'
+import{EnrolledCourse} from "@/app/instructor/courses/instructorCourseType"
 
 type Props = {}
-
-interface EnrolledCourse {
-    coverImage: string
-    id: number
-    name: string
-}
 
 const Page = (props: Props) => {
     const [enrolledCourse, setEnrolledCourse] = useState<EnrolledCourse[]>([])
@@ -19,7 +14,7 @@ const Page = (props: Props) => {
     useEffect(() => {
         const getEnrolledCourses = async () => {
             try {
-                const response = await api.get(`/instructor/allCourses`)
+                const response = await api.get<{ data: EnrolledCourse[] }>(`/instructor/allCourses`)
                 setEnrolledCourse(response.data.data)
             } catch (error) {
                 console.error('Error getting enrolled courses:', error)

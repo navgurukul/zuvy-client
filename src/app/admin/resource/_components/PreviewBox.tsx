@@ -4,6 +4,7 @@ import DOMPurify from 'dompurify'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { X } from 'lucide-react'
+import {DialogBoxProps,PreviewBoxQuizVariantData,PreviewBoxQuizVariant} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 export default function DialogBox({
     show,
@@ -11,18 +12,12 @@ export default function DialogBox({
     title,
     message,
     quizQuestionId,
-}: {
-    show: boolean
-    onClose: () => void
-    title: string
-    message: string
-    quizQuestionId: number
-}) {
+}:DialogBoxProps) {
     const { quizData, difficulty, tagName } = useGetMCQs({
         id: quizQuestionId,
     })
     const [activeTab, setActiveTab] = useState<string | null>(null)
-    const [codeSnippet, setCodeSnippet] = useState<any>()
+    const [codeSnippet, setCodeSnippet] = useState< string>('')
 
     useEffect(() => {
         if (quizData?.quizVariants?.length) {
@@ -33,7 +28,7 @@ export default function DialogBox({
     }, [quizData])
 
     // Function to sanitize and update codeSnippet
-    const updateCodeSnippet = (question: any) => {
+    const updateCodeSnippet = (question:  string) => {
         const clean = DOMPurify.sanitize(question)
         const updatedHtml = clean.replace(
             /<pre>/g,
@@ -59,10 +54,10 @@ export default function DialogBox({
 
     if (!quizData) return null
 
-    const handleTabChange = (variantId: any) => {
+    const handleTabChange = (variantId: PreviewBoxQuizVariantData) => {
         setActiveTab(variantId.toString())
         const selectedVariant = quizData.quizVariants.find(
-            (variant: any) => variant.id.toString() === variantId.toString()
+            (variant: PreviewBoxQuizVariant) => variant.id.toString() === variantId.toString()
         )
         if (selectedVariant) {
             updateCodeSnippet(selectedVariant.question)

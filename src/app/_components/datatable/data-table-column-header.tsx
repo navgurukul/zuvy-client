@@ -10,12 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { ArrowDownIcon, ArrowUpIcon, EyeOffIcon, SortAsc } from 'lucide-react'
-
-interface DataTableColumnHeaderProps<TData, TValue>
-    extends React.HTMLAttributes<HTMLDivElement> {
-    column: Column<TData, TValue>
-    title: string
-}
+import {DataTableColumnHeaderProps} from "@/app/_components/datatable/componentDatatable"
 
 export function DataTableColumnHeader<TData, TValue>({
     column,

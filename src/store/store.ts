@@ -1120,3 +1120,16 @@ interface CodingSubmissionStore {
     codingSubmissionAction: null,
     setCodingSubmissionAction: (action) => set({ codingSubmissionAction: action }),
   }));
+
+
+interface isStudentEnrolledInOneCourseStore {
+    isStudentEnrolledInOneCourse : boolean;
+    setIsStudentEnrolledInOneCourse : (newValue: boolean) => void;
+}  
+
+export const useIsStudentEnrolledInOneCourseStore = create<isStudentEnrolledInOneCourseStore>((set) => ({
+    isStudentEnrolledInOneCourse : true,
+    setIsStudentEnrolledInOneCourse : (newValue: boolean) => {
+        set({ isStudentEnrolledInOneCourse : newValue })
+    }
+}))

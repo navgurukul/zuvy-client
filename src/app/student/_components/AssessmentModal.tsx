@@ -4,13 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, X } from "lucide-react";
 import AssessmentInstructions from "./AssessmentInstructions";
-
-interface AssessmentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  assessmentTitle: string;
-  duration: string;
-}
+import{AssessmentModalProps} from '@/app/student/_components/componentStudentType'
 
 const AssessmentModal = ({ isOpen, onClose, assessmentTitle, duration }: AssessmentModalProps) => {
   const [showInstructions, setShowInstructions] = useState(false);

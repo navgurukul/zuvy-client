@@ -26,7 +26,7 @@ const QuizResults = ({
     // Calculate statistics
     const totalQuestions = quizResults?.mcqs?.length || 0
     const correctAnswers = quizResults?.mcqs?.filter(
-        (result: any) => result.submissionsData?.status === 'passed'
+        (result:any) => result.submissionsData?.status === 'passed'
     )?.length || 0
     const totalMarks = quizResults?.mcqs?.reduce(
         (sum: number, result: any) => sum + (result.submissionsData?.status === 'passed' ? Number(result.mark) : 0), 

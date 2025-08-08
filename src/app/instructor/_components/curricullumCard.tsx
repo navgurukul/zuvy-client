@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import { isPlural } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
+import{Props,GetChaptersResponse}from '@/app/instructor/_components/componentInstructorTypes'
 
 import {
     BookOpenText,
@@ -12,20 +13,15 @@ import {
     PencilLine,
 } from 'lucide-react'
 
-type Props = {
-    course: any
-}
 
 const CurricullumCard = ({ course }: Props) => {
     const router = useRouter()
     const { viewcourses } = useParams()
     const [chapterId, setChapterId] = useState<any>()
-
     const timeAllotedInWeeks = Math.ceil(course.timeAlloted / 604800)
-
     const getChapterId = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<GetChaptersResponse >(
                 `tracking/getAllChaptersWithStatus/${course.id}`
             )
             setChapterId(response.data.trackingData[0].id)
@@ -51,7 +47,6 @@ const CurricullumCard = ({ course }: Props) => {
             )
         }
     }
-
     return (
         <div className="w-full flex items-center justify-between gap-y-2 cursor-pointer">
             <div className="w-full p-2" onClick={handleModuleRoute}>
