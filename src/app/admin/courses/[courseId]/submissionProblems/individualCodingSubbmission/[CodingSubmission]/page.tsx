@@ -42,11 +42,11 @@ const Page = ({ params }: any) => {
                 href: `/admin/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
-            {
-                crumb: 'Submission - Practice Problems',
-                href: `/admin/courses/${params.courseId}/submissions`,
-                isLast: false,
-            },
+            // {
+            //     crumb: 'Submission - Practice Problems',
+            //     href: `/admin/courses/${params.courseId}/submissions`,
+            //     isLast: false,
+            // },
             {
                 crumb: parsedCrumbData[1],
                 href: `/admin/courses/${params.courseId}/submissionProblems/${moduleId}`,

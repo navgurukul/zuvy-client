@@ -26,6 +26,7 @@ import {
     getChapterUpdateStatus,
     getCourseData,
 } from '@/store/store'
+import { useRouter } from 'next/navigation'
 
 type Chapter = {
     chapterId: number
@@ -53,6 +54,7 @@ interface QuizQuestionDetails {
 }
 
 function Chapter() {
+    const router = useRouter()
     const { courseId, moduleId, chapterID } = useParams()
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
@@ -80,6 +82,9 @@ function Chapter() {
     const dragTimeoutRef = useRef<NodeJS.Timeout | null>(null)
     const lastOrderRef = useRef<number[]>([]) // Track last processed order
     const isDragActiveRef = useRef(false) // Track if drag is currently active
+
+    const [flashingChapterId, setFlashingChapterId] = useState<number | null>(null)
+    const [borderFlashTimeout, setBorderFlashTimeout] = useState<NodeJS.Timeout | null>(null)
 
     const handleAddChapter = () => {
         setOpen(true)
@@ -116,6 +121,22 @@ function Chapter() {
         if (courseData?.name === "") fetchCourseDetails(courseID)
     }, [courseData])
 
+     const triggerBorderFlash = (chapterId: number) => {
+        setFlashingChapterId(chapterId)
+        
+        // Clear existing timeout if any
+        if (borderFlashTimeout) {
+            clearTimeout(borderFlashTimeout)
+        }
+        
+        // Set new timeout to hide border flash
+        const timeout = setTimeout(() => {
+            setFlashingChapterId(null)
+        }, 600) // Flash duration - 600ms
+        
+        setBorderFlashTimeout(timeout)
+    }
+
     const fetchChapters = useCallback(async () => {
         try {
             const response = await api.get(
@@ -131,11 +152,19 @@ function Chapter() {
             setModuleData(response.data.chapterWithTopic)
 
              // Store original data for comparison
-            setOriginalChapterData([...response.data.chapterWithTopic])
+            setOriginalChapterData([...response.data.chapterWithTopic.map((item: any) => ({ ...item }))])
             
             // Initialize last order reference
             lastOrderRef.current = response.data.chapterWithTopic.map((item: any) => item.chapterId)
         } catch (error) {
+            router.replace(
+                `/admin/courses/${courseId}/curriculum`
+            )
+            toast.info({
+                title: 'Caution',
+                description:
+                    'The Module has been deleted by another Admin'            
+            })
             console.error('Error fetching chapters:', error)
         }
     }, [moduleId, chapter_id, isChapterUpdated])
@@ -189,48 +218,68 @@ function Chapter() {
 
         // Only call API if drag is not active (i.e., drag has ended)
         if (!isDragActiveRef.current) {
-            dragTimeoutRef.current = setTimeout(async () => {
-                // Call updateChapterOrder for each chapter in new order
-                for (let i = 0; i < newOrderChapters.length; i++) {
-                    await updateChapterOrder(newOrderChapters[i].chapterId, i + 1)
-                }
-            }, 1200) // Very short delay for final drop
+            // dragTimeoutRef.current = setTimeout(async () => {
+            //     // Call updateChapterOrder for each chapter in new order
+            //     for (let i = 0; i < newOrderChapters.length; i++) {
+            //         await updateChapterOrder(newOrderChapters[i].chapterId, i + 1)
+            //     }
+            // }, 1200) // Very short delay for final drop
 
+             dragTimeoutRef.current = setTimeout(() => {
+            // Get the dragged chapter ID
+            const draggedId = draggedChapterRef.current
+            if (!draggedId) return
 
-        // const currentOrder = newOrderChapters.map(item => item.chapterId)
-        // const lastOrder = lastOrderRef.current
-
-        // const orderChanged = !lastOrder.every((id, idx) => id === currentOrder[idx])
-
-        // if (orderChanged) {
-        //     dragTimeoutRef.current = setTimeout(() => {
-        //         handleReorder(newOrderChapters)
-        //     }, 1000)
-        // }
+            // Find new and original positions
+            const newIndex = newOrderChapters.findIndex(c => c.chapterId === draggedId)
+            const originalIndex = originalChapterData.findIndex(c => c.chapterId === draggedId)
+            
+            // Only make API call if position actually changed
+            if (newIndex !== originalIndex && newIndex !== -1) {
+                updateChapterOrder(draggedId, newIndex + 1)
+            }
+        }, 300)
     }
-    }, [])
+    }, [[originalChapterData]])
 
     const handleDragStart = (chapterId: number) => {
         draggedChapterRef.current = chapterId
         isDragActiveRef.current = true
+        setIsDragging(true)
     }
     
     // Drag end par final position calculate karna
     const handleDragEnd = (newOrderChapters: any[]) => {
         isDragActiveRef.current = false
+        setIsDragging(false)
         const draggedId = draggedChapterRef.current
         if (!draggedId) return
 
         const newIndex = newOrderChapters.findIndex(c => c.chapterId === draggedId)
-        if (newIndex === -1) return
+        const originalIndex = originalChapterData.findIndex(c => c.chapterId === draggedId)
+        // if (newIndex === -1) return
+
+        if (newIndex !== originalIndex && newIndex !== -1) {
+        // Small delay to ensure drag animation completes
+        setTimeout(() => {
+            updateChapterOrder(draggedId, newIndex + 1)
+        }, 100)
+    }
 
         // Call API with draggedId and new position
-        updateChapterOrder(draggedId, newIndex + 1)
+        // updateChapterOrder(draggedId, newIndex + 1)
         draggedChapterRef.current = null
     }
 
     // Actual API call function
     const updateChapterOrder = async (chapterId: number, newPosition: number) => {
+
+        const originalPosition = originalChapterData.findIndex(c => c.chapterId === chapterId) + 1
+        const hasActuallyChanged = originalPosition !== newPosition
+
+        if (!hasActuallyChanged) {
+        return // Early return - no API call, no toast, no flash
+    }
         try {
             await api.put(
                 `/Content/editChapterOfModule/${moduleId}?chapterId=${chapterId}`,
@@ -242,7 +291,19 @@ function Chapter() {
                 title: 'Success',
                 description: 'Chapter order updated successfully',
             })
+
+            triggerBorderFlash(chapterId)
+
+            // if (hasActuallyChanged) {
+            //     triggerBorderFlash(chapterId)
+            // }
             // Update local reference
+
+             const updatedOriginalData = [...chapterData].map((item, index) => ({
+            ...item,
+            order: index + 1
+        }))
+        setOriginalChapterData(updatedOriginalData)
             lastOrderRef.current = chapterData.map(c => c.chapterId)
         } catch (error: any) {
             console.error('Reorder error:', error)
@@ -251,35 +312,12 @@ function Chapter() {
                 title: 'Failed',
                 description: error.response?.data?.message || 'An error occurred.',
             })
+            
 
             setChapterData([...originalChapterData]) // revert if failed
         }
     }
 
-    //    // Handle drag start
-    // const handleDragStart = useCallback(() => {
-
-    //     setIsDragging(true)
-    //     isDragActiveRef.current = true
-        
-    //     // Clear any pending API calls
-    //     if (dragTimeoutRef.current) {
-    //         clearTimeout(dragTimeoutRef.current)
-    //     }
-    //     console.log("darg start")
-    // }, [])
-
-    // // Handle drag end - This is when we actually want to make the API call
-    // const handleDragEnd = useCallback(() => {
-    //     console.log("darg end")
-    //     setIsDragging(false)
-    //     isDragActiveRef.current = false
-        
-    //     // Now trigger the API call with current chapter data
-    //     setTimeout(() => {
-    //         handleReorder(chapterData)
-    //     }, 1500) // Small delay to ensure state is updated
-    // }, [])
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -287,8 +325,12 @@ function Chapter() {
             if (dragTimeoutRef.current) {
                 clearTimeout(dragTimeoutRef.current)
             }
+
+            if (borderFlashTimeout) {
+                clearTimeout(borderFlashTimeout)
+            }
         }
-    }, [])
+    }, [borderFlashTimeout])
 
     const scrollToBottom = () => {
         const lastChapterElement = document.getElementById('last-chapter')
@@ -370,6 +412,7 @@ function Chapter() {
                                         isDragging={isDragging}
                                         onDragStart={() => handleDragStart(item.chapterId)}
                                         onDragEnd={() => handleDragEnd(chapterData)}
+                                        showBorderFlash={flashingChapterId === item.chapterId}
                                     />
                                 )
                             })}

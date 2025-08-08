@@ -681,6 +681,7 @@ function Page({ params }: { params: any }) {
                                         <FormControl>
                                             <Input
                                                 placeholder="Enter collaborator text"
+                                                maxLength={80}
                                                 {...field}
                                                 value={field.value || ''}
                                             />
