@@ -3,7 +3,7 @@ import SelectCodingQuestions from '@/app/admin/courses/[courseId]/module/_compon
 import SelectOpenEndedQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/SelectOpenEndedQuestions'
 import SelectQuizQuestions from '@/app/admin/courses/[courseId]/module/_components/Assessment/SelectQuizQuestions'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-
+import {QuestionComponentProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const selectedQuestions = ({
     selectedCodingQuestions,
     selectedQuizQuestions,
@@ -14,17 +14,7 @@ const selectedQuestions = ({
     questionType,
     tags,
     setIsNewQuestionAdded,
-}: {
-    selectedCodingQuestions: any
-    selectedQuizQuestions: any
-    selectedOpenEndedQuestions: any
-    setSelectedCodingQuestions: any
-    setSelectedQuizQuestions: any
-    setSelectedOpenEndedQuestions: any
-    questionType: string
-    tags: any
-    setIsNewQuestionAdded: any
-}) => {
+}:QuestionComponentProps) => {
     return (
         <div className="">
                 {/* <ScrollBar orientation="vertical" className='text-red-500' /> */}

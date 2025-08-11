@@ -37,26 +37,7 @@ import { proctoringOptions } from '@/utils/admin'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import PublishAssessmentDialog, { PublishData } from '../PublishDialog';
 import { Badge } from '@/components/ui/badge'
-
-type SettingsAssessmentProps = {
-    selectedCodingQuesIds: any
-    selectedQuizQuesIds: any
-    selectedOpenEndedQuesIds: any
-    selectedCodingQuesTagIds: any
-    selectedQuizQuesTagIds: any
-    content: any
-    fetchChapterContent: any
-    chapterTitle: string
-    saveSettings: boolean
-    setSaveSettings: (value: boolean) => void
-    setQuestionType: (value: string) => void
-    selectCodingDifficultyCount: any
-    selectQuizDifficultyCount: any
-    topicId: number
-    isNewQuestionAdded: boolean
-    setIsNewQuestionAdded: (value: boolean) => void
-    setChapterTitle: (value: string) => void
-}
+import {SettingsAssessmentProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectedCodingQuesIds,

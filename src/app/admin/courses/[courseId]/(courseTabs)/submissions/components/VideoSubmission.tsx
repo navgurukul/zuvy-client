@@ -52,7 +52,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                     (key) => 
                         {
                     if (['totalStudents', 'totalRows', 'message'].includes(key)) return null
-                    const videosArray = Array.isArray(videoData[key]) ? videoData[key] : []
+                    const videosArray: any[] = Array.isArray(videoData[key]) ? videoData[key] as any[] : [];
 
                     const filteredVideos = videosArray.filter((video:any) =>
                         debouncedSearch

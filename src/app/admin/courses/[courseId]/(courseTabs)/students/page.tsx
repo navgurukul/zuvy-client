@@ -39,7 +39,7 @@ interface Student {
 
 type StudentDataState = Student[]
 
-const Page = ({ params }: { params: any}) => {
+const Page = ({ params }: { params: any }) => {
     const router = useRouter()
     // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
     const {
@@ -60,7 +60,7 @@ const Page = ({ params }: { params: any}) => {
     } = useStudentData(params.courseId)
 
     const { batchData } = getBatchData()
-    const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
+    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [isOpen, setIsOpen] = useState(false)
     const [showSuggestions, setShowSuggestions] = useState(false)

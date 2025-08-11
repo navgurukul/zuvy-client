@@ -9,33 +9,18 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
-
-interface OpenEndedQuestion {
-    id: number
-    question: string
-    difficulty: string
-    tagId: number
-    marks: number
-    usage: number
-}
+import {OpenEndedQuestiones, OpenEndedQuestionesProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const OpenEndedQuestions = ({
     questions,
     setSelectedQuestions,
     selectedQuestions,
     tags,
-}: {
-    questions: OpenEndedQuestion[]
-    setSelectedQuestions: React.Dispatch<
-        React.SetStateAction<OpenEndedQuestion[]>
-    >
-    selectedQuestions: OpenEndedQuestion[]
-    tags: any
-}) => {
+}:OpenEndedQuestionesProps) => {
     return (
         <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
-            {questions.map((question: OpenEndedQuestion) => {
+            {questions.map((question: OpenEndedQuestiones) => {
                 const tag = tags?.find(
                     (tag: any) => tag?.id === question?.tagId
                 )
@@ -90,7 +75,7 @@ const OpenEndedQuestions = ({
                             </div>
                             <div className="flex">
                                 {selectedQuestions.some(
-                                    (q: OpenEndedQuestion) =>
+                                    (q: OpenEndedQuestiones) =>
                                         q.id === question.id
                                 ) ? (
                                     <svg
@@ -113,7 +98,7 @@ const OpenEndedQuestions = ({
                                         onClick={() => {
                                             if (
                                                 !selectedQuestions.some(
-                                                    (q: OpenEndedQuestion) =>
+                                                    (q: OpenEndedQuestiones) =>
                                                         q.id === question.id
                                                 )
                                             ) {

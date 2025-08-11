@@ -21,21 +21,7 @@ import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
-
-type AddAssessmentProps = {
-    chapterData: any
-    content: any
-    fetchChapterContent: (chapterId: number, topicId: number) => void
-    moduleId: any
-    topicId: any
-    activeChapterTitle: string
-}
-
-export type Tag = {
-    id: number
-    tagName: string
-}
-
+import {AddAssessmentProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const AddAssessment: React.FC<AddAssessmentProps> = ({
     chapterData,
     content,
@@ -488,13 +474,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             {questionType === 'mcq' && (
                                 <QuizQuestions
                                     questions={filteredQuestions}
-                                    setSelectedQuestions={
-                                        setSelectedQuizQuestions
-                                    }
+                                    setSelectedQuestions={setSelectedQuizQuestions}
                                     selectedQuestions={selectedQuizQuestions}
                                     tags={tags}
-                                    setIsNewQuestionAdded={setIsNewQuestionAdded}
-                                />
+                                    setIsNewQuestionAdded={setIsNewQuestionAdded} type={''}                                />
                             )}
                             {questionType === 'open-ended' && (
                                 <OpenEndedQuestions
