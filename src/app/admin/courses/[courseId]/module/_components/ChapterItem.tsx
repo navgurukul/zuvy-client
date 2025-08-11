@@ -19,6 +19,7 @@ import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
 import { Reorder, useDragControls } from 'framer-motion'
+import {ChapterItems} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
 function ChapterItem({
     title,
@@ -37,24 +38,7 @@ function ChapterItem({
     onDragStart,
     onDragEnd,
     showBorderFlash,
-}: {
-    title: string
-    topicId: number
-    topicName: string
-    chapterId: number
-    activeChapter: number
-    setActiveChapter: any
-    fetchChapters: () => void
-    moduleId: string
-    activeChapterRef: any
-    isChapterClickedRef: any
-    chapterData: any
-    isLastItem?: boolean
-    isDragging?: boolean
-    onDragStart: () => void
-    onDragEnd: () => void
-    showBorderFlash?: boolean
-}) {
+}:ChapterItems) {
     // states and variables
     const { courseId } = useParams()
     const router = useRouter()

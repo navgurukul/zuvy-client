@@ -10,6 +10,7 @@ import { getChapterUpdateStatus } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
+import {CodingTopicsProps,CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 
 const SelectedProblems = ({
     selectedQuestions,
@@ -18,14 +19,7 @@ const SelectedProblems = ({
     moduleId,
     chapterTitle,
     tags
-}: {
-    selectedQuestions: any
-    setSelectedQuestions: any
-    content: any
-    moduleId: string
-    chapterTitle: string
-    tags: any
-}) => {
+}:CodingTopicsProps) => {
 
     const handleRemoveLastQuestion = () => {
         setSelectedQuestions([])

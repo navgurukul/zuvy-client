@@ -9,28 +9,7 @@ import {
     requestFullScreen,
 } from '@/utils/students'
 import QuestionDescriptionModal from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
-
-interface QuestionCardProps {
-    id: number
-    title: string
-    difficulty: string
-    description: string
-    status: string
-    tagName: any
-    tagId?: number
-    isSuccess?: boolean
-    onSolveChallenge: (id: number) => void
-}
-
-interface questionDetails {
-    id: any
-    title: string
-    description: string
-    difficulty: string
-    constraints?: string
-    testCases?: string
-    examples: { input: number[]; output: number }
-}
+import {QuestionCardProps,questionDetails} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
 function CodingQuestionCard({
     id,
@@ -53,7 +32,7 @@ function CodingQuestionCard({
         difficulty: '',
     })
 
-    const handleSolveChallenge = (id: any) => {
+    const handleSolveChallenge = (id: number) => {
         onSolveChallenge(id)
         // requestFullScreen(document.documentElement)
     }
