@@ -423,6 +423,33 @@ const Courses: React.FC = () => {
         })
     }
 
+    function getValidImageUrl(url: string): string | null {
+        if (typeof url !== "string" || url.trim() === "") {
+            return null;
+        }
+
+        const trimmedUrl = url.trim();
+
+        // Check if it starts with valid protocol or relative path
+        const isValidStart =
+            trimmedUrl.startsWith("/") ||
+            trimmedUrl.startsWith("http://") ||
+            trimmedUrl.startsWith("https://");
+
+        // Check for common image extensions
+        const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".tiff"];
+        const hasValidExtension = imageExtensions.some((ext) =>
+            trimmedUrl.toLowerCase().includes(ext)
+        );
+
+        if (isValidStart && hasValidExtension) {
+            return trimmedUrl;
+        }
+
+        return '';
+    }
+
+
     return (
         <>
             {loading ? (
@@ -502,11 +529,11 @@ const Courses: React.FC = () => {
                                                                 'px-3 py-2.5 cursor-pointer text-sm transition-colors',
                                                                 'hover:bg-muted/50',
                                                                 index ===
-                                                                    selectedSuggestionIndex &&
-                                                                    'bg-muted',
+                                                                selectedSuggestionIndex &&
+                                                                'bg-muted',
                                                                 index !==
-                                                                    filteredSuggestions.length -
-                                                                        1
+                                                                filteredSuggestions.length -
+                                                                1
                                                             )}
                                                             onClick={() =>
                                                                 handleSuggestionClick(
@@ -687,42 +714,45 @@ const Courses: React.FC = () => {
                             ) : (
                                 <div>
                                     <div className="flex flex-wrap justify-center gap-3">
-                                        {courses.map((course, index) => (
-                                            <Card
-                                                key={index}
-                                                className={`h-max w-[400px] cursor-pointer hover:shadow-lg transition-shadow duration-200`}
-                                                onClick={() =>
-                                                    handleCardClick(course.id)
-                                                }
-                                            >
-                                                <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                                                    <OptimizedImageWithFallback
-                                                        src={course.coverImage}
-                                                        alt={course.name}
-                                                        fallBackSrc={
-                                                            '/logo_white.png'
-                                                        }
-                                                    />
-                                                </div>
-                                                <div className="text-start px-4 py-3 bg-muted">
-                                                    <p className="capitalize mb-2 font-semibold">
-                                                        {course.name}
-                                                    </p>
-                                                    <div className="flex gap-2 items-center">
-                                                        <GraduationCap
-                                                            width={20}
+                                        {courses.map((course, index) => {
+
+                                            const validImageUrl = getValidImageUrl(course.coverImage);
+
+                                            return (
+                                                <Card
+                                                    key={index}
+                                                    className={`h-max w-[400px] cursor-pointer hover:shadow-lg transition-shadow duration-200`}
+                                                    onClick={() =>
+                                                        handleCardClick(course.id)
+                                                    }
+                                                >
+                                                    <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                                                        <OptimizedImageWithFallback
+                                                            src={validImageUrl ?? ""}
+                                                            alt={course.name || "Course Image"}
+                                                            fallBackSrc="/logo_white.png"
                                                         />
-                                                        <span className="text-sm font-semibold">
-                                                            {
-                                                                course.students_in_bootcamp
-                                                            }{' '}
-                                                            Learners
-                                                        </span>
-                                                        {/* <span>{course.date}</span> */}
                                                     </div>
-                                                </div>
-                                            </Card>
-                                        ))}
+                                                    <div className="text-start px-4 py-3 bg-muted">
+                                                        <p className="capitalize mb-2 font-semibold">
+                                                            {course.name}
+                                                        </p>
+                                                        <div className="flex gap-2 items-center">
+                                                            <GraduationCap
+                                                                width={20}
+                                                            />
+                                                            <span className="text-sm font-semibold">
+                                                                {
+                                                                    course.students_in_bootcamp
+                                                                }{' '}
+                                                                Learners
+                                                            </span>
+                                                            {/* <span>{course.date}</span> */}
+                                                        </div>
+                                                    </div>
+                                                </Card>
+                                            );
+                                        })}
                                     </div>
                                     <DataTablePagination
                                         totalStudents={totalBootcamps}
