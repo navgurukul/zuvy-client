@@ -337,8 +337,6 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   };
 
   const getItemDetails = (item: any) => {
-
-    console.log(item.type)
     if (item.type === 'live-class') {
       return 'Live Class';
     }
