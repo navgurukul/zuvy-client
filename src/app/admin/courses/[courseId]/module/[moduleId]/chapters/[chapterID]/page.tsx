@@ -23,28 +23,11 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
 import { useRouter } from 'next/navigation'
-
-interface QuizOptions {
-    option1: string
-    option2: string
-    option3: string
-    option4: string
-}
-
-interface QuizQuestionDetails {
-    id: number
-    question: string
-    options: QuizOptions
-    correctOption: string
-    marks: null | number
-    difficulty: string
-    tagId: number
-}
-
+import {ChaptersQuizQuestionDetails} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType"
 export default function Page({
     params,
 }: {
-    params: { moduleId: any; courseId: any }
+    params: { moduleId: string; courseId: string }
 }) {
     const router = useRouter()
     const heightClass = useResponsiveHeight()

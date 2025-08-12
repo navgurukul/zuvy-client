@@ -19,31 +19,10 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { b64DecodeUnicode } from '@/utils/base64'
+import {QuestionIdquestionDetails,QuestionIdTestCase,QuestionIdInput,QuestionParams } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/coding/[codingQuestionId]/articleCodingPageType"
 
-interface questionDetails {
-    title: string
-    description: string
-    constraints: string
-    testCases: TestCase[]
-    examples: { input: number[]; output: number }
-}
-
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
-
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
-
-function IdePreview({ params }: { params: any }) {
-    const [questionDetails, setQuestionDetails] = useState<questionDetails>({
+function IdePreview({ params }: { params: QuestionParams}) {
+    const [questionDetails, setQuestionDetails] = useState<QuestionIdquestionDetails>({
         title: '',
         description: '',
         constraints: '',
@@ -181,7 +160,7 @@ function IdePreview({ params }: { params: any }) {
                                                           ?.slice(0, 2)
                                                           .map(
                                                               (
-                                                                  testCase: TestCase,
+                                                                  testCase: QuestionIdTestCase,
                                                                   index: number
                                                               ) => (
                                                                   <div
@@ -198,7 +177,7 @@ function IdePreview({ params }: { params: any }) {
                                                                       )
                                                                           ? testCase.inputs.map(
                                                                                 (
-                                                                                    input: Input,
+                                                                                    input: QuestionIdInput,
                                                                                     idx: number
                                                                                 ) => (
                                                                                     <p
