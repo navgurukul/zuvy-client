@@ -305,7 +305,6 @@ const IDE: React.FC<IDEProps> = ({
     }, [])
 
 
- console.log(codingSubmissionAction)
 
 
     return (
