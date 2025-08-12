@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/dialog'
 import { Check } from 'lucide-react'
 import { getIsReattemptApproved } from "@/store/store"
+import {ReattemptData} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/individualReportApproveType"
 
-const ApproveReattempt = ({ data }: { data: any }) => {
+const ApproveReattempt = ({ data }: { data: ReattemptData }) => {
     const [reattemptRequested, setReattemptRequested] = useState(data?.reattemptRequested)
     const [reattemptApproved, setReattemptApproved] = useState(data?.reattemptApproved)
     const { setIsReattemptApproved } = getIsReattemptApproved()

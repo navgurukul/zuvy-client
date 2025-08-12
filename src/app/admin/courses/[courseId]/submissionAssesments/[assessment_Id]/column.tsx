@@ -364,9 +364,14 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <>
                     <DownloadReport
-                        userInfo={row.original}
-                        submitedAt={submitedAt}
-                    />
+                     userInfo={{
+                      userId: String(row.original.userId),
+                      id: String(row.original.id),
+                      title: row.original.title ?? ''
+                    }}
+                    submitedAt={submitedAt}
+                />
+
                 </>
             )
         },

@@ -6,8 +6,9 @@ import { color } from 'framer-motion'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { ArrowBigDownDash } from 'lucide-react'
+import {PracticeCode,ReportData,DownloadReportProps }from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/submissionComponentDownloadType"
 
-const DownloadReport = ({ userInfo, submitedAt }: any) => {
+const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
     const { userId, id, title } = userInfo
 
     const formatDate = (dateString: string) => {
@@ -30,7 +31,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
         }
     }
 
-    async function generatePDF(reportData: any) {
+    async function generatePDF(reportData: ReportData) {
         const doc = new jsPDF()
 
         // Add Assessment Summary at the Top
@@ -79,10 +80,10 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             theme: 'grid',
             headStyles: {
                 fillColor: [96, 144, 130],
-                textColor: [255, 255, 255], // White text for contrast
+                textColor: [255, 255, 255], 
             },
             bodyStyles: {
-                textColor: [0, 0, 0], // Black text for body cells
+                textColor: [0, 0, 0],
             },
             columnStyles: {
                 0: { cellWidth: 120 },
@@ -127,13 +128,13 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             body: [
                   [
                       'Total MCQ Attempted',
-                    `${Math.round(reportData.attemptedMCQQuestions) || 0} / ${
+                    `${Math.round(reportData.attemptedMCQQuestions ?? 0) || 0} / ${
                         reportData?.submitedOutsourseAssessment?.totalMcqQuestions || 0
                     }`
                 ],
                 [
                     'MCQ Score',
-                    `${Math.round(reportData.mcqScore) || 0} / ${
+                    `${Math.round(reportData.mcqScore ?? 0) || 0} / ${
                         reportData?.submitedOutsourseAssessment?.weightageMcqQuestions || 0
                     }`
                 ]
@@ -154,7 +155,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
 
         // Create an array to hold all rows for the table
         const tableData = reportData.PracticeCode.map(
-            (practiceCode: any, index: any) => [
+            (practiceCode: PracticeCode, index: number) => [
                 `Q${index + 1}. ${practiceCode.questionDetail.title}`,
                 practiceCode.status == 'Accepted'
                     ? 'Correct Answer'

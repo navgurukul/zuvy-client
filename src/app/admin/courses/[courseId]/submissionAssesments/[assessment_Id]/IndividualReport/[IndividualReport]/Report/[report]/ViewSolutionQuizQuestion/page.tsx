@@ -3,48 +3,17 @@ import React, { useState, useEffect, useCallback } from 'react'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getProctoringDataStore } from '@/store/store'
-import { paramsType } from '../ViewSolutionOpenEnded/page'
+import { PageparamsType } from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionOpenEnded/ViewSolutionPageType"
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import {SubmissionData,BootcampData,QuizDetails} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionQuizQuestion/viewQuizQuestionPageType"
 
-type SubmissionData = {
-    id: number
-    userId: number
-    chosenOption: number
-    questionId: number
-    attemptCount: number
-}
-
-type QuizOptions = {
-    [key: string]: string
-}
-
-type Quiz = {
-    id: number
-    question: string
-    options: QuizOptions
-    difficulty: string
-    correctOption: number
-    marks: number | null
-}
-
-type QuizDetails = {
-    id: number
-    quiz_id: number
-    assessmentOutsourseId: number
-    bootcampId: number
-    chapterId: number
-    createdAt: string
-    submissionsData: SubmissionData[]
-    Quiz: Quiz
-}
-
-const Page = ({ params }: { params: paramsType }) => {
+const Page = ({ params }: { params: PageparamsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
-    const [bootcampData, setBootcampData] = useState<any>()
-    const [assesmentData, setAssesmentData] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<BootcampData| null>(null)
+    const [assesmentData, setAssesmentData] = useState<SubmissionData | null>(null)
     const [quizQuestionDetails, setQuizQuiestionDetails] = useState<any>()
     const [loading, setLoading] = useState<boolean>(true)
     const codeBlockClass =
@@ -169,7 +138,7 @@ const Page = ({ params }: { params: paramsType }) => {
 
                 <div>
                     {quizQuestionDetails?.mcqs?.map(
-                        (quizDetail: any, index: number) => {
+                        (quizDetail: QuizDetails, index: number) => {
                             const { submissionsData } = quizDetail
                             const chosenOption = submissionsData?.chosenOption
                             const isAttempted =

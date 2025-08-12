@@ -18,26 +18,15 @@ import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { fetchStudentAssessments } from '@/utils/admin'
 import { POSITION } from '@/utils/constant'
+import {PageParams,Suggestion,BootcampData, SubmissionData } from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/individualReportApproveType"
 
-type Props = {}
 
-interface PageParams {
-    courseId: string
-    assessment_Id: string
-}
-
-interface Suggestion {
-    id: string;
-    name: string;
-    email: string;
-}
-
-const Page = ({ params }: any) => {
+const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
 
-    const [assesmentData, setAssessmentData] = useState<any>()
+    const [assesmentData, setAssessmentData] = useState<SubmissionData | null>(null)
     const [searchInputValue, setSearchInputValue] = useState<string>('')
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
@@ -64,7 +53,7 @@ const Page = ({ params }: any) => {
     const debouncedInputValue = useDebounce(searchInputValue, 300)
 
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<BootcampData|null>(null)
     const [passPercentage, setPassPercentage] = useState<number>(0)
 
     const crumbs = [
@@ -359,7 +348,7 @@ const Page = ({ params }: any) => {
                             </div>
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalSubmitedStudents}
+                                    {assesmentData?.totalSubmitedStudent}
                                 </h1>
                                 <p className="text-gray-500 ">
                                     Submissions Received
@@ -368,9 +357,10 @@ const Page = ({ params }: any) => {
                             <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
                                     {(
-                                        assesmentData?.totalStudents -
-                                        assesmentData?.totalSubmitedStudents
+                                    (assesmentData?.totalStudents ?? 0) - 
+                                    (assesmentData?.totalSubmitedStudent ?? 0)
                                     ).toString()}
+
                                 </h1>
                                 <p className="text-gray-500 ">
                                     Not Yet Submitted
