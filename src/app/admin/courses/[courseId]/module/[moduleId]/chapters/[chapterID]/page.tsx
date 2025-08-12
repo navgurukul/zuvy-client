@@ -22,29 +22,14 @@ import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
-
-interface QuizOptions {
-    option1: string
-    option2: string
-    option3: string
-    option4: string
-}
-
-interface QuizQuestionDetails {
-    id: number
-    question: string
-    options: QuizOptions
-    correctOption: string
-    marks: null | number
-    difficulty: string
-    tagId: number
-}
-
+import { useRouter } from 'next/navigation'
+import {ChaptersQuizQuestionDetails} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType"
 export default function Page({
     params,
 }: {
-    params: { moduleId: any; courseId: any }
+    params: { moduleId: string; courseId: string }
 }) {
+    const router = useRouter()
     const heightClass = useResponsiveHeight()
     const { courseId, moduleId, chapterID } = useParams()
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
@@ -97,16 +82,18 @@ export default function Page({
     )
 
     useEffect(() => {
-        // if (chapterData.length > 0 && topicId != null) {
-        //     fetchChapterContent(chapter_id, topicId)
-        //     // fetchChapterContent(activeChapter, topicId)
-        // } 
-        
-         if (chapterData.length > 0 && topicId != null && chapter_id > 0) {
+        if (chapterData.length > 0 && topicId != null && chapter_id > 0) {
             // Check if we actually need to fetch (chapter changed)
             if (chapterId !== chapter_id) {
                 fetchChapterContent(chapter_id, topicId)
-            } } else {
+            }
+        } else {
+            if (moduleData.length > 0) {
+                const firstChapterId = moduleData[0].chapterId
+                router.replace(
+                    `/admin/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
+                )
+            }
             setActiveChapter(0)
             setChapterContent([])
             setActiveChapterTitle('')
@@ -133,23 +120,13 @@ export default function Page({
             switch (topicId) {
                 case 1:
                     return (
-                        // <ScrollArea
-                        //     // className="h-[600px] lg:h-[600px] pr-4"
-                        //     className={`${heightClass} pr-4`}
-                        //     type="hover"
-                        //     style={{
-                        //         scrollbarWidth: 'none', // Firefox
-                        //         msOverflowStyle: 'none', // IE and Edge
-                        //     }}
-                        // >
-                            <AddVideo
-                                key={chapterId}
-                                moduleId={moduleID}
-                                courseId={courseId}
-                                content={chapterContent}
-                                fetchChapterContent={fetchChapterContent}
-                            />
-                        // </ScrollArea>
+                        <AddVideo
+                            key={chapterId}
+                            moduleId={moduleID}
+                            courseId={courseId}
+                            content={chapterContent}
+                            fetchChapterContent={fetchChapterContent}
+                        />
                     )
                 case 2:
                     return (
@@ -247,7 +224,6 @@ export default function Page({
                             </div>
                         </div>
                     ) : (
-                        // <h1>Create New Chapter</h1>
                         <div className="flex flex-col items-center justify-center min-h-[80vh] relative">
                             <div className="absolute left-1/2 -translate-x-1/2 md:left-[380px] md:translate-x-0">
                                 <img
@@ -255,7 +231,9 @@ export default function Page({
                                     alt="Create Chapter"
                                     className="lg:w-[280px] lg:h-[280px] md:w-[320px] md:h-[320px] object-contain mb-3 opacity-80"
                                 />
-                                <p className="absolute text-lg text-center lg:left-[45px]">Create New Chapter</p>
+                                <p className="absolute text-lg text-center lg:left-[45px]">
+                                    Create New Chapter
+                                </p>
                             </div>
                         </div>
                     )}

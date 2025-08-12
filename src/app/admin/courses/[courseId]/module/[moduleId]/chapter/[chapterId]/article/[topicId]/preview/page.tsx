@@ -8,15 +8,11 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import { useSearchParams } from 'next/navigation'
+import {PageEditorDoc,PageParams} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/article/moduleIdArticalPageType"
 
-type EditorDoc = {
-    type: string
-    content: any[]
-}
-
-const PreviewArticle = ({ params }: { params: any }) => {
+const PreviewArticle = ({ params }: { params: PageParams }) => {
     const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
+        { doc: PageEditorDoc } | undefined
     >()
     const searchParams = useSearchParams()
     const isPdf = searchParams.get('pdf') === 'true'

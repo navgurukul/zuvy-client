@@ -7,10 +7,11 @@ import Image from 'next/image'
 import useDebounce from '@/hooks/useDebounce'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import {AssessmentSubmissions,StudentAssessmentSubmission,APIResponses} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
 // import assesmentNotfound from @/public
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
-    const [assesments, setAssesments] = useState<any>()
+    const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(null)
     const debouncedSearch = useDebounce(searchTerm, 300)
 
     const getAssessments = useCallback(async () => {
@@ -33,13 +34,13 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         getAssessments()
     }, [getAssessments])
 
-    const handleDownloadPdf = async (assessment: any) => {
+    const handleDownloadPdf = async (assessment:AssessmentSubmissions) => {
         if (!assessment) return
 
         const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
 
         try {
-            const response = await api.get(apiUrl)
+            const response = await api.get<APIResponses>(apiUrl)
             const assessments = response.data.submitedOutsourseAssessments
             const requiredCodingScore =
                 assessments[0]?.requiredCodingScore || null
@@ -91,7 +92,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 { header: 'Copy Pasted', dataKey: 'copyPaste' },
             ]
 
-            const rows = assessments.map((student: any) => ({
+            const rows = assessments.map((student: StudentAssessmentSubmission) => ({
                 name: student.name || 'N/A',
                 email: student.email || 'N/A',
                 qualified: student.isPassed ? 'Yes' : 'No',
@@ -149,7 +150,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         }
     }
 
-    const handleDownloadCsv = async (assessment: any) => {
+    const handleDownloadCsv = async (assessment: AssessmentSubmissions) => {
         if (!assessment) return
 
         const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
@@ -179,7 +180,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 'Copy Pasted',
             ]
 
-            const rows = assessments.map((student: any) => [
+            const rows = assessments.map((student: StudentAssessmentSubmission) => [
                 student.name || 'N/A',
                 student.email || 'N/A',
                 student.isPassed ? 'Yes' : 'No',
@@ -230,10 +231,10 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                     </h2>
                                     <div className="grid md:grid-cols-3 gap-3">
                                         {assesments[key].map(
-                                            (assessment: any) => (
+                                            (assessment:AssessmentSubmissions) => (
                                                 <AssesmentComponent
                                                     key={assessment.id}
-                                                    id={assessment.id}
+                                                   id={Number(assessment.id)}
                                                     title={assessment.title}
                                                     codingChallenges={
                                                         assessment.totalCodingQuestions
@@ -245,7 +246,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                                         assessment.totalOpenEndedQuestions
                                                     }
                                                     totalSubmissions={
-                                                        assesments.totalStudents
+                                                        assesments?.totalStudents
                                                     }
                                                     studentsSubmitted={
                                                         assessment.totalSubmitedAssessments

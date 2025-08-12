@@ -30,27 +30,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-
-interface ContentDetail {
-    title: string
-    description: string | null
-    links: string | null
-    file: string | null
-    content: string | null
-}
-
-interface Content {
-    id: number
-    moduleId: number
-    topicId: number
-    order: number
-    contentDetails: ContentDetail[]
-}
-
-type EditorDoc = {
-    type: string
-    content: any[]
-}
+import {EditorDocArcticle} from "@/app/admin/courses/[courseId]/module/_components/Article/courseModuleArticleType"
 
 const AddArticle = ({
     content,
@@ -78,9 +58,9 @@ const AddArticle = ({
     const [deleteLoading, setIsDeleteLoading] = useState(false)
     const { setArticlePreviewContent } = getArticlePreviewStore()
     const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
+        { doc: EditorDocArcticle } | undefined
     >()
-    const [isEditorSaved, setIsEditorSaved] = useState(false) // <-- Add this state
+    const [isEditorSaved, setIsEditorSaved] = useState(false) 
     const hasFetched = useRef(false)
     const [hasEditorContent, setHasEditorContent] = useState(false)
     const [previousContentHash, setPreviousContentHash] = useState('')
@@ -461,6 +441,11 @@ const AddArticle = ({
                                                         // FIXED: Always update the same title state
                                                         setTitle(e.target.value)
                                                         field.onChange(e)
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter') {
+                                                          e.preventDefault() 
+                                                        }
                                                     }}
                                                     placeholder={
                                                         defaultValue === 'editor'

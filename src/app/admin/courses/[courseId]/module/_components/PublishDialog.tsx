@@ -15,21 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-
-export type PublishData = {
-    publishDateTime?: string | null; // UTC ISO string - Allow null
-    startDateTime?: string | null;   // UTC ISO string - Allow null
-    endDateTime?: string | null;     // UTC ISO string - Allow null
-    action: 'schedule' | 'publishNow' | 'moveToDraft'; // Added 'moveToDraft'
-  };
-  
-type PublishAssessmentDialogProps = {
-    onSave: (data: PublishData) => void;
-    currentAssessmentStatus?: string; // Added
-    initialPublishDate?: string | null;    // Added
-    initialStartDate?: string | null;      // Added
-    initialEndDate?: string | null;        // Added
-};
+import {PublishData,PublishAssessmentDialogs} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
 // Helper function to parse ISO string to Date and time string (HH:mm)
 const parseIsoToDateAndTime = (isoString?: string | null) => { // Allow null for isoString
@@ -48,7 +34,7 @@ const parseIsoToDateAndTime = (isoString?: string | null) => { // Allow null for
     return { date: new Date(), time: '' }; // Default if no string provided
 };
 
-const PublishAssessmentDialog: React.FC<PublishAssessmentDialogProps> = ({
+const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
     onSave,
     currentAssessmentStatus, // Destructured
     initialPublishDate,      // Destructured

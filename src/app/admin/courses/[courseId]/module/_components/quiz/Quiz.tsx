@@ -2,10 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
-import {
-    quizData,
-    Options,
-} from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
+import {QuizDataLibrary,LibraryOptions} from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizModal'
@@ -21,12 +18,13 @@ import {
 import { ArrowUpRightSquare, Pencil } from 'lucide-react'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import {QuizProps} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 
-function Quiz(props: any) {
+function Quiz(props: QuizProps) {
     const router = useRouter()
     const [tags, setTags] = useState<PageTag[]>([])
     const [isOpen, setIsOpen] = useState(false)
-    const [addQuestion, setAddQuestion] = useState<quizData[]>([])
+    const [addQuestion, setAddQuestion] = useState<QuizDataLibrary[]>([])
     const [questionId, setQuestionId] = useState()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const [quizTitle, setQuizTitle] = useState('')
@@ -37,16 +35,16 @@ function Quiz(props: any) {
     const hasLoaded = useRef(false)
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
-    const [savedQuestions, setSavedQuestions] = useState<quizData[]>([])
+    const [savedQuestions, setSavedQuestions] = useState<QuizDataLibrary[]>([])
 
-    const handleAddQuestion = (data: any) => {
-        const uniqueData = data.filter((question: quizData) => {
+    const handleAddQuestion = (data: QuizDataLibrary[]) => {
+        const uniqueData = data.filter((question: QuizDataLibrary) => {
             return !addQuestion.some(
-                (existingQuestion: quizData) =>
+                (existingQuestion: QuizDataLibrary) =>
                     existingQuestion.id === question.id
             )
         })
-        setAddQuestion((prevQuestions: quizData[]) => [
+        setAddQuestion((prevQuestions: QuizDataLibrary[]) => [
             ...prevQuestions,
             ...uniqueData,
         ])
@@ -78,7 +76,7 @@ function Quiz(props: any) {
         const response = await api.get('Content/allTags')
         if (response) {
             const transformedData = response.data.allTags.map(
-                (item: { id: any; tagName: any }) => ({
+                (item: { id: number; tagName: string }) => ({
                     id: item.id.toString(),
                     tagName: item.tagName,
                 })
@@ -91,8 +89,8 @@ function Quiz(props: any) {
         }
     }
     const removeQuestionById = (questionId: number) => {
-        setAddQuestion((prevQuestions: any) =>
-            prevQuestions.filter((question: any) => question?.id !== questionId)
+        setAddQuestion((prevQuestions:QuizDataLibrary[]) =>
+            prevQuestions.filter((question: QuizDataLibrary) => question?.id !== questionId)
         )
     }
 
@@ -276,7 +274,7 @@ function Quiz(props: any) {
                             </div>
                             <ScrollArea className="h-96 pr-3 pb-10">
                                 {addQuestion?.map(
-                                    (questions: quizData, index: number) => (
+                                    (questions: QuizDataLibrary, index: number) => (
                                         <QuizModal
                                             key={index}
                                             tags={tags}

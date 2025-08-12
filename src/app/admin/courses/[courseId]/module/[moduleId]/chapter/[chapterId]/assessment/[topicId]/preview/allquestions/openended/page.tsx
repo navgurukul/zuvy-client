@@ -18,8 +18,9 @@ import {
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
 import { fetchPreviewData } from '@/utils/admin'
+import {PageQuizQuestion, MCQParams} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/mcq/ArticleMcqPageType"
 
-const OpenEndedPreview = ({ params }: { params: any[] }) => {
+const OpenEndedPreview = ({ params }: { params: MCQParams[] }) => {
     const router = useRouter()
     const [assessmentPreviewContent, setAssessmentPreviewContent] =
         useState<any>([])
@@ -58,7 +59,7 @@ const OpenEndedPreview = ({ params }: { params: any[] }) => {
             <Form {...form}>
                 <form className="flex flex-col items-center mt-10">
                     {assessmentPreviewContent?.OpenEndedQuestions?.map(
-                        (question: any, index: any) => (
+                        (question: PageQuizQuestion, index: number) => (
                             <FormField
                                 key={question.id}
                                 control={form.control}

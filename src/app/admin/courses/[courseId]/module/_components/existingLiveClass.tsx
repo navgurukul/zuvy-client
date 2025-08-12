@@ -18,10 +18,7 @@ import {
     DialogClose,
 } from "@/components/ui/dialog"
 
-type ExistingLiveClassProps = {
-    fetchingChapters: () => void;
-    onClose: () => void;
-};
+import {ExistingLiveClassProps} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps) => {
     const [position, setPosition] = useState(POSITION)
     const [selectedRows, setSelectedRows] = useState<any[]>([])

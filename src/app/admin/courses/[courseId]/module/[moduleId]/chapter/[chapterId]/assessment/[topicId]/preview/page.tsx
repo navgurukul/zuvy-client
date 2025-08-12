@@ -14,8 +14,9 @@ import { AlertOctagon, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import {PriviewTag, Params } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/PreviewPageType"
 
-const PreviewAssessment = ({ params }: { params: any }) => {
+const PreviewAssessment = ({ params }: { params: Params }) => {
     const { assessmentPreviewContent, setAssessmentPreviewContent } =
         getAssessmentPreviewStore()
 

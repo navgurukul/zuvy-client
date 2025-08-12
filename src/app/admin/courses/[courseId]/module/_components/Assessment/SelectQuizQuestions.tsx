@@ -9,31 +9,14 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
-
-interface MCQQuestion {
-    id: number
-    question: string
-    options: Record<string, string>
-    correctOption: number
-    marks: number | null
-    difficulty: string
-    tagId: number
-    usage: number
-}
-
+import {SelectQuizMCQQuestion,setSelectedCodingQuestionsProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const SelectQuizQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
     type,
     setIsNewQuestionAdded,
-}: {
-    setSelectedQuestions: any
-    selectedQuestions: any
-    tags: any
-    type: string
-    setIsNewQuestionAdded: any
-}) => {
+}:setSelectedCodingQuestionsProps) => {
 
     const handleQuestionRemoval = (
         question: { id: number }, // Assuming 'id' is a number, adjust as needed

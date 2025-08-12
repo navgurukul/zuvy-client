@@ -2,13 +2,9 @@ import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 import React from 'react'
 import ReactPlayer from 'react-player'
+import {PreviewProps} from "@/app/admin/courses/[courseId]/module/_components/video/ModuleVideoType"
 
-type Props = {
-    content: any
-    setShowPreview: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-const PreviewVideo = ({ content, setShowPreview }: Props) => {
+const PreviewVideo = ({ content, setShowPreview }: PreviewProps) => {
     return (
         <div className="w-full flex flex-col items-center justify-center">
             <div className="w-full flex items-start">

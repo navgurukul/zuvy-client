@@ -12,18 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import QuestionDescriptionModal from './QuestionDescriptionModal'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
-
-interface MCQQuestion {
-    id: number
-    question: string
-    options: Record<string, string>
-    correctOption: number
-    marks: number | null
-    difficulty: string
-    tagId: number
-    usage: number
-    quizVariants: any
-}
+import {MCQQuestion,CodingQuestionsProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const QuizQuestions = ({
     questions,
@@ -31,13 +20,7 @@ const QuizQuestions = ({
     selectedQuestions,
     tags,
     setIsNewQuestionAdded,
-}: {
-    questions: MCQQuestion[]
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>
-    selectedQuestions: MCQQuestion[]
-    tags: any
-    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-}) => {
+}:CodingQuestionsProps) => {
 
     const handleQuestionSelection = (
         question: MCQQuestion,

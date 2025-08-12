@@ -19,6 +19,7 @@ import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
 import { Reorder, useDragControls } from 'framer-motion'
+import {ChapterItems} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
 function ChapterItem({
     title,
@@ -36,23 +37,8 @@ function ChapterItem({
     isDragging,
     onDragStart,
     onDragEnd,
-}: {
-    title: string
-    topicId: number
-    topicName: string
-    chapterId: number
-    activeChapter: number
-    setActiveChapter: any
-    fetchChapters: () => void
-    moduleId: string
-    activeChapterRef: any
-    isChapterClickedRef: any
-    chapterData: any
-    isLastItem?: boolean
-    isDragging?: boolean
-    onDragStart: () => void
-    onDragEnd: () => void
-}) {
+    showBorderFlash,
+}:ChapterItems) {
     // states and variables
     const { courseId } = useParams()
     const router = useRouter()
@@ -145,17 +131,21 @@ function ChapterItem({
         setDeleteModalOpen(true)
     }
 
-    const handleDragStart = () => {
-        setIsBeingDragged(true)
-        // Don't show any toast during drag
-    }
+    // const handleDragStart = () => {
+    //     setIsBeingDragged(true)
+    //     onDragStart()
+    //     // Don't show any toast during drag
+    // }
 
-    const handleDragEnd = () => {
-        // Add small delay to prevent click after drag
-        setTimeout(() => {
-            setIsBeingDragged(false)
-        }, 300)
-    }
+    // const handleDragEnd = () => {
+    //     // Add small delay to prevent click after drag
+    //     // setTimeout(() => {
+    //     //     setIsBeingDragged(false)
+    //     // }, 300)
+
+    //     setIsBeingDragged(false)
+    //     onDragEnd()
+    // }
 
     return (
         <Reorder.Item
@@ -193,7 +183,10 @@ function ChapterItem({
                         setActiveChapterItem(),
                         isBeingDragged
                             ? 'opacity-90 cursor-grabbing'
-                            : 'opacity-100 cursor-pointer'
+                            : 'opacity-100 cursor-pointer',
+                        showBorderFlash 
+                            ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
+                            : ''
                     )}
                     onClick={handleClick}
                     style={{

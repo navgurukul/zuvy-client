@@ -2,9 +2,7 @@ import React from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Link from 'next/link'
 
-type Props = {}
-
-const Page = (props: Props) => {
+const Page = () => {
     return (
         <div>
             <div className="flex  items-center gap-x-3">

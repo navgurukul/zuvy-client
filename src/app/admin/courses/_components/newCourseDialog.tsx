@@ -263,6 +263,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         <Input
                             type="text"
                             placeholder="Enter collaborator name"
+                            maxLength={80}
                             value={collaborator}
                             onChange={(e) => setCollaborator(e.target.value)}
                             className="mt-1"

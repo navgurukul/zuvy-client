@@ -14,3 +14,28 @@ export interface ComboboxStudentProps {
   selectedRows?: any[]; 
   fetchStudentData:any; 
 }
+
+
+// DeleteModelNew.tsx
+export interface DeleteAlertDialogProps {
+    title: string
+    description: string
+    userId: any
+    bootcampId: any
+    fetchStudentData?: any
+    setSelectedRows?: any
+}
+
+
+
+// CompoboxStudentDataTable
+export interface ComboxAlertDialogProps{
+    name: string
+    email: string
+    userId: number
+    bootcampId: any
+}
+
+
+
+

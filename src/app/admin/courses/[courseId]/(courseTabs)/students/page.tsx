@@ -18,6 +18,8 @@ import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'
 import AlertDialogDemo from './components/deleteModalNew'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import axios from 'axios'
+import { toast } from '@/components/ui/use-toast'
 
 export type StudentData = {
     email: string
@@ -86,6 +88,18 @@ const Page = ({ params }: { params: any }) => {
                 setSelectedRows([])
                 setStudents(res.data.modifiedStudentInfo)
             } catch (error: any) {
+                if (axios.isAxiosError(error)) {
+                    if (
+                        error?.response?.data.message === 'Bootcamp not found!'
+                    ) {
+                        router.push(`/admin/courses`)
+                        toast.info({
+                            title: 'Caution',
+                            description:
+                                'The Course has been deleted by another Admin',
+                        })
+                    }
+                }
                 console.error(error)
             }
         },

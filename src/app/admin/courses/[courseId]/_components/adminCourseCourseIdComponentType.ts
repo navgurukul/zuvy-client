@@ -101,6 +101,7 @@ export type CurricullamCardProps = {
     setDraggedModuleId: React.Dispatch<React.SetStateAction<number | null>>
     onDragStart?: () => void
     onDragEnd?: () => void
+    showBorderFlash?: boolean
 }
 
 

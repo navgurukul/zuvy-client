@@ -75,14 +75,14 @@ const PraticeProblems = ({ params }: any) => {
                 href: `/admin/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
+            // {
+            //     crumb: 'Submission - Practice Problems',
+            //     href: '',
+            //     isLast: false,
+            // },
             {
-                crumb: 'Submission - Practice Problems',
-                href: '',
-                isLast: false,
-            },
-            {
-                crumb: matchingData?.moduleChapterData[0]?.codingQuestionDetails
-                    ?.title,
+                crumb: (matchingData?.moduleChapterData[0]?.codingQuestionDetails 
+                ?.title) + ' - Submissions',
                 href: '',
                 isLast: true,
             },
@@ -182,8 +182,8 @@ const PraticeProblems = ({ params }: any) => {
             'crumbData',
             JSON.stringify([
                 bootcampData?.name,
-                matchingData?.moduleChapterData[0]?.codingQuestionDetails
-                    ?.title,
+                `${matchingData?.moduleChapterData[0]?.codingQuestionDetails
+                    ?.title} - Submissions`,
             ])
         )
     }
