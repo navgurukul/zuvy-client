@@ -21,67 +21,14 @@ import { handleSaveChapter } from '@/utils/admin'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
-
-interface Example {
-    input: number[]
-    output: number[]
-}
-
-interface Question {
-    id: number
-    title: string
-    description: string
-    difficulty: string
-    tags: number
-    constraints: string
-    authorId: number
-    inputBase64: string | null
-    examples: Example[]
-    testCases: Example[]
-    expectedOutput: number[]
-    solution: string
-    createdAt: string
-    updatedAt: string
-}
-interface ContentDetail {
-    title: string
-    description: string | null
-    links: string | null
-    file: string | null
-    content: string | null
-}
-interface Content {
-    id: number
-    moduleId: number
-    topicId: number
-    order: number
-    contentDetails: ContentDetail[]
-}
-interface CodeProps {
-    content: Content
-}
-
-export type Tag = {
-    id: number
-    tagName: string
-}
-
-interface Option {
-    tagName: string
-    id: number
-}
-
+import {CodingChallangesQuestion,ChallangesTag,ChallangesOption,ChallangesProps, CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
+import { AnyARecord } from 'dns'
 function CodingChallenge({
     content,
     activeChapterTitle,
     moduleId,
     courseId,
-}: {
-    content: any
-    activeChapterTitle: string
-    moduleId: string
-    courseId: any
-}) {
+}:ChallangesProps) {
     const router = useRouter()
     const { setCodingPreviewContent } = getCodingPreviewStore()
     const [searchTerm, setSearchTerm] = useState('')
@@ -90,15 +37,15 @@ function CodingChallenge({
     
     // SIMPLE FIX: Direct computation instead of useEffect
     const codingQuestions = content?.codingQuestionDetails || []
-    const [selectedQuestions, setSelectedQuestions] = useState<Question[]>(codingQuestions)
-    const [savedQuestions, setSavedQuestions] = useState<Question[]>(codingQuestions)
+    const [selectedQuestions, setSelectedQuestions] = useState<CodingChallangesQuestion[]>(codingQuestions)
+    const [savedQuestions, setSavedQuestions] = useState<CodingChallangesQuestion[]>(codingQuestions)
     
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
-    const [selectedTag, setSelectedTag] = useState<Tag>({
+    const [selectedTag, setSelectedTag] = useState<ChallangesTag>({
         tagName: 'All Topics',
         id: -1,
     })
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+    const [selectedOptions, setSelectedOptions] = useState<ChallangesOption[]>([
         { id: -1, tagName: 'All Topics' },
     ])
     const [selectedDifficulty, setSelectedDifficulty] = useState([
@@ -106,7 +53,7 @@ function CodingChallenge({
     ])
     const [selectedLanguage, setSelectedLanguage] =
         useState<string>('All Languages')
-    const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
+    const [filteredQuestions, setFilteredQuestions] = useState<CodingChallangesQuestion[]>([])
     const [chapterTitle, setChapterTitle] = useState<string>(activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -365,8 +312,9 @@ function CodingChallenge({
                                 setSelectedTopics={setSelectedOptions}
                                 selectedDifficulties={selectedDifficulty}
                                 setSelectedDifficulties={setSelectedDifficulty}
-                                tags={tags}
-                            />
+                                tags={tags} selectedQuestions={undefined} setSelectedQuestions={function (value: React.SetStateAction<AnyARecord[]>): void {
+                                    throw new Error('Function not implemented.')
+                                } } content={undefined} moduleId={''} chapterTitle={''}                            />
                         </div>
                         <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
                             Coding Library
@@ -495,16 +443,19 @@ function CodingChallenge({
                         <SelectedProblems
                             key={contentKey}
                             chapterTitle={chapterTitle}
-                            selectedQuestions={selectedQuestions as Question[]}
-                            setSelectedQuestions={
-                                setSelectedQuestions as React.Dispatch<
-                                    React.SetStateAction<Question[]>
-                                >
-                            }
+                            selectedQuestions={selectedQuestions as CodingChallangesQuestion[]}
+                            setSelectedQuestions={setSelectedQuestions as React.Dispatch<
+                                React.SetStateAction<CodingChallangesQuestion[]>
+                            >}
                             content={content}
                             moduleId={moduleId}
-                            tags={tags}
-                        />
+                            tags={tags} setSearchTerm={function (newSearchTerm: string): void {
+                                throw new Error('Function not implemented.')
+                            } } searchTerm={''} selectedTopics={[]} setSelectedTopics={function (value: React.SetStateAction<CodingTopicsTag[]>): void {
+                                throw new Error('Function not implemented.')
+                            } } selectedDifficulties={[]} setSelectedDifficulties={function (value: React.SetStateAction<string[]>): void {
+                                throw new Error('Function not implemented.')
+                            } }                        />
                     </div>
                 </div>
             </div>

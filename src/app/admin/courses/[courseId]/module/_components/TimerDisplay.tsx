@@ -1,9 +1,7 @@
 import React from 'react'
 import { Timer } from 'lucide-react'
+import {TimerDisplayProps} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
-interface TimerDisplayProps {
-    remainingTime: number
-}
 
 const TimerDisplay: React.FC<TimerDisplayProps> = ({ remainingTime }) => {
     const formatTime = (seconds: number) => {

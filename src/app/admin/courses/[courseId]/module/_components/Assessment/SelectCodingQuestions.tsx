@@ -4,19 +4,14 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
+import {setSelectedCodingQuestionsProps,SelectTag,SelectQuestion} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const SelectCodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
     type,
     setIsNewQuestionAdded,
-}: {
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<any[]>>
-    selectedQuestions: any[]
-    tags: any
-    type: string
-    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-}) => {
+}:setSelectedCodingQuestionsProps) => {
 
     const handleQuestionRemoval = (
         question: { id: number; [key: string]: any }, // Assuming 'id' is a number, other properties can be anything
@@ -30,8 +25,8 @@ const SelectCodingQuestions = ({
 
     return (
         <div className="w-full">
-            {selectedQuestions.map((question: any) => {
-                const tag = tags?.find((tag: any) => tag.id === question.tagId)
+            {selectedQuestions.map((question: SelectQuestion) => {
+                const tag = tags?.find((tag:SelectTag) => tag.id === question.tagId)
 
                 return (
                     <div key={question.id} className="p-5 rounded-sm border-b border-gray-200 mb-4">

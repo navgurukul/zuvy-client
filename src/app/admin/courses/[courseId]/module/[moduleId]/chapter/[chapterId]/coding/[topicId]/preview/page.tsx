@@ -7,8 +7,8 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import IDE from '@/app/admin/courses/[courseId]/module/_components/IDE'
 import CodingQuestionCard from '@/app/admin/courses/[courseId]/module/_components/CodingQuestionCard'
-
-const PreviewCoding = ({ params }: { params: any }) => {
+import {Params,PriviewQuizTag,TopicCodingQuestion  } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType"
+const PreviewCoding = ({ params }: { params: Params}) => {
     const { codingPreviewContent, setCodingPreviewContent } =
         getCodingPreviewStore()
     const { tags, setTags } = getCodingQuestionTags()
@@ -24,7 +24,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
         codingPreviewContent?.codingQuestionDetails &&
         codingPreviewContent?.codingQuestionDetails.length > 0
             ? tags.find(
-                  (item: any) =>
+                  (item: PriviewQuizTag) =>
                       item.id ===
                       codingPreviewContent?.codingQuestionDetails[0].tagId
               )
@@ -76,7 +76,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
                     <>
                         <h2 className="font-bold text-gray-600 text-[15px]">Coding Challenges</h2>
                         {codingPreviewContent?.codingQuestionDetails?.map(
-                            (question: any) => (
+                            (question: TopicCodingQuestion) => (
                                 <CodingQuestionCard
                                     key={question.id}
                                     id={question.id}

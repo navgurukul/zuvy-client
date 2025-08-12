@@ -15,10 +15,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
-
-type Props = {}
-
-// ✅ Helper function to extract clean text from HTML
+import {QuizListQuestion,QuizListTag} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 const extractTextFromHTML = (html: string): string => {
     if (!html) return ''
     

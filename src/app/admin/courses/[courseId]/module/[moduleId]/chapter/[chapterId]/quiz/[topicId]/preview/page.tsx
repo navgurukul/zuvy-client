@@ -229,8 +229,8 @@ import Link from 'next/link'
 import { addClassToCodeTags } from '@/utils/admin'
 import { Button } from '@/components/ui/button'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
-
-const PreviewQuiz = ({ params }: { params: any }) => {
+import {Params,TopicCodingQuestion} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType"
+const PreviewQuiz = ({ params }: { params: Params }) => {
     const { quizPreviewContent, setQuizPreviewContent } = getQuizPreviewStore()
 
     useEffect(() => {
@@ -267,7 +267,7 @@ const PreviewQuiz = ({ params }: { params: any }) => {
                     </h1>
                     
                     {quizPreviewContent?.quizQuestionDetails.map(
-                        (question: any, index: number) => {
+                        (question: TopicCodingQuestion, index: number) => {
                             return (
                                 <div key={question.id} className="mb-4 p-4 ">
                                     <h3 className="font-semibold text-gray-600 text-[15px] text-left">
