@@ -191,7 +191,7 @@ const Dropzone = ({
                                                 )}
 
                                                 <span>
-                                                    PDF is ready to upload
+                                                    PDF is ready
                                                 </span>
                                                 <span className="italic text-gray-500 text-sm">
                                                     (Click on Upload PDF)

@@ -25,6 +25,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import '@/app/_components/editor/Tiptap.css'
 import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
 import {
@@ -61,6 +62,7 @@ const AddAssignent = ({
 
     const formSchema = z.object({
         title: z.string(),
+        description: z.string().optional(),
         startDate: z.date({
             required_error: 'A start date is required.',
         }),
@@ -68,6 +70,7 @@ const AddAssignent = ({
 
     const router = useRouter()
     const [title, setTitle] = useState('')
+    const [description, setDescription] = useState('')
     const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
@@ -97,6 +100,7 @@ const AddAssignent = ({
         resolver: zodResolver(formSchema),
         values: {
             title: title,
+            description: description,
             startDate:
                 deadline ||
                 setHours(
@@ -152,6 +156,7 @@ const AddAssignent = ({
                 : ''
             const requestBody = {
                 title: titles,
+                description: description,
                 completionDate: deadline,
                 articleContent: initialContentString,
             }
@@ -192,6 +197,7 @@ const AddAssignent = ({
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
+            setDescription(contentDetails.description || '') 
             if (contentDetails.links && contentDetails.links[0]) {
                 setpdfLink(contentDetails.links[0])
                 setIsPdfUploaded(true)
@@ -282,6 +288,7 @@ const AddAssignent = ({
                 : ''
             const requestBody = {
                 title: data.title,
+                description: data.description,
                 completionDate: deadlineDate,
                 articleContent: initialContentString,
             }
@@ -572,7 +579,7 @@ const AddAssignent = ({
                                                                 }
                                                                 disabled={!disabledUploadButton}
                                                             >
-                                                                Upload PDF
+                                                                Save
                                                             </Button>
                                                         </div>
                                                     )}
@@ -580,6 +587,54 @@ const AddAssignent = ({
                                             </div>
                                         </FormControl>
                                         <FormMessage className="h-5" />
+                                    </FormItem>
+                                )}
+                            />
+
+                             {/* Description Field */}
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col gap-0 mt-1">
+                                        <FormControl>
+                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                <Textarea
+                                                    {...field}
+                                                    onChange={(e) => {
+                                                        setDescription(e.target.value)
+                                                        field.onChange(e)
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && e.shiftKey === false) {
+                                                            e.preventDefault() 
+                                                        }
+                                                    }}
+                                                    placeholder="Enter description here..."
+                                                    className="mb-2 pl-1 pr-8 min-h-[40px] max-h-[120px] text-md text-left text-gray-600 font-normal placeholder:text-gray-400 placeholder:font-normal border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none focus:ring-0 focus:border-gray-400 focus:border-dashed focus:border-b-2 resize-none overflow-hidden"
+                                                    rows={1}
+                                                    style={{
+                                                        height: 'auto',
+                                                        lineHeight: '1.5',
+                                                        boxShadow: 'none'
+                                                    }}
+                                                    onInput={(e) => {
+                                                        const target = e.target as HTMLTextAreaElement;
+                                                        target.style.height = 'auto';
+                                                        target.style.height = target.scrollHeight + 'px';
+                                                    }}
+                                                />
+                                                 {!description && ( // Show pencil icon only when description is empty
+                                                    <Pencil
+                                                        fill="true"
+                                                        fillOpacity={0.4}
+                                                        size={18}
+                                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                                    />
+                                                )}
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage className="h-2" />
                                     </FormItem>
                                 )}
                             />
