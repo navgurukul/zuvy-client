@@ -62,7 +62,7 @@ export interface MCQQuestion {
     id: number
     question: string
     difficulty: string
-    tagId?: string
+    tagId?: number
     quizVariants?: {
         id: string
         question: string

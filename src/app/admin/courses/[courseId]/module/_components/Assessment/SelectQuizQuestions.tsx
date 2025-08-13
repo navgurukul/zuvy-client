@@ -10,14 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
-
-interface MCQQuestion {
-    id: number;
-    question: string;
-    tagId: number;
-    difficulty: string;
-    quizVariants: { question: string }[];
-}
+import { MCQQuestion } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 
 const SelectQuizQuestions = ({
     setSelectedQuestions,
@@ -66,7 +59,7 @@ const SelectQuizQuestions = ({
                                                     { textLength: 40 }
                                                 )}
                                             </h2>
-                                            
+
                                         </div>
 
                                         <Dialog>
