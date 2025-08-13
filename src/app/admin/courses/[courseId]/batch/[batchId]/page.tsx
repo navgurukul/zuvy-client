@@ -132,9 +132,21 @@ const BatchesInfo = ({
                     capEnrollmentValue <= 100000
                 )
             },
-            {
-                message: `Cap Enrollment must be at least 1 and not less than the number of current students(${studentsData?.length}).`,
+            // {
+            //     message: `Cap Enrollment must be at least 1 and not less than the number of current students(${studentsData?.length}).`,
+            // }
+
+            (val) => {
+            const capEnrollmentValue = parseInt(val)
+            if (capEnrollmentValue > 100000) {
+                return {
+                    message: 'Cap Enrollment cannot exceed 100000.',
+                }
             }
+            return {
+                message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
+            }
+        }
         ),
     })
 
