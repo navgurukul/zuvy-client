@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import {QuizListQuestion,QuizListTag} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
+import { renderQuestionPreview } from '@/utils/quizHelpers'
 
 function QuizList({
     questionData,
@@ -47,19 +48,10 @@ function QuizList({
                         <div className="flex items-center justify-between border-b border-gray-200 py-4">
                             <div className="w-full space-y-2 ">
                                 <div className="flex justify-between items-center gap-x-2">
-                                    <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
-                                        {question.quizVariants.map(
-                                            (ques: any) => {
-                                                return (
-                                                   <span
-                                                    className='text-base text-gray-600'
-                                                        key={ques}
-                                                         dangerouslySetInnerHTML={{
-                                                     __html: ellipsis(stripHtmlTags(ques.question), 40),
-                                                     }}
-                                                    />
-                                                )
-                                            }
+                                    <h1 className="scroll-m-20 text-base text-gray-600 font-semibold tracking-tight lg:text-lg">
+                                        {renderQuestionPreview(
+                                            question.quizVariants[0]?.question,
+                                            { textLength: 40 }
                                         )}
                                     </h1>
                                     <div className="flex mr-4">
