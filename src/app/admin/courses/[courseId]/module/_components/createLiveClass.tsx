@@ -54,6 +54,7 @@ import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
+import {CreateSessionDialogProps} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
 const formSchema = z
     .object({
@@ -119,10 +120,7 @@ const formSchema = z
             'Total Classes must be at least equal to the number of selected days of week.',
         path: ['totalClasses'],
     })
-type CreateSessionDialogProps = {
-    fetchingChapters: () => void
-    onClose: () => void // <-- Add this
-}
+
 const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
     fetchingChapters,
     onClose,

@@ -6,9 +6,11 @@ import { ChevronRight } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import Image from 'next/image'
+import {VideoSubmissions,VideoData} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
-    const [videoData, setVideoData] = useState<any>()
+    const [videoData, setVideoData] = useState<VideoData | null>(null);
+
 
     const getVideoSubmission = useCallback(async () => {
         try {
@@ -50,9 +52,9 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                     (key) => 
                         {
                     if (['totalStudents', 'totalRows', 'message'].includes(key)) return null
-                    const videosArray = Array.isArray(videoData[key]) ? videoData[key] : []
+                    const videosArray: any[] = Array.isArray(videoData[key]) ? videoData[key] as any[] : [];
 
-                    const filteredVideos = videosArray.filter((video: any) =>
+                    const filteredVideos = videosArray.filter((video:any) =>
                         debouncedSearch
                             ? (video.title || '').toLowerCase().includes(debouncedSearch.toLowerCase())
                             : true
@@ -64,7 +66,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                 Module - {key}
                             </h2>
                             <div className="grid md:grid-cols-3 gap-3">
-                                {filteredVideos.map((video: any) => {
+                                {filteredVideos.map((video: VideoSubmissions) => {
                                     const isDisabled = video.completedStudents === 0
                                     const submissionPercentage =
                                         video.completedStudents > 0

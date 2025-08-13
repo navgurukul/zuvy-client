@@ -7,21 +7,8 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
+import {CodingTopicsProps,CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 
-interface CodingTopicsProps {
-    setSearchTerm: (newSearchTerm: string) => void
-    searchTerm: string
-    tags: Tag[]
-    selectedTopics: Tag[]
-    setSelectedTopics: React.Dispatch<React.SetStateAction<Tag[]>>
-    selectedDifficulties: string[]
-    setSelectedDifficulties: React.Dispatch<React.SetStateAction<string[]>>
-}
-
-export type Tag = {
-    id: number
-    tagName: string
-}
 
 const difficulties = ['Any Difficulty', 'Easy', 'Medium', 'Hard']
 
@@ -38,7 +25,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
         setSearchTerm(event.target.value)
     }
 
-    const handleTopicChange = (tag: Tag) => {
+    const handleTopicChange = (tag: CodingTopicsTag) => {
         setSelectedTopics((prev) => {
             if (tag.tagName === 'All Topics') {
                 return prev.some((t) => t.tagName === 'All Topics') ? [] : [tag]

@@ -26,19 +26,7 @@ import { getChapterUpdateStatus, getFormPreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
-
-type AddFormProps = {
-    chapterData: any
-    content: any
-    // fetchChapterContent: any
-    moduleId: any
-    courseId: any
-}
-
-interface chapterDetails {
-    title: string
-    description: string
-}
+import {AddFormProps,FormQuestionDetail} from "@/app/admin/courses/[courseId]/module/_components/form/ModuleFormType"
 
 const formSchema = z.object({
     title: z.string().min(2, {
@@ -81,7 +69,7 @@ const AddForm: React.FC<AddFormProps> = ({
             description: content?.description ?? '',
             questions:
                 content.formQuestionDetails?.length > 0
-                    ? content.formQuestionDetails.map((q: any) => ({
+                    ? content.formQuestionDetails.map((q: FormQuestionDetail) => ({
                           id: q.id.toString(),
                           question: q.question,
                           typeId: q.typeId,
@@ -106,7 +94,7 @@ const AddForm: React.FC<AddFormProps> = ({
             description: content?.description ?? '',
             questions:
                 content.formQuestionDetails?.length > 0
-                    ? content.formQuestionDetails.map((q: any) => ({
+                    ? content.formQuestionDetails.map((q: FormQuestionDetail) => ({
                           id: q.id.toString(),
                           question: q.question,
                           typeId: q.typeId,

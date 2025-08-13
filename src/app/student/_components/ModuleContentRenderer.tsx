@@ -53,7 +53,7 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
   const chapterId = selectedItemData?.item?.id || null;
   
   // Fetch chapter details using the new hook
-  const { chapterDetails, loading, error } = useChapterDetails(chapterId);
+  const { chapterDetails, loading, error , refetch} = useChapterDetails(chapterId);
 
 
   if (!selectedItemData) {
@@ -100,7 +100,7 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
           ...chapterDetails,
           links: chapterDetails.links ? [chapterDetails.links] : null
         };
-        return <VideoContent chapterDetails={videoChapterDetails} onChapterComplete={onChapterComplete} />;
+        return <VideoContent chapterDetails={videoChapterDetails} onChapterComplete={onChapterComplete} refetch={refetch} />;
       case 2:
         return <ArticleContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
       case 3:

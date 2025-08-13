@@ -1,51 +1,10 @@
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn, difficultyBgColor, difficultyColor } from '@/lib/utils';
+import {QuestionDescriptionModalProps } from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 // Define the types for different question types
-interface MCQQuestion {
-    id: number;
-    title: string;
-    description: string;
-    options: string[];
-    difficulty: string;
-}
 
-interface CodingQuestion {
-    id: number;
-    title: string;
-    description: string;
-    difficulty: string;
-    constraints: string;
-    testCases: {
-        id: number;
-        inputs: {
-            parameterName: string;
-            parameterType: string;
-            parameterValue: any;
-        }[];
-        expectedOutput: {
-            parameterType: string;
-            parameterValue: any;
-        };
-    }[];
-}
-
-interface OpenEndedQuestion {
-    id: number;
-    title: string;
-    description: string;
-    difficulty: string;
-}
-
-// Use a union type for the question prop
-type Question = CodingQuestion | MCQQuestion | OpenEndedQuestion;
-
-interface QuestionDescriptionModalProps {
-    question: Question;
-    type: 'coding' | 'mcq' | 'open-ended';
-    tagName?: string;
-}
 
 const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescriptionModalProps) => {
     return (
