@@ -15,88 +15,9 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
+import { isCodeQuestion, renderQuestionPreview } from '@/utils/quizHelpers'
 
 type Props = {}
-
-// ✅ Helper function to extract clean text from HTML
-const extractTextFromHTML = (html: string): string => {
-    if (!html) return ''
-    
-    try {
-        if (typeof window === 'undefined') {
-            return html
-                .replace(/<[^>]*>/g, ' ')
-                .replace(/&amp;/g, '&')
-                .replace(/&lt;/g, '<')
-                .replace(/&gt;/g, '>')
-                .replace(/&quot;/g, '"')
-                .replace(/&#39;/g, "'")
-                .replace(/\s+/g, ' ')
-                .trim()
-        }
-        
-        const tempDiv = document.createElement('div')
-        tempDiv.innerHTML = html
-        return tempDiv.textContent || tempDiv.innerText || ''
-    } catch (error) {
-        console.warn('Error extracting text from HTML:', error)
-        return html
-    }
-}
-
-// ✅ Helper function to check if question has code block
-const isCodeQuestion = (question: string): boolean => {
-    if (!question || typeof question !== 'string') return false
-    return question.includes('<pre') && question.includes('<code')
-}
-
-// ✅ Function to render question text properly
-const renderQuestionText = (question: string) => {
-    if (!question) return 'No question available'
-    
-    const hasCodeBlock = isCodeQuestion(question)
-    
-    if (hasCodeBlock) {
-        // For code questions, extract clean text and apply ellipsis
-        const cleanText = extractTextFromHTML(question)
-        return ellipsis(cleanText, 40)
-    } else {
-        // For regular questions, handle cases where the first content is an image
-                const tempDiv = document.createElement('div')
-                tempDiv.innerHTML = question
-
-                // Remove all <img> tags
-                tempDiv.querySelectorAll('img').forEach((img) => img.remove())
-
-                // Convert heading tags (e.g., <h1>, <h2>, etc.) to plain text
-                tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading) => {
-                    const textNode = document.createTextNode(heading.textContent || '');
-                    heading.replaceWith(textNode);
-                });
-
-                // Extract the remaining HTML content
-                const sanitizedHTML = tempDiv.innerHTML
-
-                // Truncate the content if it's too long
-                const truncatedQuestion = ellipsis(sanitizedHTML, 70)
-
-                return (
-                    <div
-                        className="text-left text-md p-1 w-full font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 text-ellipsis"
-                        style={{
-                            display: '-webkit-box',
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: 'vertical',
-                        }}
-                    >
-                        <span
-                            dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
-                        />
-                        {/* {question} */}
-                    </div>
-                )
-    }
-}
 
 const QuizModal = ({
     data,
@@ -118,7 +39,6 @@ const QuizModal = ({
     const filteredTag = tags?.filter((tag: any) => tag.id == data.tagId)
     const question = data?.quizVariants[0]?.question
     const hasCodeBlock = isCodeQuestion(question)
-    const questionText = renderQuestionText(question)
 
     return (
         <div className="flex w-full justify-between py-3 items-center border-b h-30 border-gray-200">
@@ -128,7 +48,9 @@ const QuizModal = ({
                         <div className="flex items-center gap-2 flex-wrap">
                             {/* Question Text */}
                             <span className={`text-gray-600 text-[16px] ${hasCodeBlock ? 'font-mono text-sm' : ''}`}>
-                                {typeof questionText === 'string' ? questionText : questionText}
+                                {renderQuestionPreview(question, {
+                                    textLength: 40,
+                                })}
                             </span>
                         </div>
                         {/* {ellipsis(data?.quizVariants[0]?.question, 40)} */}

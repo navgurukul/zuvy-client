@@ -11,8 +11,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-
-const PreviewForm = ({ params }: { params: any }) => {
+import {Params,QuestionItem} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType"
+const PreviewForm = ({ params }: { params: Params }) => {
     const { formPreviewContent, setFormPreviewContent } = getFormPreviewStore()
 
     useEffect(() => {
@@ -58,7 +58,7 @@ const PreviewForm = ({ params }: { params: any }) => {
                         </div>
 
                         {formPreviewContent?.formQuestionDetails?.map(
-                            (item: any, index: number) => (
+                            (item: QuestionItem, index: number) => (
                                 <div
                                     key={index}
                                     className="space-y-3 text-start"
@@ -83,12 +83,7 @@ const PreviewForm = ({ params }: { params: any }) => {
                                                                     }
                                                                 />
                                                                 <label className="font-normal">
-                                                                    {
-                                                                        item
-                                                                            .options[
-                                                                            optionKey
-                                                                        ]
-                                                                    }
+                                                                      {item.options[Number(optionKey)]}
                                                                 </label>
                                                             </div>
                                                         </div>
@@ -113,19 +108,13 @@ const PreviewForm = ({ params }: { params: any }) => {
                                                             <Checkbox
                                                                 aria-label={
                                                                     item
-                                                                        .options[
-                                                                        optionKey
-                                                                    ]
+                                                                        .options[Number(optionKey)]
                                                                 }
                                                                 className="translate-y-[2px] mr-3"
                                                             />
                                                             <p>
-                                                                {
-                                                                    item
-                                                                        .options[
-                                                                        optionKey
-                                                                    ]
-                                                                }
+                                                                  {item.options[Number(optionKey)]}
+
                                                             </p>
                                                         </div>
                                                     )

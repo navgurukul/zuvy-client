@@ -6,8 +6,8 @@ import { getVideoPreviewStore } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-
-const PreviewVideo = ({ params }: { params: any }) => {
+import {Params} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType"
+const PreviewVideo = ({ params }: { params: Params }) => {
     const { videoPreviewContent, setVideoPreviewContent } =
         getVideoPreviewStore()
 

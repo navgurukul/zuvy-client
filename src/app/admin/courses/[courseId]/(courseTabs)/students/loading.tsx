@@ -1,8 +1,6 @@
 import React from 'react'
 
-type Props = {}
-
-const Loading = (props: Props) => {
+const Loading = () => {
     return (
         <div className="flex justify-center items-center h-[100vh]">
             <div role="status">

@@ -195,4 +195,5 @@ export interface VideoContentProps {
         links: string[] | null
     }
     onChapterComplete: () => void
+    refetch: () => void
 }

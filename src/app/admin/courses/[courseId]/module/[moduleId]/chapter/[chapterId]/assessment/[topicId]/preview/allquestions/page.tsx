@@ -9,18 +9,14 @@ import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { difficultyColor, cn, difficultyBgColor } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import {PriviewTag, Params } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/PreviewPageType"
 
-export type Tag = {
-    id: number
-    tagName: string
-}
-
-function AllQuestions({ params }: { params: any }) {
+function AllQuestions({ params }: { params:  Params }) {
     const [assessmentPreviewContent, setAssessmentPreviewContent] =
         useState<any>([])
     const [assessmentPreviewCodingContent, setAssessmentPreviewCodingContent] =
         useState<any>([])
-    const [allTags, setAllTags] = useState<Tag[]>([])
+    const [allTags, setAllTags] = useState<PriviewTag[]>([])
     const router = useRouter()
 
     useEffect(() => {

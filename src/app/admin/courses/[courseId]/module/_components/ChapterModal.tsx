@@ -26,6 +26,7 @@ import { getTopicId } from '@/store/store'
 import { useState, useEffect } from 'react'
 import CreateSessionDialog from './createLiveClass'
 import ExistingLiveClass from './existingLiveClass'
+import {ChapterModalPropa} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
 function ChapterModal({
     fetchChapters,
@@ -34,14 +35,7 @@ function ChapterModal({
     courseId,
     scrollToBottom,
     onClose,
-}: {
-    fetchChapters: () => void
-    newChapterOrder: number
-    courseId: any
-    moduleId: any
-    scrollToBottom: () => void
-    onClose: () => void
-}) {
+}:ChapterModalPropa) {
     const { setTopicId } = getTopicId()
     const router = useRouter()
     const [classType, setClassType] = useState('createLiveClass')
