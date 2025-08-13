@@ -12,25 +12,8 @@ import {
 import QuestionDescriptionModal from './QuestionDescriptionModal'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
-
-interface MCQQuestion {
-    id: number
-    question: string
-    difficulty: string
-    tagId?: string
-    quizVariants?: {
-        id: string
-        question: string
-    }[]
-}
-
-interface CodingQuestionsProps {
-    questions: MCQQuestion[]
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>
-    selectedQuestions: MCQQuestion[]
-    tags: any
-    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-}
+import { MCQQuestion } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
+import { CodingQuestionsProps } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 
 const QuizQuestions = ({
     questions,
@@ -38,6 +21,7 @@ const QuizQuestions = ({
     selectedQuestions,
     tags,
     setIsNewQuestionAdded,
+    type,
 }:CodingQuestionsProps) => {
 
         const handleQuestionSelection = (
