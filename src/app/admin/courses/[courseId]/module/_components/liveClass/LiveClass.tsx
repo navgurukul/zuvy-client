@@ -10,15 +10,15 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
     const session= content?.sessionDetails?.[0];
 
     const [isJoinDisabled, setIsJoinDisabled] = useState(true);
-    const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session.status);
+    const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session?.status);
 
 
   useEffect(() => {
   if (!session) return;
 
-  const startTime = new Date(session.startTime).getTime();
+  const startTime = new Date(session?.startTime).getTime();
   const now = new Date().getTime();
-  const endTime = new Date(session.endTime).getTime();
+  const endTime = new Date(session?.endTime).getTime();
   const THIRTY_MIN = 30 * 60 * 1000;
 
   const timeUntil30MinBefore = startTime - now - THIRTY_MIN;
