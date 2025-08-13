@@ -6,11 +6,11 @@ import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
-
-const Page = ({ params }: any) => {
-    const [indiviDualStudentData, setIndividualStudentData] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
-    const [submittedDate, setSubmittedDate] = useState<string>('')
+import {PageParams,BootcampData,IndividualStudentData} from "@/app/admin/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType"
+const Page = ({ params }: PageParams) => {
+    const [indiviDualStudentData, setIndividualStudentData] = useState<IndividualStudentData | null>(null)
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    const [submittedDate, setSubmittedDate] = useState<string | undefined>()
     const [initialContent, setInitialContent] = useState()
 
     const crumbs = [
@@ -75,7 +75,7 @@ const Page = ({ params }: any) => {
     }, [getIndividualStudentData, getBootcampHandler])
 
     const dateString = submittedDate
-    const date = new Date(dateString?.toString())
+    const date = new Date((dateString ?? "").toString())
     const dayNames = [
         'Sunday',
         'Monday',
@@ -189,5 +189,4 @@ const Page = ({ params }: any) => {
         )
     }
 }
-
 export default Page

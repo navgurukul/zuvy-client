@@ -18,10 +18,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 
-const Page = ({ params }: { params: any }) => {
+import {BootcampData,PageParams,TrackedFormData,FormItem} from "@/app/admin/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType"
+const Page = ({ params }: { params: PageParams}) => {
     const [individualFormData, setIndividualFormData] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
-    const [bootcampData, setBootcampData] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<BootcampData|null>(null)
     const [user, setUser] = useState<any>()
     const crumbs = [
         {
@@ -82,7 +83,7 @@ const Page = ({ params }: { params: any }) => {
         const moduleId = params.StudentForm
         const userId = params.IndividualReport
         await api
-            .get(
+            .get<TrackedFormData>(
                 `submission/getFormDetailsById/${moduleId}?chapterId=${chapterId}&userId=${userId}`
             )
             .then((res) => {
@@ -96,7 +97,7 @@ const Page = ({ params }: { params: any }) => {
             })
 
         await api
-            .get(`/tracking/getChapterDetailsWithStatus/${chapterId}`)
+            .get<TrackedFormData>(`/tracking/getChapterDetailsWithStatus/${chapterId}`)
             .then((res) => {
                 setChapterDetails(res.data.trackingData)
             })
@@ -116,7 +117,7 @@ const Page = ({ params }: { params: any }) => {
                 )
                 .then((res) => {
                     const student = res.data.combinedData.find(
-                        (item: any) => item.id == params.IndividualReport
+                        (item: FormItem) => item.id == params.IndividualReport
                     )
                     setUser(student)
                 })
@@ -160,7 +161,7 @@ const Page = ({ params }: { params: any }) => {
                             )}
                         </div>
                         {individualFormData &&
-                            individualFormData.map((item: any, index: any) => (
+                            individualFormData.map((item: FormItem, index:number) => (
                                 <div
                                     key={index}
                                     className="space-y-3 text-start"
@@ -236,7 +237,7 @@ const Page = ({ params }: { params: any }) => {
                                                                 .formTrackingData[0]
                                                                 .chosenOptions
                                                         const optionNumber =
-                                                            Number(option)
+                                                            (option)
                                                         return (
                                                             <div
                                                                 key={option}

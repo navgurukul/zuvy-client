@@ -10,32 +10,9 @@ import { columns } from './columns'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import {PageParams,BootcampData,StudentPage} from "@/app/admin/courses/[courseId]/submissionProblems/[StudentProblemData]/studentProblemdataType"
 
-interface CodingQuestionDetails {
-    id: number
-    title: string
-}
-
-interface ModuleChapterData {
-    id: number
-    codingQuestionDetails: CodingQuestionDetails
-    submitStudents: number
-}
-
-interface Module {
-    id: number
-    typeId: number
-    isLock: boolean
-    bootcampId: number
-    name: string
-    description: string
-    projectId: number | null
-    order: number
-    timeAlloted: number
-    moduleChapterData: ModuleChapterData[]
-}
-
-const PraticeProblems = ({ params }: any) => {
+const PraticeProblems = ({ params }: PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -44,7 +21,7 @@ const PraticeProblems = ({ params }: any) => {
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [studentDetails, setStudentDetails] = useState<any[]>([])
     const [filteredStudentDetails, setFilteredStudentDetails] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>({})
+    const [bootcampData, setBootcampData] = useState<BootcampData |null>(null)
     const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('search') || '')
     const [activeSearch, setActiveSearch] = useState<string>(searchParams.get('search') || '')
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
@@ -117,11 +94,11 @@ const PraticeProblems = ({ params }: any) => {
     }, [searchQuery, studentDetails])
 
     // Filter student details based on search
-    const filterStudentDetails = useCallback((students: any[], query: string) => {
+    const filterStudentDetails = useCallback((students: StudentPage[], query: string) => {
         if (!query.trim()) return students
         
         const searchTerm = query.toLowerCase()
-        return students.filter((student: any) => {
+        return students.filter((student: StudentPage) => {
             const nameMatch = student.name && student.name.toLowerCase().includes(searchTerm)
             const emailMatch = student.email && student.email.toLowerCase().includes(searchTerm)
             return nameMatch || emailMatch
@@ -204,7 +181,7 @@ const PraticeProblems = ({ params }: any) => {
 
                 if (submissions.length > 0 && params.StudentProblemData) {
                     const matchingModule = submissions.find(
-                        (module: any) =>
+                        (module:any) =>
                             module.id === +params.StudentProblemData
                     )
                     setMatchingData(matchingModule || null)
@@ -213,7 +190,7 @@ const PraticeProblems = ({ params }: any) => {
                         const studentRes = await api.get(
                             `/submission/practiseProblemStatus/${matchingModule.id}?chapterId=${matchingModule.moduleChapterData[0].id}&questionId=${matchingModule.moduleChapterData[0].codingQuestionDetails.id}`
                         )
-                        const updatedStudentDetails = studentRes.data.data.map((studentDetail: any) => ({
+                        const updatedStudentDetails = studentRes.data.data.map((studentDetail: StudentPage) => ({
                             ...studentDetail,
                             email: studentDetail.emailId,
                             bootcampId: params.courseId,
@@ -296,8 +273,7 @@ const PraticeProblems = ({ params }: any) => {
                         <div className="p-4 rounded-lg shadow-md">
                             <h1 className="text-gray-600 font-semibold text-xl">
                                 {totalStudents -
-                                    matchingData?.moduleChapterData[0]
-                                        .submitStudents}
+                                   (matchingData?.moduleChapterData?.[0]?.submitStudents ?? 0)}                              
                             </h1>
                             <p className="text-gray-500 ">Not Yet Submitted</p>
                         </div>

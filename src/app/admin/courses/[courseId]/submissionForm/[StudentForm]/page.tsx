@@ -12,10 +12,9 @@ import { toast } from '@/components/ui/use-toast'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, POSITION } from '@/utils/constant'
+import {BootcampData,PageParams,StudentPage,Chapter,APIResponse} from "@/app/admin/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType"
 
-type Props = {}
-
-const Page = ({ params }: any) => {
+const Page = ({ params }: PageParams) => {
     const moduleId =
         typeof window !== 'undefined' &&
         new URLSearchParams(window.location.search).get('moduleId')
@@ -27,8 +26,8 @@ const Page = ({ params }: any) => {
     const [studentStatus, setStudentStatus] = useState<any>()
     const [totalSubmission, setTotalSubmission] = useState<any>()
     const [notSubmitted, setNotSubmitted] = useState<any>()
-    const [chapterDetails, setChapterDetails] = useState<any>()
-    const [bootcampData, setBootcampData] = useState<any>()
+    const [chapterDetails, setChapterDetails] = useState<Chapter |null>(null)
+    const [bootcampData, setBootcampData] = useState<BootcampData|null>(null)
 
     const [searchQuery, setSearchQuery] = useState<string>('') // What user types
     const [appliedSearchQuery, setAppliedSearchQuery] = useState<string>('') // What actually filters the data
@@ -75,7 +74,7 @@ const Page = ({ params }: any) => {
     
         const seen = new Set()
     
-        studentStatus.forEach((student: any) => {
+        studentStatus.forEach((student: StudentPage) => {
             const nameMatch = student.name?.toLowerCase().includes(query)
             const emailMatch = student.emailId?.toLowerCase().includes(query)
     
@@ -95,7 +94,7 @@ const Page = ({ params }: any) => {
         }
 
         const searchTerm = appliedSearchQuery.toLowerCase()
-        return studentStatus.filter((student: any) => {
+        return studentStatus.filter((student: StudentPage) => {
             const nameMatch = student.name && student.name.toLowerCase().includes(searchTerm)
             const emailMatch = student.email && student.email.toLowerCase().includes(searchTerm)
             return nameMatch || emailMatch
@@ -204,8 +203,8 @@ const Page = ({ params }: any) => {
         let url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=${position}&offset=${currentOffset}`
 
         try {
-            const response = await api.get(url)
-            const data = response.data.combinedData.map((student: any) => {
+            const response = await api.get<APIResponse>(url)
+            const data = response.data.combinedData.map((student: StudentPage) => {
                 return {
                     ...student,
                     bootcampId: params.courseId,
@@ -217,10 +216,10 @@ const Page = ({ params }: any) => {
             })
 
             const submitted = response.data.combinedData.filter(
-                (student: any) => student.status === 'Submitted'
+                (student:StudentPage) => student.status === 'Submitted'
             )
             const notSubmitted = response.data.combinedData.filter(
-                (student: any) => student.status !== 'Submitted'
+                (student: StudentPage) => student.status !== 'Submitted'
             )
 
             setStudentStatus(data)

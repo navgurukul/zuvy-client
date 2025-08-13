@@ -9,12 +9,11 @@ import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import {BootcampData,PageParams,IndividualStudentData} from "@/app/admin/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType"
 
-type Props = {}
-
-const Page = ({ params }: any) => {
-    const [individualStudentData, setIndividualStudentData] = useState<any>({})
-    const [bootcampData, setBootcampData] = useState<any>({})
+const Page = ({ params }: PageParams) => {
+    const [individualStudentData, setIndividualStudentData] = useState<IndividualStudentData | null>(null);
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [assignmentTitle, setAssignmentTItle] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
 
@@ -63,7 +62,7 @@ const Page = ({ params }: any) => {
 
                 const data = res?.data?.data
                 if (data) {
-                    const chapterTrackingDetails =
+                    const chapterTrackingDetails: IndividualStudentData =
                         data.chapterTrackingDetails?.[0]
                     const articleContent = data.articleContent?.[0]
 
