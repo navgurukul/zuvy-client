@@ -10,7 +10,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
     const session= content?.sessionDetails?.[0];
 
     const [isJoinDisabled, setIsJoinDisabled] = useState(true);
-    const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session.status);
+    const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session?.status);
 
 
   useEffect(() => {
