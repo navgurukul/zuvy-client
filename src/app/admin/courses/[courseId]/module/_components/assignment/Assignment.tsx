@@ -25,7 +25,6 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import '@/app/_components/editor/Tiptap.css'
 import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
 import {
@@ -50,14 +49,41 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import {AssignmentProps,AssignmentContentEditorDoc,DocItem,TextContent,ChapterDetailsResponse,EditorContent} from "@/app/admin/courses/[courseId]/module/_components/assignment/moduleComponentAssignmentType"
+
+interface ContentDetail {
+    title: string
+    description: string | null
+    links: string | null
+    file: string | null
+    content: string | null
+}
+
+interface Content {
+    id: number
+    moduleId: number
+    topicId: number
+    order: number
+    contentDetails: ContentDetail[]
+}
+
+type EditorDoc = {
+    type: string
+    content: any[]
+}
+
+interface AssignmentProps {
+    content: Content
+    courseId: any
+    assignmentUpdateOnPreview: boolean
+    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>
+}
 
 const AddAssignent = ({
     content,
     courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
-}: AssignmentProps) => {
+}: any) => {
     // misc
 
     const formSchema = z.object({
@@ -70,7 +96,6 @@ const AddAssignent = ({
 
     const router = useRouter()
     const [title, setTitle] = useState('')
-    const [description, setDescription] = useState('')
     const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
@@ -83,7 +108,7 @@ const AddAssignent = ({
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
 
     const [initialContent, setInitialContent] = useState<
-        { doc: AssignmentContentEditorDoc } | undefined
+        { doc: EditorDoc } | undefined
     >()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [hasEditorContent, setHasEditorContent] = useState(false)
@@ -100,7 +125,6 @@ const AddAssignent = ({
         resolver: zodResolver(formSchema),
         values: {
             title: title,
-            description: description,
             startDate:
                 deadline ||
                 setHours(
@@ -114,7 +138,7 @@ const AddAssignent = ({
         mode: 'onChange',
     })
 
-    const isEditorContentEmpty = (content?: EditorContent) => {
+    const isEditorContentEmpty = (content: any) => {
         if (!content || !content.doc || !content.doc.content) return true
 
         const docContent = content.doc.content
@@ -128,9 +152,9 @@ const AddAssignent = ({
         }
 
         // Check if all content is empty
-        const hasRealContent = docContent.some((item: DocItem) => {
+        const hasRealContent = docContent.some((item: any) => {
             if (item.type === 'paragraph' && item.content) {
-                return item.content.some((textItem: TextContent) =>
+                return item.content.some((textItem: any) =>
                     textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0
                 )
             }
@@ -156,7 +180,6 @@ const AddAssignent = ({
                 : ''
             const requestBody = {
                 title: titles,
-                description: description,
                 completionDate: deadline,
                 articleContent: initialContentString,
             }
@@ -189,7 +212,7 @@ const AddAssignent = ({
     const getAssignmentContent = async () => {
         setIsDataLoading(true)
         try {
-            const response = await api.get<ChapterDetailsResponse>(
+            const response = await api.get(
                 `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
 
@@ -197,7 +220,6 @@ const AddAssignent = ({
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
-            setDescription(contentDetails.description || '') 
             if (contentDetails.links && contentDetails.links[0]) {
                 setpdfLink(contentDetails.links[0])
                 setIsPdfUploaded(true)
@@ -288,7 +310,6 @@ const AddAssignent = ({
                 : ''
             const requestBody = {
                 title: data.title,
-                description: data.description,
                 completionDate: deadlineDate,
                 articleContent: initialContentString,
             }
@@ -587,54 +608,6 @@ const AddAssignent = ({
                                             </div>
                                         </FormControl>
                                         <FormMessage className="h-5" />
-                                    </FormItem>
-                                )}
-                            />
-
-                             {/* Description Field */}
-                            <FormField
-                                control={form.control}
-                                name="description"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col gap-0 mt-1">
-                                        <FormControl>
-                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                <Textarea
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        setDescription(e.target.value)
-                                                        field.onChange(e)
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' && e.shiftKey === false) {
-                                                            e.preventDefault() 
-                                                        }
-                                                    }}
-                                                    placeholder="Enter description here..."
-                                                    className="mb-2 pl-1 pr-8 min-h-[40px] max-h-[120px] text-md text-left text-gray-600 font-normal placeholder:text-gray-400 placeholder:font-normal border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none focus:ring-0 focus:border-gray-400 focus:border-dashed focus:border-b-2 resize-none overflow-hidden"
-                                                    rows={1}
-                                                    style={{
-                                                        height: 'auto',
-                                                        lineHeight: '1.5',
-                                                        boxShadow: 'none'
-                                                    }}
-                                                    onInput={(e) => {
-                                                        const target = e.target as HTMLTextAreaElement;
-                                                        target.style.height = 'auto';
-                                                        target.style.height = target.scrollHeight + 'px';
-                                                    }}
-                                                />
-                                                 {!description && ( // Show pencil icon only when description is empty
-                                                    <Pencil
-                                                        fill="true"
-                                                        fillOpacity={0.4}
-                                                        size={18}
-                                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                                    />
-                                                )}
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage className="h-2" />
                                     </FormItem>
                                 )}
                             />

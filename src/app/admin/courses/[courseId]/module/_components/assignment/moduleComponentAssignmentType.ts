@@ -55,7 +55,6 @@ export interface ContentLink {
 export interface ContentDetail {
   content: any
   title: string;
-  description: string;
   links?: ContentLink[];
 }
 
