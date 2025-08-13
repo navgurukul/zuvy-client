@@ -57,3 +57,23 @@ export interface QuizListTag {
   id: number;
   tagName: string;
 }
+
+export interface MCQQuestion {
+    id: number
+    question: string
+    difficulty: string
+    tagId?: number
+    quizVariants?: {
+        id: string
+        question: string
+    }[]
+}
+
+export interface CodingQuestionsProps {
+    questions: MCQQuestion[]
+    setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>
+    selectedQuestions: MCQQuestion[]
+    tags: any
+    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
+    type: string
+}
