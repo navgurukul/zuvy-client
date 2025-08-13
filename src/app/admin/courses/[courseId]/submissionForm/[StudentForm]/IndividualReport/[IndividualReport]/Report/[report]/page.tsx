@@ -18,8 +18,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { CalendarIcon, Clock } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 
-import {BootcampData,PageParams,TrackedFormData,FormItem} from "@/app/admin/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType"
-const Page = ({ params }: { params: PageParams}) => {
+import {BootcampData,TrackedFormData,FormItem} from "@/app/admin/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType"
+const Page = ({ params }: { params: any}) => {
     const [individualFormData, setIndividualFormData] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
     const [bootcampData, setBootcampData] = useState<BootcampData|null>(null)

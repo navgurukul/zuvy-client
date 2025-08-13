@@ -11,9 +11,9 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import {BootcampData,PageParams,AssignmentStatus,AssignmentDataResponse} from "@/app/admin/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType"
+import {BootcampData,AssignmentStatus,AssignmentDataResponse} from "@/app/admin/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType"
 
-const Page = ({ params }: { params: PageParams }) => {
+const Page = ({ params }: { params: any }) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()

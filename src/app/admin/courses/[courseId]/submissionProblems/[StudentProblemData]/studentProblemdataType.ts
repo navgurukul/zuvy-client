@@ -15,7 +15,6 @@ export interface BootcampData{
 }
 
 export interface PageParams {
-  assignmentData: any;
   params: {
     videoId: any;
     individualReport: any;
@@ -29,10 +28,6 @@ export interface PageParams {
     individualStatus:string
     StudentForm:string
   }
-  courseId:string
-  report:string
-  StudentForm:string
-  IndividualReport:string
 }
 
 

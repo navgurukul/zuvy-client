@@ -10,7 +10,6 @@ import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {BootcampData,PageParams,IndividualStudentData} from "@/app/admin/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType"
-
 const Page = ({ params }: PageParams) => {
     const [individualStudentData, setIndividualStudentData] = useState<IndividualStudentData | null>(null);
     const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)

@@ -5,7 +5,6 @@ export type BootcampData = {
 };
 
 export interface PageParams {
-  assignmentData: any;
   params: {
     id: string;
     courseId: string
@@ -13,7 +12,6 @@ export interface PageParams {
     assignmentData:string
     individualStatus:string
   }
-  courseId:string
 }
 export interface IndividualStudentData {
   user: {
