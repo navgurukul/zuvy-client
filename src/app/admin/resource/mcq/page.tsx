@@ -3,6 +3,7 @@
 // External imports
 import React, { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, Search } from 'lucide-react'
+import dynamic from 'next/dynamic'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -11,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
-import NewMcqProblemForm from '../_components/NewMcqProblemForm'
+// import NewMcqProblemForm from '../_components/NewMcqProblemForm'
 import { api } from '@/utils/axios.config'
 import {
     getAllQuizData,
@@ -31,13 +32,17 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { OFFSET, POSITION } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import BulkUploadMcq from '../_components/BulkMcqForm'
-import NewMcqForm from '../_components/NewMcqForm'
-import EditMcqForm from '../_components/EditMcqForm'
+// import BulkUploadMcq from '../_components/BulkMcqForm'
+// import NewMcqForm from '../_components/NewMcqForm'
+// import EditMcqForm from '../_components/EditMcqForm'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
+const BulkUploadMcq = dynamic(() => import('../_components/BulkMcqForm'), { ssr: false })
+const NewMcqForm = dynamic(() => import('../_components/NewMcqForm'), { ssr: false })
+const EditMcqForm = dynamic(() => import('../_components/EditMcqForm'), { ssr: false })
+const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), { ssr: false })
 
 type Props = {}
 export type Tag = {

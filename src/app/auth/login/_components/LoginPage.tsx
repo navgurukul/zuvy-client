@@ -16,6 +16,7 @@ type Props = {}
 
 function LoginPage({}: Props) {
     function reverseJwtBody(jwt: string): string {
+       
         const [header, body, signature] = jwt.split('.')
         const reversedBody = body.split('').reverse().join('')
 
@@ -60,6 +61,7 @@ function LoginPage({}: Props) {
                         className:
                             'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
+                  localStorage.setItem('isLoginFirst' , 'true')
                 }
 
                 // dispatch(saveStudent(resp.data.user));

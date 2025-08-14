@@ -13,9 +13,11 @@ import Schedule from './_components/schedule'
 import { Spinner } from '@/components/ui/spinner'
 import { Stat } from './_components/stat'
 import Attendance from './_components/attendance'
+import FlashAnnouncementDialog from '../_components/FlashAnnouncement'
 
 function Page() {
     const [loading, setLoading] = useState(true)
+     const isLoginFirst =  localStorage.getItem('isLoginFirst')
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
@@ -25,6 +27,7 @@ function Page() {
     }, [])
     return (
         <div className="md:container md:mx-auto">
+           {isLoginFirst && <FlashAnnouncementDialog  />}
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
                     <Spinner className="text-secondary" />
