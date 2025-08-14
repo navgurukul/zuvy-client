@@ -188,7 +188,13 @@ const AddAssignent = ({
                 `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
 
-            setDeadline(response.data.completionDate)
+            // Convert string to Date object
+            if (response.data.completionDate) {
+                setDeadline(parseISO(response.data.completionDate))
+            } else {
+                setDeadline(null)
+            }
+
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
@@ -380,6 +386,17 @@ const AddAssignent = ({
 
 
     const onFileUpload = async () => {
+        // Define convertToISO function here
+        function convertToISO(dateInput: any): string {
+            const date = new Date(dateInput);
+
+            if (isNaN(date.getTime())) {
+                throw new Error('Invalid date input');
+            }
+
+            return date.toISOString();
+        }
+
         if (file) {
             if (file.type !== 'application/pdf') {
                 return toast.error({
@@ -395,12 +412,26 @@ const AddAssignent = ({
             try {
                 await api.post(
                     `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
-                    formData, // ← pass FormData directly
+                    formData,
                     {
                         // OPTIONAL: axios will set the correct Content-Type boundary for you
                         headers: { 'Content-Type': 'multipart/form-data' },
                     }
                 )
+
+                const deadlineDate = convertToISO(deadline);
+
+                const requestBody = {
+                    title: titles,
+                    completionDate: deadlineDate,
+                };
+
+                console.log('Request Body:', requestBody)
+
+                await api.put(
+                    `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                    requestBody
+                );
 
                 toast.success({
                     title: 'Success',
@@ -443,10 +474,34 @@ const AddAssignent = ({
 
     const onDeletePdfhandler = async () => {
         setIsLoading(true)
+        if (!deadline) {
+            toast.error({
+                title: 'Failed',
+                description: 'Cannot delete PDF without a deadline date.',
+            })
+            setIsLoading(false)
+            return
+        }
+
+        // Define convertToISO function here
+        function convertToISO(dateInput: any): string {
+            const date = new Date(dateInput);
+
+            if (isNaN(date.getTime())) {
+                throw new Error('Invalid date input');
+            }
+
+            date.setDate(date.getDate() + 1);
+
+            return date.toISOString();
+        }
+
+        const deadlineDate = convertToISO(deadline);
+
         await api
             .put(
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                { title: title, links: null }
+                { title: titles, links: null, completionDate: deadlineDate }
             )
             .then((res) => {
                 toast.success({
