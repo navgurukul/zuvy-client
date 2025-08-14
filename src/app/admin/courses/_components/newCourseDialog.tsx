@@ -21,6 +21,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {newCourseDialogProps,CourseData} from "@/app/admin/courses/_components/courseComponentType"
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     newCourseName,
@@ -193,7 +194,8 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                 <DialogTitle className="text-left">New Course</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
+        <ScrollArea className="max-h-[60vh] px-1">
+            <div className="space-y-5 py-4 pr-4">
                 <div className="text-left">
                     <Label htmlFor="name">Course Name:</Label>
                     <Input
@@ -206,7 +208,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                     />
                 </div>
 
-                <div className="text-left">
+                <div className="text-left ml-1">
                     <Label htmlFor="description">Description:</Label>
                     <Textarea
                         id="description"
@@ -436,6 +438,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                     )}
                 </div>
             </div>
+        </ScrollArea>
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>

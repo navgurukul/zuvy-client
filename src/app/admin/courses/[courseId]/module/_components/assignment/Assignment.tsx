@@ -572,7 +572,8 @@ const AddAssignent = ({
                                                                 }
                                                                 disabled={!disabledUploadButton}
                                                             >
-                                                                Upload PDF
+                                                                {/* Upload PDF */}
+                                                                {isSaving ? 'Saving...' : 'Save'}
                                                             </Button>
                                                         </div>
                                                     )}
