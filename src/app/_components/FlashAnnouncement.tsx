@@ -103,9 +103,9 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
   <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
   <AlertDialogContent
     className="
-      max-w-4xl w-full 
-      p-0 text-left 
-      max-h-[90vh] overflow-y-auto overflow-x-hidden
+      max-w-7xl w-full 
+      pb-5 text-left 
+      max-h-[85vh] overflow-y-auto overflow-x-hidden
       sm:rounded-lg
     "
   >
@@ -182,7 +182,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
             </p>
 
             <div className="pt-2">
-              <Button className="px-6 bg-[#3e69de] hover:bg-[#3e69de]/80">
+              <Button className="px-6 bg-[#3e69de] cursor-default">
                 Stay tuned
               </Button>
             </div>
