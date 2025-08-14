@@ -10,6 +10,8 @@ import {
 import { CheckCircle2, Sparkles, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { type FC } from "react";
+import useWindowSize from "@/hooks/useHeightWidth";
+
 
 interface Feature {
   id: string;
@@ -53,6 +55,8 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
 }) => {
   const [timer, setTimer] = useState<number>(Math.ceil(autoCloseDelay / 1000));
   const [isOpen, setIsOpen] = useState<boolean>(true); // Open by default
+   const { width } = useWindowSize()
+  const isMobile = width < 768
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -100,14 +104,15 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
   };
 
   return (
-  <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
+    <div className="">
+        <AlertDialog open={isOpen} onOpenChange={handleOpenChange}>
   <AlertDialogContent
-    className="
-      max-w-7xl w-full 
-      pb-5 text-left 
-      max-h-[85vh] overflow-y-auto overflow-x-hidden
+    className={
+     `text-left 
+      max-h-[80vh]  overflow-x-hidden
       sm:rounded-lg
-    "
+      ${isMobile ? "overflow-y-scroll max-w-max" : "overflow-y-hidden max-w-[calc(100%-100px)]"}
+    `}
   >
     {/* Close button */}
     <button
@@ -146,7 +151,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
 
             <h1
               id="flash-title"
-              className="font-bold tracking-tight text-3xl sm:text-4xl md:text-5xl"
+              className="font-bold text-xl"
             >
               A better Zuvy is on its way!
             </h1>
@@ -231,6 +236,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
     />
   </AlertDialogContent>
 </AlertDialog>
+    </div>
 
     );
 };
