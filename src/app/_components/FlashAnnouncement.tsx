@@ -151,7 +151,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
 
             <h1
               id="flash-title"
-              className="font-bold text-xl"
+              className="font-bold text-2xl"
             >
               A better Zuvy is on its way!
             </h1>
