@@ -16,6 +16,8 @@ export interface SessionDetail{
     s3link: string | null;
     status: 'upcoming' | 'completed' | 'ongoing';
     attendance: number | null;
+    // Added flag to identify platform
+    isZoomMeet?: boolean;
 }
 
 export interface LiveClassData{

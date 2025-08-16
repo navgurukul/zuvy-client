@@ -8,6 +8,7 @@ import {LiveClassProps} from "@/app/admin/courses/[courseId]/module/_components/
 
 const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps) => {
     const session= content?.sessionDetails?.[0];
+    const platformName = session?.platform ? session.platform.charAt(0).toUpperCase() + session.platform.slice(1) : 'google meet';
 
     const [isJoinDisabled, setIsJoinDisabled] = useState(true);
     const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session?.status);
@@ -161,7 +162,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                                     {content.description}
                                 </p>
                             )}
-                            <div className="flex items-center gap-2 mb-3">
+                            <div className="flex items-center gap-2 mb-3 flex-wrap">
                                 <Badge
                                     variant="secondary"
                                     className={`${getStatusColor(
@@ -171,6 +172,12 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                                     {getStatusIcon(currentStatus)}
                                     {currentStatus.charAt(0).toUpperCase() +
                                         currentStatus.slice(1)}
+                                </Badge>
+                                <Badge
+                                    variant="outline"
+                                    className="font-medium px-3 py-1 flex items-center gap-1 border-primary/30 text-primary"
+                                >
+                                    {platformName}
                                 </Badge>
                             </div>
                         </div>
