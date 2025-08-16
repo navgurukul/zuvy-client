@@ -7,6 +7,7 @@ import { api } from '@/utils/axios.config'
 import { string } from 'zod'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { persist } from 'zustand/middleware'
+import axios from 'axios'
 
 type CounterStore = {
     studentData: {
@@ -50,7 +51,7 @@ interface BatchData {
 interface StoreCourseData {
     courseData: CourseData | null
     setCourseData: (newValue: CourseData) => void
-    fetchCourseDetails: (courseId: number) => void
+    fetchCourseDetails: (courseId: number) => Promise<boolean>
 }
 
 interface StoreBatchData {
@@ -79,9 +80,9 @@ export const getCourseData = create<StoreCourseData>((set) => ({
         id: 0,
         name: '',
         bootcampTopic: '',
-        description:'',
+        description: '',
         coverImage: '',
-        collaborator:'',
+        collaborator: '',
         duration: '',
         language: 'string',
         startTime: '',
@@ -90,13 +91,21 @@ export const getCourseData = create<StoreCourseData>((set) => ({
     setCourseData: (newValue: CourseData) => {
         set({ courseData: newValue })
     },
-    fetchCourseDetails: async (courseId: number) => {
+    fetchCourseDetails: async (courseId: number): Promise<boolean> => {
         try {
             const response = await api.get(`/bootcamp/${courseId}`)
             const data = response.data
             set({ courseData: data.bootcamp })
-        } catch (error) {
+            return true
+        } catch (error: unknown) {
             console.error('Error fetching course details:', error)
+            if (axios.isAxiosError(error)) {
+                if (error?.response?.data.message === 'Bootcamp not found!')
+                    return false
+            } else {
+                console.log('Unknown error', error)
+            }
+            return true
         }
     },
 }))
@@ -1071,28 +1080,28 @@ export const useThemeStore = create<ThemeStore>()(
         (set, get) => ({
             isDark: false,
             toggleTheme: () => {
-                const newIsDark = !get().isDark;
-                set({ isDark: newIsDark });
+                const newIsDark = !get().isDark
+                set({ isDark: newIsDark })
                 // Apply theme to document
                 if (typeof window !== 'undefined') {
                     if (newIsDark) {
-                        document.documentElement.classList.add('dark');
+                        document.documentElement.classList.add('dark')
                     } else {
-                        document.documentElement.classList.remove('dark');
+                        document.documentElement.classList.remove('dark')
                     }
                 }
             },
             setTheme: (isDark: boolean) => {
-                set({ isDark });
+                set({ isDark })
                 // Apply theme to document
                 if (typeof window !== 'undefined') {
                     if (isDark) {
-                        document.documentElement.classList.add('dark');
+                        document.documentElement.classList.add('dark')
                     } else {
-                        document.documentElement.classList.remove('dark');
+                        document.documentElement.classList.remove('dark')
                     }
                 }
-            }
+            },
         }),
         {
             name: 'student-theme-storage',
@@ -1101,12 +1110,12 @@ export const useThemeStore = create<ThemeStore>()(
                 // Apply theme immediately after rehydration
                 if (typeof window !== 'undefined' && state) {
                     if (state.isDark) {
-                        document.documentElement.classList.add('dark');
+                        document.documentElement.classList.add('dark')
                     } else {
-                        document.documentElement.classList.remove('dark');
+                        document.documentElement.classList.remove('dark')
                     }
                 }
-            }
+            },
         }
     )
 )
@@ -1120,3 +1129,39 @@ interface CodingSubmissionStore {
     codingSubmissionAction: null,
     setCodingSubmissionAction: (action) => set({ codingSubmissionAction: action }),
   }));
+
+
+interface isStudentEnrolledInOneCourseStore {
+    isStudentEnrolledInOneCourse : boolean;
+    setIsStudentEnrolledInOneCourse : (newValue: boolean) => void;
+}  
+
+export const useIsStudentEnrolledInOneCourseStore = create<isStudentEnrolledInOneCourseStore>((set) => ({
+    isStudentEnrolledInOneCourse : true,
+    setIsStudentEnrolledInOneCourse : (newValue: boolean) => {
+        set({ isStudentEnrolledInOneCourse : newValue })
+    }
+}))
+
+interface VideoProgressState {
+    progress: Record<string, number>;
+    setProgress: (videoId: string, time: number) => void;
+  }
+  
+  export const useVideoStore = create<VideoProgressState>()(
+    persist(
+      (set) => ({
+        progress: {},
+        setProgress: (videoId, time) =>
+          set((state) => ({
+            progress: {
+              ...state.progress,
+              [videoId]: time,
+            },
+          })),
+      }),
+      {
+        name: 'video-progress', // key in localStorage
+      }
+    )
+  );

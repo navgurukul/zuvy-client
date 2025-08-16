@@ -18,6 +18,8 @@ import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'
 import AlertDialogDemo from './components/deleteModalNew'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import axios from 'axios'
+import { toast } from '@/components/ui/use-toast'
 
 export type StudentData = {
     email: string
@@ -63,17 +65,7 @@ const Page = ({ params }: { params: any }) => {
     const [isOpen, setIsOpen] = useState(false)
     const [showSuggestions, setShowSuggestions] = useState(false)
 
-    // Use suggestions from the hook instead of filtering students
-    const filteredSuggestions = suggestions
-        .filter(
-            (student: StudentData) =>
-                student.name &&
-                student.name
-                    .toLowerCase()
-                    .includes(debouncedInternalSearch.toLowerCase()) &&
-                debouncedInternalSearch.trim() !== ''
-        )
-        .slice(0, 6) // Show up to 6 suggestions
+    const filteredSuggestions = suggestions.slice(0, 6)
 
     // Reset selectedRows when course changes
     useEffect(() => {
@@ -96,6 +88,18 @@ const Page = ({ params }: { params: any }) => {
                 setSelectedRows([])
                 setStudents(res.data.modifiedStudentInfo)
             } catch (error: any) {
+                if (axios.isAxiosError(error)) {
+                    if (
+                        error?.response?.data.message === 'Bootcamp not found!'
+                    ) {
+                        router.push(`/admin/courses`)
+                        toast.info({
+                            title: 'Caution',
+                            description:
+                                'The Course has been deleted by another Admin',
+                        })
+                    }
+                }
                 console.error(error)
             }
         },
@@ -161,7 +165,7 @@ const Page = ({ params }: { params: any }) => {
 
                         {showSuggestions && filteredSuggestions.length > 0 && (
                             <div className="absolute z-50 w-full bg-white border border-border rounded-md mt-1 shadow-lg">
-                                {filteredSuggestions.map(
+                                {/* {filteredSuggestions.map(
                                     (student: StudentData, i: number) => (
                                         <div
                                             key={i}
@@ -175,7 +179,22 @@ const Page = ({ params }: { params: any }) => {
                                             {student.name}
                                         </div>
                                     )
-                                )}
+                                )} */}
+                                {filteredSuggestions.map((student: StudentData, i: number) => (
+                                    <div
+                                        key={i}
+                                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
+                                        onClick={() => {
+                                            handleSetSearch(student.name)
+                                            commitSearch(student.name)
+                                            setShowSuggestions(false)
+                                        }}
+                                    >
+                                        <div className="font-medium">{student.name}</div>
+                                        <div className="text-sm text-gray-500">{student.email}</div>
+                                    </div>
+                                ))}
+
                             </div>
                         )}
                     </div>
@@ -188,10 +207,10 @@ const Page = ({ params }: { params: any }) => {
                                     userId={userIds}
                                     bootcampId={batchData && params.courseId}
                                     title="Are you absolutely sure?"
-                                    description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                    description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
                                 />
                                 <ComboboxStudent
-                                    batchData={newBatchData}
+                                    batchData={newBatchData || []}
                                     bootcampId={batchData && params.courseId}
                                     selectedRows={selectedRows}
                                     fetchStudentData={fetchStudentDataForBatch}

@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { getEditOpenEndedDialogs, getCodingQuestionTags } from '@/store/store'
+import {OpenEndedQuestion,Tag} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
 
@@ -39,10 +40,10 @@ function EditOpenEndedQuestionForm({
     setOpenEndedQuestions,
     openEndedQuestions,
 }: {
-    setIsOpenEndDialogOpen: any
-    getAllOpenEndedQuestions: any
-    setOpenEndedQuestions: any
-    openEndedQuestions: any
+    setIsOpenEndDialogOpen:  (value: boolean) => void;
+    getAllOpenEndedQuestions: any;
+    setOpenEndedQuestions:(questions: OpenEndedQuestion[]) => void;
+    openEndedQuestions:OpenEndedQuestion[];
 }) {
     const { tags, setTags } = getCodingQuestionTags()
 
@@ -70,7 +71,7 @@ function EditOpenEndedQuestionForm({
         }
     }, [selectedQuestion[0], form])
 
-    async function editOpenEndedQuestion(data: any) {
+    async function editOpenEndedQuestion(data:any) {
         try {
             const response = await api.patch(
                 `/Content/updateOpenEndedQuestion/${editOpenEndedQuestionId}`,
@@ -172,7 +173,7 @@ function EditOpenEndedQuestionForm({
                                         }
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
-                                                (tag: any) =>
+                                                (tag: Tag) =>
                                                     tag?.tagName === value
                                             )
                                             if (selectedTag) {
@@ -196,7 +197,7 @@ function EditOpenEndedQuestionForm({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {tags.map((tag: any) => (
+                                            {tags.map((tag: Tag) => (
                                                 <SelectItem
                                                     key={tag.id}
                                                     value={tag?.tagName}

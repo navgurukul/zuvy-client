@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import * as z from 'zod'
+import{UseFeedbackFormProps,FeedbackFormResponse} from '@/hooks/hookType'
+
 
 export const formSchema = z.object({
     section: z.array(
@@ -20,18 +22,7 @@ export const formSchema = z.object({
 
 export type FormSchema = z.infer<typeof formSchema>
 
-interface UseFeedbackFormProps {
-    moduleId: string
-    chapterId: number
-    bootcampId: number
-    onSuccess?: () => void
-}
 
-interface FeedbackFormResponse {
-    questions: any[]
-    trackedData: any[]
-    status: string
-}
 
 export const useFeedbackForm = ({
     moduleId,
@@ -48,7 +39,7 @@ export const useFeedbackForm = ({
         try {
             setLoading(true)
             setError(null)
-            const res = await api.get(
+            const res = await api.get<FeedbackFormResponse>(
                 `/tracking/getAllFormsWithStatus/${moduleId}?chapterId=${chapterId}`
             )
             if (res.data && res.data.questions) {

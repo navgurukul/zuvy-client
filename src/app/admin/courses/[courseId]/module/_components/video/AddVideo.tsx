@@ -23,6 +23,7 @@ import PreviewVideo from '@/app/admin/courses/[courseId]/module/_components/vide
 import { getChapterUpdateStatus, getVideoPreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import {AddVideoProps} from "@/app/admin/courses/[courseId]/module/_components/video/ModuleVideoType"
 
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
@@ -115,36 +116,11 @@ const formSchema = z.object({
         }
     ),
 })
-interface ContentDetail {
-    title: string
-    description: string
-    links: string[]
-    file: any
-    content: any
-}
-
-interface chapterDetails {
-    title: string
-    description: string
-    links: string[]
-}
-const AddVideo = ({
-    moduleId,
-    courseId,
-    content,
-    fetchChapterContent,
-}: {
-    content: {
-        id: number
-        title: string
-        moduleId: number
-        topicId: number
-        order: number
-        contentDetails: ContentDetail[]
-    }
-    courseId: any
-    moduleId: string
-    fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
+const AddVideo: React.FC<AddVideoProps> = ({
+  moduleId,
+  courseId,
+  content,
+  fetchChapterContent,
 }) => {
     // const heightClass = useResponsiveHeight()
     const router = useRouter()
@@ -156,6 +132,7 @@ const AddVideo = ({
     const { setVideoPreviewContent } = getVideoPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -171,6 +148,10 @@ const AddVideo = ({
             links: content?.contentDetails?.[0]?.links?.[0] ?? '',
         },
     })
+
+    const {
+        formState: { isDirty },
+    } = form
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const modifiedLink = getEmbedLink(values.links)
@@ -192,6 +173,7 @@ const AddVideo = ({
                         title: res.data.status,
                         description: res.data.message,
                     })
+                    form.reset(values) // to reset the dirty state
                     setShowVideoBox(true)
                     fetchChapterContent(content.id, content.topicId)
                     setIsChapterUpdated(!isChapterUpdated)
@@ -266,6 +248,14 @@ const AddVideo = ({
     }
 
     function previewVideo() {
+        if (isDirty) {
+            toast.info({
+                title: 'Unsaved Changes',
+                description: 'Please Save the chapter to preview.',
+            })
+            return
+        }
+
         if (content?.contentDetails[0]?.links) {
             setVideoPreviewContent(content)
             router.push(

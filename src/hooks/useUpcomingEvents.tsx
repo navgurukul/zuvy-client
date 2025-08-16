@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
+// import{UpcomingEventsData } from '@/hooks/hookType'
 
 export interface Event {
   type: "Live Class" | "Assessment" | "Assignment";
@@ -16,19 +17,19 @@ export interface Event {
   chapterId: number;
 }
 
-interface UpcomingEventsData {
+export interface UpcomingEventsData {
   events: Event[];
   totalEvents: number;
   totalPages: number;
 }
-
-interface UseUpcomingEventsReturn {
+export interface UseUpcomingEventsReturn {
   upcomingEventsData: UpcomingEventsData | null;
   loading: boolean;
   error: string | null;
 }
 
-export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
+
+export const useUpcomingEvents = (courseId?: string): UseUpcomingEventsReturn => {
   const [upcomingEventsData, setUpcomingEventsData] = useState<UpcomingEventsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,15 +39,27 @@ export const useUpcomingEvents = (): UseUpcomingEventsReturn => {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await api.get('/student/UpcomingEvents');
-        
-        if (response.data && response.data.isSuccess) {
-          setUpcomingEventsData(response.data.data);
+        if(courseId) {
+          
+          const response = await api.get(`/student/UpcomingEvents?bootcampId=${courseId}`);
+          
+          if (response.data && response.data.isSuccess) {
+            setUpcomingEventsData(response.data.data);
+          } else {
+            setUpcomingEventsData(null);
+            setError(response.data.message || 'Failed to fetch upcoming events');
+          }
         } else {
-          setUpcomingEventsData(null);
-          setError(response.data.message || 'Failed to fetch upcoming events');
+          const response = await api.get('/student/UpcomingEvents');
+          
+          if (response.data && response.data.isSuccess) {
+            setUpcomingEventsData(response.data.data);
+          } else {
+            setUpcomingEventsData(null);
+            setError(response.data.message || 'Failed to fetch upcoming events');
+          }
         }
+        
       } catch (err: any) {
         console.error('Error fetching upcoming events:', err);
         setError(err.response?.data?.message || 'Failed to fetch upcoming events');

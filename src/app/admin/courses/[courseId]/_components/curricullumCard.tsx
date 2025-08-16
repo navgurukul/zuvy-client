@@ -16,32 +16,9 @@ import { useRouter } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { Reorder, useDragControls } from 'framer-motion'
+import {CurricullamCardProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    value: any
-    isStarted?: boolean
-    editHandle: any
-    index: number
-    moduleId: any
-    courseId: number
-    name: string
-    order: number
-    description: string
-    quizCount: number
-    assignmentCount: number
-    timeAlloted: number
-    codingProblemsCount: number
-    articlesCount: number
-    typeId: number
-    fetchCourseModules: () => void
-    projectId: number
-    chapterId: number
-    setDraggedModuleId: React.Dispatch<React.SetStateAction<number | null>>
-    onDragStart?: () => void
-    onDragEnd?: () => void
-}
-
-const CurricullumCard = (props: Props) => {
+const CurricullumCard = (props:CurricullamCardProps) => {
     const {
         editHandle,
         index,
@@ -62,6 +39,7 @@ const CurricullumCard = (props: Props) => {
         isStarted,
         onDragStart,
         onDragEnd,
+        showBorderFlash,
     } = props
 
     const router = useRouter()
@@ -135,7 +113,10 @@ const CurricullumCard = (props: Props) => {
             <div
                 className={`${
                     props.typeId === 2 ? 'bg-yellow-100/80' : 'bg-muted'
-                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]`}
+                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]  transition-all duration-300 ${
+                    showBorderFlash 
+                        ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
+                        : ''}`}
             >
                 <div className="w-full p-2" onClick={handleModuleRoute}>
                     <div className="flex mb-2 w-full justify-between">

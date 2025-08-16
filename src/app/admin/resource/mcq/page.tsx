@@ -1,5 +1,4 @@
 'use client'
-
 // External imports
 import React, { useState, useEffect, useCallback, useRef, useMemo} from 'react'
 import { ChevronLeft, Search, X } from 'lucide-react'
@@ -12,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
-import NewMcqProblemForm from '../_components/NewMcqProblemForm'
+import dynamic from 'next/dynamic'
 import { api } from '@/utils/axios.config'
 import {
     getAllQuizData,
@@ -30,13 +29,33 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { POSITION, OFFSET } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
-import BulkUploadMcq from '../_components/BulkMcqForm'
-import NewMcqForm from '../_components/NewMcqForm'
-import EditMcqForm from '../_components/EditMcqForm'
+
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
+import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
+
+
+const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
+
+const BulkUploadMcq = dynamic(() => import('../_components/BulkMcqForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
+
+const NewMcqForm = dynamic(() => import('../_components/NewMcqForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
+
+const EditMcqForm = dynamic(() => import('../_components/EditMcqForm'), {
+    ssr: false,
+    loading: () => <div className="flex justify-center"><Spinner /></div>
+})
 
 type Props = {}
 export type Tag = {
@@ -72,13 +91,13 @@ const Mcqs = (props: Props) => {
     const [search, setSearch] = useState('')
     const [mcqType, setMcqType] = useState<string>('')
     const [newTopic, setNewTopic] = useState<string>('')
-    const [options, setOptions] = useState<Option[]>([
+    const [options, setOptions] = useState<PageOption[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const [loading, setLoading] = useState(true)
 
     // New search enhancement states
-    const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([])
+    const [searchSuggestions, setSearchSuggestions] = useState<PageSearchSuggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
     const [isSearchFocused, setIsSearchFocused] = useState(false)
@@ -106,7 +125,7 @@ const Mcqs = (props: Props) => {
         setmcqSearch(debouncedSearch)
     }, [debouncedSearch, setmcqSearch])
 
-    const updateURL = useCallback((searchTerm: string, topics: Option[], difficulties: Option[]) => {
+    const updateURL = useCallback((searchTerm: string, topics: PageOption[], difficulties: PageOption[]) => {
         let query = ''
 
         // Always follow this order: difficulty > topic > search
@@ -164,6 +183,11 @@ const Mcqs = (props: Props) => {
             return
         }
 
+        // Check if we're on the client side
+        if (typeof window === 'undefined' || typeof document === 'undefined') {
+            return
+        }
+
         // Fallback: create suggestions from existing data
         const questionSuggestions = quizData
             .filter(item => {
@@ -199,6 +223,7 @@ const Mcqs = (props: Props) => {
                 }
             })
 
+
         const topicSuggestions = tags
             .filter(tag => tag.tagName.toLowerCase().includes(query.toLowerCase()))
             .slice(0, 3)
@@ -228,8 +253,8 @@ const Mcqs = (props: Props) => {
         fetchCodingQuestions(0, search.trim())
     }
 
-    const handleTagOption = (option: Option) => {
-        let newSelectedOptions: Option[] = []
+    const handleTagOption = (option: PageOption ) => {
+        let newSelectedOptions: PageOption[] = []
         
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
@@ -260,8 +285,8 @@ const Mcqs = (props: Props) => {
         fetchCodingQuestions(0, search)
     }
 
-    const handleDifficulty = (option: Option) => {
-        let newDifficulty: Option[] = []
+    const handleDifficulty = (option: PageOption) => {
+        let newDifficulty: PageOption[] = []
         
         // When user selects All Difficulty
         if (option.value === 'None') {
@@ -317,7 +342,7 @@ const Mcqs = (props: Props) => {
         }, 200)
     }
 
-    const handleSuggestionClick = (suggestion: SearchSuggestion) => {
+    const handleSuggestionClick = (suggestion: PageSearchSuggestion) => {
         if (suggestion.type === 'question') {
             const trimmed = suggestion.question.trim()
             setSearch(trimmed)
@@ -328,7 +353,7 @@ const Mcqs = (props: Props) => {
             // Topic click
             const topicOption = options.find(opt => opt.label === suggestion.topic)
             if (topicOption) {
-                let newSelectedOptions: Option[] = []
+                let newSelectedOptions: PageOption[] = []
                 
                 if (topicOption.value === '-1') {
                     newSelectedOptions = [topicOption]

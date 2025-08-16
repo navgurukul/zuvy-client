@@ -5,16 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { X } from "lucide-react";
+import{CodingProblemPageProps} from '@/app/student/_components/componentStudentType'
 
-interface CodingProblemPageProps {
-  problem: {
-    title: string;
-    difficulty: string;
-    topic: string;
-    status: string;
-  };
-  onClose: () => void;
-}
 
 const CodingProblemPage = ({ problem, onClose }: CodingProblemPageProps) => {
   const [code, setCode] = useState('// Write your solution here\n\n');

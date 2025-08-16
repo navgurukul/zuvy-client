@@ -9,20 +9,17 @@ import { Link } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useRouter, useSearchParams } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import {PriviewEditorDoc,Params } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType"
 
-type EditorDoc = {
-    type: string
-    content: any[]
-}
 
-const PreviewAssignment = ({ params }: { params: any }) => {
+const PreviewAssignment = ({ params }: { params: Params }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const isPdfPreview = searchParams.get('pdf') === 'true'
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()
     const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
+        { doc: PriviewEditorDoc } | undefined
     >()
 
     const timestamp = assignmentPreviewContent?.completionDate

@@ -4,17 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
-
-interface CodingChallengeProps {
-  challenge: {
-    title: string;
-    difficulty: string;
-    marks: number;
-  };
-  onBack: () => void;
-  onComplete: () => void;
-  timeLeft: string;
-}
+import{CodingChallengeProps} from '@/app/student/_components/componentStudentType'
 
 const CodingChallenge = ({ challenge, onBack, onComplete, timeLeft }: CodingChallengeProps) => {
   const [code, setCode] = useState('// Write your solution here\n\n');

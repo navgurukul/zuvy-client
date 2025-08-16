@@ -2,9 +2,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronRight } from 'lucide-react'
 import React from 'react'
 
-type Props = {}
-
-const ProjectSubmissionComponent = (props: Props) => {
+const ProjectSubmissionComponent = () => {
     return (
         <div className="lg:flex h-[120px] w-[400px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-md p-4">
             <div className="flex flex-col w-full ">

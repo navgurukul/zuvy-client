@@ -6,15 +6,9 @@ import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getStoreStudentDataNew } from '@/store/store'
 import { getEditStudent, getStudentData } from '@/store/store'
+import{ComboxAlertDialogProps} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 
-interface AlertDialogProps {
-    name: string
-    email: string
-    userId: number
-    bootcampId: number
-}
-
-export const EditModal: React.FC<AlertDialogProps> = ({
+export const EditModal: React.FC<ComboxAlertDialogProps> = ({
     name,
     email,
     userId,
@@ -35,7 +29,7 @@ export const EditModal: React.FC<AlertDialogProps> = ({
     const { isStudent, setIsStudent } = getEditStudent()
     const { studentData, setStudentData } = getStudentData()
 
-    async function editStudentHandler(userId: any, bootcampId: any) {
+    async function editStudentHandler(userId: number, bootcampId: string) {
         try {
             await api
                 .patch(`/bootcamp/updateUserDetails/${userId}`, studentData)
@@ -64,7 +58,6 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
-            setIsOpen(false)
         }
     }
 

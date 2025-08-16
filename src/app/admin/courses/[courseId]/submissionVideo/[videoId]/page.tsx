@@ -62,23 +62,26 @@ const Page = ({ params }: any) => {
     const searchSuggestions = useMemo(() => {
         if (!searchQuery.trim() || !dataTableVideo.length) return []
         
-        const suggestions = new Set<string>()
+        const suggestions: { name: string; email: string }[] = []
         const query = searchQuery.toLowerCase()
-        const hasAtSymbol = query.includes('@')
         
         dataTableVideo.forEach((student: any) => {
-            if (hasAtSymbol) {
-                if (student.email && student.email.toLowerCase().includes(query)) {
-                    suggestions.add(student.email)
-                }
-            } else {
-                if (student.name && student.name.toLowerCase().includes(query)) {
-                    suggestions.add(student.name)
+            const nameMatch = student.name && student.name.toLowerCase().includes(query)
+            const emailMatch = student.email && student.email.toLowerCase().includes(query)
+            
+            if (nameMatch || emailMatch) {
+                // Avoid duplicates
+                const exists = suggestions.some(s => s.name === student.name && s.email === student.email)
+                if (!exists) {
+                    suggestions.push({
+                        name: student.name || '',
+                        email: student.email || ''
+                    })
                 }
             }
         })
         
-        return Array.from(suggestions).slice(0, 5)
+        return suggestions.slice(0, 5)
     }, [searchQuery, dataTableVideo])
 
     // Handle search input change
@@ -90,12 +93,13 @@ const Page = ({ params }: any) => {
         setShowSuggestions(isAddingText && value.trim().length > 0)
     }
 
-    // Handle suggestion click
-    const handleSuggestionClick = (suggestion: string) => {
-        setSearchQuery(suggestion)
-        setActiveSearch(suggestion)
+    // Handle suggestion click - use name for input and URL
+    const handleSuggestionClick = (suggestion: { name: string; email: string }) => {
+        const displayValue = suggestion.name || suggestion.email // Fallback to email if no name
+        setSearchQuery(displayValue)
+        setActiveSearch(displayValue)
         setShowSuggestions(false)
-        updateSearchInURL(suggestion)
+        updateSearchInURL(displayValue)
     }
 
     // Handle clear search
@@ -210,7 +214,7 @@ const Page = ({ params }: any) => {
                     <div className="relative w-1/3">
                         <div className="relative">
                             <Input
-                                placeholder="Search for Student"
+                                placeholder="Search by name or email"
                                 className="input-with-icon pl-8 pr-10"
                                 value={searchQuery}
                                 onChange={handleSearchChange}
@@ -258,7 +262,10 @@ const Page = ({ params }: any) => {
                                         onMouseDown={(e) => e.preventDefault()}
                                         type="button"
                                     >
-                                        {suggestion}
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{suggestion.name}</span>
+                                            <span className="text-xs text-gray-500">{suggestion.email}</span>
+                                        </div>
                                     </button>
                                 ))}
                             </div>

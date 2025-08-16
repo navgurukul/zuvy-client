@@ -1,47 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-
-interface ChapterTrackingDetail {
-  id: number;
-}
-
-interface TrackingDataItem {
-  id: number;
-  title: string;
-  topicId: number;
-  chapterTrackingDetails: ChapterTrackingDetail[];
-  status: 'Pending' | 'Completed';
-}
-
-interface ModuleDetail {
-  id: number;
-  typeId: number;
-  isLock: boolean;
-  bootcampId: number;
-  name: string;
-  description: string;
-  projectId: number | null;
-  order: number;
-  timeAlloted: number;
-  version: number | null;
-}
-
-interface AllChaptersWithStatusResponse {
-  status: string;
-  code: number;
-  trackingData: TrackingDataItem[];
-  moduleDetails: ModuleDetail[];
-}
-
-interface UseAllChaptersWithStatusReturn {
-  trackingData: TrackingDataItem[];
-  moduleDetails: ModuleDetail[];
-  loading: boolean;
-  isRefetching: boolean;
-  error: string | null;
-  refetch: () => void;
-}
-
+import{AllChaptersWithStatusResponse,UseAllChaptersWithStatusReturn,ModuleDetail,TrackingDataItem} from '@/hooks/hookType'
 const useAllChaptersWithStatus = (moduleId: string): UseAllChaptersWithStatusReturn => {
   const [trackingData, setTrackingData] = useState<TrackingDataItem[]>([]);
   const [moduleDetails, setModuleDetails] = useState<ModuleDetail[]>([]);

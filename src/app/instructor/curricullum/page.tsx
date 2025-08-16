@@ -32,15 +32,14 @@ const Curricullum = () => {
                 <div key={item.id} className="w-1/2">
                     <div
                         className={`${
-                            item.typeId === 2 ? 'bg-yellow/50' : 'bg-muted'
+                            item.typeId=== 2 ? 'bg-yellow/50' : 'bg-muted'
                         } my-3 p-3  flex rounded-xl`}
                     >
-                        <CurricullumCard key={item} course={item} />
+                        <CurricullumCard key={item.id} course={item} />
                     </div>
                 </div>
             ))}
         </div>
     )
 }
-
 export default Curricullum

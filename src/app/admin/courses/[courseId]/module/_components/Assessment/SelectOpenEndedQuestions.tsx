@@ -9,22 +9,18 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
+import {selectedOpenEndedQuestionsProps,SelectTag} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const SelectOpenEndedQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
     type,
-}: {
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<any[]>>
-    selectedQuestions: any[]
-    tags: any
-    type: string
-}) => {
+}:selectedOpenEndedQuestionsProps) => {
     return (
         <div className="w-full">
             {selectedQuestions.map((question: any) => {
-                const tag = tags?.find((tag: any) => tag.id === question.tagId)
+                const tag = tags?.find((tag: SelectTag ) => tag.id === question.tagId)
 
                 return (
                     <div

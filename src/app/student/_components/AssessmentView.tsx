@@ -3,24 +3,7 @@ import { useState, useEffect } from "react";
 import AssessmentHeader from "./AssessmentHeader";
 import AssessmentStateCard from "./AssessmentStateCard";
 import AssessmentModal from "./AssessmentModal";
-
-interface AssessmentData {
-  id: string;
-  title: string;
-  description: string;
-  startDate: Date;
-  endDate: Date;
-  duration: string;
-  totalMarks: number;
-  passScore: number;
-  state: 'scheduled' | 'open' | 'interrupted' | 'reAttemptRequested' | 'completed' | 'expired';
-  score?: number;
-  attemptStatus: 'Not Attempted' | 'Attempted' | 'Interrupted';
-}
-
-interface AssessmentViewProps {
-  assessment: AssessmentData;
-}
+import{AssessmentData,AssessmentViewProps} from '@/app/student/_components/componentStudentType'
 
 const AssessmentView = ({ assessment }: AssessmentViewProps) => {
   const [currentState, setCurrentState] = useState(assessment.state);

@@ -20,16 +20,9 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
+import {DataTableFacetedFilterProps} from "@/app/_components/datatable/componentDatatable"
 
-interface DataTableFacetedFilterProps<TData, TValue> {
-  column?: Column<TData, TValue>;
-  title?: string;
-  options: {
-    label: string;
-    value: string;
-    icon?: React.ComponentType<{ className?: string }>;
-  }[];
-}
+
 
 export function DataTableFacetedFilter<TData, TValue>({
   column,

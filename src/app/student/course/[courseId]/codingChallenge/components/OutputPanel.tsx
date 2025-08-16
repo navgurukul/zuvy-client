@@ -1,11 +1,6 @@
 import React from 'react';
 import { CodeResult } from '@/utils/types/coding-challenge';
-
-interface OutputPanelProps {
-    loading: boolean;
-    codeError: string;
-    codeResult: CodeResult[];
-}
+import{OutputPanelProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
 export function OutputPanel({ loading, codeError, codeResult }: OutputPanelProps) {
     return (

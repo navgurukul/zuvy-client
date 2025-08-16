@@ -1,12 +1,7 @@
 import React from 'react'
+import {AddLiveClasstoProps} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
-type Props = {
-    logSelectedRows: () => any[]
-    table: any
-}
-
-
-const AddLiveClasstoChapter = ({ logSelectedRows, table }: Props) => {
+const AddLiveClasstoChapter = ({ logSelectedRows, table }: AddLiveClasstoProps) => {
     const selectedRows = logSelectedRows()
 
   return (

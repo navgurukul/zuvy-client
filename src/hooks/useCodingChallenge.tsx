@@ -2,6 +2,7 @@ import { useReducer, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/utils/axios.config';
 import { b64EncodeUnicode, b64DecodeUnicode } from '@/utils/base64';
+import{UseCodingChallengeProps} from '@/hooks/hookType'
 import {
     CodingChallengeState,
     CodingChallengeAction,
@@ -22,7 +23,9 @@ const editorLanguages: CodingLanguage[] = [
 const initialState: CodingChallengeState = {
     questionDetails: null,
     currentCode: '',
-    language: 'python',
+    sourceCode: '',
+    action: '',
+    language: '',
     languageId: 100,
     loading: false,
     isSubmitting: false,
@@ -33,6 +36,7 @@ const initialState: CodingChallengeState = {
     showConfirmModal: false,
     isSolutionModalOpen: false,
     modalType: 'success',
+    programLangId: '',
 };
 
 function codingChallengeReducer(
@@ -44,6 +48,10 @@ function codingChallengeReducer(
             return { ...state, questionDetails: action.payload };
         case 'SET_CODE':
             return { ...state, currentCode: action.payload };
+        case 'SET_SOURCE_CODE':
+            return { ...state, sourceCode: action.payload };
+        case 'SET_ACTION':
+            return { ...state, action: action.payload };
         case 'SET_LANGUAGE':
             return {
                 ...state,
@@ -68,18 +76,14 @@ function codingChallengeReducer(
             return { ...state, isSolutionModalOpen: action.payload };
         case 'SET_MODAL_TYPE':
             return { ...state, modalType: action.payload };
+        case 'SET_PROGRAM_LANG_ID':
+            return { ...state, programLangId: action.payload };
         case 'RESET_ERRORS':
             return { ...state, codeError: '', codeResult: [] };
         default:
             return state;
     }
 }
-
-interface UseCodingChallengeProps {
-    questionId: string;
-    onChapterComplete?: () => void;
-}
-
 export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingChallengeProps) {
     const [state, dispatch] = useReducer(codingChallengeReducer, initialState);
     const { toast } = useToast();
@@ -99,6 +103,12 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
                     dispatch({ type: 'SET_ALREADY_SUBMITTED', payload: true });
                     dispatch({ type: 'SET_COMPLETED', payload: true });
                 }
+                if(submissionData.action === 'run'){
+                    dispatch({ type: 'SET_ACTION', payload: 'run' });
+                    dispatch({type: 'SET_PROGRAM_LANG_ID', payload: submissionData.programLangId});
+                    dispatch({ type: 'SET_SOURCE_CODE', payload: b64DecodeUnicode(submissionData.sourceCode) });
+                }
+                
 
                 if (submissionData.programLangId && submissionData.sourceCode) {
                     const langId = parseInt(submissionData.programLangId);
@@ -261,10 +271,18 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
 
     // Update code when language changes (only if not already submitted)
     useEffect(() => {
-        if (state.questionDetails?.templates?.[state.language]?.template && !state.isAlreadySubmitted) {
-            const template = state.questionDetails.templates[state.language].template;
-            dispatch({ type: 'SET_CODE', payload: b64DecodeUnicode(template) });
+
+        if (state.questionDetails?.templates?.[state.language]?.template && !state.isAlreadySubmitted ) {
+            if(state.action === 'run' && state.programLangId === state.languageId.toString()){
+                dispatch({ type: 'SET_CODE', payload: state.sourceCode });
+            }
+            else{
+                const template = state.questionDetails.templates[state.language].template;
+                dispatch({ type: 'SET_CODE', payload: b64DecodeUnicode(template) });
+            }
         }
+
+       
     }, [state.language, state.questionDetails, state.isAlreadySubmitted]);
 
     return {

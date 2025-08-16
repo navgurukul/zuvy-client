@@ -1,6 +1,11 @@
 'use client'
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
-import { useParams, useRouter, usePathname, useSearchParams } from 'next/navigation'
+import {
+    useParams,
+    useRouter,
+    usePathname,
+    useSearchParams,
+} from 'next/navigation'
 import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
@@ -40,7 +45,7 @@ import {
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { api } from '@/utils/axios.config'
-import { StudentData } from '../../(courseTabs)/students/page'
+import { StudentDataPage } from '../../(courseTabs)/students/studentComponentTypes'
 import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { Spinner } from '@/components/ui/spinner'
@@ -51,13 +56,9 @@ import { ComboboxStudent } from '../../(courseTabs)/students/components/combobox
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 import { POSITION } from '@/utils/constant'
+import {StudentDataState} from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
+import axios from 'axios'
 
-interface Student {
-    email: string
-    name: string
-}
-
-type StudentDataState = Student[]
 
 const BatchesInfo = ({
     params,
@@ -71,13 +72,16 @@ const BatchesInfo = ({
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
     const [allBatches, setAllBatches] = useState<any>([])
-    const [studentData, setStudentData] = useState<StudentData[]>([])
+    const [studentData, setStudentData] = useState<StudentDataPage[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
     const [search, setSearch] = useState('')
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
     const [instructorsInfo, setInstructorInfo] = useState<any>([])
     const [pages, setPages] = useState<number>()
-    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const [offset, setOffset] = useState<number>(0)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
@@ -86,7 +90,7 @@ const BatchesInfo = ({
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
     const [loading, setLoading] = useState(true)
-    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+    const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
     const [studentDataTable, setStudentDataTable] = useState<
         StudentDataState | any
     >({})
@@ -123,13 +127,26 @@ const BatchesInfo = ({
                 const capEnrollmentValue = parseInt(capEnrollment)
                 return (
                     !isNaN(capEnrollmentValue) &&
+                    capEnrollmentValue >= 1 &&
                     capEnrollmentValue >= studentsData.length &&
                     capEnrollmentValue <= 100000
                 )
             },
-            {
-                message: `Cap enrollment cannot be less than the current number of students (${studentsData?.length}).`,
+            // {
+            //     message: `Cap Enrollment must be at least 1 and not less than the number of current students(${studentsData?.length}).`,
+            // }
+
+            (val) => {
+            const capEnrollmentValue = parseInt(val)
+            if (capEnrollmentValue > 100000) {
+                return {
+                    message: 'Cap Enrollment cannot exceed 100000.',
+                }
             }
+            return {
+                message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
+            }
+        }
         ),
     })
 
@@ -173,6 +190,18 @@ const BatchesInfo = ({
                 })
                 setAllBatches(batchData)
             } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    if (
+                        error?.response?.data.message === 'Bootcamp not found!'
+                    ) {
+                        router.push(`/admin/courses`)
+                        toast.info({
+                            title: 'Caution',
+                            description:
+                                'The Course has been deleted by another Admin',
+                        })
+                    }
+                }
                 console.error('Error fetching batches', error)
             }
         },
@@ -525,7 +554,7 @@ const BatchesInfo = ({
                                         userId={userIds}
                                         bootcampId={parseInt(params.courseId)}
                                         title="Are you absolutely sure?"
-                                        description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                        description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
                                         fetchStudentData={fetchStudentData}
                                     />
                                     <ComboboxStudent
@@ -713,7 +742,7 @@ const BatchesInfo = ({
                             totalStudents={totalStudents}
                             lastPage={lastPage}
                             pages={pages}
-                            fetchStudentData={fetchStudentData}                        
+                            fetchStudentData={fetchStudentData}
                         />
                     </div>
                 )}

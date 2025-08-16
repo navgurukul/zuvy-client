@@ -46,6 +46,8 @@ export interface CodingLanguage {
 export interface CodingChallengeState {
     questionDetails: QuestionDetails | null;
     currentCode: string;
+    sourceCode: string;
+    action: 'run' | 'submit' | '';
     language: string;
     languageId: number;
     loading: boolean;
@@ -57,11 +59,14 @@ export interface CodingChallengeState {
     showConfirmModal: boolean;
     isSolutionModalOpen: boolean;
     modalType: 'success' | 'error';
+    programLangId: string;
 }
 
 export type CodingChallengeAction =
     | { type: 'SET_QUESTION_DETAILS'; payload: QuestionDetails }
     | { type: 'SET_CODE'; payload: string }
+    | { type: 'SET_SOURCE_CODE'; payload: string }
+    | { type: 'SET_ACTION'; payload: 'run' | 'submit' | '' }
     | { type: 'SET_LANGUAGE'; payload: { language: string; languageId: number } }
     | { type: 'SET_LOADING'; payload: boolean }
     | { type: 'SET_SUBMITTING'; payload: boolean }
@@ -72,6 +77,7 @@ export type CodingChallengeAction =
     | { type: 'SET_CONFIRM_MODAL'; payload: boolean }
     | { type: 'SET_SOLUTION_MODAL'; payload: boolean }
     | { type: 'SET_MODAL_TYPE'; payload: 'success' | 'error' }
+    | { type: 'SET_PROGRAM_LANG_ID'; payload: string }
     | { type: 'RESET_ERRORS' };
 
 export interface ApiError {

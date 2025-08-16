@@ -38,36 +38,13 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
-interface Input {
-    parameterName: string
-    parameterType: string
-    parameterValue: [] | {}
-}
+import {IDEProps,IDEInput,TestCase} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
-interface TestCase {
-    inputs: Input[] | Record<string, unknown>
-    expectedOutput: {
-        parameterType: string
-        parameterValue: [] | {}
-    }
-}
-
-interface questionDetails {
+export interface questionDetails{
     title: string
     description: string
     constraints?: string
     examples: { input: number[]; output: number }
-}
-
-interface IDEProps {
-    params: { editor: string }
-    onBack?: () => void
-    remainingTime?: any
-    assessmentSubmitId?: number
-    selectedCodingOutsourseId?: any
-    getAssessmentData?: any
-    runCodeLanguageId?: number
-    runSourceCode?: string
 }
 
 const IDE: React.FC<IDEProps> = ({
@@ -318,8 +295,8 @@ const IDE: React.FC<IDEProps> = ({
 
     return (
         <div>
-            <div className="flex justify-between mb-2">
-                <AlertDialog>
+            <div className="flex justify-end mb-2">
+                {/* <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="ghost" size="icon">
                             <ChevronLeft fontSize={24} />
@@ -345,7 +322,7 @@ const IDE: React.FC<IDEProps> = ({
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
-                </AlertDialog>
+                </AlertDialog> */}
 
                 <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
                     <AlertDialogContent className="max-w-[350px]">
@@ -382,9 +359,9 @@ const IDE: React.FC<IDEProps> = ({
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <div className="font-bold text-xl">
+                {/* <div className="font-bold text-xl">
                     <TimerDisplay remainingTime={remainingTime} />
-                </div>
+                </div> */}
                 <div>
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
@@ -447,7 +424,7 @@ const IDE: React.FC<IDEProps> = ({
                                                     )
                                                         ? testCase.inputs.map(
                                                               (
-                                                                  input: Input,
+                                                                  input: IDEInput,
                                                                   idx: number
                                                               ) => (
                                                                   <p

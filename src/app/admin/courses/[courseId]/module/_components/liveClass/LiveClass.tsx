@@ -3,44 +3,11 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, Video, Users, ExternalLink } from 'lucide-react';
+import {LiveClassProps} from "@/app/admin/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType"
 
-type Props = {
-    chapterData: any
-    content: any
-    moduleId: any
-    courseId: any
-}
 
-interface SessionDetail {
-    id: number;
-    meetingId: string;
-    hangoutLink: string;
-    creator: string;
-    startTime: string;
-    endTime: string;
-    title: string;
-    s3link: string | null;
-    status: 'upcoming' | 'completed' | 'ongoing';
-    attendance: number | null;
-}
-
-interface LiveClassData {
-    id: number;
-    title: string;
-    description: string;
-    moduleId: number;
-    topicId: number;
-    order: number;
-    completionDate: string | null;
-    sessionDetails: SessionDetail[];
-}
-
-interface LiveClassCardProps {
-    classData: LiveClassData;
-}
-
-const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
-    const session = content?.sessionDetails?.[0];
+const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps) => {
+    const session= content?.sessionDetails?.[0];
 
     const [isJoinDisabled, setIsJoinDisabled] = useState(true);
     const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session?.status);
@@ -49,9 +16,9 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: Props) => {
   useEffect(() => {
   if (!session) return;
 
-  const startTime = new Date(session.startTime).getTime();
+  const startTime = new Date(session?.startTime).getTime();
   const now = new Date().getTime();
-  const endTime = new Date(session.endTime).getTime();
+  const endTime = new Date(session?.endTime).getTime();
   const THIRTY_MIN = 30 * 60 * 1000;
 
   const timeUntil30MinBefore = startTime - now - THIRTY_MIN;

@@ -1,33 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-
-interface QuizOption {
-  [key: string]: string;
-}
-
-interface SubmissionData {
-  status: string;
-  chosenOption?: number;
-}
-
-interface QuizResult {
-  quizId: number;
-  question: string;
-  options: QuizOption;
-  correctOption: number;
-  mark: string;
-  difficulty: string;
-  submissionsData?: SubmissionData;
-}
-
-interface QuizResultsResponse {
-  mcqs: QuizResult[];
-}
-
-interface UseQuizResultsParams {
-  submissionId: string | null;
-  enabled?: boolean;
-}
+import{UseQuizResultsParams,QuizResultsResponse} from '@/hooks/hookType'
 
 export const useQuizResults = ({
   submissionId,

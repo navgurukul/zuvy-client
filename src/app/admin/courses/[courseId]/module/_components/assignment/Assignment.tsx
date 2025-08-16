@@ -49,41 +49,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-
-interface ContentDetail {
-    title: string
-    description: string | null
-    links: string | null
-    file: string | null
-    content: string | null
-}
-
-interface Content {
-    id: number
-    moduleId: number
-    topicId: number
-    order: number
-    contentDetails: ContentDetail[]
-}
-
-type EditorDoc = {
-    type: string
-    content: any[]
-}
-
-interface AssignmentProps {
-    content: Content
-    courseId: any
-    assignmentUpdateOnPreview: boolean
-    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>
-}
+import {AssignmentProps,AssignmentContentEditorDoc,DocItem,TextContent,ChapterDetailsResponse,EditorContent} from "@/app/admin/courses/[courseId]/module/_components/assignment/moduleComponentAssignmentType"
 
 const AddAssignent = ({
     content,
     courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
-}: any) => {
+}: AssignmentProps) => {
     // misc
 
     const formSchema = z.object({
@@ -107,7 +80,7 @@ const AddAssignent = ({
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
 
     const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
+        { doc: AssignmentContentEditorDoc } | undefined
     >()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [hasEditorContent, setHasEditorContent] = useState(false)
@@ -137,7 +110,7 @@ const AddAssignent = ({
         mode: 'onChange',
     })
 
-    const isEditorContentEmpty = (content: any) => {
+    const isEditorContentEmpty = (content?: EditorContent) => {
         if (!content || !content.doc || !content.doc.content) return true
 
         const docContent = content.doc.content
@@ -151,9 +124,9 @@ const AddAssignent = ({
         }
 
         // Check if all content is empty
-        const hasRealContent = docContent.some((item: any) => {
+        const hasRealContent = docContent.some((item: DocItem) => {
             if (item.type === 'paragraph' && item.content) {
-                return item.content.some((textItem: any) =>
+                return item.content.some((textItem: TextContent) =>
                     textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0
                 )
             }
@@ -211,7 +184,7 @@ const AddAssignent = ({
     const getAssignmentContent = async () => {
         setIsDataLoading(true)
         try {
-            const response = await api.get(
+            const response = await api.get<ChapterDetailsResponse>(
                 `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
 
@@ -534,6 +507,11 @@ const AddAssignent = ({
                                                             )
                                                             field.onChange(e)
                                                         }}
+                                                        onKeyDown={(e) => {
+                                                         if (e.key === 'Enter') {
+                                                          e.preventDefault() 
+                                                         }
+                                                        }}
                                                         placeholder="Untitled Assignment"
                                                         className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         autoFocus
@@ -594,7 +572,8 @@ const AddAssignent = ({
                                                                 }
                                                                 disabled={!disabledUploadButton}
                                                             >
-                                                                Upload PDF
+                                                                {/* Upload PDF */}
+                                                                {isSaving ? 'Saving...' : 'Save'}
                                                             </Button>
                                                         </div>
                                                     )}

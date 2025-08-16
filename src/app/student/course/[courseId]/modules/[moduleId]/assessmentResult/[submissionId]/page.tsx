@@ -3,8 +3,8 @@
 // DO NOT import Header here to disable it for this page
 import { toast } from '@/components/ui/use-toast'
 import { cn, difficultyColor } from '@/lib/utils'
-import { useLazyLoadedStudentData } from '@/store/store'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useLazyLoadedStudentData, useThemeStore } from '@/store/store'
+import { ChevronLeft, ChevronRight, Moon, Sun } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import Image from 'next/image'
@@ -12,15 +12,19 @@ import { getAssesmentBackgroundColorClass } from '@/lib/utils'
 import useAssessmentResult from '@/hooks/useAssessmentResult'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import {AssessmentParams} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"
 
-const ViewAssessmentResults = ({ params }: { params: any }) => {
+const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
     // State Variables
     const [assessmentOutsourseId, setAssessmentOutsourseId] = useState<number | null>(null)
     const { studentData } = useLazyLoadedStudentData()
+    const { isDark, toggleTheme } = useThemeStore();
+
     const router = useRouter()
 
     // Use the custom hook
     const { data: viewResultsData, loading, error, refetch } = useAssessmentResult(params.submissionId)
+   
 
     React.useEffect(() => {
         if (viewResultsData && viewResultsData.assessmentOutsourseId) {
@@ -515,7 +519,7 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
 
     return (
         <div className="min-h-screen bg-background">
-            <div className="text-left">
+            <div className="text-left flex justify-between mr-4">
 
                 <div
                     onClick={() => router.back()}
@@ -524,6 +528,19 @@ const ViewAssessmentResults = ({ params }: { params: any }) => {
                     <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
                     <span className="font-medium">Back to Assessment</span>
                 </div>
+                <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleTheme}
+          className="w-8 h-8 sm:w-9 sm:h-9 p-0 mt-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        >
+          {isDark ? (
+            <Sun className="h-4 w-4" />
+          ) : (
+            <Moon className="h-4 w-4" />
+          )}
+        </Button>
+
             </div>
             <div className="max-w-4xl mx-auto p-6">
                 {/* Header */}

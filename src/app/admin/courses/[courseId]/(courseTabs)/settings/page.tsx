@@ -14,8 +14,10 @@ import { Spinner } from '@/components/ui/spinner'
 import ModulesLockToggleSwitch from '@/app/admin/courses/[courseId]/_components/ModulesLockToggleSwitch'
 import Image from 'next/image'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import axios from 'axios'
+import{PageProps} from "@/app/admin/courses/[courseId]/(courseTabs)/settings/courseSettingType"
 
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params: PageProps}) => {
     // misc
     const router = useRouter()
     // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
@@ -31,13 +33,26 @@ const Page = ({ params }: { params: any }) => {
     // async
     const fetchBootCampSettings = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<PageProps>(
                 `/bootcamp/bootcampSetting/${params.courseId}`
             )
             const type = response.data.bootcampSetting[0].type
             setBootcampSettings(type)
             setIsChecked(type === 'Public')
         } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (
+                    error?.response?.data.message ===
+                    'Bootcamp not found for the provided id.'
+                ) {
+                    router.push(`/admin/courses`)
+                    toast.info({
+                        title: 'Caution',
+                        description:
+                            'The Course has been deleted by another Admin',
+                    })
+                }
+            }
             console.error('Error fetching boot camp settings:', error)
         }
     }, [params.courseId])
@@ -99,7 +114,7 @@ const Page = ({ params }: { params: any }) => {
     //         </div>
     //       )
     //     }
-        
+
     //     if (isCourseDeleted) {
     //       return (
     //         <div className="flex flex-col justify-center items-center h-full mt-20">
@@ -111,7 +126,7 @@ const Page = ({ params }: { params: any }) => {
     //         </div>
     //       )
     //     }
-    
+
     return (
         <>
             {loading ? (
@@ -143,7 +158,9 @@ const Page = ({ params }: { params: any }) => {
                             </div>
                         </div>
 
-                        <h1 className="text-lg font-semibold mt-5">Course Status</h1>
+                        <h1 className="text-lg font-semibold mt-5">
+                            Course Status
+                        </h1>
                         <p>
                             This course has not been published yet. You will
                             able to unpublish it at any time if new enrollments
@@ -151,7 +168,9 @@ const Page = ({ params }: { params: any }) => {
                         </p>
                     </div>
                     <h1 className="text-lg font-semibold mt-5 text-left">Modules Lock Status</h1>
-                    <ModulesLockToggleSwitch bootcampId={params.courseId} />
+                    <ModulesLockToggleSwitch bootcampId={String(params.courseId)} onToggle={function (isChecked: boolean): void {
+                            throw new Error('Function not implemented.')
+                        } }/>
 
                     <div className="w-full text-start my-5">
                         <div className="mb-3 text-start">
