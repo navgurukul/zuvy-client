@@ -102,8 +102,6 @@ function RecordingCard({
         }
     }
 
-    console.log('classData', classData)
-
     const handleAttendance = async () => {
         try {
             const response = await api.get(
