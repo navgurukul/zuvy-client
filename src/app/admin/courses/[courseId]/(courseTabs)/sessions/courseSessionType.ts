@@ -2,6 +2,7 @@
 export interface EditSessionProps {
     meetingId: string
     initialData: {
+        isZoomMeet: any
         sessionTitle: string
         description: string
         startTime: string

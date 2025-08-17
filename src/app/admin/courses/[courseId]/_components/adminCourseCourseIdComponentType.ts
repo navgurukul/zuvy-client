@@ -64,6 +64,7 @@ export type ClassDatas = {
     moduleId:string
     description:string
     hangoutLink: string
+    isZoomMeet?: boolean
 }
 
 
@@ -167,7 +168,7 @@ export interface editModuleDialogProps {
 //  FormComponent
 export type FormComponentProps = {
     bootcampId: number
-    moduleId: number
+        isZoomMeet?: boolean
     data: any
     moduleName: string
     debouncedSearch: string

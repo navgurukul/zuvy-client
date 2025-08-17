@@ -42,7 +42,7 @@ function ClassCard({
     getClasses,
     activeTab,
     studentSide,
-}:ClassCardProps) {
+}: ClassCardProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -84,21 +84,23 @@ function ClassCard({
                 className="w-full mb-6 border-none p-5 shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] relative"
                 key={classData.id}
             >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between">-
                     <div className="flex items-center space-x-6">
                         <div className="font-bold text-lg flex flex-col border rounded-md py-3 px-5 text-muted-foreground border-muted-foreground">
                             <Moment format="DD">{classData.startTime}</Moment>{' '}
                             <Moment format="MMM">{classData.startTime}</Moment>
                         </div>
                         <div className="text-start">
-                            {classType === 'ongoing' ? (
-                                <Badge
-                                    variant="yellow"
-                                    className="mb-3 inline-block lg:hidden"
-                                >
-                                    Ongoing
-                                </Badge>
-                            ) : null}
+                            <div className="flex flex-wrap gap-2 mb-2 lg:hidden">
+                                {classType === 'ongoing' && (
+                                    <Badge
+                                        variant="yellow"
+                                        className="inline-block"
+                                    >
+                                        Ongoing
+                                    </Badge>
+                                )}
+                            </div>
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -135,14 +137,6 @@ function ClassCard({
                         </div>
                     </div>
                     <div>
-                        {classType === 'ongoing' ? (
-                            <Badge
-                                variant="yellow"
-                                className="mb-3 hidden lg:inline-block absolute top-4 right-5"
-                            >
-                                Ongoing
-                            </Badge>
-                        ) : null}
                         {!admin && (
                             <div className="hidden lg:flex text-end absolute right-1">
                                 <Button
@@ -232,6 +226,7 @@ function ClassCard({
                                         description: classData.description,
                                         startTime: classData.startTime,
                                         endTime: classData.endTime,
+                                        isZoomMeet: classData.isZoomMeet,
                                     }}
                                     getClasses={getClasses}
                                     open={isDialogOpen}

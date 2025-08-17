@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { addDays, format } from 'date-fns'
-import { CalendarIcon, RotateCcw } from 'lucide-react'
+import { CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { toast } from '@/components/ui/use-toast'
@@ -39,7 +39,6 @@ const formSchema = z
         sessionTitle: z.string().min(2, {
             message: 'Session Title must be at least 2 characters.',
         }),
-
         startDate: z.date({
             required_error: 'Start Date is required',
         }),
@@ -49,6 +48,7 @@ const formSchema = z
         endTime: z.string().min(1, {
             message: 'End Time is required',
         }),
+        platform: z.string().optional(),
     })
     .refine((data) => data.startTime <= data.endTime, {
         message: 'End time cannot be after start time',
@@ -64,6 +64,11 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
         return `${hours}:${minutes}`
     }
 
+    // Determine default platform
+    const derivedPlatform = typeof props.initialData.isZoomMeet === 'boolean'
+        ? (props.initialData.isZoomMeet ? 'zoom' : 'google-meet')
+        : (props.initialData.startTime.includes('zoom') ? 'zoom' : 'google-meet')
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -71,17 +76,18 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             startDate: new Date(props.initialData.startTime),
             startTime: formatTime(props.initialData.startTime),
             endTime: formatTime(props.initialData.endTime),
+            platform: derivedPlatform,
         },
         mode: 'onChange',
     })
 
-    const { sessionTitle, startDate, startTime, endTime } = form.watch()
+    const { sessionTitle, startDate, startTime, endTime, platform } = form.watch()
 
     const isSubmitDisabled = !(
         sessionTitle &&
         startDate &&
         startTime &&
-        endTime
+    endTime && platform
     )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -99,10 +105,14 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
         )
         const endDateTime = combineDateTime(values.startDate, values.endTime)
 
-        const transformedData = {
+        const transformedData: any = {
             title: values.sessionTitle,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
+        }
+
+        if (values.platform) {
+            transformedData.isZoomMeet = values.platform === 'zoom'
         }
 
         try {
