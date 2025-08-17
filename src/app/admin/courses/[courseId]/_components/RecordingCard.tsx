@@ -102,6 +102,8 @@ function RecordingCard({
         }
     }
 
+    console.log('classData', classData)
+
     const handleAttendance = async () => {
         try {
             const response = await api.get(
@@ -160,9 +162,9 @@ function RecordingCard({
                     <div className="text-[15px] flex font-semibold capitalize items-center">
                         <Moment format="D MMMM">{classData.startTime}</Moment>
                         <p className="mr-2">,</p>
-                        <Moment format="hh:mm A">{classData.startTime}</Moment>
+                        <Moment format="hh:mm A" utc={classData?.isZoomMeet}>{classData.startTime}</Moment>
                         <p className="mx-2">-</p>
-                        <Moment format="hh:mm A">{classData.endTime}</Moment>
+                        <Moment format="hh:mm A" utc={classData?.isZoomMeet}>{classData.endTime}</Moment>
                     </div>
                 </div>
             </div>
