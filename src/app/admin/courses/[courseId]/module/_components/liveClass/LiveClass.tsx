@@ -101,13 +101,15 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
     };
 
     const formatTime = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        });
-    };
+        const date = new Date(dateString)
+        const options: Intl.DateTimeFormatOptions = {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+            ...(session?.isZoomMeet && { timeZone: "UTC" }),
+        }
+        return date.toLocaleTimeString("en-US", options)
+    }
 
     const getStatusColor = (status: string) => {
         switch (status) {
