@@ -47,6 +47,7 @@ export type ModuleProps = {
 // ClassCard.tsx
 
 export type ClassDatas = {
+    isZoomMeet: boolean | undefined;
     id: number
     chapterDeadline:string
     name: string
