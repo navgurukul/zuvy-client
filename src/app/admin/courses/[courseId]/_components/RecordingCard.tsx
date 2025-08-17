@@ -26,7 +26,7 @@ import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import {ClassDatas,DisplayAttendance} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import {ClassDatas} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 
 function RecordingCard({
@@ -50,27 +50,22 @@ function RecordingCard({
         embedUrl = `https://drive.google.com/file/d/${videoId}/preview`
     }
 
-    const [displayAttendance, setDisplayAttendance] =
-        useState<DisplayAttendance | null>(null)
+    const [analyticsData, setAnalyticsData] = useState<any | null>(null)
 
     // func
 
     async function handleClassDetails() {
         try {
-            const response = await api.get(
-                `/classes/analytics/${classData?.id}`
-            )
-            setDisplayAttendance(response.data)
+            const response = await api.get(`/classes/analytics/${classData?.id}`)
+            setAnalyticsData(response.data?.data)
         } catch (err) {
             console.error(err)
         }
     }
 
-    const absentStudents =
-        (displayAttendance?.studentsInfo?.total_students ?? 0) -
-        (displayAttendance?.studentsInfo?.present ?? 0)
-
-    const presentStudents = displayAttendance?.studentsInfo?.present
+    const totalStudents = analyticsData?.analytics?.totalStudents ?? 0
+    const presentStudents = analyticsData?.analytics?.present ?? 0
+    const absentStudents = analyticsData?.analytics?.absent ?? (totalStudents - presentStudents)
 
     const isWithin12Hours = () => {
         if (!classData.endTime) return false
@@ -102,39 +97,55 @@ function RecordingCard({
         }
     }
 
-    const handleAttendance = async () => {
+    const handleAttendance = () => {
         try {
-            const response = await api.get(
-                `/classes/getAttendance/${classData.meetingId}`
-            )
-            const attendanceData = response.data.attendanceSheet
-            if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
-                throw new Error(
-                    'Attendance data is not in the expected format or is empty.'
-                )
+            if (!analyticsData) {
+                toast.error({ title: 'Open Class Details first to load analytics' })
+                return
             }
-            const headers = Object.keys(attendanceData[0])
-            const csvContent = `${headers.join(',')}\n${attendanceData
-                .map((row) => headers.map((header) => row[header]).join(','))
-                .join('\n')}`
-            const encodedUri = encodeURI(csvContent)
+            const records = analyticsData?.session?.studentAttendanceRecords || []
+            if (!Array.isArray(records) || records.length === 0) {
+                toast.error({ title: 'No attendance records to download' })
+                return
+            }
+            const total = analyticsData?.analytics?.totalStudents ?? ''
+            const present = analyticsData?.analytics?.present ?? ''
+            const absent = analyticsData?.analytics?.absent ?? ''
+
+            const mapped = records.map((r: any) => ({
+                id: r.id,
+                userId: r.userId,
+                batchId: r.batchId,
+                bootcampId: r.bootcampId,
+                sessionId: r.sessionId,
+                attendanceDate: r.attendanceDate,
+                status: r.status,
+                duration: r.duration,
+                createdAt: r.createdAt,
+            }))
+            const headers = Object.keys(mapped[0])
+            const summaryHeader = ['totalStudents', 'present', 'absent']
+            const summaryRow = [total, present, absent]
+            const csvRows = [
+                summaryHeader.join(','),
+                summaryRow.join(','),
+                '',
+                headers.join(','),
+                ...mapped.map(row => headers.map(h => (row as any)[h] ?? '').join(',')),
+            ]
+            const csvContent = csvRows.join('\n')
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
             const link = document.createElement('a')
-            link.setAttribute(
-                'href',
-                'data:text/csv;charset=utf-8,' + encodedUri
-            )
+            const url = URL.createObjectURL(blob)
+            link.href = url
             link.setAttribute('download', `${classData.title}_attendance.csv`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
+            URL.revokeObjectURL(url)
         } catch (error) {
-            console.error(
-                'Error fetching or processing attendance data:',
-                error
-            )
-            toast.error({
-                title: 'Error fetching attendance data',
-            })
+            console.error('Error generating attendance CSV from cached analytics:', error)
+            toast.error({ title: 'Error preparing attendance data' })
         }
     }
 
@@ -164,6 +175,22 @@ function RecordingCard({
                         <p className="mx-2">-</p>
                         <Moment format="hh:mm A">{classData.endTime}</Moment>
                     </div>
+                    {analyticsData && (
+                        <div className="mt-2 flex gap-6 text-sm font-medium">
+                            <div>
+                                <span className="text-muted-foreground mr-1">Total:</span>
+                                {totalStudents}
+                            </div>
+                            <div>
+                                <span className="text-muted-foreground mr-1">Present:</span>
+                                <span className="text-secondary">{presentStudents}</span>
+                            </div>
+                            <div>
+                                <span className="text-muted-foreground mr-1">Absent:</span>
+                                <span className="text-destructive">{absentStudents}</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className="mt-6 gap-3 flex justify-end text-secondary font-bold text-md cursor-pointer">
@@ -229,7 +256,7 @@ function RecordingCard({
                                     )}
                                 {within12Hours && (
                                     <TooltipContent className="font-semibold">
-                                        Class details will be updated 12 hours after the class ends.
+                                        Class details will be updated at mid night after the class ends.
                                     </TooltipContent>
                                 )}
                             </Tooltip>
@@ -281,17 +308,11 @@ function RecordingCard({
                                 <h3 className="mb-3 font-bold mt-3 text-[15px]">
                                     Attendance Information
                                 </h3>
-                                {displayAttendance ? (
+                                {analyticsData ? (
                                     <div className="flex mb-5">
                                         <div className="flex-grow basis-0">
                                             <p>Total Students</p>
-                                            <p>
-                                                {
-                                                    displayAttendance
-                                                        ?.studentsInfo
-                                                        ?.total_students
-                                                }
-                                            </p>
+                                            <p>{totalStudents}</p>
                                         </div>
                                         <div className="flex-grow basis-0">
                                             <p>Present</p>
@@ -312,7 +333,7 @@ function RecordingCard({
                                 <Button
                                     className="flex gap-2 items-center"
                                     onClick={handleAttendance}
-                                    disabled={presentStudents === 0}
+                                    disabled={presentStudents === 0 || !analyticsData}
                                 >
                                     <p>Download Attendance Data</p>
                                     <Download size={20} />
