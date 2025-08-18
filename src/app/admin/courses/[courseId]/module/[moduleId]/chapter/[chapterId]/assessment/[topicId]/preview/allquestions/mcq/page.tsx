@@ -18,8 +18,9 @@ import {
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
 import { addClassToCodeTags, fetchPreviewData } from '@/utils/admin'
+import {PageQuizQuestion, MCQParams} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/mcq/ArticleMcqPageType"
 
-const McqPreview = ({ params }: { params: any[] }) => {
+const McqPreview = ({ params }: { params: MCQParams[] }) => {
     const router = useRouter()
     const [assessmentPreviewContent, setAssessmentPreviewContent] =
         useState<any>([])
@@ -51,7 +52,7 @@ const McqPreview = ({ params }: { params: any[] }) => {
                     onClick={router.back}
                 >
                     <ChevronLeft strokeWidth={2} size={24} />
-                    <h1 className="font-extrabold">All Questions</h1>
+                    <h1 className="font-extrabold text-[15px]">All Questions</h1>
                 </div>
                 {/* <div>
                     <Button>Shuffle Quiz Qs</Button>
@@ -62,7 +63,7 @@ const McqPreview = ({ params }: { params: any[] }) => {
                 <form className="flex flex-col items-center mt-10 text-left">
                     {/* Map through the quizzes and display them */}
                     {assessmentPreviewContent?.Quizzes?.map(
-                        (question: any, index: any) => (
+                        (question:PageQuizQuestion, index: number) => (
                             <FormField
                                 key={question.id}
                                 control={form.control}
@@ -102,14 +103,11 @@ const McqPreview = ({ params }: { params: any[] }) => {
                                                             <RadioGroupItem
                                                                 value={key}
                                                             />
-                                                            <p>
-                                                                {
-                                                                    question
-                                                                        ?.quizVariants[0]
-                                                                        ?.options[
-                                                                        key
-                                                                    ]
-                                                                }
+                                                            <p>{Object.entries(question.quizVariants[0]?.options || {}).map(
+                                                        ([key, value]) => (
+                                                         <p key={key}>{value}</p>
+                                                    )
+                                                )}
                                                             </p>
                                                         </div>
                                                     ))}
@@ -126,5 +124,4 @@ const McqPreview = ({ params }: { params: any[] }) => {
         </div>
     )
 }
-
 export default McqPreview

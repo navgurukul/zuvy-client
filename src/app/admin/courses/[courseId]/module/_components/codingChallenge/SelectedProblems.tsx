@@ -10,6 +10,7 @@ import { getChapterUpdateStatus } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
+import {CodingTopicsProps,CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 
 const SelectedProblems = ({
     selectedQuestions,
@@ -18,14 +19,7 @@ const SelectedProblems = ({
     moduleId,
     chapterTitle,
     tags
-}: {
-    selectedQuestions: any
-    setSelectedQuestions: any
-    content: any
-    moduleId: string
-    chapterTitle: string
-    tags: any
-}) => {
+}:CodingTopicsProps) => {
 
     const handleRemoveLastQuestion = () => {
         setSelectedQuestions([])
@@ -47,7 +41,7 @@ const SelectedProblems = ({
         <div className="flex w-full">
             <Separator orientation='vertical' className='w-0.5 h-screen mx-2' />
             <div className="text-start w-full">
-                <h2 className="font-bold mb-5">Selected Coding Problems</h2>
+                <h2 className="font-bold mb-5 text-[15px] text-gray-600">Selected Coding Problems</h2>
                 {selectedQuestions?.length > 0 ? (
                     <div className="w-full">
                         {selectedQuestions?.map((selectedQuestion: any, index: any) => {
@@ -57,7 +51,7 @@ const SelectedProblems = ({
                             return (
                                 <div key={selectedQuestion?.id}>
                                     <div className="flex items-center gap-2 justify-between w-full">
-                                        <h3 className="font-bold text-lg">
+                                        <h3 className="font-bold text-[16px] text-gray-600">
                                             {selectedQuestion.title}
                                         </h3>
                                         <div className='flex gap-2 items-center'>
@@ -85,7 +79,7 @@ const SelectedProblems = ({
                                             />
                                         </div>
                                     </div>
-                                    <p className=" text-gray-600 mt-1 mb-2">
+                                    <p className=" text-gray-600 mt-1 mb-2 text-[15px]">
                                         {ellipsis(selectedQuestion.description, 60)}
                                     </p>
                                     <Dialog>

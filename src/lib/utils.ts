@@ -5,6 +5,13 @@ import { twMerge } from 'tailwind-merge'
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
+
+export function stripHtmlTags(html: string): string {
+    if (!html) return ''
+    const doc = new DOMParser().parseFromString(html, 'text/html')
+    return doc.body.textContent || ''
+}
+
 export function ellipsis(text: string | undefined, maxLength: number): string {
     const purifiedText = DOMPurify.sanitize(text || '')
     if (!purifiedText) {
@@ -24,9 +31,9 @@ export function isPlural(count: number): boolean {
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'text-secondary'
+            return 'text-[rgb(81,134,114)]'
         case 'medium':
-            return 'text-yellow-dark'
+            return 'text-secondary'
         case 'hard':
             return 'text-destructive'
         default:
@@ -104,12 +111,123 @@ export const formatDate = (dateString: string): string => {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZoneName: 'short',
+        // hour: '2-digit',
+        // minute: '2-digit',
+        // second: '2-digit',
+        // timeZoneName: 'short',
     }
 
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', options)
 }
+
+export const formatDateTime = (dateString: string): string => {
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+    }
+
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', options)
+}
+
+// Assessment utility functions
+export const formatToIST = (dateString: string | null | undefined) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+
+    const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'long',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+        timeZone: 'Asia/Kolkata',
+    };
+
+    const formatter = new Intl.DateTimeFormat('en-IN', options);
+    const parts = formatter.formatToParts(date);
+
+    const getPart = (type: string) =>
+        parts.find(part => part.type === type)?.value || '';
+
+    const day = getPart('day');
+    const month = getPart('month');
+    const year = getPart('year');
+    const hour = getPart('hour');
+    const minute = getPart('minute');
+    const dayPeriod = getPart('dayPeriod');
+
+    return `${day} ${month} ${year}, ${hour}:${minute} ${dayPeriod}`;
+};
+
+export const formatTimeLimit = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else {
+        return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+};
+
+export const calculateCountdown = (startTime: string) => {
+    const now = new Date().getTime();
+    const start = new Date(startTime).getTime();
+    const distance = start - now;
+
+    if (distance < 0) {
+        return '';
+    }
+
+    const oneSecond = 1000;
+    const oneMinute = oneSecond * 60;
+    const oneHour = oneMinute * 60;
+    const oneDay = oneHour * 24;
+
+    const days = Math.floor(distance / oneDay);
+    const hours = Math.floor((distance % oneDay) / oneHour);
+    const minutes = Math.floor((distance % oneHour) / oneMinute);
+    const seconds = Math.floor((distance % oneMinute) / oneSecond);
+
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+};
+
+export const startPolling = (
+    pollIntervalRef: React.MutableRefObject<NodeJS.Timeout | null>,
+    refetch: () => void,
+    delay: number = 2000
+) => {
+    if (pollIntervalRef.current) {
+        return;
+    }
+
+    const timerId = setTimeout(() => {
+        refetch();
+    }, delay);
+
+    pollIntervalRef.current = timerId;
+};
+
+export const stopPolling = (pollIntervalRef: React.MutableRefObject<NodeJS.Timeout | null>) => {
+    if (pollIntervalRef.current) {
+        clearTimeout(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+    }
+};
+
+export const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'bg-success-light text-success';
+      case 'Medium': return 'bg-warning-light text-warning';
+      case 'Hard': return 'bg-destructive-light text-destructive';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+  

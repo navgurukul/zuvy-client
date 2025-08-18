@@ -15,8 +15,7 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     const { user, setUser } = getUser()
-    const rolesList =
-        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+    const rolesList = user && user.rolesList.length > 0 && user.rolesList[0]
 
     return (
         <div>

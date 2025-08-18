@@ -14,8 +14,9 @@ import { AlertOctagon, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import {PriviewTag, Params } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/PreviewPageType"
 
-const PreviewAssessment = ({ params }: { params: any }) => {
+const PreviewAssessment = ({ params }: { params: Params }) => {
     const { assessmentPreviewContent, setAssessmentPreviewContent } =
         getAssessmentPreviewStore()
 
@@ -40,7 +41,7 @@ const PreviewAssessment = ({ params }: { params: any }) => {
     return (
         <>
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode. The questions cannot be
                     interacted with.
                 </h1>
@@ -111,7 +112,7 @@ const PreviewAssessment = ({ params }: { params: any }) => {
                     ) : null}
 
                     {
-                        <div className="my-2 w-full max-w-2xl mx-auto">
+                        <div className="my-2 w-full max-w-2xl mx-auto text-gray-600">
                             {!hasQuestions && (
                                 <p className="mb-2 font-medium">
                                     No Questions Available. Assessment will
@@ -125,7 +126,7 @@ const PreviewAssessment = ({ params }: { params: any }) => {
                                         size={16}
                                         className="text-destructive"
                                     />
-                                    <p>
+                                    <p className="text-[16px]">
                                         Do not change tabs or assessment will
                                         get submitted automatically.
                                     </p>
@@ -135,7 +136,7 @@ const PreviewAssessment = ({ params }: { params: any }) => {
                                         size={16}
                                         className="text-destructive"
                                     />
-                                    <p>
+                                    <p className="text-[16px]">
                                         Do not close the browser during the
                                         assessment or it will get submitted
                                         automatically.
@@ -146,7 +147,7 @@ const PreviewAssessment = ({ params }: { params: any }) => {
                                         size={16}
                                         className="text-destructive"
                                     />
-                                    <p>
+                                    <p className="text-[16px]">
                                         MCQs & Open-ended Questions can be
                                         submitted only once.
                                     </p>

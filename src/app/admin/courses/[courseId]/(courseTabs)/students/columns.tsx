@@ -108,7 +108,7 @@ export const columns: ColumnDef<Task>[] = [
                             onChange={handleSingleStudent}
                         />
                     ) : (
-                        <div className="w-[150px]">{row.getValue('name')}</div>
+                        <div className="w-[150px] text-left">{row.getValue('name')}</div>
                     )}
                 </>
             )
@@ -170,12 +170,11 @@ export const columns: ColumnDef<Task>[] = [
             return (
                 <div className="flex">
                     <ComboboxStudent
-                        batchData={newBatchData}
+                        batchData={newBatchData || []}
                         batchName={batchName}
                         userId={userId}
                         bootcampId={bootcampId}
-                        batchId={batchId}
-                    />
+                        batchId={batchId} fetchStudentData={undefined}                    />
                 </div>
             )
         },
@@ -318,7 +317,7 @@ export const columns: ColumnDef<Task>[] = [
                             userId={[userId]}
                             bootcampId={bootcampId}
                             title="Are you absolutely sure?"
-                            description="This action cannot be undone. This will permanently the student from the bootcamp"
+                            description="This action cannot be undone. This will permanently remove the student from the bootcamp"
                         />
                     </div>
                 </>

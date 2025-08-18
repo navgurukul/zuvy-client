@@ -28,25 +28,9 @@ import {
 } from '@/components/ui/table'
 import { getBatchData, getIsRowSelected } from '@/store/store'
 import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
+import AddLiveClasstoChapter from '@/app/admin/courses/[courseId]/module/_components/AddLiveClasstoChapter'
+import {DataTableProps,StudentData} from "@/app/_components/datatable/componentDatatable"
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[]
-    setSelectedRows?: any
-    mcqSide?: boolean
-    assignStudents?: string
-}
-
-type StudentData = {
-    email: string
-    name: string
-    userId: number
-    bootcampId: number
-    batchName: string
-    batchId: number
-    progress: number
-    profilePicture: string
-}
 
 export function DataTable<TData, TValue>({
     columns,
@@ -54,6 +38,8 @@ export function DataTable<TData, TValue>({
     setSelectedRows,
     mcqSide,
     assignStudents,
+    adminMcqSide,
+    customTopBar,
 }: DataTableProps<TData, TValue>) {
     const [rowSelection, setRowSelection] = React.useState({})
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
@@ -97,7 +83,6 @@ export function DataTable<TData, TValue>({
         table.toggleAllRowsSelected(false)
         setIsRowUnSelected(false) // Reset the state after unselecting
     }, [isRowUnSelected])
-
     return (
         <div className="space-y-4 relative">
             {!assignStudents && (
@@ -110,8 +95,16 @@ export function DataTable<TData, TValue>({
                     )}
                 </div>
             )}
-            {!assignStudents && <DataTableToolbar table={table} />}
-            <div className="rounded-md border">
+        
+            {!assignStudents && (
+                <div className="flex items-center justify-between mb-2">
+                    <div>{customTopBar}</div>
+                    <div className="ml-auto">
+                        <DataTableToolbar table={table} />
+                    </div>
+                </div>
+            )}
+            <div className="rounded-md border text-gray-600">
                 <Table>
                     <TableHeader className={assignStudents && 'hidden'}>
                         {table.getHeaderGroups().map((headerGroup) => (

@@ -7,7 +7,15 @@ import { Upload } from 'lucide-react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 import { removeNulls, transformQuizzes } from '@/utils/admin'
+// import {DropzoneforMcqProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
+// export interface DropzoneforMcqProps {
+//   className?: string
+// acceptedFiles?: string
+//   mcqSide: boolean
+//   mcqData: any // replace with actual type if known
+//   setMcqData: React.Dispatch<React.SetStateAction<any>>
+// }
 const DropzoneforMcq = ({
     className,
     acceptedFiles = 'text/csv',
@@ -70,7 +78,7 @@ const DropzoneforMcq = ({
                     <p>Drop the files here ...</p>
                 </div>
             ) : (
-                <div className="p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full text-secondary ">
+                <div className="p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full text-[rgb(81,134,114)] ">
                     <Upload className="mb-[20px]" />
                     <p className="mx-3 font-semibold">Upload Or Drag File</p>
                     <p className="text-gray-400">.csv files are supported</p>

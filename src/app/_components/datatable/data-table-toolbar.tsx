@@ -9,10 +9,8 @@ import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Cross } from "lucide-react";
+import {DataTableToolbarProps} from "@/app/_components/datatable/componentDatatable"
 
-interface DataTableToolbarProps<TData> {
-  table: Table<TData>;
-}
 
 export function DataTableToolbar<TData>({
   table,

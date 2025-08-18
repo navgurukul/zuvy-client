@@ -6,15 +6,9 @@ import useGetMCQs from '@/hooks/useGetMcq'
 import DOMPurify from 'dompurify'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import {PreviewMcqProps,Tags,QuizVariant} from "@/app/admin/resource/_components/adminResourceComponentType"
 
-type Props = {
-    quizQuestionId: number
-    tags?: any
-    assesmentSide?: boolean
-    tagId?: number
-}
-
-const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
+const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: PreviewMcqProps) => {
     const { quizData, difficulty, tagName } = useGetMCQs({
         id: quizQuestionId,
         tags,
@@ -58,10 +52,10 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
 
     if (!quizData) return null
 
-    const handleTabChange = (variantId: any) => {
+    const handleTabChange = (variantId: QuizVariant) => {
         setActiveTab(variantId.toString())
         const selectedVariant = quizData.quizVariants.find(
-            (variant: any) => variant.id.toString() === variantId.toString()
+            (variant: QuizVariant) => variant.id.toString() === variantId.toString()
         )
         if (selectedVariant) {
             updateCodeSnippet(selectedVariant.question)
@@ -86,16 +80,17 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
         return updatedHtml
     }
 
-    const newTagName = tags.filter((tag: any) => tag.id == tagId)
+    const newTagName = tags?.filter((tag:Tags) => tag.id == tagId)
 
     return (
         <div className="w-full max-h-[500px] flex flex-col">
             <DialogHeader className="flex-shrink-0">
-                <div className="flex gap-x-3 ">
+                <div className="flex gap-x-3 text-gray-600">
                     Question Preview{' '}
                     <div className="flex gap-x-3 items-center">
-                        <span className="font-md text-[14px] bg-green-200 px-2  py-0.5 my-0.5 text-secondary rounded-md">
-                            {assesmentSide ? tagName : newTagName[0].tagName}
+                        <span className="font-md text-[14px] text-[rgb(81,134,114)] bg-green-200 px-2  py-0.5 my-0.5 rounded-md">
+                            {assesmentSide ? tagName : newTagName?.[0]?.tagName}
+
                         </span>
                         <span
                             className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(
@@ -121,7 +116,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                             onClick={() => handleTabChange(variant.id)}
                             className={`px-4 py-2 rounded-none ${
                                 activeTab === variant.id.toString()
-                                    ? 'text-secondary border-b-2 border-secondary'
+                                    ? 'text-secondary border-b-2 border-[rgb(81,134,114)]'
                                     : 'text-gray-500'
                             }`}
                         >
@@ -140,7 +135,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                     className="w-full mt-0"
                                 >
                                     <div className="mb-4 p-2">
-                                        <div className="text-left mb-2">
+                                        <div className="text-left text-gray-600 mb-2">
                                             <RemirrorForm
                                                 description={variant.question}
                                                 preview={true}
@@ -152,7 +147,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                             ).map(([key, option], index) => (
                                                 <li
                                                     key={key}
-                                                    className="mt-1 flex gap-x-2 items-center"
+                                                    className="mt-1 flex gap-x-2 items-center text-gray-600"
                                                 >
                                                     <p>{index + 1}.</p>
                                                     <Input
@@ -161,7 +156,7 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: Props) => {
                                                         className={
                                                             parseInt(key) ===
                                                             variant.correctOption
-                                                                ? 'border-2 border-secondary text-secondary'
+                                                                ? 'border-2 border-[rgb(81,134,114)] text-[rgb(81,134,114)]'
                                                                 : 'border-gray-300'
                                                         }
                                                     />

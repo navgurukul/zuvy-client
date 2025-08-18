@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef } from 'react'
-import { useCommands, useActive } from '@remirror/react'
+import { useCommands, useActive, useRemirrorContext } from '@remirror/react'
 import {
     Camera,
     Code,
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import './remirror-editor.css'
 import { api } from '@/utils/axios.config'
+import { TextSelection } from 'prosemirror-state'
 
 export const Toolbar = () => {
     const {
@@ -36,6 +37,9 @@ export const Toolbar = () => {
         focus,
     } = useCommands()
     const active = useActive()
+
+    const { manager } = useRemirrorContext()
+    const { commands } = useRemirrorContext()
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const { insertImage } = useCommands()
@@ -81,6 +85,7 @@ export const Toolbar = () => {
         // Focus the editor after inserting the image
         // Use setTimeout to ensure the image insertion is complete
         setTimeout(() => {
+            commands.insertText(' ')
             focus()
         }, 100)
 
@@ -88,6 +93,135 @@ export const Toolbar = () => {
         if (fileInputRef.current) {
             fileInputRef.current.value = ''
         }
+    }
+
+    const handleCodeBlock = () => {
+        const { view } = manager
+        const { state, dispatch } = view
+        const { selection } = state
+        
+        if (active.codeBlock()) {
+            toggleCodeBlock()
+            return
+        }
+        
+        const selectedText = state.doc.textBetween(selection.from, selection.to, '\n')
+        const hasSelectedText = selectedText.trim().length > 0
+
+        // Check if we're at the very beginning of the document
+        const isAtStart = selection.from === 1
+        
+        // Create code block with selected text
+        const codeBlock = state.schema.nodes.codeBlock.create(
+            { language: 'javascript' },
+            selectedText ? state.schema.text(selectedText) : undefined
+        )
+        
+        let tr = state.tr
+    
+        if (isAtStart && hasSelectedText) {
+            // If at start AND has selected text, replace the selected text with paragraph + code block
+            const emptyParagraph = state.schema.nodes.paragraph.create()
+            
+            // Replace the selected text with paragraph and code block
+            tr = tr.replaceWith(selection.from, selection.to, [emptyParagraph, codeBlock])
+            
+            // Position cursor in the code block
+            const codeBlockStartPos = 1 + emptyParagraph.nodeSize + 1
+            tr = tr.setSelection(
+                TextSelection.near(tr.doc.resolve(codeBlockStartPos))
+            )
+        } else if (isAtStart && !hasSelectedText) {
+            // If at start, first insert an empty paragraph, then the code block
+            const emptyParagraph = state.schema.nodes.paragraph.create()
+            
+            // Insert both paragraph and code block
+            tr = tr.insert(1, [emptyParagraph, codeBlock])
+            // Position cursor in the code block (after the empty paragraph)
+            const codeBlockStartPos = 1 + emptyParagraph.nodeSize + 1
+            tr = tr.setSelection(
+                TextSelection.near(tr.doc.resolve(codeBlockStartPos))
+            )
+        } else {
+            // Normal code block insertion
+            tr = tr.replaceSelectionWith(codeBlock)
+        }
+        
+        dispatch(tr)
+        focus()
+    }
+
+    const handleHeading = (level: number) => {
+        if (active.heading({ level })) {
+            // Same level heading clicked - convert to paragraph
+            commands.toggleHeading({ level })
+        } else if (active.bulletList() || active.orderedList()) {
+            // In list - first remove list, then apply heading
+            if (active.bulletList()) commands.toggleBulletList()
+            if (active.orderedList()) commands.toggleOrderedList()
+            commands.toggleHeading({ level })
+        } else {
+            commands.toggleHeading({ level })
+        }
+        commands.focus()
+        const { state, dispatch } = manager.view;
+        const { to } = state.selection;
+        const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(to)));
+        dispatch(tr);
+    }
+
+    const handleBulletList = () => {
+        if (active.bulletList()) {
+            // Already bullet list - toggle off
+            commands.toggleBulletList()
+        } else if (active.heading()) {
+            // In heading - first remove heading, then apply list
+            let currentLevel = 1
+            
+            // Check which heading level is active
+            for (let level = 1; level <= 4; level++) {
+                if (active.heading({ level })) {
+                    currentLevel = level
+                    break
+                }
+            }
+            commands.toggleHeading({ level: currentLevel })
+            commands.toggleBulletList()
+        } else {
+            commands.toggleBulletList()
+        }
+        commands.focus()
+        const { state, dispatch } = manager.view;
+        const { to } = state.selection;
+        const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(to)));
+        dispatch(tr);
+    }
+
+    const handleOrderedList = () => {
+        if (active.orderedList()) {
+            // Already ordered list - toggle off
+            commands.toggleOrderedList()
+        } else if (active.heading()) {
+            // In heading - first remove heading, then apply list
+            let currentLevel = 1
+        
+        // Check which heading level is active
+        for (let level = 1; level <= 4; level++) {
+            if (active.heading({ level })) {
+                currentLevel = level
+                break
+            }
+        }
+            commands.toggleHeading({ level: currentLevel })
+            commands.toggleOrderedList()
+        } else {
+            commands.toggleOrderedList()
+        }
+        commands.focus()
+        const { state, dispatch } = manager.view;
+        const { to } = state.selection;
+        const tr = state.tr.setSelection(TextSelection.near(state.doc.resolve(to)));
+        dispatch(tr);
     }
 
     return (
@@ -141,7 +275,7 @@ export const Toolbar = () => {
 
             {/* Headings */}
             <button
-                onClick={() => toggleHeading({ level: 1 })}
+                onClick={() => handleHeading(1)}
                 className={`p-2 rounded ${
                     active.heading({ level: 1 })
                         ? 'bg-[#d1d5db]'
@@ -154,7 +288,7 @@ export const Toolbar = () => {
             </button>
 
             <button
-                onClick={() => toggleHeading({ level: 2 })}
+                onClick={() => handleHeading(2)}
                 className={`p-2 rounded ${
                     active.heading({ level: 2 })
                         ? 'bg-[#d1d5db]'
@@ -167,7 +301,7 @@ export const Toolbar = () => {
             </button>
 
             <button
-                onClick={() => toggleHeading({ level: 3 })}
+                onClick={() => handleHeading(3)}
                 className={`p-2 rounded ${
                     active.heading({ level: 3 })
                         ? 'bg-[#d1d5db]'
@@ -180,7 +314,7 @@ export const Toolbar = () => {
             </button>
 
             <button
-                onClick={() => toggleHeading({ level: 4 })}
+                onClick={() => handleHeading(4)}
                 className={`p-2 rounded ${
                     active.heading({ level: 4 })
                         ? 'bg-[#d1d5db]'
@@ -196,7 +330,7 @@ export const Toolbar = () => {
 
             {/* Lists */}
             <button
-                onClick={() => toggleBulletList()}
+                onClick={handleBulletList}
                 className={`p-2 rounded ${
                     active.bulletList() ? 'bg-[#d1d5db]' : 'hover:[#d1d5db]'
                 }`}
@@ -207,7 +341,7 @@ export const Toolbar = () => {
             </button>
 
             <button
-                onClick={() => toggleOrderedList()}
+                onClick={handleOrderedList}
                 className={`p-2 rounded ${
                     active.orderedList() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}
@@ -233,7 +367,7 @@ export const Toolbar = () => {
             </button>
 
             <button
-                onClick={() => toggleCodeBlock()}
+                onClick={handleCodeBlock}
                 className={`p-2 rounded ${
                     active.codeBlock() ? 'bg-[#d1d5db]' : 'hover:bg-gray-200'
                 }`}

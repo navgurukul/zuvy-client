@@ -34,30 +34,13 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import axios from 'axios'
-import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
+// import QuestionCard from '@/app/student/courses/[viewcourses]/modules/[moduleID]/assessment/[assessmentOutSourceId]/QuestionCard'
 import { AIQuestionCard } from './AIQuestionCard'
 import { getGeneratedQuestions, getRequestBody } from '@/store/store'
 import LottieLoader from '@/components/ui/lottie-loader'
-
-export type Tag = {
-    label: string
-    value: string
-    id: number
-    tagName: string
-}
+import {NewMcqRequestBodyType,NewMcqProblemFormProps } from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
-
-export type RequestBodyType = {
-    quizzes: {
-        tagId: number
-        difficulty: string
-        variantMCQs: {
-            question: string
-            options: { 1: string; 2: string; 3: string; 4: string }
-        }[]
-    }[]
-}
 
 const formSchema = z.object({
     difficulty: z
@@ -97,14 +80,7 @@ const NewMcqProblemForm = ({
     getAllQuizQuesiton,
     setIsMcqModalOpen,
     setMcqType,
-}: {
-    tags: Tag[]
-    closeModal: () => void
-    setStoreQuizData: any
-    getAllQuizQuesiton: any
-    setIsMcqModalOpen: any
-    setMcqType: any
-}) => {
+}:NewMcqProblemFormProps ) => {
     const [loadingAI, setLoadingAI] = useState<boolean>(false)
     const [saving, setSaving] = useState<boolean>(false)
     const [bulkDifficulties, setBulkDifficulties] = useState<string[]>([])
@@ -155,25 +131,21 @@ const NewMcqProblemForm = ({
     const sleep = (ms: number) =>
         new Promise((resolve) => setTimeout(resolve, ms))
 
-    const handleCreateQuizQuestion = async (requestBody: RequestBodyType) => {
+    const handleCreateQuizQuestion = async (requestBody:NewMcqRequestBodyType) => {
         try {
             const res = await api.post(`/Content/quiz`, requestBody)
             setIsMcqModalOpen(false)
             setMcqType('')
             handleClear()
-            toast({
+            toast.success({
                 title: res.data.status || 'Success',
                 description: res.data.message || 'Quiz Question Created',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -186,11 +158,9 @@ const NewMcqProblemForm = ({
         )
 
         if (emptyOptions) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Options cannot be empty',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -213,7 +183,9 @@ const NewMcqProblemForm = ({
         }
 
         setSaving(true)
-        await getAllQuizQuesiton(setStoreQuizData)
+        // await getAllQuizQuesiton(setStoreQuizData)
+        const quizData = await getAllQuizQuesiton(); // ✅ No arguments here
+        setStoreQuizData(quizData); 
         setSaving(false)
         closeModal()
     }
@@ -346,12 +318,10 @@ const NewMcqProblemForm = ({
                     !questionId ||
                     correctAnswer === null
                 ) {
-                    toast({
+                    toast.error({
                         title: 'Error',
                         description:
                             'Failed to parse the MCQ correctly. Please try generating again.',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                     setLoadingAI(false)
                     return
@@ -372,12 +342,10 @@ const NewMcqProblemForm = ({
                 ) {
                     newSelectedOption = correctAnswer
                 } else {
-                    toast({
+                    toast.warning({
                         title: 'Warning',
                         description:
                             'Correct Answer could not be determined. Defaulting to the first option.',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
                     })
                 }
 
@@ -421,33 +389,29 @@ const NewMcqProblemForm = ({
 
                     setRequestBody(requestBody)
                     // await handleCreateQuizQuestion(requestBody)
-                    await getAllQuizQuesiton(setStoreQuizData)
+                    const quizData = await getAllQuizQuesiton(); // ✅ No arguments here
+setStoreQuizData(quizData); 
+                    // await getAllQuizQuesiton(setStoreQuizData)
                     closeModal()
                 }
 
-                toast({
+                toast.success({
                     title: 'Success',
                     description: 'MCQ generated successfully using AI.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
                 console.warn('Unexpected response structure:', responseData)
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         "Failed to generate MCQ. I'm sorry, I couldn't understand the response from the API.",
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         } catch (error: any) {
             console.error('Error generating MCQ:', error)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to generate MCQ. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
         setLoadingAI(false)
@@ -483,11 +447,9 @@ const NewMcqProblemForm = ({
                 'AIzaSyAm3e9-VoLFVVVLRIla-cZ40jwAqqd1FDY'
 
             if (difficulties.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Please select at least one difficulty level.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -495,11 +457,9 @@ const NewMcqProblemForm = ({
             }
 
             if (topicIds.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Please select at least one topic.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -507,11 +467,9 @@ const NewMcqProblemForm = ({
             }
 
             if (totalNumbersOfQuestions < 1) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'Please enter a valid number of questions.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -730,12 +688,10 @@ const NewMcqProblemForm = ({
             }
 
             if (generatedQuestions.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         'Failed to generate unique MCQs. Please try again.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
                 setBulkLoading(false)
                 setLoadingAI(false)
@@ -743,18 +699,14 @@ const NewMcqProblemForm = ({
             }
 
             if (generatedQuestions.length < totalNumbersOfQuestions) {
-                toast({
+                toast.warning({
                     title: 'Warning',
                     description: `Only ${generatedQuestions.length} unique MCQs were generated.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
                 })
             } else {
-                toast({
+                toast.error({
                     title: 'Success',
                     description: `${generatedQuestions.length} MCQs generated and saved successfully.`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             }
 
@@ -779,16 +731,16 @@ const NewMcqProblemForm = ({
 
                 setGeneratedQuestions(generatedQuestions)
                 setRequestBody(requestBody)
-                await getAllQuizQuesiton(setStoreQuizData)
+                const quizData = await getAllQuizQuesiton();
+                setStoreQuizData(quizData); 
+                // await getAllQuizQuesiton(setStoreQuizData)
                 closeModal()
             }
         } catch (error: any) {
             console.error('Error generating bulk MCQs:', error)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to generate bulk MCQs. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
         setBulkLoading(false)
@@ -898,7 +850,7 @@ const NewMcqProblemForm = ({
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Easy"
-                                                className="translate-y-[2px]"
+                                                className="translate-y-[2px] border-black"
                                             />
                                             <FormLabel className="text-lg">
                                                 Easy
@@ -925,7 +877,7 @@ const NewMcqProblemForm = ({
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Medium"
-                                                className="translate-y-[2px]"
+                                                className="translate-y-[2px] border-black"
                                             />
                                             <FormLabel className="text-lg">
                                                 Medium
@@ -951,7 +903,7 @@ const NewMcqProblemForm = ({
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Hard"
-                                                className="translate-y-[2px]"
+                                                className="translate-y-[2px] border-black"
                                             />
                                             <FormLabel className="text-lg">
                                                 Hard
@@ -1073,7 +1025,7 @@ const NewMcqProblemForm = ({
                             type="button"
                             // onClick={generateMCQUsingGemini}
                             onClick={generateQuestions}
-                            className="flex items-center"
+                            className="flex items-center bg-success-dark opacity-75"
                         >
                             {loadingAI ? (
                                 <>

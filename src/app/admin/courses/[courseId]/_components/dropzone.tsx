@@ -6,20 +6,14 @@ import Papa from 'papaparse'
 import { Upload } from 'lucide-react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
-
-type Props = {
-    studentData?: any
-    className: string
-    setStudentData?: any
-    acceptedFiles?: any
-}
+import {DropzoneProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const Dropzone = ({
     className,
     studentData,
     setStudentData,
     acceptedFiles = 'text/csv',
-}: Props) => {
+}: DropzoneProps) => {
     // misc
 
     // state and variables
@@ -98,7 +92,7 @@ const Dropzone = ({
             {fileName ? (
                 <div className="flex flex-col items-start mt-5  w-full gap-y-5 border border-gray-300 p-3 rounded-lg ">
                     <div className="w-full flex items-center justify-between">
-                        <h2 className="font-bold ">{fileName}</h2>
+                        <h2 className="font-bold text-[1rem]">{fileName}</h2>
                         <X
                             size={20}
                             className="text-gray-400 cursor-pointer"
@@ -107,7 +101,7 @@ const Dropzone = ({
                     </div>
                     {acceptedFiles === 'text/csv' && (
                         <div className="text-start">
-                            <h3 className="mb-2 font-semibold">
+                            <h3 className="text-[1rem] font-semibold">
                                 Upload Status
                             </h3>
                             <div className="flex items-center justify-start space-x-2">

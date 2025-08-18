@@ -31,6 +31,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 interface RemirrorFormProps {
     description: any
     onChange?: (html: string) => void
+    onValidationChange?: (isValid: boolean) => void // New prop
     preview?: boolean
     bigScreen?: boolean
 }
@@ -38,6 +39,7 @@ interface RemirrorFormProps {
 export const RemirrorForm: React.FC<RemirrorFormProps> = ({
     description,
     onChange,
+    onValidationChange, // New prop
     preview,
     bigScreen,
 }) => {
@@ -69,6 +71,30 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
         stringHandler: 'html',
     })
 
+    const validateContent = useCallback(
+        (htmlContent: string) => {
+            // Check if we're on the client side
+            if (typeof window === 'undefined' || typeof document === 'undefined') {
+                // Fallback for SSR - simple text validation
+                const plainText = htmlContent.replace(/<[^>]*>/g, '')
+                const isValid = plainText.trim().length > 0
+                onValidationChange?.(isValid)
+                return
+            }
+
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = htmlContent
+
+            // Remove <img> tags to check for other content
+            tempDiv.querySelectorAll('img').forEach((img) => img.remove())
+
+            // Check if there's any meaningful content left
+            const isValid = (tempDiv.textContent ?? '').trim().length > 0
+            onValidationChange?.(isValid) // Notify parent
+        },
+        [onValidationChange]
+    )
+
     const EditorChangeHandler = () => {
         const helpers = useHelpers()
 
@@ -78,6 +104,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     // Get HTML content from the editor using the correct helper method
                     const htmlContent = helpers.getHTML()
                     onChange(htmlContent)
+                    validateContent(htmlContent) // Validate content
                 } catch (error) {
                     console.warn('Failed to get HTML content:', error)
                 }
@@ -120,6 +147,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                         // Get HTML from the editor state
                         const htmlContent = parameter.helpers.getHTML()
                         onChange && onChange(htmlContent)
+                        validateContent(htmlContent) // Validate content
                     }}
                 >
                     <div
@@ -144,7 +172,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                                 </div>
                                 {!preview && <CodeBlockHelper />}
                             </div>
-                        ) : description.length < 300 && preview ? (
+                        ) : description.length < 525 && preview ? (
                             <div className="min-h-auto remirror-form-bigscreen-content">
                                 <div className="px-2 pb-2" data-gramm="false">
                                     <EditorComponent />
@@ -162,7 +190,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                                 }}
                             >
                                 <div
-                                    className="px-2 min-h-[250px]"
+                                    className="px-2 min-h-[250px] break-words whitespace-pre-wrap"
                                     data-gramm="false"
                                 >
                                     <EditorComponent />

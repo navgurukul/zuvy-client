@@ -4,33 +4,20 @@ import { addClassToCodeTags } from '@/utils/admin'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn, difficultyBgColor, difficultyColor } from '@/lib/utils'
 import { getCodingQuestionTags } from '@/store/store'
+import {OpenEndedQuestions,OpenEndedQuestionProps, Tags,Question} from "@/app/admin/resource/_components/adminResourceComponentType"
 
-interface OpenEndedQuestion {
-    id: number
-    difficulty: string
-    question: string
-    tagId: number
-    marks: number
-    usage: number
-}
 
-type Question = OpenEndedQuestion
-
-type Props = {
-    question: Question
-    tag?: any
-}
-
-const PreviewOpenEnded = ({ question, tag }: Props) => {
+const PreviewOpenEnded = ({ question, tag }: OpenEndedQuestionProps ) => {
     const { tags } = getCodingQuestionTags()
-    const [tagName, setTagName] = useState<string | null>(tag?.tagName || null)
+const [tagName, setTagName] = useState<string | null>(null)
+
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
     useEffect(() => {
         if (!tag) {
             const matchingTag = tags.find(
-                (tag: any) => tag.id === question.tagId
+                (tag: Tags) => tag.id === question.tagId
             )
             setTagName(matchingTag ? matchingTag.tagName : null)
         }
@@ -39,7 +26,7 @@ const PreviewOpenEnded = ({ question, tag }: Props) => {
     return (
         <div className="w-full max-h-[500px]">
             <DialogHeader className="">
-                <DialogTitle className="text-xl font-bold">
+                <DialogTitle className="text-xl font-bold text-gray-600">
                     Question Preview
                     {tagName && (
                         <span className="text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] ml-2 py-1 px-[8px]">
@@ -61,15 +48,15 @@ const PreviewOpenEnded = ({ question, tag }: Props) => {
                 {/* Render question description */}
                 <ScrollArea className="pr-4">
                     <div>
-                        <h4 className="font-semibold text-lg mb-5">
+                        <h4 className="font-semibold text-lg mb-5 text-gray-600">
                             Title and Description:
                         </h4>
                         <div className="text-left flex gap-2 mb-2">
-                            <span className="font-bold flex">
-                                <h1>Q.</h1>
+                            <span className="font-bold flex text-gray-600">
+                                <h6>Q.</h6>
                             </span>
                             <div
-                                className={` text-wrap ${
+                                className={` text-wrap text-[16px] text-gray-600 ${
                                     question.question.includes('pre') &&
                                     'overflow-scroll'
                                 } `}

@@ -6,50 +6,30 @@ import QuizList from './QuizList'
 import { api } from '@/utils/axios.config'
 import useDebounce from '@/hooks/useDebounce'
 import CodingTopics from '../codingChallenge/CodingTopics'
-export interface quizData {
-    id: number
-    question: string
-    options: Options
-    correctOption: string
-    marks: number
-    difficulty: string
-    tagId: number
-}
-
-export interface Options {
-    option1: string
-    option2: string
-    option3: string
-    option4: string
-}
-
-interface Option {
-    tagName: string
-    id: number
-}
+import {QuizDataLibrary,LibraryOption} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 
 function QuizLibrary({
     addQuestion,
     handleAddQuestion,
     tags,
 }: {
-    addQuestion: any
+    addQuestion:any
     handleAddQuestion: any
     tags: any
 }) {
     const [search, setSearch] = useState<string>('')
     const debouncedSeatch = useDebounce(search, 1000)
-    const [selectedOptions, setSelectedOptions] = useState<Option[]>([
+    const [selectedOptions, setSelectedOptions] = useState<LibraryOption[]>([
         { id: -1, tagName: 'All Topics' },
     ])
     const [selectedDifficulty, setSelectedDifficulty] = useState([
         'Any Difficulty',
     ])
     const [quizData, setQuizData] = useState<{
-        allQuestions: quizData[]
-        easyQuestions: quizData[]
-        mediumQuestions: quizData[]
-        hardQuestions: quizData[]
+        allQuestions:  QuizDataLibrary[]
+        easyQuestions:  QuizDataLibrary[]
+        mediumQuestions:  QuizDataLibrary[]
+        hardQuestions:  QuizDataLibrary[]
     }>({
         allQuestions: [],
         easyQuestions: [],
@@ -101,7 +81,7 @@ function QuizLibrary({
 
                 const response = await api.get(url)
 
-                const allQuestions: quizData[] = response?.data?.data
+                const allQuestions: QuizDataLibrary[] = response?.data?.data
 
                 const easyQuestions = allQuestions.filter(
                     (question) => question.difficulty === 'Easy'
@@ -156,11 +136,10 @@ function QuizLibrary({
                     selectedTopics={selectedOptions}
                     setSelectedTopics={setSelectedOptions}
                     selectedDifficulties={selectedDifficulty}
-                    setSelectedDifficulties={setSelectedDifficulty}
-                />
+                    setSelectedDifficulties={setSelectedDifficulty} selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                />
             </div>
             <div className="w-full h-max-content ">
-                <h2 className="text-left text-gray-700 font-semibold">
+                <h2 className="text-left text-gray-600 text-[15px] font-semibold">
                     MCQ Library
                 </h2>
                 {renderQuizList}

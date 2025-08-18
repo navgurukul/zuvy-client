@@ -41,14 +41,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { ellipsis } from '@/lib/utils'
-
-type FormSectionProps = {
-    item: any
-    index: any
-    form: any
-    deleteQuestion: any
-    formData: any
-}
+import {FormSectionProps} from "@/app/admin/courses/[courseId]/module/_components/form/ModuleFormType"
 
 const getQuestionType = (typeId: number) => {
     switch (typeId) {
@@ -242,7 +235,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 render={({ field }) => (
                     <FormItem>
                         <div className="flex flex-row justify-between">
-                            <FormLabel className="flex text-left text-md font-semibold mb-1">
+                            <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
                                 Question {index + 1}
                             </FormLabel>
                             <TooltipProvider>
@@ -331,7 +324,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                         variant={'secondary'}
                         type="button"
                         onClick={addOption}
-                        className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
+                        className="gap-x-2 border-none text-[rgb(81,134,114)] hover:text-[rgb(81,134,114)] hover:bg-popover"
                     >
                         <Plus /> Add Option
                     </Button>
@@ -348,7 +341,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                                 <Input
                                     // {...field}
                                     className="w-[450px] px-3 py-2 border rounded-md "
-                                    placeholder="Placeholder"
+                                    placeholder="Student will answer here"
                                     disabled
                                 />
                             </FormControl>
@@ -409,12 +402,12 @@ const FormSection: React.FC<FormSectionProps> = ({
                                 <div className="relative flex items-center">
                                     <Input
                                         {...field}
-                                        className="w-[100px] px-3 py-2 border rounded-md "
+                                        className="w-[230px] px-3 py-2 border rounded-md "
                                         placeholder="Time Placeholder"
                                         type="time"
                                         disabled={true}
                                     />
-                                    <Clock className="absolute left-[55px] mt-2 h-5 w-5 text-gray-400" />
+                                    <Clock className="absolute left-[195px] mt-2 h-5 w-5 text-gray-400" />
                                 </div>
                             </FormControl>
                             <FormMessage />

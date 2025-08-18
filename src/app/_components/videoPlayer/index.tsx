@@ -1,14 +1,7 @@
 // components/YouTubePlayer.tsx
-import { tree } from 'next/dist/build/templates/app-page'
 import React from 'react'
 import ReactPlayer from 'react-player/youtube'
-
-interface YouTubePlayerProps {
-    url: string
-    completeChapter: any
-    status: string
-}
-
+import{YouTubePlayerProps} from "@/app/_components/videoPlayer/componentVideoType"
 const YouTubePlayer: React.FC<YouTubePlayerProps> = ({
     url,
     completeChapter,

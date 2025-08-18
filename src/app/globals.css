@@ -1,91 +1,329 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Neural Nexus Theme - Complete Shadcn UI Configuration with Updated Color System */
+/* This theme creates a sophisticated learning environment that enhances focus and cognitive function */
+
+
+
 @layer base {
-    :root {
-        --background: 0 0% 100%;
-        --foreground: 222.2 84% 4.9%;
+  :root {
+    /* Base Colors - The foundation of your interface */
+    --background: 0 0% 100%;           /* Pure white background for maximum readability */
+    --foreground: 222.2 84% 4.9%;     /* Deep charcoal for primary text - ensures excellent contrast */
+    
+    /* Card and Surface Colors - Creates depth and hierarchy, aligned with refined primary blue hue */
+    --card: 224 30% 97%;              /* Subtle blue-tinted off-white that harmonizes with refined primary blue */
+    --card-light: 224 25% 98.5%;      /* Even more subtle card variant for minimal elevation */
+    --card-elevated: 224 40% 95.5%;   /* Slightly more pronounced card for important content */
+    --card-foreground: 222.2 84% 4.9%; /* Consistent text color across all surfaces */
+    
+    /* Popover and Modal Colors - Maintains visual consistency */
+    --popover: 0 0% 100%;             /* White background for dropdowns and overlays */
+    --popover-foreground: 222.2 84% 4.9%; /* Same readable text color */
+    
+    /* Primary Brand Colors - Refined, focused blue that reduces visual fatigue */
+    --primary: 224 71% 56%;           /* #4f6dcf - Refined blue that is confident and stable */
+    --primary-light: 224 71% 95%;     /* Much lighter blue for subtle backgrounds */
+    --primary-dark: 224 71% 36%;      /* Darker blue for emphasis and active states */
+    --primary-foreground: 210 20% 98%; /* Light text on primary backgrounds for accessibility */
+    
+    /* Secondary Brand Colors - Warm orange-coral recalibrated to complement new primary */
+    --secondary: 25 85% 55%;          /* #f57b29 - Warm orange-coral for dynamic contrast with refined blue */
+    --secondary-light: 25 85% 95%;    /* Much lighter orange for subtle backgrounds */
+    --secondary-dark: 25 85% 35%;     /* Dark orange for strong emphasis and active states */
+    --secondary-foreground: 210 20% 98%; /* Light text maintains readability on orange backgrounds */
+    
+    /* Muted Colors - Subtle backgrounds and disabled states with variants */
+    --muted: 210 40% 96%;             /* Very light blue-gray for subtle backgrounds */
+    --muted-light: 210 40% 98%;       /* Even lighter muted for the most subtle backgrounds */
+    --muted-dark: 210 40% 90%;        /* Slightly darker muted for better definition */
+    --muted-foreground: 215.4 16.3% 46.9%; /* Medium gray for secondary text and descriptions */
+    
+    /* Accent Colors - Energizing cyan tempered to avoid visual distraction */
+    --accent: 198 80% 50%;            /* #19b2d8 - Cyan that maintains alertness without overstimulation */
+    --accent-light: 198 80% 95%;      /* Much lighter cyan for subtle backgrounds */
+    --accent-dark: 198 80% 30%;       /* Dark cyan for strong emphasis and depth */
+    --accent-foreground: 210 20% 98%; /* Light text on accent backgrounds */
+    
+    /* Destructive/Error Colors - Clear feedback without harsh alarm, with variants */
+    --destructive: 0 84.2% 60.2%;     /* #ef4444 - Clear but not aggressive red for errors */
+    --destructive-light: 0 84.2% 95%; /* Much lighter red for subtle backgrounds */
+    --destructive-dark: 0 84.2% 40.2%; /* #dc2626 - Dark red for strong error emphasis */
+    --destructive-foreground: 210 20% 98%; /* Light text on error backgrounds */
+    
+    /* Border and Outline Colors - Subtle definition without distraction */
+    --border: 214.3 31.8% 91.4%;      /* Light blue-gray borders that complement the theme */
+    --input: 214.3 31.8% 91.4%;       /* Same as border for input field consistency */
+    --ring: 224 71% 56%;              /* Refined primary blue for focus rings - maintains brand consistency */
+    
+    /* Radius Values - Modern, friendly corner rounding */
+    --radius: 0.5rem;                 /* 8px radius for a modern, approachable feel */
 
-        --card: 0 0% 100%;
-        --card-foreground: 222.2 84% 4.9%;
+    /* Success Colors - For achievements and positive feedback with variants */
+    --success: 160 84.1% 39.4%;        /* #10b981 - Green that celebrates accomplishment */
+    --success-light: 160 84.1% 95%;    /* Much lighter green for subtle backgrounds */
+    --success-dark: 160 84.1% 19.4%;   /* #065f46 - Dark green for strong success emphasis */
+    --success-foreground: 0 0% 98%;    /* Light text on success backgrounds */
+    
+    /* Warning Colors - For important notices and alerts with variants */
+    --warning: 45.4 93.4% 47.5%;       /* #f59e0b - Amber that draws attention without alarm */
+    --warning-light: 45.4 93.4% 95%;   /* Much lighter amber for subtle backgrounds */
+    --warning-dark: 45.4 93.4% 27.5%;  /* #d97706 - Dark amber for strong warning emphasis */
+    --warning-foreground: 26 83.3% 14.1%; /* Dark text on warning backgrounds */
+    
+    /* Info Colors - For helpful tips and supplementary information using new accent */
+    --info: 198 80% 50%;               /* Using our refined accent cyan for informational content */
+    --info-light: 198 80% 95%;         /* Much lighter cyan for subtle backgrounds */
+    --info-dark: 198 80% 30%;          /* Dark cyan for strong info emphasis */
+    --info-foreground: 210 20% 98%;    /* Light text on info backgrounds */
+    
+    /* Learning Progress Colors - For progress bars and completion indicators */
+    --progress-bg: 224 71% 95%;        /* Light primary background for progress containers */
+    --progress-fill: 224 71% 56%;      /* Refined primary blue for progress fill */
+    
+    /* Interactive States - Hover and active states that enhance the neural theme */
+    --hover-overlay: 224 71% 56% / 0.1;    /* 10% refined primary overlay for hover states */
+    --active-overlay: 224 71% 56% / 0.2;   /* 20% refined primary overlay for active states */
 
-        --popover: 0 0% 100%; /* White */
-        --popover-foreground: 222.2 84% 4.9%; /* Navy Blue */
+    /* Shadow System - Material Design inspired elevation system with refined Neural Nexus blue tints */
+    --shadow-2dp: 0 1px 3px 0 rgba(79, 109, 207, 0.1), 0 1px 2px 0 rgba(79, 109, 207, 0.06);
+    --shadow-4dp: 0 2px 4px -1px rgba(79, 109, 207, 0.1), 0 1px 2px -1px rgba(79, 109, 207, 0.06);
+    --shadow-8dp: 0 4px 6px -1px rgba(79, 109, 207, 0.1), 0 2px 4px -2px rgba(79, 109, 207, 0.1);
+    --shadow-16dp: 0 10px 15px -3px rgba(79, 109, 207, 0.1), 0 4px 6px -4px rgba(79, 109, 207, 0.1);
+    --shadow-24dp: 0 20px 25px -5px rgba(79, 109, 207, 0.1), 0 8px 10px -6px rgba(79, 109, 207, 0.1);
+    --shadow-32dp: 0 25px 50px -12px rgba(79, 109, 207, 0.25);
+    
+    /* Specialized shadows for different interaction states */
+    --shadow-hover: 0 8px 25px -8px rgba(79, 109, 207, 0.15);
+    --shadow-focus: 0 0 0 2px rgba(79, 109, 207, 0.2);
+    --shadow-pressed: 0 1px 3px 0 rgba(79, 109, 207, 0.2);
+    
+    /* Colored shadows for semantic feedback */
+    --shadow-success: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -2px rgba(16, 185, 129, 0.1);
+    --shadow-warning: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -2px rgba(245, 158, 11, 0.1);
+    --shadow-error: 0 4px 6px -1px rgba(239, 68, 68, 0.1), 0 2px 4px -2px rgba(239, 68, 68, 0.1);
+    --shadow-info: 0 4px 6px -1px rgba(25, 178, 216, 0.1), 0 2px 4px -2px rgba(25, 178, 216, 0.1);
 
-        --primary: 222.2 47.4% 11.2%; /* Black */
-        --primary-foreground: 210 40% 98%; /* Light Green */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 224 71% 56%;
+  }
 
-        --secondary: 210 40% 96.1%; /* Green */
-        --secondary-foreground: 222.2 47.4% 11.2%; /* Dark Grey */
+  /* Dark Mode Configuration - Warm, comfortable dark theme */
+  .dark {
+    /* Dark Base Colors - Warm charcoal surfaces with neutral undertones */
+    --background: 210 11% 9%;          /* Warm charcoal background eliminates blue tint */
+    --foreground: 210 20% 92%;         /* Softer off-white text reduces eye strain */
+    
+    /* Dark Card Colors - Enhanced elevation with warm undertones */
+    --card: 210 11% 13%;               /* Warm card background for clear elevation */
+    --card-light: 210 11% 11%;         /* Minimal elevation for subtle content grouping */
+    --card-elevated: 210 11% 15%;      /* More pronounced elevation for important cards */
+    --card-foreground: 210 20% 92%;    /* Consistent soft text color */
+    
+    /* Dark Popover Colors */
+    --popover: 210 11% 9%;             /* Consistent with background */
+    --popover-foreground: 210 20% 92%; /* Soft text for readability */
+    
+    /* Dark Primary Colors - Adjusted for warm dark backgrounds */
+    --primary: 224 75% 65%;            /* Refined blue maintains visibility */
+    --primary-light: 224 71% 20%;      /* Subtle primary elements */
+    --primary-dark: 224 71% 48%;       /* Darker primary for contrast */
+    --primary-foreground: 210 20% 92%; /* Soft text maintains accessibility */
+    
+    /* Dark Secondary Colors - Orange adjusted for warm dark mode */
+    --secondary: 25 90% 63%;           /* Bright orange for visibility */
+    --secondary-light: 25 85% 20%;     /* Subtle orange accents */
+    --secondary-dark: 25 85% 47%;      /* Darker orange for emphasis */
+    --secondary-foreground: 210 11% 9%; /* Dark text on bright orange */
+    
+    /* Dark Muted Colors - Improved contrast with warm undertones */
+    --muted: 210 11% 21%;              /* Warm muted background for better contrast */
+    --muted-light: 210 11% 25%;        /* Lighter muted for subtle elevation */
+    --muted-dark: 210 11% 17%;         /* Darker muted for depth */
+    --muted-foreground: 210 20% 72%;   /* Softer secondary text for readability */
+    
+    /* Dark Accent Colors - Cyan maintains energy in warm dark mode */
+    --accent: 198 85% 58%;             /* Bright cyan for visibility */
+    --accent-light: 198 80% 20%;       /* Subtle cyan accents */
+    --accent-dark: 198 80% 42%;        /* Darker cyan for emphasis */
+    --accent-foreground: 210 11% 9%;   /* Dark text on bright accent */
+    
+    /* Dark Destructive Colors - Error feedback with warm undertones */
+    --destructive: 0 62.8% 55%;        /* Slightly brighter red for visibility */
+    --destructive-light: 0 62.8% 20%;  /* Subtle error indicators */
+    --destructive-dark: 0 62.8% 40%;   /* Dark red for emphasis */
+    --destructive-foreground: 210 20% 92%; /* Soft text on error backgrounds */
+    
+    /* Dark Border Colors - Enhanced visibility with warm undertones */
+    --border: 210 11% 26%;             /* Warm borders for clear separation */
+    --input: 210 11% 26%;              /* Input borders match other borders */
+    --ring: 224 75% 65%;               /* Primary blue focus ring */
 
-        --muted: 210 40% 96.1%; /* Gray */
-        --muted-foreground: 215.4 16.3% 46.9%; /* Bluish Grey */
+    /* Success Colors - Adjusted for warm dark mode */
+    --success: 160 84.1% 50%;          /* Brighter green for visibility */
+    --success-light: 160 84.1% 20%;    /* Subtle success indicators */
+    --success-dark: 160 84.1% 35%;     /* Darker green for emphasis */
+    --success-foreground: 210 20% 92%; /* Soft text maintains readability */
+    
+    /* Warning Colors - Adjusted for warm dark mode */
+    --warning: 45.4 93.4% 58%;         /* Brighter amber for visibility */
+    --warning-light: 45.4 93.4% 20%;   /* Subtle warning elements */
+    --warning-dark: 45.4 93.4% 42%;    /* Darker amber for emphasis */
+    --warning-foreground: 210 11% 9%;  /* Dark text for contrast */
+    
+    /* Info Colors - Adjusted for warm dark mode */
+    --info: 198 85% 58%;               /* Bright cyan for visibility */
+    --info-light: 198 80% 20%;         /* Subtle info elements */
+    --info-dark: 198 80% 42%;          /* Darker cyan for emphasis */
+    --info-foreground: 210 11% 9%;     /* Dark text on bright info */
+    
+    /* Progress Colors - Enhanced for warm dark mode */
+    --progress-bg: 210 11% 21%;        /* Warm progress container background */
+    --progress-fill: 224 75% 65%;      /* Primary blue progress fill */
+    --progress-label: 210 20% 92%;     /* Soft text for progress labels */
+    --progress-label-bg: 210 11% 15%;  /* Warm background for progress labels */
 
-        --accent: 210 40% 96.1%; /* Navy Blue */
-        --accent-foreground: 222.2 47.4% 11.2%; /* Baby Blue */
+    --sidebar-background: 210 11% 11%;
+    --sidebar-foreground: 210 20% 92%;
+    --sidebar-primary: 224 71% 56%;
+    --sidebar-primary-foreground: 210 20% 92%;
+    --sidebar-accent: 210 11% 17%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 210 11% 26%;
+    --sidebar-ring: 224 75% 65%;
+  }
+}
 
-        --destructive: 0 84.2% 60.2%; /* Red */
-        --destructive-foreground: 210 40% 98%;
+/* Utility Classes for Extended Color System */
+@layer utilities {
+  .bg-card-light { background-color: hsl(var(--card-light)); }
+  .bg-card-elevated { background-color: hsl(var(--card-elevated)); }
+  .bg-primary-light { background-color: hsl(var(--primary-light)); }
+  .bg-primary-dark { background-color: hsl(var(--primary-dark)); }
+  .bg-secondary-light { background-color: hsl(var(--secondary-light)); }
+  .bg-secondary-dark { background-color: hsl(var(--secondary-dark)); }
+  .bg-muted-light { background-color: hsl(var(--muted-light)); }
+  .bg-muted-dark { background-color: hsl(var(--muted-dark)); }
+  .bg-accent-light { background-color: hsl(var(--accent-light)); }
+  .bg-accent-dark { background-color: hsl(var(--accent-dark)); }
+  .bg-destructive-light { background-color: hsl(var(--destructive-light)); }
+  .bg-destructive-dark { background-color: hsl(var(--destructive-dark)); }
+  .bg-success-light { background-color: hsl(var(--success-light)); }
+  .bg-success-dark { background-color: hsl(var(--success-dark)); }
+  .bg-warning-light { background-color: hsl(var(--warning-light)); }
+  .bg-warning-dark { background-color: hsl(var(--warning-dark)); }
+  .bg-info-light { background-color: hsl(var(--info-light)); }
+  .bg-info-dark { background-color: hsl(var(--info-dark)); }
 
-        --border: 214.3 31.8% 91.4%;
-        --input: 214.3 31.8% 91.4%;
-        --ring: 222.2 84% 4.9%;
+  .text-primary-light { color: hsl(var(--primary-light)); }
+  .text-primary-dark { color: hsl(var(--primary-dark)); }
+  .text-secondary-light { color: hsl(var(--secondary-light)); }
+  .text-secondary-dark { color: hsl(var(--secondary-dark)); }
+  .text-accent-light { color: hsl(var(--accent-light)); }
+  .text-accent-dark { color: hsl(var(--accent-dark)); }
 
-        --radius: 0.5rem;
-    }
+  .shadow-2dp { box-shadow: var(--shadow-2dp); }
+  .shadow-4dp { box-shadow: var(--shadow-4dp); }
+  .shadow-8dp { box-shadow: var(--shadow-8dp); }
+  .shadow-16dp { box-shadow: var(--shadow-16dp); }
+  .shadow-24dp { box-shadow: var(--shadow-24dp); }
+  .shadow-32dp { box-shadow: var(--shadow-32dp); }
+  .shadow-hover { box-shadow: var(--shadow-hover); }
+  .shadow-focus { box-shadow: var(--shadow-focus); }
+  .shadow-pressed { box-shadow: var(--shadow-pressed); }
+  .shadow-success { box-shadow: var(--shadow-success); }
+  .shadow-warning { box-shadow: var(--shadow-warning); }
+  .shadow-error { box-shadow: var(--shadow-error); }
+  .shadow-info { box-shadow: var(--shadow-info); }
 
-    .dark {
-        --background: 222.2 84% 4.9%;
-        --foreground: 210 40% 98%;
+  .progress-bg { background-color: hsl(var(--progress-bg)); }
+  .progress-fill { background-color: hsl(var(--progress-fill)); }
+  .progress-label { color: hsl(var(--progress-label)); }
+  .progress-label-bg { background-color: hsl(var(--progress-label-bg)); }
 
-        --card: 222.2 84% 4.9%;
-        --card-foreground: 210 40% 98%;
-
-        --popover: 222.2 84% 4.9%;
-        --popover-foreground: 210 40% 98%;
-
-        --primary: 210 40% 98%;
-        --primary-foreground: 222.2 47.4% 11.2%;
-
-        --secondary: 217.2 32.6% 17.5%;
-        --secondary-foreground: 210 40% 98%;
-
-        --muted: 217.2 32.6% 17.5%;
-        --muted-foreground: 215 20.2% 65.1%;
-
-        --accent: 217.2 32.6% 17.5%;
-        --accent-foreground: 210 40% 98%;
-
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 210 40% 98%;
-
-        --border: 217.2 32.6% 17.5%;
-        --input: 217.2 32.6% 17.5%;
-        --ring: 212.7 26.8% 83.9%;
-    }
+  /* Add scrollbar hide utility */
+  .scrollbar-hide {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  }
+  .scrollbar-hide::-webkit-scrollbar { /* WebKit */
+    display: none;
+  }
 }
 
 @layer base {
-    * {
-        @apply border-border;
-    }
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+    line-height: 1.7;
+  }
+
+  h1 { font-size: 6rem; } /* 96px */
+  h2 { font-size: 4.5rem; } /* 72px */
+  h3 { font-size: 3.5rem; } /* 56px */
+  h4 { font-size: 2.625rem; } /* 42px */
+  h5 { font-size: 2rem; } /* 32px */
+  h6 { font-size: 1.5rem; } /* 24px */
+
+  .text-sm {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.7;
+  }
+
+  .text-xs {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.7;
+  }
+
+  code, pre {
+    @apply font-code;
+  }
+
+  /* Mobile responsive typography */
+  @media (max-width: 768px) {
     body {
-        @apply bg-background text-foreground;
+      font-size: 1rem; /* 16px */
     }
-}
 
-@import url('https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,500;1,500&display=swap');
+    h1 { font-size: 5rem; } /* 80px */
+    h2 { font-size: 4rem; } /* 64px */
+    h3 { font-size: 3rem; } /* 48px */
+    h4 { font-size: 2rem; } /* 32px */
+    h5 { font-size: 1.5rem; } /* 24px */
+    h6 { font-size: 1.25rem; } /* 20px */
 
-.grainy {
-    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAElBMVEUAAAD8/vz08vT09vT8+vzs7uxH16TeAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAuFJREFUOI0Vk+3NLiEIRG1B8ClAYAsQ2AIEt4D9ePtv5Xp/mZgYJ2fOFJKEfInkVWY2aglmQFkimRTV7MblYyVqD7HXyhKsSuPX12MeDhRHLtGvRG+P+B/S0Vu4OswR9tmvwNPyhdCDbVayJGads/WiUWcjCvCnruTBNHS9gmX2VzVbk7ZvB1gb1hkWFGl+A/n+/FowcO34U/XvKqZ/fHY+6vgRfU92XrOBUbGeeDfQmjWjdrK+frc6FdGReQhfSF5JvR29O2QrfNw1huTwlgsyXLo0u+5So82sgv7tsFZR2nxB6lXiquHrfD8nfYZ9SeT0LiuvSoVrxGY16pCNRZKqvwWsn5OHypPBELzohMCaRaa0ceTHYqe7X/gfJEEtKFbJpWoNqO+aS1cuTykGPpK5Ga48m6L3NefTr013KqYBQu929iP1oQ/7UwSR+i3zqruUmT84qmhzLpxyj7pr9kg7LKvqaXxZmdpn+6o8sHqSqojy02gU3U8q9PnpidiaLks0mbMYz+q2uVXsoBQ8bfURULYxRgZVYCHMv9F4OA7qxT2NPPpvGQ/sTDH2yznKh7E2AcErfcNsaIoN1izzbJiaY63x4QjUFdBSvDCvugPpu5xDny0jzEeuUQbcP1aGT9V90uixngTRLYNEIIZ6yOF1H8tm7rj2JxiefsVy53zGVy3ag5uuPsdufYOzYxLRxngKe7nhx3VAq54pmz/DK9/Q3aDam2Yt3hNXB4HuU87jKNd/CKZn77Qdn5QkXPfqSkhk7hGOXXB+7v09KbBbqdvxGqa0AqfK/atIrL2WXdAgXAJ43Wtwe/aIoacXezeGPMlhDOHDbSfHnaXsL2QzbT82GRwZuezdwcoWzx5pnOnGMUdHuiY7lhdyWzWiHnucLZQxYStMJbtcydHaQ6vtMbe0AcDbxG+QG14AL94xry4297xpy9Cpf1OoxZ740gHDfrK+gtsy0xabwJmfgtCeii79B6aj0SJeLbd7AAAAAElFTkSuQmCC);
-}
+    .text-sm {
+      font-size: 0.875rem; /* 14px */
+    }
 
-.admin-container {
-    display: flex;
-    height: 100vh;
+    .text-xs {
+      font-size: 0.75rem; /* 12px */
+    }
+  }
 }
-.main-content {
-    flex: 1;
-    padding: 20px;
-}
+.remirror-editor {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  

@@ -12,10 +12,15 @@ import { getCourseData } from '@/store/store'
 import ToggleSwitch from '@/app/admin/courses/[courseId]/_components/SwitchSettings'
 import { Spinner } from '@/components/ui/spinner'
 import ModulesLockToggleSwitch from '@/app/admin/courses/[courseId]/_components/ModulesLockToggleSwitch'
+import Image from 'next/image'
+import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+import axios from 'axios'
+import{PageProps} from "@/app/admin/courses/[courseId]/(courseTabs)/settings/courseSettingType"
 
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params: PageProps}) => {
     // misc
     const router = useRouter()
+    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
     const [loading, setLoading] = useState(true)
     const { courseData } = getCourseData()
     // state and variables
@@ -28,13 +33,26 @@ const Page = ({ params }: { params: any }) => {
     // async
     const fetchBootCampSettings = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<PageProps>(
                 `/bootcamp/bootcampSetting/${params.courseId}`
             )
             const type = response.data.bootcampSetting[0].type
             setBootcampSettings(type)
             setIsChecked(type === 'Public')
         } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (
+                    error?.response?.data.message ===
+                    'Bootcamp not found for the provided id.'
+                ) {
+                    router.push(`/admin/courses`)
+                    toast.info({
+                        title: 'Caution',
+                        description:
+                            'The Course has been deleted by another Admin',
+                    })
+                }
+            }
             console.error('Error fetching boot camp settings:', error)
         }
     }, [params.courseId])
@@ -47,39 +65,31 @@ const Page = ({ params }: { params: any }) => {
         await api
             .put(`/bootcamp/bootcampSetting/${params.courseId}`, convertedData)
             .then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status,
                     description: `Bootcamp type updated to ${type}`,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((error) => {
-                toast({
+                toast.error({
                     title: error.data.status,
                     description: error.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
     const handleDelete = async () => {
         try {
             await api.delete(`/bootcamp/${courseData?.id}`).then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status,
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             router.push('/admin/courses')
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: error.data.status,
                 description: error.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
         setDeleteModalOpen(false)
@@ -97,6 +107,26 @@ const Page = ({ params }: { params: any }) => {
         return () => clearTimeout(timer)
     }, [])
 
+    //   if (loadingCourseCheck) {
+    //       return (
+    //         <div className="flex justify-center items-center h-full mt-20">
+    //           <Spinner className="text-secondary" />
+    //         </div>
+    //       )
+    //     }
+
+    //     if (isCourseDeleted) {
+    //       return (
+    //         <div className="flex flex-col justify-center items-center h-full mt-20">
+    //           <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
+    //           <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
+    //           <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
+    //             Back to Courses
+    //           </Button>
+    //         </div>
+    //       )
+    //     }
+
     return (
         <>
             {loading ? (
@@ -104,13 +134,13 @@ const Page = ({ params }: { params: any }) => {
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
                             <div className="relative top-[25%]">
-                                <Spinner className="text-secondary" />
+                                <Spinner className="text-[rgb(81,134,114)]" />
                             </div>
                         </div>
                     </div>
                 </div>
             ) : (
-                <div>
+                <div className="text-gray-600">
                     <div className=" w-full text-start mb-5">
                         <div>
                             <h1 className="text-lg font-semibold">
@@ -128,7 +158,9 @@ const Page = ({ params }: { params: any }) => {
                             </div>
                         </div>
 
-                        <h1 className="text-lg font-semibold mt-5">Course Status</h1>
+                        <h1 className="text-lg font-semibold mt-5">
+                            Course Status
+                        </h1>
                         <p>
                             This course has not been published yet. You will
                             able to unpublish it at any time if new enrollments
@@ -136,7 +168,9 @@ const Page = ({ params }: { params: any }) => {
                         </p>
                     </div>
                     <h1 className="text-lg font-semibold mt-5 text-left">Modules Lock Status</h1>
-                    <ModulesLockToggleSwitch bootcampId={params.courseId} />
+                    <ModulesLockToggleSwitch bootcampId={String(params.courseId)} onToggle={function (isChecked: boolean): void {
+                            throw new Error('Function not implemented.')
+                        } }/>
 
                     <div className="w-full text-start my-5">
                         <div className="mb-3 text-start">

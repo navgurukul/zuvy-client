@@ -5,11 +5,10 @@ import { getCodingPreviewStore, getCodingQuestionTags } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { requestFullScreen } from '@/utils/students'
-import IDE from '@/app/student/playground/[editor]/editor'
-import CodingQuestionCard from '@/app/student/courses/[viewcourses]/modules/_components/CodingQuestionCard'
-
-const PreviewCoding = ({ params }: { params: any }) => {
+import IDE from '@/app/admin/courses/[courseId]/module/_components/IDE'
+import CodingQuestionCard from '@/app/admin/courses/[courseId]/module/_components/CodingQuestionCard'
+import {Params,PriviewQuizTag,TopicCodingQuestion  } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType"
+const PreviewCoding = ({ params }: { params: Params}) => {
     const { codingPreviewContent, setCodingPreviewContent } =
         getCodingPreviewStore()
     const { tags, setTags } = getCodingQuestionTags()
@@ -25,15 +24,13 @@ const PreviewCoding = ({ params }: { params: any }) => {
         codingPreviewContent?.codingQuestionDetails &&
         codingPreviewContent?.codingQuestionDetails.length > 0
             ? tags.find(
-                  (item: any) =>
+                  (item: PriviewQuizTag) =>
                       item.id ===
                       codingPreviewContent?.codingQuestionDetails[0].tagId
               )
             : null
 
-    useEffect(() => {
-        if (showCodePanel) requestFullScreen(document.documentElement)
-    }, [showCodePanel])
+    
 
     const remainingTime = null
     const assessmentSubmitId = 1
@@ -41,7 +38,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
     return (
         <>
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode. The questions cannot be
                     interacted with.
                 </h1>
@@ -59,7 +56,7 @@ const PreviewCoding = ({ params }: { params: any }) => {
                     </p>
                 </Link>
                 {showCodePanel ? (
-                    <div className="mt-5">
+                    <div className="mt-5 w-full">
                         <IDE
                             params={{
                                 editor: String(
@@ -77,9 +74,9 @@ const PreviewCoding = ({ params }: { params: any }) => {
                     </div>
                 ) : (
                     <>
-                        <h2 className="font-bold">Coding Challenges</h2>
+                        <h2 className="font-bold text-gray-600 text-[15px]">Coding Challenges</h2>
                         {codingPreviewContent?.codingQuestionDetails?.map(
-                            (question: any) => (
+                            (question: TopicCodingQuestion) => (
                                 <CodingQuestionCard
                                     key={question.id}
                                     id={question.id}

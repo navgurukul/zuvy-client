@@ -5,18 +5,12 @@ import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { toast } from 'react-toastify'
 import { api } from '@/utils/axios.config'
-type Props = {
-    title: string
-    studentsSubmitted: number
-    totalSubmissions: number
-    courseId: number
-    id: string
-    moduleId: any
-}
+import {SubmissionComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-const SubmissionComponent = (props: Props) => {
+
+const SubmissionComponent = (props: SubmissionComponentProps) => {
     const handleDownloadPdf = async (id: any) => {
-        const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=365&questionId=102`
+        const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`
 
         async function fetchData() {
             try {
@@ -133,7 +127,7 @@ const SubmissionComponent = (props: Props) => {
                                 }`}
                             ></div>
                         </div>
-                        <h3>
+                        <h3 className='text-sm'>
                             {props.studentsSubmitted} / {props.totalSubmissions}
                         </h3>
 
@@ -142,14 +136,14 @@ const SubmissionComponent = (props: Props) => {
                             <Link
                                 href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}`}
                             >
-                                <h3 className="font-semibold cursor-pointer">
-                                    Submissions
+                                <h3 className="font-semibold cursor-pointer text-sm">
+                                    View Submissions
                                 </h3>
                             </Link>
                         ) : (
-                            <h3 className="text-gray-400 font-semibold cursor-not-allowed">
-                                Submissions
-                            </h3>
+                            <h3 className="text-gray-400 font-semibold cursor-not-allowed text-sm">
+                                View Submissions
+                            </h3> 
                         )}
                     </div>
                 </div>

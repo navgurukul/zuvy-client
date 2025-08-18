@@ -4,13 +4,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 import PracticeProblems from '../../../_components/PraticeProblems'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
+import {PractieProblemProps,SubmissionsResponse} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
 
-type Props = {
-    courseId: number
-    debouncedSearch: string
-}
 
-const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
+const PraticeProblemsComponent = ({ courseId, debouncedSearch }: PractieProblemProps) => {
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
 
@@ -22,16 +19,14 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
             const url = debouncedSearch
                 ? `/submission/submissionsOfPractiseProblems/${courseId}?searchPractiseProblem=${debouncedSearch}`
                 : `/submission/submissionsOfPractiseProblems/${courseId}`
-            const res = await api.get(url)
+            const res = await api.get<SubmissionsResponse>(url)
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
             console.error('Error fetching submissions:', error)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching submissions.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } finally {
         }
@@ -48,9 +43,9 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
     if (allEmpty) {
         return (
             <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                <h1 className="text-center font-semibold ">
+                <h5 className="text-center font-semibold text-[17px]">
                     No practice problems found.
-                </h1>
+                </h5>
                 <Image
                     src="/emptyStates/curriculum.svg"
                     alt="No Assessment Found"
@@ -78,9 +73,9 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
                 )
             ) : (
                 <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h1 className="text-center font-semibold ">
+                    <h5 className="text-center font-semibold">
                         No Practice Problem Found
-                    </h1>
+                    </h5>
                     <Image
                         src="/emptyStates/curriculum.svg"
                         alt="No Assessment Found"

@@ -32,20 +32,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-
-interface EditSessionProps {
-    meetingId: string
-    initialData: {
-        sessionTitle: string
-        description: string
-        startTime: string
-        endTime: string
-    }
-    getClasses: () => void
-    open: boolean // Controlled state
-    onClose: () => void // Function to handle dialog close
-    setIsDialogOpen: any
-}
+import{EditSessionProps} from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
 
 const formSchema = z
     .object({
@@ -125,12 +112,9 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
             )
 
             if (response.status === 200) {
-                toast({
+                toast.success({
                     title: 'Session Updated',
                     description: 'Session updated successfully',
-                    variant: 'default',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 props.getClasses() // Refresh the class list
                 props.onClose()

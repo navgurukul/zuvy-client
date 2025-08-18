@@ -7,21 +7,8 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
+import {CodingTopicsProps,CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 
-interface CodingTopicsProps {
-    setSearchTerm: (newSearchTerm: string) => void
-    searchTerm: string
-    tags: Tag[]
-    selectedTopics: Tag[]
-    setSelectedTopics: React.Dispatch<React.SetStateAction<Tag[]>>
-    selectedDifficulties: string[]
-    setSelectedDifficulties: React.Dispatch<React.SetStateAction<string[]>>
-}
-
-export type Tag = {
-    id: number
-    tagName: string
-}
 
 const difficulties = ['Any Difficulty', 'Easy', 'Medium', 'Hard']
 
@@ -38,7 +25,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
         setSearchTerm(event.target.value)
     }
 
-    const handleTopicChange = (tag: Tag) => {
+    const handleTopicChange = (tag: CodingTopicsTag) => {
         setSelectedTopics((prev) => {
             if (tag.tagName === 'All Topics') {
                 return prev.some((t) => t.tagName === 'All Topics') ? [] : [tag]
@@ -113,8 +100,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
-                            variant="outline"
-                            className="w-48 sm:w-56 justify-between"
+                            className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]"
                         >
                             {getTopicsButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -147,8 +133,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
-                            variant="outline"
-                            className="w-48 sm:w-56 justify-between"
+                            className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]"
                         >
                             {getDifficultiesButtonText()}
                             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

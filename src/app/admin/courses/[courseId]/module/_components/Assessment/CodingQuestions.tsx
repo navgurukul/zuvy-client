@@ -4,31 +4,7 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from './QuestionDescriptionModal'
-
-interface TestCase {
-    id: number
-    inputs: {
-        parameterName: string
-        parameterType: string
-        parameterValue: any
-    }[]
-    expectedOutput: {
-        parameterType: string
-        parameterValue: any
-    }
-}
-
-interface CodingQuestion {
-    id: number
-    title: string
-    description: string
-    difficulty: string
-    tagId: number
-    constraints: string
-    testCases: TestCase[]
-    expectedOutput: number[]
-    createdAt: string
-}
+import {CodingQuestiones,codingQuestionProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const CodingQuestions = ({
     questions,
@@ -36,18 +12,12 @@ const CodingQuestions = ({
     selectedQuestions,
     tags,
     setIsNewQuestionAdded,
-}: {
-    questions: CodingQuestion[]
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>
-    selectedQuestions: CodingQuestion[]
-    tags: any
-    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-}) => {
+}:codingQuestionProps) => {
 
     const handleCodingQuestionSelection = (
-        question: CodingQuestion,
-        selectedQuestions: CodingQuestion[],
-        setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestion[]>>,
+        question: CodingQuestiones,
+        selectedQuestions: CodingQuestiones[],
+        setSelectedQuestions: React.Dispatch<React.SetStateAction<CodingQuestiones[]>>,
         setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
       ) => {
         if (!selectedQuestions.some((q) => q.id === question.id)) {
@@ -60,7 +30,7 @@ const CodingQuestions = ({
         <ScrollArea className="h-3/5  w-full pr-5 pb-32">
             {/* <ScrollBar orientation="vertical" className="h-3/4" /> */}
             <div className="h-screen">
-                {questions.map((question: CodingQuestion) => {
+                {questions.map((question: CodingQuestiones) => {
                     const tag = tags?.find(
                         (tag: any) => tag?.id === question?.tagId
                     )
@@ -72,7 +42,7 @@ const CodingQuestions = ({
                             <div className="flex justify-between text-start items-center w-full">
                                 <div className="w-full">
                                     <div className="flex items-center justify-between w-full">
-                                        <h2 className="font-bold">
+                                        <h2 className="font-bold text-[1rem] text-gray-600">
                                             {ellipsis(question.title, 30)}
                                         </h2>
                                         <div className="flex gap-2 ml-auto">
@@ -96,7 +66,7 @@ const CodingQuestions = ({
                                             </span>
                                             <div className="flex">
                                                 {selectedQuestions.some(
-                                                    (q: CodingQuestion) =>
+                                                    (q: CodingQuestiones) =>
                                                         q.id === question.id
                                                 ) ? (
                                                     <svg
@@ -128,14 +98,14 @@ const CodingQuestions = ({
                                                           setIsNewQuestionAdded
                                                         );
                                                       }}
-                                                        className="text-secondary cursor-pointer"
+                                                        className="text-[rgb(81,134,114)] cursor-pointer"
                                                         size={20}
                                                     />
                                                 )}
                                             </div>
                                         </div>
                                     </div>
-                                    <p className="text-[#4A4A4A] mt-1 font-[14px]">
+                                    <p className="text-[#4A4A4A] mt-1 text-[1rem] font-[14px]">
                                         {ellipsis(question.description, 45)}
                                     </p>
                                     <Dialog>

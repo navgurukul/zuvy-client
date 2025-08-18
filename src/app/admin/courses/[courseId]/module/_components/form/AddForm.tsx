@@ -26,19 +26,7 @@ import { getChapterUpdateStatus, getFormPreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
-
-type AddFormProps = {
-    chapterData: any
-    content: any
-    // fetchChapterContent: any
-    moduleId: any
-    courseId: any
-}
-
-interface chapterDetails {
-    title: string
-    description: string
-}
+import {AddFormProps,FormQuestionDetail} from "@/app/admin/courses/[courseId]/module/_components/form/ModuleFormType"
 
 const formSchema = z.object({
     title: z.string().min(2, {
@@ -72,6 +60,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setFormPreviewContent } = getFormPreviewStore()
     const [titles, setTitles] = useState(content?.title || '')
+    const [isSaved, setIsSaved] = useState(false)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -80,7 +69,7 @@ const AddForm: React.FC<AddFormProps> = ({
             description: content?.description ?? '',
             questions:
                 content.formQuestionDetails?.length > 0
-                    ? content.formQuestionDetails.map((q: any) => ({
+                    ? content.formQuestionDetails.map((q: FormQuestionDetail) => ({
                           id: q.id.toString(),
                           question: q.question,
                           typeId: q.typeId,
@@ -105,7 +94,7 @@ const AddForm: React.FC<AddFormProps> = ({
             description: content?.description ?? '',
             questions:
                 content.formQuestionDetails?.length > 0
-                    ? content.formQuestionDetails.map((q: any) => ({
+                    ? content.formQuestionDetails.map((q: FormQuestionDetail) => ({
                           id: q.id.toString(),
                           question: q.question,
                           typeId: q.typeId,
@@ -213,13 +202,13 @@ const AddForm: React.FC<AddFormProps> = ({
                 typeId: item.typeId,
                 options: item.options?.reduce<Record<number, string>>(
                     (acc, option, index) => {
-                        acc[index] = option
+                        acc[index + 1] = option
                         return acc
                     },
                     {}
                 ),
             }))
-
+        
         const editFormQuestionDto = questions
             .filter((item) => item.id && !item.id.startsWith('new-'))
             .map((item) => ({
@@ -227,12 +216,13 @@ const AddForm: React.FC<AddFormProps> = ({
                 id: item.id && Number(item.id),
                 options: item.options?.reduce<Record<number, string>>(
                     (acc, option, index) => {
-                        acc[index] = option
+                        acc[index + 1] = option
                         return acc
                     },
                     {}
                 ),
             }))
+        console.log('editFormQuestionDto',editFormQuestionDto)
 
         let payload = {}
         if (formQuestionDto.length > 0 && editFormQuestionDto.length > 0) {
@@ -268,25 +258,31 @@ const AddForm: React.FC<AddFormProps> = ({
                 `Content/createAndEditForm/${content.id}`,
                 payload
             )
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Form Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsChapterUpdated(!isChapterUpdated)
+            setIsSaved(true)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
 
     function previewForm() {
+
+        if (!isSaved) {
+        toast({
+            variant: 'destructive',
+            title: 'Please save the form first',
+            description: 'Preview is only available after saving the form.',
+        })
+        return
+    }
         if (content) {
             setFormPreviewContent(content)
             router.push(
@@ -294,7 +290,7 @@ const AddForm: React.FC<AddFormProps> = ({
             )
         }
     }
-
+    
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
             <ScrollBar className="h-dvh " orientation="vertical" />
@@ -322,7 +318,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                                         field.onChange(e)
                                                     }}
                                                     placeholder="Untitled Form"
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                     autoFocus
                                                 />
                                                 {!titles && (
@@ -337,7 +333,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                             <div className="flex justify-start">
                                                 <Button
                                                     type="submit"
-                                                    className="w-3/3"
+                                                    className="w-3/3 bg-success-dark opacity-75"
                                                 >
                                                     Save
                                                 </Button>
@@ -348,7 +344,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                         <div
                                             id="previewForm"
                                             onClick={previewForm}
-                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                            className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer"
                                         >
                                             <Eye size={18} />
                                             <h6 className="ml-1 text-sm">
@@ -365,13 +361,13 @@ const AddForm: React.FC<AddFormProps> = ({
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="flex text-left text-md font-semibold mb-1">
+                                    <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
                                         Description
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            className="w-[450px] px-3 py-2 border rounded-md"
+                                            className="w-[450px] px-3 py-2 border text-gray-600 rounded-md"
                                             placeholder="Add Description"
                                         />
                                     </FormControl>
@@ -396,7 +392,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                 variant={'secondary'}
                                 type="button"
                                 onClick={addQuestion}
-                                className="gap-x-2 border-none hover:text-secondary hover:bg-popover"
+                                className="gap-x-2 border-none text-[rgb(81,134,114)] hover:text-[rgb(81,134,114)] hover:bg-popover"
                             >
                                 <Plus /> Add Question
                             </Button>

@@ -13,6 +13,7 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
+import {AddLiveClass} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
 function AssessmentItem({
     title,
@@ -23,16 +24,7 @@ function AssessmentItem({
     fetchChapterContent,
     fetchChapters,
     moduleId,
-}: {
-    title: string
-    topicId: number
-    topicName: string
-    chapterId: number
-    activeChapter: number
-    fetchChapterContent: (chapterId: number) => void
-    fetchChapters: () => void
-    moduleId: string
-}) {
+}:AddLiveClass) {
     // states and variables
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
@@ -67,20 +59,16 @@ function AssessmentItem({
                     `/content/deleteChapter/${moduleId}?chapterId=${chapterId}`
                 )
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.title,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchChapters()
                 })
                 .catch((error) => {
-                    toast({
+                    toast.error({
                         title: error.data.title,
                         description: error.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                     })
                 })
         } catch (error) {

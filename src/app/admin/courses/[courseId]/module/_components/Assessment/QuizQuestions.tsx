@@ -11,18 +11,9 @@ import {
 } from '@/components/ui/dialog'
 import QuestionDescriptionModal from './QuestionDescriptionModal'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
-
-interface MCQQuestion {
-    id: number
-    question: string
-    options: Record<string, string>
-    correctOption: number
-    marks: number | null
-    difficulty: string
-    tagId: number
-    usage: number
-    quizVariants: any
-}
+import { renderQuestionPreview } from '@/utils/quizHelpers'
+import { MCQQuestion } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
+import { CodingQuestionsProps } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 
 const QuizQuestions = ({
     questions,
@@ -30,25 +21,20 @@ const QuizQuestions = ({
     selectedQuestions,
     tags,
     setIsNewQuestionAdded,
-}: {
-    questions: MCQQuestion[]
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>
-    selectedQuestions: MCQQuestion[]
-    tags: any
-    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-}) => {
+    type,
+}:CodingQuestionsProps) => {
 
-    const handleQuestionSelection = (
+        const handleQuestionSelection = (
         question: MCQQuestion,
         selectedQuestions: MCQQuestion[],
         setSelectedQuestions: React.Dispatch<React.SetStateAction<MCQQuestion[]>>,
         setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-      ) => {
+    ) => {
         if (!selectedQuestions.some((q) => q.id === question.id)) {
-          setSelectedQuestions([...selectedQuestions, question]);
+            setSelectedQuestions([...selectedQuestions, question]);
         }
         setIsNewQuestionAdded(true);
-      };
+    };
 
     return (
         <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
@@ -57,6 +43,9 @@ const QuizQuestions = ({
                 const tag = tags?.find(
                     (tag: any) => tag?.id === question?.tagId
                 )
+                const questionText =
+                    question?.quizVariants?.[0]?.question || question.question
+
                 return (
                     <div
                         key={question.id}
@@ -65,23 +54,18 @@ const QuizQuestions = ({
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">
                                 <div className="flex items-center  justify-between gap-2">
-                                    <h2 className="font-bold">
-                                        {question?.quizVariants?.map(
-                                            (ques: any) => {
-                                                return (
-                                                    <span
-                                                        key={ques}
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: ellipsis(
-                                                                ques.question,
-                                                                40
-                                                            ),
-                                                        }}
-                                                    ></span>
-                                                )
-                                            }
-                                        )}
-                                        {/* {ellipsis(question.question, 35)} */}
+                                    <h2 className="font-bold text-[1rem] text-gray-600">
+                                        <div className="text-[#4A4A4A] mt-1 overflow-hidden text-ellipsis font-semibold"
+                                            style={{
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: 'vertical',
+                                            }}>
+                                            {renderQuestionPreview(
+                                                questionText,
+                                                { textLength: 40 }
+                                            )}
+                                        </div>
                                     </h2>
                                     <div className="flex items-center gap-x-2">
                                         <div className="space-x-2">
@@ -130,26 +114,34 @@ const QuizQuestions = ({
                                                 </svg>
                                             ) : (
                                                 <PlusCircle
-                                                onClick={() => {
-                                                    handleQuestionSelection(
-                                                      question,
-                                                      selectedQuestions,
-                                                      setSelectedQuestions,
-                                                      setIsNewQuestionAdded
-                                                    );
-                                                  }}
-                                                    className="text-secondary cursor-pointer"
+                                                    onClick={() => {
+                                                        handleQuestionSelection(
+                                                            question,
+                                                            selectedQuestions,
+                                                            setSelectedQuestions,
+                                                            setIsNewQuestionAdded
+                                                        )
+                                                    }}
+                                                    className="text-[rgb(81,134,114)] cursor-pointer"
                                                     size={20}
                                                 />
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="w-full">
+                                {/* <div className="w-full">
                                     <p className="text-[#4A4A4A] mt-1 font-[14px">
                                         {ellipsis(question.question, 60)}
                                     </p>
-                                </div>
+                                    <div className="text-[#4A4A4A] mt-1 font-[14px] overflow-hidden text-ellipsis font-semibold"
+                                        style={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 3,
+                                            WebkitBoxOrient: 'vertical',
+                                        }}>
+                                        {renderQuestionContent(question)}
+                                    </div>
+                                </div> */}
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">

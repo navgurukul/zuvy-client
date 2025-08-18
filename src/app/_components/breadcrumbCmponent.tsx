@@ -20,7 +20,7 @@ function BreadcrumbComponent({
                         <BreadcrumbItem
                             key={item.crumb}
                             className={` ${
-                                !item.isLast ? 'text-secondary' : ''
+                                !item.isLast ? 'text-[rgb(81,134,114)]' : ''
                             }`}
                         >
                             <BreadcrumbLink href={item.href}>

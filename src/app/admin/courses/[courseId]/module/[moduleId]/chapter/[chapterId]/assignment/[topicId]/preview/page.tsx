@@ -9,41 +9,70 @@ import { Link } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useRouter, useSearchParams } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import {PriviewEditorDoc,Params } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType"
 
-type EditorDoc = {
-    type: string
-    content: any[]
-}
 
-const PreviewAssignment = ({ params }: { params: any }) => {
+const PreviewAssignment = ({ params }: { params: Params }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const isPdfPreview = searchParams.get('pdf') === 'true'
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()
     const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
+        { doc: PriviewEditorDoc } | undefined
     >()
 
     const timestamp = assignmentPreviewContent?.completionDate
     const date = new Date(timestamp)
 
-    const options: any = {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'UTC',
-        timeZoneName: 'short',
+    // Improved date formatting function with better error handling
+    const formatDeadlineDate = (timestamp?: string) => {
+        if (!timestamp) return 'No deadline set';
+        
+        try {
+            const date = new Date(timestamp)
+            // Validate date
+            if (isNaN(date.getTime())) {
+                console.error('Invalid date:', timestamp);
+                return 'Invalid deadline date';
+            }
+            
+            const options: Intl.DateTimeFormatOptions = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                timeZone: 'UTC' // Ensure consistent date display
+            };
+            
+            return new Intl.DateTimeFormat('en-US', options).format(date);
+        } catch (error) {
+            console.error('Error formatting date:', error, 'Timestamp:', timestamp);
+            return 'Error showing deadline';
+        }
+    }
+
+    // Get formatted date - now checking both possible locations for the date
+    const getDeadlineDate = () => {
+        // Try getting date from assignmentPreviewContent first
+        if (assignmentPreviewContent?.completionDate) {
+            return formatDeadlineDate(assignmentPreviewContent.completionDate);
+        }
+        
+        // If not found, try getting from contentDetails (for PDF case)
+        if (assignmentPreviewContent?.contentDetails?.[0]?.completionDate) {
+            return formatDeadlineDate(assignmentPreviewContent.contentDetails[0].completionDate);
+        }
+        
+        return 'No deadline set';
     }
     const options2: any = {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     }
-    const formattedDate = date.toLocaleDateString('en-US', options)
+    const formattedDate = date.toLocaleDateString('en-US', options2)
+
+    const deadlineDate = getDeadlineDate();
 
     useEffect(() => {
         fetchPreviewData(params, setAssignmentPreviewContent)
@@ -91,7 +120,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
     return (
         <div className="">
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode.
                 </h1>
             </div>
@@ -108,7 +137,7 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                 </div>
 
                 {/* Right Section: Editor */}
-                <div className="pt-12 w-[395%]">
+                <div className="pt-12 w-[395%] text-gray-600">
                     <div className="flex justify-between">
                         <div className="flex flex-col items-start mb-3">
                             <h1 className="text-2xl font-semibold text-left">
@@ -116,8 +145,8 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                                     ? assignmentPreviewContent.title
                                     : 'No Title yet'}
                             </h1>
-                            <h1 className="font-semibold">
-                                Deadline: {formattedDate}
+                            <h1 className="font-semibold text-[15px]">
+                                Deadline: {deadlineDate}
                             </h1>
                         </div>
                         <div className="mt-2 text-end">
@@ -125,17 +154,32 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                         </div>
                     </div>
 
-                    {/* PDF Preview */}
-                    {isPdfPreview && pdfLink ? (
-                        <div className="mt-2 text-start">
-                            <iframe
-                                src={pdfLink}
-                                width="100%"
-                                height="800"
-                                title="PDF Preview"
-                                className="border rounded"
-                            />
-                        </div>
+                    {/* Conditional rendering based on preview type */}
+                    {isPdfPreview ? (
+                        <>
+                            {pdfLink ? (
+                                <div className="mt-2 text-start">
+                                    <iframe
+                                        src={pdfLink}
+                                        width="100%"
+                                        height="800"
+                                        title="PDF Preview"
+                                        className="border rounded"
+                                    />
+                                    <div className="mt-4 p-4 border rounded bg-gray-50">
+                                        <p className="font-medium">PDF Assignment Details:</p>
+                                        <p>Deadline: {deadlineDate}</p>
+                                        {assignmentPreviewContent?.description && (
+                                            <p>Description: {assignmentPreviewContent.description}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mt-4 p-4 border rounded bg-gray-50">
+                                    <p>No PDF available for preview</p>
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <div className="mt-2 text-start">
                             <RemirrorTextEditor
@@ -143,8 +187,16 @@ const PreviewAssignment = ({ params }: { params: any }) => {
                                 setInitialContent={setInitialContent}
                                 preview={true}
                             />
+                            <div className="mt-4 p-4 border rounded bg-gray-50">
+                                <p className="font-medium">Assignment Details:</p>
+                                <p>Deadline: {deadlineDate}</p>
+                                {assignmentPreviewContent?.description && (
+                                    <p>Description: {assignmentPreviewContent.description}</p>
+                                )}
+                            </div>
                         </div>
                     )}
+                    
                     <div className="mt-2">
                         <div className="flex items-center">
                             <Link className="mr-2 h-4 w-4" />

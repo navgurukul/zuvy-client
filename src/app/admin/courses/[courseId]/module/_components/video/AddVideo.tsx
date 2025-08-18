@@ -17,20 +17,35 @@ import { Textarea } from '@/components/ui/textarea'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import VideoEmbed from '@/app/admin/courses/[courseId]/module/_components/video/VideoEmbed'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ArrowUpRightSquare, X, Pencil } from 'lucide-react'
 import PreviewVideo from '@/app/admin/courses/[courseId]/module/_components/video/PreviewVideo'
 import { getChapterUpdateStatus, getVideoPreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import {AddVideoProps} from "@/app/admin/courses/[courseId]/module/_components/video/ModuleVideoType"
 
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
 // Helper function to convert links to embed-friendly format
 
 const isLinkValid = (link: string) => {
-    const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
-    return urlRegex.test(link)
+    // const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
+    // return urlRegex.test(link)
+
+    try {
+        const url = new URL(link.trim())
+
+        const isYouTube =
+            url.hostname.includes('youtube.com') ||
+            url.hostname.includes('youtu.be')
+
+        const isGoogleDrive = url.hostname.includes('drive.google.com')
+
+        return isYouTube || isGoogleDrive
+    } catch {
+        return false // If it's not a valid URL at all
+    }
 }
 const getEmbedLink = (url: string) => {
     if (!url) return ''
@@ -97,40 +112,15 @@ const formSchema = z.object({
             return links.every((link) => isLinkValid(link))
         },
         {
-            message: 'One or more links are invalid.',
+            message: 'Only YouTube and Google Drive links are allowed.',
         }
     ),
 })
-interface ContentDetail {
-    title: string
-    description: string
-    links: string[]
-    file: any
-    content: any
-}
-
-interface chapterDetails {
-    title: string
-    description: string
-    links: string[]
-}
-const AddVideo = ({
-    moduleId,
-    courseId,
-    content,
-    fetchChapterContent,
-}: {
-    content: {
-        id: number
-        title: string
-        moduleId: number
-        topicId: number
-        order: number
-        contentDetails: ContentDetail[]
-    }
-    courseId: any
-    moduleId: string
-    fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
+const AddVideo: React.FC<AddVideoProps> = ({
+  moduleId,
+  courseId,
+  content,
+  fetchChapterContent,
 }) => {
     // const heightClass = useResponsiveHeight()
     const router = useRouter()
@@ -140,9 +130,13 @@ const AddVideo = ({
     const [videoTitle, setVideoTitle] = useState('')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setVideoPreviewContent } = getVideoPreviewStore()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const hasLoaded = useRef(false)
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        mode: 'onChange',
         defaultValues: {
             videoTitle: '',
             description: '',
@@ -154,6 +148,10 @@ const AddVideo = ({
             links: content?.contentDetails?.[0]?.links?.[0] ?? '',
         },
     })
+
+    const {
+        formState: { isDirty },
+    } = form
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const modifiedLink = getEmbedLink(values.links)
@@ -171,27 +169,28 @@ const AddVideo = ({
                     convertedObj
                 )
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
+                    form.reset(values) // to reset the dirty state
                     setShowVideoBox(true)
                     fetchChapterContent(content.id, content.topicId)
                     setIsChapterUpdated(!isChapterUpdated)
                 })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: "Couldn't Update the Chapter Module",
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
 
     useEffect(() => {
+        if (hasLoaded.current) return
+        hasLoaded.current = true
+        setIsDataLoading(true)
+
         if (content?.contentDetails?.[0]?.links?.[0]) {
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
@@ -202,6 +201,7 @@ const AddVideo = ({
             setShowVideoBox(false)
         }
         setVideoTitle(content?.contentDetails?.[0]?.title ?? '')
+        setIsDataLoading(false)
     }, [content?.contentDetails, form])
 
     const handleClose = async () => {
@@ -227,11 +227,9 @@ const AddVideo = ({
             !form.watch('videoTitle') ||
             form.watch('videoTitle').trim().length === 0
         ) {
-            toast({
+            toast.info({
                 title: 'No Title',
                 description: 'Please provide a title for the video to preview.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -239,11 +237,9 @@ const AddVideo = ({
         // Check if links are empty or invalid
         const links = form.watch('links').trim()
         if (!links || !isLinkValid(links)) {
-            toast({
+            toast.info({
                 title: 'Invalid Link',
                 description: 'Please provide a valid video link to preview.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-warning max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -252,6 +248,14 @@ const AddVideo = ({
     }
 
     function previewVideo() {
+        if (isDirty) {
+            toast.info({
+                title: 'Unsaved Changes',
+                description: 'Please Save the chapter to preview.',
+            })
+            return
+        }
+
         if (content?.contentDetails[0]?.links) {
             setVideoPreviewContent(content)
             router.push(
@@ -259,24 +263,26 @@ const AddVideo = ({
             )
         }
         else {
-            toast({
+            toast.info({
                 title: 'No Video Uploaded',
                 description: 'Please Save the chapter to preview.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
             })
         }
-    } 
+    }
 
-
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Quiz details...</div>
+                </div>
+            </div>
+        )
+    }
+    
     return (
-        <ScrollArea
-            type="hover"
-            style={{
-                scrollbarWidth: 'none', // Firefox
-                msOverflowStyle: 'none', // IE and Edge
-            }}
-        >
+        <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
+            <ScrollBar className="h-dvh " orientation="vertical" />
             <div className="flex flex-col gap-y-8 mx-auto items-center justify-center w-full">
                 {/* {showPreview ? (
                     <PreviewVideo
@@ -296,7 +302,7 @@ const AddVideo = ({
                                 render={({ field }) => (
                                     <FormItem className="flex flex-col">
                                         <FormControl>
-                                            <div className="w-[450px] flex justify-center items-center relative">
+                                            <div className="w-[450px] gap-[40%] flex justify-center items-center relative">
                                                 <Input
                                                     required
                                                     {...field} // Spread the field props (e.g., value, name, etc.)
@@ -309,7 +315,7 @@ const AddVideo = ({
                                                     placeholder={
                                                         'Untitled Video'
                                                     }
-                                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize  placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize  placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                     autoFocus
                                                 />
                                                 {!videoTitle && (
@@ -321,7 +327,16 @@ const AddVideo = ({
                                                     // Adjusted right positioning
                                                     />
                                                 )}
+                                                   
+                                                    <Button
+                                                      type="submit"
+                                                      className="w-3/3 bg-success-dark opacity-75"
+                                                       >
+                                                           Save
+                                                    </Button>
+                                                
                                             </div>
+                                            
                                         </FormControl>
 
                                         {/* <Button
@@ -336,7 +351,7 @@ const AddVideo = ({
                                         <div
                                             id="previewVideo"
                                             onClick={previewVideo}
-                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                            className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer text-gray-600"
                                         >
                                             <Eye size={18} />
                                             <h6 className="ml-1 text-sm">
@@ -389,8 +404,11 @@ const AddVideo = ({
                                 name="links"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel className=" flex text-left text-xl font-semibold">
+                                        <FormLabel className=" flex items-center gap-1 text-left text-xl font-semibold w-full">
                                             Embed Link
+                                            <span className="text-sm font-normal text-muted-foreground ml-2">
+                                                 (Accepted: YouTube and Google Drive links only.)
+                                           </span>
                                         </FormLabel>
                                         <FormControl>
                                             <Input
@@ -403,12 +421,7 @@ const AddVideo = ({
                                     </FormItem>
                                 )}
                             />
-                            <Button
-                                type="submit"
-                                className=" flex flex-start w-[450px]  text-white font-bold py-2 px-4 rounded"
-                            >
-                                Save
-                            </Button>
+                           
                         </form>
                     </Form>
                 </>

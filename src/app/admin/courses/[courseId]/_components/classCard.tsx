@@ -34,6 +34,7 @@ import {
     AlertDialogContent,
 } from '@/components/ui/alert-dialog'
 import { ellipsis } from '@/lib/utils'
+import {ClassCardProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 function ClassCard({
     classData,
@@ -41,13 +42,7 @@ function ClassCard({
     getClasses,
     activeTab,
     studentSide,
-}: {
-    classData: any
-    classType: any
-    getClasses: any
-    activeTab: any
-    studentSide: any
-}) {
+}:ClassCardProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -66,23 +61,17 @@ function ClassCard({
             await api
                 .delete(`/classes/delete/${classData.meetingId}`, {})
                 .then(() => {
-                    toast({
+                    toast.success({
                         title: 'Session deleted',
                         description: 'Session delete successfully',
-                        variant: 'default',
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     getClasses()
                 })
             setDeleteModalOpen(false)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Unable to delete the Session',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-                variant: 'destructive',
             })
         } finally {
             setLoading(false)
@@ -113,7 +102,7 @@ function ClassCard({
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <h3 className="font-semibold">
+                                        <h3 className="font-semibold text-lg">
                                             {ellipsis(classData.title, 30)}
                                         </h3>
                                     </TooltipTrigger>
@@ -217,12 +206,12 @@ function ClassCard({
                             onOpenChange={setIsDialogOpen}
                         >
                             <TooltipProvider>
-                                <Tooltip>
+                                <Tooltip delayDuration={0}>
                                     <TooltipTrigger asChild>
                                         <AlertDialogTrigger asChild>
                                             <Edit
                                                 size={18}
-                                                className="text-secondary"
+                                                className="text-secondary cursor-pointer"
                                             />
                                         </AlertDialogTrigger>
                                     </TooltipTrigger>
@@ -233,7 +222,7 @@ function ClassCard({
                             </TooltipProvider>
 
                             <AlertDialogContent>
-                                <AlertDialogAction className="w-2 h-2 bg-white text-black ">
+                                <AlertDialogAction className="absolute top-4 right-4 w-6 h-6 bg-white text-black flex items-center justify-center">
                                     X
                                 </AlertDialogAction>
                                 <EditSessionDialog
@@ -252,11 +241,11 @@ function ClassCard({
                             </AlertDialogContent>
                         </AlertDialog>
                         <TooltipProvider>
-                            <Tooltip>
+                            <Tooltip delayDuration={0}>
                                 <TooltipTrigger asChild>
                                     <Trash2Icon
                                         size={18}
-                                        className="text-destructive"
+                                        className="text-destructive cursor-pointer"
                                         onClick={() => setDeleteModalOpen(true)}
                                     />
                                 </TooltipTrigger>
@@ -273,7 +262,7 @@ function ClassCard({
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleDelete}
-                modalText="This action will Permanatly Delete the Session"
+                modalText="This action will permanently delete the session"
                 modalText2=""
                 input={false}
                 buttonText="Delete Session"

@@ -2,10 +2,10 @@
 
 import React, { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { Trash, Trash2, Upload, X } from 'lucide-react'
+import { Trash, Trash2, Upload, } from 'lucide-react'
 import Link from 'next/link'
 import { Spinner } from '@/components/ui/spinner'
-
+import { DialogClose } from "@/components/ui/dialog";
 import {
     Dialog,
     DialogContent,
@@ -17,18 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
-
-type Props = {
-    className?: string
-    file: File
-    setFile: any
-    isPdfUploaded: boolean
-    pdfLink: any
-    loading: boolean
-    setIsPdfUploaded: any
-    onDeletePdfhandler: () => void
-    setDisableButton: any
-}
+import {UploadProps} from "@/app/admin/courses/[courseId]/module/_components/Article/courseModuleArticleType"
 
 const Dropzone = ({
     className = '',
@@ -40,7 +29,7 @@ const Dropzone = ({
     setIsPdfUploaded,
     onDeletePdfhandler,
     setDisableButton,
-}: Props) => {
+}: UploadProps) => {
     const [previewPdfLink, setPreviewPdfLink] = useState<string | null>(null)
     const [open, setIsOpen] = useState(false)
 
@@ -53,11 +42,9 @@ const Dropzone = ({
             setIsPdfUploaded(false)
             setDisableButton(true)
         } else {
-            return toast({
+            return toast.error({
                 title: 'Error',
                 description: 'Only PDF files can be uploaded',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [])
@@ -77,6 +64,18 @@ const Dropzone = ({
         onDeletePdfhandler()
         removeFile()
     }
+
+    function getCleanFileNameFromUrl(url: string) {
+        try {
+            const decodedUrl = decodeURIComponent(url);
+            const fileName = decodedUrl.split('/').pop()?.split('?')[0] ?? '';
+            // Remove leading numbers (with or without dash)
+            return fileName.replace(/^\d+[-_]?/, '');
+        } catch {
+            return 'PDF';
+        }
+    }
+
     return (
         <>
             <div
@@ -109,7 +108,7 @@ const Dropzone = ({
                         {isPdfUploaded ? (
                             <div className="flex flex-col items-start mt-5 w-full gap-y-5 border border-gray-300 p-3 rounded-lg">
                                 <div className="flex items-center space-x-2">
-                                    <h3 className=" font-semibold">
+                                    <h3 className=" font-semibold text-base">
                                         Upload Status
                                     </h3>
                                     <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -122,14 +121,15 @@ const Dropzone = ({
                                             target="_blank"
                                             className="text-blue-700"
                                         >
-                                            View PDF
+                                            {file?.name ?? getCleanFileNameFromUrl(pdfLink)}
                                         </Link>
                                         <Dialog>
                                             <DialogTrigger>
                                                 <Trash2 className="text-red-500 w-4 cursor-pointer " />
                                             </DialogTrigger>
-
-                                            <DialogContent className="sm:max-w-md">
+                                            <DialogContent
+                                                className="sm:max-w-md [&>button.absolute.right-4.top-4]:hidden"
+                                            >
                                                 <DialogHeader>
                                                     <DialogTitle>
                                                         Are you absolutely sure?
@@ -142,9 +142,11 @@ const Dropzone = ({
                                                     </DialogDescription>
                                                 </DialogHeader>
                                                 <DialogFooter className="flex justify-end gap-2">
-                                                    <Button variant="outline">
-                                                        Cancel
-                                                    </Button>
+                                                    <DialogClose asChild>
+                                                        <Button variant="outline">
+                                                            Cancel
+                                                        </Button>
+                                                    </DialogClose>
                                                     <Button
                                                         variant="destructive"
                                                         onClick={onConfirm}
@@ -163,7 +165,7 @@ const Dropzone = ({
                                     <div className="flex flex-col items-start mt-5 w-full gap-y-5 border border-gray-300 p-3 rounded-lg">
                                         <div className="flex flex-col items-center space-x-2">
                                             <div className="flex items-center justify-start w-full gap-x-2 ml-3">
-                                                <h3 className=" font-semibold">
+                                                <h3 className=" font-semibold text-base">
                                                     Upload Status{' '}
                                                 </h3>
                                                 <div className="w-2 h-2 rounded-full bg-green-500 " />

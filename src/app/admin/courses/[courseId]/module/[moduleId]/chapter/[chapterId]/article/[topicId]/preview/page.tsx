@@ -8,15 +8,11 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import { useSearchParams } from 'next/navigation'
+import {PageEditorDoc,PageParams} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/article/moduleIdArticalPageType"
 
-type EditorDoc = {
-    type: string
-    content: any[]
-}
-
-const PreviewArticle = ({ params }: { params: any }) => {
+const PreviewArticle = ({ params }: { params: PageParams }) => {
     const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
+        { doc: PageEditorDoc } | undefined
     >()
     const searchParams = useSearchParams()
     const isPdf = searchParams.get('pdf') === 'true'
@@ -55,10 +51,13 @@ const PreviewArticle = ({ params }: { params: any }) => {
         }
     }, [articlePreviewContent])
 
+    const pdfLink =
+        articlePreviewContent?.contentDetails?.[0]?.links?.[0] || null
+
     return (
         <div className="">
             <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[#FFFFFF]">
+                <h1 className="text-center text-[16px] text-[#FFFFFF]">
                     You are in the Admin Preview Mode.
                 </h1>
             </div>
@@ -95,7 +94,9 @@ const PreviewArticle = ({ params }: { params: any }) => {
                             />
                         </div>
                         <div className="mt-2 text-end">
-                            <Button disabled>Mark as Done </Button>
+                            <Button className="bg-[#518672]" disabled>
+                                Mark as Done{' '}
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -110,11 +111,19 @@ const PreviewArticle = ({ params }: { params: any }) => {
                             Go back
                         </p>
                     </Link>
-
-                    <iframe
-                        className="h-screen w-full "
-                        src={articlePreviewContent?.contentDetails[0]?.links[0]}
-                    />
+                    {pdfLink ? (
+                        <iframe
+                            src={pdfLink}
+                            width="100%"
+                            height="800"
+                            title="PDF Preview"
+                            className="border rounded"
+                        />
+                    ) : (
+                        <div className="mt-4 p-4 border rounded bg-gray-50">
+                            <p>No PDF available for preview</p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
