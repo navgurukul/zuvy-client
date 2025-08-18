@@ -102,10 +102,10 @@ const StudentDashboard = () => {
     if (!item.eventDate) {
       return "Date not available";
     }
-
+    
     // Handle the specific format "2025-06-27 08:26:00+00"
     let parsableDateString = item.eventDate;
-
+    
     // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
     if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
       parsableDateString = parsableDateString.replace(' ', 'T');
@@ -300,7 +300,6 @@ const StudentDashboard = () => {
                 {/* Separator and Upcoming Items - Only for enrolled courses */}
                 {filter === 'enrolled' && (
                   <>
-                    <div className="border-t border-border mt-6 mb-6"></div>
 
                     {/* Upcoming Items */}
                     {eventsLoading ? (
@@ -329,7 +328,9 @@ const StudentDashboard = () => {
                         <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
                       </Carousel>
                                          ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
-                      <Carousel className="w-full group">
+                     <div>
+                      <div className="border-t border-border mt-6 mb-6"></div>
+                       <Carousel className="w-full group">
                         <CarouselContent className="-ml-2">
                           {upcomingEventsData?.events
                             .filter((item) => item.bootcampId === bootcamp.id)
@@ -387,7 +388,7 @@ const StudentDashboard = () => {
                                         <p className="text-xs text-left flex justify-between w-full text-muted-foreground mb-2">
                                           <span>
 
-                                          {eventType === 'Assignment' ? 'Due in' : eventType === 'Live Class' ? '' : 'Due in'}  {formatUpcomingItem(item)}
+                                          {eventType === 'Assignment' ? 'Due in' : eventType === 'Live Class' ? '' : 'Due in'} {eventType === 'Live Class' && liveClassStatus === 'upcoming' && 'Starts in'} {formatUpcomingItem(item)}
                                           </span>
                                           <span>
 
@@ -405,7 +406,8 @@ const StudentDashboard = () => {
                         </CarouselContent>
                         <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Carousel>
+                       </Carousel>
+                     </div>                     
                     ) : null}
                   </>
                 )}
