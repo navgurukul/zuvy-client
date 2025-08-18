@@ -188,7 +188,13 @@ const AddAssignent = ({
                 `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
 
-            setDeadline(response.data.completionDate)
+            // Convert string to Date object
+            if (response.data.completionDate) {
+                setDeadline(parseISO(response.data.completionDate))
+            } else {
+                setDeadline(null)
+            }
+
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
@@ -260,21 +266,23 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content])
 
+    const convertToISO = (dateInput: any, addDay: boolean = true): string => {
+        const date = new Date(dateInput);
+
+        if (isNaN(date.getTime())) {
+            throw new Error('Invalid date input');
+        }
+
+        if (addDay) {
+            date.setDate(date.getDate() + 1);
+        }
+
+        return date.toISOString();
+    }
+
     // UPDATED: Manual save function - sets the flag for manual save
     const editAssignmentContent = async (data: any) => {
-        function convertToISO(dateString: string): string {
-            const date = new Date(dateString)
-
-            if (isNaN(date.getTime())) {
-                throw new Error('Invalid date string')
-            }
-
-            date.setDate(date.getDate() + 1)
-
-            const isoString = date.toISOString()
-
-            return isoString
-        }
+        
         const deadlineDate = convertToISO(data.startDate)
         try {
             const initialContentString = initialContent
@@ -380,6 +388,7 @@ const AddAssignent = ({
 
 
     const onFileUpload = async () => {
+        
         if (file) {
             if (file.type !== 'application/pdf') {
                 return toast.error({
@@ -395,12 +404,24 @@ const AddAssignent = ({
             try {
                 await api.post(
                     `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
-                    formData, // ← pass FormData directly
+                    formData,  // ← pass FormData directly
                     {
                         // OPTIONAL: axios will set the correct Content-Type boundary for you
                         headers: { 'Content-Type': 'multipart/form-data' },
                     }
                 )
+
+                const deadlineDate = convertToISO(deadline, false);
+
+                const requestBody = {
+                    title: titles,
+                    completionDate: deadlineDate,
+                };
+
+                await api.put(
+                    `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                    requestBody
+                );
 
                 toast.success({
                     title: 'Success',
@@ -443,10 +464,13 @@ const AddAssignent = ({
 
     const onDeletePdfhandler = async () => {
         setIsLoading(true)
+        
+        const deadlineDate = convertToISO(deadline);
+
         await api
             .put(
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                { title: title, links: null }
+                { title: titles, links: null, completionDate: deadlineDate }
             )
             .then((res) => {
                 toast.success({
