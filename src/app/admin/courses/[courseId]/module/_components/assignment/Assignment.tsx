@@ -418,8 +418,6 @@ const AddAssignent = ({
                     completionDate: deadlineDate,
                 };
 
-                console.log('Request Body:', requestBody)
-
                 await api.put(
                     `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
                     requestBody
