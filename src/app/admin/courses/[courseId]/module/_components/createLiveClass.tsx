@@ -211,20 +211,11 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true)
 
-        const combineDateTime = (dateStr: any, timeStr: string) => {
-            const selectedDate = new Date(dateStr)
-            const today = new Date()
-
-            const isToday = selectedDate.toDateString() === today.toDateString()
-
-            const adjustedDate = isToday
-                ? selectedDate
-                : new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000) // Add 1 day
-
-            const dateString = adjustedDate.toISOString().split('T')[0]
-            const dateTimeStr = `${dateString}T${timeStr}:00.000Z`
-
-            return dateTimeStr
+        const combineDateTime = (date: Date, time: string) => {
+            const year = date.getFullYear()
+            const month = String(date.getMonth() + 1).padStart(2, '0')
+            const day = String(date.getDate()).padStart(2, '0')
+            return `${year}-${month}-${day}T${time}:00`
         }
 
         const startDateTime = combineDateTime(
