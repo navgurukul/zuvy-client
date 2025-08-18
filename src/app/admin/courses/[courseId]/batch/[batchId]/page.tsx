@@ -45,7 +45,7 @@ import {
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { api } from '@/utils/axios.config'
-import { StudentData } from '../../(courseTabs)/students/page'
+import { StudentDataPage } from '../../(courseTabs)/students/studentComponentTypes'
 import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { Spinner } from '@/components/ui/spinner'
@@ -56,14 +56,9 @@ import { ComboboxStudent } from '../../(courseTabs)/students/components/combobox
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 import { POSITION } from '@/utils/constant'
+import {StudentDataState} from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
 import axios from 'axios'
 
-interface Student {
-    email: string
-    name: string
-}
-
-type StudentDataState = Student[]
 
 const BatchesInfo = ({
     params,
@@ -77,7 +72,7 @@ const BatchesInfo = ({
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
     const [allBatches, setAllBatches] = useState<any>([])
-    const [studentData, setStudentData] = useState<StudentData[]>([])
+    const [studentData, setStudentData] = useState<StudentDataPage[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
     const [search, setSearch] = useState('')
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
@@ -95,7 +90,7 @@ const BatchesInfo = ({
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
     const [loading, setLoading] = useState(true)
-    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+    const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
     const [studentDataTable, setStudentDataTable] = useState<
         StudentDataState | any
     >({})
@@ -137,9 +132,21 @@ const BatchesInfo = ({
                     capEnrollmentValue <= 100000
                 )
             },
-            {
-                message: `Cap Enrollment must be at least 1 and not less than the number of current students(${studentsData?.length}).`,
+            // {
+            //     message: `Cap Enrollment must be at least 1 and not less than the number of current students(${studentsData?.length}).`,
+            // }
+
+            (val) => {
+            const capEnrollmentValue = parseInt(val)
+            if (capEnrollmentValue > 100000) {
+                return {
+                    message: 'Cap Enrollment cannot exceed 100000.',
+                }
             }
+            return {
+                message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
+            }
+        }
         ),
     })
 

@@ -10,6 +10,8 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
+import {QuizListQuestion,QuizListTag} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
+import { renderQuestionPreview } from '@/utils/quizHelpers'
 
 function QuizList({
     questionData,
@@ -19,14 +21,14 @@ function QuizList({
 }: {
     questionData: any[]
     addQuestion: any[]
-    handleAddQuestion: (questions: any[]) => void
+    handleAddQuestion: (questions: QuizListQuestion[]) => void
     tags: any
 }) {
     return (
         <ScrollArea className="h-[580px] w-full pb-10">
-            {questionData.map((question: any) => {
+            {questionData.map((question:QuizListQuestion) => {
                 const isSelected = addQuestion?.some(
-                    (quest: any) => quest?.id === question.id
+                    (quest: QuizListQuestion) => quest?.id === question.id
                 )
                 const handleClick = () => {
                     if (!isSelected) {
@@ -35,7 +37,7 @@ function QuizList({
                     }
                 }
                 const newTagName = tags?.filter(
-                    (tag: any) => tag.id == question.tagId
+                    (tag: QuizListTag) => tag.id == question.tagId
                 )
 
                 return (
@@ -46,19 +48,10 @@ function QuizList({
                         <div className="flex items-center justify-between border-b border-gray-200 py-4">
                             <div className="w-full space-y-2 ">
                                 <div className="flex justify-between items-center gap-x-2">
-                                    <h1 className="scroll-m-20 text-4xl  font-semibold tracking-tight lg:text-lg">
-                                        {question.quizVariants.map(
-                                            (ques: any) => {
-                                                return (
-                                                   <span
-                                                    className='text-base text-gray-600'
-                                                        key={ques}
-                                                         dangerouslySetInnerHTML={{
-                                                     __html: ellipsis(stripHtmlTags(ques.question), 40),
-                                                     }}
-                                                    />
-                                                )
-                                            }
+                                    <h1 className="scroll-m-20 text-base text-gray-600 font-semibold tracking-tight lg:text-lg">
+                                        {renderQuestionPreview(
+                                            question.quizVariants[0]?.question,
+                                            { textLength: 40 }
                                         )}
                                     </h1>
                                     <div className="flex mr-4">

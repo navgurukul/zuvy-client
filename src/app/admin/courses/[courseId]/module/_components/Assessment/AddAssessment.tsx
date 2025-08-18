@@ -21,21 +21,7 @@ import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
-
-type AddAssessmentProps = {
-    chapterData: any
-    content: any
-    fetchChapterContent: (chapterId: number, topicId: number) => void
-    moduleId: any
-    topicId: any
-    activeChapterTitle: string
-}
-
-export type Tag = {
-    id: number
-    tagName: string
-}
-
+import {AddAssessmentProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const AddAssessment: React.FC<AddAssessmentProps> = ({
     chapterData,
     content,
@@ -443,8 +429,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             selectedTopics={selectedTopics}
                             setSelectedTopics={setSelectedTopics}
                             selectedDifficulties={selectedDifficulties}
-                            setSelectedDifficulties={setSelectedDifficulties}
-                        />
+                            setSelectedDifficulties={setSelectedDifficulties} selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                        />
                     </div>
                     <div className="flex justify-between w-2/3">
                         <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
@@ -488,13 +473,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             {questionType === 'mcq' && (
                                 <QuizQuestions
                                     questions={filteredQuestions}
-                                    setSelectedQuestions={
-                                        setSelectedQuizQuestions
-                                    }
+                                    setSelectedQuestions={setSelectedQuizQuestions}
                                     selectedQuestions={selectedQuizQuestions}
                                     tags={tags}
-                                    setIsNewQuestionAdded={setIsNewQuestionAdded}
-                                />
+                                    setIsNewQuestionAdded={setIsNewQuestionAdded} type={''}                                />
                             )}
                             {questionType === 'open-ended' && (
                                 <OpenEndedQuestions

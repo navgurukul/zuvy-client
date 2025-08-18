@@ -35,9 +35,10 @@ const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps)
     });
 
     // Main coding challenge hook
-    const { state, actions, constants } = useCodingChallenge({
+    const { state, actions, constants ,  } = useCodingChallenge({
         questionId,
         onChapterComplete: completeChapter,
+        
     });
 
     const handleBack = () => {

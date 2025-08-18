@@ -42,11 +42,13 @@ export function ComboboxStudent({
     }, [batchName, batchId])
 
     const handleSelectBatchChange = async (
-        currentValue: any,
-        value: any,
-        setValue: any,
-        setOpen: any
-    ) => {
+     currentValue: string,
+    value: string,
+    setValue: (val: string) => void,
+    setOpen: (open: boolean) => void
+) => {
+    setValue(value);
+    setOpen(false)
         const [selectedValue] = currentValue.split('-')
         const selectedBatch = batchData.find(
             (batch: CourseStudentBatchItem) => batch.value == selectedValue

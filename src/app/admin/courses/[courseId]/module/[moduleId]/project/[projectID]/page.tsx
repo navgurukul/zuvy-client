@@ -39,21 +39,8 @@ import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
 import { RemirrorJSON } from 'remirror'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import {ProjectDataProject,ProjectData} from "@/app/admin/courses/[courseId]/module/[moduleId]/project/projectProjectIdPageType"
 
-interface Project {
-    id: number
-    title: string | null
-    instruction: string | null
-    isLock: boolean
-    deadline: string | null
-}
-interface ProjectData {
-    status: string
-    code: number
-    project: Project[]
-    bootcampId: number
-    moduleId: number
-}
 
 export default function Project() {
     const router = useRouter()

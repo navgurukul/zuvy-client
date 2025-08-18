@@ -2,12 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import {
-    Calendar as CalendarIcon,
-    Check,
-    ChevronsUpDown,
-    RotateCcw,
-} from 'lucide-react'
+import { Calendar as CalendarIcon } from 'lucide-react'
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -34,14 +30,7 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { toast } from '@/components/ui/use-toast'
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogHeader,
-    DialogOverlay,
-    DialogTrigger,
-} from '@/components/ui/dialog'
+// Removed modal dialog usage for selects
 import { Input } from '@/components/ui/input'
 import {
     Command,
@@ -54,6 +43,7 @@ import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
+// Removed conflicting imported type CreateSessionDialogProps (local type declared below)
 
 const formSchema = z
     .object({
@@ -73,16 +63,20 @@ const formSchema = z
         batch: z.string({
             required_error: 'Please select a Batch.',
         }),
-        daysOfWeek: z.array(z.string()).nonempty({
-            message: 'Please select at least one day',
+        // Optional second batch selection
+        secondBatch: z
+            .string()
+            .optional()
+            .refine(
+                (val) => {
+                    // allow empty / undefined
+                    return val === undefined || val === '' || !isNaN(Number(val))
+                },
+                { message: 'Invalid second batch' }
+            ),
+        platform: z.string({
+            required_error: 'Please select a Platform.',
         }),
-
-        totalClasses: z.number().min(1, {
-            message: 'Total Classes must be at least 1.',
-        }),
-        // modulesId: z.number().min(1, {
-        //     message: 'Total Selected Modules must be at least 1.',
-        // }),
     })
     .refine((data) => data.startTime <= data.endTime, {
         message: 'Start Time cannot be after end Time',
@@ -114,25 +108,37 @@ const formSchema = z
             path: ['startTime'],
         }
     )
-    .refine((data) => data.totalClasses >= data.daysOfWeek.length, {
-        message:
-            'Total Classes must be at least equal to the number of selected days of week.',
-        path: ['totalClasses'],
-    })
-type CreateSessionDialogProps = {
+    .refine(
+        (data) => {
+            if (!data.secondBatch) return true
+            return data.secondBatch !== data.batch
+        },
+        {
+            message: 'Second batch must be different from first batch',
+            path: ['secondBatch'],
+        }
+    )
+type LocalCreateSessionDialogProps = {
     fetchingChapters: () => void
     onClose: () => void // <-- Add this
 }
-const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
+const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     fetchingChapters,
     onClose,
 }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
-    const [formIsOpen, setFormIsOpen] = useState<boolean>(false)
     const [isCalendarOpen, setCalendarOpen] = useState(false)
     const [bootcampData, setBootcampData] = useState<any>([])
+    // Reusable select styling helper
+    const baseSelectClass = 'w-full border border-input rounded-md px-3 py-2 bg-background text-gray-600 focus:outline-none focus:ring-2 focus:ring-[rgb(81,134,114)] focus:border-[rgb(81,134,114)] disabled:opacity-50 disabled:cursor-not-allowed';
+    
+    // Platform options
+    const platformOptions = [
+        { value: 'zoom', label: 'Zoom' },
+        { value: 'google-meet', label: 'Google Meet' },
+    ]
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
             await api
@@ -155,19 +161,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
         getHandleAllBootcampBatches()
     }, [getHandleAllBootcampBatches])
 
-    // Mock data for batches
-    // const [bootcampData] = useState([
-    //     { value: '1', label: 'Web Development Bootcamp' },
-    //     { value: '2', label: 'Data Science Bootcamp' },
-    //     { value: '3', label: 'Mobile App Development' },
-    //     { value: '4', label: 'AI/ML Bootcamp' },
-    //     { value: '5', label: 'Full Stack Development' },
-    // ]);
-
-    const toggleForm = () => {
-        setFormIsOpen(!formIsOpen)
-        form.clearErrors()
-    }
+    // Removed toggleForm since dialog-based selects were replaced with native dropdowns
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -178,30 +172,11 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
             startTime: '',
             endTime: '',
             batch: '',
-            daysOfWeek: [],
-            totalClasses: 1,
-            // modulesId: 0,
+            secondBatch: undefined,
+            platform: 'zoom',
         },
         mode: 'onChange',
     })
-
-    useEffect(() => {
-        const daysCount = form.watch('daysOfWeek').length
-        form.setValue('totalClasses', daysCount)
-    }, [form.watch('daysOfWeek')])
-
-    const weekDays = useMemo(
-        () => [
-            { value: 'Sunday', label: 'Sunday' },
-            { value: 'Monday', label: 'Monday' },
-            { value: 'Tuesday', label: 'Tuesday' },
-            { value: 'Wednesday', label: 'Wednesday' },
-            { value: 'Thursday', label: 'Thursday' },
-            { value: 'Friday', label: 'Friday' },
-            { value: 'Saturday', label: 'Saturday' },
-        ],
-        []
-    )
 
     useEffect(() => {
         form.setValue('sessionTitle', '')
@@ -210,30 +185,18 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
         form.setValue('startTime', '')
         form.setValue('endTime', '')
         form.setValue('batch', '')
-        form.setValue('daysOfWeek', [''])
-        form.setValue('totalClasses', 1)
-    }, [formIsOpen, form])
-
-    useEffect(() => {
-        const selectedDate = form.watch('startDate')
-        if (selectedDate) {
-            const dayOfWeek = format(selectedDate, 'EEEE')
-            const dayValue =
-                weekDays.find((day) => day.label === dayOfWeek)?.value || ''
-            if (dayValue) {
-                form.setValue('daysOfWeek', [dayValue])
-            }
-        }
-    }, [form.watch('startDate')])
+        form.setValue('platform', 'zoom')
+        form.setValue('secondBatch', undefined)
+    }, [form])
 
     const {
         sessionTitle,
         startDate,
         startTime,
         endTime,
-        batch,
-        daysOfWeek,
-        totalClasses,
+    batch,
+    secondBatch,
+        platform,
     } = form.watch()
 
     const isSubmitDisabled = !(
@@ -241,9 +204,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
         startDate &&
         startTime &&
         endTime &&
-        batch &&
-        (daysOfWeek?.length || 0) > 0 &&
-        totalClasses
+    batch &&
+        platform
     )
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -270,20 +232,17 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
             values.startTime
         )
         const endDateTime = combineDateTime(values.startDate, values.endTime)
-        let daysWeek = values.daysOfWeek.filter((day) => {
-            return day !== ''
-        })
 
-        const transformedData = {
+        const transformedData: any = {
             title: values.sessionTitle,
             batchId: +values.batch,
+            secondBatchId: values.secondBatch ? +values.secondBatch : null,
             moduleId: +params.moduleId,
             description: values.description,
             startDateTime: startDateTime,
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
-            daysOfWeek: daysWeek,
-            totalClasses: values.totalClasses,
+            isZoomMeet: values.platform === 'zoom'
         }
 
         try {
@@ -338,6 +297,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
             <div className="text-lg text-left font-semibold mb-4 text-gray-600">
                 Live Classes Chapter
             </div>
+            {/* Removed stray baseSelectClass constant that was rendering as text */}
 
             <Form {...form}>
                 <form
@@ -354,11 +314,12 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                     <span className="text-red-500">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                    <Input
-                                        className="w-full"
-                                        placeholder="Session Title"
-                                        {...field}
-                                    />
+                                        <Input
+                                            className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                            placeholder="Session Title"
+                                            disabled={isLoading}
+                                            {...field}
+                                        />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -442,7 +403,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                             <Input
                                                 type="time"
                                                 {...field}
-                                                className="w-full"
+                                                disabled={isLoading}
+                                                className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
                                                 min={
                                                     isToday
                                                         ? currentTimeString
@@ -488,7 +450,8 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                                             <Input
                                                 type="time"
                                                 {...field}
-                                                className="w-full"
+                                                disabled={isLoading}
+                                                className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -504,188 +467,93 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
                             render={({ field }) => (
                                 <FormItem className="text-left text-gray-600">
                                     <FormLabel>
-                                        Batches
-                                        <span className="text-red-500">*</span>
+                                        Batches <span className="text-red-500">*</span>
                                     </FormLabel>
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    role="combobox"
-                                                    aria-expanded={formIsOpen}
-                                                    className={cn(
-                                                        'w-full justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
-                                                        !field.value &&
-                                                            'text-muted-foreground'
-                                                    )}
-                                                >
-                                                     <span className="truncate text-left max-w-[90%]">
-                                                    {field.value
-                                                        ? bootcampData.find(
-                                                              (bootcamp: any) =>
-                                                                  bootcamp.value ===
-                                                                  field.value
-                                                          )?.label
-                                                        : 'Select batch...'}
-                                                        </span>
-                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </DialogTrigger>
-                                        <DialogClose asChild>
-                                            <DialogContent className="w-[300px] p-0">
-                                                <Command>
-                                                    <CommandInput placeholder="Search batch..." />
-                                                    <CommandEmpty>
-                                                        No batch found.
-                                                    </CommandEmpty>
-                                                    <CommandGroup>
-                                                        {bootcampData.map(
-                                                            (bootcamp: any) => (
-                                                                <CommandItem
-                                                                    value={
-                                                                        bootcamp.value
-                                                                    }
-                                                                    key={
-                                                                        bootcamp.value
-                                                                    }
-                                                                    onSelect={() => {
-                                                                        form.setValue(
-                                                                            'batch',
-                                                                            bootcamp.value
-                                                                        )
-                                                                        form.clearErrors(
-                                                                            'batch'
-                                                                        )
-                                                                    }}
-                                                                >
-                                                                    <Check
-                                                                        className={cn(
-                                                                            'mr-2 h-4 w-4',
-                                                                            bootcamp.value ===
-                                                                                field.value
-                                                                                ? 'opacity-100'
-                                                                                : 'opacity-0'
-                                                                        )}
-                                                                    />
-                                                                    <span className="block max-w-[90%] break-words text-left">
-                                                                    {
-                                                                        bootcamp.label
-                                                                    }
-                                                                    </span>
-                                                                </CommandItem>
-                                                            )
-                                                        )}
-                                                    </CommandGroup>
-                                                </Command>
-                                            </DialogContent>
-                                        </DialogClose>
-                                    </Dialog>
+                                    <FormControl>
+                                        <select
+                                            className={cn(baseSelectClass, !field.value && 'text-muted-foreground')}
+                                            value={field.value}
+                                            disabled={isLoading}
+                                            onChange={(e) => {
+                                                field.onChange(e.target.value)
+                                                if (form.getValues('secondBatch') === e.target.value) {
+                                                    form.setValue('secondBatch', undefined)
+                                                }
+                                                form.clearErrors('batch')
+                                            }}
+                                            aria-busy={isLoading}
+                                        >
+                                            <option value="">Select batch...</option>
+                                            {bootcampData.map((b: any) => (
+                                                <option key={b.value} value={b.value}>{b.label}</option>
+                                            ))}
+                                        </select>
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <FormField
                             control={form.control}
-                    
-                            name="daysOfWeek"
+                            name="secondBatch"
                             render={({ field }) => (
-                                <FormItem className="text-left text-gray-600 cursor-not-allowed">
+                                <FormItem className="text-left text-gray-600">
+                                    <FormLabel>Second Batch (optional)</FormLabel>
+                                    <FormControl>
+                                        <select
+                                            className={baseSelectClass}
+                                            value={field.value || ''}
+                                            disabled={isLoading || !batch}
+                                            onChange={(e) => {
+                                                const val = e.target.value
+                                                field.onChange(val || undefined)
+                                                form.clearErrors('secondBatch')
+                                            }}
+                                            aria-busy={isLoading}
+                                        >
+                                            {batch ? (
+                                                <>
+                                                    <option value="">None</option>
+                                                    {bootcampData
+                                                        .filter((b: any) => b.value !== form.getValues('batch'))
+                                                        .map((b: any) => (
+                                                            <option key={b.value} value={b.value}>{b.label}</option>
+                                                        ))}
+                                                </>
+                                            ) : (
+                                                <option value="">Select primary batch first</option>
+                                            )}
+                                        </select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="platform"
+                            render={({ field }) => (
+                                <FormItem className="text-left text-gray-600">
                                     <FormLabel>
-                                        Days of Week
-                                        {/* <span className="text-green-900">*</span> */}
+                                        Platform <span className="text-red-500">*</span>
                                     </FormLabel>
-                                    <Dialog>
-                                        {/* <DialogTrigger asChild> */}
-                                            <FormControl>
-                                                <Button
-                                                    role="combobox"
-                                                    disabled
-                                                    aria-expanded={formIsOpen}
-                                                    className={
-                                                        'w-full justify-between text-gray-600 bg-gray-200'
-                                                        // field.value.length ===
-                                                        //     0 &&
-                                                        //     'text-muted-foreground'
-                                                    }
-                                                >
-                                                    {field.value.length > 0 ? (
-                                                        <>
-                                                            {field.value
-                                                                .slice(0, 2)
-                                                                .join(', ')}
-                                                            {field.value
-                                                                .length > 2 &&
-                                                                ` + ${
-                                                                    field.value
-                                                                        .length -
-                                                                    2
-                                                                } more`}
-                                                        </>
-                                                    ) : (
-                                                        'Select days...'
-                                                    )}
-                                                    
-                                                </Button>
-                                            </FormControl>
-                                        {/* </DialogTrigger> */}
-                                        <DialogContent className="w-[35%] p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Search days..." />
-                                                <CommandEmpty>
-                                                    No day found.
-                                                </CommandEmpty>
-                                                <CommandGroup>
-                                                    {weekDays.map(
-                                                        (day: any) => (
-                                                            <CommandItem
-                                                                value={
-                                                                    day.value
-                                                                }
-                                                                key={day.value}
-                                                                onSelect={() => {
-                                                                    const newValue: any =
-                                                                        field.value.includes(
-                                                                            day.value
-                                                                        )
-                                                                            ? field.value.filter(
-                                                                                  (
-                                                                                      value
-                                                                                  ) =>
-                                                                                      value !==
-                                                                                      day.value
-                                                                              )
-                                                                            : [
-                                                                                  ...field.value,
-                                                                                  day.value,
-                                                                              ]
-                                                                    form.setValue(
-                                                                        'daysOfWeek',
-                                                                        newValue
-                                                                    )
-                                                                    form.clearErrors(
-                                                                        'daysOfWeek'
-                                                                    )
-                                                                }}
-                                                            >
-                                                                <Check
-                                                                    className={cn(
-                                                                        'mr-2 h-4 w-4',
-                                                                        field.value.includes(
-                                                                            day.value
-                                                                        )
-                                                                            ? 'opacity-100'
-                                                                            : 'opacity-0'
-                                                                    )}
-                                                                />
-                                                                {day.label}
-                                                            </CommandItem>
-                                                        )
-                                                    )}
-                                                </CommandGroup>
-                                            </Command>
-                                        </DialogContent>
-                                    </Dialog>
+                                    <FormControl>
+                                        <select
+                                            className={cn(baseSelectClass, !field.value && 'text-muted-foreground')}
+                                            value={field.value}
+                                            disabled={isLoading}
+                                            onChange={(e) => {
+                                                field.onChange(e.target.value)
+                                                form.clearErrors('platform')
+                                            }}
+                                            aria-busy={isLoading}
+                                        >
+                                            <option value="">Select platform...</option>
+                                            {platformOptions.map((p) => (
+                                                <option key={p.value} value={p.value}>{p.label}</option>
+                                            ))}
+                                        </select>
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -719,7 +587,7 @@ const CreateSessionDialog: React.FC<CreateSessionDialogProps> = ({
 
                     <div className="flex justify-end">
                         {isLoading ? (
-                            <Button disabled>
+                            <Button disabled className="w-1/3 mt-3 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border">
                                 <Spinner className="mr-2 text-black h-4 w-4 animate-spin" />
                                 Creating Session
                             </Button>

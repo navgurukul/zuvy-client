@@ -49,41 +49,14 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-
-interface ContentDetail {
-    title: string
-    description: string | null
-    links: string | null
-    file: string | null
-    content: string | null
-}
-
-interface Content {
-    id: number
-    moduleId: number
-    topicId: number
-    order: number
-    contentDetails: ContentDetail[]
-}
-
-type EditorDoc = {
-    type: string
-    content: any[]
-}
-
-interface AssignmentProps {
-    content: Content
-    courseId: any
-    assignmentUpdateOnPreview: boolean
-    setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>
-}
+import {AssignmentProps,AssignmentContentEditorDoc,DocItem,TextContent,ChapterDetailsResponse,EditorContent} from "@/app/admin/courses/[courseId]/module/_components/assignment/moduleComponentAssignmentType"
 
 const AddAssignent = ({
     content,
     courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
-}: any) => {
+}: AssignmentProps) => {
     // misc
 
     const formSchema = z.object({
@@ -107,7 +80,7 @@ const AddAssignent = ({
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
 
     const [initialContent, setInitialContent] = useState<
-        { doc: EditorDoc } | undefined
+        { doc: AssignmentContentEditorDoc } | undefined
     >()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [hasEditorContent, setHasEditorContent] = useState(false)
@@ -137,7 +110,7 @@ const AddAssignent = ({
         mode: 'onChange',
     })
 
-    const isEditorContentEmpty = (content: any) => {
+    const isEditorContentEmpty = (content?: EditorContent) => {
         if (!content || !content.doc || !content.doc.content) return true
 
         const docContent = content.doc.content
@@ -151,9 +124,9 @@ const AddAssignent = ({
         }
 
         // Check if all content is empty
-        const hasRealContent = docContent.some((item: any) => {
+        const hasRealContent = docContent.some((item: DocItem) => {
             if (item.type === 'paragraph' && item.content) {
-                return item.content.some((textItem: any) =>
+                return item.content.some((textItem: TextContent) =>
                     textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0
                 )
             }
@@ -211,11 +184,17 @@ const AddAssignent = ({
     const getAssignmentContent = async () => {
         setIsDataLoading(true)
         try {
-            const response = await api.get(
+            const response = await api.get<ChapterDetailsResponse>(
                 `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
             )
 
-            setDeadline(response.data.completionDate)
+            // Convert string to Date object
+            if (response.data.completionDate) {
+                setDeadline(parseISO(response.data.completionDate))
+            } else {
+                setDeadline(null)
+            }
+
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
@@ -287,21 +266,23 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content])
 
+    const convertToISO = (dateInput: any, addDay: boolean = true): string => {
+        const date = new Date(dateInput);
+
+        if (isNaN(date.getTime())) {
+            throw new Error('Invalid date input');
+        }
+
+        if (addDay) {
+            date.setDate(date.getDate() + 1);
+        }
+
+        return date.toISOString();
+    }
+
     // UPDATED: Manual save function - sets the flag for manual save
     const editAssignmentContent = async (data: any) => {
-        function convertToISO(dateString: string): string {
-            const date = new Date(dateString)
-
-            if (isNaN(date.getTime())) {
-                throw new Error('Invalid date string')
-            }
-
-            date.setDate(date.getDate() + 1)
-
-            const isoString = date.toISOString()
-
-            return isoString
-        }
+        
         const deadlineDate = convertToISO(data.startDate)
         try {
             const initialContentString = initialContent
@@ -407,6 +388,7 @@ const AddAssignent = ({
 
 
     const onFileUpload = async () => {
+        
         if (file) {
             if (file.type !== 'application/pdf') {
                 return toast.error({
@@ -422,12 +404,24 @@ const AddAssignent = ({
             try {
                 await api.post(
                     `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
-                    formData, // ← pass FormData directly
+                    formData,  // ← pass FormData directly
                     {
                         // OPTIONAL: axios will set the correct Content-Type boundary for you
                         headers: { 'Content-Type': 'multipart/form-data' },
                     }
                 )
+
+                const deadlineDate = convertToISO(deadline, false);
+
+                const requestBody = {
+                    title: titles,
+                    completionDate: deadlineDate,
+                };
+
+                await api.put(
+                    `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
+                    requestBody
+                );
 
                 toast.success({
                     title: 'Success',
@@ -470,10 +464,13 @@ const AddAssignent = ({
 
     const onDeletePdfhandler = async () => {
         setIsLoading(true)
+        
+        const deadlineDate = convertToISO(deadline);
+
         await api
             .put(
                 `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                { title: title, links: null }
+                { title: titles, links: null, completionDate: deadlineDate }
             )
             .then((res) => {
                 toast.success({
@@ -599,7 +596,8 @@ const AddAssignent = ({
                                                                 }
                                                                 disabled={!disabledUploadButton}
                                                             >
-                                                                Upload PDF
+                                                                {/* Upload PDF */}
+                                                                {isSaving ? 'Saving...' : 'Save'}
                                                             </Button>
                                                         </div>
                                                     )}

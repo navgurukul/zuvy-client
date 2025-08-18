@@ -260,14 +260,16 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-x-hidden overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl">Full Attendance Record</DialogTitle>
+              <DialogTitle className="text-xl">Full Attendance Record </DialogTitle>
             </DialogHeader>
             <div className="space-y-1">
               {classes.map((classItem, index, array) => (
                 <div key={classItem.id}>
                   <div className="flex items-center justify-between py-4">
                     <div className="flex-1 text-left">
-                      <h4 className="text-lg font-bold">{classItem.title}</h4>
+                      <Link className="w-fit font-manrope text-lg w-fit font-bold hover:text-primary hover:underline underline-offset-[5px]" href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`} >
+                    {classItem.title}
+                      </Link>
                       <p className="text-sm text-muted-foreground">
                         {formatDate(classItem.startTime)}
                       </p>

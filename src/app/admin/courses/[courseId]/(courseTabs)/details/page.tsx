@@ -609,9 +609,17 @@ function Page({ params }: { params: any }) {
                                                         className="w-full h-full object-cover"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
-                                                        No image selected
-                                                    </div>
+                                                    // <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
+                                                    //     No image selected
+                                                    // </div>
+
+                                                    <OptimizedImageWithFallback
+                                                       src={
+                                                         courseData?.coverImage || '/logo_white.png'
+                                                       }
+                                                       alt={courseData?.name || 'Cover Image'}
+                                                       fallBackSrc={'/logo_white.png'}
+                                                    />
                                                 )}
                                             </div>
                                         </div>
@@ -729,9 +737,12 @@ function Page({ params }: { params: any }) {
                                                     setCalendarOpen(false)
                                                 }
                                             }}
-                                            disabled={(date) =>
-                                                date < new Date()
-                                            }
+                                            disabled={(date) =>{
+                                                // date < new Date()
+                                                const today = new Date();
+                                                today.setHours(0, 0, 0, 0);
+                                                 return date < today;
+                                            }}
                                         />
                                     </PopoverContent>
                                 </Popover>
@@ -769,6 +780,14 @@ function Page({ params }: { params: any }) {
                                                     title: 'Invalid Integer',
                                                     description:
                                                         'Please enter a valid integer value',
+                                                })
+                                                return
+                                            }
+
+                                            if (parseInt(value, 10) <= 0) {
+                                                 toast.error({
+                                                   title: 'Invalid Value',
+                                                  description: 'Duration must be greater than 0',
                                                 })
                                                 return
                                             }

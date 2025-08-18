@@ -15,8 +15,6 @@ import {
 import OverviewComponent from '../../../../_components/OverviewComponent'
 import IndividualStudentAssesment from '../../../../_components/individualStudentAssesment'
 
-type Props = {}
-
 const Page = ({ params }: { params: any }) => {
     return (
         <div>

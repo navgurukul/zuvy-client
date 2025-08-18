@@ -5,13 +5,12 @@ function OptimizedImageWithFallback({
   src,
   alt,
   fallBackSrc = fallback.src,
-}: // className = "",
-{
+}: {
   src: string;
   alt: string;
-  fallBackSrc: string;
-  // className: any;
+  fallBackSrc?: string;
 }) {
+
   return (
     <>
       {src && src.trim() !== "" ? (

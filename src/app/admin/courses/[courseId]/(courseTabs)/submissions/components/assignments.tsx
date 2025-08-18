@@ -10,14 +10,10 @@ import autoTable from 'jspdf-autotable'
 import Image from 'next/image'
 import { error } from 'console'
 import { nullable } from 'zod'
+import {AssignmentProps,AssignmentModuleData,AssignmentApiResponse} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
 
-type Props = {
-    courseId: number
-    debouncedSearch: string
-    // id:number
-}
 
-const Assignments = ({ courseId, debouncedSearch }: Props) => {
+const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
 
@@ -27,7 +23,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
                 const url = debouncedSearch
                     ? `/submission/submissionsOfAssignment/${courseId}?searchAssignment=${debouncedSearch}`
                     : `/submission/submissionsOfAssignment/${courseId}`
-                const res = await api.get(url)
+                const res = await api.get<AssignmentApiResponse>(url)
                 setAssignmentData(res.data.data.trackingData)
                 setTotalStudents(res.data.data.totalStudents)
             } catch (error) {
@@ -41,7 +37,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
         fetchAssignmentDataHandler()
     }, [courseId, debouncedSearch])
 
-    const handleDownloadPdf = async (id: any) => {
+    const handleDownloadPdf = async (id: number) => {
         const apiUrl = `/submission/assignmentStatus?chapterId=${id}&limit=5&offset=0`
 
         async function fetchData() {
@@ -136,7 +132,7 @@ const Assignments = ({ courseId, debouncedSearch }: Props) => {
 
                                     <div className="grid grid-cols-1 gap-8 mt-2 md:mt-4 md:grid-cols-2 lg:grid-cols-3">
                                         {data.moduleChapterData.map(
-                                            (moduleData: any) => {
+                                            (moduleData: AssignmentModuleData) => {
                                                 const isDisabled =
                                                     moduleData.submitStudents ===
                                                     0

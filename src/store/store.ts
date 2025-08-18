@@ -1142,3 +1142,26 @@ export const useIsStudentEnrolledInOneCourseStore = create<isStudentEnrolledInOn
         set({ isStudentEnrolledInOneCourse : newValue })
     }
 }))
+
+interface VideoProgressState {
+    progress: Record<string, number>;
+    setProgress: (videoId: string, time: number) => void;
+  }
+  
+  export const useVideoStore = create<VideoProgressState>()(
+    persist(
+      (set) => ({
+        progress: {},
+        setProgress: (videoId, time) =>
+          set((state) => ({
+            progress: {
+              ...state.progress,
+              [videoId]: time,
+            },
+          })),
+      }),
+      {
+        name: 'video-progress', // key in localStorage
+      }
+    )
+  );

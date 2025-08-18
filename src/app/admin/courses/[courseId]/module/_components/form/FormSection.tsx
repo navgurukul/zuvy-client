@@ -41,14 +41,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { ellipsis } from '@/lib/utils'
-
-type FormSectionProps = {
-    item: any
-    index: any
-    form: any
-    deleteQuestion: any
-    formData: any
-}
+import {FormSectionProps} from "@/app/admin/courses/[courseId]/module/_components/form/ModuleFormType"
 
 const getQuestionType = (typeId: number) => {
     switch (typeId) {

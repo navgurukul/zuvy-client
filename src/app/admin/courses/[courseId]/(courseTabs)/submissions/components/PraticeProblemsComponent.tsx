@@ -4,13 +4,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 import PracticeProblems from '../../../_components/PraticeProblems'
 import Image from 'next/image'
 import { Spinner } from '@/components/ui/spinner'
+import {PractieProblemProps,SubmissionsResponse} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
 
-type Props = {
-    courseId: number
-    debouncedSearch: string
-}
 
-const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
+const PraticeProblemsComponent = ({ courseId, debouncedSearch }: PractieProblemProps) => {
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
 
@@ -22,7 +19,7 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: Props) => {
             const url = debouncedSearch
                 ? `/submission/submissionsOfPractiseProblems/${courseId}?searchPractiseProblem=${debouncedSearch}`
                 : `/submission/submissionsOfPractiseProblems/${courseId}`
-            const res = await api.get(url)
+            const res = await api.get<SubmissionsResponse>(url)
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
