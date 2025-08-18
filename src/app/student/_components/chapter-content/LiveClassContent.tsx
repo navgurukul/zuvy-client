@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
   Play, 
-  Check
+  Check,
+  VideoIcon
 } from "lucide-react";
 import useChapterCompletion from '@/hooks/useChapterCompletion';
 import { getEmbedLink } from '@/utils/students';
 import {Session,LiveClassContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 
@@ -188,6 +190,8 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
       );
 
       return (
+        <ScrollArea className="h-[80vh]">
+
         <div className="max-w-4xl mx-auto p-8">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-xl font-heading font-bold">{item.title}</h1>
@@ -224,7 +228,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
             Class completed
           </p>
           
-          {hasRecording && (
+          {hasRecording ? (
             <div className="border-t border-border pt-6">
               <h2 className="text-xl text-left font-heading font-semibold mb-4">Recording available for the live class</h2>
               <div 
@@ -253,8 +257,14 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({ chapterDetails, onC
                 </div>
               )}
             </div>
-          )}
+          ):    
+      <div className="flex flex-col items-center justify-center w-full h-[70vh] bg-card">
+          <VideoIcon className="w-16 h-16 mb-2 opacity-60" />
+          <p>Recording Not Found</p>
+      </div> 
+      }
         </div>
+        </ScrollArea>
       );
     }
   }
