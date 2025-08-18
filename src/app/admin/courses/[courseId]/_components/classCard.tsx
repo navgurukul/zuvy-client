@@ -124,11 +124,11 @@ function ClassCard({
                                 )}
                             </TooltipProvider>
                             <div className="text-md flex w-[250px] capitalize items-center">
-                                <Moment format="hh:mm A" utc={classData?.isZoomMeet}>
+                                <Moment format="hh:mm A">
                                     {classData.startTime}
                                 </Moment>
                                 <p className="mx-2">-</p>
-                                <Moment format="hh:mm A" utc={classData?.isZoomMeet}>
+                                <Moment format="hh:mm A">
                                     {classData.endTime}
                                 </Moment>
                             </div>
