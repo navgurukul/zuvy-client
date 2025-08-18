@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { getEditOpenEndedDialogs, getCodingQuestionTags } from '@/store/store'
+import {OpenEndedQuestion,Tag} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
 
@@ -39,10 +40,10 @@ function EditOpenEndedQuestionForm({
     setOpenEndedQuestions,
     openEndedQuestions,
 }: {
-    setIsOpenEndDialogOpen: any
-    getAllOpenEndedQuestions: any
-    setOpenEndedQuestions: any
-    openEndedQuestions: any
+    setIsOpenEndDialogOpen:  (value: boolean) => void;
+    getAllOpenEndedQuestions: any;
+    setOpenEndedQuestions:(questions: OpenEndedQuestion[]) => void;
+    openEndedQuestions:OpenEndedQuestion[];
 }) {
     const { tags, setTags } = getCodingQuestionTags()
 
@@ -70,26 +71,22 @@ function EditOpenEndedQuestionForm({
         }
     }, [selectedQuestion[0], form])
 
-    async function editOpenEndedQuestion(data: any) {
+    async function editOpenEndedQuestion(data:any) {
         try {
             const response = await api.patch(
                 `/Content/updateOpenEndedQuestion/${editOpenEndedQuestionId}`,
                 data
             )
             setIsOpenEndDialogOpen(false)
-            toast({
+            toast.success({
                 title: 'Success',
                 description: response.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -127,7 +124,7 @@ function EditOpenEndedQuestionForm({
                                         </FormLabel>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -135,7 +132,7 @@ function EditOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -143,7 +140,7 @@ function EditOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -176,7 +173,7 @@ function EditOpenEndedQuestionForm({
                                         }
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
-                                                (tag: any) =>
+                                                (tag: Tag) =>
                                                     tag?.tagName === value
                                             )
                                             if (selectedTag) {
@@ -200,7 +197,7 @@ function EditOpenEndedQuestionForm({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {tags.map((tag: any) => (
+                                            {tags.map((tag: Tag) => (
                                                 <SelectItem
                                                     key={tag.id}
                                                     value={tag?.tagName}
@@ -237,7 +234,7 @@ function EditOpenEndedQuestionForm({
                         }}
                     />
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2">
+                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
                             Edit Open-Ended Question
                         </Button>
                     </div>

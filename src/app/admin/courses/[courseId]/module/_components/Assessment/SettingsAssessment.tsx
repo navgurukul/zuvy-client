@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -34,26 +34,12 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { proctoringOptions } from '@/utils/admin'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+// import {PublishAssessmentDialog} from '../PublishDialog';
+import{PublishData,PublishAssessmentDialogs} from '@/app/admin/courses/[courseId]/module/_components/ModuleComponentType';
+import { Badge } from '@/components/ui/badge'
+import {SettingsAssessmentProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 import PublishAssessmentDialog from '../PublishDialog'
-
-type SettingsAssessmentProps = {
-    selectedCodingQuesIds: any
-    selectedQuizQuesIds: any
-    selectedOpenEndedQuesIds: any
-    selectedCodingQuesTagIds: any
-    selectedQuizQuesTagIds: any
-    content: any
-    fetchChapterContent: any
-    chapterTitle: string
-    saveSettings: boolean
-    setSaveSettings: (value: boolean) => void
-    setQuestionType: (value: string) => void
-    selectCodingDifficultyCount: any
-    selectQuizDifficultyCount: any
-    topicId: number
-    isNewQuestionAdded: boolean
-    setIsNewQuestionAdded: (value: boolean) => void
-}
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectedCodingQuesIds,
@@ -67,11 +53,12 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     saveSettings,
     setSaveSettings,
     setQuestionType,
-    selectCodingDifficultyCount,
-    selectQuizDifficultyCount,
+    selectCodingDifficultyCount, // Prop is already typed
+    selectQuizDifficultyCount,   // Prop is already typed
     topicId,
     isNewQuestionAdded,
     setIsNewQuestionAdded,
+    setChapterTitle,
 }) => {
     const { chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
@@ -79,6 +66,65 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [codingWeightageDisabled, setCodingWeightageDisabled] =
         useState(false)
     const [mcqsWeightageDisabled, setMcqsWeightageDisabled] = useState(false)
+    const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false); // Added state for dialog
+    const [currentAssessmentStatus, setCurrentAssessmentStatus] = useState(content?.currentState);
+
+    useEffect(() => {
+        setCurrentAssessmentStatus(content?.currentState);
+    }, [content?.currentState]);
+
+    const fetchCooldown = useRef(false);
+
+    useEffect(() => {
+        const { currentState, publishDatetime, startDatetime, endDatetime } = content;
+        if (!currentState) return;
+
+        // The date strings from the backend are in UTC. new Date().getTime() is also UTC-based.
+        const now = new Date().getTime();
+
+        let transitionTimeStr: string | null | undefined = null;
+
+        if (currentState === 'DRAFT' && publishDatetime) {
+            transitionTimeStr = publishDatetime;
+        } else if (currentState === 'PUBLISHED' && startDatetime) {
+            transitionTimeStr = startDatetime;
+        } else if (currentState === 'ACTIVE' && endDatetime) {
+            transitionTimeStr = endDatetime;
+        }
+
+        if (!transitionTimeStr) {
+            return; // No scheduled transition for the current state
+        }
+
+        const transitionTime = new Date(transitionTimeStr).getTime();
+        const delay = transitionTime - now;
+
+        if (delay > 0) {
+            // To prevent a race condition with the backend, we wait 10 seconds after the scheduled
+            // transition time before fetching the updated content.
+            const timerId = setTimeout(() => {
+                fetchChapterContent(chapterID, topicId);
+            }, delay + 3000); // Add 3-second delay
+
+            return () => clearTimeout(timerId); // Cleanup timer
+        } else {
+            // The transition time is in the past.
+            // We fetch the content to ensure the UI is up-to-date.
+            // A cooldown and a 10-second delay are used to prevent API errors if the
+            // backend is slow to update.
+            if (!fetchCooldown.current) {
+                fetchCooldown.current = true;
+                setTimeout(() => {
+                    fetchChapterContent(chapterID, topicId);
+                }, 10000); // Wait 10 seconds before fetching
+
+                // Reset cooldown after 20s to allow another check later if needed.
+                setTimeout(() => {
+                    fetchCooldown.current = false;
+                }, 20000);
+            }
+        }
+    }, [content, fetchChapterContent, chapterID, topicId]);
 
     const [totalQuestions, setTotalQuestions] = useState({
         codingProblemsEasy: content?.easyCodingQuestions || 0,
@@ -95,6 +141,13 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const hours = Array.from({ length: 5 }, (_, i) => i + 1)
     const minutes = [0, 15, 30, 45]
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
+    const [description, setDescription] = useState(content?.ModuleAssessment?.description || '');
+
+    const handleDialogSave = (publishData: PublishData) => {
+        // Trigger RHF submit which then calls onSubmit with both form and publish data.
+        form.handleSubmit((formValues) => onSubmit(formValues, publishData))();
+        setIsPublishDialogOpen(false); // Close dialog after save attempt
+    };
 
     const formSchema = z
         .object({
@@ -317,14 +370,24 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }, [totalQuestions, content])
 
-    async function onSubmit(values: any) {
+    async function onSubmit(values: any, publishData?: PublishData) {
         setIsNewQuestionAdded(false);
         const timeLimit =
-            Number(values.hour) * 3600 + Number(values.minute) * 60
-        const data = {
+            Number(values.hour) * 3600 + Number(values.minute) * 60;
+
+        const totalCodingQuestions =
+            (Number(values.codingProblemsEasy) || 0) +
+            (Number(values.codingProblemsMedium) || 0) +
+            (Number(values.codingProblemsHard) || 0);
+
+        const totalMcqQuestions =
+            (Number(values.mcqsEasy) || 0) +
+            (Number(values.mcqsMedium) || 0) +
+            (Number(values.mcqsHard) || 0);
+
+        const data: any = {
             title: chapterTitle,
-            description:
-                'This assessment has 2 dsa problems, 5 mcq and 3 theory questions',
+            description: description,
             codingProblemIds: selectedCodingQuesIds,
             mcqIds: selectedQuizQuesIds,
             openEndedQuestionIds: selectedOpenEndedQuesIds,
@@ -339,31 +402,61 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             easyCodingQuestions: Number(values.codingProblemsEasy),
             mediumCodingQuestions: Number(values.codingProblemsMedium),
             hardCodingQuestions: Number(values.codingProblemsHard),
+            totalCodingQuestions: totalCodingQuestions,
+            totalMcqQuestions: totalMcqQuestions,
             easyMcqQuestions: Number(values.mcqsEasy),
             mediumMcqQuestions: Number(values.mcqsMedium),
             hardMcqQuestions: Number(values.mcqsHard),
             weightageCodingQuestions: Number(values.codingProblemsWeightage),
             weightageMcqQuestions: Number(values.mcqsWeightage),
+        };
+
+        if (publishData) {
+            // If publishData is present, assign its date properties to the data object.
+            // This will correctly pass along string dates, nulls, or undefined.
+            // JSON.stringify will include keys with null values, and omit keys with undefined values.
+            data.publishDatetime = publishData.publishDateTime;
+            data.startDatetime = publishData.startDateTime;
+            data.endDatetime = publishData.endDateTime;
+        }
+
+        if (publishData?.action === 'publishNow') {
+            const nowUTC = new Date().toISOString();
+            // If current state is PUBLISHED or ACTIVE, keep existing publish time and update start time to now.
+            if (content?.currentState === 'PUBLISHED' || content?.currentState === 'ACTIVE') {
+                data.startDatetime = nowUTC;
+                data.publishDatetime = content?.publishDatetime || nowUTC; // Preserve existing publish time if available
+            } else { // For DRAFT or CLOSED states, set both publish and start to now.
+                data.publishDatetime = nowUTC;
+                data.startDatetime = nowUTC;
+            }
         }
 
         try {
-            await api
-                .put(
-                    `Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`,
-                    data
-                )
-                .then((res: any) => {
-                    fetchChapterContent(chapterID, topicId)
-                    setIsChapterUpdated(!isChapterUpdated)
-                })
+            const response = await api.put(
+                `Content/editAssessment/${content.assessmentOutsourseId}/${chapterID}`,
+                data
+            );
+
+            fetchChapterContent(chapterID, topicId);
+            setIsChapterUpdated(!isChapterUpdated);
+
+            const updatedContent = await fetchChapterContent(chapterID, topicId);
+            setCurrentAssessmentStatus(updatedContent?.currentState);
+
             toast({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
-            console.error(error)
+            console.error(error);
+            toast({
+                title: 'Error Updating Assessment',
+                description: 'There was an error updating the assessment.',
+                variant: 'destructive',
+                className:
+                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
+            });
         }
     }
 
@@ -433,7 +526,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             setTotalSelectedCodingQues(codingMax)
             form.setValue('mcqsEasy', selectQuizDifficultyCount?.mcqsEasy || 0)
             form.setValue('mcqsMedium', selectQuizDifficultyCount?.mcqsMedium || 0)
-            form.setValue('mcqsHard', selectQuizDifficultyCount?.mcqsHard || 0)
+            form.setValue('mcqsHard', selectQuizDifficultyCount?.mcqsHard || 0) // selectQuizDifficultyCount is typed via props
             setTotalSelectedQuizQues(mcqMax)
             setTotalQuestions({
                 codingProblemsEasy: selectCodingDifficultyCount?.codingProblemsEasy || 0,
@@ -476,55 +569,72 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     onClick={() => setQuestionType('coding')}
                     className="flex items-center mb-6 cursor-pointer box-border"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-2 box-border" />
-                    <span className="font-semibold">
+                    <ChevronLeft className="w-4 h-4 mr-2 box-border text-gray-600" />
+                    <span className="font-semibold text-gray-600">
                         Back to{' '}
-                        {content?.ModuleAssessment?.title || 'Assessment'}
+                        {/* {content?.ModuleAssessment?.title || 'Assessment'} */}
+                        {chapterTitle}
                     </span>
+
                 </div>
 
                 <Form {...form}>
                     <form
-                        onSubmit={form.handleSubmit(onSubmit)}
+                        // onSubmit={form.handleSubmit(onSubmit)} // Submission is now triggered by dialog save
                         className="mt-4"
                     >
-                        {/* Submit Button */}
-                        <div className="flex justify-between w-full">
-                            <h1 className="text-lg font-bold">
-                                Manage Settings
-                            </h1>
+                        <div className="flex justify-between w-full items-center mb-6">
+                            <div className="flex items-center">
+                                <h1 className="text-lg font-bold text-gray-600">
+                                    Manage Settings
+                                </h1>
+                                {currentAssessmentStatus && (
+                                    <Badge
+                                        variant={
+                                            currentAssessmentStatus === 'ACTIVE'
+                                                ? 'secondary'
+                                                : currentAssessmentStatus === 'PUBLISHED'
+                                                    ? 'default'
+                                                    : currentAssessmentStatus === 'DRAFT'
+                                                        ? 'yellow'
+                                                        : currentAssessmentStatus === 'CLOSED'
+                                                            ? 'default'
+                                                            : 'destructive'
+                                        }
+                                        className="ml-3 text-sm"
+                                    >
+                                        {currentAssessmentStatus.charAt(0).toUpperCase() + currentAssessmentStatus.slice(1).toLowerCase()}
+                                    </Badge>
+                                )}
+                            </div>
 
-                            {/* <Button>
-                                <PublishAssessmentDialog/>
-                            </Button> */}
-                            {/* Section 6: Submit button */}
-                            {
-                                codingMax === 0 && mcqMax === 0 ? (
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild> 
-                                            <div className="w-1/5 mr-3">          
-                                                <Button type="submit" className="w-full" disabled={codingMax === 0 && mcqMax === 0}>
-                                                    Save Settings
-                                                </Button>
-                                                </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="font-semibold">
-                                                Add questions
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                ):(
-                                    <Button type="submit" className="w-1/5 mr-3">
-                                        Save Settings
+                            <Dialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button type="button" variant="default" className="w-auto px-6 bg-success-dark opacity-75">
+                                        Publish Options
                                     </Button>
-                                )
-                            }
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <PublishAssessmentDialog
+                                        onSave={handleDialogSave} // Use the new handler
+                                        currentAssessmentStatus={currentAssessmentStatus}
+                                        initialPublishDate={content?.publishDatetime} 
+                                        initialStartDate={content?.startDatetime}  
+                                        initialEndDate={content?.endDatetime}
+                                    />
+                                </DialogContent>
+                            </Dialog>
+
+                        </div>
+
+                        <div className='flex items-center mb-6 text-gray-600'>
+                            <label className='font-semibold mr-2 mt-1' htmlFor="description">Description: </label>
+                            <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder='Enter description (optional)' type="text" className='w-1/2' id="description" />
                         </div>
 
                         {/* Section 1: Choose number of questions */}
                         <section>
-                            <h2 className="font-semibold mb-2">
+                            <h2 className="font-semibold mb-2 text-gray-600 text-[15px]">
                                 Choose number of questions shown to students
                             </h2>
                             <p className="text-sm text-gray-600 mb-4">
@@ -534,7 +644,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 for each question type.
                             </p>
 
-                            <div className="flex justify-between items-start">
+                            <div className="flex justify-between items-start text-gray-600">
                                 {[
                                     {
                                         title: 'Coding Problems',
@@ -558,7 +668,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     },
                                 ].map((category, index) => (
                                     <div key={index} className="mb-4">
-                                        <h3 className="font-semibold mb-2">
+                                        <h3 className="font-semibold mb-2 text-[15px]">
                                             {category.title}
                                         </h3>
                                         {category.fields.map((field, idx) => (
@@ -701,7 +811,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 ))}
 
                                 <div className="mb-4">
-                                    <h3 className="font-semibold mb-2 mr-3">
+                                    <h3 className="font-semibold mb-2 mr-3 text-[15px]">
                                         Total Selected Questions
                                     </h3>
                                     <div className="mt-2">
@@ -735,14 +845,14 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         {/* Section 2: Individual Section Weightage */}
                         <div className="flex space-x-48 my-8 ">
                             <section>
-                                <h2 className="font-semibold mb-2">
+                                <h2 className="font-semibold mb-2 text-gray-600 text-[15px]">
                                     Individual Section Weightage
                                 </h2>
                                 <p className="text-sm text-gray-600 mb-4">
                                     Total from both categories should be 100%
                                 </p>
                                 {[
-                                    { 
+                                    {
                                         title: 'Coding Problems',
                                         field: 'codingProblemsWeightage',
                                         disabled: codingWeightageDisabled,
@@ -830,7 +940,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                             {/* Section 3: Manage Proctoring Settings */}
                             <section className="w-1/3">
-                                <h2 className="font-semibold mb-4">
+                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
                                     Manage Proctoring Settings
                                 </h2>
                                 {proctoringOptions.map((option, index) => (
@@ -876,8 +986,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                             <ToggleSwitch
                                                                 isChecked={field.value as boolean}
                                                                 onToggle={field.onChange}
+                                                                className={field.value ? 'bg-[#609082]' : 'bg-gray-300'} 
                                                             />
-
                                                         </FormControl>
                                                     </div>
                                                 </div>
@@ -892,7 +1002,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         <div className="flex space-x-44">
                             {/* Section 1: Time Limit */}
                             <section className="w-1/4">
-                                <h2 className="font-semibold mb-4">
+                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
                                     Time limit
                                 </h2>
                                 <div className="flex flex-col space-y-4 ">
@@ -991,7 +1101,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                             {/* Section 5: Set Pass Percentage */}
                             <section className="">
-                                <h2 className="font-semibold mb-4">
+                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
                                     Pass Percentage (Out Of 100)
                                 </h2>
                                 <FormField

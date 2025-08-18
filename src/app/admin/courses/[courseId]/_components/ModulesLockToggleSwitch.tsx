@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-
-interface ToggleSwitchProps {
-    bootcampId: number
-}
+import {ToggleSwitchProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const ModulesLockToggleSwitch: React.FC<ToggleSwitchProps> = ({ bootcampId }) => {
     const [isModuleLocked, setIsModuleLocked] = useState<boolean>(false)
@@ -36,16 +33,14 @@ const ModulesLockToggleSwitch: React.FC<ToggleSwitchProps> = ({ bootcampId }) =>
                 type: bootcampType,
                 isModuleLocked: newState,
             })
-            toast({
+            toast.success({
                 title: 'Success',
                 description: `Modules ${newState ? 'locked' : 'unlocked'} successfully`,
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error updating module lock settings. Please try again.',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }

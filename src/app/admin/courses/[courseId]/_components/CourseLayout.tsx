@@ -9,9 +9,11 @@ import TabItem from './TabItem'
 import { getCourseData } from '@/store/store'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { toast } from '@/components/ui/use-toast'
 
 function CourseLayout() {
+    const router = useRouter()
     const { courseId } = useParams()
     const { courseData } = getCourseData()
     // const [courseId, setCourseId] = useState<string>('')
@@ -53,7 +55,32 @@ function CourseLayout() {
             href: `/admin/courses/${courseData?.id}/submissions`,
         },
     ]
- 
+
+    const handleFetch = async () => {
+        if (courseId) {
+            try {
+                const courseID = Array.isArray(courseId)
+                    ? courseId[0]
+                    : courseId
+                const success = await getCourseData
+                    .getState()
+                    .fetchCourseDetails(parseInt(courseID))
+                console.log('success', success)
+                if (!success) {
+                    console.log('Not true')
+                    router.push(`/admin/courses`)
+                    toast.info({
+                        title: 'Caution',
+                        description:
+                            'The Course has been deleted by another Admin',
+                    })
+                }
+            } catch (error) {
+                console.log('Caught in handleFetch', error)
+            }
+        }
+    }
+
     useEffect(() => {
         const storedCourseId = localStorage.getItem('courseId')
         // if (courseId && storedCourseId) {
@@ -62,22 +89,27 @@ function CourseLayout() {
         //         .getState()
         //         .fetchCourseDetails(parseInt(storedCourseId))
         // }
-        if (courseId) {
-            const courseID = Array.isArray(courseId) ? courseId[0] : courseId
-            getCourseData.getState().fetchCourseDetails(parseInt(courseID))
-        }
+        // if (courseId) {
+        //     const courseID = Array.isArray(courseId) ? courseId[0] : courseId
+        //     getCourseData.getState().fetchCourseDetails(parseInt(courseID))
+        //     console.log('yha se aa rha hai')
+        // }
+        handleFetch()
     }, [])
 
     return (
         <>
             {/* <Breadcrumb crumbs={crumbs} /> */}
-            <Link href={'/admin/courses'} className="flex space-x-2 w-[120px]">
+            <Link
+                href={'/admin/courses'}
+                className="flex space-x-2 w-[120px] text-gray-800"
+            >
                 <ArrowLeft size={20} />
-                <p className="ml-1 inline-flex text-sm font-medium text-gray-800 md:ml-2">
+                <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
                     My Courses
                 </p>
             </Link>
-            <h1 className="text-3xl text-start font-bold my-6">
+            <h1 className="text-3xl text-start font-bold my-6 text-gray-600">
                 {courseData?.name}
             </h1>
 

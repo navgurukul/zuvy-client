@@ -1,9 +1,10 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState } from 'react'
-import { Search } from 'lucide-react'
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
+import { Search, X } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,6 @@ import {
     getCodingQuestionTags,
     getopenEndedQuestionstate,
     getOffset,
-    getPosition,
     getSelectedOpenEndedOptions,
     getOpenEndedDifficulty,
 } from '@/store/store'
@@ -46,25 +46,20 @@ import { Spinner } from '@/components/ui/spinner'
 import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-import { OFFSET, POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
+import {OpenEndedQuestionType,OpenPageTag, OpenOption} from "@/app/admin/resource/open-ended/adminResourceOpenType"
 
 type Props = {}
-export type Tag = {
-    id: number
-    tagName: string
-}
-
-interface Option {
-    label: string
-    value: string
-}
 
 const OpenEndedQuestions = (props: Props) => {
-    const [selectedTag, setSelectedTag] = useState<Tag>(() => {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+
+    const [selectedTag, setSelectedTag] = useState<OpenPageTag>(() => {
         if (typeof window !== 'undefined') {
             const storedTag = localStorage.getItem('openEndedCurrentTag')
             return storedTag !== null
@@ -73,48 +68,210 @@ const OpenEndedQuestions = (props: Props) => {
         }
         return { tagName: 'All Topics', id: -1 }
     })
-    const { selectedOptions, setSelectedOptions } =
-        getSelectedOpenEndedOptions()
 
-    const [options, setOptions] = useState<Option[]>([
+    const { selectedOptions, setSelectedOptions } = getSelectedOpenEndedOptions()
+    const [options, setOptions] = useState<OpenOption[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const { tags, setTags } = getCodingQuestionTags()
-
     const { difficulty, setDifficulty } = getOpenEndedDifficulty()
-
-    const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState([])
-    const { openEndedQuestions, setOpenEndedQuestions } =
-        getopenEndedQuestionstate()
+    const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState<OpenEndedQuestionType[]>([])
+    const { openEndedQuestions, setOpenEndedQuestions } = getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
+    const [confirmedSearch, setConfirmedSearch] = useState('')
     const [newTopic, setNewTopic] = useState<string>('')
     const [currentPage, setCurrentPage] = useState(1)
     const [totalOpenEndedQuestion, setTotalOpenEndedQuestion] = useState<any>(0)
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const { offset, setOffset } = getOffset()
-    const { position, setPosition } = getPosition()
-    const debouncedSearch = useDebounce(searchTerm, 500)
+    const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+        }, [searchParams]);
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
+    const [suggestions, setSuggestions] = useState<OpenEndedQuestionType[]>([])
+    const [showSuggestions, setShowSuggestions] = useState(false)
+    const [isSuggestionClicked, setIsSuggestionClicked] = useState(false)
+    const searchInputRef = useRef<HTMLInputElement>(null)
+    const [filtersInitialized, setFiltersInitialized] = useState(false)
+    const [hasSetInitialTopicsFromURL, setHasSetInitialTopicsFromURL] = useState(false)
+
+    // Debounced value for suggestions
+    const debouncedSearchForSuggestions = useDebounce(searchTerm, 300)
+    useEffect(() => {
+        if (!options || options.length <= 1 || hasSetInitialTopicsFromURL) return
+
+        const params = new URLSearchParams(window.location.search)
+
+        // Search
+        const urlSearch = params.get('search') || ''
+        setSearchTerm(urlSearch)
+        setConfirmedSearch(urlSearch)
+
+        // Topics
+        const topicsParam = params.get('topics')
+        if (topicsParam) {
+            const topicValues = topicsParam.split(',')
+            const selectedTopics = topicValues
+                .map(value => options.find(opt => opt.value === value))
+                .filter(Boolean) as  OpenOption[]
+            setSelectedOptions(selectedTopics.length > 0
+                ? selectedTopics
+                : [{ value: '-1', label: 'All Topics' }]
+            )
+        }
+
+        // Difficulty
+        const difficultyParam = params.get('difficulty')
+        if (difficultyParam) {
+            const difficultyValues = difficultyParam.split(',')
+            const selectedDifficulties = difficultyValues
+                .map(value => difficultyOptions.find(opt => opt.value === value))
+                .filter(Boolean) as  OpenOption[]
+            setDifficulty(selectedDifficulties.length > 0
+                ? selectedDifficulties
+                : [{ value: 'None', label: 'All Difficulty' }]
+            )
+        }
+
+        // Tag from localStorage
+        if (typeof window !== 'undefined') {
+            const storedTag = localStorage.getItem('openEndedCurrentTag')
+            if (storedTag) {
+                setSelectedTag(JSON.parse(storedTag))
+            }
+        }
+
+        setHasSetInitialTopicsFromURL(true)
+        setFiltersInitialized(true)
+    }, [options, hasSetInitialTopicsFromURL])
+
+    // Update URL when filters change
+    useEffect(() => {
+        if (!filtersInitialized) return
+
+        const params = new URLSearchParams(window.location.search)
+
+        // Update topics
+        if (!(selectedOptions.length === 1 && selectedOptions[0].value === '-1')) {
+            const topicValues = selectedOptions.map(option => option.value).join(',')
+            params.set('topics', topicValues)
+        } else {
+            params.delete('topics')
+        }
+
+        // Update difficulty
+        if (!(difficulty.length === 1 && difficulty[0].value === 'None')) {
+            const difficultyValues = difficulty.map(option => option.value).join(',')
+            params.set('difficulty', difficultyValues)
+        } else {
+            params.delete('difficulty')
+        }
+
+        // Update search
+        if (confirmedSearch) {
+            params.set('search', confirmedSearch)
+        } else {
+            params.delete('search')
+        }
+
+        const newUrl = `?${params.toString()}`
+        router.replace(newUrl)
+    }, [selectedOptions, difficulty, confirmedSearch, filtersInitialized, router])
+
+    // Handle suggestions with debouncing
+    useEffect(() => {
+        if (debouncedSearchForSuggestions.trim() !== '' && allOpenEndedQuestions.length > 0 && !isSuggestionClicked) {
+            const filtered = allOpenEndedQuestions
+                .filter((item: OpenEndedQuestionType) =>
+                    item.question.toLowerCase().includes(debouncedSearchForSuggestions.toLowerCase())
+                )
+                .slice(0, 5)
+            setSuggestions(filtered)
+        } else {
+            setSuggestions([])
+        }
+    }, [debouncedSearchForSuggestions, allOpenEndedQuestions, isSuggestionClicked])
+
+    const fetchCodingQuestions = useCallback(
+        async (offset: number) => {
+            await filteredOpenEndedQuestions(
+                (data: OpenEndedQuestionType[]) => {
+                    if (confirmedSearch.trim()) {
+                        const filtered = data.filter((item: OpenEndedQuestionType) =>
+                            item.question.toLowerCase().includes(confirmedSearch.toLowerCase())
+                        )
+                        setOpenEndedQuestions(filtered)
+                    } else {
+                        setOpenEndedQuestions(data)
+                    }
+                },
+                offset,
+                position,
+                difficulty,
+                selectedOptions,
+                setTotalOpenEndedQuestion,
+                setLastPage,
+                setTotalPages,
+                confirmedSearch,
+            )
+
+            if (isSuggestionClicked) {
+                setIsSuggestionClicked(false)
+            }
+        },
+        [confirmedSearch, difficulty, selectedOptions, position, offset, isSuggestionClicked, setOpenEndedQuestions]
+    )
+
+    // Fetch questions when filters or confirmed search changes
+    useEffect(() => {
+        if (!filtersInitialized) return
+        fetchCodingQuestions(offset)
+    }, [confirmedSearch, difficulty, selectedOptions, offset, filtersInitialized, fetchCodingQuestions])
+
+    useEffect(() => {
+        const timer = setTimeout(() => setLoading(false), 1000)
+        return () => clearTimeout(timer)
+    }, [])
+
+    // Load all questions for suggestions
+    useEffect(() => {
+        getAllOpenEndedQuestions((data: OpenEndedQuestionType[]) => {
+            setAllOpenEndedQuestions(data)
+        })
+    }, [])
 
     const handleTopicClick = (value: string) => {
-        const tag = tags.find((t: Tag) => t.tagName === value) || {
-            tagName: 'All Topics',
-            id: -1,
-        }
+        const tag = tags.find((t) => t.tagName === value) || { tagName: 'All Topics', id: -1 }
         setSelectedTag(tag)
         localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
-    const handleTagOption = (option: Option) => {
+    const handleNewTopicChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNewTopic(event.target.value)
+    }
+
+    const handleCreateTopic = async () => {
+        try {
+            const res = await api.post(`/Content/createTag`, { tagName: newTopic })
+            toast.success({ title: `${newTopic} Topic created`, description: res.data.message })
+            getAllTags(setTags, setOptions)
+            setNewTopic('')
+        } catch (error) {
+            toast.error({ title: 'Network error', description: 'Unable to create topic.' })
+        }
+    }
+
+    const selectedTagCount = selectedOptions.length
+    const difficultyCount = difficulty.length
+
+    const handleTagOption = (option:OpenOption) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
-                // setSelectedOptions((prev) =>
-                //     prev.filter((selected) => selected.value !== option.value)
-                // )
                 setSelectedOptions(
                     selectedOptions.filter(
                         (selected) => selected.value !== option.value
@@ -132,54 +289,38 @@ const OpenEndedQuestions = (props: Props) => {
                         (selected) => selected.value === option.value
                     )
                 ) {
-                    // setSelectedOptions((prev) =>
-                    //     prev.filter(
-                    //         (selected) => selected.value !== option.value
-                    //     )
-                    // )
                     setSelectedOptions(
                         selectedOptions.filter(
                             (selected) => selected.value !== option.value
                         )
                     )
                 } else {
-                    // setSelectedOptions((prev) => [...prev, option])
                     setSelectedOptions([...selectedOptions, option])
                 }
             }
         }
     }
 
-    const handleDifficulty = (option: Option) => {
-        // When user selects All Difficulty
+    const handleDifficulty = (option: OpenOption) => {
         if (option.value === 'None') {
-            // It will check if the user has already selected All Difficulty or not
             if (difficulty.some((item) => item.value === option.value)) {
-                // If All Difficulty is already selected it will remove
                 const filteredDifficulty = difficulty.filter(
                     (item) => item.value !== option.value
                 )
                 setDifficulty(filteredDifficulty)
             } else {
-                // If user selects All Difficulty when it is not already selected,
-                // Rest other difficulties will be removed and only All Difficulty will be added in the array
                 setDifficulty([option])
             }
         } else {
-            // When user selects other Difficulties
             if (difficulty.some((item) => item.value === 'None')) {
-                // When All Difficulty is already selected and user selects other difficulties
-                // then All Difficulty will be removed and new difficulty will be added to the list
                 setDifficulty([option])
             } else {
                 if (difficulty.some((item) => item.value === option.value)) {
-                    // Removing other difficulty when already selected
                     const filteredDifficulty = difficulty.filter(
                         (item) => item.value !== option.value
                     )
                     setDifficulty(filteredDifficulty)
                 } else {
-                    // Add other difficulties
                     const filteredDifficulty = [...difficulty, option]
                     setDifficulty(filteredDifficulty)
                 }
@@ -189,157 +330,144 @@ const OpenEndedQuestions = (props: Props) => {
 
     useEffect(() => {
         getAllTags(setTags, setOptions)
-    }, [setTags])
-
-    const fetchCodingQuestions = useCallback(
-        async (offset: number) => {
-            filteredOpenEndedQuestions(
-                setOpenEndedQuestions,
-                offset,
-                position,
-                difficulty,
-                selectedOptions,
-                setTotalOpenEndedQuestion,
-                setLastPage,
-                setTotalPages,
-                debouncedSearch
-            )
-        },
-        [
-            searchTerm,
-            selectedOptions,
-            difficulty,
-            setOpenEndedQuestions,
-            debouncedSearch,
-            isDialogOpen,
-            position,
-            offset,
-        ]
-    )
-    useEffect(() => {
-        getAllOpenEndedQuestions(setAllOpenEndedQuestions)
-        fetchCodingQuestions(offset)
-    }, [
-        searchTerm,
-        selectedOptions,
-        difficulty,
-        setOpenEndedQuestions,
-        // selectedDifficulty,
-        debouncedSearch,
-        isDialogOpen,
-        position,
-        offset,
-    ])
-    // useEffect(() => {
-    //     getAllOpenEndedQuestions(setAllOpenEndedQuestions)
-    //     filteredOpenEndedQuestions(
-    //         offset,
-    //         setOpenEndedQuestions,
-    //         difficulty,
-    //         selectedOptions,
-    //         selectedLanguage,
-    //         debouncedSearch,
-    //         position
-    // )
-
-    // }, [
-    //     searchTerm,
-    //     selectedOptions,
-    //     difficulty,
-    //     setOpenEndedQuestions,
-    //     debouncedSearch,
-    // ])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false)
-        }, 1000)
-
-        return () => clearTimeout(timer)
     }, [])
 
-    const handleNewTopicChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setNewTopic(event.target.value)
+    // Clear all filters and search
+    const clearSearch = () => {
+        setSearchTerm('')
+        setConfirmedSearch('')
+        setShowSuggestions(false)
+        setCurrentPage(1)
+        searchInputRef.current?.focus()
+
+        // Clear URL parameters
+        router.replace(window.location.pathname)
     }
 
-    const handleCreateTopic = async () => {
-        try {
-            await api
-                .post(`/Content/createTag`, { tagName: newTopic })
-                .then((res) => {
-                    toast({
-                        title: `${newTopic} Topic has created`,
-                        description: res.data.message,
-                        variant: 'default',
-                        className:
-                            'fixed bottom-4 right-4 text-start border border-secondary max-w-sm px-6 py-5 box-border z-50',
-                    })
-                    getAllTags(setTags, setOptions)
-                    setNewTopic('')
-                })
-        } catch (error) {
-            toast({
-                title: 'Network error',
-                description:
-                    'Unable to create session. Please try again later.',
-                variant: 'destructive',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
+    // Handle Enter key in search
+    const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            setConfirmedSearch(searchTerm)
+            setCurrentPage(1)
+            setShowSuggestions(false)
+            setIsSuggestionClicked(true)
         }
     }
 
-    const selectedTagCount = selectedOptions.length
-    const difficultyCount = difficulty.length
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setSearchTerm(value)
+        setShowSuggestions(true)
+        setIsSuggestionClicked(false)
+    }
 
+    const handleSuggestionClick = (question: string) => {
+        setSearchTerm(question)
+        setConfirmedSearch(question)
+        setShowSuggestions(false)
+        setIsSuggestionClicked(true)
+        setCurrentPage(1)
+    }
+
+    useEffect(() => {
+        const handleRouteChange = () => {
+            // Reset filters on route change
+            setSelectedOptions([{ value: '-1', label: 'All Topics' }])
+            setDifficulty([{ value: 'None', label: 'All Difficulty' }])
+            localStorage.removeItem('openEndedCurrentTag')
+        }
+    
+        window.addEventListener('beforeunload', handleRouteChange)
+        return () => {
+            handleRouteChange() // manually call on unmount
+            window.removeEventListener('beforeunload', handleRouteChange)
+        }
+    }, [])
+    
+    useEffect(() => {
+        if (!filtersInitialized) return
+    
+        if (searchTerm.trim() === '' && confirmedSearch !== '') {
+            setConfirmedSearch('')
+            setCurrentPage(1)
+    
+            // Remove `search` from URL
+            const params = new URLSearchParams(window.location.search)
+            params.delete('search')
+            const newUrl = `?${params.toString()}`
+            router.replace(newUrl)
+        }
+    }, [searchTerm, filtersInitialized, confirmedSearch, router])
+    
     return (
         <>
             {loading ? (
                 <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-secondary" />
+                    <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
                 <div>
                     {allOpenEndedQuestions?.length > 0 ? (
                         <MaxWidthWrapper>
-                            <h1 className="text-left font-semibold text-2xl">
+                            <h1 className="text-left font-semibold text-2xl text-gray-600">
                                 Resource Library - Open-Ended-Questions
                             </h1>
                             <div className="flex justify-between">
                                 <div className="relative w-full">
-                                    <Input
-                                        value={searchTerm}
-                                        onChange={(e) =>
-                                            setSearchTerm(e.target.value)
-                                        }
-                                        placeholder="Search for Name, Email"
-                                        className="w-1/4 p-2 my-6 input-with-icon pl-8" // Add left padding for the icon
-                                    />
-                                    <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                        <Search
-                                            className="text-gray-400"
-                                            size={20}
+                                    <div className="relative w-1/4">
+                                        <Input
+                                            ref={searchInputRef}
+                                            value={searchTerm}
+                                            onChange={handleSearchInputChange}
+                                            onKeyDown={handleSearchInputKeyDown}
+                                            placeholder="Search Question"
+                                            className="w-full p-2 my-6 input-with-icon pl-8"
+                                            onFocus={() => searchTerm && setShowSuggestions(true)}
+                                            onBlur={() => {
+                                                setTimeout(() => setShowSuggestions(false), 200)
+                                            }}
                                         />
+                                        <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                                            <Search className="text-gray-400" size={20} />
+                                        </div>
+                                        {searchTerm && (
+                                            <button
+                                                onClick={clearSearch}
+                                                className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
+                                            >
+                                                <X size={16} />
+                                            </button>
+                                        )}
+                                    
+                                    {showSuggestions && suggestions.length > 0 && (
+                                        <div className="absolute top-full left-0 right-0 z-50 mt-1">
+                                            <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
+                                                {suggestions.map((item) => (
+                                                    <div
+                                                        key={item.id}
+                                                        onMouseDown={() => handleSuggestionClick(item.question)}
+                                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
+                                                    >
+                                                        {item.question}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     </div>
                                 </div>
                                 <div className="flex flex-row items-center gap-2">
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button className="text-white bg-secondary lg:max-w-[150px] w-full">
+                                            <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full">
                                                 <p>Create Topic</p>
                                             </Button>
                                         </DialogTrigger>
                                         <DialogOverlay />
                                         <CreatTag
                                             newTopic={newTopic}
-                                            handleNewTopicChange={
-                                                handleNewTopicChange
-                                            }
-                                            handleCreateTopic={
-                                                handleCreateTopic
-                                            }
+                                            handleNewTopicChange={handleNewTopicChange}
+                                            handleCreateTopic={handleCreateTopic}
                                         />
                                     </Dialog>
                                     <Dialog
@@ -347,7 +475,7 @@ const OpenEndedQuestions = (props: Props) => {
                                         open={isDialogOpen}
                                     >
                                         <DialogTrigger asChild>
-                                            <Button> Create Question</Button>
+                                            <Button className='bg-success-dark opacity-75'> Create Question</Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[500px]">
                                             <DialogHeader>
@@ -358,15 +486,9 @@ const OpenEndedQuestions = (props: Props) => {
                                             <div className="w-full">
                                                 <NewOpenEndedQuestionForm
                                                     tags={tags}
-                                                    setIsDialogOpen={
-                                                        setIsDialogOpen
-                                                    }
-                                                    filteredOpenEndedQuestions={
-                                                        filteredOpenEndedQuestions
-                                                    }
-                                                    setOpenEndedQuestions={
-                                                        setOpenEndedQuestions
-                                                    }
+                                                    setIsDialogOpen={setIsDialogOpen}
+                                                    filteredOpenEndedQuestions={filteredOpenEndedQuestions}
+                                                    setOpenEndedQuestions={setOpenEndedQuestions}
                                                 />
                                             </div>
                                         </DialogContent>
@@ -409,7 +531,7 @@ const OpenEndedQuestions = (props: Props) => {
                         </MaxWidthWrapper>
                     ) : (
                         <>
-                            <h1 className="text-left font-semibold text-2xl">
+                            <h1 className="text-left font-semibold text-2xl text-gray-600">
                                 Resource Library - Open-Ended-Questions
                             </h1>
                             <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
@@ -441,15 +563,9 @@ const OpenEndedQuestions = (props: Props) => {
                                         <div className="w-full">
                                             <NewOpenEndedQuestionForm
                                                 tags={tags}
-                                                setIsDialogOpen={
-                                                    setIsDialogOpen
-                                                }
-                                                filteredOpenEndedQuestions={
-                                                    filteredOpenEndedQuestions
-                                                }
-                                                setOpenEndedQuestions={
-                                                    setOpenEndedQuestions
-                                                }
+                                                setIsDialogOpen={setIsDialogOpen}
+                                                filteredOpenEndedQuestions={filteredOpenEndedQuestions}
+                                                setOpenEndedQuestions={setOpenEndedQuestions}
                                             />
                                         </div>
                                     </DialogContent>
@@ -459,14 +575,9 @@ const OpenEndedQuestions = (props: Props) => {
                     )}
                     <DataTablePagination
                         totalStudents={totalOpenEndedQuestion}
-                        position={position}
-                        setPosition={setPosition}
-                        pages={totalPages}
                         lastPage={lastPage}
-                        currentPage={currentPage}
-                        setCurrentPage={setCurrentPage}
+                        pages={totalPages}
                         fetchStudentData={fetchCodingQuestions}
-                        setOffset={setOffset}
                     />
                 </div>
             )}

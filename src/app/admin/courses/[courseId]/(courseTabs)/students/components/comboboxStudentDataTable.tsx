@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/popover'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-
+import{ComboboxStudentProps,CourseStudentBatchItem} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 export function ComboboxStudent({
     batchData,
     batchName,
@@ -28,15 +28,7 @@ export function ComboboxStudent({
     batchId,
     selectedRows,
     fetchStudentData,
-}: {
-    batchData: any
-    batchName?: any
-    userId?: any
-    bootcampId: any
-    batchId?: any
-    selectedRows?: any[]
-    fetchStudentData?: any
-}) {
+}:ComboboxStudentProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
     const [displaybatchName, setDisplayBatchName] = React.useState(
@@ -46,16 +38,23 @@ export function ComboboxStudent({
 
     React.useEffect(() => {
         setDisplayBatchName(batchName || 'Unassigned')
-        setValue(batchId)
+        setValue(batchId?.toString() || '')
     }, [batchName, batchId])
 
     const handleSelectBatchChange = async (
-        currentValue: any,
-        value: any,
-        setValue: any,
-        setOpen: any
-    ) => {
-        const [selectedValue, label] = currentValue.split('-')
+     currentValue: string,
+    value: string,
+    setValue: (val: string) => void,
+    setOpen: (open: boolean) => void
+) => {
+    setValue(value);
+    setOpen(false)
+        const [selectedValue] = currentValue.split('-')
+        const selectedBatch = batchData.find(
+            (batch: CourseStudentBatchItem) => batch.value == selectedValue
+        )
+        const label = selectedBatch ? selectedBatch.label : ''
+        
         if (selectedValue !== value) {
             setValue(selectedValue)
         }
@@ -66,22 +65,18 @@ export function ComboboxStudent({
                     `/batch/reassign/student_id=${userId}/new_batch_id=${selectedValue}?bootcamp_id=${bootcampId}`
                 )
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     setDisplayBatchName(label)
                 })
         } catch (error: any) {
             if (error.response.data.message === 'Batch is full')
                 setBatchisFull(true)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error.response.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         } finally {
         }
@@ -103,22 +98,18 @@ export function ComboboxStudent({
                     students: selected,
                 })
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchStudentData && fetchStudentData()
                 })
         } catch (error: any) {
             if (error.response.data.message === 'Batch is full')
                 setBatchisFull(true)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error.response.data.message,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -127,10 +118,9 @@ export function ComboboxStudent({
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
-                    variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between"
+                    className="w-[200px] justify-between text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                 >
                     <span className="truncate max-w-[200px] text-left">
                         {userId ? displaybatchName : 'Select a Batch'}
@@ -143,7 +133,7 @@ export function ComboboxStudent({
                     <CommandInput placeholder="Search batch..." />
                     <CommandEmpty>No batch found.</CommandEmpty>
                     <CommandGroup>
-                        {batchData.map((batch: any) => (
+                        {batchData.map((batch: CourseStudentBatchItem) => (
                             <CommandItem
                                 key={batch.value}
                                 disabled={value == batch.value && !batchisFull}

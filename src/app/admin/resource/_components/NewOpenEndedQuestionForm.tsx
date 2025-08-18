@@ -27,6 +27,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Plus, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {NewOpenEndedQuestionFormProps,Tags} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const formSchema = z.object({
     questionDescription: z.string().min(5, {
@@ -46,16 +47,7 @@ function NewOpenEndedQuestionForm({
     difficulty,
     offset,
     position
-}: {
-    tags: any
-    setIsDialogOpen: any
-    setOpenEndedQuestions: any
-    filteredOpenEndedQuestions: any
-    selectedOptions?:any,
-    difficulty?:any,
-    offset?:number,
-    position?:String
-}) {
+}:NewOpenEndedQuestionFormProps) {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -72,20 +64,16 @@ function NewOpenEndedQuestionForm({
                 data
             )
 
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Open-Ended Question Created Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -103,7 +91,7 @@ function NewOpenEndedQuestionForm({
     }
 
     return (
-        <main className="flex  flex-col p-3 ">
+        <main className="flex  flex-col p-3 text-gray-600">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
@@ -125,7 +113,7 @@ function NewOpenEndedQuestionForm({
                                         </FormLabel>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -133,7 +121,7 @@ function NewOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -141,7 +129,7 @@ function NewOpenEndedQuestionForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -164,7 +152,7 @@ function NewOpenEndedQuestionForm({
                                     <Select
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
-                                                (tag: any) =>
+                                                (tag: Tags) =>
                                                     tag?.tagName === value
                                             )
                                             if (selectedTag) {
@@ -178,7 +166,7 @@ function NewOpenEndedQuestionForm({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {tags.map((tag: any) => (
+                                            {tags.map((tag: Tags) => (
                                                 <SelectItem
                                                     key={tag.id}
                                                     value={tag?.tagName}
@@ -215,7 +203,7 @@ function NewOpenEndedQuestionForm({
                         }}
                     />
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2 ">
+                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
                             Create Open-Ended Question
                         </Button>
                     </div>

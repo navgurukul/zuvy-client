@@ -27,7 +27,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { Tag } from '../mcq/page'
+import {PageTag} from '../mcq/adminResourceMcqType'
 import { DialogFooter } from '@/components/ui/dialog'
 import { getAllQuizQuestion } from '@/utils/admin'
 import {
@@ -37,17 +37,10 @@ import {
 } from '@/store/store'
 import { error } from 'console'
 import { Spinner } from '@/components/ui/spinner'
+import {RequestBodyType,QuizQuestions,EditQuizQuestionProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
-export type RequestBodyType = {
-    questions: {
-        question: string
-        options: { [key: number]: string }
-        correctOption: number
-        tagId: number
-        difficulty: string
-    }[]
-}
+
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard'], {
         required_error: 'You need to select a Difficulty  type.',
@@ -65,14 +58,11 @@ const formSchema = z.object({
 const EditQuizQuestion = ({
     setStoreQuizData,
     quizId,
-}: {
-    setStoreQuizData: any
-    quizId: number
-}) => {
+}: EditQuizQuestionProps) => {
     const [difficulty, setDifficulty] = useState<string>('Easy')
-    const [selectedOption, setSelectedOption] = useState<any>('')
+    const [selectedOption, setSelectedOption] = useState<string>('0')
     const [options, setOptions] = useState<string[]>(['', ''])
-    const [quizQuestionById, setQuizQuestionById] = useState<any>()
+    const [quizQuestionById, setQuizQuestionById] = useState<QuizQuestions | null>(null);
     const [loadingState, setLoadingState] = useState<string>('')
     const { tags } = getCodingQuestionTags()
     const { mcqDifficulty } = getmcqdifficulty()
@@ -117,7 +107,7 @@ const EditQuizQuestion = ({
     useEffect(() => {
         const selectedQuizQuestion = quizQuestionById
         if (selectedQuizQuestion) {
-            setOptions(Object.values(selectedQuizQuestion.options))
+        setOptions(Object.values(selectedQuizQuestion.options) as string[])
             setSelectedOption(
                 (selectedQuizQuestion.correctOption - 1).toString()
             )
@@ -147,20 +137,16 @@ const EditQuizQuestion = ({
     const handleEditQuizQuestion = async (requestBody: RequestBodyType) => {
         try {
             await api.post('/Content/editquiz', requestBody).then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status || 'Success',
                     description: res.data.message || 'Quiz Question Created',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     'There was an error creating the quiz question. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -171,11 +157,9 @@ const EditQuizQuestion = ({
         )
 
         if (emptyOptions) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Options cannot be empty',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
             return
         }
@@ -206,7 +190,7 @@ const EditQuizQuestion = ({
     return (
         <>
             {loadingState === 'formIsLoading' ? (
-                <Spinner className="text-secondary" />
+                <Spinner className="text-[rgb(81,134,114)]" />
             ) : loadingState === 'formIsLoaded' ? (
                 <main className="flex  flex-col p-3 ">
                     <Form {...form}>

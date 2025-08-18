@@ -23,6 +23,7 @@ import useDebounce from '@/hooks/useDebounce'
 import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
+import {AddStudentsModalProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const AddStudentsModal = ({
     id,
@@ -30,26 +31,21 @@ const AddStudentsModal = ({
     batch,
     batchId,
     fetchBatchesData,
-    batchData
-}: {
-    id: number
-    message: boolean
-    batch: boolean
-    batchId: any
-    fetchBatchesData?: any
-    batchData?: boolean
-}) => {
+    batchData,
+    studentData,
+    setStudentData,
+}:AddStudentsModalProps) => {
     // misc
-    interface Student {
-        email: string
-        name: string
-    }
+    // interface Student {
+    //     email: string
+    //     name: string
+    // }
 
-    type StudentDataState = Student[]
+    // type StudentDataState = Student[]
 
     // state and variables
     const [selectedOption, setSelectedOption] = useState('1')
-    const [studentData, setStudentData] = useState<StudentDataState | any>({})
+    // const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const { fetchCourseDetails } = getCourseData()
     const {
         setStudents,
@@ -71,7 +67,7 @@ const AddStudentsModal = ({
         setSelectedOption(value)
     }
 
-    const courseId: any = id
+    const courseId:  string = id.toString();
 
     // async
     const handleSubmit = async () => {
@@ -89,11 +85,9 @@ const AddStudentsModal = ({
                     : `/bootcamp/students/${id}`
                 await api.post(endpoint, requestBody).then((response) => {
                     batch && fetchBatchesData()
-                    toast({
+                    toast.success({
                         title: response.data.status,
                         description: response.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     fetchStudentsHandler({
                         courseId,
@@ -110,18 +104,16 @@ const AddStudentsModal = ({
                     setStudentData({ name: '', email: '' })
                 })
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: 'Error Adding Students',
                     description: error?.response.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         }
     }
 
     return (
-        <DialogContent>
+        <DialogContent className='text-gray-600'>
             <DialogHeader>
                 <DialogTitle>
                     {message
@@ -132,7 +124,9 @@ const AddStudentsModal = ({
                 </DialogTitle>
                 <span>
                     {message
-                        ? batchData ? 'All the students are assigned to batches. Please add new students to create new batches' : 'Please add student(s) to create New Batches'
+                        ? batchData
+                            ? 'All the students are assigned to batches. Please add new students to create new batches'
+                            : 'Please add student(s) to create New Batches'
                         : ''}
                 </span>
             </DialogHeader>
@@ -144,7 +138,7 @@ const AddStudentsModal = ({
                         onValueChange={handleStudentUploadType}
                     >
                         <div className="flex   space-x-2 mr-4">
-                            <RadioGroupItem value={id} id={id} />
+                            <RadioGroupItem value={id} id={id} className='text-black border-black' />
                             <Label htmlFor={id}>{label}</Label>
                         </div>
                     </RadioGroup>
@@ -181,7 +175,7 @@ const AddStudentsModal = ({
             )}
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button type="submit" onClick={handleSubmit}>
+                    <Button type="submit" onClick={handleSubmit} className='bg-success-dark opacity-75'>
                         {selectedOption === '2'
                             ? 'Add Student'
                             : 'Add Students'}

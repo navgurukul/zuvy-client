@@ -11,6 +11,7 @@ import html from 'highlight.js/lib/languages/xml'
 // load all languages with "all" or common languages with "common"
 import { all, createLowlight } from 'lowlight'
 import React from 'react'
+import {MyEditorProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 // create a lowlight instance with all languages loaded
 const lowlight = createLowlight(all)
@@ -23,9 +24,7 @@ lowlight.register('js', js)
 lowlight.register('ts', ts)
 
 // Define the type of the prop (question)
-interface MyEditorProps {
-    question: string
-}
+
 
 const MyEditorComponent: React.FC<MyEditorProps> = ({ question }) => {
     const editor = useEditor({

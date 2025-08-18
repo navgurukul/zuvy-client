@@ -15,6 +15,8 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
+import { isCodeQuestion, renderQuestionPreview } from '@/utils/quizHelpers'
+
 type Props = {}
 
 const QuizModal = ({
@@ -33,21 +35,24 @@ const QuizModal = ({
             await saveQuizQuestionHandler(requestBody)
         }
     }
+    
     const filteredTag = tags?.filter((tag: any) => tag.id == data.tagId)
+    const question = data?.quizVariants[0]?.question
+    const hasCodeBlock = isCodeQuestion(question)
 
     return (
         <div className="flex w-full justify-between py-3 items-center border-b h-30 border-gray-200">
-            <div className="flex flex-col gap-2 w-full ">
-                <div className="flex flex-col gap-2 w-full ">
-                    <div className="font-semibold flex justify-between w-full ">
-                        <span
-                            dangerouslySetInnerHTML={{
-                                __html: ellipsis(
-                                    data?.quizVariants[0]?.question,
-                                    40
-                                ),
-                            }}
-                        />
+            <div className="flex flex-col gap-2 w-full">
+                <div className="flex flex-col gap-2 w-full">
+                    <div className="font-semibold flex justify-between w-full">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            {/* Question Text */}
+                            <span className={`text-gray-600 text-[16px] ${hasCodeBlock ? 'font-mono text-sm' : ''}`}>
+                                {renderQuestionPreview(question, {
+                                    textLength: 40,
+                                })}
+                            </span>
+                        </div>
                         {/* {ellipsis(data?.quizVariants[0]?.question, 40)} */}
                         <div className="mr-4 space-x-2 ">
                             <span className="text-sm text-[#518672] bg-[#DCE7E3] p-1 rounded-[100px] px-[8px]">
@@ -63,7 +68,7 @@ const QuizModal = ({
                                 {data.difficulty}
                             </span>
                         </div>
-                    </div>
+                    </div>            
                     <Dialog>
                         <DialogTrigger asChild>
                             <p className=" text-left font-bold text-sm  text-[#518672] cursor-pointer">
@@ -80,26 +85,12 @@ const QuizModal = ({
                         </DialogContent>
                     </Dialog>
                 </div>
-                {/* <Button
-                    className="flex w-1/3 text-secondary font-semibold text-md justify-start mr-10"
-                    variant={'ghost'}
-                >
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Edit size={15} />
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Edit Quiz question</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </Button> */}
             </div>
+            
             <XCircle
                 size={20}
                 onClick={handleClick}
-                className="cursor-pointer text-red-600 mb-5"
+                className="cursor-pointer text-red-600 mb-5 hover:text-red-800 transition-colors flex-shrink-0"
             />
         </div>
     )

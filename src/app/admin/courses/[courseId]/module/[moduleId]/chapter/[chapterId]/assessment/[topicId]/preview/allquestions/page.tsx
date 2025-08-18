@@ -9,18 +9,14 @@ import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { difficultyColor, cn, difficultyBgColor } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
+import {PriviewTag, Params } from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/PreviewPageType"
 
-export type Tag = {
-    id: number
-    tagName: string
-}
-
-function AllQuestions({ params }: { params: any }) {
+function AllQuestions({ params }: { params:  Params }) {
     const [assessmentPreviewContent, setAssessmentPreviewContent] =
         useState<any>([])
     const [assessmentPreviewCodingContent, setAssessmentPreviewCodingContent] =
         useState<any>([])
-    const [allTags, setAllTags] = useState<Tag[]>([])
+    const [allTags, setAllTags] = useState<PriviewTag[]>([])
     const router = useRouter()
 
     useEffect(() => {
@@ -65,7 +61,7 @@ function AllQuestions({ params }: { params: any }) {
     }
 
     return (
-        <div className="h-auto mb-24">
+        <div className="h-auto mb-24 text-gray-600">
             <>
                 <div className="flex items-center justify-between gap-2">
                     <div
@@ -84,7 +80,7 @@ function AllQuestions({ params }: { params: any }) {
             <div className="flex justify-center">
                 <div className="flex flex-col gap-5 w-1/2 text-left">
                     <div className="flex justify-between">
-                        <h2 className="font-bold">Testing Your Knowledge</h2>
+                        <h2 className="font-bold text-[18px]">Testing Your Knowledge</h2>
                         {/* <Button onClick={shuffleQuestions}>
                             Shuffle Coding Qs
                         </Button> */}
@@ -122,7 +118,7 @@ function AllQuestions({ params }: { params: any }) {
             {assessmentPreviewCodingContent?.length > 0 && (
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                        <h2 className="font-bold">Coding Challenges</h2>
+                        <h2 className="font-bold text-[18px]">Coding Challenges</h2>
                         {assessmentPreviewCodingContent?.map(
                             (codingQuestion: any, index: number) => (
                                 <div
@@ -130,7 +126,7 @@ function AllQuestions({ params }: { params: any }) {
                                     className="p-6 bg-white rounded-xl shadow-md"
                                 >
                                     <div className="flex justify-between">
-                                        <h3 className="font-bold capitalize">
+                                        <h3 className="font-bold capitalize text-[17px]">
                                             {codingQuestion.title}
                                         </h3>
                                         <span
@@ -181,10 +177,10 @@ function AllQuestions({ params }: { params: any }) {
             {assessmentPreviewContent.Quizzes?.length > 0 && (
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                        <h2 className="font-bold">MCQs</h2>
+                        <h2 className="font-bold text-[18px]">MCQs</h2>
                         <div className="p-6 bg-white rounded-xl shadow-md">
                             <div className="flex justify-between items-center mb-5">
-                                <h3 className="font-bold capitalize">
+                                <h3 className="font-bold capitalize text-[17px]">
                                     Multiple-Choice Questions (MCQs).
                                 </h3>
                                 <span className="bg-[#FFC374] text-sm p-2 rounded-full">
@@ -212,10 +208,10 @@ function AllQuestions({ params }: { params: any }) {
             {assessmentPreviewContent.OpenEndedQuestions?.length > 0 && (
                 <div className="flex justify-center">
                     <div className="flex flex-col gap-5 w-1/2 text-left mt-10">
-                        <h2 className="font-bold">Open-Ended Questions</h2>
+                        <h2 className="font-bold text-[18px]">Open-Ended Questions</h2>
                         <div className="p-6 bg-white rounded-xl shadow-md">
                             <div className="flex justify-between items-center mb-5">
-                                <h3 className="font-bold capitalize">
+                                <h3 className="font-bold capitalize text-[17px]">
                                     Open-Ended Questions.
                                 </h3>
                                 <span className="bg-[#FFC374] text-sm p-2 rounded-full">

@@ -1,19 +1,19 @@
-// Inspired by react-hot-toast library
 import * as React from "react"
-
 import type {
   ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_REMOVE_DELAY = 1000
 
 type ToasterToast = ToastProps & {
   id: string
   title?: React.ReactNode
   description?: React.ReactNode
   action?: ToastActionElement
+  variant?: "default" | "success" | "error" | "warning" | "info" | "destructive"
+  duration?: number
 }
 
 const actionTypes = {
@@ -91,8 +91,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -138,9 +136,11 @@ function dispatch(action: Action) {
   })
 }
 
-type Toast = Omit<ToasterToast, "id">
+type Toast = Omit<ToasterToast, "id"> & {
+  duration?: number
+}
 
-function toast({ ...props }: Toast) {
+function toast({ duration = 2000, ...props }: Toast) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -156,6 +156,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
+      duration,
       onOpenChange: (open) => {
         if (!open) dismiss()
       },
@@ -168,6 +169,12 @@ function toast({ ...props }: Toast) {
     update,
   }
 }
+
+toast.success = (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: 'success' })
+toast.error = (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: 'error' })
+toast.warning = (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: 'warning' })
+toast.info = (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: 'info' })
+toast.destructive = (props: Omit<Toast, 'variant'>) => toast({ ...props, variant: 'destructive' })
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)

@@ -1,6 +1,11 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useParams, useRouter, usePathname, notFound } from 'next/navigation'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import {
+    useParams,
+    useRouter,
+    usePathname,
+    useSearchParams,
+} from 'next/navigation'
 import ErrorPage from 'next/error'
 
 import { Input } from '@/components/ui/input'
@@ -40,7 +45,7 @@ import {
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { api } from '@/utils/axios.config'
-import { StudentData } from '../../(courseTabs)/students/page'
+import { StudentDataPage } from '../../(courseTabs)/students/studentComponentTypes'
 import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { Spinner } from '@/components/ui/spinner'
@@ -50,6 +55,10 @@ import AddStudentsModal from '../../_components/addStudentsmodal'
 import { ComboboxStudent } from '../../(courseTabs)/students/components/comboboxStudentDataTable'
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
+import { POSITION } from '@/utils/constant'
+import {StudentDataState} from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
+import axios from 'axios'
+
 
 const BatchesInfo = ({
     params,
@@ -57,18 +66,22 @@ const BatchesInfo = ({
     params: { courseId: string; batchId: string }
 }) => {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const param = useParams()
     const location = usePathname()
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
     const [allBatches, setAllBatches] = useState<any>([])
-    const [studentData, setStudentData] = useState<StudentData[]>([])
+    const [studentData, setStudentData] = useState<StudentDataPage[]>([])
     const [bootcamp, setBootcamp] = useState<any>([])
     const [search, setSearch] = useState('')
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
     const [instructorsInfo, setInstructorInfo] = useState<any>([])
     const [pages, setPages] = useState<number>()
-    const [position, setPosition] = useState('10')
+    const position = useMemo(
+        () => searchParams.get('limit') || POSITION,
+        [searchParams]
+    )
     const [offset, setOffset] = useState<number>(0)
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
@@ -77,7 +90,10 @@ const BatchesInfo = ({
     const [error, setError] = useState(true)
     const debouncedValue = useDebounce(search, 1000)
     const [loading, setLoading] = useState(true)
-    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+    const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
+    const [studentDataTable, setStudentDataTable] = useState<
+        StudentDataState | any
+    >({})
 
     const crumbs = [
         {
@@ -111,12 +127,26 @@ const BatchesInfo = ({
                 const capEnrollmentValue = parseInt(capEnrollment)
                 return (
                     !isNaN(capEnrollmentValue) &&
-                    capEnrollmentValue >= studentsData.length
+                    capEnrollmentValue >= 1 &&
+                    capEnrollmentValue >= studentsData.length &&
+                    capEnrollmentValue <= 100000
                 )
             },
-            {
-                message: `The cap enrollment must be greater than or equal to the number of students inside a batch there are currently ${studentsData?.length} students  .`,
+            // {
+            //     message: `Cap Enrollment must be at least 1 and not less than the number of current students(${studentsData?.length}).`,
+            // }
+
+            (val) => {
+            const capEnrollmentValue = parseInt(val)
+            if (capEnrollmentValue > 100000) {
+                return {
+                    message: 'Cap Enrollment cannot exceed 100000.',
+                }
             }
+            return {
+                message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
+            }
+        }
         ),
     })
 
@@ -160,6 +190,18 @@ const BatchesInfo = ({
                 })
                 setAllBatches(batchData)
             } catch (error) {
+                if (axios.isAxiosError(error)) {
+                    if (
+                        error?.response?.data.message === 'Bootcamp not found!'
+                    ) {
+                        router.push(`/admin/courses`)
+                        toast.info({
+                            title: 'Caution',
+                            description:
+                                'The Course has been deleted by another Admin',
+                        })
+                    }
+                }
                 console.error('Error fetching batches', error)
             }
         },
@@ -199,18 +241,14 @@ const BatchesInfo = ({
     const batchDeleteHandler = async () => {
         try {
             await api.delete(`/batch/${params.batchId}`)
-            toast({
+            toast.success({
                 title: 'Batch Deleted Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setDeleteModalOpen(false)
             router.push(`/admin/courses/${params.courseId}/batches`)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Batch not Deleted',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -226,11 +264,9 @@ const BatchesInfo = ({
             await api
                 .patch(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     const fetchBatchesInfo = async () => {
                         try {
@@ -247,10 +283,8 @@ const BatchesInfo = ({
                 })
             //   }
         } catch (error) {
-            toast({
+            toast.error({
                 title: "Batches Didn't Update Succesfully",
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -305,7 +339,7 @@ const BatchesInfo = ({
     return (
         <>
             <BreadcrumbCmponent crumbs={crumbs} />
-            <MaxWidthWrapper className="p-4 ">
+            <MaxWidthWrapper className="p-4 text-gray-600">
                 <div className="flex justify-between">
                     <div className="w-1/2 flex flex-col items-start ">
                         <div className=" flex flex-col ">
@@ -520,7 +554,7 @@ const BatchesInfo = ({
                                         userId={userIds}
                                         bootcampId={parseInt(params.courseId)}
                                         title="Are you absolutely sure?"
-                                        description="This action cannot be undone. This will permanently the student from the bootcamp"
+                                        description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
                                         fetchStudentData={fetchStudentData}
                                     />
                                     <ComboboxStudent
@@ -539,7 +573,7 @@ const BatchesInfo = ({
                                         className="flex"
                                         onClick={toggleForm}
                                     >
-                                        <Pencil size={18} className="mx-4" />
+                                        <Pencil size={18} className="mx-1" />
                                         Edit Batch
                                     </button>
                                 </DialogTrigger>
@@ -603,6 +637,23 @@ const BatchesInfo = ({
                                                                     placeholder="Cap Enrollment"
                                                                     type="name"
                                                                     {...field}
+                                                                    onChange={(
+                                                                        e
+                                                                    ) => {
+                                                                        // Prevent entering more than 6 digits
+                                                                        const value =
+                                                                            e
+                                                                                .target
+                                                                                .value
+                                                                        if (
+                                                                            value.length <=
+                                                                            6
+                                                                        ) {
+                                                                            field.onChange(
+                                                                                e
+                                                                            )
+                                                                        }
+                                                                    }}
                                                                 />
                                                             </FormControl>
                                                             <FormMessage />
@@ -633,7 +684,7 @@ const BatchesInfo = ({
                                 </DialogContent>
                             </Dialog>
                         </div>
-                        <div className="flex items-center gap-x-5 text-sm">
+                        <div className="flex items-center gap-x-1 text-sm">
                             <Trash2
                                 onClick={() => setDeleteModalOpen(true)}
                                 className="text-destructive cursor-pointer"
@@ -641,7 +692,7 @@ const BatchesInfo = ({
                             ></Trash2>
                             <span
                                 onClick={() => setDeleteModalOpen(true)}
-                                className=" cursor-pointer ml-1"
+                                className=" cursor-pointer mr-2"
                             >
                                 Delete
                             </span>
@@ -658,7 +709,7 @@ const BatchesInfo = ({
                             />
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className=" gap-x-2 ">
+                                    <Button className=" gap-x-2 bg-success-dark opacity-75">
                                         <Plus /> Add Students
                                     </Button>
                                 </DialogTrigger>
@@ -669,6 +720,8 @@ const BatchesInfo = ({
                                     batch={true}
                                     batchId={params.batchId}
                                     fetchBatchesData={fetchStudentData}
+                                    setStudentData={setStudentDataTable}
+                                    studentData={studentDataTable}
                                 />
                             </Dialog>
                         </div>
@@ -676,7 +729,7 @@ const BatchesInfo = ({
                 </div>
                 {loading ? (
                     <div className="flex justify-center">
-                        <Spinner className="text-secondary" />
+                        <Spinner className="text-[rgb(81,134,114)]" />
                     </div>
                 ) : (
                     <div>
@@ -687,14 +740,9 @@ const BatchesInfo = ({
                         />
                         <DataTablePagination
                             totalStudents={totalStudents}
-                            position={position}
-                            setPosition={setPosition}
-                            pages={pages}
                             lastPage={lastPage}
-                            currentPage={currentPage}
-                            setCurrentPage={setCurrentPage}
+                            pages={pages}
                             fetchStudentData={fetchStudentData}
-                            setOffset={setOffset}
                         />
                     </div>
                 )}

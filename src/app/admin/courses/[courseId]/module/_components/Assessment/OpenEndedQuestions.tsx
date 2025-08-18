@@ -9,33 +9,18 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
-
-interface OpenEndedQuestion {
-    id: number
-    question: string
-    difficulty: string
-    tagId: number
-    marks: number
-    usage: number
-}
+import {OpenEndedQuestiones, OpenEndedQuestionesProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const OpenEndedQuestions = ({
     questions,
     setSelectedQuestions,
     selectedQuestions,
     tags,
-}: {
-    questions: OpenEndedQuestion[]
-    setSelectedQuestions: React.Dispatch<
-        React.SetStateAction<OpenEndedQuestion[]>
-    >
-    selectedQuestions: OpenEndedQuestion[]
-    tags: any
-}) => {
+}:OpenEndedQuestionesProps) => {
     return (
         <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
-            {questions.map((question: OpenEndedQuestion) => {
+            {questions.map((question: OpenEndedQuestiones) => {
                 const tag = tags?.find(
                     (tag: any) => tag?.id === question?.tagId
                 )
@@ -47,7 +32,7 @@ const OpenEndedQuestions = ({
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">
                                 <div className="flex items-center justify-between w-full">
-                                    <h2 className="font-bold">
+                                    <h2 className="font-bold text-[15px] text-gray-600">
                                         {ellipsis(question?.question, 35)}
                                     </h2>
                                     <div className="flex gap-2 ml-auto">
@@ -71,7 +56,7 @@ const OpenEndedQuestions = ({
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-[#4A4A4A] mt-1 font-[14px]">
+                                <p className="text-[#4A4A4A] mt-1 text-[1rem] font-[14px]">
                                     {ellipsis(question?.question, 45)}
                                 </p>
                                 <Dialog>
@@ -90,7 +75,7 @@ const OpenEndedQuestions = ({
                             </div>
                             <div className="flex">
                                 {selectedQuestions.some(
-                                    (q: OpenEndedQuestion) =>
+                                    (q: OpenEndedQuestiones) =>
                                         q.id === question.id
                                 ) ? (
                                     <svg
@@ -113,7 +98,7 @@ const OpenEndedQuestions = ({
                                         onClick={() => {
                                             if (
                                                 !selectedQuestions.some(
-                                                    (q: OpenEndedQuestion) =>
+                                                    (q: OpenEndedQuestiones) =>
                                                         q.id === question.id
                                                 )
                                             ) {
@@ -123,7 +108,7 @@ const OpenEndedQuestions = ({
                                                 ])
                                             }
                                         }}
-                                        className="text-secondary cursor-pointer"
+                                        className="text-[rgb(81,134,114)] cursor-pointer"
                                         size={20}
                                     />
                                 )}

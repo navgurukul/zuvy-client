@@ -7,18 +7,8 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Copy } from 'lucide-react'
-
-type Props = {
-    batchName: string
-    topicTitle: string
-    startTime: string
-    endTime: string
-    typeClass: string
-    classLink: string
-    status: string
-}
-
-const InstructorCard: React.FC<Props> = ({
+import{InstructorCardProps}from '@/app/instructor/_components/componentInstructorTypes'
+const InstructorCard: React.FC<InstructorCardProps> = ({
     batchName,
     topicTitle,
     startTime,
@@ -26,7 +16,7 @@ const InstructorCard: React.FC<Props> = ({
     typeClass,
     classLink,
     status,
-}: Props) => {
+}: InstructorCardProps) => {
     const pathname = usePathname()
     const classRecordings = pathname?.includes('/recording')
     const handleCopyToClipboard = (link: string) => {
@@ -34,11 +24,9 @@ const InstructorCard: React.FC<Props> = ({
             .writeText(link)
             .then(() => {
                 // alert('Link copied to clipboard!') // Optional: Show a confirmation
-                toast({
+                toast.info({
                     title: 'Copied!',
                     description: 'Link copied to clipboard!',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
             })
             .catch((err) => {
@@ -109,5 +97,4 @@ const InstructorCard: React.FC<Props> = ({
         </div>
     )
 }
-
 export default InstructorCard

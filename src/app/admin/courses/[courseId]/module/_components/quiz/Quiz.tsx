@@ -1,16 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
-import {
-    quizData,
-    Options,
-} from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
+import {QuizDataLibrary,LibraryOptions} from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizModal'
 import { api } from '@/utils/axios.config'
-import { Tag } from '@/app/admin/resource/mcq/page'
+import {PageTag} from '@/app/admin/resource/mcq/adminResourceMcqType'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import {
@@ -21,38 +18,65 @@ import {
 import { ArrowUpRightSquare, Pencil } from 'lucide-react'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import {QuizProps} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 
-function Quiz(props: any) {
+function Quiz(props: QuizProps) {
     const router = useRouter()
-    const [tags, setTags] = useState<Tag[]>([])
+    const [tags, setTags] = useState<PageTag[]>([])
     const [isOpen, setIsOpen] = useState(false)
-    const [addQuestion, setAddQuestion] = useState<quizData[]>([])
+    const [addQuestion, setAddQuestion] = useState<QuizDataLibrary[]>([])
     const [questionId, setQuestionId] = useState()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const [quizTitle, setQuizTitle] = useState('')
     const [inputValue, setInputValue] = useState(props.activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setQuizPreviewContent } = getQuizPreviewStore()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const hasLoaded = useRef(false)
 
-    const handleAddQuestion = (data: any) => {
-        const uniqueData = data.filter((question: quizData) => {
+    const [isSaved, setIsSaved] = useState<boolean>(true)
+    const [savedQuestions, setSavedQuestions] = useState<QuizDataLibrary[]>([])
+
+    const handleAddQuestion = (data: QuizDataLibrary[]) => {
+        const uniqueData = data.filter((question: QuizDataLibrary) => {
             return !addQuestion.some(
-                (existingQuestion: quizData) =>
+                (existingQuestion: QuizDataLibrary) =>
                     existingQuestion.id === question.id
             )
         })
-        setAddQuestion((prevQuestions: quizData[]) => [
+        setAddQuestion((prevQuestions: QuizDataLibrary[]) => [
             ...prevQuestions,
             ...uniqueData,
         ])
     }
+    const checkIfSaved = () => {
+
+        if (!addQuestion || !savedQuestions) {
+            return true
+        }
+
+        if (addQuestion.length !== savedQuestions.length) {
+            return false
+        }
+
+        // Check if all selected questions are in saved questions
+        return addQuestion.every(selectedQ =>
+            savedQuestions.some(savedQ => savedQ.id === selectedQ.id)
+        )
+    }
+
+    // Update isSaved state when addQuestion changes
+    useEffect(() => {
+        setIsSaved(checkIfSaved())
+    }, [addQuestion, savedQuestions])
+
     const openModal = () => setIsOpen(true)
     const closeModal = () => setIsOpen(false)
     async function getAllTags() {
         const response = await api.get('Content/allTags')
         if (response) {
             const transformedData = response.data.allTags.map(
-                (item: { id: any; tagName: any }) => ({
+                (item: { id: number; tagName: string }) => ({
                     id: item.id.toString(),
                     tagName: item.tagName,
                 })
@@ -65,8 +89,8 @@ function Quiz(props: any) {
         }
     }
     const removeQuestionById = (questionId: number) => {
-        setAddQuestion((prevQuestions: any) =>
-            prevQuestions.filter((question: any) => question?.id !== questionId)
+        setAddQuestion((prevQuestions:QuizDataLibrary[]) =>
+            prevQuestions.filter((question: QuizDataLibrary) => question?.id !== questionId)
         )
     }
 
@@ -78,18 +102,14 @@ function Quiz(props: any) {
                 `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
                 requestBody
             )
-            toast({
+            toast.success({
                 title: 'Success',
                 description: response?.data?.message || 'Saved successfully!',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'An error occurred while saving the chapter.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -102,6 +122,9 @@ function Quiz(props: any) {
         }
         saveQuizQuestionHandler(requestBody)
         setIsChapterUpdated(!isChapterUpdated)
+
+        setIsSaved(true)
+        setSavedQuestions([...addQuestion])
     }
 
     const getAllSavedQuizQuestion = useCallback(async () => {
@@ -109,41 +132,68 @@ function Quiz(props: any) {
 
         try {
             const res = await api.get(
-                `/Content/chapterDetailsById/${props.chapterId}`
+                `/Content/chapterDetailsById/${props.chapterId}?bootcampId=${props.courseId}&moduleId=${props.moduleId}&topicId=${props.content.topicId}`
             )
             setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
+            setSavedQuestions(res.data.quizQuestionDetails)
+            setIsSaved(true)
         } catch (error) {
             console.error('Failed to fetch chapter details', error)
         }
     }, [props.chapterId])
 
     useEffect(() => {
-        getAllTags()
-        if (props.chapterId && props.chapterId !== 0) {
-            getAllSavedQuizQuestion()
+        if (hasLoaded.current) return
+        hasLoaded.current = true
+        const fetchData = async () => {
+            setIsDataLoading(true)
+            await getAllTags()
+            if (props.chapterId && props.chapterId !== 0) {
+                await getAllSavedQuizQuestion()
+            }
+            setIsDataLoading(false)
         }
+        fetchData()
     }, [props.chapterId, getAllSavedQuizQuestion])
 
     function previewQuiz() {
-        if (addQuestion.length > 0) {
-            setQuizPreviewContent({
-                ...props.content,
-                quizQuestionDetails: addQuestion,
-            })
-            router.push(
-                `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
-            )
-        } else {
-            return toast({
-                title: 'No Question saved yet',
-                description: 'Please add at least one question to preview.',
-                className:
-                    'border border-red-500 text-red-500 text-left w-[90%] capitalize',
+
+        if (addQuestion.length === 0) {
+            return toast.error({
+                title: 'Cannot Preview',
+                description: 'Please select at least one question to preview.',
             })
         }
+
+        // Check if questions are selected but not saved
+        if (!isSaved) {
+            return toast.error({
+                title: 'Cannot Preview',
+                description: 'Please save the selected questions before previewing.',
+            })
+        }
+
+        // If questions are selected and saved, proceed with preview
+        setQuizPreviewContent({
+            ...props.content,
+            quizQuestionDetails: addQuestion,
+        })
+        router.push(
+            `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+        )
     }
 
+    if (isDataLoading) {
+        return (
+            <div className="px-5">
+                <div className="w-full flex justify-center items-center py-8">
+                    <div className="animate-pulse">Loading Quiz details...</div>
+                </div>
+            </div>
+        )
+    }
+    
     return (
         <div>
             <div className="px-5">
@@ -151,7 +201,7 @@ function Quiz(props: any) {
                     <div className="w-full flex flex-col items-start gap-3">
                         {/* Input Field */}
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-full relative">
+                            <div className="w-2/6 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -159,7 +209,8 @@ function Quiz(props: any) {
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
-                                    className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 w-1/3 border-gray-400 border-dashed focus:outline-none"
+                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+
                                     autoFocus
                                 />
                                 {!inputValue && (
@@ -167,7 +218,7 @@ function Quiz(props: any) {
                                         fill="true"
                                         fillOpacity={0.4}
                                         size={20}
-                                        className="absolute text-gray-100 pointer-events-none top-1/2 right-5 transform -translate-y-1/2"
+                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                                     />
                                 )}
                             </div>
@@ -175,7 +226,7 @@ function Quiz(props: any) {
                                 <div
                                     id="previewQuiz"
                                     onClick={previewQuiz}
-                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
+                                    className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
                                 >
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
@@ -184,7 +235,7 @@ function Quiz(props: any) {
                                     <div className="mt-5">
                                         <Button
                                             onClick={handleSaveQuiz}
-                                            className=""
+                                            className="bg-success-dark opacity-75"
                                         >
                                             Save
                                         </Button>
@@ -209,13 +260,13 @@ function Quiz(props: any) {
                         <div>
                             <div className="flex flex-col items-center justify-between">
                                 <div className="flex justify-between w-full mt-36">
-                                    <h2 className="text-left text-gray-700 w-full font-semibold">
+                                    <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
                                         Selected Question
                                     </h2>
                                 </div>
                                 <div className="text-left w-full">
                                     {addQuestion?.length === 0 && (
-                                        <h1 className="text-left italic">
+                                        <h1 className="text-left text-gray-600 text-[15px] italic">
                                             No Selected Questions
                                         </h1>
                                     )}
@@ -223,7 +274,7 @@ function Quiz(props: any) {
                             </div>
                             <ScrollArea className="h-96 pr-3 pb-10">
                                 {addQuestion?.map(
-                                    (questions: quizData, index: number) => (
+                                    (questions: QuizDataLibrary, index: number) => (
                                         <QuizModal
                                             key={index}
                                             tags={tags}

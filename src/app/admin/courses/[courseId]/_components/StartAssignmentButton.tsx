@@ -12,7 +12,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
-
+import {ClassDatas} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 function StartAssignmentButton({
     classData,
     // status,
@@ -20,11 +20,11 @@ function StartAssignmentButton({
     buttonClass,
     variant,
 }: {
-    classData: any
+    classData:ClassDatas 
     // status: any
     // view: any
-    buttonClass: any
-    variant: any
+    buttonClass:string
+    variant:any
 }) {
     return (
         <Button variant={variant} className={buttonClass}>

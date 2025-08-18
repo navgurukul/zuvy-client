@@ -22,26 +22,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-
-interface editModuleDialogProps {
-    moduleData: {
-        name: string
-        description: string
-    }
-    timeData: {
-        days: number
-        months: number
-        weeks: number
-    }
-    editMode: any
-    handleModuleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    editModule: () => void
-    createModule: () => void
-    handleTimeAllotedChange: (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => void
-    typeId: number
-}
+import {editModuleDialogProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const moduleSchema = z.object({
     name: z.string().min(2, { message: 'Module Name must be at least 2 characters.' }),
@@ -92,7 +73,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4 "
             >
-                <DialogContent>
+                <DialogContent className='text-gray-600'>
                     <DialogHeader>
                         <DialogTitle>
                             Edit Module
@@ -171,6 +152,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                             handleTimeAllotedChange(e)
                                                         }}
                                                         name="months"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -195,6 +180,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                             handleTimeAllotedChange(e)
                                                         }}
                                                         name="weeks"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -219,6 +208,10 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                                                             handleTimeAllotedChange(e)
                                                         }}
                                                         name="days"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === "-" || e.key === "e") e.preventDefault();
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -231,7 +224,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
-                            <Button onClick={form.handleSubmit(onSubmit)}>
+                            <Button onClick={form.handleSubmit(onSubmit)} className="bg-[rgb(81,134,114)]">
                                 Edit Module
                             </Button>
                         </DialogClose>

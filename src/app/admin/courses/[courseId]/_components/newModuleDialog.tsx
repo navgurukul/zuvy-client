@@ -27,26 +27,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import {newModuleDialogProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-interface newModuleDialogProps {
-    moduleData: {
-        name: string
-        description: string
-    }
-    timeData: {
-        days: number
-        months: number
-        weeks: number
-    }
-    handleModuleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    createModule: () => void
-    handleTimeAllotedChange: (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => void
-    handleTypeChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    typeId: number
-    isOpen: any
-}
 
 const moduleSchema = z.object({
     moduleType: z.enum(['learning-material', 'project']),
@@ -70,31 +52,40 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     handleTypeChange,
     typeId,
     isOpen,
+    setIsLoading,
+    isLoading,
 }) => {
     const form = useForm<z.infer<typeof moduleSchema>>({
         resolver: zodResolver(moduleSchema),
         defaultValues: {
             moduleType: 'learning-material',
-            name: moduleData.name,
-            description: moduleData.description,
+            name: '',
+            description: '',
             months: 0,
             weeks: 0,
+            days: 0,
         },
     })
 
     const onSubmit: any = (values: z.infer<typeof moduleSchema>) => {
+        setIsLoading(true)
         createModule()
     }
 
+    // FIXED: Dialog close pe form reset
     useEffect(() => {
-        if (!isOpen) {
-            form.reset() // Reset form state and errors when the dialog is closed
+        if (isOpen) {
+            const event = {
+                target: {
+                    value: 'learning-material',
+                },
+            } as React.ChangeEvent<HTMLInputElement>
+            handleTypeChange(event)
         }
-    }, [isOpen, form])
+    }, [isOpen])
 
     useEffect(() => {
-        // Check if typeId is not -1, which means it's a new form
-        if (typeId === -1) {
+        if (!isOpen) {
             form.reset({
                 moduleType: 'learning-material',
                 name: '',
@@ -103,15 +94,38 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 weeks: 0,
                 days: 0,
             })
-        } else {
-            form.setValue('moduleType', 'learning-material')
-            form.setValue('name', moduleData.name)
-            form.setValue('description', moduleData.description)
-            form.setValue('months', timeData.months)
-            form.setValue('weeks', timeData.weeks)
-            form.setValue('days', timeData.days)
         }
-    }, [moduleData, timeData, typeId, form])
+    }, [isOpen, form])
+
+    // FIXED: Proper synchronization between parent state and form state
+    useEffect(() => {
+        // Update form values when parent state changes
+        const currentModuleType = typeId === 1 ? 'learning-material' : 'project'
+        
+        form.setValue('moduleType', currentModuleType)
+        form.setValue('name', moduleData.name)
+        form.setValue('description', moduleData.description)
+        
+        // Handle time data properly
+        form.setValue('months', timeData.months > -1 ? timeData.months : 0)
+        form.setValue('weeks', timeData.weeks > -1 ? timeData.weeks : 0)
+        form.setValue('days', timeData.days > -1 ? timeData.days : 0)
+        
+    }, [moduleData, timeData, typeId, form, isOpen]) // Added isOpen to dependencies
+
+    // FIXED: Enhanced handleTypeChange wrapper
+    const handleRadioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value as 'learning-material' | 'project'
+        
+        // Update form state
+        form.setValue('moduleType', value)
+        
+        // Update parent state
+        handleTypeChange(e)
+        
+        // Force form re-render
+        form.trigger('moduleType')
+    }
 
     return (
         <Form {...form}>
@@ -119,7 +133,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4 "
             >
-                <DialogContent>
+                <DialogContent className='text-gray-600'>
                     <DialogHeader>
                         <DialogTitle>New Module</DialogTitle>
                         <div className="main_container flex items-center align-middle text-center">
@@ -136,10 +150,8 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         id="learning-material"
                                                         className="size-4"
                                                         value="learning-material"
-                                                        checked={typeId === 1}
-                                                        onChange={
-                                                            handleTypeChange
-                                                        }
+                                                        checked={field.value === 'learning-material'} // FIXED: Use form field value
+                                                        onChange={handleRadioChange} // FIXED: Use wrapper function
                                                         name="moduleType"
                                                     />
                                                 </FormControl>
@@ -171,10 +183,8 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         id="project"
                                                         className="size-4"
                                                         value="project"
-                                                        checked={typeId === 2}
-                                                        onChange={
-                                                            handleTypeChange
-                                                        }
+                                                        checked={field.value === 'project'} // FIXED: Use form field value
+                                                        onChange={handleRadioChange} // FIXED: Use wrapper function
                                                         name="moduleType"
                                                     />
                                                 </FormControl>
@@ -207,9 +217,11 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                             ? 'Project Name'
                                                             : 'Module Name'
                                                     }
-                                                    onChange={
-                                                        handleModuleChange
-                                                    }
+                                                    value={field.value} // FIXED: Use form field value
+                                                    onChange={(e) => {
+                                                        field.onChange(e) // Update form state
+                                                        handleModuleChange(e) // Update parent state
+                                                    }}
                                                     name="name"
                                                 />
                                             </FormControl>
@@ -241,9 +253,11 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                             ? 'Project Description'
                                                             : 'Module Description'
                                                     }
-                                                    onChange={(e) =>
-                                                        handleModuleChange(e)
-                                                    }
+                                                    value={field.value} // FIXED: Use form field value
+                                                    onChange={(e) => {
+                                                        field.onChange(e) // Update form state
+                                                        handleModuleChange(e) // Update parent state
+                                                    }}
                                                     name="description"
                                                 />
                                             </FormControl>
@@ -268,16 +282,21 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         type="number"
                                                         id="months"
                                                         placeholder="Months"
-                                                        value={
-                                                            timeData?.months >
-                                                            -1
-                                                                ? timeData?.months
-                                                                : undefined
-                                                        }
-                                                        onChange={
-                                                            handleTimeAllotedChange
-                                                        }
+                                                        value={field.value || ''} // FIXED: Use form field value
+                                                        onChange={(e) => {
+                                                            const value = parseInt(e.target.value) || 0
+                                                            field.onChange(value) // Update form state
+                                                            handleTimeAllotedChange(e) // Update parent state
+                                                        }}
                                                         name="months"
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key === '-' ||
+                                                                e.key === 'e'
+                                                            )
+                                                                e.preventDefault()
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -298,15 +317,21 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         type="number"
                                                         id="weeks"
                                                         placeholder="Weeks"
-                                                        value={
-                                                            timeData?.weeks > -1
-                                                                ? timeData?.weeks
-                                                                : undefined
-                                                        }
-                                                        onChange={
-                                                            handleTimeAllotedChange
-                                                        }
+                                                        value={field.value || ''} // FIXED: Use form field value
+                                                        onChange={(e) => {
+                                                            const value = parseInt(e.target.value) || 0
+                                                            field.onChange(value) // Update form state
+                                                            handleTimeAllotedChange(e) // Update parent state
+                                                        }}
                                                         name="weeks"
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key === '-' ||
+                                                                e.key === 'e'
+                                                            )
+                                                                e.preventDefault()
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -327,15 +352,21 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         type="number"
                                                         id="days"
                                                         placeholder="Days"
-                                                        value={
-                                                            timeData?.days > -1
-                                                                ? timeData?.days
-                                                                : undefined
-                                                        }
-                                                        onChange={
-                                                            handleTimeAllotedChange
-                                                        }
+                                                        value={field.value || ''} // FIXED: Use form field value
+                                                        onChange={(e) => {
+                                                            const value = parseInt(e.target.value) || 0
+                                                            field.onChange(value) // Update form state
+                                                            handleTimeAllotedChange(e) // Update parent state
+                                                        }}
                                                         name="days"
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key === '-' ||
+                                                                e.key === 'e'
+                                                            )
+                                                                e.preventDefault()
+                                                        }}
+                                                        min={0}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -348,7 +379,11 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end">
                         <DialogClose asChild>
-                            <Button onClick={form.handleSubmit(onSubmit)}>
+                            <Button
+                                onClick={form.handleSubmit(onSubmit)}
+                                className='bg-[rgb(81,134,114)]'
+                                disabled={isLoading}
+                            >
                                 Create Module
                             </Button>
                         </DialogClose>

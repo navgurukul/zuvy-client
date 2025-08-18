@@ -13,12 +13,7 @@ import {
 import styles from './cources.module.css'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-
-interface newTopicDialogProps {
-    newTopic: string
-    handleNewTopicChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    handleCreateTopic: () => void
-}
+import {newTopicDialogProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const CreatTag: React.FC<newTopicDialogProps> = ({
     newTopic,
@@ -26,7 +21,7 @@ const CreatTag: React.FC<newTopicDialogProps> = ({
     handleCreateTopic,
 }) => {
     return (
-        <DialogContent>
+        <DialogContent className="text-gray-600">
             <DialogHeader>
                 <DialogTitle>New Topic</DialogTitle>
                 <div className="py-4">
@@ -43,6 +38,7 @@ const CreatTag: React.FC<newTopicDialogProps> = ({
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
                     <Button
+                        className="bg-success-dark opacity-75"
                         onClick={() => handleCreateTopic()}
                         // className={styles.createCourseBtnDialog}
                     >

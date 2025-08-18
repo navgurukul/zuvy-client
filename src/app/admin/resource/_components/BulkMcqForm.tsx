@@ -11,34 +11,34 @@ import { toast } from '@/components/ui/use-toast'
 import { useState } from 'react'
 import DropzoneforMcq from './DropzoneforMcq'
 import { api } from '@/utils/axios.config'
+import {BulkMcqProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
-type Props = {
-    setIsMcqModalOpen: any
-}
+// type Props = {
+//     setIsMcqModalOpen: any
+// }
+// type BulkMcqProps = {
+//     setIsMcqModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+// }
 const FormSchema = z.object({
     sheeturl: z.string().url(),
 })
 
-const BulkUploadMcq = ({ setIsMcqModalOpen }: Props) => {
+const BulkUploadMcq = ({ setIsMcqModalOpen }: BulkMcqProps) => {
     const [mcqData, setMcqData] = useState(null)
 
     async function handleSubmit(e: any) {
         e.preventDefault()
         try {
             await api.post(`/Content/quiz`, mcqData)
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsMcqModalOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -56,7 +56,7 @@ const BulkUploadMcq = ({ setIsMcqModalOpen }: Props) => {
                 </div>
 
                 <div className="flex justify-end  w-full">
-                    <Button className="" type="submit">
+                    <Button className="bg-success-dark opacity-75" type="submit">
                         Add Questions
                     </Button>
                 </div>

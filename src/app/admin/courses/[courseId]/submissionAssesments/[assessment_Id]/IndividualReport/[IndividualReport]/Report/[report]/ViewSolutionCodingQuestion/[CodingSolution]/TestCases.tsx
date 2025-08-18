@@ -25,13 +25,13 @@ const TestCaseResults = ({ testCases }: any) => {
 
                         {/* Inputs Section */}
                         <div className="mt-4 flex justify-center">
-                            <h3 className="font-semibold text-lg text-gray-600">
+                            <h3 className="font-semibold text-[15px] text-gray-600">
                                 Inputs:
                             </h3>
                             <p className="list-disc list-inside pl-2 text-gray-800">
                                 {testCase.testCases.inputs.map(
                                     (input: any, i: number) => (
-                                        <p key={i} className="my-1">
+                                        <p key={i} className="my-1 text-[15px]">
 
                                             <span className="bg-gray-100 p-1 rounded-md">
                                                 {JSON.stringify(
@@ -46,10 +46,10 @@ const TestCaseResults = ({ testCases }: any) => {
 
                         {/* Your Output Section */}
                         <div className="mt-4 flex justify-center font-semibold text-lg text-gray-600">
-                            <h3>
+                            <h3 className="text-[15px]">
                             {testCase.stderr === null && 'Your Output:'}
                             </h3>
-                            <p className='ml-2'>
+                            <p className='ml-2 text-[15px]'>
                                 {testCase.stderr === null && (
                                     Array.isArray(testCase.stdout) || testCase.stdout === 'jsonType' ? (
                                         <span className="bg-gray-100 p-1 rounded-md">
@@ -67,10 +67,10 @@ const TestCaseResults = ({ testCases }: any) => {
                         {/* Error Output Section */}
                         {testCase.status !== 'Accepted' && (
                             <div className="mt-4 flex justify-center font-semibold text-lg text-gray-600">
-                                <h3>
+                                <h3 className="text-[15px]">
                                     Error Output:
                                 </h3>
-                                <p className='ml-2'>
+                                <p className='ml-2 text-[15px]'>
                                     {Array.isArray(testCase.stderr) || testCase.stderr === 'jsonType' ? (
                                         <span className="bg-gray-100 p-1 rounded-md">
                                             {JSON.stringify(testCase.stderr)}
@@ -90,7 +90,7 @@ const TestCaseResults = ({ testCases }: any) => {
                            {
                                 testCase.status === 'Accepted' && (
                                     <>
-                                        <h3>
+                                        <h3 className="text-[15px]">
                                             Time:
                                         </h3>
                                         <p className='ml-2'>
@@ -103,7 +103,7 @@ const TestCaseResults = ({ testCases }: any) => {
                         <div className="mt-4 flex justify-center font-semibold text-lg text-gray-600">
                           {testCase.status === 'Accepted' && (
                               <>
-                              <h3>
+                              <h3 className="text-[15px]">
                               Memory:
                           </h3>
                           <p className='ml-2'>
@@ -117,10 +117,10 @@ const TestCaseResults = ({ testCases }: any) => {
                         {/* Expected Output */}
                         <div className="mt-4">
                             <div className="flex justify-center items-center gap-x-2">
-                                <h3 className="font-semibold text-lg text-gray-600">
+                                <h3 className="font-semibold text-[15px] text-gray-600">
                                     Expected Output:
                                 </h3>
-                                <p className="text-gray-800">
+                                <p className="text-gray-800 text-[15px]">
                                     <span className="font-semibold text-gray-600">
                                         {testCase.testCases.expectedOutput
                                             .parameterType === 'arrayOfnum' ||

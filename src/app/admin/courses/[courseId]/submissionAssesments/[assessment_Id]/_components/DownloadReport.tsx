@@ -59,7 +59,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             15,
             40
         )
-        doc.text(`Total Marks: ${reportData.marks || 0}`, 15, 45)
+        doc.text(`Total Marks: 100`, 15, 45)
         doc.text(
             `Percentage: ${Math.trunc(reportData.percentage || 0)}%`,
             15,
@@ -73,6 +73,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             body: [
                 ['Copy Paste', `${reportData.copyPaste || 0} times`],
                 ['Tab Change', `${reportData.tabChange || 0} times`],
+                ['Exit Full Screen', `${reportData.fullScreenExit || 0} times`],
             ],
             startY: 60,
             theme: 'grid',
@@ -95,14 +96,14 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
             body: [
                 [
                     'Coding Questions Attempted',
-                    `${reportData.attemptedCodingQuestions || 0} / ${
-                        reportData.codingQuestionCount || 0
+                    `${reportData.PracticeCode.length || 0} / ${
+                        reportData.submitedOutsourseAssessment.totalCodingQuestions || 0
                     }`,
                 ],
                 [
                     'Coding Score',
                     `${reportData.codingScore || 0} / ${
-                        reportData.requiredCodingScore || 0
+                        reportData.submitedOutsourseAssessment.weightageCodingQuestions || 0
                     }`,
                 ],
             ],
@@ -124,12 +125,18 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
         autoTable(doc, {
             head: [[`MCQ Details`, 'Score']],
             body: [
+                  [
+                      'Total MCQ Attempted',
+                    `${Math.round(reportData.attemptedMCQQuestions) || 0} / ${
+                        reportData?.submitedOutsourseAssessment?.totalMcqQuestions || 0
+                    }`
+                ],
                 [
                     'MCQ Score',
-                    `${reportData.mcqScore || 0} / ${
-                        reportData.requiredMCQScore || 0
-                    }`,
-                ],
+                    `${Math.round(reportData.mcqScore) || 0} / ${
+                        reportData?.submitedOutsourseAssessment?.weightageMcqQuestions || 0
+                    }`
+                ]
             ],
             theme: 'grid',
             headStyles: {
@@ -185,7 +192,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
         <div className="flex items-center space-x-2">
             <button
                 onClick={handleDownload}
-                className={ submitedAt ? `max-w-[500px] text-secondary font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
+                className={ submitedAt ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
             >
                 <ArrowBigDownDash className="mr-2" />
                 Download Report

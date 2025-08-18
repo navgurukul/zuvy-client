@@ -11,10 +11,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Table } from "@tanstack/react-table";
 import { View } from "lucide-react";
-
-interface DataTableViewOptionsProps<TData> {
-  table: Table<TData>;
-}
+import { Cross } from "lucide-react";
+import {DataTableViewOptionsProps} from "@/app/_components/datatable/componentDatatable"
 
 export function DataTableViewOptions<TData>({
   table,
@@ -23,9 +21,8 @@ export function DataTableViewOptions<TData>({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
           size="sm"
-          className="ml-auto hidden h-8 lg:flex"
+          className="ml-auto hidden h-8 lg:flex text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
         >
           <View className="mr-2 h-4 w-4" />
           View
@@ -47,6 +44,7 @@ export function DataTableViewOptions<TData>({
                 className="capitalize"
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                onSelect={(e) => e.preventDefault()}
               >
                 {column.id}
               </DropdownMenuCheckboxItem>

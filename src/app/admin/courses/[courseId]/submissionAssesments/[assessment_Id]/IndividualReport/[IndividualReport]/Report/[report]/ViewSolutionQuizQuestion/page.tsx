@@ -91,15 +91,16 @@ const Page = ({ params }: { params: paramsType }) => {
         }
     }, [params.courseId])
 
-    const getStudentAssesmentDataHandler = useCallback(async () => {
-        await api
-            .get(
-                `/admin/assessment/students/assessment_id${params.assessment_Id}`
-            )
-            .then((res) => {
-                setAssesmentData(res.data.ModuleAssessment)
-            })
-    }, [params.assessment_Id])
+    // const getStudentAssesmentDataHandler = useCallback(async () => {
+    //     await api
+    //         .get(
+    //             `/admin/assessment/students/assessment_id${params.assessment_Id}`
+    //         )
+    //         .then((res) => {
+    //             setAssesmentData(res.data.ModuleAssessment)
+    //         })
+    // }, [params.assessment_Id])
+
     const fetchQuizQuestionDetails = useCallback(async () => {
         try {
             await api
@@ -110,7 +111,7 @@ const Page = ({ params }: { params: paramsType }) => {
                     setQuizQuiestionDetails(res.data.data)
                 })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed To fetch',
             })
@@ -123,10 +124,10 @@ const Page = ({ params }: { params: paramsType }) => {
         fetchProctoringData(params.report, params.IndividualReport)
         fetchQuizQuestionDetails()
         getBootcampHandler()
-        getStudentAssesmentDataHandler()
+        // getStudentAssesmentDataHandler()
     }, [
         getBootcampHandler,
-        getStudentAssesmentDataHandler,
+        // getStudentAssesmentDataHandler,
         fetchQuizQuestionDetails,
         fetchProctoringData,
         params,

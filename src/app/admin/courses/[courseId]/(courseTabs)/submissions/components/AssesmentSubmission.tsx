@@ -7,10 +7,11 @@ import Image from 'next/image'
 import useDebounce from '@/hooks/useDebounce'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import {AssessmentSubmissions,StudentAssessmentSubmission,APIResponses} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
 // import assesmentNotfound from @/public
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
-    const [assesments, setAssesments] = useState<any>()
+    const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(null)
     const debouncedSearch = useDebounce(searchTerm, 300)
 
     const getAssessments = useCallback(async () => {
@@ -22,10 +23,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             const res = await api.get(url)
             setAssesments(res.data)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Error fetching assessments:',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }, [courseId, debouncedSearch])
@@ -34,24 +34,22 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         getAssessments()
     }, [getAssessments])
 
-    const handleDownloadPdf = async (assessment: any) => {
+    const handleDownloadPdf = async (assessment:AssessmentSubmissions) => {
         if (!assessment) return
 
         const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
 
         try {
-            const response = await api.get(apiUrl)
+            const response = await api.get<APIResponses>(apiUrl)
             const assessments = response.data.submitedOutsourseAssessments
             const requiredCodingScore =
                 assessments[0]?.requiredCodingScore || null
             const requiredMcqScore = assessments[0]?.requiredMCQScore || null
 
             if (!Array.isArray(assessments) || assessments.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'No data available to generate PDF.',
-                    className:
-                        'text-start capitalize border border-destructive',
                 })
                 return
             }
@@ -69,7 +67,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             doc.setFont('helvetica', 'normal')
             doc.text(`Assessment Name: ${assessment.title}`, 10, 20)
             doc.text(
-                `Qualifying Criteria: ${response?.data.passPercentage}%`,
+                `Qualifying Criteria: ${response?.data.ModuleAssessment.passPercentage}%`,
                 10,
                 26
             )
@@ -94,7 +92,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 { header: 'Copy Pasted', dataKey: 'copyPaste' },
             ]
 
-            const rows = assessments.map((student: any) => ({
+            const rows = assessments.map((student: StudentAssessmentSubmission) => ({
                 name: student.name || 'N/A',
                 email: student.email || 'N/A',
                 qualified: student.isPassed ? 'Yes' : 'No',
@@ -145,15 +143,14 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
             doc.save(`${assessment.title}-Report.pdf`)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to download PDF. Please try again later.',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }
 
-    const handleDownloadCsv = async (assessment: any) => {
+    const handleDownloadCsv = async (assessment: AssessmentSubmissions) => {
         if (!assessment) return
 
         const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
@@ -163,11 +160,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             const assessments = response.data.submitedOutsourseAssessments
 
             if (!Array.isArray(assessments) || assessments.length === 0) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: 'No data available to generate CSV.',
-                    className:
-                        'text-start capitalize border border-destructive',
                 })
                 return
             }
@@ -185,7 +180,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 'Copy Pasted',
             ]
 
-            const rows = assessments.map((student: any) => [
+            const rows = assessments.map((student: StudentAssessmentSubmission) => [
                 student.name || 'N/A',
                 student.email || 'N/A',
                 student.isPassed ? 'Yes' : 'No',
@@ -216,10 +211,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             link.click()
             document.body.removeChild(link)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to download CSV. Please try again later.',
-                className: 'text-start capitalize border border-destructive',
             })
         }
     }
@@ -237,10 +231,10 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                     </h2>
                                     <div className="grid md:grid-cols-3 gap-3">
                                         {assesments[key].map(
-                                            (assessment: any) => (
+                                            (assessment:AssessmentSubmissions) => (
                                                 <AssesmentComponent
                                                     key={assessment.id}
-                                                    id={assessment.id}
+                                                   id={Number(assessment.id)}
                                                     title={assessment.title}
                                                     codingChallenges={
                                                         assessment.totalCodingQuestions
@@ -252,7 +246,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                                         assessment.totalOpenEndedQuestions
                                                     }
                                                     totalSubmissions={
-                                                        assesments.totalStudents
+                                                        assesments?.totalStudents
                                                     }
                                                     studentsSubmitted={
                                                         assessment.totalSubmitedAssessments
@@ -285,9 +279,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     )
                 ) : (
                     <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                        <h1 className="text-center font-semibold ">
+                        <h5 className="text-center font-semibold text-[17px]">
                             No Assessment Found
-                        </h1>
+                        </h5>
                         <Image
                             src="/emptyStates/curriculum.svg"
                             alt="No Assessment Found"
@@ -297,10 +291,10 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                     </div>
                 )
             ) : (
-                <div className="w-full flex justify-center items-center absolute inset-0 h-screen">
-                    <h1 className="text-center font-semibold ">
+                <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                    <h5 className="text-center font-semibold text-[17px]">
                         No Assessment Found
-                    </h1>
+                    </h5>
                     <Image
                         src="/emptyStates/curriculum.svg"
                         alt="No Assessment Found"

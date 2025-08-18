@@ -10,22 +10,10 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {AssesmentComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-type Props = {
-    title: string
-    codingChallenges: number
-    mcq: number
-    openEnded: number
-    studentsSubmitted: number
-    totalSubmissions: number
-    id: any
-    bootcampId: number
-    qualifiedStudents: number
-    onDownloadPdf: () => void
-    onDownloadCsv: () => void
-}
 
-const AssesmentComponent = (props: Props) => {
+const AssesmentComponent = (props: AssesmentComponentProps) => {
     const printRef = useRef<HTMLDivElement | null>(null)
     const [isOpen, setIsOpen] = useState(false)
 
@@ -85,47 +73,40 @@ const AssesmentComponent = (props: Props) => {
                                 open={isOpen}
                                 onOpenChange={setIsOpen}
                             >
-                                <div
-                                    onMouseEnter={() => setIsOpen(true)}
-                                    onMouseLeave={() => setIsOpen(false)}
-                                    className="relative"
-                                >
-                                    <DropdownMenuTrigger asChild>
-                                        <button
-                                            className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
-                                            aria-label="Download full report"
-                                        >
-                                            <ArrowDownToLine size={20} />
-                                        </button>
-                                    </DropdownMenuTrigger>
-
-                                    <DropdownMenuContent
-                                        className="w-38 rounded-md shadow-md border border-gray-300"
-                                        align="end"
-                                        sideOffset={8}
-                                        onMouseEnter={() => setIsOpen(true)}
-                                        onMouseLeave={() => setIsOpen(false)}
+                                <DropdownMenuTrigger asChild>
+                                    <button
+                                        className="ml-2 text-gray-500 hover:text-gray-700 cursor-pointer"
+                                        aria-label="Download full report"
+                                        onClick={() => setIsOpen(!isOpen)} // Toggle dropdown on click
                                     >
-                                        <DropdownMenuItem
-                                            className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
-                                            onClick={() => {
-                                                props.onDownloadPdf()
-                                                setIsOpen(false)
-                                            }}
-                                        >
-                                            Download PDF
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
-                                            onClick={() => {
-                                                props.onDownloadCsv()
-                                                setIsOpen(false)
-                                            }}
-                                        >
-                                            Download CSV
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </div>
+                                        <ArrowDownToLine size={20} />
+                                    </button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent
+                                    className="w-38 rounded-md shadow-md border border-gray-300"
+                                    align="end"
+                                    sideOffset={8}
+                                >
+                                    <DropdownMenuItem
+                                        className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
+                                        onClick={() => {
+                                            props.onDownloadPdf();
+                                            setIsOpen(false); // Close dropdown after action
+                                        }}
+                                    >
+                                        Download PDF
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        className="py-2 px-4 text-sm text-gray-700 hover:!text-gray-900 hover:bg-gray-100 rounded-md focus:bg-gray-100 cursor-pointer transition-all duration-200"
+                                        onClick={() => {
+                                            props.onDownloadCsv();
+                                            setIsOpen(false); // Close dropdown after action
+                                        }}
+                                    >
+                                        Download CSV
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
                             </DropdownMenu>
                         )}
                     </div>
@@ -201,9 +182,9 @@ const AssesmentComponent = (props: Props) => {
                     >
                         <Button
                             variant="ghost"
-                            className="flex h-full justify-center items-center w-full lg:w-auto py-2 text-secondary font-bold rounded-md transition-all duration-300"
+                            className="flex h-full justify-center items-center w-full lg:w-auto py-2 font-bold rounded-md transition-all duration-300"
                         >
-                            <h1 className="w-full text-center flex lg:text-right">
+                            <h1 className="w-full text-center text-sm flex lg:text-right text-green-700">
                                 View Submission
                                 <ChevronRight size={20} className="ml-2" />
                             </h1>

@@ -28,6 +28,13 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
 import RemirrorForForm from '@/app/admin/resource/_components/RemirrorForForm'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {NewMcqFormProps,TransformedMCQ} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),
@@ -55,16 +62,11 @@ export default function NewMcqForm({
     setStoreQuizData,
     getAllQuizQuesiton,
     setIsMcqModalOpen,
-}: {
-    tags: any[]
-    closeModal: () => void
-    setStoreQuizData: any
-    getAllQuizQuesiton: any
-    setIsMcqModalOpen: any
-}) {
+}:NewMcqFormProps) {
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [codeSnippet, setCodeSnippet] = useState<any>()
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
+    const [isContentValid, setIsContentValid] = useState<boolean>(true) // New state
     const [selectedTag, setSelectedTag] = useState<{
         id: number
         tagName: String
@@ -120,7 +122,7 @@ export default function NewMcqForm({
     })
 
     const onSubmitHandler = async (values: z.infer<typeof formSchema>) => {
-        const transformedObj: any = {
+        const transformedObj: TransformedMCQ = {
             title: 'Introduction to Quantum Physics',
             difficulty: values.difficulty,
             tagId: values.topics,
@@ -129,7 +131,7 @@ export default function NewMcqForm({
             isRandomOptions: false,
             variantMCQs: values.variants.map((variant, index) => ({
                 question: variant.questionText,
-                options: variant.options.reduce((acc: any, option, idx) => {
+                options: variant.options.reduce((acc: Record<number, string>, option, idx) => {
                     acc[idx + 1] = option.optionText
                     return acc
                 }, {}),
@@ -139,19 +141,15 @@ export default function NewMcqForm({
 
         try {
             await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsMcqModalOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -186,7 +184,7 @@ export default function NewMcqForm({
                                                     <FormControl className="">
                                                         <RadioGroupItem
                                                             value={difficulty}
-                                                            className="text-secondary"
+                                                            className="text-[rgb(81,134,114)] border-black"
                                                         />
                                                     </FormControl>
                                                     <FormLabel className="font-normal text-md ">
@@ -272,11 +270,10 @@ export default function NewMcqForm({
                         {fields.map((field, index) => (
                             <Button
                                 key={field.id}
-                                className={`${
-                                    activeVariantIndex === index
-                                        ? 'border-b-4 border-secondary text-secondary text-md'
+                                className={`${activeVariantIndex === index
+                                        ? 'border-b-4 border-[rgb(81,134,114)] text-[rgb(81,134,114)] text-md'
                                         : ''
-                                } rounded-none`}
+                                    } rounded-none`}
                                 variant="ghost"
                                 type="button"
                                 onClick={() => setActiveVariantIndex(index)}
@@ -320,6 +317,7 @@ export default function NewMcqForm({
                                             <RemirrorForForm
                                                 description={field.value}
                                                 onChange={field.onChange}
+                                                onValidationChange={setIsContentValid} // Pass validation callback
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -351,6 +349,7 @@ export default function NewMcqForm({
                                                     >
                                                         <FormControl>
                                                             <RadioGroupItem
+                                                                className="text-black border-black"
                                                                 value={optionIndex.toString()}
                                                             />
                                                         </FormControl>
@@ -388,19 +387,19 @@ export default function NewMcqForm({
 
                                                         {optionFields.length >
                                                             2 && (
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                className="text-red-500"
-                                                                onClick={() =>
-                                                                    removeOption(
-                                                                        optionIndex
-                                                                    )
-                                                                }
-                                                            >
-                                                                X
-                                                            </Button>
-                                                        )}
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    className="text-red-500"
+                                                                    onClick={() =>
+                                                                        removeOption(
+                                                                            optionIndex
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    X
+                                                                </Button>
+                                                            )}
                                                     </div>
                                                 )
                                             )}
@@ -415,7 +414,7 @@ export default function NewMcqForm({
                                         onClick={() =>
                                             appendOption({ optionText: '' })
                                         }
-                                        className="text-left text-secondary font-semibold text-md"
+                                        className="text-left text-[rgb(81,134,114)] font-semibold text-md"
                                     >
                                         + Add Option
                                     </Button>
@@ -424,11 +423,36 @@ export default function NewMcqForm({
                         </>
                     )}
                 </div>
-                <div className="flex flex-col justify-end items-end w-[550px]">
-                    <Button className="" type="submit">
-                        Add Question
-                    </Button>
-                </div>
+                {!isContentValid ? (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex flex-col justify-end items-end w-[550px] cursor-not-allowed opacity-50">
+                                    <Button
+                                        className="bg-success-dark opacity-75"
+                                        type="submit"
+                                        disabled
+                                    >
+                                        Add Question
+                                    </Button>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                         Question content is required. Also image-only questions are not allowed — please include text as well.
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                ) : (
+                    <div className="flex flex-col justify-end items-end w-[550px]">
+                        <Button
+                            className="bg-success-dark opacity-75"
+                            type="submit"
+                        >
+                            Add Question
+                        </Button>
+                    </div>
+                )}
+
             </form>
         </Form>
     )

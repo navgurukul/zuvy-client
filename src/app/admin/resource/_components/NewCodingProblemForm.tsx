@@ -28,6 +28,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
+import {NewCodingProblemFormProps} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -81,16 +82,7 @@ export default function NewCodingProblemForm({
     difficulty,
     offset,
     position,
-}: {
-    tags: any
-    setIsDialogOpen: any
-    setCodingQuestions: any
-    filteredCodingQuestions?: any
-    selectedOptions?: any
-    difficulty?: any
-    offset?: number
-    position?: String
-}) {
+}:NewCodingProblemFormProps) {
     const [testCases, setTestCases] = useState([
         {
             id: 1,
@@ -103,10 +95,11 @@ export default function NewCodingProblemForm({
 
     let outputObjectRef = useRef('' as any);
 
-    function formatFloat(num: any) {
-        num = parseFloat(num);
-        return num % 1 === 0 ? num.toFixed(1) : num;
-    }
+    function formatFloat(num: string | number): string | number {
+    const parsed = parseFloat(num as string);
+    return parsed % 1 === 0 ? parsed.toFixed(1) : parsed;
+}
+
 
     const getAvailableInputTypes = (testCaseIndex: number) => {
         const usedTypes = testCases[testCaseIndex].inputs.map(input => input.type);
@@ -167,10 +160,9 @@ export default function NewCodingProblemForm({
             }
             case 'int': {
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Input",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -178,10 +170,9 @@ export default function NewCodingProblemForm({
             }
             case 'float': {
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Input",
                         description: "Please enter a valid float value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -189,10 +180,9 @@ export default function NewCodingProblemForm({
             }
             case 'bool': {
                 if (value && !/^(true|false)$/.test(value) && !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)) {
-                    toast({
+                    toast.error({
                         title: "Invalid Boolean Input",
                         description: "Please enter either 'true' or 'false'",
-                        className: "fixed bottom-4 right-4 text-start border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -206,7 +196,7 @@ export default function NewCodingProblemForm({
         e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>,
         testCaseIndex: number,
         inputIndex: number,
-        testCases: any[],
+        testCases: any,
         setTestCases: React.Dispatch<React.SetStateAction<any[]>>
     ) => {
         const newValue = e.target.value;
@@ -385,18 +375,16 @@ export default function NewCodingProblemForm({
         switch (type) {
             case 'int': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one integer as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Output",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -404,18 +392,16 @@ export default function NewCodingProblemForm({
             }
             case 'float': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one float value as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Output",
                         description: "Please enter a valid float value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -559,10 +545,9 @@ export default function NewCodingProblemForm({
 
         // Final check to ensure all test cases are valid
         if (formattedData.testCases.length !== testCases.length) {
-            toast({
+            toast.error({
                 title: 'Invalid Test Cases',
                 description: 'Some test cases contain invalid data. Please correct them before submitting.',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             });
             return;
         }
@@ -581,24 +566,22 @@ export default function NewCodingProblemForm({
         try {
             const response = await api.post(`codingPlatform/create-question`, data)
 
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsDialogOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: error?.response?.data?.message || 'An error occurred',
-                className: 'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
 
 
     return (
-        <main className="flex flex-col p-3 w-full items-center">
+        <main className="flex flex-col p-3 w-full items-center text-gray-600">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
@@ -666,7 +649,7 @@ export default function NewCodingProblemForm({
                                     >
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -674,7 +657,7 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -682,7 +665,7 @@ export default function NewCodingProblemForm({
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -784,10 +767,9 @@ export default function NewCodingProblemForm({
                                         ))}
                                         {testCaseIndex === 0 && (
                                             <Button
-                                                variant="outline"
                                                 type="button"
                                                 onClick={() => handleAddInputType(testCase.id)}
-                                                className="mt-2"
+                                                className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                                                 disabled={testCase.inputs.length >= inputTypes.length}
                                             >
                                                 <Plus size={16} className="mr-2" />
@@ -882,9 +864,8 @@ export default function NewCodingProblemForm({
                         ))}
 
                         <Button
-                            variant="outline"
                             type="button"
-                            className="mt-2"
+                            className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                             onClick={handleAddTestCase}
                         >
                             <Plus size={20} className="mr-2" />
@@ -893,7 +874,7 @@ export default function NewCodingProblemForm({
                     </div>
 
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2">
+                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
                             Create Question
                         </Button>
                     </div>

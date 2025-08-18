@@ -13,15 +13,16 @@ import {
 } from '@/components/ui/tooltip'
 import { Button } from '@/components/ui/button'
 import StartAssignmentButton from './StartAssignmentButton'
+import {ClassDatas} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 function SubmissionCard({
     classData,
     status,
     view,
 }: {
-    classData: any
-    status: any
-    view: any
+    classData: ClassDatas
+    status: string
+    view: string
 }) {
     return (
         <Card

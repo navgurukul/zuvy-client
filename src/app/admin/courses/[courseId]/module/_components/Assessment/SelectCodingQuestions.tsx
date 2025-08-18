@@ -4,19 +4,14 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
+import {setSelectedCodingQuestionsProps,SelectTag,SelectQuestion} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const SelectCodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
     type,
     setIsNewQuestionAdded,
-}: {
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<any[]>>
-    selectedQuestions: any[]
-    tags: any
-    type: string
-    setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
-}) => {
+}:setSelectedCodingQuestionsProps) => {
 
     const handleQuestionRemoval = (
         question: { id: number; [key: string]: any }, // Assuming 'id' is a number, other properties can be anything
@@ -30,15 +25,15 @@ const SelectCodingQuestions = ({
 
     return (
         <div className="w-full">
-            {selectedQuestions.map((question: any) => {
-                const tag = tags?.find((tag: any) => tag.id === question.tagId)
+            {selectedQuestions.map((question: SelectQuestion) => {
+                const tag = tags?.find((tag:SelectTag) => tag.id === question.tagId)
 
                 return (
                     <div key={question.id} className="p-5 rounded-sm border-b border-gray-200 mb-4">
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <div className="flex items-center justify-between w-full">
-                                    <h2 className="font-bold truncate">
+                                    <h2 className="font-bold truncate text-[15px] text-gray-600">
                                         {ellipsis(question.title, 25)}
                                     </h2>
                                     <div className="flex gap-2 ml-auto">
@@ -58,7 +53,7 @@ const SelectCodingQuestions = ({
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-gray-600 mt-1 text-left">
+                                <p className="text-gray-600 mt-1 text-[1rem] text-left">
                                     {ellipsis(question.description, 45)}
                                 </p>
                                 <Dialog>

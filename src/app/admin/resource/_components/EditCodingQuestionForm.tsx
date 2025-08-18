@@ -33,16 +33,19 @@ import {
 import { cleanUpValues, getAllCodingQuestions, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { create } from 'domain'
+import {TestCaseInput,TestCases} from "@/app/admin/resource/_components/adminResourceComponentType"
+import { Input as PostcssInput} from 'postcss'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
 const inputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
 const outputTypes = ['str', 'int', 'float', 'arrayOfnum', 'arrayOfStr', 'bool', 'jsonType'] as const
 
-function formatFloat(num: any) {
-    num = parseFloat(num);
-    return num % 1 === 0 ? num.toFixed(1) : num;
+function formatFloat(num: string | number): string {
+    num = parseFloat(num as string);
+    return num % 1 === 0 ? num.toFixed(1) : num.toString();
 }
+
 
 const formSchema = z.object({
   title: z
@@ -108,10 +111,9 @@ export default function EditCodingQuestionForm() {
             }
             case 'int': {
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Input",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -119,10 +121,9 @@ export default function EditCodingQuestionForm() {
             }
             case 'float': {
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Input",
                         description: "Please enter a valid float value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -130,10 +131,9 @@ export default function EditCodingQuestionForm() {
             }
             case 'bool': {
                 if (value && !/^(true|false)$/.test(value) && !/^(t(r(u(e)?)?)?|f(a(l(s(e)?)?)?)?)$/.test(value)) {
-                    toast({
+                    toast.error({
                         title: "Invalid Boolean Input",
                         description: "Please enter either 'true' or 'false'",
-                        className: "fixed bottom-4 right-4 text-start border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -147,18 +147,16 @@ export default function EditCodingQuestionForm() {
         switch (type) {
             case 'int': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one integer as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (!Number.isInteger(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Integer Output",
                         description: "Please enter a valid integer value",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
@@ -166,15 +164,14 @@ export default function EditCodingQuestionForm() {
             }
             case 'float': {
                 if (value.includes(' ')) {
-                    toast({
+                    toast.error({
                         title: "Invalid Output Format",
                         description: "You can only add one float number as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
                     });
                     return false;
                 }
                 if (isNaN(Number(value)) && value !== '') {
-                    toast({
+                    toast.error({
                         title: "Invalid Float Output",
                         description: "Please enter a valid float value",
                         className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
@@ -183,17 +180,17 @@ export default function EditCodingQuestionForm() {
                 }
                 break;
             }
-            case 'str': {
-                if (value.includes(' ')) {
-                    toast({
-                        title: "Invalid Output Format",
-                        description: "You can only add one string as output",
-                        className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
-                    });
-                    return false;
-                }
-                break;
-            }
+            // case 'str': {
+            //     if (value.includes(' ')) {
+            //         toast.error({
+            //             title: "Invalid Output Format",
+            //             description: "You can only add one string as output",
+            //             className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
+            //         });
+            //         return false;
+            //     }
+            //     break;
+            // }
         }
         return true;
     };
@@ -235,7 +232,7 @@ export default function EditCodingQuestionForm() {
 
         const availableTypes = getAvailableInputTypes(0); // Get all input types
         if (availableTypes.length === 0) {
-            toast({
+            toast.error({
                 title: "Cannot Add Input",
                 description: "All input types have been used in this test case.",
                 className: "fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50",
@@ -463,7 +460,7 @@ export default function EditCodingQuestionForm() {
                 selectCodingQuestion[0]?.testCases?.map((testCase: any) => ({
                     id: testCase.id, // Ensure this is correctly mapped
                     input: JSON.stringify(
-                        testCase.inputs.map((input: any) =>
+                        testCase.inputs.map((input: TestCaseInput) =>
                             String(input.parameterValue)
                         )
                     ),
@@ -482,20 +479,16 @@ export default function EditCodingQuestionForm() {
                 data
             )
 
-            toast({
+            toast.success({
                 title: 'Success',
                 description: 'Question Edited Successfully',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
             })
             setIsCodingEditDialogOpen(false)
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description:
                     error?.response?.data?.message || 'An error occurred',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -504,9 +497,9 @@ export default function EditCodingQuestionForm() {
         if (selectCodingQuestion.length > 0) {
           const question = selectCodingQuestion[0];
           
-          const mappedTestCases = question.testCases.map((testCase: any) => ({
+          const mappedTestCases = question.testCases.map((testCase: TestCases) => ({
             id: testCase.id,
-            inputs: testCase.inputs.map((input: any) => ({
+            inputs: testCase.inputs.map((input: TestCaseInput ) => ({
               id: Date.now() + Math.random(),
               type: input.parameterType,
               value: input.parameterType === 'jsonType'
@@ -557,13 +550,13 @@ export default function EditCodingQuestionForm() {
             difficulty: values.difficulty,
             tagId: values.topics,
             constraints: values.constraints,
-            testCases: testCases.map((testCase: any) => {
+            testCases: testCases.map((testCase:any) => {
                 let parameterNameCounter = 0;
 
                 // Group JSON inputs together
                 const jsonInputs = testCase.inputs
-                    .filter((input: any) => input.type === 'jsonType')
-                    .map((input: any) => {
+                    .filter((input: TestCaseInput) => input.type === 'jsonType')
+                    .map((input: TestCaseInput) => {
                         try {
                             return JSON.parse(input.value);
                         } catch (e) {
@@ -575,8 +568,8 @@ export default function EditCodingQuestionForm() {
 
                 // Process non-JSON inputs
                 const otherInputs = testCase.inputs
-                    .filter((input: any) => input.type !== 'jsonType')
-                    .flatMap((input: any) => {
+                    .filter((input: TestCaseInput) => input.type !== 'jsonType')
+                    .flatMap((input: TestCaseInput) => {
                         const processedValue = processInput(input.value, input.type);
 
                         if (processedValue === null) {
@@ -652,7 +645,7 @@ export default function EditCodingQuestionForm() {
                             processedOutput = JSON.parse(testCase.output.value);
                         }
                         catch (e) {
-                            toast({
+                            toast.error({
                                 title: "Invalid Output Format",
                                 description: "Please enter a valid array format",
                             })
@@ -682,7 +675,7 @@ export default function EditCodingQuestionForm() {
     return (
         <main className="flex flex-col p-3 w-full items-center ">
             <div
-                className="flex align-middle self-start text-secondary cursor-pointer"
+                className="flex align-middle self-start text-[rgb(81,134,114)] cursor-pointer"
                 onClick={() => setIsCodingEditDialogOpen(false)}
             >
                 <p>
@@ -694,7 +687,7 @@ export default function EditCodingQuestionForm() {
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleEditSubmit)}
-                    className="w-2/4 flex flex-col gap-4"
+                    className="w-2/4 flex flex-col gap-4 text-gray-600"
                 >
                     <FormField
                         control={form.control}
@@ -758,7 +751,7 @@ export default function EditCodingQuestionForm() {
                                     >
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" />
+                                                <RadioGroupItem value="Easy" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
@@ -766,7 +759,7 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" />
+                                                <RadioGroupItem value="Medium" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
@@ -774,7 +767,7 @@ export default function EditCodingQuestionForm() {
                                         </FormItem>
                                         <FormItem className="flex items-center space-x-3 space-y-0">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" />
+                                                <RadioGroupItem value="Hard" className="text-black border-black" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -974,9 +967,8 @@ export default function EditCodingQuestionForm() {
                         ))}
 
                         <Button
-                            variant="outline"
                             type="button"
-                            className="mt-2"
+                            className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
                             onClick={handleAddTestCase}
                         >
                             <Plus size={20} className="mr-2" />
@@ -986,7 +978,7 @@ export default function EditCodingQuestionForm() {
 
                     <div className="flex justify-end gap-3">
 
-                        <Button type="submit">Save</Button>
+                        <Button type="submit" className="bg-success-dark opacity-75">Save</Button>
                     </div>
                 </form>
             </Form>

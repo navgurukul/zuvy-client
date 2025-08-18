@@ -13,21 +13,7 @@ import {
 } from '@/components/ui/popover'
 import { Check, ChevronDown } from 'lucide-react'
 import axios, { AxiosError } from 'axios'
-
-export interface RadioCheckboxProps {
-    fetchSessions: (data: any) => void
-    offset: number
-    position: any
-    setTotalSessions: any
-    setPages: any
-    setLastPage: any
-    debouncedSearch?: string
-}
-
-interface Option {
-    label: string
-    value: string
-}
+import{RadioCheckboxProps,Option,UpcomingClassResponse,CompletedClassResponse}from '@/app/instructor/_components/componentInstructorTypes'
 
 const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     fetchSessions,
@@ -38,8 +24,8 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
     setLastPage,
     debouncedSearch,
 }: RadioCheckboxProps) => {
-    const [batches, setBatches] = useState<any[]>([])
-    const [batchId, setBatchId] = useState<any[]>([])
+    const [batches, setBatches] = useState<Option[]>([])
+    const [batchId, setBatchId] = useState<Option[]>([])
     const [timeFrame, setTimeFrame] = useState<string>('all')
     const [weeks, setWeeks] = useState<number>(0)
     const pathname = usePathname()
@@ -50,7 +36,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
         try {
             const response = await api.get(`/instructor/batchOfInstructor`)
             const transformedData = response.data.data.map(
-                (item: { batchId: any; batchName: any }) => ({
+                (item: { batchId:number; batchName:string}) => ({
                     value: item.batchId.toString(),
                     label: item.batchName,
                 })
@@ -59,29 +45,25 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
             setBatchId([transformedData[0]])
             setBatches(transformedData)
         } catch (error) {
-            toast({
+            toast.error({
                 title: 'Error fetching Batches:',
                 description:
                     'There is an error fetching batches: contact Admin.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }, [])
-
     const getSessions = useCallback(
         async (offset: number) => {
             try {
                 let ids = ''
                 batchId.map((item) => (ids += '&batchId=' + item.value))
-                const response = await api.get(
+                const response = await api.get<{ data: UpcomingClassResponse }>(
                     `/instructor/getAllUpcomingClasses?limit=${position}&offset=${offset}&timeFrame=${timeFrame}${ids}`
                 )
-
                 fetchSessions(response.data.data.responses)
                 setTotalSessions(response.data.data.totalUpcomingClasses)
                 setPages(response.data.data.totalUpcomingPages)
-                setLastPage(response.data.data.totalUpcomingPages)
+                setLastPage(response.data.data.totalUpcomingClasses)
             } catch (error) {
                 let errorMessage = 'An unknown error occurred'
                 // Type checking for error
@@ -92,12 +74,10 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                 } else if (error instanceof Error) {
                     errorMessage = error.message
                 }
-                toast({
+                toast.error({
                     title: 'Error fetching Classes:',
                     description: errorMessage,
                     // 'There is an error fetching classes: contact Admin.',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         },
@@ -118,7 +98,7 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                         debouncedSearch
                     )}`
                 }
-                const response = await api.get(baseUrl)
+                const response = await api.get<{ data: CompletedClassResponse}>(baseUrl)
                 fetchSessions(response.data.data.classDetails)
                 setTotalSessions(response.data.data.totalCompletedClass)
                 setPages(response.data.data.totalPages)
@@ -134,11 +114,9 @@ const RadioCheckbox: React.FC<RadioCheckboxProps> = ({
                     errorMessage = error.message
                 }
 
-                toast({
+                toast.error({
                     title: 'Error:',
                     description: errorMessage,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         },

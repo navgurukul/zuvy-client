@@ -9,22 +9,18 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
+import {selectedOpenEndedQuestionsProps,SelectTag} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const SelectOpenEndedQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
     tags,
     type,
-}: {
-    setSelectedQuestions: React.Dispatch<React.SetStateAction<any[]>>
-    selectedQuestions: any[]
-    tags: any
-    type: string
-}) => {
+}:selectedOpenEndedQuestionsProps) => {
     return (
         <div className="w-full">
             {selectedQuestions.map((question: any) => {
-                const tag = tags?.find((tag: any) => tag.id === question.tagId)
+                const tag = tags?.find((tag: SelectTag ) => tag.id === question.tagId)
 
                 return (
                     <div
@@ -34,7 +30,7 @@ const SelectOpenEndedQuestions = ({
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <div className="flex items-center justify-between w-full">
-                                    <h2 className="font-bold text-lg truncate">
+                                    <h2 className="font-bold text-[15px] truncate text-gray-600">
                                         {ellipsis(question.question, 30)}
                                     </h2>
                                     <div className="flex gap-2 ml-auto">
@@ -58,7 +54,7 @@ const SelectOpenEndedQuestions = ({
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-gray-600 mt-1 text-left">
+                                <p className="text-gray-600 mt-1 text-[1rem] text-left">
                                     {ellipsis(question.question, 60)}
                                 </p>
                                 <Dialog>

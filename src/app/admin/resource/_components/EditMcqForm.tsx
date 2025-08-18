@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/tooltip'
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import RemirrorForForm from '@/app/admin/resource/_components/RemirrorForForm'
+import {Tag,QuizDataType} from "@/app/admin/resource/_components/adminResourceComponentType"
 
 type Props = {}
 
@@ -65,9 +66,9 @@ const EditMcqForm = ({
     setStoreQuizData,
     getAllQuizQuesiton,
 }: {
-    tags: any[]
+    tags: Tag[]
     closeModal: () => void
-    setStoreQuizData: any
+    setStoreQuizData:any;
     getAllQuizQuesiton: any
 }) => {
     const { quizQuestionId } = getEditQuizQuestion()
@@ -80,6 +81,7 @@ const EditMcqForm = ({
 
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
+    const [isContentValid, setIsContentValid] = useState<boolean>(true) // New state
     const [selectedTag, setSelectedTag] = useState<{
         id: number
         tagName: String
@@ -150,22 +152,18 @@ const EditMcqForm = ({
             data: reqBody,
         })
             .then((res) => {
-                toast({
+                toast.success({
                     title: 'Success',
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 setDeleteModalOpen(false)
                 refetch()
             })
             .catch((error) => {
-                toast({
+                toast.error({
                     title: 'Error',
                     description:
                         error.response?.data?.message || 'An error occurred',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             })
     }
@@ -228,22 +226,18 @@ const EditMcqForm = ({
                 await api
                     .post(`/Content/quiz/add/variants`, reqBody)
                     .then((res) => {
-                        toast({
+                        toast.success({
                             title: 'Success',
                             description: res.data.message,
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                         })
                     })
 
                 setIsVariantAdded(false)
                 await refetch()
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: error?.data?.message || 'An error occurred',
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
                 })
             }
         } else {
@@ -269,7 +263,7 @@ const EditMcqForm = ({
                 await api
                     .post(`/Content/editquiz`, transformedObj)
                     .then((res) => {
-                        toast({
+                        toast.success({
                             title: 'Success',
                             description: res?.data.message,
                             className:
@@ -278,7 +272,7 @@ const EditMcqForm = ({
                     })
                 await refetch()
             } catch (error: any) {
-                toast({
+                toast.error({
                     title: 'Error',
                     description: error?.data?.message || 'An error occurred',
                     className:
@@ -319,7 +313,7 @@ const EditMcqForm = ({
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmitHandler)}
-                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center "
+                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center text-gray-600"
             >
                 <FormField
                     control={form.control}
@@ -346,7 +340,7 @@ const EditMcqForm = ({
                                                     <FormControl className="">
                                                         <RadioGroupItem
                                                             value={difficulty}
-                                                            className="text-secondary"
+                                                            className="text-[rgb(81,134,114)] border-black"
                                                         />
                                                     </FormControl>
                                                     <FormLabel className="font-normal text-md ">
@@ -429,7 +423,7 @@ const EditMcqForm = ({
                                     key={field.id}
                                     className={`${
                                         activeVariantIndex === index
-                                            ? 'border-b-4 border-secondary text-secondary text-md'
+                                            ? 'border-b-4 border-[rgb(81,134,114)] text-[rgb(81,134,114)] text-md'
                                             : ''
                                     } rounded-none`}
                                     variant="ghost"
@@ -466,6 +460,7 @@ const EditMcqForm = ({
                                             <RemirrorForForm
                                                 description={field.value}
                                                 onChange={field.onChange}
+                                                onValidationChange={setIsContentValid} // Pass validation callback
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -510,6 +505,7 @@ const EditMcqForm = ({
                                                         >
                                                             <FormControl>
                                                                 <RadioGroupItem
+                                                                    className="text-black border-black"
                                                                     value={optionIndex.toString()}
                                                                 />
                                                             </FormControl>
@@ -568,7 +564,7 @@ const EditMcqForm = ({
                                             onClick={() =>
                                                 appendOption({ optionText: '' })
                                             }
-                                            className="text-left text-secondary font-semibold text-md"
+                                            className="text-left text-[rgb(81,134,114)] font-semibold text-md"
                                         >
                                             + Add Option
                                         </Button>
@@ -614,7 +610,11 @@ const EditMcqForm = ({
                             />
                         </>
                     )}
-                    <Button className="" type="submit">
+                    <Button 
+                        className="bg-success-dark opacity-75" 
+                        type="submit"
+                        disabled={!isContentValid} // Disable button if content is invalid
+                    >
                         {isVariantAdded ? 'Add Variant' : 'Save Question'}
                     </Button>
                 </div>

@@ -40,6 +40,7 @@ import {
 import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
 import { Checkbox } from '@/components/ui/checkbox'
 import PreviewMCQ from '../_components/PreviewMcq'
+import { renderQuestionPreview } from '@/utils/quizHelpers'
 
 export const columns: ColumnDef<quiz>[] = [
     {
@@ -86,7 +87,7 @@ export const columns: ColumnDef<quiz>[] = [
 
         cell: ({ row }) => {
             const question = row.original?.quizVariants[0]?.question
-            const truncatedQuestion = ellipsis(question, 70)
+
             return (
                 <div
                     className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
@@ -96,10 +97,7 @@ export const columns: ColumnDef<quiz>[] = [
                         WebkitBoxOrient: 'vertical',
                     }}
                 >
-                    <span
-                        dangerouslySetInnerHTML={{ __html: truncatedQuestion }}
-                    />
-                    {/* {question} */}
+                    {renderQuestionPreview(question)}
                 </div>
             )
         },

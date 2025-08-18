@@ -6,15 +6,9 @@ import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getStoreStudentDataNew } from '@/store/store'
 import { getEditStudent, getStudentData } from '@/store/store'
+import{ComboxAlertDialogProps} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 
-interface AlertDialogProps {
-    name: string
-    email: string
-    userId: number
-    bootcampId: number
-}
-
-export const EditModal: React.FC<AlertDialogProps> = ({
+export const EditModal: React.FC<ComboxAlertDialogProps> = ({
     name,
     email,
     userId,
@@ -35,16 +29,14 @@ export const EditModal: React.FC<AlertDialogProps> = ({
     const { isStudent, setIsStudent } = getEditStudent()
     const { studentData, setStudentData } = getStudentData()
 
-    async function editStudentHandler(userId: any, bootcampId: any) {
+    async function editStudentHandler(userId: number, bootcampId: string) {
         try {
             await api
                 .patch(`/bootcamp/updateUserDetails/${userId}`, studentData)
                 .then((res) => {
-                    toast({
+                    toast.success({
                         title: res.data.status,
                         description: res.data.message,
-                        className:
-                            'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                     })
                     setIsStudent(0)
                     fetchStudentsHandler({
@@ -61,14 +53,11 @@ export const EditModal: React.FC<AlertDialogProps> = ({
                     setIsOpen(false)
                 })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
-            setIsOpen(false)
         }
     }
 

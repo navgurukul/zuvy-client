@@ -20,17 +20,9 @@ import {
     getStoreStudentData,
     getIsRowSelected,
 } from '@/store/store'
+import{DeleteAlertDialogProps} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 
-interface AlertDialogProps {
-    title: string
-    description: string
-    userId: any
-    bootcampId: number
-    fetchStudentData?: any
-    setSelectedRows?: any
-}
-
-export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
+export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     title,
     description,
     userId,
@@ -55,11 +47,9 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
             let url = `/student/{userId}/${bootcampId}?`
             url += 'userId=' + userId.join('&userId=')
             await api.delete(url).then((res) => {
-                toast({
+                toast.success({
                     title: 'User Deleted Successfully!',
                     description: res.data.message,
-                    className:
-                        'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                 })
                 fetchStudentData && fetchStudentData()
                 fetchStudentsHandler({
@@ -77,12 +67,10 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
                 setIsRowUnSelected(!isRowUnSelected)
             })
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: 'Failed',
                 description:
                     error.response?.data?.message || 'An error occurred.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
@@ -102,7 +90,7 @@ export const AlertDialogDemo: React.FC<AlertDialogProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel className="!text-gray-600 hover:border-[rgb(81,134,114)]">Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-red-500"
                         onClick={() => deleteStudentHandler(userId, bootcampId)}

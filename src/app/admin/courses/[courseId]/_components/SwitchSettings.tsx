@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {ToggleSwitchProps, ApiResponse} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
-interface ToggleSwitchProps {
-    onToggle: (isChecked: boolean) => void
-    bootcampId: number
-}
 
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
     onToggle,
@@ -19,7 +16,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
 
     const fetchBootCampSettings = async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<ApiResponse>(
                 `/bootcamp/bootcampSetting/${bootcampId}`
             )
             const type = response.data.bootcampSetting[0].type
@@ -37,21 +34,8 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
         try {
             await api.put(`/bootcamp/bootcampSetting/${bootcampId}`, {
                 type,
-            })
-            toast({
-                title: 'Success',
-                description: `Bootcamp type updated to ${type}`,
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
-            })
+            })  
         } catch (error) {
-            toast({
-                title: 'Error',
-                description:
-                    'Error updating bootcamp settings. Please try again.',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
-            })
         }
     }
 
