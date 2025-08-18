@@ -515,7 +515,8 @@ const AddArticle = ({
                                                                 !disabledUploadButton
                                                             }
                                                         >
-                                                            Upload PDF
+                                                            {/* Upload PDF */}
+                                                            {isSaving ? 'Saving...' : 'Save'}
                                                         </Button>
                                                     </div>
                                                 )}

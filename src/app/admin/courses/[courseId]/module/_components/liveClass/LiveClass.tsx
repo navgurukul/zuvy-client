@@ -7,87 +7,7 @@ import {LiveClassProps} from "@/app/admin/courses/[courseId]/module/_components/
 
 
 const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps) => {
-    const session= content?.sessionDetails?.[0];
-
-    const [isJoinDisabled, setIsJoinDisabled] = useState(true);
-    const [currentStatus, setCurrentStatus] = useState<'upcoming' | 'ongoing' | 'completed'>(session?.status);
-
-
-  useEffect(() => {
-  if (!session) return;
-
-  const startTime = new Date(session.startTime).getTime();
-  const now = new Date().getTime();
-  const endTime = new Date(session.endTime).getTime();
-  const THIRTY_MIN = 30 * 60 * 1000;
-
-  const timeUntil30MinBefore = startTime - now - THIRTY_MIN;
-
-  if (timeUntil30MinBefore > 0) {
-    // Still more than 30 min left → wait until 30 min before
-    setIsJoinDisabled(true);
-    setCurrentStatus('upcoming');
-
-    const waitUntil30Min = setTimeout(() => {
-      setCurrentStatus('upcoming');
-      const enableAtStart = setTimeout(() => {
-        setIsJoinDisabled(false);
-        setCurrentStatus('ongoing');
-
-        //Schedule session end
-        const endTimeout = setTimeout(() => {
-          setIsJoinDisabled(true);
-          setCurrentStatus('completed');
-        }, endTime - startTime);
-
-        return () => clearTimeout(endTimeout);
-      }, THIRTY_MIN);
-
-      return () => clearTimeout(enableAtStart);
-    }, timeUntil30MinBefore);
-
-    return () => clearTimeout(waitUntil30Min);
-  }
-
-  if (now < startTime) {
-    // We're already in 30-min window → wait until session start
-    setIsJoinDisabled(true);
-    setCurrentStatus('upcoming');
-
-    const waitUntilStart = setTimeout(() => {
-      setIsJoinDisabled(false);
-      setCurrentStatus('ongoing');
-
-      // Schedule session end
-      const endTimeout = setTimeout(() => {
-        setIsJoinDisabled(true);
-        setCurrentStatus('completed');
-      }, endTime - startTime);
-
-      return () => clearTimeout(endTimeout);
-    }, startTime - now);
-
-    return () => clearTimeout(waitUntilStart);
-  }
-
-  // Session already started
-  if (now < endTime) {
-    // Ongoing
-    setIsJoinDisabled(false);
-    setCurrentStatus('ongoing');
-
-    const endTimeout = setTimeout(() => {
-      setIsJoinDisabled(true);
-      setCurrentStatus('completed');
-    }, endTime - now);
-
-    return () => clearTimeout(endTimeout);
-  } else {
-    // Completed
-    setIsJoinDisabled(true);
-    setCurrentStatus('completed');
-  }
-}, [session]);
+    const session = content?.sessionDetails?.[0]
 
 
     const formatDate = (dateString: string) => {
@@ -110,7 +30,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
     };
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        switch (status.toLowerCase()) {
             case 'upcoming':
                 return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'ongoing':
@@ -156,8 +76,8 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                             <h3 className="font-semibold text-lg text-left text-primary leading-tight mb-2">
                                 {content.title}
                             </h3>
-                            {content.description && (
-                                <p className="text-sm text-muted-foreground mb-3">
+                            {content?.description && (
+                                <p className="text-sm text-left text-muted-foreground mb-3">
                                     {content.description}
                                 </p>
                             )}
@@ -165,12 +85,12 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                                 <Badge
                                     variant="secondary"
                                     className={`${getStatusColor(
-                                        currentStatus
+                                        session.status
                                     )} font-medium px-3 py-1 flex items-center gap-1`}
                                 >
-                                    {getStatusIcon(currentStatus)}
-                                    {currentStatus.charAt(0).toUpperCase() +
-                                        currentStatus.slice(1)}
+                                    {getStatusIcon(session.status)}
+                                    {session.status.charAt(0).toUpperCase() +
+                                        session.status.slice(1)}
                                 </Badge>
                             </div>
                         </div>
@@ -202,9 +122,10 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                         </div>
                     </div>
 
-                    {/* Meeting Action Section */}
                     <div className="pt-4 border-t border-border">
-                        {currentStatus === 'completed' && session.s3link && session.s3link !== 'not found' ? (
+                        {session.status.toLowerCase() === 'completed' &&
+                        session.s3link &&
+                        session.s3link !== 'not found' ? (
                             <div className="space-y-3">
                                 <h4 className="text-sm font-medium text-primary flex items-center gap-2">
                                     <Video className="w-4 h-4" />
@@ -222,27 +143,25 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                             </div>
                         ) : (
                             <Button
-                              className={`w-full font-medium py-2.5 transition-all duration-200 bg-success-dark text-white ${
-                                ((currentStatus === 'upcoming' && isJoinDisabled) ||
-                                (currentStatus === 'completed' && (!session.s3link || session.s3link === 'not found')))
-                                ? 'opacity-50 cursor-not-allowed'
-                                : ''
-                            }`}
-                            onClick={() => {
-                            if ((isJoinDisabled && currentStatus === 'upcoming') ||
-                               (currentStatus === 'completed' && (!session.s3link || session.s3link === 'not found'))) return;
-                               window.open(session.hangoutLink, '_blank');
-                            }}
+                                className={`w-full font-medium py-2.5 transition-all duration-200 bg-success-dark text-white ${
+                                    session.status.toLowerCase() !== 'ongoing'
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : ''
+                                }`}
+                                onClick={() => {
+                                    if (session.status.toLowerCase() !== 'ongoing') return
+                                    window.open(session.hangoutLink, '_blank')
+                                }}
                             >
                                 <Video className="w-4 h-4 mr-2 text-white" />
-                                <span className='text-white'>
-                                    {currentStatus === 'completed'
+                                <span className="text-white">
+                                    {session.status.toLowerCase() === 'completed'
                                         ? 'Recording Not Available'
-                                        : currentStatus === 'ongoing'
-                                            ? 'Join Live Meeting'
-                                            : 'Join Meeting'}
+                                        : session.status.toLowerCase() === 'ongoing'
+                                          ? 'Join Live Meeting'
+                                          : 'Join Meeting'}
                                 </span>
-                                {currentStatus !== 'completed' && (
+                                {session.status.toLowerCase() !== 'completed' && (
                                     <ExternalLink className="w-3 h-3 ml-2" />
                                 )}
                             </Button>
