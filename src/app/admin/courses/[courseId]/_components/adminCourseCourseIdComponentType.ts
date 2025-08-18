@@ -1,5 +1,3 @@
-
-
 // AddStudentsModal
 export type AddStudentsModalProps = {
   id: number;
@@ -254,15 +252,62 @@ export type PraticeProblemProps = {
 
 
 // RecordingCard
-export interface StudentsInfo {
-    total_students: number
-    present: number
-    s3link: string
-}
-export interface DisplayAttendance {
-    status: string
+export type DisplayAttendance = {
+    success: boolean
+    data: {
+        session: {
+            id: number
+            meetingId: string
+            hangoutLink: string
+            creator: string
+            startTime: string
+            endTime: string
+            batchId: number
+            secondBatchId: number | null
+            bootcampId: number
+            moduleId: number
+            chapterId: number
+            title: string
+            s3link: string | null
+            recurringId: string | null
+            status: string
+            version: string | null
+            isZoomMeet: boolean
+            zoomStartUrl: string | null
+            zoomPassword: string | null
+            zoomMeetingId: string | null
+            hasBeenMerged: string | null
+            isParentSession: string | null
+            isChildSession: string | null
+            invitedStudents: {
+                email: string
+                userId: number
+                name?: string
+            }[]
+            studentAttendanceRecords: {
+                id: number
+                userId: number
+                batchId: number
+                bootcampId: number
+                sessionId: number
+                attendanceDate: string
+                status: string
+                version: string | null
+                duration: number
+                createdAt: string
+                email: string
+                name: string
+            }[]
+        }
+        analytics: {
+            totalStudents: number
+            present: number
+            absent: number
+            recordedAttendanceEntries: number
+            missingAttendanceEntries: number
+        }
+    }
     message: string
-    studentsInfo: StudentsInfo
 }
 
 // SubmissionComponent
@@ -292,3 +337,4 @@ export interface ToggleSwitchProps {
     onToggle: (isChecked: boolean) => void
     bootcampId: string
 }
+
