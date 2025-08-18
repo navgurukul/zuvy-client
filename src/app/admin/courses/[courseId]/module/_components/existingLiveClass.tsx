@@ -39,7 +39,7 @@ const ExistingLiveClass = ({ fetchingChapters, onClose }: ExistingLiveClassProps
             const res = await api.get(
                 `/classes/bootcamp/${param.courseId}/classes?limit=${position}&offset=${offset}`
             )
-            setClasses(res.data.data.classes)
+            setClasses(res.data.classes)
         } catch (err) {
             console.error('Failed to fetch classes', err)
         }
