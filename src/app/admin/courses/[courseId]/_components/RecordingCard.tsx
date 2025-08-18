@@ -26,7 +26,7 @@ import { ellipsis } from '@/lib/utils'
 import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import { useEffect, useState } from 'react'
-import {ClassDatas,DisplayAttendance} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import { ClassDatas, DisplayAttendance } from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 
 function RecordingCard({
@@ -37,63 +37,65 @@ function RecordingCard({
     isAdmin: Boolean
 }) {
     // misc
-    const isVideo = classData.s3link
+    const [classDetails, setClassDetails] =
+        useState<DisplayAttendance | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
+
+    const isVideo = classDetails?.data?.session?.s3link
 
     let embedUrl = ''
 
     // Check if classData.s3link is truthy
     if (isVideo) {
         // Extract video ID from classData.s3link
-        const videoId = classData.s3link?.split('/d/')[1]?.split('/view')[0]
+        const videoId =
+            classDetails?.data?.session.s3link?.split('/d/')[1]?.split('/view')[0]
 
         // Construct embeddable URL
         embedUrl = `https://drive.google.com/file/d/${videoId}/preview`
     }
 
-    const [displayAttendance, setDisplayAttendance] =
-        useState<DisplayAttendance | null>(null)
-
-    // func
-
+    // Get Class Details
     async function handleClassDetails() {
+        setIsLoading(true)
         try {
             const response = await api.get(
                 `/classes/analytics/${classData?.id}`
             )
-            setDisplayAttendance(response.data)
+            setClassDetails(response.data)
         } catch (err) {
             console.error(err)
+        } finally {
+            setIsLoading(false)
         }
     }
 
-    const absentStudents =
-        (displayAttendance?.studentsInfo?.total_students ?? 0) -
-        (displayAttendance?.studentsInfo?.present ?? 0)
+    const absentStudents = classDetails?.data?.analytics?.absent
 
-    const presentStudents = displayAttendance?.studentsInfo?.present
+    const presentStudents = classDetails?.data?.analytics?.present
 
-    const isWithin12Hours = () => {
+    const isWithin24Hours = () => {
         if (!classData.endTime) return false
         const classEndTime = new Date(classData.endTime)
         const now = new Date()
         const timeDiff = now.getTime() - classEndTime.getTime()
         const hoursDiff = timeDiff / (1000 * 60 * 60)
-        return hoursDiff < 12
+        return hoursDiff < 24
     }
 
-    const within12Hours = isWithin12Hours()
+    const within24Hours = isWithin24Hours()
 
     const handleViewRecording = () => {
         if (isVideo) {
             if (
-                classData.s3link === 'not found' ||
-                !classData.s3link.startsWith('https')
+                classDetails?.data?.session?.s3link === 'not found' ||
+                !classDetails?.data?.session?.s3link?.startsWith('https')
             ) {
                 toast.error({
                     title: 'Recording not yet updated',
                 })
             } else {
-                window.open(classData.s3link, '_blank')
+                window.open(classDetails?.data?.session?.s3link, '_blank')
             }
         } else {
             toast.error({
@@ -103,37 +105,60 @@ function RecordingCard({
     }
 
     const handleAttendance = async () => {
+        if (!classDetails?.data) {
+            toast.error({
+                title: 'Class details not available.',
+            })
+            return
+        }
+
         try {
-            const response = await api.get(
-                `/classes/getAttendance/${classData.meetingId}`
+            const { studentAttendanceRecords, invitedStudents, title } =
+                classDetails.data.session
+
+            const attendanceMap = new Map(
+                studentAttendanceRecords.map((rec) => [rec.userId, rec])
             )
-            const attendanceData = response.data.attendanceSheet
-            if (!Array.isArray(attendanceData) || attendanceData.length === 0) {
-                throw new Error(
-                    'Attendance data is not in the expected format or is empty.'
-                )
+
+            const attendanceData = invitedStudents.map((student) => {
+                const record = attendanceMap.get(student.userId)
+                return {
+                    userId: student.userId,
+                    email: student.email,
+                    duration: record ? record.duration : 0,
+                    attendance: record ? record.status : 'absent',
+                }
+            })
+
+            if (attendanceData.length === 0) {
+                toast.error({
+                    title: 'No attendance data to download.',
+                })
+                return
             }
+
             const headers = Object.keys(attendanceData[0])
             const csvContent = `${headers.join(',')}\n${attendanceData
-                .map((row) => headers.map((header) => row[header]).join(','))
+                .map((row: any) =>
+                    headers.map((header) => row[header]).join(',')
+                )
                 .join('\n')}`
-            const encodedUri = encodeURI(csvContent)
+
+            const encodedUri =
+                'data:text/csv;charset=utf-8,' + encodeURI(csvContent)
             const link = document.createElement('a')
-            link.setAttribute(
-                'href',
-                'data:text/csv;charset=utf-8,' + encodedUri
-            )
-            link.setAttribute('download', `${classData.title}_attendance.csv`)
+            link.setAttribute('href', encodedUri)
+            link.setAttribute('download', `${title}_attendance.csv`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
         } catch (error) {
             console.error(
-                'Error fetching or processing attendance data:',
+                'Error processing or downloading attendance data:',
                 error
             )
             toast.error({
-                title: 'Error fetching attendance data',
+                title: 'Error generating attendance data',
             })
         }
     }
@@ -148,21 +173,35 @@ function RecordingCard({
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <h3 className="font-semibold text-lg">
-                                        {ellipsis(classData.title, 30)}
+                                        {ellipsis(
+                                            classDetails?.data?.session
+                                                ?.title ?? classData.title,
+                                            30
+                                        )}
                                     </h3>
                                 </TooltipTrigger>
                                 <TooltipContent className="font-semibold">
-                                    {classData.title}
+                                    {classDetails?.data?.session?.title ??
+                                        classData.title}
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
                     </p>
                     <div className="text-[15px] flex font-semibold capitalize items-center">
-                        <Moment format="D MMMM">{classData.startTime}</Moment>
+                        <Moment format="D MMMM">
+                            {classDetails?.data?.session?.startTime ??
+                                classData.startTime}
+                        </Moment>
                         <p className="mr-2">,</p>
-                        <Moment format="hh:mm A">{classData.startTime}</Moment>
+                        <Moment format="hh:mm A">
+                            {classDetails?.data?.session?.startTime ??
+                                classData.startTime}
+                        </Moment>
                         <p className="mx-2">-</p>
-                        <Moment format="hh:mm A">{classData.endTime}</Moment>
+                        <Moment format="hh:mm A">
+                            {classDetails?.data?.session?.endTime ??
+                                classData.endTime}
+                        </Moment>
                     </div>
                 </div>
             </div>
@@ -176,71 +215,70 @@ function RecordingCard({
                         <ChevronRight size={15} />
                     </div>
                 ) : (<Sheet>
-                    <div className={`flex items-center ${isVideo === 'not found' ||
-                        presentStudents === 0 ||
-                        within12Hours
+                    <div className={`flex items-center ${classData.s3link ===
+                        'not found' || !classData?.s3link ||
+                        within24Hours
                         ? 'cursor-not-allowed'
                         : 'cursor-pointer'
                         }`}>
-                        <TooltipProvider>                                
+                        <TooltipProvider>
                             <SheetTrigger
-                            disabled={
-                                isVideo === 'not found' ||
-                                presentStudents === 0 ||
-                                within12Hours
-                            }
-                            className={
-                                isVideo === 'not found' ||
-                                    presentStudents === 0 ||
-                                    within12Hours
-                                    ? 'cursor-not-allowed'
-                                    : 'cursor-pointer'
-                            }
-                        >
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <div className="inline-block">                                                
-                                        <Button
-                                        variant="ghost"
-                                        className={`flex gap-2 items-center ${isVideo === 'not found' ||
-                                            presentStudents === 0 ||
-                                            within12Hours
-                                            ? 'cursor-not-allowed'
-                                            : ''
-                                            }`}
-                                        onClick={handleClassDetails}
-                                        disabled={
-                                            isVideo ===
-                                            'not found' ||
-                                            presentStudents === 0 ||
-                                            within12Hours
-                                        }
-                                    >
-                                        Class Details
-                                    </Button>
-                                    </div>
-                                </TooltipTrigger>
-                                {(isVideo === 'not found' ||
-                                    presentStudents === 0) && (
+                                disabled={
+                                    classData.s3link ===
+                                    'not found' || !classData?.s3link ||
+                                    within24Hours
+                                }
+                                className={
+                                    classData.s3link ===
+                                        'not found' || !classData?.s3link ||
+                                        within24Hours
+                                        ? 'cursor-not-allowed'
+                                        : 'cursor-pointer'
+                                }
+                            >
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="inline-block">
+                                            <Button
+                                                variant="ghost"
+                                                className={`flex gap-2 items-center ${classData?.s3link ===
+                                                    'not found' || !classData?.s3link ||
+                                                    within24Hours
+                                                    ? 'cursor-not-allowed'
+                                                    : ''
+                                                    }`}
+                                                onClick={handleClassDetails}
+                                                disabled={
+                                                    classData.s3link ===
+                                                    'not found' || !classData?.s3link ||
+                                                    within24Hours
+                                                }
+                                            >
+                                                Class Details
+                                            </Button>
+                                        </div>
+                                    </TooltipTrigger>
+                                    {(classData.s3link === 'not found' ||
+                                        presentStudents === 0) && (
+                                            <TooltipContent className="font-semibold">
+                                                Recording is not available or
+                                                attendance is 0
+                                            </TooltipContent>
+                                        )}
+                                    {within24Hours && (
                                         <TooltipContent className="font-semibold">
-                                            Recording is not available and
-                                            present students are 0
+                                            Class details will be updated 24 hours after the class ends.
                                         </TooltipContent>
                                     )}
-                                {within12Hours && (
-                                    <TooltipContent className="font-semibold">
-                                        Class details will be updated 12 hours after the class ends.
-                                    </TooltipContent>
-                                )}
-                            </Tooltip>
-                        </SheetTrigger>                            
+                                </Tooltip>
+                            </SheetTrigger>
                         </TooltipProvider>
                         <ChevronRight
                             size={15}
                             className={
-                                isVideo === 'not found' ||
+                                classData.s3link === 'not found' ||
                                     presentStudents === 0 ||
-                                    within12Hours
+                                    within24Hours
                                     ? 'text-muted-foreground opacity-50'
                                     : ''
                             }
@@ -250,7 +288,7 @@ function RecordingCard({
                         <SheetHeader>
                             <SheetTitle>
                                 <h1 className="mb-10 text-lg text-start">
-                                    {classData.title}
+                                    {classDetails?.data?.session?.title}
                                 </h1>
                             </SheetTitle>
                             <SheetDescription>
@@ -271,25 +309,23 @@ function RecordingCard({
                                     </div>
                                 ) : (
                                     <p className="mb-5">
-                                        Video is under processing...Please
-                                        check after some time
+                                        Recording Not Available
                                     </p>
                                 )}
-                                <p className="text-md text-start">
-                                    {classData.description}
-                                </p>
                                 <h3 className="mb-3 font-bold mt-3 text-[15px]">
                                     Attendance Information
                                 </h3>
-                                {displayAttendance ? (
+                                {isLoading ? (
+                                    <p className="my-5">Loading...</p>
+                                ) : classDetails ? (
                                     <div className="flex mb-5">
                                         <div className="flex-grow basis-0">
                                             <p>Total Students</p>
                                             <p>
                                                 {
-                                                    displayAttendance
-                                                        ?.studentsInfo
-                                                        ?.total_students
+                                                    classDetails?.data
+                                                        ?.analytics
+                                                        ?.totalStudents
                                                 }
                                             </p>
                                         </div>
@@ -307,7 +343,9 @@ function RecordingCard({
                                         </div>
                                     </div>
                                 ) : (
-                                    <p className="my-5">Loading...</p>
+                                    <p className="my-5">
+                                        No attendance data available.
+                                    </p>
                                 )}
                                 <Button
                                     className="flex gap-2 items-center"
