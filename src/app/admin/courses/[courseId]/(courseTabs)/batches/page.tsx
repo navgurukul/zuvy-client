@@ -54,7 +54,7 @@ import {
 import { cn } from '@/lib/utils'
 import{StudentData,BatchSuggestion,StudentDataState,ParamsType} from "@/app/admin/courses/[courseId]/(courseTabs)/batches/courseBatchesType"
 
-const Page = ({ params }: { params: ParamsType}) => {
+const Page = ({ params }: { params: ParamsType }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { students } = useStudentData(params.courseId)
@@ -291,14 +291,14 @@ const Page = ({ params }: { params: ParamsType}) => {
         switch (e.key) {
             case 'ArrowDown':
                 e.preventDefault()
-                setSelectedIndex(prev =>
+                setSelectedIndex((prev) =>
                     prev < filteredSuggestions.length - 1 ? prev + 1 : 0
                 )
                 break
 
             case 'ArrowUp':
                 e.preventDefault()
-                setSelectedIndex(prev =>
+                setSelectedIndex((prev) =>
                     prev > 0 ? prev - 1 : filteredSuggestions.length - 1
                 )
                 break
@@ -307,8 +307,7 @@ const Page = ({ params }: { params: ParamsType}) => {
                 e.preventDefault()
                 if (selectedIndex >= 0 && selectedIndex < filteredSuggestions.length) {
                     handleSuggestionClick(filteredSuggestions[selectedIndex])
-                }
-                else {
+                } else {
                     updateURL(searchQuery)
                     await handleSearch(searchQuery) // Search when user presses Enter directly
                 }
@@ -345,7 +344,7 @@ const Page = ({ params }: { params: ParamsType}) => {
             if (selectedElement) {
                 selectedElement.scrollIntoView({
                     behavior: 'smooth',
-                    block: 'nearest'
+                    block: 'nearest',
                 })
             }
         }
@@ -442,6 +441,11 @@ const Page = ({ params }: { params: ParamsType}) => {
 
     const assignLearners = form.watch('assignLearners')
 
+    const handleModal = (isOpen: boolean) => {
+        isOpen && form.reset()
+        setAssignStudents('')
+    }
+
     const renderModal = (emptyState: boolean) => {
         if (courseData?.unassigned_students === 0) {
             return (
@@ -465,7 +469,7 @@ const Page = ({ params }: { params: ParamsType}) => {
             )
         } else {
             return (
-                <Dialog onOpenChange={(isOpen) => isOpen && form.reset()}>
+                <Dialog onOpenChange={(isOpen) => handleModal(isOpen)}>
                     <DialogTrigger asChild>
                         <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
