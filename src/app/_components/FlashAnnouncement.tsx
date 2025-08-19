@@ -181,14 +181,10 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
               />
 
               <CardContent
-                className="
-                  relative grid gap-8 p-6 
-                  md:gap-10 md:p-12 
-                  md:grid-cols-2
-                "
+                className={`flex gap-6 py-4 ${isMobile && 'flex-col'}`}
               >
                 {/* Left Section */}
-                <div className="space-y-6">
+                <div className="space-y-3">
                   <div className="inline-flex items-center gap-2 rounded-full bg-[#3e69de] px-3 py-1 text-xs font-medium text-white">
                     <Rocket className="h-4 w-4" aria-hidden="true" />
                     Now Live
