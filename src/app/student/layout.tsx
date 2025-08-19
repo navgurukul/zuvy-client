@@ -3,10 +3,12 @@ import Header from './_components/Header'
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, Suspense } from 'react';
 import { useThemeStore } from '@/store/store';
+import FlashAnnouncementDialog from '../_components/FlashAnnouncement';
 
 // Theme Initializer Component
 const ThemeInitializer = () => {
     const { isDark, setTheme } = useThemeStore();
+    
 
     useEffect(() => {
         // Apply theme on initial load/hydration
@@ -35,6 +37,7 @@ function StudentLayoutContent({
 
     return (
         <div className="h-screen bg-background flex flex-col font-manrope">
+            
             <ThemeInitializer />
             {!hideHeader && !isOnCourseModulePage && <Header />}
             <main className="flex-1 overflow-y-auto ">
