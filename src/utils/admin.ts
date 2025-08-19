@@ -1131,6 +1131,69 @@ export function showSyntaxErrors(testCases: any) {
     return hasErrors
 }
 
+export const calculateTimeTaken = (start: string, submit: string): string => {
+    const startDate = new Date(start)
+    const submitDate = new Date(submit)
+    const diffInMilliseconds = submitDate.getTime() - startDate.getTime()
+    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60))
+    const minutes = Math.floor(
+        (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
+    )
+    return `${hours}h & ${minutes}m`
+}
+
+export const addClassToCodeTags: any = (
+    htmlString: string,
+    codeBlockClass: string
+) => {
+    // Find the positions of the first <code> and the last </code>
+    const firstCodeIndex = htmlString.indexOf('<code')
+    const lastCodeIndex = htmlString.lastIndexOf('</code>')
+
+    if (
+        firstCodeIndex === -1 ||
+        lastCodeIndex === -1 ||
+        lastCodeIndex < firstCodeIndex
+    ) {
+        // If no valid code blocks are found, return the string unchanged
+        return htmlString
+    }
+
+    // Split the content into three parts
+    const beforeCode = htmlString.substring(0, firstCodeIndex) // Everything before the first <code>
+    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7) // From the first <code> to the last </code>
+    const afterCode = htmlString.substring(lastCodeIndex + 7) // Everything after the last </code>
+
+    // Wrap the codeContent with <pre> and the given class
+    const styledCodeBlock = `
+        <pre class="${codeBlockClass}">
+            ${codeContent}
+        </pre>
+    `
+
+    // Combine the parts back together
+    return `${beforeCode}${styledCodeBlock}${afterCode}`
+}
+
+export const isLinkValid = (link: string) => {
+    // const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
+    // return urlRegex.test(link)
+
+    try {
+        const url = new URL(link.trim())
+
+        const isYouTube =
+            url.hostname.includes('youtube.com') ||
+            url.hostname.includes('youtu.be')
+
+        const isGoogleDrive = url.hostname.includes('drive.google.com')
+
+        return isYouTube || isGoogleDrive
+    } catch {
+        return false // If it's not a valid URL at all
+    }
+}
+
 export const getEmbedLink = (url: string) => {
     if (!url) return ''
     try {
@@ -1180,48 +1243,4 @@ export const getEmbedLink = (url: string) => {
     }
 
     return '' // Return empty string for unsupported or invalid URLs
-}
-
-export const calculateTimeTaken = (start: string, submit: string): string => {
-    const startDate = new Date(start)
-    const submitDate = new Date(submit)
-    const diffInMilliseconds = submitDate.getTime() - startDate.getTime()
-    const hours = Math.floor(diffInMilliseconds / (1000 * 60 * 60))
-    const minutes = Math.floor(
-        (diffInMilliseconds % (1000 * 60 * 60)) / (1000 * 60)
-    )
-    return `${hours}h & ${minutes}m`
-}
-
-export const addClassToCodeTags: any = (
-    htmlString: string,
-    codeBlockClass: string
-) => {
-    // Find the positions of the first <code> and the last </code>
-    const firstCodeIndex = htmlString.indexOf('<code')
-    const lastCodeIndex = htmlString.lastIndexOf('</code>')
-
-    if (
-        firstCodeIndex === -1 ||
-        lastCodeIndex === -1 ||
-        lastCodeIndex < firstCodeIndex
-    ) {
-        // If no valid code blocks are found, return the string unchanged
-        return htmlString
-    }
-
-    // Split the content into three parts
-    const beforeCode = htmlString.substring(0, firstCodeIndex) // Everything before the first <code>
-    const codeContent = htmlString.substring(firstCodeIndex, lastCodeIndex + 7) // From the first <code> to the last </code>
-    const afterCode = htmlString.substring(lastCodeIndex + 7) // Everything after the last </code>
-
-    // Wrap the codeContent with <pre> and the given class
-    const styledCodeBlock = `
-        <pre class="${codeBlockClass}">
-            ${codeContent}
-        </pre>
-    `
-
-    // Combine the parts back together
-    return `${beforeCode}${styledCodeBlock}${afterCode}`
 }
