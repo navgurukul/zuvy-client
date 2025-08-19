@@ -6,8 +6,9 @@ import { color } from 'framer-motion'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { ArrowBigDownDash } from 'lucide-react'
+import {PracticeCode,ReportData,DownloadReportProps }from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/submissionComponentDownloadType"
 
-const DownloadReport = ({ userInfo, submitedAt }: any) => {
+const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
     const { userId, id, title } = userInfo
 
     const formatDate = (dateString: string) => {
@@ -30,7 +31,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
         }
     }
 
-    async function generatePDF(reportData: any) {
+    async function generatePDF(reportData: ReportData) {
         const doc = new jsPDF()
 
         // Add Assessment Summary at the Top
@@ -154,7 +155,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
 
         // Create an array to hold all rows for the table
         const tableData = reportData.PracticeCode.map(
-            (practiceCode: any, index: any) => [
+            (practiceCode: PracticeCode, index: number) => [
                 `Q${index + 1}. ${practiceCode.questionDetail.title}`,
                 practiceCode.status == 'Accepted'
                     ? 'Correct Answer'

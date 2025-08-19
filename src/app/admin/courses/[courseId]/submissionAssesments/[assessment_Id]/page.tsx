@@ -18,26 +18,15 @@ import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { fetchStudentAssessments } from '@/utils/admin'
 import { POSITION } from '@/utils/constant'
+import {PageParams,Suggestion,BootcampData, SubmissionData,StudentRaw} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/individualReportApproveType"
 
-type Props = {}
 
-interface PageParams {
-    courseId: string
-    assessment_Id: string
-}
-
-interface Suggestion {
-    id: string;
-    name: string;
-    email: string;
-}
-
-const Page = ({ params }: any) => {
+const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
 
-    const [assesmentData, setAssessmentData] = useState<any>()
+    const [assesmentData, setAssessmentData] = useState<SubmissionData | null>(null)
     const [searchInputValue, setSearchInputValue] = useState<string>('')
     const [suggestions, setSuggestions] = useState<Suggestion[]>([])
     const [showSuggestions, setShowSuggestions] = useState(false)
@@ -124,12 +113,12 @@ const Page = ({ params }: any) => {
             )
 
             const fetchedSuggestions = assessments
-                .map((student: any) => ({
+                .map((student: StudentRaw) => ({
                     id: student.id || student.studentId || student.student?.id || Math.random().toString(),
                     name: student.name || student.studentName || student.student?.name || '',
                     email: student.email || student.studentEmail || student.student?.email || ''
                 }))
-                .filter((suggestion: Suggestion) => suggestion.name && suggestion.email) // Only show if both name and email exist
+                .filter((suggestion: Suggestion) => suggestion.name && suggestion.email) 
 
             setSuggestions(fetchedSuggestions)
 
@@ -160,7 +149,7 @@ const Page = ({ params }: any) => {
 
     const getBootcampHandler = useCallback(async () => {
         try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
+            const res = await api.get<{ bootcamp: BootcampData}>(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
             console.error('API Error:', error)
@@ -359,7 +348,7 @@ const Page = ({ params }: any) => {
                             </div>
                             <div className="p-4 rounded-lg shadow-md ">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalSubmitedStudents}
+                                    {assesmentData?.totalSubmitedStudent}
                                 </h1>
                                 <p className="text-gray-500 ">
                                     Submissions Received
@@ -368,8 +357,8 @@ const Page = ({ params }: any) => {
                             <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
                                     {(
-                                        assesmentData?.totalStudents -
-                                        assesmentData?.totalSubmitedStudents
+                                    (assesmentData?.totalStudents ?? 0) - 
+                                    (assesmentData?.totalSubmitedStudent ?? 0)
                                     ).toString()}
                                 </h1>
                                 <p className="text-gray-500 ">

@@ -16,9 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ArrowLeft, Code, Play, Upload } from 'lucide-react'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 
-type Props = {}
-
-const ViewSolution = (props: Props) => {
+const ViewSolution = () => {
     return (
         <div>
             <h1>View Solution</h1>
