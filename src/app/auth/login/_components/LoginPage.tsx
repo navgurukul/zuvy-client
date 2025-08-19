@@ -163,6 +163,7 @@ const handleGoogleSuccess = async (
                     title: 'Login Successful',
                     description: 'Welcome to Zuvy Dashboard',
                 })
+                localStorage.setItem('isLoginFirst' , 'true')
 
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
