@@ -1,14 +1,3 @@
-import useChapterDetails from "./useChapterDetails";
-import { useCodingChallenge } from "./useCodingChallenge";
-import useCodingSubmissions from "./useCodingSubmissions";
-import useCourseSyllabus from "./useCourseSyllabus";
-import useGetMCQs from "./useGetMcq";
-import { useLatestUpdatedCourse } from "./useLatestUpdatedCourse";
-import useProjectDetails from "./useProjectDetails";
-import useQuizResults from "./useQuizResults";
-import { useStudentData } from "./useStudentData";
-import { useUpcomingEvents } from "./useUpcomingEvents";
-
 // UseAllChaptersWithStatus
 export interface ChapterTrackingDetail {
   id: number;
@@ -68,6 +57,7 @@ export interface Module {
   progress: number;
   ChapterId: number;
   quizCount: number;
+  topic: string;
   assignmentCount: number;
   codingProblemsCount: number;
   articlesCount: number;

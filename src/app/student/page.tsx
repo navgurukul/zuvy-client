@@ -2,9 +2,7 @@
 import React from 'react'
 import StudentDashboard from './_pages/StudentDashboard'
 
-type Props = {}
-
-const Page = (props: Props) => {
+const Page = () => {
   return (
     <StudentDashboard />
   )
