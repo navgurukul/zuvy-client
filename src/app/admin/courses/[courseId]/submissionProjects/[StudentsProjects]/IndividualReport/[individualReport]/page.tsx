@@ -6,10 +6,11 @@ import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
+import {PageParams,BootcampData,IndividualStudentData,ProjectSubmissionDetails} from "@/app/admin/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType"
 
-const Page = ({ params }: any) => {
-    const [indiviDualStudentData, setIndividualStudentData] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+const Page = ({ params }: PageParams) => {
+    const [indiviDualStudentData, setIndividualStudentData] = useState<IndividualStudentData | null>(null)
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [submittedDate, setSubmittedDate] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
 
@@ -43,7 +44,7 @@ const Page = ({ params }: any) => {
 
     const getIndividualStudentData = useCallback(async () => {
         await api
-            .get(
+            .get<ProjectSubmissionDetails>(
                 `/submission/projectDetail/${params.individualReport}?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}`
             )
             .then((res) => {
@@ -62,7 +63,7 @@ const Page = ({ params }: any) => {
     }, [params.individualReport, params.courseId, params.StudentsProjects])
     const getBootcampHandler = useCallback(async () => {
         try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
+            const res = await api.get<{ bootcamp: BootcampData}>(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
             console.error('API Error:', error)

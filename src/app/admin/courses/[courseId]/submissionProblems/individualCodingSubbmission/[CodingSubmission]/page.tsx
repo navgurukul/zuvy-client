@@ -7,11 +7,11 @@ import Editor from '@monaco-editor/react'
 import { b64DecodeUnicode } from '@/utils/base64'
 import { cn, difficultyColor } from '@/lib/utils'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import {PageParams,CodingSubmission,ApiResponse} from "@/app/admin/courses/[courseId]/submissionProblems/individualCodingSubbmission/CodingSubmissionType"
 
-type Props = {}
 
-const Page = ({ params }: any) => {
-    const [codingSubmissiondata, setCodingSubmissiondata] = useState<any>()
+const Page = ({ params }: PageParams) => {
+    const [codingSubmissiondata, setCodingSubmissiondata] = useState<CodingSubmission |null>(null)
     const [decodedString, setDecodedString] = useState<string>('')
     const searchQuery = useSearchParams()
     const [crumbData, setCrumbData] = useState<string | null>(null)

@@ -13,6 +13,11 @@ export interface PageParams {
     individualStatus:string
   }
 }
+
+export interface Params {
+  assignmentData: any;
+  courseId: string
+}
 export interface IndividualStudentData {
   user: {
     studentAssignmentStatus: any;
@@ -40,5 +45,13 @@ export interface AssignmentDataResponse {
   chapterId: string;
   chapterName: string;
   data: AssignmentStatus[];
+}
+
+export interface StudentPage {
+    id: string;
+    email: string;
+    emailId: string;
+    status: string;
+    name:string
 }
 
