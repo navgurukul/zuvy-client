@@ -10,7 +10,7 @@ import {
 function BreadcrumbComponent({
     crumbs,
 }: {
-    crumbs: { crumb: string; href?: string; isLast: boolean }[]
+    crumbs: { crumb?: string; href?: string; isLast: boolean }[]
 }) {
     return (
         <Breadcrumb>

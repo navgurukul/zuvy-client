@@ -1,9 +1,9 @@
 import { b64DecodeUnicode } from '@/utils/base64'
-
+import {TestCase} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/SubmissionViewPageType"
 const TestCaseResults = ({ testCases }: any) => {
     return (
         <div className="w-full space-y-4">
-            {testCases.map((testCase: any, index: number) => {
+            {testCases.map((testCase: TestCase, index: number) => {
                 return (
                     <div
                         key={index}

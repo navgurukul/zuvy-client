@@ -9,10 +9,9 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Skeleton } from '@nextui-org/react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import {PageParams,BootcampData,StudentPage,ProjectSubmissionResponse} from "@/app/admin/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType"
 
-type Props = {}
-
-const Page = ({ params }: any) => {
+const Page = ({ params }:PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -20,7 +19,7 @@ const Page = ({ params }: any) => {
     const [data, setData] = useState<any>()
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [projectStudentData, setProjectStudentData] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [searchQuery, setSearchQuery] = useState<string>('') // What user types
     const [appliedSearchQuery, setAppliedSearchQuery] = useState<string>('') // What actually filters the data
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
@@ -57,7 +56,7 @@ const Page = ({ params }: any) => {
     
         const seen = new Set()
     
-        projectStudentData.forEach((student: any) => {
+        projectStudentData.forEach((student: StudentPage) => {
             // Fixed: Use consistent property names (userName and userEmail)
             const nameMatch = student.userName?.toLowerCase().includes(query)
             const emailMatch = student.userEmail?.toLowerCase().includes(query)
@@ -82,7 +81,7 @@ const Page = ({ params }: any) => {
         }
 
         const searchTerm = appliedSearchQuery.toLowerCase()
-        const filtered = projectStudentData.filter((student: any) => {
+        const filtered = projectStudentData.filter((student: StudentPage) => {
             const nameMatch = student.userName && student.userName.toLowerCase().includes(searchTerm)
             const emailMatch = student.userEmail && student.userEmail.toLowerCase().includes(searchTerm)
             return nameMatch || emailMatch
@@ -153,7 +152,7 @@ const Page = ({ params }: any) => {
 
     const getProjectsData = useCallback(async () => {
         try {
-            const res = await api.get(
+            const res = await api.get<ProjectSubmissionResponse>(
                 `/submission/submissionsOfProjects/${params.courseId}`
             )
             setData(res.data.data.bootcampModules[0])

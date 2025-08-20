@@ -1,6 +1,4 @@
 'use client'
-
-// External imports
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
@@ -10,10 +8,8 @@ import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-
-type Props = {}
-
-const Page = ({ params }: any) => {
+import {PageParams,BootcampData,StudentPage } from "@/app/admin/courses/[courseId]/submissionVideo/[videoId]/submissionVideoIdPageType"
+const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -24,7 +20,7 @@ const Page = ({ params }: any) => {
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
     const [isInputFocused, setIsInputFocused] = useState<boolean>(false)
     const [dataTableVideo, setDataTableVideo] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<BootcampData|null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
     // Update URL with search parameter
@@ -65,7 +61,7 @@ const Page = ({ params }: any) => {
         const suggestions: { name: string; email: string }[] = []
         const query = searchQuery.toLowerCase()
         
-        dataTableVideo.forEach((student: any) => {
+        dataTableVideo.forEach((student: StudentPage) => {
             const nameMatch = student.name && student.name.toLowerCase().includes(query)
             const emailMatch = student.email && student.email.toLowerCase().includes(query)
             

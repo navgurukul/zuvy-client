@@ -11,8 +11,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-
-type Props = {}
+import {BootcampData,AssignmentStatus,AssignmentDataResponse} from "@/app/admin/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType"
 
 const Page = ({ params }: { params: any }) => {
     const router = useRouter()
@@ -20,7 +19,7 @@ const Page = ({ params }: { params: any }) => {
     const searchParams = useSearchParams()
 
     const [assignmentData, setAssignmentData] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>({})
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [assignmentTitle, setAssignmentTitle] = useState<string>('')
     const [submittedStudents, setSubmittedStudents] = useState<number>(0)
     const [searchQuery, setSearchQuery] = useState<string>('') // What user types
@@ -161,9 +160,9 @@ const Page = ({ params }: { params: any }) => {
                     `/submission/assignmentStatus?chapterId=${params.assignmentData}&limit=5&offset=0`
                 )
                 .then((res) => {
-                    const assignmentData: any = res?.data?.data
+                    const assignmentData: AssignmentDataResponse = res?.data?.data
                     const chapterId = assignmentData?.chapterId
-                    assignmentData.data.forEach((data: any) => {
+                    assignmentData.data.forEach((data:AssignmentStatus) => {
                         data.chapterId = chapterId
                     })
                     setAssignmentData(assignmentData.data)
@@ -193,7 +192,9 @@ const Page = ({ params }: { params: any }) => {
     }, [getBootcampHandler, fetchAssignmentDataHandler])
 
     const totalStudents =
-        bootcampData?.students_in_bootcamp - bootcampData?.unassigned_students
+       Number(bootcampData?.students_in_bootcamp ?? 0) -
+       Number(bootcampData?.unassigned_students ?? 0);
+
 
     return (
         <>
