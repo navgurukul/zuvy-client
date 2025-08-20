@@ -1,7 +1,3 @@
-import MCQQuiz from "./MCQQuiz";
-import ModuleContentRenderer from "./ModuleContentRenderer";
-import TruncatedDescription from "./TruncatedDescription";
-
 // AssessmentHeader
 export interface AssessmentHeaderProps {
   title: string;
