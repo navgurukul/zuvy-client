@@ -7,6 +7,7 @@ import { useLatestUpdatedCourse } from "./useLatestUpdatedCourse";
 import useProjectDetails from "./useProjectDetails";
 import useQuizResults from "./useQuizResults";
 import { useStudentData } from "./useStudentData";
+import { useUpcomingEvents } from "./useUpcomingEvents";
 
 // UseAllChaptersWithStatus
 export interface ChapterTrackingDetail {
@@ -316,6 +317,8 @@ export interface UseCodingSubmissionsParams {
 
 // useCompletedClass
 export interface CompletedClass {
+  moduleId: any;
+  chapterId: any;
   id: number;
   title: string;
   startTime: string;
@@ -340,11 +343,18 @@ export interface CompletedClassesData {
   attendanceStats: AttendanceStats;
 }
 
+export interface CompletedClassesResponse {
+  data:any;
+  message: string;
+  isSuccess: boolean;
+}
 export interface UseCompletedClassesReturn {
   completedClassesData: CompletedClassesData | null;
   loading: boolean;
   error: string | null;
 }
+
+
 
 
 
@@ -602,6 +612,8 @@ export interface InstructorDetails {
 }
 
 export interface UpcomingEvent {
+  chapterId: any;
+  moduleId: any;
   id: number;
   title: string;
   startTime: string;
@@ -635,4 +647,35 @@ export interface StudentData {
   totalCompleted: number;
   totalInProgress: number;
   totalPages: number;
+}
+
+
+
+
+// useUpcomingEvents
+
+export interface Event {
+  type: "Live Class" | "Assessment" | "Assignment";
+  id: number;
+  title: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  bootcampId: number;
+  bootcampName: string;
+  batchId: number;
+  eventDate: string;
+  moduleId: number;
+  chapterId: number;
+}
+
+export interface UpcomingEventsData {
+  events: Event[];
+  totalEvents: number;
+  totalPages: number;
+}
+export interface UseUpcomingEventsReturn {
+  upcomingEventsData: UpcomingEventsData | null;
+  loading: boolean;
+  error: string | null;
 }

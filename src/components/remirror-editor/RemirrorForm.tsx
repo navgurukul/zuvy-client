@@ -27,14 +27,7 @@ import {
 } from '@remirror/react'
 import { Toolbar } from './Toolbar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
-interface RemirrorFormProps {
-    description: any
-    onChange?: (html: string) => void
-    onValidationChange?: (isValid: boolean) => void // New prop
-    preview?: boolean
-    bigScreen?: boolean
-}
+import {RemirrorFormProps} from "@/components/remirror-editor/componentRemirrorType"
 
 export const RemirrorForm: React.FC<RemirrorFormProps> = ({
     description,

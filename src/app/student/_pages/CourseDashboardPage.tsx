@@ -11,8 +11,10 @@ import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer } from "
 import Image from "next/image";
 import { useBootcampProgress } from '@/hooks/useBootcampProgress';
 import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
-import { useUpcomingEvents, Event as UpcomingEvent } from '@/hooks/useUpcomingEvents';
-import { useCompletedClasses, CompletedClass } from '@/hooks/useCompletedClasses';
+import { useUpcomingEvents} from '@/hooks/useUpcomingEvents';
+import {UpcomingEvent} from '@/hooks/hookType';
+import { useCompletedClasses} from '@/hooks/useCompletedClasses';
+import {CompletedClass } from '@/hooks/hookType';
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
 import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";

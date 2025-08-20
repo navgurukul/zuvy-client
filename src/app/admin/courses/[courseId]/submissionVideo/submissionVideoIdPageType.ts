@@ -69,3 +69,28 @@ export interface VideoDataResponse {
   moduleVideochapter: ModuleVideoChapter;
   submittedStudents: SubmittedStudent[];
 }
+
+
+
+
+
+// Page.tsx
+export interface Course {
+    name: string
+    learnersCount: number
+    date: string
+    coverImage: string 
+    id: number
+    students_in_bootcamp: number
+}
+export interface CourseData {
+    name: string
+    description?: string
+    collaborator?: string
+}
+
+export interface CoursesResponse {
+  data: Course[];
+  totalBootcamps: number;
+  totalPages: number;
+}
