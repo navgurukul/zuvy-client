@@ -103,8 +103,13 @@ const StudentDashboard = () => {
       return "Date not available";
     }
     
+    
     // Handle the specific format "2025-06-27 08:26:00+00"
     let parsableDateString = item.eventDate;
+    //  if (item.type?.toLowerCase() === 'assessment') {
+    //   parsableDateString = item.sta
+    // }
+    
     
     // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
     if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
