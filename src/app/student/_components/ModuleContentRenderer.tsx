@@ -114,7 +114,7 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
       case 7:
         return <FeedbackFormContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete}/>;
       case 8:
-        return <LiveClassContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} />;
+        return <LiveClassContent chapterDetails={chapterDetails} onChapterComplete={onChapterComplete} refetch={refetch} />;
       default:
     return (
       <div className="max-w-4xl mx-auto ">
