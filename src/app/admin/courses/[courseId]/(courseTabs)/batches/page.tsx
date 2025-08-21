@@ -441,6 +441,7 @@ const Page = ({ params }: { params: ParamsType}) => {
     }
 
     const assignLearners = form.watch('assignLearners')
+    const capEnrollmentValue = form.watch("capEnrollment");
 
     const handleModal = (isOpen: boolean) => {
         isOpen && form.reset()
@@ -512,7 +513,7 @@ const Page = ({ params }: { params: ParamsType}) => {
                                             />
                                             <h1 className="pt-2 text-[1rem]">
                                                 Total Learners Selected:{' '}
-                                                {selectedRows.length}
+                                                {selectedRows.length}/{capEnrollmentValue}
                                             </h1>
                                             <div className="flex justify-between w-full pt-2">
                                                 <Button
