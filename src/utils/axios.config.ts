@@ -11,11 +11,13 @@ import { useSessionModalStore } from '@/store/session.store'
 
 const sessionModalStore = useSessionModalStore.getState()
 
-const mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
+let mainUrl = process.env.NEXT_PUBLIC_MAIN_URL
+
 // const mainUrl = "http://zuvy.navgurukul.org/"
 // const mainUrl = "https://main-api.zuvy.org"
 const apiURL = process.env.NEXT_PUBLIC_API_URL
 const localUrl = process.env.NEXT_PUBLIC_LOCAL_URL
+// const env_name = process.env.NODE_ENV
 
 // const access_token = localStorage.getItem('access_token')
 let headers: AxiosRequestConfig['headers'] = {
@@ -24,6 +26,10 @@ let headers: AxiosRequestConfig['headers'] = {
 // let merakiHeaders: AxiosRequestConfig['headers'] = {
 //     'Content-Type': 'application/json',
 //     Authorization: `Bearer ${access_token}`,
+// }
+
+// if (process.env.NEXT_PUBLIC_ENV_NAME === 'STAGE') {
+//     mainUrl = 'https://stage.api.zuvy.org'
 // }
 
 const api = axios.create({

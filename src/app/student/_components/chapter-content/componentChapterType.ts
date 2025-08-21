@@ -167,6 +167,7 @@ export interface LiveClassContentProps {
     sessions?: Session[];
   };
   onChapterComplete: () => void;
+  refetch: () => void
 }
 
 
