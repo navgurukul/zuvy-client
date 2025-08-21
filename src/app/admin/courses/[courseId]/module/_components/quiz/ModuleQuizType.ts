@@ -77,3 +77,8 @@ export interface CodingQuestionsProps {
     setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
     type: string
 }
+
+export type Tag = {
+    id: number
+    tagName: string
+}
