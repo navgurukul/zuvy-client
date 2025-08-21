@@ -26,6 +26,13 @@ export interface QuizDataLibrary{
     tagId: number
 }
 
+
+export interface ChapterDetailsResponse{
+  title: string;
+  quizQuestionDetails:QuizDataLibrary[];
+}
+
+
 export interface LibraryOptions{
     option1: string
     option2: string
@@ -37,10 +44,6 @@ export interface LibraryOption{
     tagName: string
     id: number
 }
-
-
-
-
 export interface QuizListVariant {
   question: string;
 }
@@ -76,4 +79,9 @@ export interface CodingQuestionsProps {
     tags: any
     setIsNewQuestionAdded: React.Dispatch<React.SetStateAction<boolean>>
     type: string
+}
+
+export type Tag = {
+    id: number
+    tagName: string
 }

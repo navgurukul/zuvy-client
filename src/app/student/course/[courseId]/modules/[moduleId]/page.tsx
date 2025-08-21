@@ -4,10 +4,7 @@ import React from 'react'
 import ModuleContentPage from '../../../../_pages/ModuleContentPage';
 import { useParams } from 'next/navigation';
 
-
-type Props = {}
-
-const Page = (props: Props) => {
+const Page = () => {
     const params = useParams();
     const courseId = params.courseId as string;
     const moduleId = params.moduleId as string;

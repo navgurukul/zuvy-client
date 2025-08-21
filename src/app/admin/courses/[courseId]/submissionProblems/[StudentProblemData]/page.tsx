@@ -10,32 +10,10 @@ import { columns } from './columns'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import {PageParams,BootcampData,StudentPage,Module} from "@/app/admin/courses/[courseId]/submissionProblems/[StudentProblemData]/studentProblemdataType"
 
-interface CodingQuestionDetails {
-    id: number
-    title: string
-}
 
-interface ModuleChapterData {
-    id: number
-    codingQuestionDetails: CodingQuestionDetails
-    submitStudents: number
-}
-
-interface Module {
-    id: number
-    typeId: number
-    isLock: boolean
-    bootcampId: number
-    name: string
-    description: string
-    projectId: number | null
-    order: number
-    timeAlloted: number
-    moduleChapterData: ModuleChapterData[]
-}
-
-const PraticeProblems = ({ params }: any) => {
+const PraticeProblems = ({ params }: PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -44,7 +22,7 @@ const PraticeProblems = ({ params }: any) => {
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [studentDetails, setStudentDetails] = useState<any[]>([])
     const [filteredStudentDetails, setFilteredStudentDetails] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>({})
+    const [bootcampData, setBootcampData] = useState<BootcampData |null>(null)
     const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('search') || '')
     const [activeSearch, setActiveSearch] = useState<string>(searchParams.get('search') || '')
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
@@ -92,13 +70,11 @@ const PraticeProblems = ({ params }: any) => {
 
         const suggestions: { name: string; email: string }[] = []
         const query = searchQuery.toLowerCase()
-
-        studentDetails.forEach((student: any) => {
-            const nameMatch =
-                student.name && student.name.toLowerCase().includes(query)
-            const emailMatch =
-                student.email && student.email.toLowerCase().includes(query)
-
+        
+        studentDetails.forEach((student: StudentPage) => {
+            const nameMatch = student.name && student.name.toLowerCase().includes(query)
+            const emailMatch = student.email && student.email.toLowerCase().includes(query)
+            
             if (nameMatch || emailMatch) {
                 // Avoid duplicates
                 const exists = suggestions.some(
@@ -117,23 +93,16 @@ const PraticeProblems = ({ params }: any) => {
     }, [searchQuery, studentDetails])
 
     // Filter student details based on search
-    const filterStudentDetails = useCallback(
-        (students: any[], query: string) => {
-            if (!query.trim()) return students
-
-            const searchTerm = query.toLowerCase()
-            return students.filter((student: any) => {
-                const nameMatch =
-                    student.name &&
-                    student.name.toLowerCase().includes(searchTerm)
-                const emailMatch =
-                    student.email &&
-                    student.email.toLowerCase().includes(searchTerm)
-                return nameMatch || emailMatch
-            })
-        },
-        []
-    )
+    const filterStudentDetails = useCallback((students: StudentPage[], query: string) => {
+        if (!query.trim()) return students
+        
+        const searchTerm = query.toLowerCase()
+        return students.filter((student: StudentPage) => {
+            const nameMatch = student.name && student.name.toLowerCase().includes(searchTerm)
+            const emailMatch = student.email && student.email.toLowerCase().includes(searchTerm)
+            return nameMatch || emailMatch
+        })
+    }, [])
 
     // Handle search input change
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,7 +182,7 @@ const PraticeProblems = ({ params }: any) => {
 
                 if (submissions.length > 0 && params.StudentProblemData) {
                     const matchingModule = submissions.find(
-                        (module: any) =>
+                        (module: Module) =>
                             module.id === +params.StudentProblemData
                     )
 
@@ -221,7 +190,7 @@ const PraticeProblems = ({ params }: any) => {
                         matchingModule?.moduleChapterData.find(
                             (chapter: any) => chapter.id == praticeProblems
                         )
-                        
+
                     setMatchingData(matchingChapter || null)
 
                     if (matchingModule) {

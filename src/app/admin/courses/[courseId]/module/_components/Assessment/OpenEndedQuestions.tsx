@@ -9,7 +9,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
-import {OpenEndedQuestiones, OpenEndedQuestionesProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {OpenEndedQuestiones, OpenEndedQuestionesProps, Tag} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const OpenEndedQuestions = ({
     questions,
@@ -22,7 +22,7 @@ const OpenEndedQuestions = ({
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
             {questions.map((question: OpenEndedQuestiones) => {
                 const tag = tags?.find(
-                    (tag: any) => tag?.id === question?.tagId
+                    (tag:Tag) => tag?.id === question?.tagId
                 )
                 return (
                     <div

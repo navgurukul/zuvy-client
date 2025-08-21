@@ -1,13 +1,3 @@
-import useChapterDetails from "./useChapterDetails";
-import { useCodingChallenge } from "./useCodingChallenge";
-import useCodingSubmissions from "./useCodingSubmissions";
-import useCourseSyllabus from "./useCourseSyllabus";
-import useGetMCQs from "./useGetMcq";
-import { useLatestUpdatedCourse } from "./useLatestUpdatedCourse";
-import useProjectDetails from "./useProjectDetails";
-import useQuizResults from "./useQuizResults";
-import { useStudentData } from "./useStudentData";
-
 // UseAllChaptersWithStatus
 export interface ChapterTrackingDetail {
   id: number;
@@ -67,6 +57,7 @@ export interface Module {
   progress: number;
   ChapterId: number;
   quizCount: number;
+  topic: string;
   assignmentCount: number;
   codingProblemsCount: number;
   articlesCount: number;
@@ -316,6 +307,8 @@ export interface UseCodingSubmissionsParams {
 
 // useCompletedClass
 export interface CompletedClass {
+  moduleId: any;
+  chapterId: any;
   id: number;
   title: string;
   startTime: string;
@@ -340,11 +333,18 @@ export interface CompletedClassesData {
   attendanceStats: AttendanceStats;
 }
 
+export interface CompletedClassesResponse {
+  data:any;
+  message: string;
+  isSuccess: boolean;
+}
 export interface UseCompletedClassesReturn {
   completedClassesData: CompletedClassesData | null;
   loading: boolean;
   error: string | null;
 }
+
+
 
 
 
@@ -602,6 +602,8 @@ export interface InstructorDetails {
 }
 
 export interface UpcomingEvent {
+  chapterId: any;
+  moduleId: any;
   id: number;
   title: string;
   startTime: string;
@@ -635,4 +637,35 @@ export interface StudentData {
   totalCompleted: number;
   totalInProgress: number;
   totalPages: number;
+}
+
+
+
+
+// useUpcomingEvents
+
+export interface Event {
+  type: "Live Class" | "Assessment" | "Assignment";
+  id: number;
+  title: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  bootcampId: number;
+  bootcampName: string;
+  batchId: number;
+  eventDate: string;
+  moduleId: number;
+  chapterId: number;
+}
+
+export interface UpcomingEventsData {
+  events: Event[];
+  totalEvents: number;
+  totalPages: number;
+}
+export interface UseUpcomingEventsReturn {
+  upcomingEventsData: UpcomingEventsData | null;
+  loading: boolean;
+  error: string | null;
 }

@@ -17,116 +17,11 @@ import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore } from '@/store/store'
 import { Check, CheckCircle, User, X, XCircle } from 'lucide-react'
 import { calculateTimeTaken } from '@/utils/admin'
+import { paramsType } from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionOpenEnded/ViewSolutionPageType"
+import {SubmissionData,BootcampData,AssessmentResponse,CodingQuestion,PageParams} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionQuizQuestion/viewQuizQuestionPageType"
 
-type User = {
-    name: string
-    email: string
-}
-
-type OpenEndedQuestion = {
-    id: number
-    question: string
-    difficulty: string
-    tagId: number
-    usage: number
-}
-
-type SubmissionData = {
-    id: number
-    openEndedQuestionId?: number
-    assessmentOutsourseId?: number
-    bootcampId?: number
-    moduleId?: number
-    chapterId?: number
-    createdAt?: string
-    OpenEndedQuestion?: OpenEndedQuestion
-}
-
-type OpenEndedSubmission = {
-    id: number
-    answer: string
-    questionId: number
-    feedback: string | null
-    marks: number
-    submissionData: SubmissionData
-}
-
-type QuizSubmission = {
-    id: number
-    chosenOption: number
-    questionId: number | null
-    attemptCount: number
-    submissionData: null
-}
-
-type CodingSubmission = {}
-
-type StudentAssessment = {
-    id: number
-    userId: number
-    marks: number | null
-    startedAt: string
-    submitedAt: string
-    tabChange: number
-    copyPaste: string
-    embeddedGoogleSearch: number
-    user: User
-    openEndedSubmission: OpenEndedSubmission[]
-    quizSubmission: QuizSubmission[]
-    PracticeCode: any
-    totalQuizzes: number
-    totalOpenEndedQuestions: number
-    totalCodingQuestions: number
-}
-type newDataType =
-    | {
-        openEndedSubmission: OpenEndedSubmission[]
-        quizSubmission: QuizSubmission[]
-        codingSubmission: CodingSubmission[]
-    }
-    | any
-
-interface Example {
-    input: string[]
-    output: string[]
-}
-
-interface TestCase {
-    input: string[]
-    output: string[]
-}
-
-interface Submission {
-    id: number
-    status: string
-    action: string
-    createdAt: string
-    codingOutsourseId: number
-}
-
-interface CodingQuestion {
-    questionId: number
-    id: number
-    title: string
-    description: string
-    difficulty: string
-    tags: number
-    constraints: string
-    authorId: number
-    inputBase64: string | null
-    examples: Example[]
-    testCases: TestCase[]
-    expectedOutput: string[]
-    solution: string
-    createdAt: string | null
-    updatedAt: string | null
-    usage: number
-    submissions: Submission[]
-    codingOutsourseId: number
-}
-
-const Page = ({ params }: { params: any }) => {
-    const [bootcampData, setBootcampData] = useState<any>()
+const Page = ({ params }: { params: paramsType }) => {
+    const [bootcampData, setBootcampData] = useState<BootcampData| null>(null)
     const [assesmentData, setAssesmentData] = useState<any>()
     const [codingdata, setCodingData] = useState<CodingQuestion[]>([])
     const [username, setUsername] = useState<string>('')
@@ -170,7 +65,7 @@ const Page = ({ params }: { params: any }) => {
 
     const getBootcampHandler = useCallback(async () => {
         try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
+            const res = await api.get<{ bootcamp: BootcampData}>(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
             console.error('API Error:', error)
@@ -180,7 +75,7 @@ const Page = ({ params }: { params: any }) => {
     const getIndividualCodingDataHandler = useCallback(async () => {
         try {
             await api
-                .get(
+                .get<AssessmentResponse>(
                     `/tracking/assessment/submissionId=${params.report}?studentId=${params.IndividualReport}`
                 )
                 .then((res) => {

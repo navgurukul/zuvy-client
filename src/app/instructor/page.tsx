@@ -28,7 +28,7 @@ const InstructorPage = () => {
         username?.[0]?.charAt(0)?.toUpperCase() +
         (username?.[0]?.slice(1)?.toLowerCase() || '')
 
-    const fetchSessions = (data: any) => {
+    const fetchSessions = (data:any) => {
         setAllSessions([...data.ongoing, ...data.upcoming])
         setOngoingSessions(data.ongoing)
         setUpcomingSessions(data.upcoming)

@@ -21,7 +21,7 @@ import { handleSaveChapter } from '@/utils/admin'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
-import {CodingChallangesQuestion,ChallangesTag,ChallangesOption,ChallangesProps, CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
+import {CodingChallangesQuestion,ChallangesProps, CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 import { AnyARecord } from 'dns'
 function CodingChallenge({
     content,
@@ -41,11 +41,11 @@ function CodingChallenge({
     const [savedQuestions, setSavedQuestions] = useState<CodingChallangesQuestion[]>(codingQuestions)
     
     const [selectedTopic, setSelectedTopic] = useState<string>('All Topics')
-    const [selectedTag, setSelectedTag] = useState<ChallangesTag>({
+    const [selectedTag, setSelectedTag] = useState<CodingTopicsTag>({
         tagName: 'All Topics',
         id: -1,
     })
-    const [selectedOptions, setSelectedOptions] = useState<ChallangesOption[]>([
+    const [selectedOptions, setSelectedOptions] = useState<CodingTopicsTag[]>([
         { id: -1, tagName: 'All Topics' },
     ])
     const [selectedDifficulty, setSelectedDifficulty] = useState([

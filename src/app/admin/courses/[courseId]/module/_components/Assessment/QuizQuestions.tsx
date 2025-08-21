@@ -13,7 +13,7 @@ import QuestionDescriptionModal from './QuestionDescriptionModal'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
 import { MCQQuestion } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
-import { CodingQuestionsProps } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
+import { CodingQuestionsProps, Tag } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 
 const QuizQuestions = ({
     questions,
@@ -41,7 +41,7 @@ const QuizQuestions = ({
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
             {questions.map((question: MCQQuestion) => {
                 const tag = tags?.find(
-                    (tag: any) => tag?.id === question?.tagId
+                    (tag: Tag) => tag?.id === question?.tagId
                 )
                 const questionText =
                     question?.quizVariants?.[0]?.question || question.question

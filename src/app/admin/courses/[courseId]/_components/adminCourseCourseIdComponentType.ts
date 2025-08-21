@@ -182,12 +182,14 @@ export type IndividuleStudentProps = {
     tabChanges: string
 }
 
-// ToggleSwitch
-// export interface ToggleSwitchProps {
-//     bootcampId: 
-//     onToggle: (newState: boolean) => void;
-// }
+export interface BootcampSettings {
+  isModuleLocked: boolean;
+  type: string; 
+}
 
+export interface BootcampResponse {
+  bootcampSetting: BootcampSettings[];
+}
 
 // newModuleDialog
 export interface newModuleDialogProps {
@@ -239,7 +241,9 @@ export type OverviewComponentProps = {
 }
 
 
-
+export interface Params{
+    courseID:string
+}
 
 export type PraticeProblemProps = {
     courseId: number

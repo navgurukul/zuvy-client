@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils'
 import { SheetClose } from '@/components/ui/sheet'
 import{SidebarItemProps} from "@/app/_components/componentType"
 
-
 export const SidebarItem = ({
     icon: Icon,
     label,

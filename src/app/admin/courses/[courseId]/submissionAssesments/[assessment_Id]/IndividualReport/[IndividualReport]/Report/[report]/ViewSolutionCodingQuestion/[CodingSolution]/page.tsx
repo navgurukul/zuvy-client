@@ -4,7 +4,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 
 import Editor from '@monaco-editor/react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { paramsType } from '../../ViewSolutionOpenEnded/page'
+import { paramsType } from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionOpenEnded/ViewSolutionPageType"
 import { toast } from '@/components/ui/use-toast'
 
 import { api } from '@/utils/axios.config'
@@ -13,14 +13,14 @@ import { useSearchParams } from 'next/navigation'
 import { b64DecodeUnicode } from '@/utils/base64'
 import TestCaseResults from './TestCases'
 import { cn, difficultyColor } from '@/lib/utils'
-type Props = {}
+import {CodingSubmissionData,BootcampData,ProctoringData,CodingSubmissionResponse} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/SubmissionViewPageType"
 
 const Page = ({ params }: { params: paramsType }) => {
-    const [codingSubmissionData, setCodingSubmissionData] = useState<any>({})
+    const [codingSubmissionData, setCodingSubmissionData] = useState<CodingSubmissionData | null>(null)
     const [codingQuestionData, setcodingQuestionData] = useState<any>()
-    const [bootcampData, setBootcampData] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [decodedString, setDecodedString] = useState<string>('')
-    const [proctoringData, setProctorngData] = useState<any>()
+    const [proctoringData, setProctorngData] = useState<ProctoringData | null>(null);
     const [testCases, setTestCases] = useState<any>([])
 
     const saerchQuery = useSearchParams()
@@ -84,7 +84,7 @@ const Page = ({ params }: { params: paramsType }) => {
     const fetchCodingSubmissionData = useCallback(async () => {
         try {
             await api
-                .get(
+                .get<CodingSubmissionResponse>(
                     `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${params.report}&studentId=${params.IndividualReport}&codingOutsourseId=${params.CodingSolution}`
                 )
                 .then((res) => {
@@ -160,9 +160,8 @@ const Page = ({ params }: { params: paramsType }) => {
                             <span
                                 className={cn(
                                     `font-semibold text-secondary`,
-                                    difficultyColor(
-                                        codingSubmissionData?.data
-                                            ?.questionDetail?.difficulty
+                                       difficultyColor(
+                                       codingSubmissionData?.data?.questionDetail?.difficulty ?? 'unknown'
                                     )
                                 )}
                             >

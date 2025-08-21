@@ -6,7 +6,7 @@ import QuizList from './QuizList'
 import { api } from '@/utils/axios.config'
 import useDebounce from '@/hooks/useDebounce'
 import CodingTopics from '../codingChallenge/CodingTopics'
-import {QuizDataLibrary,LibraryOption} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
+import {QuizDataLibrary,LibraryOption,Tag} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 
 function QuizLibrary({
     addQuestion,

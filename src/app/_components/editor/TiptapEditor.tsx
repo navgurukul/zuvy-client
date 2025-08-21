@@ -2,8 +2,8 @@
 import React from 'react'
 import { EditorContent } from '@tiptap/react'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-
-const TiptapEditor = ({ editor }: { editor: any }) => {
+import{Editor} from '@/app/_components/editor/componentEditorType'
+const TiptapEditor = ({ editor }: { editor: Editor }) => {
     return (
         <div className="focus:outline-none focus:border-0">
             <div className="bg-muted/80 py-4  rounded-sm  mt-2  text-start">

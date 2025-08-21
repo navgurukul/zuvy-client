@@ -90,7 +90,7 @@ function Page() {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
                     const data = res.data.find(
-                        (item: any) => moduleId === item.id
+                        (item:  ModuleData ) => moduleId === item.id
                     )
                     setSelectedModuleData(data)
                 })
@@ -339,7 +339,7 @@ function Page() {
             const response = await api.get(
                 `/content/allModules/${courseData.id}`
             )
-            const modulesWithStartedFlag = response.data.map((module: any) => ({
+            const modulesWithStartedFlag = response.data.map((module: ModuleData) => ({
                 ...module,
                 isStarted: false,
             }))

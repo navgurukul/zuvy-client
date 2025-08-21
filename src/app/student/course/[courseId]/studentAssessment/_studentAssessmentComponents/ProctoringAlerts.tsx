@@ -31,8 +31,6 @@ export const AlertProvider = ({
   const [isOpen, setIsOpen] = useState(false);
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
  
-
-
   const showAlert = (props: AlertProps) => {
     setAlertContent(props);
     setIsOpen(true);
