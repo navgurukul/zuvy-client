@@ -21,8 +21,9 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
 }) => {
     const { courseId, moduleId } = useParams()
     const { progress, setProgress } = useVideoStore()
-    
+
     const playerRef = useRef<ReactPlayer>(null)
+    const containerRef = useRef<HTMLDivElement>(null)
     const lastSaveRef = useRef<number>(0)
     const hasCompletedRef = useRef(false)
     const [playing, setPlaying] = useState(false)
@@ -33,7 +34,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     const session = chapterDetails.sessions?.[0] || null
 
     // Chapter completion hook
-    const { isCompleting, completeChapter  } = useChapterCompletion({
+    const { isCompleting, completeChapter } = useChapterCompletion({
         courseId: courseId as string,
         moduleId: moduleId as string,
         chapterId: chapterDetails.id.toString(),
@@ -106,33 +107,42 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         return `${minutes} minute${minutes > 1 ? 's' : ''}`
     }
 
-       const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
-            (state: any) => {
-                const now = Date.now()
-                // Save progress every 2 seconds
-                if (now - lastSaveRef.current > 2000) {
-                    setProgress(chapterDetails.id.toString(), state.playedSeconds)
-                    lastSaveRef.current = now
-                }
-    
-                // Call completeChapter when 75% is reached (only once)
-                if (
-                    !isCompleted &&
-                    !hasCompletedRef.current &&
-                    state.played >= 0.75
-                ) {
-                    hasCompletedRef.current = true
-                    completeChapter()
-                    refetch()
-                }
-            },
-            [
-                chapterDetails.id.toString(),
-                setProgress,
-                completeChapter,
-                isCompleted,
-            ]
-        )
+    const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
+        (state: any) => {
+            const now = Date.now()
+            // Save progress every 2 seconds
+            if (now - lastSaveRef.current > 2000) {
+                setProgress(chapterDetails.id.toString(), state.playedSeconds)
+                lastSaveRef.current = now
+            }
+
+            // Call completeChapter when 75% is reached (only once)
+            if (
+                !isCompleted &&
+                !hasCompletedRef.current &&
+                state.played >= 0.75
+            ) {
+                hasCompletedRef.current = true
+                completeChapter()
+                refetch()
+            }
+        },
+        [
+            chapterDetails.id.toString(),
+            setProgress,
+            completeChapter,
+            isCompleted,
+        ]
+    )
+
+    const toggleFullScreen = () => {
+        if (!document.fullscreenElement && containerRef.current) {
+            containerRef.current.requestFullscreen()
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen()
+        }
+    }
+
     // If no session data, show empty state
     if (!session) {
         return (
@@ -364,9 +374,10 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                             className="w-full h-full border-none"
                                         />
                                     ) : (
-                                        <div className="relative w-full h-full">
-
-                                           
+                                        <div
+                                            ref={containerRef}
+                                            className="relative w-full h-full"
+                                        >
                                             <ReactPlayer
                                                 ref={playerRef}
                                                 url={embedLink}
@@ -377,33 +388,46 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                                 onProgress={handleProgress}
                                                 // onPlay={'Play'}
                                             />
-                                           {!isCompleted && <div className="absolute inset-0 opacity-0 hover:opacity-100 flex flex-col items-center justify-center bg-black/50 text-white">
-                                                <Button
-                                                    onClick={() =>
-                                                        setPlaying(!playing)
-                                                    }
-                                                    className="bg-white/80 text-black  rounded-full px-4 py-2 shadow-lg"
-                                                >
-                                                    {playing ? 'Pause' : 'Play'}
-                                                </Button>
-                                            </div>}
+                                            {!isCompleted && (
+                                                <div className="absolute inset-0 opacity-0 hover:opacity-100 flex gap-4 items-center justify-center bg-black/50 text-white">
+                                                    <Button
+                                                        onClick={() =>
+                                                            setPlaying(!playing)
+                                                        }
+                                                        className="bg-white/80 text-black  rounded-full px-4 py-2 shadow-lg"
+                                                    >
+                                                        {playing
+                                                            ? 'Pause'
+                                                            : 'Play'}
+                                                    </Button>
+                                                    <Button
+                                                        onClick={
+                                                            toggleFullScreen
+                                                        }
+                                                        className="bg-white/80 text-black rounded-full px-4 py-2 shadow-lg"
+                                                    >
+                                                        Fullscreen
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
 
-                                {!isCompleted && !embedLink.includes('zoom.us') && (
-                                    <div className="mt-6">
-                                        <Button
-                                            onClick={completeChapter}
-                                            disabled={isCompleting}
-                                            className="w-full bg-primary hover:bg-primary-dark text-white"
-                                        >
-                                            {isCompleting
-                                                ? 'Marking as Done...'
-                                                : 'Mark as Done'}
-                                        </Button>
-                                    </div>
-                                )}
+                                {!isCompleted &&
+                                    !embedLink.includes('zoom.us') && (
+                                        <div className="mt-6">
+                                            <Button
+                                                onClick={completeChapter}
+                                                disabled={isCompleting}
+                                                className="w-full bg-primary hover:bg-primary-dark text-white"
+                                            >
+                                                {isCompleting
+                                                    ? 'Marking as Done...'
+                                                    : 'Mark as Done'}
+                                            </Button>
+                                        </div>
+                                    )}
                             </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center w-full h-[70vh] bg-card">
