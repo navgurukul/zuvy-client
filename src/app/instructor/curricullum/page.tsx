@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import CurricullumCard from '../_components/curricullumCard'
 import { api } from '@/utils/axios.config'
+import{CourseModule}from '@/app/instructor/_components/componentInstructorTypes'
 
 const Curricullum = () => {
-    const [allCourses, setAllCourses] = useState<any[]>([])
+    const [allCourses, setAllCourses] = useState<CourseModule[]>([])
 
     const getAllCourses = useCallback(async () => {
         try {

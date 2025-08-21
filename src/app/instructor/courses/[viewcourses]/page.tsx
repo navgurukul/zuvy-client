@@ -5,10 +5,10 @@ import { api } from '@/utils/axios.config'
 import CurricullumCard from '../../_components/curricullumCard'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useParams } from 'next/navigation'
-
+import{CourseModule}from '@/app/instructor/_components/componentInstructorTypes'
 const Curricullum = () => {
     const { viewcourses } = useParams()
-    const [allCourses, setAllCourses] = useState<any[]>([])
+    const [allCourses, setAllCourses] = useState<CourseModule[]>([])
 
     const crumbs = [
         {
@@ -56,7 +56,7 @@ const Curricullum = () => {
                                     : 'bg-popover'
                             } my-3 p-3  flex rounded-xl border-none shadow-[0_1px_5px_0_rgba(74,74,74,0.10),0_2px_1px_0_rgba(74,74,74,0.06),0_1px_2px_0_rgba(74,74,74,0.08)]`}
                         >
-                            <CurricullumCard key={item} course={item} />
+                            <CurricullumCard key={item.id} course={item} />
                         </div>
                     </div>
                 ))}

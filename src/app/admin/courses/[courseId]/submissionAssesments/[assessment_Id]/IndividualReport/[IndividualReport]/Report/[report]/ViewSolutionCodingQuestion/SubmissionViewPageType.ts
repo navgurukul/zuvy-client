@@ -1,0 +1,71 @@
+import { JSX } from "react";
+
+// page.tsx
+export type CodingSubmissionData = {
+    data: {
+        questionDetail: {
+            title: string;
+            description:string;
+            difficulty?:string
+            constraints?: string;
+        };
+    };
+};
+
+
+export type BootcampData = {
+    name: string;
+};
+
+
+export type ProctoringData = {
+    user: {
+        name: string;
+    };
+};
+
+
+// TestCase
+export type Parameter = {
+  parameterType: string;
+  parameterValue: any;
+};
+export type TestCase = {
+    inputs: Parameter;
+    output: string;
+    stderr:string
+    status: string;
+    memory?: number; 
+    time?: number;
+    stdout:string
+  testCases: {
+    // TestCase
+    map(arg0: (testCase: TestCase, index: number) => JSX.Element): import("react").ReactNode;
+    inputs: any;
+    expectedOutput: {
+      parameterType: string;
+      parameterValue: any;
+    };
+  };
+};
+
+
+export type QuestionDetail = {
+    title: string;
+    description: string;
+    difficulty?: string;
+    constraints?: string;
+};
+
+export type CodingSubmissionResponse = {
+    data: {
+        sourceCode: string;
+        TestCasesSubmission: TestCase[];
+        questionDetail: QuestionDetail;
+    };
+};
+
+
+export interface InputPage{
+    parameterValue:string
+}

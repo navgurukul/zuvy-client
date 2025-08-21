@@ -11,16 +11,15 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import {BootcampData,AssignmentStatus,AssignmentDataResponse,Params} from "@/app/admin/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType"
 
-type Props = {}
-
-const Page = ({ params }: { params: any }) => {
+const Page = ({ params }: { params:Params}) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
 
-    const [assignmentData, setAssignmentData] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>({})
+    const [assignmentData, setAssignmentData] = useState<AssignmentStatus[]>([])
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [assignmentTitle, setAssignmentTitle] = useState<string>('')
     const [submittedStudents, setSubmittedStudents] = useState<number>(0)
     const [searchQuery, setSearchQuery] = useState<string>('') // What user types
@@ -56,10 +55,9 @@ const Page = ({ params }: { params: any }) => {
 
         const query = searchQuery.toLowerCase()
         const suggestions: { name: string; email: string }[] = []
-
         const seen = new Set()
 
-        assignmentData.forEach((student: any) => {
+        assignmentData.forEach((student:any) => {
             const nameMatch = student.name?.toLowerCase().includes(query)
             const emailMatch = student.emailId?.toLowerCase().includes(query)
 
@@ -77,7 +75,7 @@ const Page = ({ params }: { params: any }) => {
         if (!appliedSearchQuery.trim()) return assignmentData;
 
         const searchTerm = appliedSearchQuery.toLowerCase();
-        return assignmentData.filter((student: any) =>
+        return assignmentData.filter((student:any) =>
             student.name?.toLowerCase().includes(searchTerm) ||
             student.emailId?.toLowerCase().includes(searchTerm)
         );
@@ -147,7 +145,7 @@ const Page = ({ params }: { params: any }) => {
 
     const getBootcampHandler = useCallback(async () => {
         try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
+            const res = await api.get<{ bootcamp: BootcampData}>(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
             console.error('Error fetching bootcamp data:', error)
@@ -161,9 +159,9 @@ const Page = ({ params }: { params: any }) => {
                     `/submission/assignmentStatus?chapterId=${params.assignmentData}&limit=5&offset=0`
                 )
                 .then((res) => {
-                    const assignmentData: any = res?.data?.data
+                    const assignmentData: AssignmentDataResponse = res?.data?.data
                     const chapterId = assignmentData?.chapterId
-                    assignmentData.data.forEach((data: any) => {
+                    assignmentData.data.forEach((data: AssignmentStatus) => {
                         data.chapterId = chapterId
                     })
                     setAssignmentData(assignmentData.data)
@@ -192,8 +190,10 @@ const Page = ({ params }: { params: any }) => {
         Promise.all([getBootcampHandler(), fetchAssignmentDataHandler()])
     }, [getBootcampHandler, fetchAssignmentDataHandler])
 
-    const totalStudents =
-        bootcampData?.students_in_bootcamp - bootcampData?.unassigned_students
+ const totalStudents =
+    (bootcampData?.students_in_bootcamp || 0) -
+    (bootcampData?.unassigned_students ?? 0);
+
 
     return (
         <>

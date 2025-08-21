@@ -12,7 +12,7 @@ import ModuleContentRenderer from "@/app/student/_components/ModuleContentRender
 import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
 import Header from "../_components/Header";
-import {TopicItem,Module,Course,Topic} from '@/app/student/_pages/pageStudentType'
+import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
 
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
   const router = useRouter();
@@ -157,7 +157,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
 
   const getAllItems = () => {
     if (!enhancedModule) return [];
-    const items: { item: any; topicId: string }[] = [];
+    const items: { item: TopicItem; topicId: string }[] = [];
     enhancedModule.topics.forEach(topic => {
       topic.items.forEach(item => {
         items.push({ item, topicId: topic.id });
@@ -336,7 +336,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
     );
   };
 
-  const getItemDetails = (item: any) => {
+  const getItemDetails = (item:TopicItem) => {
     if (item.type === 'live-class') {
       return 'Live Class';
     }
@@ -482,8 +482,9 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
           <div className={`h-full  ${isMobile ? 'p-2.5' : 'p-10'}`}>
             <ModuleContentRenderer
               selectedItemData={selectedItemData}
-              onChapterComplete={refetch}
-            />
+              onChapterComplete={refetch} getAssessmentData={function (itemId: string) {
+                throw new Error("Function not implemented.");
+              } }            />
           </div>
         </div>
       </div>

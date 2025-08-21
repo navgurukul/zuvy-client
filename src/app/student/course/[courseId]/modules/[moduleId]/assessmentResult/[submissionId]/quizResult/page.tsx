@@ -9,7 +9,7 @@ import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import { useQuizResults } from '@/hooks/useQuizResults'
 import { useThemeStore } from '@/store/store'
 import { Button } from '@/components/ui/button'
-
+import {MCQResult} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/quizResult/modulesAssessmentQuixResultType"
 const QuizResults = ({
     params,
 }: {
@@ -206,7 +206,7 @@ const QuizResults = ({
 
                 {/* Questions */}
                 <div className="space-y-6">
-                    {quizResults?.mcqs.map((result: any, index: number) => (
+                    {quizResults?.mcqs.map((result: MCQResult, index: number) => (
                         <div
                             key={result.quizId}
                             className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden"

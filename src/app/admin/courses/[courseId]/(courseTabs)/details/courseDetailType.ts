@@ -10,3 +10,9 @@ export interface CourseData {
     startTime?: string
     unassigned_students?: number
 }
+
+
+export interface PageParams {
+  id: string;
+  slug: string;
+}

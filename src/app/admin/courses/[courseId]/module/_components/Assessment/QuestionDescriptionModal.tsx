@@ -2,6 +2,7 @@ import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn, difficultyBgColor, difficultyColor } from '@/lib/utils';
 import {QuestionDescriptionModalProps } from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, PromiseLikeOfReactNode, Key } from 'react';
 
 // Define the types for different question types
 
@@ -85,7 +86,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                             {/* Test Cases */}
                             <div>
                                 <h4 className="font-semibold text-gray-600 text-lg">Test Cases:</h4>
-                                {question.testCases.map((testCase, index) => (
+                                {question.testCases.map((testCase: { id: Key | null | undefined; inputs: any[]; expectedOutput: { parameterType: any; parameterValue: any; }; }, index: number) => (
                                     <div key={testCase.id} className="px-4">
                                         <h5 className="font-semibold text-gray-600 text-[16px]">Example {index + 1}:</h5>
 
@@ -93,7 +94,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                                         <div className="mb-2">
                                             <strong className='text-gray-600 text-[18px]'>Input:</strong>
                                             <pre className="ml-4 bg-gray-100 p-2 rounded-md text-gray-600 text-sm whitespace-pre-wrap">
-                                                {testCase.inputs.map((input, idx) => {
+                                                {testCase.inputs.map((input: { parameterType: any; parameterValue: any; }, idx: Key | null | undefined) => {
                                                     const { parameterType, parameterValue } = input;
                                                     let formattedValue = "";
                                                     if (["str", "int", "float", "bool"].includes(parameterType)) {
@@ -165,7 +166,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                     <div>
                         <h4 className="font-semibold text-lg mb-2">Options:</h4>
                         <ul className="list-disc pl-6">
-                            {question.options.map((option, idx) => (
+                            {question.options.map((option: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | PromiseLikeOfReactNode | null | undefined, idx: Key | null | undefined) => (
                                 <li key={idx}>{option}</li>
                             ))}
                         </ul>

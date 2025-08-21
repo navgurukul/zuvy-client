@@ -32,6 +32,7 @@ import {
 import { cn, difficultyColor } from '@/lib/utils'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import { useThemeStore } from '@/store/store'
+import {Question} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const QuizQuestions = ({
     onBack,
@@ -85,7 +86,7 @@ const QuizQuestions = ({
 
     useEffect(() => {
         const defaultValues = {
-            answers: questions?.data?.mcqs?.map((question: any) =>
+            answers: questions?.data?.mcqs?.map((question:Question) =>
                 question.submissionsData && question.submissionsData.length > 0
                     ? question.submissionsData[0].chosenOption.toString()
                     : ''

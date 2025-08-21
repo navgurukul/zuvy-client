@@ -15,6 +15,7 @@ export interface CurriculumItem {
 }
 
 export interface ModuleData {
+    id: number
     name: string
     description: string
     type: string

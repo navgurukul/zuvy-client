@@ -1,13 +1,35 @@
+import OpenEndedQuestions from "./OpenEndedQuestions";
+
+export interface SubmissionData {
+  chosenOption: any;
+  answer: any;
+  id: number;
+  startedAt: string;
+}
+
+
 // export interface AssessmentData {
-//   submission: {
-//     startedAt: string
-//   }
-//   timeLimit: number
-//   tabChange: boolean
-//   screenRecord: boolean
-//   copyPaste: boolean
-//   IsQuizzSubmission: boolean
-//   // add other fields...
+//   hardCodingMark: number;
+//   mediumCodingMark: number;
+//   easyCodingMark: number;
+//   tabChange?: boolean;
+//   screenRecord?: boolean;
+//   copyPaste?: boolean;
+//   IsQuizzSubmission?:boolean
+//   hardMcqQuestions?:number
+//   easyMcqQuestions?:number
+//   mediumMcqQuestions?:number
+//   bootcampId:string
+//   totalMcqQuestions:number
+//   moduleId:string
+//   chapterId:string
+//   title:string
+//   canTabChange: boolean;
+//   canScreenExit: boolean;
+//   canCopyPaste: boolean;
+//   ModuleAssessment:string
+//   canEyeTrack: boolean;
+//   submission?:SubmissionData 
 // }
 
 // AssessmentProvider
@@ -55,6 +77,11 @@ export interface TestCase {
 }
 
 export interface TestCasesSubmission {
+  stdIn: any;
+  expectedOutput: any;
+  stdOut: string | undefined;
+  stdErr: string | undefined;
+  compileOutput: any;
   status: string
   testCases: TestCase
   stdout?: string
@@ -72,6 +99,7 @@ export interface CodingSubmissionData {
     TestCasesSubmission: TestCasesSubmission[]
   }
 }
+
 
 
 export interface Input {
@@ -95,6 +123,7 @@ export interface questionDetails {
     examples: { input: number[]; output: number }
 }
 
+
 export interface IDEProps {
     params: { editor: string }
     onBack?: () => void
@@ -107,7 +136,21 @@ export interface IDEProps {
     getCodingSubmissionsData?: any
 }
 
+// OpenEndedQuestions
+export interface AssessmentProps{
+  onBack: () => void;
+  remainingTime: number;
+  questions: any[];
+  assessmentSubmitId: number;
+  getSeperateOpenEndedQuestions: () => void;
+  getAssessmentData: () => void;
+}
 
+
+
+export interface Question{
+  submissionsData?: SubmissionData[];
+}
 
 // showProctoringAlert
 export type AlertProps = {
@@ -128,8 +171,6 @@ declare global {
 }
 
 
-
-
 // QuestionCard
 export interface QuestionCardProps {
     id: number
@@ -140,7 +181,6 @@ export interface QuestionCardProps {
     hardCodingMark?: number
     description: string
     tagId?: number
-    // assessmentOutsourseId?: number
     assessmentSubmitId?: number
     codingOutsourseId?: number
     codingQuestions?: boolean
@@ -150,14 +190,15 @@ export interface QuestionCardProps {
     setIsCodingSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
 
 }
+
 export type Tag = {
     id: number
     tagName: string
 }
 
 
-
 // TimerDisplay
 export interface TimerDisplayProps {
   remainingTime: number;
 }
+
