@@ -97,14 +97,12 @@ const StudentDashboard = () => {
     }
   };
 
-  const formatUpcomingItem = (item: UpcomingEvent) => {
-    // Use eventDate as the source of truth for the event's timing.
-    if (!item.eventDate) {
-      return "Date not available";
-    }
+const formatUpcomingItem = (item: any) => {
+  // Helper function to parse and normalize date strings
+  const parseDate = (dateString: any) => {
+    if (!dateString) return null;
     
-    // Handle the specific format "2025-06-27 08:26:00+00"
-    let parsableDateString = item.eventDate;
+    let parsableDateString = dateString;
     
     // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
     if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
@@ -114,43 +112,105 @@ const StudentDashboard = () => {
         parsableDateString += ':00';
       }
     }
+    
+    const date = new Date(parsableDateString);
+    return isNaN(date.getTime()) ? null : date;
+  };
 
-    const itemDate = new Date(parsableDateString);
-    const now = new Date();
-
-    if (isNaN(itemDate.getTime())) {
-      // If parsing still fails, try a different approach
-      console.error('Failed to parse date:', item.eventDate);
-      return "Invalid date format";
-    }
-
-    const diffTime = itemDate.getTime() - now.getTime();
-
-    if (diffTime <= 0) {
-      // Since we're not using an end date, we provide a generic past-tense status.
-      if (item.type?.toLowerCase() === 'assignment') {
-        return "Past due";
-      }
-      return "Event has started";
-    }
-
-    // Calculate remaining time
+  // Helper function to format countdown time
+  const formatCountdown = (diffTime: any, prefix = '') => {
     const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
 
-    // Return formatted countdown string
+    let timeString = '';
     if (days > 0) {
-      return `${days} day${days > 1 ? 's' : ''}${hours > 0 ? ` ${hours} hr${hours > 1 ? 's' : ''}` : ''}`;
+      timeString = `${days} day${days > 1 ? 's' : ''}${hours > 0 ? ` ${hours} hr${hours > 1 ? 's' : ''}` : ''}`;
+    } else if (hours > 0) {
+      timeString = `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` ${minutes} min${minutes > 1 ? 's' : ''}` : ''}`;
+    } else if (minutes > 0) {
+      timeString = `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else {
+      timeString = "Starting soon";
     }
-    if (hours > 0) {
-      return `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` ${minutes} min${minutes > 1 ? 's' : ''}` : ''}`;
-    }
-    if (minutes > 0) {
-      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
-    }
-    return "Starting soon";
+
+    return prefix ? `${prefix} ${timeString}` : timeString;
   };
+
+  // Get the appropriate date field based on event type
+  const getStartDate = (item:any) => {
+    if (item.type?.toLowerCase() === 'live class') {
+      return parseDate(item.startTime);
+    } else {
+      return parseDate(item.startDatetime);
+    }
+  };
+
+  const getEndDate = (item:any) => {
+    if (item.type?.toLowerCase() === 'live class') {
+      return parseDate(item.endTime);
+    } else if (item.type?.toLowerCase() === 'assignment') {
+      return parseDate(item.completionDate);
+    } else {
+      return parseDate(item.endDatetime);
+    }
+  };
+
+  const startDate = getStartDate(item);
+  const endDate = getEndDate(item);
+  const now = new Date();
+
+  // If we can't parse the start date, fall back to eventDate
+  if (!startDate) {
+    const eventDate = parseDate(item.eventDate);
+    if (!eventDate) {
+      return "Date not available";
+    }
+    const diffTime = eventDate.getTime() - now.getTime();
+    if (diffTime <= 0) {
+      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event has started";
+    }
+    return formatCountdown(diffTime, "Starts in");
+  }
+
+  const startTime = startDate.getTime();
+  const currentTime = now.getTime();
+
+  // Case 1: start date and time > current date
+  if (startTime > currentTime) {
+    const diffTime = startTime - currentTime;
+    return formatCountdown(diffTime, "Starts in");
+  }
+
+  // Case 2: start date and time < current date & end date & time is not null
+  if (startTime < currentTime && endDate) {
+    const endTime = endDate.getTime();
+    if (endTime > currentTime) {
+      const diffTime = endTime - currentTime;
+      return formatCountdown(diffTime, "Deadline in");
+    } else {
+      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event ended";
+    }
+  }
+
+  // Case 3: start date and time < current date & end date & time is null
+  if (startTime < currentTime && !endDate) {
+    // Format the start date for display
+    const options: any = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC'
+    };
+    const formattedDate = startDate.toLocaleDateString('en-US', options);
+    return `Due Date: ${formattedDate}`;
+  }
+
+  // Fallback
+  return "Status unavailable";
+};
 
   if (loading) {
     return <StudentDashboardSkeleton />;
@@ -337,6 +397,7 @@ const StudentDashboard = () => {
                             .map((item) => {
                             const eventType = mapEventType(item.type);
                             const liveClassStatus = item.status;
+                            console.log(item)
                             return (
                               <CarouselItem key={item.id} className="pl-2 md:basis-1/3  ">
                                 <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
@@ -388,7 +449,7 @@ const StudentDashboard = () => {
                                         <p className="text-xs text-left flex justify-between w-full text-muted-foreground mb-2">
                                           <span>
 
-                                          {eventType === 'Assignment' ? 'Due in' : eventType === 'Live Class' ? '' : 'Due in'} {eventType === 'Live Class' && liveClassStatus === 'upcoming' && 'Starts in'} {formatUpcomingItem(item)}
+                                          {formatUpcomingItem(item)}
                                           </span>
                                           <span>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,8 +12,8 @@ import useWindowSize from '@/hooks/useHeightWidth'
 import { useVideoStore } from '@/store/store'
 
 function getYoutubeId(url: string) {
-    const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/);
-    return match ? match[1] : url; // fallback to full URL if no match
+    const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
+    return match ? match[1] : url // fallback to full URL if no match
 }
 const VideoContent: React.FC<VideoContentProps> = ({
     chapterDetails,
@@ -21,11 +21,11 @@ const VideoContent: React.FC<VideoContentProps> = ({
     refetch,
 }) => {
     const { courseId, moduleId } = useParams()
-    const playerRef = useRef<ReactPlayer>(null);
-    const { progress, setProgress } = useVideoStore();
-    const [playing, setPlaying] = useState(false);
-    const { width } = useWindowSize();
-    const isMobile = width < 768;
+    const playerRef = useRef<ReactPlayer>(null)
+    const { progress, setProgress } = useVideoStore()
+    const [playing, setPlaying] = useState(false)
+    const { width } = useWindowSize()
+    const isMobile = width < 768
     const [isCompleted, setIsCompleted] = useState(
         chapterDetails.status === 'Completed'
     )
@@ -43,59 +43,74 @@ const VideoContent: React.FC<VideoContentProps> = ({
     useEffect(() => {
         setIsCompleted(chapterDetails.status === 'Completed')
         // Reset completion ref when chapter changes
-        hasCompletedRef.current = false;
+        hasCompletedRef.current = false
     }, [chapterDetails.status])
 
     const videoLinks =
         chapterDetails.links && chapterDetails.links.length > 0
             ? chapterDetails.links
             : chapterDetails.file
-                ? [chapterDetails.file]
-                : []
-    const flatLinks = videoLinks.flat();
-    const isYouTube = flatLinks.some(link => link.includes('youtube.com') || link.includes('youtu.be'));
+            ? [chapterDetails.file]
+            : []
+    const flatLinks = videoLinks.flat()
+    const isYouTubeandZoom =
+        flatLinks.some(
+            (link) => link.includes('youtube.com') || link.includes('youtu.be')
+        ) ||
+        flatLinks.some(
+            (link) => link.includes('zoom.us') || link.includes('zoom')
+        )
+
     // const youtubeId = isYouTube ? getYoutubeId(flatLinks[0]) : '';
-    const savedTime = isYouTube ? progress[chapterDetails.id.toString()] || 0 : 0;
+    const savedTime = isYouTubeandZoom
+        ? progress[chapterDetails.id.toString()] || 0
+        : 0
     const handleReady = useCallback(() => {
         if (savedTime && playerRef.current) {
-            playerRef.current.seekTo(savedTime, "seconds");
+            playerRef.current.seekTo(savedTime, 'seconds')
         }
-        setPlaying(true);
-    }, [savedTime, setPlaying]);
+        setPlaying(true)
+    }, [savedTime, setPlaying])
 
     // Throttle saving progress every 2 seconds
-    const lastSaveRef = useRef<number>(0);
-    const hasCompletedRef = useRef(false);
-    
-    const handleProgress: ReactPlayerProps["onProgress"] = useCallback(
+    const lastSaveRef = useRef<number>(0)
+    const hasCompletedRef = useRef(false)
+
+    const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
         (state: any) => {
-            const now = Date.now();
+            const now = Date.now()
             // Save progress every 2 seconds
             if (now - lastSaveRef.current > 2000) {
-                setProgress(chapterDetails.id.toString(), state.playedSeconds);
-                lastSaveRef.current = now;
+                setProgress(chapterDetails.id.toString(), state.playedSeconds)
+                lastSaveRef.current = now
             }
 
             // Call completeChapter when 75% is reached (only once)
-            if (!isCompleted && !hasCompletedRef.current && state.played >= 0.75) {
-                hasCompletedRef.current = true;
-                completeChapter();
+            if (
+                !isCompleted &&
+                !hasCompletedRef.current &&
+                state.played >= 0.75
+            ) {
+                hasCompletedRef.current = true
+                completeChapter()
                 refetch()
-
             }
         },
-        [chapterDetails.id.toString(), setProgress, completeChapter, isCompleted]
-    );
-
-  
+        [
+            chapterDetails.id.toString(),
+            setProgress,
+            completeChapter,
+            isCompleted,
+        ]
+    )
 
     return (
         <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
             <div className="max-w-4xl mx-auto">
-                <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}  >
+                <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}>
                     <div className="flex flex-col space-y-2 mb-6">
                         <div className="flex items-center justify-between">
-                            <div  >
+                            <div>
                                 <h1 className="text-xl text-left font-extrabold">
                                     {chapterDetails.title}
                                 </h1>
@@ -107,14 +122,13 @@ const VideoContent: React.FC<VideoContentProps> = ({
                             </div>
                             <Badge
                                 variant="secondary"
-                                className={`${isCompleted
+                                className={`${
+                                    isCompleted
                                         ? 'bg-green-100 text-green-600 hover:bg-green-100'
                                         : 'bg-white text-slate-700 hover:bg-white border border-slate-200'
-                                    } text-xs font-medium px-2 py-1 mb-5`}
+                                } text-xs font-medium px-2 py-1 mb-5`}
                             >
-                                {isCompleted
-                                    ? 'Watched'
-                                    : 'Not Watched'}
+                                {isCompleted ? 'Watched' : 'Not Watched'}
                             </Badge>
                         </div>
                     </div>
@@ -125,16 +139,15 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                 link[0].includes('youtube.com') ||
                                 link[0].includes('youtu.be')
                             const isDrive = link[0].includes('drive.google.com')
+                            const isZoom = link[0].includes('zoom.us')
                             const embedLink = getEmbedLink(link)
                             return (
-
-
                                 <div
                                     key={`${idx}-${link[0]}`}
                                     className="mb-8 bg-card-elevated rounded-lg shadow-16dp overflow-hidden border border-border"
                                 >
                                     <div className="aspect-video bg-black flex items-center justify-center relative">
-                                        {isYouTube ? (
+                                        {isYouTube  ? (
                                             <ReactPlayer
                                                 ref={playerRef}
                                                 url={embedLink[0]}
@@ -144,8 +157,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 onReady={handleReady}
                                                 onProgress={handleProgress}
-                                                
-                                                
+                                               
+
                                                 // onEnded={() => completeChapter()}
                                             />
                                         ) : isDrive ? (
@@ -156,7 +169,21 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 allowFullScreen
                                                 className="w-full h-full border-none"
                                             />
-                                        ) : (
+                                        ) : isZoom ? 
+                                        <ReactPlayer
+                                                ref={playerRef}
+                                                url={embedLink[0]}
+                                                playing={playing}
+                                                controls={isCompleted}
+                                                width="100%"
+                                                height="100%"
+                                                // onReady={handleReady}
+                                                onProgress={handleProgress}
+                                              
+
+                                                // onEnded={() => completeChapter()}
+                                            />
+                                         : (
                                             <div className="flex flex-col items-center justify-center w-full h-full text-white">
                                                 <VideoIcon className="w-16 h-16 mb-2 opacity-60" />
                                                 <p>Unsupported video format</p>
@@ -172,13 +199,12 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 {isYouTube
                                                     ? 'YouTube'
                                                     : isDrive
-                                                        ? 'Google Drive'
-                                                        : 'Video'}
+                                                    ? 'Google Drive'
+                                                    : 'Video'}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-
                             )
                         })
                     ) : (
@@ -197,26 +223,31 @@ const VideoContent: React.FC<VideoContentProps> = ({
                     {/* Video Player Section */}
 
                     {/* Mark as Watched Button */}
-                    {!isCompleted && videoLinks.length > 0 && !isYouTube && (
-                        <div className="flex justify-end mt-6">
-                            <Button
-                                onClick={completeChapter}
-                                size="lg"
-                                disabled={isCompleting}
-                                className="bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg"
-                            >
-                                <CheckCircle2 className="w-5 h-5 mr-2" />
-                                {isCompleting
-                                    ? 'Marking as Watched...'
-                                    : 'Mark as Watched'}
-                            </Button>
-                        </div>
-                    )}
+                    {!isCompleted &&
+                        videoLinks.length > 0 &&
+                        !isYouTubeandZoom && (
+                            <div className="flex justify-end mt-6">
+                                <Button
+                                    onClick={completeChapter}
+                                    size="lg"
+                                    disabled={isCompleting}
+                                    className="bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover px-8 py-2 rounded-lg"
+                                >
+                                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                                    {isCompleting
+                                        ? 'Marking as Watched...'
+                                        : 'Mark as Watched'}
+                                </Button>
+                            </div>
+                        )}
                 </ScrollArea>
-
             </div>
         </div>
     )
 }
 
 export default VideoContent
+
+
+
+

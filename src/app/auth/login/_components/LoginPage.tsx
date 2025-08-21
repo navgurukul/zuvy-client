@@ -163,6 +163,7 @@ const handleGoogleSuccess = async (
                     title: 'Login Successful',
                     description: 'Welcome to Zuvy Dashboard',
                 })
+                localStorage.setItem('isLoginFirst' , 'true')
 
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
@@ -264,7 +265,7 @@ const handleGoogleSuccess = async (
                     {/* Main Content Grid */}
                     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
                         {/* Login Panel */}
-                        <div className="w-full max-w-md p-12 md:p-12 p-6 text-center mb-20 md:mb-20 bg-card rounded-lg shadow-8dp border">
+                        <div className="w-full max-w-md md:p-12 p-6 text-center mb-20 md:mb-20 bg-card rounded-lg shadow-8dp border">
                             {/* Logo */}
                             <div className="mb-6">
                                 <Image

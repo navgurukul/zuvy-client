@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, Video, Users, ExternalLink } from 'lucide-react';
 import {LiveClassProps} from "@/app/admin/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType"
+import { getEmbedLink } from '@/utils/admin';
 
 
 const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps) => {
@@ -69,7 +70,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
 
     return (
         <div className="w-3/4 mx-auto">
-            <Card className="duration-300 border-0 bg-gradient-to-br from-white to-gray-50">
+            <div className="">
                 <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -122,7 +123,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-border">
+                    <div className="pt-4 ">
                         {session.status.toLowerCase() === 'completed' &&
                         session.s3link &&
                         session.s3link !== 'not found' ? (
@@ -131,10 +132,10 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                                     <Video className="w-4 h-4" />
                                     Meeting Recording
                                 </h4>
-                                <div className="w-full bg-black rounded-lg overflow-hidden">
+                                <div className="w-5/6 bg-black rounded-lg overflow-hidden">
                                     <iframe
-                                        src={session.s3link}
-                                        className="w-full h-64 border-0"
+                                        src={getEmbedLink(session.s3link)}
+                                        className="w-full h-80 border-0"
                                         allowFullScreen
                                         title={`Recording: ${session.title}`}
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -168,7 +169,7 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                         )}
                     </div>
                 </CardContent>
-            </Card>
+            </div>
         </div>
     )
 }
