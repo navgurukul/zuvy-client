@@ -23,7 +23,7 @@ import PreviewVideo from '@/app/admin/courses/[courseId]/module/_components/vide
 import { getChapterUpdateStatus, getVideoPreviewStore } from '@/store/store'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import {AddVideoProps} from "@/app/admin/courses/[courseId]/module/_components/video/ModuleVideoType"
+import {AddVideoProps,EditChapterResponse} from "@/app/admin/courses/[courseId]/module/_components/video/ModuleVideoType"
 
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
@@ -164,7 +164,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
 
         try {
             await api
-                .put(
+                .put<EditChapterResponse>(
                     `/Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
                     convertedObj
                 )

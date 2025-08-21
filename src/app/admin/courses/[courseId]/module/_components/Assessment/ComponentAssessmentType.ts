@@ -173,7 +173,7 @@ export interface OpenEndedQuestion {
 export type Question = CodingQuestion | MCQQuestion | OpenEndedQuestion;
 
 export interface QuestionDescriptionModalProps {
-    question: Question;
+    question:any;
     type: 'coding' | 'mcq' | 'open-ended';
     tagName?: string;
 }

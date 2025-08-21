@@ -18,7 +18,7 @@ import {
 import { ArrowUpRightSquare, Pencil } from 'lucide-react'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import {QuizProps} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
+import {QuizProps,ChapterDetailsResponse} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 
 function Quiz(props: QuizProps) {
     const router = useRouter()
@@ -131,7 +131,7 @@ function Quiz(props: QuizProps) {
         if (!props.chapterId || props.chapterId === 0) return
 
         try {
-            const res = await api.get(
+            const res = await api.get<ChapterDetailsResponse>(
                 `/Content/chapterDetailsById/${props.chapterId}?bootcampId=${props.courseId}&moduleId=${props.moduleId}&topicId=${props.content.topicId}`
             )
             setAddQuestion(res.data.quizQuestionDetails)

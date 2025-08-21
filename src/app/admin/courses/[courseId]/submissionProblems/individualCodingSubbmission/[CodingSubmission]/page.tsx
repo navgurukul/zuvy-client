@@ -64,7 +64,7 @@ const Page = ({ params }: PageParams) => {
     const fetchCodingSubbmissionDataHandler = useCallback(async () => {
         try {
             await api
-                .get(
+                .get<ApiResponse>(
                     `/codingPlatform/submissions/questionId=${questionId}?studentId=${params.CodingSubmission}`
                 )
                 .then((res) => {
