@@ -27,7 +27,8 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     const lastSaveRef = useRef<number>(0)
     const hasCompletedRef = useRef(false)
     const [playing, setPlaying] = useState(false)
-
+     const [isFullscreen, setIsFullscreen] = useState(false)
+const [showControls, setShowControls] = useState(true);
     const [localIsCompleted, setLocalIsCompleted] = useState(false)
 
     // Get session data
@@ -43,6 +44,32 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
             onChapterComplete()
         },
     })
+
+    useEffect(() => {
+        let timeout: NodeJS.Timeout;
+
+        const handleMouseMove = () => {
+            setShowControls(true); // Show controls on mouse move
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                setShowControls(false); // Hide controls after 3s
+            }, 3000);
+        };
+
+        const container = containerRef.current;
+        if (container) {
+            container.addEventListener("mousemove", handleMouseMove);
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener("mousemove", handleMouseMove);
+            }
+            clearTimeout(timeout);
+        };
+    }, []);
+
+
 
     // Update local state when chapter status changes
     useEffect(() => {
@@ -138,8 +165,10 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     const toggleFullScreen = () => {
         if (!document.fullscreenElement && containerRef.current) {
             containerRef.current.requestFullscreen()
+            setIsFullscreen(true)
         } else if (document.exitFullscreen) {
             document.exitFullscreen()
+            setIsFullscreen(false)
         }
     }
 
@@ -388,7 +417,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                                 onProgress={handleProgress}
                                                 // onPlay={'Play'}
                                             />
-                                            {!isCompleted && (
+                                            {!isCompleted && showControls &&(
                                                 <div className="absolute inset-0 opacity-0 hover:opacity-100 flex gap-4 items-center justify-center bg-black/50 text-white">
                                                     <Button
                                                         onClick={() =>
@@ -406,7 +435,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                                         }
                                                         className="bg-white/80 text-black rounded-full px-4 py-2 shadow-lg"
                                                     >
-                                                        Fullscreen
+                                                        {!isFullscreen? 'FullScreen' : 'Exit'}
                                                     </Button>
                                                 </div>
                                             )}
