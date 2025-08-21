@@ -31,6 +31,7 @@ interface Module {
     timeAlloted: number
     moduleChapterData: ModuleChapterData[]
 }
+
 const PraticeProblems = ({ params }: any) => {
     const [submissionData, setSubmissionData] = useState<any[]>([])
     const [matchingData, setMatchingData] = useState<any>(null)

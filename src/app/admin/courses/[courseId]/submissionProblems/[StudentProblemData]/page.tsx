@@ -39,7 +39,7 @@ const PraticeProblems = ({ params }: any) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    
+    const praticeProblems = searchParams.get('praticeProblems')
     const [matchingData, setMatchingData] = useState<any>(null)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [studentDetails, setStudentDetails] = useState<any[]>([])
@@ -75,14 +75,10 @@ const PraticeProblems = ({ params }: any) => {
                 href: `/admin/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
-            // {
-            //     crumb: 'Submission - Practice Problems',
-            //     href: '',
-            //     isLast: false,
-            // },
             {
-                crumb: (matchingData?.moduleChapterData[0]?.codingQuestionDetails 
-                ?.title) + ' - Submissions',
+                crumb:
+                    matchingData?.codingQuestionDetails?.title +
+                    ' - Submissions',
                 href: '',
                 isLast: true,
             },
@@ -93,62 +89,76 @@ const PraticeProblems = ({ params }: any) => {
     // Get search suggestions from existing data
     const searchSuggestions = useMemo(() => {
         if (!searchQuery.trim() || !studentDetails.length) return []
-        
+
         const suggestions: { name: string; email: string }[] = []
         const query = searchQuery.toLowerCase()
-        
+
         studentDetails.forEach((student: any) => {
-            const nameMatch = student.name && student.name.toLowerCase().includes(query)
-            const emailMatch = student.email && student.email.toLowerCase().includes(query)
-            
+            const nameMatch =
+                student.name && student.name.toLowerCase().includes(query)
+            const emailMatch =
+                student.email && student.email.toLowerCase().includes(query)
+
             if (nameMatch || emailMatch) {
                 // Avoid duplicates
-                const exists = suggestions.some(s => s.name === student.name && s.email === student.email)
+                const exists = suggestions.some(
+                    (s) => s.name === student.name && s.email === student.email
+                )
                 if (!exists) {
                     suggestions.push({
                         name: student.name || '',
-                        email: student.email || ''
+                        email: student.email || '',
                     })
                 }
             }
         })
-        
+
         return suggestions.slice(0, 5)
     }, [searchQuery, studentDetails])
 
     // Filter student details based on search
-    const filterStudentDetails = useCallback((students: any[], query: string) => {
-        if (!query.trim()) return students
-        
-        const searchTerm = query.toLowerCase()
-        return students.filter((student: any) => {
-            const nameMatch = student.name && student.name.toLowerCase().includes(searchTerm)
-            const emailMatch = student.email && student.email.toLowerCase().includes(searchTerm)
-            return nameMatch || emailMatch
-        })
-    }, [])
+    const filterStudentDetails = useCallback(
+        (students: any[], query: string) => {
+            if (!query.trim()) return students
+
+            const searchTerm = query.toLowerCase()
+            return students.filter((student: any) => {
+                const nameMatch =
+                    student.name &&
+                    student.name.toLowerCase().includes(searchTerm)
+                const emailMatch =
+                    student.email &&
+                    student.email.toLowerCase().includes(searchTerm)
+                return nameMatch || emailMatch
+            })
+        },
+        []
+    )
 
     // Handle search input change
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         const isAddingText = value.length > searchQuery.length
-        
+
         setSearchQuery(value)
         setShowSuggestions(isAddingText && value.trim().length > 0)
-        
+
         // Filter data in real-time
         const filtered = filterStudentDetails(studentDetails, value)
         setFilteredStudentDetails(filtered)
     }
 
     // Handle suggestion click - use name for input and URL
-    const handleSuggestionClick = (suggestion: { name: string; email: string }) => {
+    const handleSuggestionClick = (suggestion: {
+        name: string
+        email: string
+    }) => {
         const displayValue = suggestion.name || suggestion.email // Fallback to email if no name
         setSearchQuery(displayValue)
         setActiveSearch(displayValue)
         setShowSuggestions(false)
         updateSearchInURL(displayValue)
-        
+
         // Filter data based on selected suggestion
         const filtered = filterStudentDetails(studentDetails, displayValue)
         setFilteredStudentDetails(filtered)
@@ -162,13 +172,13 @@ const PraticeProblems = ({ params }: any) => {
         updateSearchInURL('')
         setFilteredStudentDetails(studentDetails) // Reset to all data
     }
-    
+
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             setActiveSearch(searchQuery)
             setShowSuggestions(false)
             updateSearchInURL(searchQuery.trim())
-            
+
             // Filter data on Enter
             const filtered = filterStudentDetails(studentDetails, searchQuery)
             setFilteredStudentDetails(filtered)
@@ -182,8 +192,7 @@ const PraticeProblems = ({ params }: any) => {
             'crumbData',
             JSON.stringify([
                 bootcampData?.name,
-                `${matchingData?.moduleChapterData[0]?.codingQuestionDetails
-                    ?.title} - Submissions`,
+                `${matchingData?.codingQuestionDetails?.title} - Submissions`,
             ])
         )
     }
@@ -207,27 +216,38 @@ const PraticeProblems = ({ params }: any) => {
                         (module: any) =>
                             module.id === +params.StudentProblemData
                     )
-                    setMatchingData(matchingModule || null)
+
+                    const matchingChapter =
+                        matchingModule?.moduleChapterData.find(
+                            (chapter: any) => chapter.id == praticeProblems
+                        )
+                        
+                    setMatchingData(matchingChapter || null)
 
                     if (matchingModule) {
                         const studentRes = await api.get(
-                            `/submission/practiseProblemStatus/${matchingModule.id}?chapterId=${matchingModule.moduleChapterData[0].id}&questionId=${matchingModule.moduleChapterData[0].codingQuestionDetails.id}`
+                            `/submission/practiseProblemStatus/${matchingModule.id}?chapterId=${matchingChapter.id}&questionId=${matchingChapter.codingQuestionDetails.id}`
                         )
-                        const updatedStudentDetails = studentRes.data.data.map((studentDetail: any) => ({
-                            ...studentDetail,
-                            email: studentDetail.emailId,
-                            bootcampId: params.courseId,
-                            questionId: matchingModule.moduleChapterData[0].codingQuestionDetails.id,
-                            moduleId: params.StudentProblemData,
-                        }))
-                        
+                        const updatedStudentDetails = studentRes.data.data.map(
+                            (studentDetail: any) => ({
+                                ...studentDetail,
+                                email: studentDetail.emailId,
+                                bootcampId: params.courseId,
+                                questionId:
+                                    matchingChapter.codingQuestionDetails.id,
+                                moduleId: params.StudentProblemData,
+                            })
+                        )                        
 
                         setStudentDetails(updatedStudentDetails)
-                        
+
                         // Apply initial search filter if there's a search query from URL
                         const searchFromURL = searchParams.get('search')
                         if (searchFromURL) {
-                            const filtered = filterStudentDetails(updatedStudentDetails, searchFromURL)
+                            const filtered = filterStudentDetails(
+                                updatedStudentDetails,
+                                searchFromURL
+                            )
                             setFilteredStudentDetails(filtered)
                         } else {
                             setFilteredStudentDetails(updatedStudentDetails)
@@ -244,7 +264,12 @@ const PraticeProblems = ({ params }: any) => {
         }
 
         fetchData()
-    }, [params.courseId, params.StudentProblemData, searchParams, filterStudentDetails])
+    }, [
+        params.courseId,
+        params.StudentProblemData,
+        searchParams,
+        filterStudentDetails,
+    ])
 
     // Initialize from URL
     useEffect(() => {
@@ -254,7 +279,7 @@ const PraticeProblems = ({ params }: any) => {
             setActiveSearch(searchFromURL)
         }
     }, [searchParams])
-    
+
     useEffect(() => {
         if (!searchQuery.trim() && activeSearch) {
             setActiveSearch('')
@@ -269,10 +294,7 @@ const PraticeProblems = ({ params }: any) => {
             <MaxWidthWrapper className="p-4">
                 <div className="flex flex-col gap-y-4">
                     <h1 className="text-start text-xl font-bold capitalize text-primary">
-                        {
-                            matchingData?.moduleChapterData[0]
-                                ?.codingQuestionDetails?.title
-                        }
+                        {matchingData?.codingQuestionDetails?.title}
                     </h1>
 
                     <div className="text-start flex gap-x-3">
@@ -284,10 +306,7 @@ const PraticeProblems = ({ params }: any) => {
                         </div>
                         <div className="p-4 rounded-lg shadow-md ">
                             <h1 className="text-gray-600 font-semibold text-xl">
-                                {
-                                    matchingData?.moduleChapterData[0]
-                                        .submitStudents
-                                }
+                                {matchingData?.submitStudents}
                             </h1>
                             <p className="text-gray-500 ">
                                 Submissions Received
@@ -295,9 +314,7 @@ const PraticeProblems = ({ params }: any) => {
                         </div>
                         <div className="p-4 rounded-lg shadow-md">
                             <h1 className="text-gray-600 font-semibold text-xl">
-                                {totalStudents -
-                                    matchingData?.moduleChapterData[0]
-                                        .submitStudents}
+                                {totalStudents - matchingData?.submitStudents}
                             </h1>
                             <p className="text-gray-500 ">Not Yet Submitted</p>
                         </div>
@@ -320,13 +337,18 @@ const PraticeProblems = ({ params }: any) => {
                                 }}
                                 onBlur={() => {
                                     setIsInputFocused(false)
-                                    setTimeout(() => setShowSuggestions(false), 200)
-                                    
+                                    setTimeout(
+                                        () => setShowSuggestions(false),
+                                        200
+                                    )
+
                                     // If input is cleared manually and user didn't press Enter
                                     if (!searchQuery.trim() && activeSearch) {
                                         setActiveSearch('')
                                         updateSearchInURL('')
-                                        setFilteredStudentDetails(studentDetails)
+                                        setFilteredStudentDetails(
+                                            studentDetails
+                                        )
                                     }
                                 }}
                             />
@@ -339,33 +361,54 @@ const PraticeProblems = ({ params }: any) => {
                                     className="absolute inset-y-0 right-0 pr-2 flex items-center hover:text-gray-600 transition-colors"
                                     type="button"
                                 >
-                                    <X className="text-gray-400 hover:text-gray-600" size={20} />
+                                    <X
+                                        className="text-gray-400 hover:text-gray-600"
+                                        size={20}
+                                    />
                                 </button>
                             )}
                         </div>
 
                         {/* Suggestions dropdown */}
-                        {showSuggestions && isInputFocused && searchQuery.trim().length > 0 && searchSuggestions.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg mt-1">
-                                {searchSuggestions.map((suggestion, index) => (
-                                    <button
-                                        key={index}
-                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700"
-                                        onClick={() => handleSuggestionClick(suggestion)}
-                                        onMouseDown={(e) => e.preventDefault()}
-                                        type="button"
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{suggestion.name}</span>
-                                            <span className="text-xs text-gray-500">{suggestion.email}</span>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                        {showSuggestions &&
+                            isInputFocused &&
+                            searchQuery.trim().length > 0 &&
+                            searchSuggestions.length > 0 && (
+                                <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg mt-1">
+                                    {searchSuggestions.map(
+                                        (suggestion, index) => (
+                                            <button
+                                                key={index}
+                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700"
+                                                onClick={() =>
+                                                    handleSuggestionClick(
+                                                        suggestion
+                                                    )
+                                                }
+                                                onMouseDown={(e) =>
+                                                    e.preventDefault()
+                                                }
+                                                type="button"
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span className="font-medium">
+                                                        {suggestion.name}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500">
+                                                        {suggestion.email}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        )
+                                    )}
+                                </div>
+                            )}
                     </div>
 
-                    <DataTable data={filteredStudentDetails} columns={columns} />
+                    <DataTable
+                        data={filteredStudentDetails}
+                        columns={columns}
+                    />
                 </div>
             </MaxWidthWrapper>
         </>
