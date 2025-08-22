@@ -124,13 +124,13 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
 
         if (days > 0) {
-            return `${days} day${days > 1 ? 's' : ''} ${hours} hour${
+            return `Class starts in ${days} day${days > 1 ? 's' : ''} ${hours} hour${
                 hours > 1 ? 's' : ''
             }`
         }
 
         if (hours > 0) {
-            return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${
+            return `Class starts in ${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${
                 minutes > 1 ? 's' : ''
             }`
         }
