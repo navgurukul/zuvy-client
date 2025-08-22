@@ -266,15 +266,11 @@ const AddAssignent = ({
         getAssignmentContent()
     }, [content])
 
-    const convertToISO = (dateInput: any, addDay: boolean = true): string => {
+    const convertToISO = (dateInput: any): string => {
         const date = new Date(dateInput);
 
         if (isNaN(date.getTime())) {
             throw new Error('Invalid date input');
-        }
-
-        if (addDay) {
-            date.setDate(date.getDate() + 1);
         }
 
         return date.toISOString();
@@ -411,7 +407,7 @@ const AddAssignent = ({
                     }
                 )
 
-                const deadlineDate = convertToISO(deadline, false);
+                const deadlineDate = convertToISO(deadline);
 
                 const requestBody = {
                     title: titles,
