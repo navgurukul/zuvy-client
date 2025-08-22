@@ -109,30 +109,37 @@ const [showControls, setShowControls] = useState(true);
     }
 
     // Helper function to get time remaining
-    const getTimeRemaining = (scheduledDateTime: Date) => {
-        const now = new Date()
-        const diff = scheduledDateTime.getTime() - now.getTime()
+   const getTimeRemaining = (scheduledDateTime: Date) => {
+    const now = new Date()
+    const diff = scheduledDateTime.getTime() - now.getTime()
 
-        if (diff <= 0) return 'Starting now'
+    // If time has passed or is very close (within 1 minute)
+    if (diff <= 0) return 'Starting soon'
+    
+    // If less than 1 minute remaining
+    if (diff < 60000) return 'Starting soon'
 
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-        const hours = Math.floor(
-            (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-        )
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+    const hours = Math.floor(
+        (diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    )
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
 
-        if (days > 0) {
-            return `${days} day${days > 1 ? 's' : ''} ${hours} hour${
-                hours > 1 ? 's' : ''
-            }`
-        }
-        if (hours > 0) {
-            return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${
-                minutes > 1 ? 's' : ''
-            }`
-        }
-        return `${minutes} minute${minutes > 1 ? 's' : ''}`
+    if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''} ${hours} hour${
+            hours > 1 ? 's' : ''
+        }`
     }
+
+    if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${
+            minutes > 1 ? 's' : ''
+        }`
+    }
+    
+    return ` Class starts in ${minutes} minute${minutes > 1 ? 's' : ''}`
+    
+}
 
     const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
         (state: any) => {
@@ -248,7 +255,7 @@ const [showControls, setShowControls] = useState(true);
                         <Card className="bg-info-light border-info">
                             <CardContent className="p-4">
                                 <p className="text-info font-semibold text-center">
-                                    Class starts in{' '}
+                                   
                                     {getTimeRemaining(item.scheduledDateTime!)}
                                 </p>
                             </CardContent>
@@ -383,10 +390,11 @@ const [showControls, setShowControls] = useState(true);
                                 </div>
                             )}
                         </div>
-                        <p className="text-success mb-6 flex items-center gap-2">
+                        <p className="text-success mb-2 flex items-center gap-2">
                             <Check className="w-5 h-5" />
                             Class completed
                         </p>
+                        <p className='text-left mb-4 text-sm' >{(item.s3link === 'not found' || item.s3link === null) && item.status === 'completed' && 'Your attendance and recording are being processed. Please check again after 24 to 48 hours.' }</p>
 
                         {hasRecording ? (
                             <div className="border-t border-border pt-6">
@@ -435,7 +443,7 @@ const [showControls, setShowControls] = useState(true);
                                                         }
                                                         className="bg-white/80 text-black rounded-full px-4 py-2 shadow-lg"
                                                     >
-                                                        {!isFullscreen? 'FullScreen' : 'Exit'}
+                                                        {!isFullscreen? 'FullScreen' : 'Exit FullScreen'}
                                                     </Button>
                                                 </div>
                                             )}
