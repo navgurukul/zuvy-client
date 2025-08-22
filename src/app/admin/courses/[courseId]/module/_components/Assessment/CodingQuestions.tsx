@@ -4,7 +4,7 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from './QuestionDescriptionModal'
-import {CodingQuestiones,codingQuestionProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {CodingQuestiones,codingQuestionProps, Tag} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const CodingQuestions = ({
     questions,
@@ -32,7 +32,7 @@ const CodingQuestions = ({
             <div className="h-screen">
                 {questions.map((question: CodingQuestiones) => {
                     const tag = tags?.find(
-                        (tag: any) => tag?.id === question?.tagId
+                        (tag: Tag) => tag?.id === question?.tagId
                     )
                     return (
                         <div

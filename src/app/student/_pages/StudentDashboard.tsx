@@ -19,7 +19,7 @@ import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboard
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
-import {UpcomingEvent,Bootcamp} from '@/app/student/_pages/pageStudentType'
+import {UpcomingEvent,Bootcamp,TopicItem } from '@/app/student/_pages/pageStudentType'
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
 
 const StudentDashboard = () => {

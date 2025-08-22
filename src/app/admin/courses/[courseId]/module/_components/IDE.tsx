@@ -38,14 +38,14 @@ import {
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
-import {IDEProps,IDEInput,TestCase} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
+import {IDEProps,IDEInput,TestCase,questionDetails} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
 
-export interface questionDetails{
-    title: string
-    description: string
-    constraints?: string
-    examples: { input: number[]; output: number }
-}
+// export interface questionDetails{
+//     title: string
+//     description: string
+//     constraints?: string
+//     examples: { input: number[]; output: number }
+// }
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -61,7 +61,7 @@ const IDE: React.FC<IDEProps> = ({
     const router = useRouter()
     const { toast } = useToast()
     const { viewcourses, moduleID, chapterID } = useParams()
-    const [questionDetails, setQuestionDetails] = useState<questionDetails>({
+     const [questionDetails, setQuestionDetails] = useState<questionDetails>({
         title: '',
         description: '',
         examples: {

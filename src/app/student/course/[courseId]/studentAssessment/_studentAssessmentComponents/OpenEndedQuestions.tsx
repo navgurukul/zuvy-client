@@ -29,6 +29,8 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
+import {AssessmentProps,Question} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+
 
 const OpenEndedQuestions = ({
     onBack,
@@ -37,14 +39,7 @@ const OpenEndedQuestions = ({
     assessmentSubmitId,
     getSeperateOpenEndedQuestions,
     getAssessmentData
-}: {
-    onBack: () => void
-    remainingTime: number
-    questions: any[]
-    assessmentSubmitId: number
-    getSeperateOpenEndedQuestions: () => void
-    getAssessmentData: () => void
-}) => {
+}: AssessmentProps) => {
     const router = useRouter()
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -61,7 +56,7 @@ const OpenEndedQuestions = ({
 
     useEffect(() => {
         const defaultValues = {
-            answers: questions.map((question) =>
+            answers: questions.map((question:Question) =>
                 question.submissionsData && question.submissionsData.length > 0
                     ? question.submissionsData[0].answer
                     : ''
@@ -80,7 +75,6 @@ const OpenEndedQuestions = ({
                 answer,
             })
         )
-
         try {
             const response = await api.patch(
                 `/submission/openended/assessmentSubmissionId=${assessmentSubmitId}`,

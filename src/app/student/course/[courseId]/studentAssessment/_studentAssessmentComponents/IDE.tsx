@@ -38,7 +38,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { X } from 'lucide-react'
 
-import {IDEProps,questionDetails,TestCases,Input}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+import {IDEProps,questionDetails,TestCases,Input,TestCasesSubmission}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const IDE: React.FC<IDEProps> = ({
     params,
@@ -275,11 +275,12 @@ const IDE: React.FC<IDEProps> = ({
     }, [language])
 
     useEffect(() => {
-        if (templates?.[language]?.template) {
+        if (templates?.[language]?.template){
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
     }, [language])
 
+    
     useEffect(() => {
         if (runCodeLanguageId && runSourceCode) {
             const selectedLanguage = editorLanguages.find(
@@ -303,10 +304,6 @@ const IDE: React.FC<IDEProps> = ({
         }
         getActions()
     }, [])
-
-
-
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
@@ -351,8 +348,6 @@ const IDE: React.FC<IDEProps> = ({
                                     </AlertDialogContent>
                                 </AlertDialog>
                             }
-
-
                             {questionDetails && (
                                 <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
@@ -653,7 +648,7 @@ const IDE: React.FC<IDEProps> = ({
                                             )}
 
                                             {/* Error Results (Compile/Runtime) */}
-                                            {!loading && codeError && codeResult?.map((testCase: any, index: any) => (
+                                            {!loading && codeError && codeResult?.map((testCase:TestCasesSubmission, index:number) => (
                                                 <div key={index} className="mb-4">
                                                     <div className="flex items-center space-x-2 text-red-500 font-bold">
                                                         <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
@@ -696,7 +691,7 @@ const IDE: React.FC<IDEProps> = ({
                                             ))}
 
                                             {/* Success/Run Results */}
-                                            {!loading && !codeError && codeResult?.map((testCase: any, index: any) => (
+                                            {!loading && !codeError && codeResult?.map((testCase:TestCasesSubmission , index: number) => (
                                                 <div key={index} className="mb-4">
                                                     {testCase.status === 'Accepted' ? (
                                                         <div className="flex items-center space-x-2 text-green-600 font-bold">

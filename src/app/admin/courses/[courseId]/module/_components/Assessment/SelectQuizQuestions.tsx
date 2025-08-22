@@ -10,8 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
-import { MCQQuestion } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
-
+import {MCQQuestion,CodingQuestiones} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const SelectQuizQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
@@ -39,7 +38,7 @@ const SelectQuizQuestions = ({
     return (
         <>
             <div className="w-full">
-                {selectedQuestions.map((question: any) => {
+                {selectedQuestions.map((question: CodingQuestiones) => {
                     // Find the tag name corresponding to the question's tagId
                     const tag = tags?.find((tag: any) => tag.id === question.tagId)
                     const questionText =

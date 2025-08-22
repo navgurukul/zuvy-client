@@ -22,9 +22,9 @@ import { getUser } from '@/store/store'
 import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 
-type Props = {}
 
-function LoginPage({}: Props) {
+
+function LoginPage() {
     const [loading, setLoading] = useState(false)
     const { user, setUser } = getUser()
     const router = useRouter()

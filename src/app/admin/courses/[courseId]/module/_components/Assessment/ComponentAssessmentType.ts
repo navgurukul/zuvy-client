@@ -15,6 +15,9 @@ export type Tag = {
     tagName: string
 }
 
+export type McqAccumulator = {
+ [key: string]: number;
+};
 
 // codingQuestion
 export interface CodingTestCase {
@@ -31,6 +34,8 @@ export interface CodingTestCase {
 }
 
 export interface CodingQuestiones {
+    quizVariants: any
+    question:any
     id: number
     title: string
     description: string
@@ -91,10 +96,6 @@ setSelectedQuestions: React.Dispatch<React.SetStateAction<any[]>>
 }
 
 
-export interface SelectTag {
-  id: number;
-  tagName: string;
-}
 
 export interface SelectQuestion {
   id: number;
@@ -126,10 +127,6 @@ export interface selectedOpenEndedQuestionsProps{
     tags: any
     type: string
 }
-
-
-
-
 
 
 
@@ -176,7 +173,7 @@ export interface OpenEndedQuestion {
 export type Question = CodingQuestion | MCQQuestion | OpenEndedQuestion;
 
 export interface QuestionDescriptionModalProps {
-    question: Question;
+    question:any;
     type: 'coding' | 'mcq' | 'open-ended';
     tagName?: string;
 }

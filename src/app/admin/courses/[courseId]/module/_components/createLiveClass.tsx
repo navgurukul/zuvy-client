@@ -145,7 +145,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                 .get(`/bootcamp/batches/${params.courseId}`)
                 .then((response) => {
                     const transformedData = response.data.data.map(
-                        (item: { id: any; name: any }) => ({
+                        (item: { id: number; name: string }) => ({
                             value: item.id.toString(),
                             label: item.name,
                         })

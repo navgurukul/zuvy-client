@@ -10,21 +10,21 @@ import { api } from '@/utils/axios.config'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import {PageParams,BootcampData,StudentPage,ModuleVideoChapter,SubmittedStudent,VideoDataResponse} from "@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType"
 
-type Props = {}
 
-const Page = ({ params }: any) => {
+const Page = ({ params }: PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
     
-    const [videoData, setVideoData] = useState<any>()
+    const [videoData, setVideoData] = useState<ModuleVideoChapter | null>(null)
     const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('search') || '')
     const [activeSearch, setActiveSearch] = useState<string>(searchParams.get('search') || '')
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
     const [isInputFocused, setIsInputFocused] = useState<boolean>(false)
-    const [dataTableVideo, setDataTableVideo] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
+    const [dataTableVideo, setDataTableVideo] = useState<SubmittedStudent[]>([])
+    const [bootcampData, setBootcampData] = useState<BootcampData|null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
     // Update URL with search parameter
@@ -65,7 +65,7 @@ const Page = ({ params }: any) => {
         const suggestions: { name: string; email: string }[] = []
         const query = searchQuery.toLowerCase()
         
-        dataTableVideo.forEach((student: any) => {
+        dataTableVideo.forEach((student:SubmittedStudent) => {
             const nameMatch = student.name && student.name.toLowerCase().includes(query)
             const emailMatch = student.email && student.email.toLowerCase().includes(query)
             
@@ -122,7 +122,7 @@ const Page = ({ params }: any) => {
 
     const getBootcampHandler = useCallback(async () => {
         try {
-            const res = await api.get(`/bootcamp/${params.courseId}`)
+            const res = await api.get<{ bootcamp: BootcampData}>(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
             console.error('API Error:', error)
@@ -136,7 +136,7 @@ const Page = ({ params }: any) => {
                 ? `admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${activeSearch}`
                 : `admin/moduleChapter/students/chapter_id${params.videoId}`
 
-            const res = await api.get(endpoint)
+            const res = await api.get<VideoDataResponse>(endpoint)
             setVideoData(res.data.moduleVideochapter)
             setDataTableVideo(res.data.submittedStudents || [])
         } catch (error) {

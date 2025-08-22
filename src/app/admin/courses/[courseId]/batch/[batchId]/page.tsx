@@ -56,7 +56,7 @@ import { ComboboxStudent } from '../../(courseTabs)/students/components/combobox
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 import { POSITION } from '@/utils/constant'
-import {StudentDataState} from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
+import {StudentDataState,Batch,BatchOption,SelecteItem} from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
 import axios from 'axios'
 
 
@@ -179,10 +179,10 @@ const BatchesInfo = ({
     const isValid = formState.isValid
 
     const fetchBatches = useCallback(
-        async (courseId: any) => {
+        async (courseId:string) => {
             try {
-                const response = await api.get(`/bootcamp/batches/${courseId}`)
-                const batchData = response.data.data?.map((data: any) => {
+                const response = await api.get<{ data: Batch[] }>(`/bootcamp/batches/${courseId}`)
+                const batchData:BatchOption[] = response.data.data?.map((data: any) => {
                     return {
                         value: data.id,
                         label: data.name,
@@ -209,7 +209,7 @@ const BatchesInfo = ({
     )
 
     useEffect(() => {
-        fetchBatches(params.courseId)
+        fetchBatches(params?.courseId)
     }, [params.courseId])
 
     const fetchInstructorInfo = useCallback(
@@ -262,7 +262,7 @@ const BatchesInfo = ({
         }
         try {
             await api
-                .patch(`/batch/${params.batchId}`, convertedData)
+                .patch<Batch>(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
                     toast.success({
                         title: res.data.status,
@@ -270,7 +270,7 @@ const BatchesInfo = ({
                     })
                     const fetchBatchesInfo = async () => {
                         try {
-                            const response = await api.get(
+                            const response = await api.get<Batch>(
                                 `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
                             )
                             setStudentData(response.data.modifiedStudentInfo)
@@ -303,7 +303,7 @@ const BatchesInfo = ({
             if (debouncedValue) {
                 endpoint += `&searchTerm=${debouncedValue}`
             }
-            await api.get(endpoint).then((response) => {
+            await api.get<Batch>(endpoint).then((response) => {
                 setStudentData(response.data.modifiedStudentInfo)
                 setStoreStudentData(response.data.modifiedStudentInfo)
                 setStudents(response.data.modifiedStudentInfo)
@@ -334,7 +334,7 @@ const BatchesInfo = ({
         setSearch(e.target.value)
     }
 
-    const userIds = selectedRows.map((item: any) => item.userId)
+    const userIds = selectedRows.map((item: SelecteItem) => item.userId)
 
     return (
         <>

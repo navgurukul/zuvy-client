@@ -32,20 +32,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStudentData } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Spinner } from '@/components/ui/spinner'
-
-interface Course {
-    name: string
-    learnersCount: number
-    date: string
-    coverImage: string // URL for the course image
-    id: number
-    students_in_bootcamp: number
-}
-interface CourseData {
-    name: string
-    description?: string
-    collaborator?: string
-}
+import { Course,CourseData,CoursesResponse} from "@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType"
 const Courses: React.FC = () => {
     // misc
     const router = useRouter()
@@ -168,7 +155,7 @@ const Courses: React.FC = () => {
     // Fetch all courses for search suggestions
     const getAllCourses = useCallback(async () => {
         try {
-            const response = await api.get(`/bootcamp?limit=1000&offset=0`)
+            const response = await api.get<CoursesResponse>(`/bootcamp?limit=1000&offset=0`)
             setAllCourses(response.data.data)
         } catch (error) {
             console.error('Error fetching all courses:', error)
@@ -187,7 +174,7 @@ const Courses: React.FC = () => {
             }
 
             try {
-                const response = await api.get(url)
+                const response = await api.get<CoursesResponse>(url)
                 setCourses(response.data.data)
                 setTotalBootcamps(response.data.totalBootcamps)
                 setPages(response.data.totalPages)

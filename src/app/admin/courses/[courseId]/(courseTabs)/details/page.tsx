@@ -37,7 +37,7 @@ import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
 import { getCourseData, getStoreStudentData } from '@/store/store'
 import { api} from '@/utils/axios.config'
-import{CourseData} from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
+import{CourseData,PageParams} from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
 
 const FormSchema = z.object({
     name: z.string().min(1, 'Please enter the course name.'),
@@ -52,7 +52,7 @@ const FormSchema = z.object({
     collaborator: z.string().optional(),
 })
 
-function Page({ params }: { params: any }) {
+function Page({ params }: { params: PageParams}) {
     const router = useRouter()
     const [image, setImage] = useState<string | null>(null)
     const [cropper, setCropper] = useState<Cropper | null>(null)

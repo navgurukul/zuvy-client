@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import {ToggleSwitchProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import {ToggleSwitchProps,BootcampResponse } from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const ModulesLockToggleSwitch: React.FC<ToggleSwitchProps> = ({ bootcampId }) => {
     const [isModuleLocked, setIsModuleLocked] = useState<boolean>(false)
@@ -13,7 +13,7 @@ const ModulesLockToggleSwitch: React.FC<ToggleSwitchProps> = ({ bootcampId }) =>
 
     const fetchModuleLockStatus = async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<BootcampResponse>(
                 `/bootcamp/bootcampSetting/${bootcampId}`
             )
             const settings = response.data.bootcampSetting[0]
