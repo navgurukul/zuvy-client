@@ -441,6 +441,12 @@ const Page = ({ params }: { params: ParamsType}) => {
     }
 
     const assignLearners = form.watch('assignLearners')
+    const capEnrollmentValue = form.watch("capEnrollment");
+
+    const handleModal = (isOpen: boolean) => {
+        isOpen && form.reset()
+        setAssignStudents('')
+    }
 
     const renderModal = (emptyState: boolean) => {
         if (courseData?.unassigned_students === 0) {
@@ -465,7 +471,7 @@ const Page = ({ params }: { params: ParamsType}) => {
             )
         } else {
             return (
-                <Dialog onOpenChange={(isOpen) => isOpen && form.reset()}>
+                <Dialog onOpenChange={(isOpen) => handleModal(isOpen)}>
                     <DialogTrigger asChild>
                         <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
@@ -507,7 +513,7 @@ const Page = ({ params }: { params: ParamsType}) => {
                                             />
                                             <h1 className="pt-2 text-[1rem]">
                                                 Total Learners Selected:{' '}
-                                                {selectedRows.length}
+                                                {selectedRows.length}/{capEnrollmentValue}
                                             </h1>
                                             <div className="flex justify-between w-full pt-2">
                                                 <Button
