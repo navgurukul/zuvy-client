@@ -27,8 +27,8 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     const lastSaveRef = useRef<number>(0)
     const hasCompletedRef = useRef(false)
     const [playing, setPlaying] = useState(false)
-     const [isFullscreen, setIsFullscreen] = useState(false)
-const [showControls, setShowControls] = useState(true);
+    const [isFullscreen, setIsFullscreen] = useState(false)
+    const [showControls, setShowControls] = useState(true)
     const [localIsCompleted, setLocalIsCompleted] = useState(false)
 
     // Get session data
@@ -46,30 +46,28 @@ const [showControls, setShowControls] = useState(true);
     })
 
     useEffect(() => {
-        let timeout: NodeJS.Timeout;
+        let timeout: NodeJS.Timeout
 
         const handleMouseMove = () => {
-            setShowControls(true); // Show controls on mouse move
-            clearTimeout(timeout);
+            setShowControls(true) // Show controls on mouse move
+            clearTimeout(timeout)
             timeout = setTimeout(() => {
-                setShowControls(false); // Hide controls after 3s
-            }, 3000);
-        };
+                setShowControls(false) // Hide controls after 3s
+            }, 3000)
+        }
 
-        const container = containerRef.current;
+        const container = containerRef.current
         if (container) {
-            container.addEventListener("mousemove", handleMouseMove);
+            container.addEventListener('mousemove', handleMouseMove)
         }
 
         return () => {
             if (container) {
-                container.removeEventListener("mousemove", handleMouseMove);
+                container.removeEventListener('mousemove', handleMouseMove)
             }
-            clearTimeout(timeout);
-        };
-    }, []);
-
-
+            clearTimeout(timeout)
+        }
+    }, [])
 
     // Update local state when chapter status changes
     useEffect(() => {
@@ -113,7 +111,11 @@ const [showControls, setShowControls] = useState(true);
         const now = new Date()
         const diff = scheduledDateTime.getTime() - now.getTime()
 
-        if (diff <= 0) return 'Starting now'
+        // If time has passed or is very close (within 1 minute)
+        if (diff <= 0) return 'Starting soon'
+
+        // If less than 1 minute remaining
+        if (diff < 60000) return 'Starting soon'
 
         const days = Math.floor(diff / (1000 * 60 * 60 * 24))
         const hours = Math.floor(
@@ -126,12 +128,14 @@ const [showControls, setShowControls] = useState(true);
                 hours > 1 ? 's' : ''
             }`
         }
+
         if (hours > 0) {
             return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${
                 minutes > 1 ? 's' : ''
             }`
         }
-        return `${minutes} minute${minutes > 1 ? 's' : ''}`
+
+        return ` Class starts in ${minutes} minute${minutes > 1 ? 's' : ''}`
     }
 
     const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
@@ -248,7 +252,6 @@ const [showControls, setShowControls] = useState(true);
                         <Card className="bg-info-light border-info">
                             <CardContent className="p-4">
                                 <p className="text-info font-semibold text-center">
-                                    Class starts in{' '}
                                     {getTimeRemaining(item.scheduledDateTime!)}
                                 </p>
                             </CardContent>
@@ -383,9 +386,15 @@ const [showControls, setShowControls] = useState(true);
                                 </div>
                             )}
                         </div>
-                        <p className="text-success mb-6 flex items-center gap-2">
+                        <p className="text-success mb-2 flex items-center gap-2">
                             <Check className="w-5 h-5" />
                             Class completed
+                        </p>
+                        <p className="text-left mb-4 text-sm">
+                            {(item.s3link === 'not found' ||
+                                item.s3link === null) &&
+                                item.status === 'completed' &&
+                                'Your attendance and recording are being processed. Please check again after 24 to 48 hours.'}
                         </p>
 
                         {hasRecording ? (
@@ -415,9 +424,23 @@ const [showControls, setShowControls] = useState(true);
                                                 width="100%"
                                                 height="100%"
                                                 onProgress={handleProgress}
+                                                config={{
+                                                    file: {
+                                                        attributes: {
+                                                            controlsList:
+                                                                'nodownload noremoteplayback',
+                                                            disablePictureInPicture:
+                                                                true,
+                                                            onContextMenu: (
+                                                                e: any
+                                                            ) =>
+                                                                e.preventDefault(),
+                                                        },
+                                                    },
+                                                }}
                                                 // onPlay={'Play'}
                                             />
-                                            {!isCompleted && showControls &&(
+                                            {!isCompleted && showControls && (
                                                 <div className="absolute inset-0 opacity-0 hover:opacity-100 flex gap-4 items-center justify-center bg-black/50 text-white">
                                                     <Button
                                                         onClick={() =>
@@ -435,7 +458,9 @@ const [showControls, setShowControls] = useState(true);
                                                         }
                                                         className="bg-white/80 text-black rounded-full px-4 py-2 shadow-lg"
                                                     >
-                                                        {!isFullscreen? 'FullScreen' : 'Exit'}
+                                                        {!isFullscreen
+                                                            ? 'FullScreen'
+                                                            : 'Exit FullScreen'}
                                                     </Button>
                                                 </div>
                                             )}
