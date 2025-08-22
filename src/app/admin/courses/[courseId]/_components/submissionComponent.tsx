@@ -134,7 +134,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                         {/* Conditionally rendering Link for Submissions */}
                         {hasSubmissions ? (
                             <Link
-                                href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
+                                href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}`}
                             >
                                 <h3 className="font-semibold cursor-pointer text-sm">
                                     View Submissions
