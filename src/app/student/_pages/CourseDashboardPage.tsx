@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,DialogOverlay  } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer } from "lucide-react";
 import Image from "next/image";
@@ -22,7 +22,7 @@ import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
 import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
-import {ModuleContentCounts} from '@/app/student/_pages/pageStudentType'
+import {ModuleContentCounts,TopicItem} from '@/app/student/_pages/pageStudentType'
 
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
@@ -363,7 +363,6 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       </div>
     </>
   );
-
   const EventsModal = ({ events }: { events: UpcomingEvent[] }) => (
     <>
       {/* Desktop Dialog */}
@@ -375,6 +374,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <div className="inset-0 z-40" />
             <DialogHeader>
               <DialogTitle className="text-xl">All Upcoming Events</DialogTitle>
             </DialogHeader>
@@ -382,6 +382,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
               {events.map((item, index, array) => {
                 const eventType = getEventType(item.type);
                 const isEventReady = canStartEvent(item.eventDate);
+                  function handleJoinClass(item: UpcomingEvent) {
+                    if ((item as any).hangoutLink) {
+                      window.open((item as any).hangoutLink, '_blank');
+                    } else if (item.moduleId && item.chapterId) {
+                      window.location.href = `/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`;
+                    }
+                  }
                 return (
                   <div key={item.id}>
                     <div className="flex items-start gap-4 py-4">
@@ -399,18 +406,31 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             {eventType === 'Assignment' && `Due on ${formatDate(item.eventDate)}`}
                           </p>
                         </div>
-                        <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            variant="link"
-                            disabled={!isEventReady}
-                            className="text-primary p-0 h-auto"
-                          >
-                            {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
-
-                          </Button>
-
-                        </div>
+    <div className="flex items-center gap-2 justify-end">
+    <Button
+    size="sm"
+    variant="link"
+    disabled={!isEventReady}
+    className="text-primary p-0 h-auto"
+    onClick={() => {
+      if (isEventReady && eventType === 'Live Class') {
+        handleJoinClass(item); 
+      }
+    }}
+  >
+    {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
+  </Button>
+  
+  {isEventReady && eventType === 'Live Class' && (
+    <span 
+    onClick={() => {
+      if (isEventReady && eventType === 'Live Class') {
+        handleJoinClass(item); 
+      }
+    }}
+    className="h-2 w-2 bg-green-500 rounded-full inline-block cursor-pointer"></span>
+  )}
+</div>
                       </div>
                     </div>
                     {index < array.length - 1 && <div className="border-t border-border"></div>}
@@ -477,7 +497,6 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
       </div>
     </>
   );
-
   const handleRecording = (s3Link: string) => {
     if (s3Link) {
       window.open(s3Link, '_blank');
