@@ -30,7 +30,6 @@ import {
     ClassDatas,
     DisplayAttendance,
 } from '@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType'
-import Image from 'next/image'
 
 function RecordingCard({
     classData,
@@ -221,21 +220,22 @@ function RecordingCard({
                 ) : (
                     <Sheet>
                         <div
-                            className={`flex items-center ${classData.s3link === 'not found' ||
-                                    !classData?.s3link ||
-                                    within24Hours
+                            className={`flex items-center ${
+                                classData.s3link === 'not found' ||
+                                !classData?.s3link ||
+                                within24Hours
                                     ? 'cursor-not-allowed'
                                     : 'cursor-pointer'
-                                }`}
+                            }`}
                         >
                             <TooltipProvider>
                                 <SheetTrigger
                                     disabled={
-
+                                        
                                         within24Hours
                                     }
                                     className={
-
+                                        
                                         within24Hours
                                             ? 'cursor-not-allowed'
                                             : 'cursor-pointer'
@@ -246,10 +246,12 @@ function RecordingCard({
                                             <div className="inline-block">
                                                 <Button
                                                     variant="ghost"
-                                                    className={`flex gap-2 items-center ${within24Hours
+                                                    className={`flex gap-2 items-center ${
+                                                        
+                                                        within24Hours
                                                             ? 'cursor-not-allowed'
                                                             : ''
-                                                        }`}
+                                                    }`}
                                                     onClick={handleClassDetails}
                                                     disabled={within24Hours}
                                                 >
@@ -277,8 +279,8 @@ function RecordingCard({
                                 size={15}
                                 className={
                                     classData.s3link === 'not found' ||
-                                        presentStudents === 0 ||
-                                        within24Hours
+                                    presentStudents === 0 ||
+                                    within24Hours
                                         ? 'text-muted-foreground opacity-50'
                                         : ''
                                 }
@@ -287,28 +289,31 @@ function RecordingCard({
                         <SheetContent>
                             <SheetHeader>
                                 <SheetTitle>
-                                    <h1 className="mb-5 text-lg text-start">
+                                    <h1 className="mb-10 text-lg text-start">
                                         {classDetails?.data?.session?.title}
                                     </h1>
                                 </SheetTitle>
                                 <SheetDescription>
-                                    <h2 className="mb-5 font-bold text-sm">
+                                    <h2 className="mb-3 font-bold text-[15px]">
                                         Session Recording
                                     </h2>
-
-                                    <p>
-                                          <Image
-                                        src={
-                                            '/emptyStates/undraw_online_learning_re_qw08.svg'
-                                        }
-                                        height={200}
-                                        width={200}
-                                        alt="batchEmpty State"
-                                    />
-                                    </p>
-
-                                    <h6 className='text-sm mt-4'>You can watch the recordings in the respective modules</h6>
-                                  
+                                    {isVideo ? (
+                                        <div
+                                            className="plyr__video-embed"
+                                            id="player"
+                                        >
+                                            <iframe
+                                                src={embedUrl}
+                                                allowFullScreen
+                                                allowTransparency
+                                                allow="autoplay"
+                                            ></iframe>
+                                        </div>
+                                    ) : (
+                                        <p className="mb-5">
+                                            Recording Not Available
+                                        </p>
+                                    )}
                                     <h3 className="mb-3 font-bold mt-3 text-[15px]">
                                         Attendance Information
                                     </h3>

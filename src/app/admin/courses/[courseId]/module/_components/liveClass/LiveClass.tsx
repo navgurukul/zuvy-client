@@ -1,77 +1,71 @@
 import React, { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Video, Users, ExternalLink } from 'lucide-react'
-import { LiveClassProps } from '@/app/admin/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType'
-import { getEmbedLink } from '@/utils/admin'
-import ReactPlayer from 'react-player'
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar, Clock, Video, Users, ExternalLink } from 'lucide-react';
+import {LiveClassProps} from "@/app/admin/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType"
+import { getEmbedLink } from '@/utils/admin';
 
-const LiveClass = ({
-    chapterData,
-    content,
-    moduleId,
-    courseId,
-}: LiveClassProps) => {
+
+const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
 
+
     const formatDate = (dateString: string) => {
-        const date = new Date(dateString)
+        const date = new Date(dateString);
         return date.toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
-            day: 'numeric',
-        })
-    }
+            day: 'numeric'
+        });
+    };
 
     const formatTime = (dateString: string) => {
-        const date = new Date(dateString)
+        const date = new Date(dateString);
         return date.toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit',
-            hour12: true,
-        })
-    }
+            hour12: true
+        });
+    };
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
             case 'upcoming':
-                return 'bg-blue-100 text-blue-800 border-blue-200'
+                return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'ongoing':
-                return 'bg-green-100 text-green-800 border-green-200'
+                return 'bg-green-100 text-green-800 border-green-200';
             case 'completed':
-                return 'bg-gray-100 text-gray-800 border-gray-200'
+                return 'bg-gray-100 text-gray-800 border-gray-200';
             default:
-                return 'bg-gray-100 text-gray-800 border-gray-200'
+                return 'bg-gray-100 text-gray-800 border-gray-200';
         }
-    }
+    };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
             case 'upcoming':
-                return <Clock className="w-3 h-3" />
+                return <Clock className="w-3 h-3" />;
             case 'ongoing':
-                return <Video className="w-3 h-3" />
+                return <Video className="w-3 h-3" />;
             case 'completed':
-                return <Users className="w-3 h-3" />
+                return <Users className="w-3 h-3" />;
             default:
-                return <Clock className="w-3 h-3" />
+                return <Clock className="w-3 h-3" />;
         }
-    }
+    };
 
     if (!content || !session) {
         return (
             <div className="w-3/4 mx-auto p-4">
                 <Card className="border-0 bg-gradient-to-br from-white to-gray-50">
                     <CardContent className="p-6 text-center">
-                        <p className="text-muted-foreground">
-                            No live class data available
-                        </p>
+                        <p className="text-muted-foreground">No live class data available</p>
                     </CardContent>
                 </Card>
             </div>
-        )
+        );
     }
 
     return (
@@ -138,36 +132,13 @@ const LiveClass = ({
                                     <Video className="w-4 h-4" />
                                     Meeting Recording
                                 </h4>
-                                <div className="w-5/6  bg-black rounded-lg overflow-hidden">
-                                    {/* <iframe
+                                <div className="w-5/6 bg-black rounded-lg overflow-hidden">
+                                    <iframe
                                         src={getEmbedLink(session.s3link)}
                                         className="w-full h-80 border-0"
                                         allowFullScreen
                                         title={`Recording: ${session.title}`}
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    /> */}
-
-                                    <ReactPlayer
-                                        // ref={playerRef}
-                                        url={getEmbedLink(session.s3link)}
-                                        // playing={playing}
-                                        controls={true}
-                                        width="100%"
-                                        height="h-80"
-                                        config={{
-                                            file: {
-                                                attributes: {
-                                                    controlsList:
-                                                        'nodownload noremoteplayback',
-                                                    disablePictureInPicture:
-                                                        true,
-                                                    onContextMenu: (e: any) =>
-                                                        e.preventDefault(),
-                                                },
-                                            },
-                                        }}
-                                        // onProgress={handleProgress}
-                                        // onPlay={'Play'}
                                     />
                                 </div>
                             </div>
@@ -179,26 +150,19 @@ const LiveClass = ({
                                         : ''
                                 }`}
                                 onClick={() => {
-                                    if (
-                                        session.status.toLowerCase() !==
-                                        'ongoing'
-                                    )
-                                        return
+                                    if (session.status.toLowerCase() !== 'ongoing') return
                                     window.open(session.hangoutLink, '_blank')
                                 }}
                             >
                                 <Video className="w-4 h-4 mr-2 text-white" />
                                 <span className="text-white">
-                                    {session.status.toLowerCase() ===
-                                    'completed'
+                                    {session.status.toLowerCase() === 'completed'
                                         ? 'Recording Not Available'
-                                        : session.status.toLowerCase() ===
-                                          'ongoing'
-                                        ? 'Join Live Meeting'
-                                        : 'Join Meeting'}
+                                        : session.status.toLowerCase() === 'ongoing'
+                                          ? 'Join Live Meeting'
+                                          : 'Join Meeting'}
                                 </span>
-                                {session.status.toLowerCase() !==
-                                    'completed' && (
+                                {session.status.toLowerCase() !== 'completed' && (
                                     <ExternalLink className="w-3 h-3 ml-2" />
                                 )}
                             </Button>
@@ -210,4 +174,4 @@ const LiveClass = ({
     )
 }
 
-export default LiveClass
+export default LiveClass;

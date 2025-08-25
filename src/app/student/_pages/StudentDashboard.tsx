@@ -131,7 +131,7 @@ const formatUpcomingItem = (item: any) => {
     } else if (minutes > 0) {
       timeString = `${minutes} minute${minutes > 1 ? 's' : ''}`;
     } else {
-      return "Starting soon"; // Return directly without prefix for 0 minutes
+      timeString = "Starting soon";
     }
 
     return prefix ? `${prefix} ${timeString}` : timeString;
@@ -187,9 +187,7 @@ const formatUpcomingItem = (item: any) => {
     const endTime = endDate.getTime();
     if (endTime > currentTime) {
       const diffTime = endTime - currentTime;
-      // For live class, show "Ends in" instead of "Deadline in"
-      const prefix = item.type?.toLowerCase() === 'live class' ? "Ends in" : "Deadline in";
-      return formatCountdown(diffTime, prefix);
+      return formatCountdown(diffTime, "Deadline in");
     } else {
       return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event ended";
     }
