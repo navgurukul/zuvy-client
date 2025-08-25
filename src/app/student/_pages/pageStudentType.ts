@@ -87,3 +87,10 @@ export interface Bootcamp {
   };
   upcomingEvents: UpcomingEvent[];
 }
+
+
+export interface Module{
+    isLock: boolean;
+    progress: number;
+    description: string;
+}

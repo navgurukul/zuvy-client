@@ -32,14 +32,10 @@ import {
 import Image from 'next/image'
 import { useBootcampProgress } from '@/hooks/useBootcampProgress'
 import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents'
-import {
-    useUpcomingEvents,
-    Event as UpcomingEvent,
-} from '@/hooks/useUpcomingEvents'
-import {
-    useCompletedClasses,
-    CompletedClass,
-} from '@/hooks/useCompletedClasses'
+import {useUpcomingEvents} from '@/hooks/useUpcomingEvents'
+import{Event as UpcomingEvent} from '@/hooks/hookType'
+import {useCompletedClasses} from '@/hooks/useCompletedClasses'
+import{CompletedClass} from '@/hooks/hookType'
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse'
 import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton'
 import TruncatedDescription from '@/app/student/_components/TruncatedDescription'
@@ -52,10 +48,8 @@ import {
 } from '@/components/ui/tooltip'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useIsStudentEnrolledInOneCourseStore } from '@/store/store'
-import {
-    Module,
-    ModuleContentCounts,
-} from '@/app/student/_pages/pageStudentType'
+import {Module,ModuleContentCounts,} from '@/app/student/_pages/pageStudentType'
+
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
     const [showAllModules, setShowAllModules] = useState(false)
