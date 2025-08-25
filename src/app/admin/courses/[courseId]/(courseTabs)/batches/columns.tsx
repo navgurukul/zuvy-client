@@ -13,17 +13,10 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-const useCapEnrollment = () => {
-    const form = useFormContext()
-    const capEnrollment = form.watch('capEnrollment')
-    return Number(capEnrollment) || 0
-}
-
-export const columns: ColumnDef<Task>[] = [
+export const createColumns = (capEnrollment: number): ColumnDef<Task>[] => [
     {
         id: 'select',
         header: ({ table }) => {
-            const capEnrollment = useCapEnrollment()
             const selectedCount = table.getSelectedRowModel().rows.length
             const disableAll = selectedCount >= capEnrollment
 
@@ -64,7 +57,6 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
         cell: ({ row, table }) => {
-            const capEnrollment = useCapEnrollment()
             const selectedCount = table.getSelectedRowModel().rows.length
             const disable =
                 !row.getIsSelected() && selectedCount >= capEnrollment

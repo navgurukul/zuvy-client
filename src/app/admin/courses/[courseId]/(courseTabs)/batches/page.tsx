@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState, useRef, KeyboardEvent } from 'react'
+import React, { useCallback, useEffect, useState, useRef, KeyboardEvent, useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -43,7 +43,7 @@ import { fetchStudentData } from '@/utils/students'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { useStudentData } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/useStudentData'
-import { columns } from './columns'
+import { createColumns } from './columns'
 // import { DataTable } from './dataTable'
 import {
     Tooltip,
@@ -222,7 +222,7 @@ const Page = ({ params }: { params: ParamsType}) => {
     }, [debouncedSuggestionQuery, fetchSuggestions])
 
     // Filter and limit suggestions
-    const filteredSuggestions = React.useMemo(() => {
+    const filteredSuggestions = useMemo(() => {
         if (!searchQuery.trim()) return [];
 
         return suggestions
@@ -442,6 +442,8 @@ const Page = ({ params }: { params: ParamsType}) => {
 
     const assignLearners = form.watch('assignLearners')
     const capEnrollmentValue = form.watch("capEnrollment");
+
+    const columns = useMemo(() => createColumns(Number(capEnrollmentValue)), [capEnrollmentValue])
 
     const handleModal = (isOpen: boolean) => {
         isOpen && form.reset()
