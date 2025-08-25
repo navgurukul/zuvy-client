@@ -7,6 +7,11 @@ export interface ContentDetailVideo {
     content: any
 }
 
+export interface EditChapterResponse {
+  status: string;     
+  message: string;
+}
+
 export interface chapterDetailsVideo{
     title: string
     description: string
@@ -35,3 +40,17 @@ export type PreviewProps = {
     content: any
     setShowPreview: React.Dispatch<React.SetStateAction<boolean>>
 }
+
+
+// ModuleVideoType.ts
+
+export interface ContentDetail {
+  links: string[];
+  title?: string;
+  description?: string | null;
+  file?: string | null;
+  content?: string | null;
+}
+
+
+

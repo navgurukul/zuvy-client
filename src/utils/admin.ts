@@ -1131,57 +1131,6 @@ export function showSyntaxErrors(testCases: any) {
     return hasErrors
 }
 
-export const getEmbedLink = (url: string) => {
-    if (!url) return ''
-    try {
-        const urlObj = new URL(url) // Parse the URL
-
-        if (url.includes('embed')) {
-            return url
-        }
-
-        // Handle YouTube URLs
-        if (
-            urlObj.hostname.includes('youtube.com') &&
-            urlObj.searchParams.has('v')
-        ) {
-            return `https://www.youtube.com/embed/${urlObj.searchParams.get(
-                'v'
-            )}`
-        }
-
-        if (urlObj.hostname.includes('youtu.be')) {
-            const videoId = urlObj.pathname.slice(1)
-            return `https://www.youtube.com/embed/${videoId}`
-        }
-
-        // Handle Google Drive Video URLs
-        if (urlObj.hostname.includes('drive.google.com')) {
-            const match = url.match(/\/file\/d\/([^/]+)/)
-            if (match && match[1]) {
-                return `https://drive.google.com/file/d/${match[1]}/preview`
-            }
-        }
-
-        // Handle Dailymotion Full & Shortened URLs
-        if (urlObj.hostname.includes('dailymotion.com')) {
-            const match = url.match(/video\/([^_/]+)/)
-            if (match && match[1]) {
-                return `https://geo.dailymotion.com/player.html?video=${match[1]}`
-            }
-        }
-
-        if (urlObj.hostname.includes('dai.ly')) {
-            const videoId = urlObj.pathname.slice(1)
-            return `https://geo.dailymotion.com/player.html?video=${videoId}`
-        }
-    } catch (error) {
-        console.error('Invalid URL:', url, error)
-    }
-
-    return '' // Return empty string for unsupported or invalid URLs
-}
-
 export const calculateTimeTaken = (start: string, submit: string): string => {
     const startDate = new Date(start)
     const submitDate = new Date(submit)
@@ -1224,4 +1173,76 @@ export const addClassToCodeTags: any = (
 
     // Combine the parts back together
     return `${beforeCode}${styledCodeBlock}${afterCode}`
+}
+
+export const isLinkValid = (link: string) => {
+    // const urlRegex = /^(https?:\/\/)?([\w-]+\.)*([\w-]+)(:\d{2,5})?(\/\S*)*$/
+    // return urlRegex.test(link)
+
+    try {
+        const url = new URL(link.trim())
+
+        const isYouTube =
+            url.hostname.includes('youtube.com') ||
+            url.hostname.includes('youtu.be')
+
+        const isGoogleDrive = url.hostname.includes('drive.google.com')
+
+        const isZoom = url.hostname.includes('zoom')
+
+        return isYouTube || isGoogleDrive || isZoom
+    } catch {
+        return false // If it's not a valid URL at all
+    }
+}
+
+export const getEmbedLink = (url: string) => {
+    if (!url) return ''
+    try {
+        const urlObj = new URL(url)
+
+        if (url.includes('embed')) {
+            return url
+        }
+
+        // YouTube
+        if (urlObj.hostname.includes('youtube.com') && urlObj.searchParams.has('v')) {
+            return `https://www.youtube.com/embed/${urlObj.searchParams.get('v')}`
+        }
+
+        if (urlObj.hostname.includes('youtu.be')) {
+            const videoId = urlObj.pathname.slice(1)
+            return `https://www.youtube.com/embed/${videoId}`
+        }
+
+        // Google Drive
+        if (urlObj.hostname.includes('drive.google.com')) {
+            const match = url.match(/\/file\/d\/([^/]+)/)
+            if (match && match[1]) {
+                return `https://drive.google.com/file/d/${match[1]}/preview`
+            }
+        }
+
+        // Dailymotion
+        if (urlObj.hostname.includes('dailymotion.com')) {
+            const match = url.match(/video\/([^_/]+)/)
+            if (match && match[1]) {
+                return `https://geo.dailymotion.com/player.html?video=${match[1]}`
+            }
+        }
+
+        if (urlObj.hostname.includes('dai.ly')) {
+            const videoId = urlObj.pathname.slice(1)
+            return `https://geo.dailymotion.com/player.html?video=${videoId}`
+        }
+
+        // Zoom Meetings
+        if (urlObj.hostname.includes('zoom.us')) {
+          return url
+        }
+    } catch (error) {
+        console.error('Invalid URL:', url, error)
+    }
+
+    return ''
 }

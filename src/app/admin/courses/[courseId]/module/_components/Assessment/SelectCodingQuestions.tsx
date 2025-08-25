@@ -4,7 +4,7 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
-import {setSelectedCodingQuestionsProps,SelectTag,SelectQuestion} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {setSelectedCodingQuestionsProps,Tag,SelectQuestion} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const SelectCodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
@@ -26,7 +26,7 @@ const SelectCodingQuestions = ({
     return (
         <div className="w-full">
             {selectedQuestions.map((question: SelectQuestion) => {
-                const tag = tags?.find((tag:SelectTag) => tag.id === question.tagId)
+                const tag = tags?.find((tag:Tag) => tag.id === question.tagId)
 
                 return (
                     <div key={question.id} className="p-5 rounded-sm border-b border-gray-200 mb-4">

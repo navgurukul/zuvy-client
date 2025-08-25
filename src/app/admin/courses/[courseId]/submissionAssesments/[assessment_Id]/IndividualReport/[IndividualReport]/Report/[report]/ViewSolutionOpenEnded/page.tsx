@@ -7,51 +7,18 @@ import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore } from '@/store/store'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import {PageSubmissionData,PageAssessmentData, paramsType,BootcampData} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionOpenEnded/ViewSolutionPageType"
 
-type SubmissionData = {
-    id: number
-    userId: number
-    answer: string
-    questionId: number
-    submitAt: string
-    assessmentSubmissionId: number
-}
-
-type OpenEndedQuestion = {
-    id: number
-    question: string
-    difficulty: string
-}
-
-type AssessmentData = {
-    id: number
-    openEndedQuestionId: number
-    assessmentOutsourseId: number
-    bootcampId: number
-    moduleId: number
-    chapterId: number
-    createdAt: string
-    submissionsData: SubmissionData[]
-    OpenEndedQuestion: OpenEndedQuestion
-}
-
-export type paramsType = {
-    courseId: string
-    assessment_Id: string
-    IndividualReport: string
-    report: string
-    CodingSolution: number
-}
 
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
     const [openEndedQuestionDetails, setOpenEndedQuestionsDetails] = useState<
-        AssessmentData[]
+        PageAssessmentData[]
     >([])
     const [individualAssesmentData, setIndividualAssesmentData] =
         useState<any>()
-    const [bootcampData, setBootcampData] = useState<any>()
-    const [assesmentData, setAssesmentData] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
+    const [assesmentData, setAssesmentData] = useState<PageSubmissionData | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
 
     const crumbs = [

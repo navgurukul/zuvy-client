@@ -9,7 +9,7 @@ import {SubmissionComponentProps} from "@/app/admin/courses/[courseId]/_componen
 
 
 const SubmissionComponent = (props: SubmissionComponentProps) => {
-    const handleDownloadPdf = async (id: any) => {
+    const handleDownloadPdf = async (id: number) => {
         const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`
 
         async function fetchData() {
@@ -95,7 +95,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                     ? 'text-gray-400 cursor-no-drop'
                                     : 'text-gray-500 hover:text-gray-700 cursor-pointer'
                             }`}
-                            onClick={isDisabled ? undefined : handleDownloadPdf}
+                            onClick={isDisabled ? undefined : () => handleDownloadPdf}
                             aria-label="Download full report"
                             disabled={isDisabled} // Disable button
                         >
@@ -134,7 +134,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                         {/* Conditionally rendering Link for Submissions */}
                         {hasSubmissions ? (
                             <Link
-                                href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}`}
+                                href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
                             >
                                 <h3 className="font-semibold cursor-pointer text-sm">
                                     View Submissions

@@ -10,41 +10,19 @@ import { columns } from './columns'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import {PageParams,BootcampData,StudentPage,Module} from "@/app/admin/courses/[courseId]/submissionProblems/[StudentProblemData]/studentProblemdataType"
 
-interface CodingQuestionDetails {
-    id: number
-    title: string
-}
 
-interface ModuleChapterData {
-    id: number
-    codingQuestionDetails: CodingQuestionDetails
-    submitStudents: number
-}
-
-interface Module {
-    id: number
-    typeId: number
-    isLock: boolean
-    bootcampId: number
-    name: string
-    description: string
-    projectId: number | null
-    order: number
-    timeAlloted: number
-    moduleChapterData: ModuleChapterData[]
-}
-
-const PraticeProblems = ({ params }: any) => {
+const PraticeProblems = ({ params }: PageParams) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-    
+    const praticeProblems = searchParams.get('praticeProblems')
     const [matchingData, setMatchingData] = useState<any>(null)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [studentDetails, setStudentDetails] = useState<any[]>([])
     const [filteredStudentDetails, setFilteredStudentDetails] = useState<any[]>([])
-    const [bootcampData, setBootcampData] = useState<any>({})
+    const [bootcampData, setBootcampData] = useState<BootcampData |null>(null)
     const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('search') || '')
     const [activeSearch, setActiveSearch] = useState<string>(searchParams.get('search') || '')
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
@@ -75,14 +53,10 @@ const PraticeProblems = ({ params }: any) => {
                 href: `/admin/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
-            // {
-            //     crumb: 'Submission - Practice Problems',
-            //     href: '',
-            //     isLast: false,
-            // },
             {
-                crumb: (matchingData?.moduleChapterData[0]?.codingQuestionDetails 
-                ?.title) + ' - Submissions',
+                 crumb:
+                    matchingData?.codingQuestionDetails?.title +
+                    ' - Submissions',
                 href: '',
                 isLast: true,
             },
@@ -97,7 +71,7 @@ const PraticeProblems = ({ params }: any) => {
         const suggestions: { name: string; email: string }[] = []
         const query = searchQuery.toLowerCase()
         
-        studentDetails.forEach((student: any) => {
+        studentDetails.forEach((student: StudentPage) => {
             const nameMatch = student.name && student.name.toLowerCase().includes(query)
             const emailMatch = student.email && student.email.toLowerCase().includes(query)
             
@@ -117,11 +91,11 @@ const PraticeProblems = ({ params }: any) => {
     }, [searchQuery, studentDetails])
 
     // Filter student details based on search
-    const filterStudentDetails = useCallback((students: any[], query: string) => {
+    const filterStudentDetails = useCallback((students: StudentPage[], query: string) => {
         if (!query.trim()) return students
         
         const searchTerm = query.toLowerCase()
-        return students.filter((student: any) => {
+        return students.filter((student: StudentPage) => {
             const nameMatch = student.name && student.name.toLowerCase().includes(searchTerm)
             const emailMatch = student.email && student.email.toLowerCase().includes(searchTerm)
             return nameMatch || emailMatch
@@ -182,8 +156,7 @@ const PraticeProblems = ({ params }: any) => {
             'crumbData',
             JSON.stringify([
                 bootcampData?.name,
-                `${matchingData?.moduleChapterData[0]?.codingQuestionDetails
-                    ?.title} - Submissions`,
+                `${matchingData?.codingQuestionDetails?.title} - Submissions`,
             ])
         )
     }
@@ -204,22 +177,31 @@ const PraticeProblems = ({ params }: any) => {
 
                 if (submissions.length > 0 && params.StudentProblemData) {
                     const matchingModule = submissions.find(
-                        (module: any) =>
+                        (module: Module) =>
                             module.id === +params.StudentProblemData
                     )
-                    setMatchingData(matchingModule || null)
+
+                    const matchingChapter =
+                        matchingModule?.moduleChapterData.find(
+                            (chapter: any) => chapter.id == praticeProblems
+                        )
+
+                    setMatchingData(matchingChapter || null)
 
                     if (matchingModule) {
                         const studentRes = await api.get(
-                            `/submission/practiseProblemStatus/${matchingModule.id}?chapterId=${matchingModule.moduleChapterData[0].id}&questionId=${matchingModule.moduleChapterData[0].codingQuestionDetails.id}`
+                            `/submission/practiseProblemStatus/${matchingModule.id}?chapterId=${matchingChapter.id}&questionId=${matchingChapter.codingQuestionDetails.id}`
                         )
-                        const updatedStudentDetails = studentRes.data.data.map((studentDetail: any) => ({
-                            ...studentDetail,
-                            email: studentDetail.emailId,
-                            bootcampId: params.courseId,
-                            questionId: matchingModule.moduleChapterData[0].codingQuestionDetails.id,
-                            moduleId: params.StudentProblemData,
-                        }))
+                        const updatedStudentDetails = studentRes.data.data.map(
+                            (studentDetail: any) => ({
+                                ...studentDetail,
+                                email: studentDetail.emailId,
+                                bootcampId: params.courseId,
+                                questionId:
+                                    matchingChapter.codingQuestionDetails.id,
+                                moduleId: params.StudentProblemData,
+                            })
+                        )
                         
 
                         setStudentDetails(updatedStudentDetails)
@@ -269,10 +251,7 @@ const PraticeProblems = ({ params }: any) => {
             <MaxWidthWrapper className="p-4">
                 <div className="flex flex-col gap-y-4">
                     <h1 className="text-start text-xl font-bold capitalize text-primary">
-                        {
-                            matchingData?.moduleChapterData[0]
-                                ?.codingQuestionDetails?.title
-                        }
+                        {matchingData?.codingQuestionDetails?.title}
                     </h1>
 
                     <div className="text-start flex gap-x-3">
@@ -284,10 +263,7 @@ const PraticeProblems = ({ params }: any) => {
                         </div>
                         <div className="p-4 rounded-lg shadow-md ">
                             <h1 className="text-gray-600 font-semibold text-xl">
-                                {
-                                    matchingData?.moduleChapterData[0]
-                                        .submitStudents
-                                }
+                                {matchingData?.submitStudents}
                             </h1>
                             <p className="text-gray-500 ">
                                 Submissions Received
@@ -295,9 +271,7 @@ const PraticeProblems = ({ params }: any) => {
                         </div>
                         <div className="p-4 rounded-lg shadow-md">
                             <h1 className="text-gray-600 font-semibold text-xl">
-                                {totalStudents -
-                                    matchingData?.moduleChapterData[0]
-                                        .submitStudents}
+                               {totalStudents - matchingData?.submitStudents}
                             </h1>
                             <p className="text-gray-500 ">Not Yet Submitted</p>
                         </div>

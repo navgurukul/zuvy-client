@@ -11,8 +11,10 @@ import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer } from "
 import Image from "next/image";
 import { useBootcampProgress } from '@/hooks/useBootcampProgress';
 import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
-import { useUpcomingEvents, Event as UpcomingEvent } from '@/hooks/useUpcomingEvents';
-import { useCompletedClasses, CompletedClass } from '@/hooks/useCompletedClasses';
+import { useUpcomingEvents} from '@/hooks/useUpcomingEvents';
+import {UpcomingEvent} from '@/hooks/hookType';
+import { useCompletedClasses} from '@/hooks/useCompletedClasses';
+import {CompletedClass,Module} from '@/hooks/hookType';
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
 import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
@@ -20,7 +22,7 @@ import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
 import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
-import {Module,ModuleContentCounts} from '@/app/student/_pages/pageStudentType'
+import {ModuleContentCounts} from '@/app/student/_pages/pageStudentType'
 
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
@@ -200,7 +202,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     }
   }
 
-  const getModuleCTA = (module: Module, progress: number) => {
+  const getModuleCTA = (module:Module , progress: number) => {
     if (module.isLock) {
       return "Module Locked";
     } else if (progress === 0) {
@@ -622,7 +624,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Content</h2>
 
                 <div className="space-y-6">
-                  { modulesToShow.length > 0 ? modulesToShow.map((module: any) => {
+                  { modulesToShow.length > 0 ? modulesToShow.map((module: Module) => {
                     const moduleProgress = getModuleProgress(module);
                     const isCurrentModule = latestCourseData?.moduleId === module.id;
                     const isCompleted = moduleProgress === 100;

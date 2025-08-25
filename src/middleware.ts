@@ -98,7 +98,7 @@ export function middleware(request: NextRequest) {
                 )
                 response.cookies.set('redirectedUrl', '', {
                     path: '/',
-                    maxAge: 60, // Optional: expire after 1 minute
+                    maxAge: 60, // Optional: expire after 1 minutes
                 })
                 return response
             } else {

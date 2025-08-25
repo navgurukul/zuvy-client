@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { isCodeQuestion, renderQuestionPreview } from '@/utils/quizHelpers'
-
+import {Tag} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 type Props = {}
 
 const QuizModal = ({
@@ -36,7 +36,7 @@ const QuizModal = ({
         }
     }
     
-    const filteredTag = tags?.filter((tag: any) => tag.id == data.tagId)
+    const filteredTag = tags?.filter((tag:Tag) => tag.id == data.tagId)
     const question = data?.quizVariants[0]?.question
     const hasCodeBlock = isCodeQuestion(question)
 

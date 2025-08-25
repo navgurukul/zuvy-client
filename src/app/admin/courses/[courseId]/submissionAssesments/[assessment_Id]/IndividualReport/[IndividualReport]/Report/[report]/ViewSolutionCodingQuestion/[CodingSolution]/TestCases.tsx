@@ -1,9 +1,9 @@
 import { b64DecodeUnicode } from '@/utils/base64'
-
+import {TestCase,InputPage} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/SubmissionViewPageType"
 const TestCaseResults = ({ testCases }: any) => {
     return (
         <div className="w-full space-y-4">
-            {testCases.map((testCase: any, index: number) => {
+            {testCases.map((testCase: TestCase, index: number) => {
                 return (
                     <div
                         key={index}
@@ -30,7 +30,7 @@ const TestCaseResults = ({ testCases }: any) => {
                             </h3>
                             <p className="list-disc list-inside pl-2 text-gray-800">
                                 {testCase.testCases.inputs.map(
-                                    (input: any, i: number) => (
+                                    (input: InputPage, i: number) => (
                                         <p key={i} className="my-1 text-[15px]">
 
                                             <span className="bg-gray-100 p-1 rounded-md">

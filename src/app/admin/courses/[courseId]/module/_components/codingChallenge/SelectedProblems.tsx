@@ -10,7 +10,7 @@ import { getChapterUpdateStatus } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
-import {CodingTopicsProps,CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
+import {CodingTopicsProps,CodingTopicsTag,CodingChallangesQuestion} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 
 const SelectedProblems = ({
     selectedQuestions,
@@ -44,9 +44,9 @@ const SelectedProblems = ({
                 <h2 className="font-bold mb-5 text-[15px] text-gray-600">Selected Coding Problems</h2>
                 {selectedQuestions?.length > 0 ? (
                     <div className="w-full">
-                        {selectedQuestions?.map((selectedQuestion: any, index: any) => {
+                        {selectedQuestions?.map((selectedQuestion: CodingChallangesQuestion, index: number) => {
                             const selectedTagName = tags?.filter(
-                                (tag: any) => tag.id == selectedQuestion?.tagId
+                                (tag: CodingTopicsTag) => tag.id == selectedQuestion?.tagId
                             )
                             return (
                                 <div key={selectedQuestion?.id}>

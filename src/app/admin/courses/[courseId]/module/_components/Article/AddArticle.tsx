@@ -30,18 +30,13 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import {EditorDocArcticle} from "@/app/admin/courses/[courseId]/module/_components/Article/courseModuleArticleType"
+import {EditorDocArcticle,AddArticleProps,ContentArticle} from "@/app/admin/courses/[courseId]/module/_components/Article/courseModuleArticleType"
 
-const AddArticle = ({
+const AddArticle: React.FC<AddArticleProps>= ({
     content,
     courseId,
     articleUpdateOnPreview,
     setArticleUpdateOnPreview,
-}: {
-    content: any
-    courseId: any
-    articleUpdateOnPreview: any
-    setArticleUpdateOnPreview: any
 }) => {
     const heightClass = useResponsiveHeight()
     const router = useRouter()
@@ -84,7 +79,7 @@ const AddArticle = ({
     })
 
     // NEW: Function to check if editor content is empty
-    const isEditorContentEmpty = (content: any) => {
+    const isEditorContentEmpty = (content:any) => {
         if (!content || !content.doc || !content.doc.content) return true
 
         const docContent = content.doc.content
@@ -111,7 +106,7 @@ const AddArticle = ({
     }
 
     // NEW: Function to generate content hash for comparison
-    const generateContentHash = (content: any) => {
+    const generateContentHash = (content:any) => {
         return JSON.stringify(content)
     }
 

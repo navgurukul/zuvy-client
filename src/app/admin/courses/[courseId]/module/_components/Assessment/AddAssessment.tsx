@@ -21,7 +21,7 @@ import { getAssessmentPreviewStore } from '@/store/store'
 import { useRouter } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
-import {AddAssessmentProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {AddAssessmentProps,McqAccumulator,CodingQuestiones } from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const AddAssessment: React.FC<AddAssessmentProps> = ({
     chapterData,
     content,
@@ -194,7 +194,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     useEffect(() => {
         const difficultyCount = selectedCodingQuestions.reduce(
-            (acc: any, question: any) => {
+            (acc:McqAccumulator , question: CodingQuestiones) => {
                 const key = `codingProblems${question.difficulty}` // Construct the key
                 acc[key] = acc[key] ? acc[key] + 1 : 1 // Increment the count
                 return acc
@@ -207,7 +207,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     useEffect(() => {
         const difficultyCount = selectedQuizQuestions.reduce(
-            (acc: any, question: any) => {
+            (acc:McqAccumulator , question: CodingQuestiones) => {
                 const key = `mcqs${question.difficulty}` // Construct the key
                 acc[key] = acc[key] ? acc[key] + 1 : 1 // Increment the count
                 return acc
@@ -222,25 +222,25 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         // Ensure unique coding questions
         const uniqueCodingQuestions = Array.from(
             new Set(
-                content.CodingQuestions?.map((question: any) => question.id)
+                content.CodingQuestions?.map((question: CodingQuestiones) => question.id)
             )
         ).map((id) =>
-            content.CodingQuestions.find((question: any) => question.id === id)
+            content.CodingQuestions.find((question:CodingQuestiones) => question.id === id)
         )
         setSelectedCodingQuestions(uniqueCodingQuestions || [])
 
         // Ensure unique quiz questions
         const uniqueQuizQuestions = Array.from(
-            new Set(content.Quizzes?.map((question: any) => question.id))
+            new Set(content.Quizzes?.map((question: CodingQuestiones) => question.id))
         ).map((id) =>
-            content.Quizzes.find((question: any) => question.id === id)
+            content.Quizzes.find((question:CodingQuestiones) => question.id === id)
         )
         setSelectedQuizQuestions(uniqueQuizQuestions || [])
 
         // Ensure unique open-ended questions
         const uniqueOpenEndedQuestions = Array.from(
             new Set(
-                content.OpenEndedQuestions?.map((question: any) => question.id)
+                content.OpenEndedQuestions?.map((question:CodingQuestiones) => question.id)
             )
         ).map((id) =>
             content.OpenEndedQuestions.find(

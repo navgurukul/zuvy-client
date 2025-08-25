@@ -273,6 +273,6 @@ export interface OpenEndedQuestions {
 export type Question = OpenEndedQuestions
 
 export type OpenEndedQuestionProps = {
-    question: Question
+    question:any
     tag?: Tags[]
 }

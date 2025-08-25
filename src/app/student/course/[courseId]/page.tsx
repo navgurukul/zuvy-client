@@ -3,9 +3,7 @@ import React from 'react'
 import CourseDashboardPage from '../../_pages/CourseDashboardPage'
 import { useParams } from 'next/navigation';
 
-type Props = {}
-
-const Page = (props: Props) => {
+const Page = () => {
     const params = useParams();
     const courseId = params.courseId as string;
 

@@ -25,20 +25,11 @@ export interface Topic {
   items: TopicItem[];
 }
 
-export interface Module {
-  id: string;
-  name: string;
-  description: string;
-   isLock: boolean;
-  progress: number;
-  topics: Topic[];
-}
-
 export interface Course {
   id: string;
   name: string;
-  modules: Module[];
 }
+
 
 
 
