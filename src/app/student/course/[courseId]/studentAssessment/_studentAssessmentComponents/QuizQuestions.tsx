@@ -163,7 +163,7 @@ const QuizQuestions = ({
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
+        <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 pb-8 relative bottom-0 left-0 right-0">
             <div className="max-w-4xl mx-auto p-6">
                 {/* Alert Modal for No Selection */}
                 <AlertDialog open={isAlertModal}>
