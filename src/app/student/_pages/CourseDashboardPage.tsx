@@ -28,6 +28,7 @@ import {ModuleContentCounts,TopicItem} from '@/app/student/_pages/pageStudentTyp
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   const [showAllModules, setShowAllModules] = useState(false);
+  const[isDialogOpen, setIsDialogOpen]=useState(false)
   const {setIsStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
@@ -385,9 +386,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   function handleJoinClass(item: UpcomingEvent) {
                     if ((item as any).hangoutLink) {
                       window.open((item as any).hangoutLink, '_blank');
-                    } else if (item.moduleId && item.chapterId) {
-                      window.location.href = `/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`;
-                    }
+                    return;
+                  }
                   }
                 return (
                   <div key={item.id}>
@@ -396,9 +396,22 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         {getItemIconWithBackground(item.type)}
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-start justify-between gap-4 mb-2">
-                          <h4 className="font-medium text-base">{item.title}</h4>
+                        {/* <div className="flex items-start justify-between gap-4 mb-2">
+                          <h4 className="font-medium text-base">
+                            {item.title}</h4>
+                        </div> */}
+
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                          <h4 className="font-medium text-base">
+                            <a href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                              target="_self"
+                              className="hover:text-primary hover:underline underline-offset-[4px]"
+                            >
+                            {item.title}
+                          </a>
+                          </h4>
                         </div>
+
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-medium">
                             {eventType === 'Live Class' && `Scheduled on ${formatDate(item.eventDate)}`}
@@ -406,31 +419,31 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             {eventType === 'Assignment' && `Due on ${formatDate(item.eventDate)}`}
                           </p>
                         </div>
-    <div className="flex items-center gap-2 justify-end">
-    <Button
-    size="sm"
-    variant="link"
-    disabled={!isEventReady}
-    className="text-primary p-0 h-auto"
-    onClick={() => {
-      if (isEventReady && eventType === 'Live Class') {
-        handleJoinClass(item); 
-      }
-    }}
-  >
-    {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
-  </Button>
+                        <div className="flex items-center gap-2 justify-end">
+                        <Button
+                        size="sm"
+                        variant="link"
+                        disabled={!isEventReady}
+                        className="text-primary p-0 h-auto"
+                        onClick={() => {
+                        if (isEventReady && eventType === 'Live Class') {
+                         handleJoinClass(item); 
+                        }
+                }}
+                  >
+                     {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
+                    </Button>
   
-  {isEventReady && eventType === 'Live Class' && (
-    <span 
-    onClick={() => {
-      if (isEventReady && eventType === 'Live Class') {
-        handleJoinClass(item); 
-      }
-    }}
-    className="h-2 w-2 bg-green-500 rounded-full inline-block cursor-pointer"></span>
-  )}
-</div>
+                    {isEventReady && eventType === 'Live Class' && (
+                <span 
+                  onClick={() => {
+                    if (isEventReady && eventType === 'Live Class') {
+                     handleJoinClass(item); 
+                    }
+                  }}
+               className="h-2 w-2 bg-green-500 rounded-full inline-block cursor-pointer"></span>
+             )}
+                    </div>
                       </div>
                     </div>
                     {index < array.length - 1 && <div className="border-t border-border"></div>}
@@ -850,18 +863,24 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         const isEventReady = canStartEvent(item.eventDate);
 
                         return (
-                          <a key={item.id} target={item.status === 'ongoing' ? '_blank' : '_self'} href={`${item.status === 'ongoing' ? (item as any).hangoutLink : `/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}`}>
-                            <div>
+                            <div key={item.id}>
                               <div className="flex items-start gap-4">
                                 <div className="flex-shrink-0 mt-1">
                                   {getItemIconWithBackground(item.type)}
                                 </div>
                                 <div className="flex-1">
                                   <div className="flex items-start justify-between gap-4 mb-2">
-                                    <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">{item.title}
+                                    <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">
+                                      <a 
+                                       href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                                       target="_self"
+                                       className="hover:text-primary hover:underline underline-offset-[4px]"
+                                      >
+                                        {item.title}
+                                      </a>
                                     </h4>
                                   </div>
-                                    <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
+                                  <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
                                   <div className="flex items-center justify-between mb-3">
                                     <p className="text-sm font-medium">
                                       {eventType === 'Live Class' && `Scheduled on ${formatDate(item.eventDate)}`}
@@ -870,27 +889,28 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     </p>
                                   </div>
                                   {/* CTA - Bottom right */}
+                                  {eventType === 'Live Class' &&(
                                   <div className="flex justify-end">
                                     <Button
                                       size="sm"
                                       variant="link"
                                       disabled={!isEventReady}
                                       className="text-primary p-0 h-auto"
+                                      onClick={() => window.open((item as any).hangoutLink , '_blank')}
                                     >
                                       {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
-                                      <p>
 
                                         {item.status === 'ongoing' && <span className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
-                                      </p>
+                                     
                                     </Button>
                                   </div>
+                                  )}
                                 </div>
                               </div>
                               {index < upcomingEventsData.events.slice(0, 3).length - 1 && (
                                 <div className="border-t border-border mt-4"></div>
                               )}
                             </div>
-                          </a>
                         )
                       })}
 
