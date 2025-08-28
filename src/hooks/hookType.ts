@@ -603,6 +603,7 @@ export interface InstructorDetails {
 
 export interface UpcomingEvent {
   chapterId: any;
+  hangoutLink?:string;
   moduleId: any;
   id: number;
   title: string;
