@@ -113,7 +113,9 @@ export function Combobox({
                                 aria-selected={value === item.value}
                                 className={cn('cursor-pointer',
                                     value === item.value && 'bg-orange-500 text-accent-foreground',
-                                    `data-[selected]:${value === item.value ? 'bg-orange-500' : 'bg-gray-100'} data-[selected]:${value === item.value ? 'text-accent-foreground' : 'text-accent'}`,
+                                    // 'data-[selected]:bg-gray-100 data-[selected]:text-black'
+                                    `data-[selected]:${value === item.value ? 'bg-orange-500' : 'bg-gray-100'} data-[selected]:${value === item.value ? 'text-accent-foreground' : 'text-black'}`,
+
                                 )}
                                 >
                                 <div className="flex items-center text-start gap-2">
@@ -124,7 +126,6 @@ export function Combobox({
                                 {item.label}
                                 </div>
                             </CommandItem>
-
                         ))}
                     </CommandGroup>
                 </Command>

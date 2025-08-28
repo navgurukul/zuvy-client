@@ -133,10 +133,11 @@ export function ComboboxStudent({
                     <CommandInput placeholder="Search batch..." />
                     <CommandEmpty>No batch found.</CommandEmpty>
                     <CommandGroup>
-                        {batchData.map((batch: CourseStudentBatchItem) => (
+                        {batchData.map((batch: CourseStudentBatchItem) => {
+                            return (
                             <CommandItem
                                 key={batch.value}
-                                disabled={value == batch.value && !batchisFull}
+                                // disabled={value == batch.value && !batchisFull}
                                 value={`${batch.value}-${batch.label}`}
                                 onSelect={(currentValue) => {
                                     selectedRows
@@ -148,7 +149,12 @@ export function ComboboxStudent({
                                               setOpen
                                           )
                                 }}
+                                className={cn('cursor-pointer',
+                                    value == (batch.value) && 'bg-orange-500 text-accent-foreground',
+                                    `data-[selected]:${value == (batch.value) ? 'bg-orange-500' : 'bg-gray-100'} data-[selected]:${value == (batch.value) ? 'text-accent-foreground' : 'text-black'}`,
+                                )}
                             >
+                                <div className="flex items-center text-start gap-2">
                                 <Check
                                     className={cn(
                                         'mr-2 h-4 w-4',
@@ -158,8 +164,9 @@ export function ComboboxStudent({
                                     )}
                                 />
                                 {batch.label}
+                                </div>
                             </CommandItem>
-                        ))}
+                        )})}
                     </CommandGroup>
                 </Command>
             </PopoverContent>
