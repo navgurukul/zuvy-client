@@ -137,7 +137,7 @@ export function ComboboxStudent({
                             return (
                             <CommandItem
                                 key={batch.value}
-                                // disabled={value == batch.value && !batchisFull}
+                                disabled={value == batch.value && !batchisFull}
                                 value={`${batch.value}-${batch.label}`}
                                 onSelect={(currentValue) => {
                                     selectedRows
