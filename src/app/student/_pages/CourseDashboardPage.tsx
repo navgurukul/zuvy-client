@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,DialogOverlay  } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer } from "lucide-react";
 import Image from "next/image";
@@ -28,7 +28,6 @@ import {ModuleContentCounts,TopicItem} from '@/app/student/_pages/pageStudentTyp
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   const [showAllModules, setShowAllModules] = useState(false);
-  const[isDialogOpen, setIsDialogOpen]=useState(false)
   const {setIsStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
@@ -384,8 +383,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 const eventType = getEventType(item.type);
                 const isEventReady = canStartEvent(item.eventDate);
                   function handleJoinClass(item: UpcomingEvent) {
-                    if ((item as any).hangoutLink) {
-                      window.open((item as any).hangoutLink, '_blank');
+                    if(item.hangoutLink) {
+                      window.open(item.hangoutLink, '_blank');
                     return;
                   }
                   }
@@ -396,22 +395,16 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         {getItemIconWithBackground(item.type)}
                       </div>
                       <div className="flex-1">
-                        {/* <div className="flex items-start justify-between gap-4 mb-2">
-                          <h4 className="font-medium text-base">
-                            {item.title}</h4>
-                        </div> */}
-
                           <div className="flex items-start justify-between gap-4 mb-2">
                           <h4 className="font-medium text-base">
-                            <a href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                            <Link href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
                               target="_self"
                               className="hover:text-primary hover:underline underline-offset-[4px]"
                             >
                             {item.title}
-                          </a>
+                          </Link>
                           </h4>
                         </div>
-
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-medium">
                             {eventType === 'Live Class' && `Scheduled on ${formatDate(item.eventDate)}`}
@@ -871,13 +864,13 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <div className="flex-1">
                                   <div className="flex items-start justify-between gap-4 mb-2">
                                     <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">
-                                      <a 
+                                      <Link
                                        href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
                                        target="_self"
                                        className="hover:text-primary hover:underline underline-offset-[4px]"
                                       >
                                         {item.title}
-                                      </a>
+                                      </Link>
                                     </h4>
                                   </div>
                                   <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
@@ -896,7 +889,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                       variant="link"
                                       disabled={!isEventReady}
                                       className="text-primary p-0 h-auto"
-                                      onClick={() => window.open((item as any).hangoutLink , '_blank')}
+                                      onClick={() => window.open(item.hangoutLink , '_blank')}
                                     >
                                       {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
 
