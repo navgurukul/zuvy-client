@@ -108,11 +108,15 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                     </PopoverTrigger>
                     <PopoverContent className="w-48 sm:w-56 p-0">
                         <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 scrollbar-track-green-100">
-                            {tags?.map((tag) => (
+                            {tags?.map((tag) => {
+                                const isSelected = selectedTopics.some((t) => t?.id === tag?.id);
+                            return (
                                 <div
                                     key={tag.id}
-                                    className="flex items-center px-3 py-2 hover:bg-secondary hover:text-[#FFFFFF]  cursor-pointer"
                                     onClick={() => handleTopicChange(tag)}
+                                    className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
+                                        ${isSelected 
+                                            && "text-[rgb(81,134,114)]"}`}
                                 >
                                     <Check
                                         className={`mr-2 h-4 w-4 ${
@@ -125,11 +129,10 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                                     />
                                     {tag.tagName}
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     </PopoverContent>
                 </Popover>
-
                 <Popover>
                     <PopoverTrigger asChild>
                         <Button
@@ -141,13 +144,17 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                     </PopoverTrigger>
                     <PopoverContent className="w-48 sm:w-56 p-0">
                         <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 scrollbar-track-green-100">
-                            {difficulties.map((difficulty) => (
+                            {difficulties.map((difficulty) => {
+                                const isSelected = selectedDifficulties.includes(difficulty);
+                            return(
                                 <div
                                     key={difficulty}
-                                    className="flex items-center px-3 py-2 hover:bg-secondary hover:text-[#FFFFFF] cursor-pointer"
                                     onClick={() =>
                                         handleDifficultyChange(difficulty)
                                     }
+                                    className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
+                                        ${isSelected 
+                                            && "text-[rgb(81,134,114)]"}`}
                                 >
                                     <Check
                                         className={`mr-2 h-4 w-4 ${
@@ -160,7 +167,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                                     />
                                     {difficulty}
                                 </div>
-                            ))}
+                            )})}
                         </div>
                     </PopoverContent>
                 </Popover>
