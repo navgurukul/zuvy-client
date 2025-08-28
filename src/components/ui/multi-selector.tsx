@@ -20,7 +20,7 @@ function Selector({
             {options.map((option: any) => (
                 <div
                     key={option.value}
-                    className={`flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded-md
+                    className={`flex items-center justify-between gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded-md
                         ${
                             selectedOptions.some(
                                 (selected: any) =>
@@ -29,6 +29,7 @@ function Selector({
                         }`}
                     onClick={() => handleOptionClick(option)}
                 >
+                    <span>{option.label}</span>
                     <Check
                         className={`h-5 w-5 ${
                             selectedOptions.some(
@@ -39,7 +40,6 @@ function Selector({
                                 : 'opacity-0'
                         }`}
                     />
-                    <span>{option.label}</span>
                 </div>
             ))}
         </div>
