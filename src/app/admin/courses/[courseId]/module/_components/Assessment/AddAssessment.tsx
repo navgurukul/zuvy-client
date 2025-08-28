@@ -429,7 +429,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             selectedTopics={selectedTopics}
                             setSelectedTopics={setSelectedTopics}
                             selectedDifficulties={selectedDifficulties}
-                            setSelectedDifficulties={setSelectedDifficulties} selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                        />
+                            setSelectedDifficulties={setSelectedDifficulties} selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                        
+                        />
                     </div>
                     <div className="flex justify-between w-2/3">
                         <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
