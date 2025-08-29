@@ -195,9 +195,9 @@ const ModuleSidebar = ({ courseId, moduleId, module, selectedItem, onItemSelect 
                                item.type === 'coding-challenge' ? `Coding Challenge: ${item.title}` :
                                item.title}
                             </div>
-                            <div className="text-xs text-muted-foreground">
+                            {/* <div className="text-xs text-muted-foreground">
                               {getItemDetails(adjustedItem)}
-                            </div>
+                            </div> */}
                           </div>
                           {item.status === 'completed' && (
                             <div className="flex-shrink-0">

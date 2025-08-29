@@ -391,24 +391,33 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                 <div key={classItem.id}>
                                     <div className="flex items-center justify-between py-4">
                                         <div className="flex-1 text-left">
-                                            {classItem.moduleId === null || classItem.chapterId == null ? <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger className='w-fit font-manrope text-lg  font-bold cursor-default underline-offset-[5px]' >
-                                                        {classItem.title}
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className=' ml-96 text-left' >
-                                                        The chapter has been deleted {(classItem.s3Link !== null || classItem.s3Link !== 'not found') && 'but you can still view the recording'}
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider> : 
-                                            
-                                            <Link
-                                                className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                                                href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
-                                            >
-                                                {classItem.title} 
-                                            </Link>
-                                            }
+                                            {classItem.moduleId === null ||
+                                            classItem.chapterId == null ? (
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger className="text-left font-manrope text-lg  font-bold cursor-default underline-offset-[5px]">
+                                                            {classItem.title}
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className=" text-left">
+                                                            The chapter isn’t
+                                                            included in the
+                                                            module yet,
+                                                            {(classItem.s3Link !==
+                                                                null ||
+                                                                classItem.s3Link !==
+                                                                    'not found') &&
+                                                                'but you can still view the recording'}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            ) : (
+                                                <Link
+                                                    className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
+                                                    href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                                                >
+                                                    {classItem.title}
+                                                </Link>
+                                            )}
                                             <p className="text-sm text-muted-foreground">
                                                 {formatDate(
                                                     classItem.startTime
@@ -536,16 +545,35 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                             {classes.map((classItem, index, array) => (
                                 <div key={classItem.id}>
                                     <div className="flex items-center justify-between py-4">
-                                        <div className="flex-1">
-                                            <Link
-                                                className=" font-manrope  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                                                href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
-                                            >
-                                                <h6 className="text-left text-md w-full">
+                                        <div className="flex-1 text-left">
+                                            {classItem.moduleId === null ||
+                                            classItem.chapterId == null ? (
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger className="text-left font-manrope text-lg  font-bold cursor-default underline-offset-[5px]">
+                                                            {classItem.title}
+                                                        </TooltipTrigger>
+                                                        <TooltipContent className=" text-left">
+                                                            The chapter isn’t
+                                                            included in the
+                                                            module yet,
+                                                            {(classItem.s3Link !==
+                                                                null ||
+                                                                classItem.s3Link !==
+                                                                    'not found') &&
+                                                                'but you can still view the recording'}
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            ) : (
+                                                <Link
+                                                    className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
+                                                    href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                                                >
                                                     {classItem.title}
-                                                </h6>
-                                            </Link>
-                                            <p className="text-sm text-left text-muted-foreground">
+                                                </Link>
+                                            )}
+                                            <p className="text-sm text-muted-foreground">
                                                 {formatDate(
                                                     classItem.startTime
                                                 )}
@@ -1666,7 +1694,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                                 }
                                                                 className="flex items-center justify-between gap-4"
                                                             >
-                                                                <div className="flex-1 text-left">
+                                                                {/* <div className="flex-1 text-left">
                                                                     <Link
                                                                         className=" hover:text-primary"
                                                                         href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
@@ -1674,7 +1702,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                                         <p className="font-medium text-sm ">
                                                                             {ellipsis(
                                                                                 classItem.title,
-                                                                                20
+                                                                                35
                                                                             )}
                                                                         </p>
                                                                         <p className="text-xs text-muted-foreground">
@@ -1683,6 +1711,52 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                                             )}
                                                                         </p>
                                                                     </Link>
+                                                                </div> */}
+                                                                <div className="flex-1 text-left">
+                                                                    {classItem.moduleId ===
+                                                                        null ||
+                                                                    classItem.chapterId ==
+                                                                        null ? (
+                                                                        <TooltipProvider>
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger className="text-left font-manrope text-sm cursor-default underline-offset-[5px]">
+                                                                                    {
+                                                                                        classItem.title
+                                                                                    }
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent className="w-1/3 ml-96 text-left">
+                                                                                    The
+                                                                                    chapter
+                                                                                    isn’t
+                                                                                    included
+                                                                                    in
+                                                                                    the
+                                                                                    module
+                                                                                    yet,
+                                                                                    {(classItem.s3Link !==
+                                                                                        null ||
+                                                                                        classItem.s3Link !==
+                                                                                            'not found') &&
+                                                                                        'but you can still view the recording'}
+                                                                                </TooltipContent>
+                                                                            </Tooltip>
+                                                                        </TooltipProvider>
+                                                                    ) : (
+                                                                        <Link
+                                                                            className="w-fit font-manrope text-sm  hover:text-primary hover:underline underline-offset-[5px]"
+                                                                            href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                                                                        >
+                                                                            {ellipsis(
+                                                                                classItem.title,
+                                                                                35
+                                                                            )}
+                                                                        </Link>
+                                                                    )}
+                                                                    <p className="text-sm text-muted-foreground">
+                                                                        {formatDate(
+                                                                            classItem.startTime
+                                                                        )}
+                                                                    </p>
                                                                 </div>
                                                                 <Badge
                                                                     variant="outline"
