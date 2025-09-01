@@ -22,7 +22,7 @@ const IndividualStudentAssesment = ({
     mcqScore,
     totalMcqScore,
     openEndedScore,
-    totalOpenEndedScore,
+    attemptedOpenEndedQuestions,
 }: any) => {
     const { courseId, assessment_Id, IndividualReport, report } = params
     const color = getAssesmentBackgroundColorClass(25, 5)
@@ -62,7 +62,7 @@ const IndividualStudentAssesment = ({
             totalScore = +totalMcqScore
         } else {
             score = +openEndedScore
-            totalScore = +totalOpenEndedScore
+            totalScore = 0
         }
 
         const percentage = (score / totalScore) * 100
@@ -96,32 +96,25 @@ const IndividualStudentAssesment = ({
                             : questionInfo.title}
                     </h1>
 
-                    {/* <div className="flex flex-col gap-y-2 md:flex-row md:gap-x-12 ">
-                        {type !== 'quizSubmission' && (
-                            <h1>
-                                Copy Paste:{' '}
-                                {copyPaste == 0 ? 'None' : copyPaste}
-                            </h1>
-                        )}
-                        <h1>
-                            Tab Change: {tabchanges == 0 ? 'None' : tabchanges}
-                        </h1>
-                    </div> */}
-                    <div className="flex items-center gap-x-2 my-4">
+                  <div className="flex items-center gap-x-2 my-4">
                         <span
                             className={`h-2 w-2 rounded-full ${
-                                type !== 'codingSubmission'
-                                    ? scoreHandler().className
-                                    : data.status == 'Accepted'
+                                type === 'codingSubmission'
+                                    ? data.status == 'Accepted'
                                         ? 'bg-green-300'
                                         : 'bg-red-500'
+                                    : type === 'openEndedSubmission'
+                                        ? 'bg-gray-300'
+                                        : scoreHandler().className
                                 }`}
                         />
                         <span className="text-[15px] text-gray-600">
-                            {type !== 'codingSubmission' ? (
-                                <>Score: {scoreHandler().score}</>
-                            ) : (
+                            {type === 'codingSubmission' ? (
                                 <>Status: {data.status}</>
+                            ) : type === 'openEndedSubmission' ? (
+                                <>Attempted: {attemptedOpenEndedQuestions ?? 0}</>
+                            ) : (
+                                <>Score: {scoreHandler().score}</>
                             )}
                         </span>
                     </div>
