@@ -37,10 +37,10 @@ const QuizResults = ({
         0
     ) || 0
     const maxMarks = quizResults?.mcqs?.reduce(
-        (sum: number, result: any) => sum + Math.trunc(Number(result.mark)), 
+        (sum: number, result: any) => sum + (Number(result.mark)), 
         0
     ) || 0
-    const percentage = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
+    const percentage = maxMarks > 0 ? Math.ceil((totalMarks / maxMarks) * 100) : 0
 
     // Show loading state
     if (loading) {
@@ -186,7 +186,7 @@ const QuizResults = ({
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground font-medium">Points</p>
-                                <p className="text-2xl font-bold text-foreground">{totalMarks}/{maxMarks}</p>
+                                <p className="text-2xl font-bold text-foreground">{totalMarks}/{Math.ceil(maxMarks)}</p>
                             </div>
                         </div>
                     </div>
@@ -234,7 +234,7 @@ const QuizResults = ({
                                                 ? 'bg-success/10 text-success border border-success/20'
                                                 : 'bg-muted text-muted-foreground border border-border'
                                         )}>
-                                            {result.submissionsData?.status === 'passed' ? Number(result.mark) : 0}/{Math.trunc(Number(result.mark))} Marks
+                                            {result.submissionsData?.status === 'passed' ? Number(result.mark) : 0}/{(Number(result.mark))} Marks
                                         </div>
                                     </div>
                                 </div>
