@@ -4,6 +4,7 @@ import { OFFSET, POSITION } from './constant'
 import { fetchStudentsHandler } from './admin'
 import { getStoreStudentDataNew } from '@/store/store'
 import { showProctoringAlert } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/ProctoringAlerts'
+import { QuestionPanel } from '@/app/student/course/[courseId]/codingChallenge/components'
 
 export const fetchStudentData = async (
     id: number, 
@@ -497,3 +498,87 @@ export const formatToIST = (dateString: string | null | undefined) => {
     };
 
 // --------------------------------------------
+
+
+
+
+
+
+
+
+
+// --------------------------------------------QuestionPanel.tsx--------------------------------------------
+
+
+// export const formatValue = (value: any, type: string, depth = 0): string => {
+//     const indent = '  '.repeat(depth);
+//     const innerIndent = '  '.repeat(depth + 1);
+
+//     if (Array.isArray(value)) {
+//         if (value.length === 0) return '[]';
+
+//         // 1D array -> single line
+//         const is1D = value.every(v => typeof v !== 'object' || v === null || Array.isArray(v) === false);
+//         if (is1D) {
+//             return `[${value.map(v => formatValue(v, typeof v, depth + 1)).join(', ')}]`;
+//         }
+
+//         // Nested array -> pretty format
+//         return (
+//             '[\n' +
+//             value.map(v => innerIndent + formatValue(v, typeof v, depth + 1)).join(',\n') +
+//             '\n' +
+//             indent +
+//             ']'
+//         );
+//     }
+
+//     // Objects
+//    if (typeof value === 'object' && value !== null) {
+//     return JSON.stringify(value, null, 2);
+// }
+//     // Primitives
+//     switch (type) {
+//         case 'int':
+//         case 'float':
+//             return String(value);
+//         case 'str':
+//             return `"${value}"`;
+//         default:
+//             return String(value);
+//     }
+// }
+
+
+
+export const formatValue = (value: any, type: string): string => {
+  if (type === "jsonType") {
+    return JSON.stringify(value); 
+  }
+
+  if (Array.isArray(value)) {
+    if (type === "arrayOfNum") {
+      return `[${value.join(", ")}]`;
+    }
+    if (type === "arrayOfStr") {
+      return `[${value.map((v) => `"${v}"`).join(", ")}]`;
+    }
+    return `[${value.join(", ")}]`;
+  }
+
+  if (typeof value === "object" && value !== null) {
+    return JSON.stringify(value, null, 2);
+  }
+  switch (type) {
+    case "int":
+    case "float":
+      return value.toString();
+    case "str":
+      return `"${value}"`;
+    default:
+      return String(value);
+  }
+};
+
+
+
