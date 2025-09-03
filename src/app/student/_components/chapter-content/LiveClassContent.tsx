@@ -139,7 +139,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     }
 
       // const youtubeId = isYouTube ? getYoutubeId(flatLinks[0]) : '';
-    const savedTime = session?.s3link.includes('youtube')
+    const savedTime = session?.s3link?.includes('youtube')
         ? progress[chapterDetails.id.toString()] || 0
         : 0
     const handleReady = useCallback(() => {
