@@ -20,6 +20,7 @@ import AlertDialogDemo from './components/deleteModalNew'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import axios from 'axios'
 import { toast } from '@/components/ui/use-toast'
+import { SearchBox } from '@/utils/searchBox'
 
 export type StudentData = {
     email: string
@@ -50,12 +51,7 @@ const Page = ({ params }: { params: any }) => {
         offset,
         search,
         totalStudents,
-        suggestions, // Use suggestions instead of students for autocomplete
         setStudents,
-        handleSetSearch,
-        commitSearch,
-        internalSearch,
-        debouncedInternalSearch,
         fetchStudentData,
     } = useStudentData(params.courseId)
 
@@ -63,10 +59,56 @@ const Page = ({ params }: { params: any }) => {
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [isOpen, setIsOpen] = useState(false)
-    const [showSuggestions, setShowSuggestions] = useState(false)
 
-    const filteredSuggestions = suggestions.slice(0, 6)
-
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        const response = await api.get(
+          `/bootcamp/students/${params.courseId}?searchTerm=${query}`
+        );
+        // Map StudentData to include id property for Suggestion interface
+        const suggestions = (response.data.modifiedStudentInfo || []).map(
+          (student: StudentData) => ({
+            ...student,
+            id: student.userId, // Map userId to id for Suggestion interface
+          })
+        );
+        return suggestions;
+      }, [params.courseId]);
+      
+      const fetchSearchResultsApi = useCallback(
+        async (query: string) => {
+          const response = await api.get(
+            `/bootcamp/students/${params.courseId}?limit=${limit}&offset=0&searchTerm=${query}`
+          );
+          setStudents(response.data.modifiedStudentInfo || []);
+          setSelectedRows([]);
+          return response.data;
+        },
+        [params.courseId, limit, setStudents]
+      );
+      
+      const defaultFetchApi = useCallback(
+        async () => {
+          // Check if there's a search query in URL params
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          const searchQuery = urlSearchParams.get("search");
+          let response;
+          if (searchQuery) {
+            // If there's a search query, fetch search results instead of default data
+            response = await api.get(
+              `/bootcamp/students/${params.courseId}?limit=${limit}&offset=0&searchTerm=${searchQuery}`
+            );
+          } else {
+            // Fetch default data when no search
+            response = await api.get(
+              `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
+            );
+          }
+          setStudents(response.data.modifiedStudentInfo || []);
+          setSelectedRows([]);
+          return response.data;
+        },
+        [params.courseId, limit, offset, setStudents, router]
+      );      
     // Reset selectedRows when course changes
     useEffect(() => {
         setSelectedRows([])
@@ -133,70 +175,20 @@ const Page = ({ params }: { params: any }) => {
             <div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
                     <div className="relative w-full md:w-1/2 lg:w-1/4">
-                        <Input
-                            type="search"
-                            placeholder="Search"
-                            className="w-full"
-                            value={internalSearch}
-                            onChange={(e) => {
-                                handleSetSearch(e)
-                                setShowSuggestions(true)
-
-                                // If cleared, commit search but don't reset pagination
-                                if (e.target.value.trim() === '') {
-                                    commitSearch('')
-                                    setShowSuggestions(false)
-                                }
-                            }}
-                            onKeyDown={(e) => {
-                                if (
-                                    e.key === 'Enter' &&
-                                    internalSearch.trim()
-                                ) {
-                                    commitSearch(internalSearch.trim())
-                                    setShowSuggestions(false)
-                                }
-                            }}
-                            onFocus={() => setShowSuggestions(true)}
-                            onBlur={() =>
-                                setTimeout(() => setShowSuggestions(false), 200)
-                            }
-                        />
-
-                        {showSuggestions && filteredSuggestions.length > 0 && (
-                            <div className="absolute z-50 w-full bg-white border border-border rounded-md mt-1 shadow-lg">
-                                {/* {filteredSuggestions.map(
-                                    (student: StudentData, i: number) => (
-                                        <div
-                                            key={i}
-                                            className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
-                                            onClick={() => {
-                                                handleSetSearch(student.name)
-                                                commitSearch(student.name)
-                                                setShowSuggestions(false)
-                                            }}
-                                        >
-                                            {student.name}
-                                        </div>
-                                    )
-                                )} */}
-                                {filteredSuggestions.map((student: StudentData, i: number) => (
-                                    <div
-                                        key={i}
-                                        className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
-                                        onClick={() => {
-                                            handleSetSearch(student.name)
-                                            commitSearch(student.name)
-                                            setShowSuggestions(false)
-                                        }}
-                                    >
-                                        <div className="font-medium">{student.name}</div>
-                                        <div className="text-sm text-gray-500">{student.email}</div>
-                                    </div>
-                                ))}
-
+                         <SearchBox
+                        placeholder="Search students..."
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(student) => (
+                            <div>
+                                <div className="font-medium">{student.name}</div>
+                                <div className="text-sm text-gray-500">{student.email}</div>
                             </div>
+
                         )}
+                        inputWidth="w-full"
+                    />
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center gap-x-2 gap-y-4">

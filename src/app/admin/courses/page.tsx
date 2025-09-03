@@ -27,45 +27,34 @@ import { COURSE_FILTER } from '@/utils/constant'
 import Link from 'next/link'
 import Image from 'next/image'
 import { toast } from '@/components/ui/use-toast'
-import useDebounce from '@/hooks/useDebounce'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStudentData } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Spinner } from '@/components/ui/spinner'
-import { Course,CourseData,CoursesResponse} from "@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType"
+import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
+import { SearchBox } from '@/utils/searchBox' 
+
+interface Course {
+    name: string
+    learnersCount: number
+    date: string
+    coverImage: string // URL for the course image
+    id: number
+    students_in_bootcamp: number
+}
+interface CourseData {
+    name: string
+    description?: string
+    collaborator?: string
+}
+
 const Courses: React.FC = () => {
     // misc
     const router = useRouter()
     const searchParams = useSearchParams()
     const { studentData } = useStudentData()
-    const searchInputRef = useRef<HTMLInputElement>(null)
-    const dropdownRef = useRef<HTMLDivElement>(null)
-    const searchContainerRef = useRef<HTMLDivElement>(null)
-
-    // state and variables
-    const [activeFilter, setActiveFilter] = useState<
-        'all' | 'active' | 'completed'
-    >('all')
-
-    // Initialize search query from URL params
-    const [searchQuery, setSearchQuery] = useState<string>(
-        searchParams.get('search') || ''
-    )
-
-    // Separate debounced search only for suggestions
-    const debouncedSearchForSuggestions = useDebounce(searchQuery, 100)
-
-    // Track the actual search term that should trigger course fetching
-    const [activeSearchTerm, setActiveSearchTerm] = useState<string>(
-        searchParams.get('search') || ''
-    )
 
     const [courses, setCourses] = useState<Course[]>([])
-    const [allCourses, setAllCourses] = useState<Course[]>([]) // Store all courses for search suggestions
-    const [filteredSuggestions, setFilteredSuggestions] = useState<Course[]>([])
-    const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
-    const [selectedSuggestionIndex, setSelectedSuggestionIndex] =
-        useState<number>(-1)
 
     const position = useMemo(
         () => searchParams.get('limit') || POSITION,
@@ -81,253 +70,58 @@ const Courses: React.FC = () => {
     const [newCourseDescription, setNewCourseDescription] = useState<string>('')
     const [hasAccess, setHasAccess] = useState<boolean>(true)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('')
 
-    // func
-    // const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
-    //     setActiveFilter(filter)
-    // }
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        const response = await api.get(
+          `/bootcamp?limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
+        );
+        return response.data.data;
+    }, []);
 
-    // Improved search filtering function for suggestions
-    const filterCoursesByRelevance = (
-        courses: Course[],
-        searchTerm: string
-    ): Course[] => {
-        const lowerSearchTerm = searchTerm.toLowerCase().trim()
-
-        if (!lowerSearchTerm) return []
-
-        const scoredCourses = courses.map((course) => {
-            const courseName = course.name.toLowerCase()
-            let score = 0
-
-            // Exact match gets highest score
-            if (courseName === lowerSearchTerm) {
-                score = 100
-            }
-            // Starts with search term gets high score
-            else if (courseName.startsWith(lowerSearchTerm)) {
-                score = 80
-            }
-            // Word boundary match gets medium score
-            else if (
-                courseName.includes(` ${lowerSearchTerm} `) ||
-                courseName.includes(` ${lowerSearchTerm}`) ||
-                courseName.includes(`${lowerSearchTerm} `)
-            ) {
-                score = 60
-            }
-            // Contains search term gets lower score
-            else if (courseName.includes(lowerSearchTerm)) {
-                score = 40
-            }
-            // No match
-            else {
-                score = 0
-            }
-
-            return { course, score }
-        })
-
-        // Filter out courses with no match and sort by score (descending)
-        return scoredCourses
-            .filter((item) => item.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .map((item) => item.course)
-            .slice(0, 6) // Limit to 6 suggestions to avoid scrolling
-    }
-
-    // Update URL when search query changes
-    const updateURL = useCallback(
-        (searchTerm: string) => {
-            const params = new URLSearchParams(searchParams.toString())
-            if (searchTerm) {
-                params.set('search', searchTerm)
-            } else {
-                params.delete('search')
-            }
-
-            const newURL = `${window.location.pathname}?${params.toString()}`
-            router.replace(newURL, { scroll: false })
+    const fetchSearchResultsApi = useCallback(
+        async (query: string, offsetParam = offset) => {
+          setCurrentSearchQuery(query);
+          
+          let url = `/bootcamp?limit=${position}&offset=${offsetParam}&searchTerm=${encodeURIComponent(
+            query
+          )}`;
+          const response = await api.get(url);
+          setCourses(response.data.data);
+          setTotalBootcamps(response.data.totalBootcamps);
+          setPages(response.data.totalPages);
+          setLastPage(response.data.totalPages);
+          setLoading(false);
+          return response.data;
         },
-        [router, searchParams]
-    )
+        [position, offset]
+    );
 
-    // Fetch all courses for search suggestions
-    const getAllCourses = useCallback(async () => {
-        try {
-            const response = await api.get<CoursesResponse>(`/bootcamp?limit=1000&offset=0`)
-            setAllCourses(response.data.data)
-        } catch (error) {
-            console.error('Error fetching all courses:', error)
-        }
-    }, [])
-
-    // Main function to fetch courses - only called when activeSearchTerm changes
-    const getBootcamp = useCallback(
-        async (offset: number) => {
-            let url = `/bootcamp?limit=${position}&offset=${offset}`
-
-            if (activeSearchTerm) {
-                url = `/bootcamp?limit=${position}&searchTerm=${encodeURIComponent(
-                    activeSearchTerm
-                )}`
-            }
-
-            try {
-                const response = await api.get<CoursesResponse>(url)
-                setCourses(response.data.data)
-                setTotalBootcamps(response.data.totalBootcamps)
-                setPages(response.data.totalPages)
-                setLastPage(response.data.totalPages)
-                setLoading(false)
-            } catch (error) {
-                console.error('Error fetching courses:', error)
-                setLoading(false)
-            }
+    const defaultFetchApi = useCallback(
+        async (offsetParam = offset) => {
+          setCurrentSearchQuery('');
+          
+          let url = `/bootcamp?limit=${position}&offset=${offsetParam}`;
+          const response = await api.get(url);
+          setCourses(response.data.data);
+          setTotalBootcamps(response.data.totalBootcamps);
+          setPages(response.data.totalPages);
+          setLastPage(response.data.totalPages);
+          setLoading(false);
+          return response.data;
         },
-        [activeSearchTerm, position]
-    )
+        [position, offset]
+    );
+      
+    // Use the search hook
+    const {
+        clearSearch,
+    } = useSearchWithSuggestions({
+        fetchSuggestionsApi,
+        fetchSearchResultsApi,
+        defaultFetchApi,
+    })
 
-    // Handle search input change - only affects suggestions, not course display
-    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value
-        setSearchQuery(value)
-        setSelectedSuggestionIndex(-1)
-
-        // Show/hide suggestions based on input
-        if (value.trim() && value.length > 0) {
-            setShowSuggestions(true)
-        } else {
-            setShowSuggestions(false)
-            setFilteredSuggestions([])
-        }
-    }
-
-    // Handle suggestion click - this triggers course fetching
-    const handleSuggestionClick = (course: Course) => {
-        setSearchQuery(course.name)
-        setActiveSearchTerm(course.name) // This will trigger course fetching
-        setShowSuggestions(false)
-        setSelectedSuggestionIndex(-1)
-        setOffset(0) // Reset to first page
-        setCurrentPage(1)
-
-        // Update URL immediately
-        updateURL(course.name)
-    }
-
-    // Handle manual search (Enter key) - this triggers course fetching
-    const handleManualSearch = (searchTerm: string) => {
-        setActiveSearchTerm(searchTerm) // This will trigger course fetching
-        setShowSuggestions(false)
-        setOffset(0)
-        setCurrentPage(1)
-        updateURL(searchTerm)
-    }
-
-    // Handle keyboard navigation
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!showSuggestions || filteredSuggestions.length === 0) {
-            if (event.key === 'Enter' && searchQuery.trim()) {
-                // Manual search - trigger course fetching
-                handleManualSearch(searchQuery.trim())
-            }
-            return
-        }
-
-        switch (event.key) {
-            case 'ArrowDown':
-                event.preventDefault()
-                setSelectedSuggestionIndex((prev) =>
-                    prev < filteredSuggestions.length - 1 ? prev + 1 : 0
-                )
-                break
-            case 'ArrowUp':
-                event.preventDefault()
-                setSelectedSuggestionIndex((prev) =>
-                    prev > 0 ? prev - 1 : filteredSuggestions.length - 1
-                )
-                break
-            case 'Enter':
-                event.preventDefault()
-                if (selectedSuggestionIndex >= 0) {
-                    handleSuggestionClick(
-                        filteredSuggestions[selectedSuggestionIndex]
-                    )
-                } else if (searchQuery.trim()) {
-                    // Manual search - trigger course fetching
-                    handleManualSearch(searchQuery.trim())
-                }
-                break
-            case 'Escape':
-                setShowSuggestions(false)
-                setSelectedSuggestionIndex(-1)
-                break
-        }
-    }
-
-    // Clear search
-    const clearSearch = () => {
-        if (!activeSearchTerm) return // already cleared, avoid unnecessary reset
-        setSearchQuery('')
-        setActiveSearchTerm('') // This will trigger fetching all courses
-        setShowSuggestions(false)
-        setSelectedSuggestionIndex(-1)
-        setOffset(0)
-        setCurrentPage(1)
-        updateURL('')
-        searchInputRef.current?.focus()
-    }
-
-    // Close suggestions when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                searchContainerRef.current &&
-                !searchContainerRef.current.contains(event.target as Node)
-            ) {
-                setShowSuggestions(false)
-                setSelectedSuggestionIndex(-1)
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside)
-        return () =>
-            document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
-
-    // Update suggestions based on debounced search (only for suggestions)
-    useEffect(() => {
-        if (
-            debouncedSearchForSuggestions.trim() &&
-            debouncedSearchForSuggestions.length > 0
-        ) {
-            const filtered = filterCoursesByRelevance(
-                allCourses,
-                debouncedSearchForSuggestions
-            )
-            setFilteredSuggestions(filtered)
-        } else {
-            setFilteredSuggestions([])
-        }
-    }, [debouncedSearchForSuggestions, allCourses])
-
-    // Fetch courses only when activeSearchTerm changes
-    useEffect(() => {
-        getBootcamp(offset)
-    }, [getBootcamp, offset])
-
-    useEffect(() => {
-        if (searchQuery.trim() === '') {
-            // If user manually clears input, reset everything
-            clearSearch()
-        }
-    }, [searchQuery])
-
-    // Initialize all courses
-    useEffect(() => {
-        getAllCourses()
-    }, [getAllCourses])
 
     const handleNewCourseNameChange = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -365,9 +159,14 @@ const Courses: React.FC = () => {
                 // Reset form after successful creation
                 setNewCourseName('')
                 setNewCourseDescription('')
-                getBootcamp(offset)
-                // Refresh all courses for suggestions
-                getAllCourses()
+
+                //Refresh courses based on current search state
+                if (currentSearchQuery.trim()) {
+                    fetchSearchResultsApi(currentSearchQuery)
+                } else {
+                    defaultFetchApi()
+                }
+
                 router.push(
                     `/admin/courses/${response.data.bootcamp.id}/details`
                 )
@@ -436,7 +235,6 @@ const Courses: React.FC = () => {
         return '';
     }
 
-
     return (
         <>
             {loading ? (
@@ -471,77 +269,20 @@ const Courses: React.FC = () => {
                             {/* Enhanced Search Input with Suggestions */}
                             <div
                                 className="relative w-full lg:max-w-[500px]"
-                                ref={searchContainerRef}
                             >
-                                <div className="relative">
-                                    <Input
-                                        ref={searchInputRef}
-                                        type="text"
-                                        placeholder="Search"
-                                        className="lg:max-w-[500px] w-full"
-                                        value={searchQuery}
-                                        onChange={handleSearchChange}
-                                        onKeyDown={handleKeyDown}
-                                        onFocus={() => {
-                                            if (
-                                                searchQuery.trim() &&
-                                                filteredSuggestions.length > 0
-                                            ) {
-                                                setShowSuggestions(true)
-                                            }
-                                        }}
-                                    />
-                                    {searchQuery && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
-                                            onClick={clearSearch}
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    )}
-                                </div>
-
-                                {/* Clean Search Suggestions Dropdown */}
-                                {showSuggestions &&
-                                    filteredSuggestions.length > 0 && (
-                                        <div className="absolute top-full left-0 right-0 z-50 mt-1">
-                                            <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
-                                                {filteredSuggestions.map(
-                                                    (course, index) => (
-                                                        <div
-                                                            key={course.id}
-                                                            className={cn(
-                                                                'px-3 py-2.5 cursor-pointer text-sm transition-colors',
-                                                                'hover:bg-muted/50',
-                                                                index ===
-                                                                selectedSuggestionIndex &&
-                                                                'bg-muted',
-                                                                index !==
-                                                                filteredSuggestions.length -
-                                                                1
-                                                            )}
-                                                            onClick={() =>
-                                                                handleSuggestionClick(
-                                                                    course
-                                                                )
-                                                            }
-                                                            onMouseEnter={() =>
-                                                                setSelectedSuggestionIndex(
-                                                                    index
-                                                                )
-                                                            }
-                                                        >
-                                                            <div className="capitalize font-medium text-foreground text-left">
-                                                                {course.name}
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                )}
-                                            </div>
+                                <SearchBox
+                                    placeholder="Search bootcamps..."
+                                    fetchSuggestionsApi={fetchSuggestionsApi}
+                                    fetchSearchResultsApi={fetchSearchResultsApi}
+                                    defaultFetchApi={defaultFetchApi}
+                                    getSuggestionLabel={(item) => (
+                                        <div>
+                                            <p className="font-medium">{item.name}</p>
                                         </div>
                                     )}
+                                    getSuggestionValue={(item) => item.name}
+                                    inputWidth="lg:max-w-[500px] w-full"
+                                />
                             </div>
 
                             <Dialog>
@@ -570,7 +311,8 @@ const Courses: React.FC = () => {
                         <div className="my-5 flex justify-center items-center">
                             {courses.length === 0 ? (
                                 <>
-                                    {activeSearchTerm.length > 0 ? (
+                                    {/*Use currentSearchQuery instead of searchQuery */}
+                                    {currentSearchQuery.length > 0 ? (
                                         <div className="absolute h-screen">
                                             <div className="relative top-[70%]">
                                                 <Alert
@@ -584,7 +326,7 @@ const Courses: React.FC = () => {
                                                         No course found with the
                                                         name{' '}
                                                         <span className="font-semibold">
-                                                            {activeSearchTerm}
+                                                            {currentSearchQuery}
                                                         </span>
                                                     </AlertDescription>
                                                     <Button
@@ -745,7 +487,14 @@ const Courses: React.FC = () => {
                                         totalStudents={totalBootcamps}
                                         lastPage={lastPage}
                                         pages={pages}
-                                        fetchStudentData={getBootcamp}
+                                        fetchStudentData={(offset: number) => {
+                                            // Use currentSearchQuery for pagination
+                                            if (currentSearchQuery.trim()) {
+                                                fetchSearchResultsApi(currentSearchQuery, offset);
+                                            } else {
+                                                defaultFetchApi(offset);
+                                            }
+                                        }}
                                     />
                                 </div>
                             )}
