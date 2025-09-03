@@ -430,7 +430,7 @@ const Page = ({ params }: { params: any }) => {
                                 )}
 
                             {/* Open Ended Submission */}
-                            {assesmentData?.openEndedQuestionCount > 0 && (
+                            {assesmentData?.attemptedOpenEndedQuestions > 0 && (
                                 <div className="w-full">
                                     <h1 className="text-left text-gray-600 text-[14px] font-semibold">
                                         Open-Ended
@@ -456,8 +456,8 @@ const Page = ({ params }: { params: any }) => {
                                             openEndedScore={
                                                 assesmentData?.openEndedScore
                                             }
-                                            totalOpenEndedScore={
-                                                assesmentData.requiredOpenEndedScore
+                                            attemptedOpenEndedQuestions={
+                                                assesmentData.attemptedOpenEndedQuestions
                                             }
                                         />
                                     ) : (
