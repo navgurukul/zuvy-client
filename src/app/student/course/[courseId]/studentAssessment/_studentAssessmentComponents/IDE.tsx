@@ -16,6 +16,7 @@ import { useRouter, usePathname, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
+import{formatValue} from "@/utils/students"
 import {
     Select,
     SelectContent,
@@ -124,31 +125,31 @@ const IDE: React.FC<IDEProps> = ({
         return result
     }
 
-    const formatValue = (value: any, type: string): string => {
-        if (type === 'jsonType') {
-            return JSON.stringify(value, null, 2)
-        }
+    // const formatValue = (value: any, type: string): string => {
+    //     if (type === 'jsonType') {
+    //         return JSON.stringify(value, null, 2)
+    //     }
 
-        if (Array.isArray(value)) {
-            if (type === 'arrayOfNum') {
-                return `[${value.join(', ')}]`
-            }
-            if (type === 'arrayOfStr') {
-                return `[${value.map((v) => `"${v}"`).join(', ')}]`
-            }
-            return `[${value.join(', ')}]`
-        }
+    //     if (Array.isArray(value)) {
+    //         if (type === 'arrayOfNum') {
+    //             return `[${value.join(', ')}]`
+    //         }
+    //         if (type === 'arrayOfStr') {
+    //             return `[${value.map((v) => `"${v}"`).join(', ')}]`
+    //         }
+    //         return `[${value.join(', ')}]`
+    //     }
 
-        switch (type) {
-            case 'int':
-            case 'float':
-                return value.toString()
-            case 'str':
-                return `"${value}"`
-            default:
-                return JSON.stringify(value)
-        }
-    }
+    //     switch (type) {
+    //         case 'int':
+    //         case 'float':
+    //             return value.toString()
+    //         case 'str':
+    //             return `"${value}"`
+    //         default:
+    //             return JSON.stringify(value)
+    //     }
+    // }
 
     const handleSubmit = async (
         e: { preventDefault: () => void },

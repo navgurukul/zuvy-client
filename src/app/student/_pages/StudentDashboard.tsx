@@ -455,7 +455,6 @@ const formatUpcomingItem = (item: any) => {
 
                                           {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[14px] font-semibold mr-8 ">Join</span>}
                                           </span>
-
                                         </p>
                                       </div>
                                     </div>
@@ -465,8 +464,15 @@ const formatUpcomingItem = (item: any) => {
                             );
                           })}
                         </CarouselContent>
+                        {(upcomingEventsData?.events?.filter(
+                         (item) => item.bootcampId === bootcamp.id
+                          )?.length || 0) > 3 && (
+                      <>
                         <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
                         <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </>
+                    )}
+
                        </Carousel>
                      </div>                     
                     ) : null}
