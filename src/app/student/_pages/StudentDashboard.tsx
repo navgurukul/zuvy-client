@@ -360,9 +360,9 @@ const formatUpcomingItem = (item: any) => {
                 {/* Separator and Upcoming Items - Only for enrolled courses */}
                 {filter === 'enrolled' && (
                   <>
-
+                    <div className="border-t border-border mt-6 mb-6"></div>
                     {/* Upcoming Items */}
-                    {eventsLoading ? (
+                    {eventsLoading? (
                       <Carousel className="w-full group ">
                         <CarouselContent className="-ml-2">
                           {[1, 2 ,3].map((index) => (
@@ -389,7 +389,7 @@ const formatUpcomingItem = (item: any) => {
                       </Carousel>
                                          ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
                      <div>
-                      <div className="border-t border-border mt-6 mb-6"></div>
+                      {/* <div className="border-t border-border mt-6 mb-6"></div> */}
                        <Carousel className="w-full group">
                         <CarouselContent className="-ml-2">
                           {upcomingEventsData?.events
@@ -468,11 +468,10 @@ const formatUpcomingItem = (item: any) => {
                          (item) => item.bootcampId === bootcamp.id
                           )?.length || 0) > 3 && (
                       <>
-                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
+                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
                       </>
                     )}
-
                        </Carousel>
                      </div>                     
                     ) : null}
@@ -482,7 +481,7 @@ const formatUpcomingItem = (item: any) => {
             </Card>
           ))}
         </div>
-
+        
         {filteredBootcamps.length === 0 && (
           <Card className="text-center py-12 shadow-4dp">
             <CardContent>
