@@ -1,6 +1,5 @@
-
 "use client";
-
+import React, { useEffect } from "react";
 import { useSearchWithSuggestions } from "@/utils/useUniversalSearchDynamic";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
@@ -17,21 +16,26 @@ interface SearchBoxProps {
   getSuggestionValue?: (item: Suggestion) => string;
   inputWidth?: string;
   onSearchChange?: (value: string) => void;
+  value?: string;               
 }
 
-export function SearchBox({
-  placeholder = "Search...",
-  fetchSuggestionsApi,
-  fetchSearchResultsApi,
-  defaultFetchApi,
-  getSuggestionLabel,
-  getSuggestionValue = (s: Suggestion) =>
-    s.name || s.title || s.email || s.question || String(s),
-  inputWidth = "w-full lg:w-[400px]",
-  onSearchChange,
-}: SearchBoxProps) {
+export function SearchBox(props: SearchBoxProps) {
+  const {
+    placeholder = "Search...",
+    fetchSuggestionsApi,
+    fetchSearchResultsApi,
+    defaultFetchApi,
+    getSuggestionLabel,
+    getSuggestionValue = (s: Suggestion) =>
+      s.name || s.title || s.email || s.question || String(s),
+    inputWidth = "w-full lg:w-[400px]",
+    onSearchChange,
+    value,  //controlled value coming from the parent
+  } = props;
+
   const {
     searchQuery,
+    setSearchQuery,
     showSuggestions,
     filteredSuggestions,
     selectedIndex,
@@ -50,11 +54,18 @@ export function SearchBox({
     getSuggestionValue,
   });
 
+  //  Sync the parent value with the local searchQuery
+  useEffect(() => {
+    if (value !== undefined && value !== searchQuery) {
+      setSearchQuery(value);
+    }
+  }, [value, searchQuery, setSearchQuery]);
+
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault(); // 🔑 prevent page reload
-      }}
+      onSubmit={(e) => 
+        e.preventDefault() 
+      }
       className={cn("relative", inputWidth)}
     >
       <Popover open={showSuggestions && filteredSuggestions.length > 0}>
