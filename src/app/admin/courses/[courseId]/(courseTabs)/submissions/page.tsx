@@ -36,8 +36,6 @@ const Page = ({ params }: { params: any }) => {
 
     // Get initial values from URL
     const initialTab = searchParams.get('tab') || 'practice'
-
-
     const [activeTab, setActiveTab] = useState(initialTab)
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
@@ -45,6 +43,9 @@ const Page = ({ params }: { params: any }) => {
     const [formData, setFormData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get('search') || '')
+    
+    // New state for controlling search input display vs applied search
+    const [searchInputValue, setSearchInputValue] = useState(searchParams.get('search') || '')
 
     // Fetch suggestions API function
     const fetchSuggestionsApi = useCallback(async (searchTerm: string): Promise<SearchSuggestion[]> => {
@@ -221,15 +222,20 @@ const Page = ({ params }: { params: any }) => {
         return uniqueSuggestions.slice(0, 8)
     }, [params.courseId, activeTab])
 
+    // Modified: Only apply search when user selects suggestion or presses enter
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setAppliedSearchQuery(query)
-    }, [])
+        setSearchInputValue(query)
+        updateURL(activeTab, query)
+    }, [activeTab])
 
     const defaultFetchApi = useCallback(async () => {
         setAppliedSearchQuery('')
-    }, [])
+        setSearchInputValue('')
+        updateURL(activeTab, '')
+    }, [activeTab])
+
     const {
-        
         clearSearch,
     } = useSearchWithSuggestions({
         fetchSuggestionsApi,
@@ -264,8 +270,15 @@ const Page = ({ params }: { params: any }) => {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
         setAppliedSearchQuery('')
+        setSearchInputValue('')
         clearSearch()
         updateURL(tab, '')
+    }
+
+    // Modified: Handle search input change without applying search immediately
+    const handleSearchInputChange = (value: string) => {
+        setSearchInputValue(value)
+        // Don't update appliedSearchQuery here - only update for suggestions
     }
 
     const getProjectsData = useCallback(async () => {
@@ -395,8 +408,8 @@ const Page = ({ params }: { params: any }) => {
             )}
             <div className="flex flex-col lg:flex-row justify-between">
                 <div className="relative w-full mr-2">
-                     <div className="relative w-full lg:w-1/3">
-                     <SearchBox
+                    <div className="relative w-full lg:w-1/3">
+                        <SearchBox
                             placeholder={`${
                                 activeTab === 'practice'
                                     ? 'Search for practice problems by name'
@@ -409,11 +422,12 @@ const Page = ({ params }: { params: any }) => {
                                 <div>
                                     <div className="font-medium">{s.title}</div>
                                 </div>
-                                
                             )}                            
                             inputWidth="w-full my-6 pr-10"
+                            value={searchInputValue}                        // Use searchInputValue instead
+                            onSearchChange={handleSearchInputChange}       // Use new handler
                         />
-                        </div>
+                    </div>
                 </div>
             </div>
 
