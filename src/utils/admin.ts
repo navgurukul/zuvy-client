@@ -435,14 +435,16 @@ export const fetchStudentAssessments = async (
     const { submitedOutsourseAssessments, ModuleAssessment} =
         res.data
 
-        const passPercentage = ModuleAssessment?.passPercentage
+    const passPercentage = ModuleAssessment?.passPercentage
     // Update global pagination
     // const updatedTotalPages = res?.data?.ModuleAssessment?.totalStudents / limit
-    const updatedTotalPages = Math.ceil(
-        res?.data?.ModuleAssessment?.totalPages / limit
-    )
-    setTotalPages(updatedTotalPages)
-    setLastPage(updatedTotalPages)
+    // const updatedTotalPages = Math.ceil(
+    //     res?.data?.ModuleAssessment?.totalSubmitedStudents / limit
+    // )
+    // setTotalPages(updatedTotalPages)
+    // setLastPage(updatedTotalPages)
+    setTotalPages(res?.data?.ModuleAssessment?.totalPages)
+    setLastPage(res?.data?.ModuleAssessment?.totalPages)
 
     // Map and return data
     const assessments = submitedOutsourseAssessments.map((a: any) => ({
