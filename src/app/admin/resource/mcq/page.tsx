@@ -153,9 +153,11 @@ const Mcqs = (props: Props) => {
                         if (!plainText) return null // Skip empty questions
     
                         // Truncate the question for display purposes
-                        const truncatedText = plainText.length > 100 ? plainText.substring(0, 100) + '...' : plainText
-    
-                        // Get topic name from tags (backend should ideally return topic name too)
+                        // const truncatedText = plainText.length > 100 ? plainText.substring(0, 15) + '...' : plainText
+                        const truncatedText = plainText.length > 15
+                        ? plainText.split(' ').slice(0, 2).join(' ') + '...'
+                        : plainText                        // Get topic name from tags (backend should ideally return topic name too)
+
                         const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
     
                         return {
