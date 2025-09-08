@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Timer, AlertOctagon, Check, X, RotateCcw, XCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
 import {
   Dialog,
   DialogOverlay,
@@ -283,14 +284,15 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   }, [chapterStatus])
 
   if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-heading font-bold mb-2">Loading Assessment...</h1>
-          <p className="text-muted-foreground">Fetching assessment details</p>
-        </div>
-      </div>
-    );
+    // return (
+    //   <div className="max-w-4xl mx-auto p-8">
+    //     <div className="text-center py-12">
+    //       <h1 className="text-2xl font-heading font-bold mb-2">Loading Assessment...</h1>
+    //       <p className="text-muted-foreground">Fetching assessment details</p>
+    //     </div>
+    //   </div>
+    // );
+     return <ModuleContentSkeleton />;
   }
 
   if (error) {
