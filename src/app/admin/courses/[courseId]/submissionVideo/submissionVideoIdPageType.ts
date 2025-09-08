@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 
 export interface PageParams{
   params: {
@@ -34,6 +35,7 @@ export interface StudentPage {
 
 // Page.tsx
 export interface Course {
+    duration: string;
     name: string
     learnersCount: number
     date: string
