@@ -21,6 +21,7 @@ import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
 import {UpcomingEvent,Bootcamp,TopicItem } from '@/app/student/_pages/pageStudentType'
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
+import {formatUpcomingItem} from "@/utils/students"
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -97,125 +98,9 @@ const StudentDashboard = () => {
     }
   };
 
-const formatUpcomingItem = (item: any) => {
-  // Helper function to parse and normalize date strings
-  const parseDate = (dateString: any) => {
-    if (!dateString) return null;
-    
-    let parsableDateString = dateString;
-    
-    // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
-    if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
-      parsableDateString = parsableDateString.replace(' ', 'T');
-      // Add colon to timezone if missing ("+00" becomes "+00:00")
-      if (parsableDateString.match(/[+-]\d{2}$/)) {
-        parsableDateString += ':00';
-      }
-    }
-    
-    const date = new Date(parsableDateString);
-    return isNaN(date.getTime()) ? null : date;
-  };
-
-  // Helper function to format countdown time
-  const formatCountdown = (diffTime: any, prefix = '') => {
-    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-
-    let timeString = '';
-    if (days > 0) {
-      timeString = `${days} day${days > 1 ? 's' : ''}${hours > 0 ? ` ${hours} hr${hours > 1 ? 's' : ''}` : ''}`;
-    } else if (hours > 0) {
-      timeString = `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` ${minutes} min${minutes > 1 ? 's' : ''}` : ''}`;
-    } else if (minutes > 0) {
-      timeString = `${minutes} minute${minutes > 1 ? 's' : ''}`;
-    } else {
-      timeString = "Starting soon";
-    }
-
-    return prefix ? `${prefix} ${timeString}` : timeString;
-  };
-
-  // Get the appropriate date field based on event type
-  const getStartDate = (item:any) => {
-    if (item.type?.toLowerCase() === 'live class') {
-      return parseDate(item.startTime);
-    } else {
-      return parseDate(item.startDatetime);
-    }
-  };
-
-  const getEndDate = (item:any) => {
-    if (item.type?.toLowerCase() === 'live class') {
-      return parseDate(item.endTime);
-    } else if (item.type?.toLowerCase() === 'assignment') {
-      return parseDate(item.completionDate);
-    } else {
-      return parseDate(item.endDatetime);
-    }
-  };
-
-  const startDate = getStartDate(item);
-  const endDate = getEndDate(item);
-  const now = new Date();
-
-  // If we can't parse the start date, fall back to eventDate
-  if (!startDate) {
-    const eventDate = parseDate(item.eventDate);
-    if (!eventDate) {
-      return "Date not available";
-    }
-    const diffTime = eventDate.getTime() - now.getTime();
-    if (diffTime <= 0) {
-      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event has started";
-    }
-    return formatCountdown(diffTime, "Starts in");
-  }
-
-  const startTime = startDate.getTime();
-  const currentTime = now.getTime();
-
-  // Case 1: start date and time > current date
-  if (startTime > currentTime) {
-    const diffTime = startTime - currentTime;
-    return formatCountdown(diffTime, "Starts in");
-  }
-
-  // Case 2: start date and time < current date & end date & time is not null
-  if (startTime < currentTime && endDate) {
-    const endTime = endDate.getTime();
-    if (endTime > currentTime) {
-      const diffTime = endTime - currentTime;
-      return formatCountdown(diffTime, "Deadline in");
-    } else {
-      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event ended";
-    }
-  }
-
-  // Case 3: start date and time < current date & end date & time is null
-  if (startTime < currentTime && !endDate) {
-    // Format the start date for display
-    const options: any = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'UTC'
-    };
-    const formattedDate = startDate.toLocaleDateString('en-US', options);
-    return `Due Date: ${formattedDate}`;
-  }
-
-  // Fallback
-  return "Status unavailable";
-};
-
   if (loading) {
     return <StudentDashboardSkeleton />;
   }
-
   if (error) {
     return (
       <div className="mb-12">
@@ -232,9 +117,6 @@ const formatUpcomingItem = (item: any) => {
       </div>
     );
   }
-
-
-
   return (
     <div className="mb-12">
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-6xl">
@@ -389,7 +271,6 @@ const formatUpcomingItem = (item: any) => {
                       </Carousel>
                                          ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
                      <div>
-                      {/* <div className="border-t border-border mt-6 mb-6"></div> */}
                        <Carousel className="w-full group">
                         <CarouselContent className="-ml-2">
                           {upcomingEventsData?.events
@@ -440,7 +321,6 @@ const formatUpcomingItem = (item: any) => {
                                                 </span>
                                               </Badge>
                                               <p>
-
                                               </p>
                                             </div>
                                           </div>

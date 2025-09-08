@@ -23,7 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import useWindowSize from "@/hooks/useHeightWidth";
 import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
 import {ModuleContentCounts,TopicItem} from '@/app/student/_pages/pageStudentType'
-
+import {formatUpcomingItem} from "@/utils/students"
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
@@ -169,6 +169,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
 
     if (days > 0) {
       const dayString = `${days} day${days > 1 ? 's' : ''}`;
@@ -407,9 +408,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         </div>
                         <div className="flex items-center justify-between mb-3">
                           <p className="text-sm font-medium">
-                            {eventType === 'Live Class' && `Scheduled on ${formatDate(item.eventDate)}`}
-                            {eventType === 'Assessment' && `Starts on ${formatDate(item.eventDate)}`}
-                            {eventType === 'Assignment' && `Due on ${formatDate(item.eventDate)}`}
+                             {formatUpcomingItem(item)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 justify-end">
@@ -876,9 +875,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                   <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
                                   <div className="flex items-center justify-between mb-3">
                                     <p className="text-sm font-medium">
-                                      {eventType === 'Live Class' && `Scheduled on ${formatDate(item.eventDate)}`}
-                                      {eventType === 'Assessment' && `Starts on ${formatDate(item.eventDate)}`}
-                                      {eventType === 'Assignment' && `Due on ${formatDate(item.eventDate)}`}
+                                       {formatUpcomingItem(item)}
                                     </p>
                                   </div>
                                   {/* CTA - Bottom right */}
