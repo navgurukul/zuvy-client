@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Info } from "lucide-react"
-import { AlertCircle, RefreshCw } from "lucide-react"
+import { AlertCircle, RefreshCw, AlertTriangle, Trash2 } from "lucide-react"
 
 import { api } from '@/utils/axios.config'
 import CourseDeleteModal from '../../_components/CourseDeleteModal'
@@ -17,7 +17,6 @@ import { getCourseData } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 import useBootcampSettings from '@/hooks/useBootcampSettings'
 import{PageProps} from "@/app/admin/courses/[courseId]/(courseTabs)/settings/courseSettingType"
-import { AlertTriangle, Trash2 } from "lucide-react"
 
 const Page = ({ params }: { params: PageProps}) => {
     const router = useRouter()
@@ -94,14 +93,14 @@ const Page = ({ params }: { params: PageProps}) => {
         setIsDeleting(true)
         try {
             await api.delete(`/bootcamp/${courseData?.id}`).then((res) => {
-                toast({
+                toast.success({
                     title: res.data.status,
                     description: res.data.message,
                 })
             })
             router.push('/admin/courses')
         } catch (error: any) {
-            toast({
+            toast.error({
                 title: error.data.status,
                 description: error.data.message,
             })

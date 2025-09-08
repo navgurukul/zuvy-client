@@ -35,7 +35,7 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
       if (axios.isAxiosError(err)) {
         if (err?.response?.data.message === 'Bootcamp not found for the provided id.') {
           router.push('/admin/courses');
-          toast({
+          toast.info({
             title: 'Caution',
             description: 'The Course has been deleted by another Admin',
           });
