@@ -238,6 +238,11 @@ const Page = ({ params }: { params: ParamsType }) => {
 
     const columns = useMemo(() => createColumns(Number(capEnrollmentValue)), [capEnrollmentValue])
 
+    const handleModal = (isOpen: boolean) => {
+        isOpen && form.reset()
+        setAssignStudents('')
+    }
+    
     const renderModal = (emptyState: boolean) => {
         if (courseData?.unassigned_students === 0) {
             return (
@@ -261,7 +266,7 @@ const Page = ({ params }: { params: ParamsType }) => {
             )
         } else {
             return (
-                <Dialog onOpenChange={(isOpen) => isOpen && form.reset()}>
+                <Dialog onOpenChange={(isOpen) => handleModal(isOpen)}>
                     <DialogTrigger asChild>
                         <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
