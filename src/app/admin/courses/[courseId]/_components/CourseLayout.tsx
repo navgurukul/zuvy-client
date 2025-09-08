@@ -65,9 +65,7 @@ function CourseLayout() {
                 const success = await getCourseData
                     .getState()
                     .fetchCourseDetails(parseInt(courseID))
-                console.log('success', success)
                 if (!success) {
-                    console.log('Not true')
                     router.push(`/admin/courses`)
                     toast.info({
                         title: 'Caution',
@@ -92,7 +90,6 @@ function CourseLayout() {
         // if (courseId) {
         //     const courseID = Array.isArray(courseId) ? courseId[0] : courseId
         //     getCourseData.getState().fetchCourseDetails(parseInt(courseID))
-        //     console.log('yha se aa rha hai')
         // }
         handleFetch()
     }, [])
