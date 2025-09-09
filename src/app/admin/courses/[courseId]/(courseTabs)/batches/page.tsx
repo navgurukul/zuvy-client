@@ -1,10 +1,8 @@
 'use client'
-import React, { useCallback, useEffect, useState, useRef, KeyboardEvent, useMemo } from 'react'
+import React, { useCallback, useEffect, useState, useRef, KeyboardEvent,useMemo } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Search, X } from 'lucide-react'
-
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -51,24 +49,16 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
-import{StudentData,BatchSuggestion,StudentDataState,ParamsType} from "@/app/admin/courses/[courseId]/(courseTabs)/batches/courseBatchesType"
+import { StudentData, BatchSuggestion, StudentDataState, ParamsType } from "@/app/admin/courses/[courseId]/(courseTabs)/batches/courseBatchesType"
+import { SearchBox } from '@/utils/searchBox' 
 
-const Page = ({ params }: { params: ParamsType}) => {
+const Page = ({ params }: { params: ParamsType }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { students } = useStudentData(params.courseId)
     const { courseData, fetchCourseDetails } = getCourseData()
-    const { fetchBatches, batchData, setBatchData } = getBatchData()
+    const { batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
-
-    // Search related states
-    const [searchQuery, setSearchQuery] = useState('')
-    const [suggestions, setSuggestions] = useState<BatchSuggestion[]>([])
-    const [showSuggestions, setShowSuggestions] = useState(false)
-    const [selectedIndex, setSelectedIndex] = useState(-1)
-    const [isInitialized, setIsInitialized] = useState(false)
-    const [hasFetchedOnce, setHasFetchedOnce] = useState(false)
 
     // Other states
     const [loading, setLoading] = useState(true)
@@ -76,15 +66,40 @@ const Page = ({ params }: { params: ParamsType}) => {
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
     const [totalStudents, setTotalStudents] = useState([...students])
     const [searchStudent, setSearchStudent] = useState('')
-
-    // const assignLearners = form.watch('assignLearners')
-    const inputRef = useRef<HTMLInputElement>(null)
-    const suggestionsRef = useRef<HTMLDivElement>(null)
-
-    // Debounced values - ONLY for suggestions, not for page search
-    const debouncedSuggestionQuery = useDebounce(searchQuery, 200)
     const debouncedSearchStudent = useDebounce(searchStudent, 1000)
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
+    const [searchQuery, setSearchQuery] = useState('')
+
+    // API functions for the hook
+    const fetchSuggestionsApi = useCallback(
+        async (query: string): Promise<BatchSuggestion[]> => {
+            const response = await api.get(
+                `/bootcamp/searchBatch/${params.courseId}?searchTerm=${query.trim()}`
+            );
+            return response.data || [];
+        },
+        [params.courseId]
+    );
+
+    const fetchSearchResultsApi = useCallback(
+        async (query: string) => {
+            setSearchQuery(query) // Store current search query
+
+            const response = await api.get(
+                `/bootcamp/searchBatch/${params.courseId}?searchTerm=${query.trim()}`
+            );
+            setBatchData(response.data || []);
+            return response.data || [];
+        },
+        [params.courseId, setBatchData]
+    );
+
+    const defaultFetchApi = useCallback(async () => {
+        setSearchQuery('')
+        const response = await api.get(`/bootcamp/batches/${params.courseId}`);
+        setBatchData(response.data?.data || []);
+        return response.data?.data || [];
+    }, [params.courseId, setBatchData]);
 
     const formSchema = z.object({
         name: z.string().min(2, {
@@ -130,227 +145,6 @@ const Page = ({ params }: { params: ParamsType}) => {
         mode: 'onChange',
     })
 
-    // Update URL when query changes
-    const updateURL = (query: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-
-        if (query.trim()) {
-            params.set('search', query.trim())
-        } else {
-            params.delete('search')
-        }
-
-        const newURL = params.toString() ? `?${params.toString()}` : window.location.pathname
-        router.push(newURL, { scroll: false })
-    }
-
-    // Handle search with better error handling and logging
-    const handleSearch = useCallback(async (query: string) => {
-        try {
-            if (query.trim()) {
-                const response = await api.get(
-                    `/bootcamp/searchBatch/${params.courseId}?searchTerm=${query.trim()}`
-                )
-                setBatchData(response.data || [])
-            } else {
-                // When query is empty, fetch all batches
-                fetchBatches(params.courseId)
-            }
-        } catch (error) {
-            console.error('Error searching batches:', error)
-            setBatchData([])
-        }
-    }, [params.courseId, setBatchData, fetchBatches])
-
-    // Fetch suggestions for dropdown
-    const fetchSuggestions = useCallback(async (query: string) => {
-        if (!query.trim()) {
-            setSuggestions([])
-            return
-        }
-        try {
-            const response = await api.get(
-                `/bootcamp/searchBatch/${params.courseId}?searchTerm=${query}`
-            )
-            setSuggestions(response.data || [])
-        } catch (error) {
-            console.error('Error fetching batch suggestions:', error)
-            setSuggestions([])
-        }
-    }, [params.courseId])
-  
-    // SIMPLIFIED: Single initialization effect
-    useEffect(() => {
-        if (!isInitialized) {
-            const urlQuery = searchParams.get('search')?.trim() || ''
-            // Set states
-            setIsInitialized(true)
-            setSearchQuery(urlQuery)
-
-            // Add a small delay to ensure all states are set
-            setTimeout(() => {
-                if (urlQuery) {
-                    handleSearch(urlQuery)
-                } else {
-                    fetchBatches(params.courseId)
-                }
-            }, 100)
-        }
-    }, [isInitialized, searchParams, params.courseId, handleSearch, fetchBatches])
-
-    // Handle URL changes (for browser back/forward)
-    useEffect(() => {
-        if (isInitialized) {
-            const urlQuery = searchParams.get('search')?.trim() || ''
-
-            // Only handle if URL changed and input is not focused
-            if (urlQuery !== searchQuery && document.activeElement !== inputRef.current) {
-                setSearchQuery(urlQuery)
-
-                if (urlQuery) {
-                    handleSearch(urlQuery)
-                } else {
-                    fetchBatches(params.courseId)
-                }
-            }
-        }
-    }, [searchParams, isInitialized, searchQuery, handleSearch, fetchBatches, params.courseId])
-
-    // Fetch suggestions for dropdown - ONLY debounced for suggestions
-    useEffect(() => {
-        fetchSuggestions(debouncedSuggestionQuery)
-    }, [debouncedSuggestionQuery, fetchSuggestions])
-
-    // Filter and limit suggestions
-    const filteredSuggestions = useMemo(() => {
-        if (!searchQuery.trim()) return [];
-
-        return suggestions
-            .filter(suggestion =>
-                suggestion.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                suggestion.name.toLowerCase() !== searchQuery.toLowerCase()
-            )
-            .slice(0, 6);
-    }, [suggestions, searchQuery]);
-
-    
-    // Clear input function to show all batches
-    const clearSearch = () => {
-        setSearchQuery('')
-        setShowSuggestions(false)
-        setSelectedIndex(-1)
-        updateURL('') // Clear URL parameter
-        fetchBatches(params.courseId) // Fetch all batches
-    }
-
-    // Input change handler - NO debouncing for page search
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-
-        // Force update the search query state
-        setSearchQuery(value)
-        setSelectedIndex(-1)
-
-        if (value.trim()) {
-            setShowSuggestions(true)
-            // DO NOT update URL while typing - only update when user selects or presses Enter
-        } else {
-            setShowSuggestions(false)
-            // When input is cleared, update URL and fetch all batches immediately
-            updateURL('')
-            fetchBatches(params.courseId)
-        }
-    }
-
-    // REMOVED: Debounced search effect - no longer needed
-
-    const handleSuggestionClick = async (suggestion: BatchSuggestion) => {
-        setSearchQuery(suggestion.name)
-        setShowSuggestions(false)
-        setSelectedIndex(-1)
-        updateURL(suggestion.name)
-        inputRef.current?.blur()
-
-        await handleSearch(suggestion.name) // Trigger search when suggestion is selected
-    }
-
-    const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
-        if (!showSuggestions || filteredSuggestions.length === 0) {
-            if (e.key === 'Escape') {
-                setShowSuggestions(false)
-                setSelectedIndex(-1)
-            }
-            // Handle Enter key even when no suggestions are shown
-            if (e.key === 'Enter') {
-                e.preventDefault()
-                await handleSearch(searchQuery) // Search when user presses Enter
-            }
-            return
-        }
-
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault()
-                setSelectedIndex(prev =>
-                    prev < filteredSuggestions.length - 1 ? prev + 1 : 0
-                )
-                break
-
-            case 'ArrowUp':
-                e.preventDefault()
-                setSelectedIndex(prev =>
-                    prev > 0 ? prev - 1 : filteredSuggestions.length - 1
-                )
-                break
-
-            case 'Enter':
-                e.preventDefault()
-                if (selectedIndex >= 0 && selectedIndex < filteredSuggestions.length) {
-                    handleSuggestionClick(filteredSuggestions[selectedIndex])
-                }
-                else {
-                    updateURL(searchQuery)
-                    await handleSearch(searchQuery) // Search when user presses Enter directly
-                }
-                break
-
-            case 'Escape':
-                e.preventDefault()
-                setShowSuggestions(false)
-                setSelectedIndex(-1)
-                inputRef.current?.blur()
-                break
-        }
-    }
-
-    const handleInputFocus = () => {
-        if (searchQuery && filteredSuggestions.length > 0) {
-            setShowSuggestions(true)
-        }
-    }
-
-    const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-        setTimeout(() => {
-            if (!suggestionsRef.current?.contains(document.activeElement)) {
-                setShowSuggestions(false)
-                setSelectedIndex(-1)
-            }
-        }, 200)
-    }
-
-    // Scroll selected suggestion into view
-    useEffect(() => {
-        if (selectedIndex >= 0 && suggestionsRef.current) {
-            const selectedElement = suggestionsRef.current.children[selectedIndex] as HTMLElement
-            if (selectedElement) {
-                selectedElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
-                })
-            }
-        }
-    }, [selectedIndex])
-
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const studentIds = selectedRows.map((student) => student.id)
@@ -380,7 +174,8 @@ const Page = ({ params }: { params: ParamsType}) => {
                 const res = await api.post(`/batch`, convertedData)
                 setAssignStudents('')
                 if (params.courseId) {
-                    fetchBatches(params.courseId)
+                    // Refresh data after creating batch
+                    defaultFetchApi()
                     fetchStudentData(params.courseId, setStoreStudentData)
                     fetchCourseDetails(params.courseId)
                 }
@@ -420,7 +215,6 @@ const Page = ({ params }: { params: ParamsType}) => {
     }, [])
 
     const getUnAssignedStudents = useCallback(async () => {
-    
         try {
             const res = await api.get(
                 `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
@@ -430,7 +224,6 @@ const Page = ({ params }: { params: ParamsType}) => {
             console.error("Failed to fetch unassigned students:", err)
         }
     }, [debouncedSearchStudent, params.courseId])
-    
 
     useEffect(() => {
         getUnAssignedStudents()
@@ -449,7 +242,7 @@ const Page = ({ params }: { params: ParamsType}) => {
         isOpen && form.reset()
         setAssignStudents('')
     }
-
+    
     const renderModal = (emptyState: boolean) => {
         if (courseData?.unassigned_students === 0) {
             return (
@@ -515,7 +308,7 @@ const Page = ({ params }: { params: ParamsType}) => {
                                             />
                                             <h1 className="pt-2 text-[1rem]">
                                                 Total Learners Selected:{' '}
-                                                {selectedRows.length}/{capEnrollmentValue}
+                                                {selectedRows.length}
                                             </h1>
                                             <div className="flex justify-between w-full pt-2">
                                                 <Button
@@ -665,7 +458,7 @@ const Page = ({ params }: { params: ParamsType}) => {
 
                                             {assignLearners === 'all' && (
                                                 <FormDescription>
-                                                     {`${courseData?.unassigned_students} ${courseData?.unassigned_students === 1 ? ' student' : ' students'} will be added to
+                                                    {`${courseData?.unassigned_students} ${courseData?.unassigned_students === 1 ? ' student' : ' students'} will be added to
                                                     this batch (Maximum current availability)`}
                                                 </FormDescription>
                                             )}
@@ -716,52 +509,19 @@ const Page = ({ params }: { params: ParamsType}) => {
             <div>
                 <div className="relative flex flex-col lg:flex-row items-center justify-between mb-6">
                     {batchData ? (
-                        <div className="relative lg:w-[400px] w-full">
-                            <Input
-                                ref={inputRef}
-                                // type="search"
-                                placeholder="Search"
-                                value={searchQuery}
-                                onChange={handleInputChange}
-                                onKeyDown={handleKeyDown}
-                                onFocus={handleInputFocus}
-                                onBlur={handleInputBlur}
-                                className="lg:w-[400px] w-full"
-                                autoComplete="off"
-                            />
-                            {/* clearSearch */}
-                            {searchQuery && (
-                                <button
-                                    onClick={clearSearch}
-                                    className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
-                                >
-                                    <X size={16} />
-                                </button>
-                            )}
-                            {showSuggestions && filteredSuggestions.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 z-50 mt-1">
-                                    <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
-                                        {filteredSuggestions.map((suggestion, index) => (
-                                            <div
-                                                key={suggestion.id}
-                                                className={cn(
-                                                    "px-3 py-2.5 cursor-pointer text-sm transition-colors",
-                                                    "hover:bg-muted/50",
-                                                    index === selectedIndex && "bg-muted"
-
-                                                )}
-                                                onClick={() => handleSuggestionClick(suggestion)}
-                                                onMouseEnter={() => setSelectedIndex(index)}
-                                            >
-                                                <div className="capitalize font-medium text-foreground text-left">
-                                                    {suggestion.name}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
+                        <SearchBox
+                            placeholder="Search by batch name"
+                            fetchSuggestionsApi={fetchSuggestionsApi}
+                            fetchSearchResultsApi={fetchSearchResultsApi}
+                            defaultFetchApi={defaultFetchApi}
+                            getSuggestionLabel={(s) => (
+                                <div>
+                                    <div className="font-medium">{s.name}</div>
                                 </div>
-                            )}
-                        </div>
+                                
+                            )}                            
+                            inputWidth="relative lg:w-[400px] w-full"
+                        />
                     ) : null}
                     {renderModal(false)}
                 </div>
@@ -776,7 +536,7 @@ const Page = ({ params }: { params: ParamsType}) => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-4 mt-2">
-                        {batchData?.length ?? 0 > 0 ? (
+                        {(batchData?.length ?? 0) > 0 ? (
                             batchData?.map((batch: any, index: number) => (
                                 <Link
                                     key={batch.name}
@@ -795,18 +555,18 @@ const Page = ({ params }: { params: ParamsType}) => {
                                                                 {batch.name
                                                                     .length > 25
                                                                     ? batch.name.substring(
-                                                                          0,
-                                                                          25
-                                                                      ) + '...'
+                                                                        0,
+                                                                        25
+                                                                    ) + '...'
                                                                     : batch.name}
                                                             </CardTitle>
                                                         </TooltipTrigger>
                                                         {batch.name.length >
                                                             25 && (
-                                                            <TooltipContent>
-                                                                {batch.name}
-                                                            </TooltipContent>
-                                                        )}
+                                                                <TooltipContent>
+                                                                    {batch.name}
+                                                                </TooltipContent>
+                                                            )}
                                                     </Tooltip>
                                                 </TooltipProvider>
                                                 <CardDescription className="capitalize">
@@ -852,5 +612,6 @@ const Page = ({ params }: { params: ParamsType}) => {
         )
     }
 }
+
 
 export default Page

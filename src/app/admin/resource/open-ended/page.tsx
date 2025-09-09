@@ -1,7 +1,7 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -43,7 +43,6 @@ import {
     filteredOpenEndedQuestions,
 } from '@/utils/admin'
 import { Spinner } from '@/components/ui/spinner'
-import useDebounce from '@/hooks/useDebounce'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { POSITION, OFFSET } from '@/utils/constant'
@@ -51,7 +50,8 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
-import {OpenEndedQuestionType,OpenPageTag, OpenOption} from "@/app/admin/resource/open-ended/adminResourceOpenType"
+import { OpenEndedQuestionType, OpenPageTag, OpenOption } from "@/app/admin/resource/open-ended/adminResourceOpenType"
+import { SearchBox } from '@/utils/searchBox'
 
 type Props = {}
 
@@ -78,8 +78,6 @@ const OpenEndedQuestions = (props: Props) => {
     const [allOpenEndedQuestions, setAllOpenEndedQuestions] = useState<OpenEndedQuestionType[]>([])
     const { openEndedQuestions, setOpenEndedQuestions } = getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [searchTerm, setSearchTerm] = useState('')
-    const [confirmedSearch, setConfirmedSearch] = useState('')
     const [newTopic, setNewTopic] = useState<string>('')
     const [currentPage, setCurrentPage] = useState(1)
     const [totalOpenEndedQuestion, setTotalOpenEndedQuestion] = useState<any>(0)
@@ -90,27 +88,48 @@ const OpenEndedQuestions = (props: Props) => {
     const offset = useMemo(() => {
         const page = searchParams.get('page');
         return page ? parseInt(page) : OFFSET;
-        }, [searchParams]);
+    }, [searchParams]);
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
-    const [suggestions, setSuggestions] = useState<OpenEndedQuestionType[]>([])
-    const [showSuggestions, setShowSuggestions] = useState(false)
-    const [isSuggestionClicked, setIsSuggestionClicked] = useState(false)
-    const searchInputRef = useRef<HTMLInputElement>(null)
     const [filtersInitialized, setFiltersInitialized] = useState(false)
     const [hasSetInitialTopicsFromURL, setHasSetInitialTopicsFromURL] = useState(false)
 
-    // Debounced value for suggestions
-    const debouncedSearchForSuggestions = useDebounce(searchTerm, 300)
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        const response = await api.get(`/content/openEndedQuestions?searchTerm=${encodeURIComponent(query)}&limit=5&offset=0`)
+        return response.data.data || []
+    }, [])
+
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        if (query.trim()) {
+            // For search results, use the same API endpoint
+            const response = await api.get(`/content/openEndedQuestions?searchTerm=${encodeURIComponent(query)}&limit=${position}&offset=${offset}`)
+            setOpenEndedQuestions(response.data.data || [])
+            setTotalOpenEndedQuestion(response.data.totalRows || 0)
+            setTotalPages(response.data.totalPages || 0)
+            setLastPage(response.data.totalPages || 0)
+        }
+    }, [offset, position, difficulty, selectedOptions, setOpenEndedQuestions])
+
+    const defaultFetchApi = useCallback(async () => {
+        await filteredOpenEndedQuestions(
+            setOpenEndedQuestions,
+            offset,
+            position,
+            difficulty,
+            selectedOptions,
+            setTotalOpenEndedQuestion,
+            setLastPage,
+            setTotalPages,
+            '',
+        )
+    }, [offset, position, difficulty, selectedOptions, setOpenEndedQuestions])
+
+
+
     useEffect(() => {
         if (!options || options.length <= 1 || hasSetInitialTopicsFromURL) return
 
         const params = new URLSearchParams(window.location.search)
-
-        // Search
-        const urlSearch = params.get('search') || ''
-        setSearchTerm(urlSearch)
-        setConfirmedSearch(urlSearch)
 
         // Topics
         const topicsParam = params.get('topics')
@@ -118,7 +137,7 @@ const OpenEndedQuestions = (props: Props) => {
             const topicValues = topicsParam.split(',')
             const selectedTopics = topicValues
                 .map(value => options.find(opt => opt.value === value))
-                .filter(Boolean) as  OpenOption[]
+                .filter(Boolean) as OpenOption[]
             setSelectedOptions(selectedTopics.length > 0
                 ? selectedTopics
                 : [{ value: '-1', label: 'All Topics' }]
@@ -131,7 +150,7 @@ const OpenEndedQuestions = (props: Props) => {
             const difficultyValues = difficultyParam.split(',')
             const selectedDifficulties = difficultyValues
                 .map(value => difficultyOptions.find(opt => opt.value === value))
-                .filter(Boolean) as  OpenOption[]
+                .filter(Boolean) as OpenOption[]
             setDifficulty(selectedDifficulties.length > 0
                 ? selectedDifficulties
                 : [{ value: 'None', label: 'All Difficulty' }]
@@ -172,66 +191,59 @@ const OpenEndedQuestions = (props: Props) => {
             params.delete('difficulty')
         }
 
-        // Update search
-        if (confirmedSearch) {
-            params.set('search', confirmedSearch)
-        } else {
-            params.delete('search')
+        // Keep existing search param from SearchBox
+        const searchParam = searchParams.get('search')
+        if (searchParam) {
+            params.set('search', searchParam)
         }
 
         const newUrl = `?${params.toString()}`
         router.replace(newUrl)
-    }, [selectedOptions, difficulty, confirmedSearch, filtersInitialized, router])
-
-    // Handle suggestions with debouncing
-    useEffect(() => {
-        if (debouncedSearchForSuggestions.trim() !== '' && allOpenEndedQuestions.length > 0 && !isSuggestionClicked) {
-            const filtered = allOpenEndedQuestions
-                .filter((item: OpenEndedQuestionType) =>
-                    item.question.toLowerCase().includes(debouncedSearchForSuggestions.toLowerCase())
-                )
-                .slice(0, 5)
-            setSuggestions(filtered)
-        } else {
-            setSuggestions([])
-        }
-    }, [debouncedSearchForSuggestions, allOpenEndedQuestions, isSuggestionClicked])
+    }, [selectedOptions, difficulty, filtersInitialized, router, searchParams])
 
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
-            await filteredOpenEndedQuestions(
-                (data: OpenEndedQuestionType[]) => {
-                    if (confirmedSearch.trim()) {
-                        const filtered = data.filter((item: OpenEndedQuestionType) =>
-                            item.question.toLowerCase().includes(confirmedSearch.toLowerCase())
-                        )
-                        setOpenEndedQuestions(filtered)
-                    } else {
-                        setOpenEndedQuestions(data)
-                    }
-                },
-                offset,
-                position,
-                difficulty,
-                selectedOptions,
-                setTotalOpenEndedQuestion,
-                setLastPage,
-                setTotalPages,
-                confirmedSearch,
-            )
-
-            if (isSuggestionClicked) {
-                setIsSuggestionClicked(false)
+            const searchParam = searchParams.get('search') || '';
+    
+            const selectedTopicIds = selectedOptions
+                .filter((option) => option.value !== '-1')
+                .map((option) => option.value)
+                .join(',');
+    
+            const selectedDifficultyLevels = difficulty
+                .filter((option) => option.value !== 'None')
+                .map((option) => option.value)
+                .join(',');
+    
+            try {
+                const response = await api.get(`/content/openEndedQuestions`, {
+                    params: {
+                        searchTerm: searchParam,
+                        limit: position,
+                        offset: offset,
+                        topics: selectedTopicIds,
+                        difficulty: selectedDifficultyLevels,
+                    },
+                });
+    
+                const { data, totalRows, totalPages } = response.data;
+    
+                setOpenEndedQuestions(data || []);
+                setTotalOpenEndedQuestion(totalRows || 0);
+                setTotalPages(totalPages || 0);
+                setLastPage(totalPages || 0);
+            } catch (error) {
+                console.error('Error fetching open-ended questions:', error);
             }
         },
-        [confirmedSearch, difficulty, selectedOptions, position, offset, isSuggestionClicked, setOpenEndedQuestions]
-    )
-
-    // Fetch questions when filters or confirmed search changes
+        [difficulty, selectedOptions, position, searchParams, setOpenEndedQuestions]
+    );
+    
+    // Fetch questions when filters change
     useEffect(() => {
         if (!filtersInitialized) return
         fetchCodingQuestions(offset)
-    }, [confirmedSearch, difficulty, selectedOptions, offset, filtersInitialized, fetchCodingQuestions])
+    }, [difficulty, selectedOptions, offset, filtersInitialized, fetchCodingQuestions])
 
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 1000)
@@ -269,7 +281,7 @@ const OpenEndedQuestions = (props: Props) => {
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 
-    const handleTagOption = (option:OpenOption) => {
+    const handleTagOption = (option: OpenOption) => {
         if (option.value === '-1') {
             if (selectedOptions.some((item) => item.value === option.value)) {
                 setSelectedOptions(
@@ -332,43 +344,6 @@ const OpenEndedQuestions = (props: Props) => {
         getAllTags(setTags, setOptions)
     }, [])
 
-    // Clear all filters and search
-    const clearSearch = () => {
-        setSearchTerm('')
-        setConfirmedSearch('')
-        setShowSuggestions(false)
-        setCurrentPage(1)
-        searchInputRef.current?.focus()
-
-        // Clear URL parameters
-        router.replace(window.location.pathname)
-    }
-
-    // Handle Enter key in search
-    const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            setConfirmedSearch(searchTerm)
-            setCurrentPage(1)
-            setShowSuggestions(false)
-            setIsSuggestionClicked(true)
-        }
-    }
-
-    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        setSearchTerm(value)
-        setShowSuggestions(true)
-        setIsSuggestionClicked(false)
-    }
-
-    const handleSuggestionClick = (question: string) => {
-        setSearchTerm(question)
-        setConfirmedSearch(question)
-        setShowSuggestions(false)
-        setIsSuggestionClicked(true)
-        setCurrentPage(1)
-    }
-
     useEffect(() => {
         const handleRouteChange = () => {
             // Reset filters on route change
@@ -376,29 +351,13 @@ const OpenEndedQuestions = (props: Props) => {
             setDifficulty([{ value: 'None', label: 'All Difficulty' }])
             localStorage.removeItem('openEndedCurrentTag')
         }
-    
         window.addEventListener('beforeunload', handleRouteChange)
         return () => {
             handleRouteChange() // manually call on unmount
             window.removeEventListener('beforeunload', handleRouteChange)
         }
     }, [])
-    
-    useEffect(() => {
-        if (!filtersInitialized) return
-    
-        if (searchTerm.trim() === '' && confirmedSearch !== '') {
-            setConfirmedSearch('')
-            setCurrentPage(1)
-    
-            // Remove `search` from URL
-            const params = new URLSearchParams(window.location.search)
-            params.delete('search')
-            const newUrl = `?${params.toString()}`
-            router.replace(newUrl)
-        }
-    }, [searchTerm, filtersInitialized, confirmedSearch, router])
-    
+
     return (
         <>
             {loading ? (
@@ -413,48 +372,16 @@ const OpenEndedQuestions = (props: Props) => {
                                 Resource Library - Open-Ended-Questions
                             </h1>
                             <div className="flex justify-between">
-                                <div className="relative w-full">
-                                    <div className="relative w-1/4">
-                                        <Input
-                                            ref={searchInputRef}
-                                            value={searchTerm}
-                                            onChange={handleSearchInputChange}
-                                            onKeyDown={handleSearchInputKeyDown}
-                                            placeholder="Search Question"
-                                            className="w-full p-2 my-6 input-with-icon pl-8"
-                                            onFocus={() => searchTerm && setShowSuggestions(true)}
-                                            onBlur={() => {
-                                                setTimeout(() => setShowSuggestions(false), 200)
-                                            }}
-                                        />
-                                        <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                            <Search className="text-gray-400" size={20} />
-                                        </div>
-                                        {searchTerm && (
-                                            <button
-                                                onClick={clearSearch}
-                                                className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
-                                            >
-                                                <X size={16} />
-                                            </button>
-                                        )}
-                                    
-                                    {showSuggestions && suggestions.length > 0 && (
-                                        <div className="absolute top-full left-0 right-0 z-50 mt-1">
-                                            <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
-                                                {suggestions.map((item) => (
-                                                    <div
-                                                        key={item.id}
-                                                        onMouseDown={() => handleSuggestionClick(item.question)}
-                                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
-                                                    >
-                                                        {item.question}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                    </div>
+                                <div className="relative w-1/4">
+                                    <SearchBox
+                                        placeholder="Search Question"
+                                        fetchSuggestionsApi={fetchSuggestionsApi}
+                                        fetchSearchResultsApi={fetchSearchResultsApi}
+                                        defaultFetchApi={defaultFetchApi}
+                                        getSuggestionLabel={(suggestion) => suggestion.question}
+                                        getSuggestionValue={(suggestion) => suggestion.question}
+                                        inputWidth="w-full my-6"
+                                    />
                                 </div>
                                 <div className="flex flex-row items-center gap-2">
                                     <Dialog>
