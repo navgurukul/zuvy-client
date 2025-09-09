@@ -30,3 +30,15 @@ export interface Suggestion {
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   }
  
+
+  export interface SearchBoxProps {
+    placeholder?: string;
+    fetchSuggestionsApi: (query: string) => Promise<Suggestion[]>;
+    fetchSearchResultsApi: (query: string) => Promise<any>;
+    defaultFetchApi?: () => Promise<any>;
+    getSuggestionLabel: (item: Suggestion) => React.ReactNode;
+    getSuggestionValue?: (item: Suggestion) => string;
+    inputWidth?: string;
+    onSearchChange?: (value: string) => void;
+    value?: string;               
+  }
