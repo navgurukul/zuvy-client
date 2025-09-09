@@ -431,6 +431,7 @@ const Page = ({ params }: { params: any }) => {
                 </div>
             </div>
 
+
             <div className="w-full">
                 {activeTab === 'practice' && (
                     <PraticeProblemsComponent
