@@ -5,19 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Suggestion } from "@/utils/searchType";
-
-interface SearchBoxProps {
-  placeholder?: string;
-  fetchSuggestionsApi: (query: string) => Promise<Suggestion[]>;
-  fetchSearchResultsApi: (query: string) => Promise<any>;
-  defaultFetchApi?: () => Promise<any>;
-  getSuggestionLabel: (item: Suggestion) => React.ReactNode;
-  getSuggestionValue?: (item: Suggestion) => string;
-  inputWidth?: string;
-  onSearchChange?: (value: string) => void;
-  value?: string;               
-}
+import { Suggestion,SearchBoxProps } from "@/utils/searchType";
 
 export function SearchBox(props: SearchBoxProps) {
   const {
