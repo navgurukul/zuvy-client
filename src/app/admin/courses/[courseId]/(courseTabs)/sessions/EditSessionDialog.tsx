@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-import{EditSessionProps} from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
+import { EditSessionProps } from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
 
 const formSchema = z
     .object({
@@ -86,12 +86,21 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setLoading(true)
+
         const combineDateTime = (date: Date, timeStr: string) => {
-            const [hours, minutes] = timeStr.split(':').map(Number)
-            const dateTime = new Date(date)
-            dateTime.setHours(hours, minutes, 0, 0)
-            return dateTime.toISOString()
-        }
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            const dateTime = new Date(date);
+            dateTime.setHours(hours, minutes, 0, 0);
+
+            const year = dateTime.getFullYear();
+            const month = String(dateTime.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+            const day = String(dateTime.getDate()).padStart(2, '0');
+            const hoursIST = String(dateTime.getHours()).padStart(2, '0');
+            const minutesIST = String(dateTime.getMinutes()).padStart(2, '0');
+            const secondsIST = String(dateTime.getSeconds()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hoursIST}:${minutesIST}:${secondsIST}`;
+        };
 
         const startDateTime = combineDateTime(
             values.startDate,
@@ -173,10 +182,9 @@ const EditSessionDialog: React.FC<EditSessionProps> = (props) => {
                                             <FormControl>
                                                 <Button
                                                     variant={'outline'}
-                                                    className={`w-full text-left font-normal ${
-                                                        !field.value &&
+                                                    className={`w-full text-left font-normal ${!field.value &&
                                                         'text-muted-foreground'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {field.value ? (
                                                         format(
