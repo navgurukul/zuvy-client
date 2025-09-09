@@ -45,33 +45,6 @@ function Page({ params }: ParamsType) {
     const [checkopenSessionForm, setOpenSessionForm] = useState(true)
     const [modulesData, setModulesData] = useState<any>([])
     const debouncedSearch = useDebounce(search, 1000)
-    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
-    //     params.courseId
-    // )
-
-    //     const checkIfCourseExists = async () => {
-    //     if (!params.courseId) return
-
-    //     try {
-    //       await api.get(`/bootcamp/${params.courseId}`)
-    //       setIsCourseDeleted(false)
-    //     } catch (error) {
-    //       setIsCourseDeleted(true)
-    //       getCourseData.setState({ courseData: null })
-    //     }
-    //   }
-
-    //   useEffect(() => {
-    //     let interval: NodeJS.Timeout
-
-    //     if (!isCourseDeleted) {
-    //       interval = setInterval(() => {
-    //         checkIfCourseExists()
-    //       }, 3000)
-    //     }
-
-    //     return () => clearInterval(interval)
-    //   }, [params.courseId, isCourseDeleted])
 
     const [searchInitialized, setSearchInitialized] = useState(false)
     const [suggestions, setSuggestions] = useState<any[]>([])

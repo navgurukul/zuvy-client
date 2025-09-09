@@ -478,7 +478,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                       </p>
 
                       <p className="font-semibold text-center">
-                        Your Score: {Math.trunc(percentage) || 0}/100
+                        Your Score: {(percentage.toFixed(2)) || 0}/100
                       </p>
                     </div>
                   </div>

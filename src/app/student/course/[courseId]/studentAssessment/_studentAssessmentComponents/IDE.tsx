@@ -566,7 +566,7 @@ const IDE: React.FC<IDEProps> = ({
                                                     {/* <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                                                         <Code className="w-4 h-4 text-primary" />
                                                     </div> */}
-                                                    <h6 className="font-bold text-foreground">Code Editor</h6>
+                                                    <h6 className="font-bold text-foreground">Code Editor </h6>
                                                 </div>
 
                                                 {/* Language Selector */}
@@ -654,7 +654,7 @@ const IDE: React.FC<IDEProps> = ({
                                                         <span>[✗] Test Case #{index + 1}: {testCase.status}</span>
                                                     </div>
                                                     <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
-                                                        <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
+                                                       {index < 3 && <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
                                                             {testCase?.stdIn && (
                                                                 <>
                                                                     <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
@@ -685,7 +685,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                     <pre className="text-yellow-600 whitespace-pre-wrap break-all">{testCase.compileOutput}</pre>
                                                                 </>
                                                             )}
-                                                        </div>
+                                                        </div>}
                                                     </div>
                                                 </div>
                                             ))}

@@ -40,17 +40,6 @@ const OverviewComponent = (props: OverviewComponentProps) => {
                                     </p>
                                 </div>
                             )}
-                            {props.totalOpenEnded > 0 && (
-                                <div className="flex flex-col">
-                                    <h1 className="text-sm md:text-base lg:text-lg text-gray-700 font-semibold">
-                                        {Math.trunc(props.openEndedScore)} /{' '}
-                                        {props.totalOpenEndedScore}
-                                    </h1>
-                                    <p className="text-xs md:text-sm lg:text-base text-gray-500">
-                                        Open-Ended
-                                    </p>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

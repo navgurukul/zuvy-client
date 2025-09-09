@@ -24,6 +24,7 @@ export type PageAssessmentData = {
     createdAt: string
     submissionsData: PageSubmissionData[]
     OpenEndedQuestion: PageOpenEndedQuestion
+    answer: string
 }
 
 export type paramsType = {
