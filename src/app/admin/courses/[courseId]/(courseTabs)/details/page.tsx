@@ -1,15 +1,12 @@
 'use client'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { format } from 'date-fns'
 import { CalendarIcon, Upload, Trash2 } from 'lucide-react'
-import axios from 'axios'
-import { Spinner } from '@/components/ui/spinner'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import Cropper from 'react-cropper'
+import 'cropperjs/dist/cropper.css'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -31,18 +28,13 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import Cropper from 'react-cropper'
-import 'cropperjs/dist/cropper.css'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
-import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
-import { getCourseData, getStoreStudentData } from '@/store/store'
-import { api} from '@/utils/axios.config'
-import {CourseData,PageParams } from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
+import { useCourseDetails } from '@/hooks/useCourseDetails'
+import { PageParams } from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
 
 const FormSchema = z.object({
     name: z.string().min(3, 'Please enter a course name (minimum 3 characters).').max(100, 'Course name cannot exceed 100 characters.'),
-    // bootcampTopic: z.string().min(1, 'Please specify the course topic.'),
     bootcampTopic: z.string().optional(),
     description: z.string().min(10, 'Please add a course description (minimum 10 characters).'),
     duration: z.string().min(1, 'Please enter the course duration.'),
@@ -55,14 +47,14 @@ const FormSchema = z.object({
 })
 
 function GeneralDetailsPage({ params }: { params: PageParams }) {
-    const router = useRouter()
     const [image, setImage] = useState<string | null>(null)
     const [cropper, setCropper] = useState<Cropper | null>(null)
     const [isCropping, setIsCropping] = useState(false)
     const [croppedImage, setCroppedImage] = useState<string | null>(null)
     const [isCalendarOpen, setCalendarOpen] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
-    // COMMENTED OUT: Collaborator functionality for future use
+     // COMMENTED OUT: Collaborator functionality for future use
     /*
     // Collaborator image states
     const [collaboratorImage, setCollaboratorImage] = useState<string | null>(null)
@@ -72,11 +64,15 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     const [collaboratorType, setCollaboratorType] = useState<'text' | 'image'>('text')
     */
 
-    const { courseData, setCourseData } = getCourseData()
-    const { setStoreStudentData } = getStoreStudentData()
-    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
-    //     params.courseId
-    // )
+    // Hook se sab kuch get kar rahe hain - API logic hook mein hai
+    const { 
+        isLoading, 
+        isImageUploading, 
+        courseData, 
+        updateCourseDetails, 
+        validateImageFile 
+    } = useCourseDetails()
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -91,18 +87,8 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         },
     })
 
-    // Helper function to check if string is an image URL
-    const isImageUrl = (str: string) => {
-        if (!str) return false
-        // Check if string contains image file extensions or is a URL
-        const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i
-        const isUrl = str.startsWith('http') || str.startsWith('https') || str.startsWith('data:image')
-        return imageExtensions.test(str) || isUrl
-    }
-
     // Reset all image states function
     const resetImageStates = () => {
-        // Cover image states
         setImage(null)
         setCropper(null)
         setIsCropping(false)
@@ -139,6 +125,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         }
     }, [])
 
+    // Populate form when courseData changes
     useEffect(() => {
         if (courseData) {
             // Reset image states first to ensure clean slate
@@ -150,7 +137,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                 description: courseData.description || '',
                 coverImage: courseData.coverImage || '',
                 collaborator: courseData.collaborator || '',
-                duration: courseData.duration || '',
+                duration: courseData.duration?.toString() || '', 
                 language: courseData.language || '',
                 startTime: courseData.startTime ? new Date(courseData.startTime) : undefined,
             })
@@ -197,40 +184,12 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     }*/
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        try {
-            let coverImage = data.coverImage || ''
-            // let collaborator = data.collaborator || ''
+        const success = await updateCourseDetails(data, croppedImage)
+        if (!success) {
+            return
+        }
 
-            // Handle cover image upload
-            if (croppedImage && croppedImage !== courseData?.coverImage) {
-                const response = await fetch(croppedImage)
-                const blob = await response.blob()
-                const file = new File([blob], 'cropped-cover-image.png', {
-                    type: 'image/png',
-                })
-
-                const formData = new FormData()
-                formData.append('images', file) // Changed from 'image' to 'images' to match first file
-
-                const res = await api.post('/Content/curriculum/upload-images', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
-                })
-                
-                // Updated to match response structure from first file
-                const uploadedUrls = Array.isArray(res.data?.urls) ? res.data.urls : []
-                if (uploadedUrls.length === 0) {
-                    toast.error({
-                        title: 'Error',
-                        description: 'File uploaded but no URLs returned',
-                    })
-                    return
-                }
-                coverImage = uploadedUrls[0]
-            } else if (croppedImage) {
-                coverImage = croppedImage
-            }
-
-            
+          
             // Handle collaborator image upload (only if type is image and there's a cropped image)
            /* if (
                 collaboratorType === 'image' &&
@@ -273,78 +232,21 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
             } else if (collaboratorType === 'image' && croppedCollaboratorImage) {
                 collaborator = croppedCollaboratorImage
             }*/
-
-            await api.patch(`/bootcamp/${courseData?.id}`, {
-                ...data,
-                coverImage,
-                collaborator: data.collaborator || '',
-            }, {
-                headers: { 'Content-Type': 'application/json' },
-            }).then((res) => {
-                const {
-                    id, name, bootcampTopic, description, coverImage,
-                    collaborator, startTime, duration, language, unassigned_students,
-                } = res.data.updatedBootcamp[0]
-                
-                setCourseData({
-                    id, name, bootcampTopic, description, coverImage,
-                    collaborator, startTime, duration, language, unassigned_students,
-                })
-                
-                toast.success({
-                    title: res.data.status,
-                    description: res.data.message || 'Changes saved successfully',
-                })
-            })
-        } catch (error) {
-            toast.error({
-                title: 'Failed',
-                description: 'Failed to save changes. Please try again.',
-            })
-        }
     }
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
-  /* const collaboratorFileInputRef = useRef<HTMLInputElement>(null)
-
-    const handleButtonClick = () => {
-        fileInputRef.current?.click()
-    }
-
-    const handleCollaboratorButtonClick = () => {
-        collaboratorFileInputRef.current?.click()
-    }*/
-
+    // Image upload handler - validation hook se kar rahe hain
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
-        if (file) {
-            // Validate file size (2MB max)
-            if (file.size > 2 * 1024 * 1024) {
-                toast.error({
-                    title: 'File too large',
-                    description: 'Please upload an image smaller than 2MB',
-                })
-                return
-            }
-
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                toast.error({
-                    title: 'Invalid file type',
-                    description: 'Please upload an image file (JPG, PNG, SVG)',
-                })
-                return
-            }
-
+        if (file && validateImageFile(file)) {
             const reader = new FileReader()
             reader.onloadend = () => {
                 setImage(reader.result as string)
                 setIsCropping(true)
-                setCroppedImage(null) // Reset cropped image when new image is selected
-           }
-           reader.readAsDataURL(file)
+                setCroppedImage(null)
+            }
+            reader.readAsDataURL(file)
         }
-     }
+    }
 
     // const handleCollaboratorFileChange = async (
     //     event: React.ChangeEvent<HTMLInputElement>
@@ -364,11 +266,10 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                 width: 800,
                 height: 400,
             })
-        const croppedImageData = croppedCanvas.toDataURL()
-        setCroppedImage(croppedImageData)
-       
-        setIsCropping(false)
-        setImage(null)
+            const croppedImageData = croppedCanvas.toDataURL()
+            setCroppedImage(croppedImageData)
+            setIsCropping(false)
+            setImage(null)
         }
     }
 
@@ -379,7 +280,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         form.setValue('coverImage', '')
     }
 
-    /*
+     /*
     const collaboratorFileInputRef = useRef<HTMLInputElement>(null)
     
     const handleCollaboratorButtonClick = () => {
@@ -422,25 +323,30 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     }
     */
 
-     // if (loadingCourseCheck) {
-    //   return (
-    //     <div className="flex justify-center items-center h-full mt-20">
-    //       <Spinner className="text-secondary" />
-    //     </div>
-    //   )
-    // }
 
-    // if (isCourseDeleted) {
-    //   return (
-    //     <div className="flex flex-col justify-center items-center h-full mt-20">
-    //       <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-    //       <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
-    //       <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-    //         Back to Courses
-    //       </Button>
-    //     </div>
-    //   )
-    // }
+    // Duration validation function
+    const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        if (value === '') {
+            return value
+        }
+        const isValidInteger = /^\d+$/.test(value)
+        if (!isValidInteger) {
+            toast.error({
+                title: 'Invalid Integer',
+                description: 'Please enter a valid integer value',
+            })
+            return
+        }
+        if (parseInt(value, 10) <= 0) {
+            toast.error({
+                title: 'Invalid Value',
+                description: 'Duration must be greater than 0',
+            })
+            return
+        }
+        return value
+    }
 
     return (
         <div className="w-full max-w-none space-y-6">
@@ -479,35 +385,30 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                 
                                 {!isCropping && (
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                        {/* <label className="cursor-pointer"> */}
-                                            {/* <Button variant="secondary" size="sm" className="pointer-events-none">
-                                                <Upload className="h-4 w-4 mr-2" />
-                                                Upload New Image
-                                            </Button> */}
-
-                                             <Button 
-                                               variant="secondary" 
-                                               size="sm" 
-                                               type="button"
-                                               onClick={() => fileInputRef.current?.click()}
-                                            >
-                                             <Upload className="h-4 w-4 mr-2" />
-                                                Upload New Image
-                                            </Button>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleImageUpload}
-                                                className="sr-only"
-                                                ref={fileInputRef}
-                                            />
-                                        {/* </label> */}
+                                        <Button 
+                                            variant="secondary" 
+                                            size="sm" 
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            disabled={isImageUploading}
+                                        >
+                                            <Upload className="h-4 w-4 mr-2" />
+                                            {isImageUploading ? 'Uploading...' : 'Upload New Image'}
+                                        </Button>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
+                                            className="sr-only"
+                                            ref={fileInputRef}
+                                        />
                                         {croppedImage && (
                                             <Button
                                                 variant="destructive"
                                                 size="sm"
                                                 onClick={handleRemoveImage}
                                                 type="button"
+                                                disabled={isImageUploading}
                                             >
                                                 <Trash2 className="h-4 w-4 mr-2" />
                                                 Remove Image
@@ -536,8 +437,9 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                             )}
                         </div>
 
-                        {/* Form Fields */}
+                        {/* Form Fields Section */}
                         <div className="lg:col-span-2 space-y-4">
+                            {/* Course Title */}
                             <FormField
                                 control={form.control}
                                 name="name"
@@ -556,6 +458,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                 )}
                             />
 
+                            {/* Description */}
                             <FormField
                                 control={form.control}
                                 name="description"
@@ -575,7 +478,9 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                 )}
                             />
 
+                            {/* Duration and Start Date Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Duration */}
                                 <FormField
                                     control={form.control}
                                     name="duration"
@@ -590,27 +495,10 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                     placeholder="Duration in weeks"
                                                     value={field.value}
                                                     onChange={(e) => {
-                                                        const value = e.target.value
-                                                        if (value === '') {
-                                                            field.onChange(value)
-                                                            return
+                                                        const validatedValue = handleDurationChange(e)
+                                                        if (validatedValue !== undefined) {
+                                                            field.onChange(validatedValue)
                                                         }
-                                                        const isValidInteger = /^\d+$/.test(value)
-                                                        if (!isValidInteger) {
-                                                            toast.error({
-                                                                title: 'Invalid Integer',
-                                                                description: 'Please enter a valid integer value',
-                                                            })
-                                                            return
-                                                        }
-                                                        if (parseInt(value, 10) <= 0) {
-                                                            toast.error({
-                                                                title: 'Invalid Value',
-                                                                description: 'Duration must be greater than 0',
-                                                            })
-                                                            return
-                                                        }
-                                                        field.onChange(value)
                                                     }}
                                                 />
                                             </FormControl>
@@ -619,6 +507,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                     )}
                                 />
 
+                                {/* Start Date */}
                                 <FormField
                                     control={form.control}
                                     name="startTime"
@@ -833,9 +722,10 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                     <div className="flex justify-end pt-2 border-t">
                         <Button 
                             type="submit" 
-                            className="bg-primary hover:bg-primary-dark"
+                            className="bg-primary hover:bg-primary-dark mb-5"
+                            disabled={isLoading || isImageUploading}
                         >
-                            Save Changes
+                            {isLoading ? 'Saving...' : 'Save Changes'}
                         </Button>
                     </div>
                 </form>
