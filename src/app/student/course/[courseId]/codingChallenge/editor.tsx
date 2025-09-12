@@ -14,7 +14,7 @@ import {
     HeaderBar
 } from './components';
 import{CodeEditorProps} from '@/app/student/course/[courseId]/codingChallenge/courseCodingType'
-import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
+import  {CodingChallengeSkeleton} from "@/app/student/_components/Skeletons";
 
 const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps) => {
     const router = useRouter();
@@ -66,7 +66,7 @@ const CodeEditorComponent = ({ questionId, onChapterComplete }: CodeEditorProps)
     };
 
     if (!state.questionDetails) {
-         return <ModuleContentSkeleton />;
+         return <CodingChallengeSkeleton/>;
     }
 
 

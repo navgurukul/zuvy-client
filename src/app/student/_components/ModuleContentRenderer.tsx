@@ -11,7 +11,7 @@ import AssignmentContent from "./chapter-content/AssignmentContent";
 import AssessmentContent from "./chapter-content/AssessmentContent";
 import FeedbackFormContent from "./chapter-content/FeedbackFormContent";
 import LiveClassContent from "./chapter-content/LiveClassContent";
-import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
+// import StudentDashboardSkeleton from "@/app/student/_components/CourseDashboardSkeleton"
 
 // Fallback imports for backward compatibility
 import { Badge } from "@/components/ui/badge";
@@ -64,9 +64,9 @@ const ModuleContentRenderer = ({ selectedItemData, onChapterComplete }: ModuleCo
   const { item } = selectedItemData;
 
   // Show loading state when fetching chapter details
-if (loading) {
-  return <ModuleContentSkeleton/>;
-}
+// if (loading) {
+//   return <ChapterSkeleton type={""}/>;
+// }
 
   // Show error state if chapter details failed to load
   if (error) {

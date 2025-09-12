@@ -15,7 +15,7 @@ import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-
 import Link from "next/link";
 import Image from "next/image";
 import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '@/store/store';
-import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
+import {StudentDashboardSkeleton} from "@/app/student/_components/Skeletons";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
