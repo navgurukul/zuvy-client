@@ -8,7 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
 import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
-import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
+import {CodingContentChapterSkeleton} from "@/app/student/_components/Skeletons";
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -52,6 +52,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       setCodingQuestions([]);
     } finally {
       setLoading(false);
+        // setTimeout(() => setLoading(false), 1500);
     }
   }, [chapterDetails.id, chapterDetails.status]);
 
@@ -135,9 +136,13 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
   //     );
   // }
 
+
+
+
   if (loading) {
-    return <ModuleContentSkeleton/>;
+    return <CodingContentChapterSkeleton/>;
   }
+
 
   if (isCompleted) {
       return <CodingChallengeResult chapterDetails={chapterDetails} submissionResults={submissionResults} />;

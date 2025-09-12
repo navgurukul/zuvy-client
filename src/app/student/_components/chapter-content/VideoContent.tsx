@@ -11,6 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useVideoStore } from '@/store/store'
 
+import { VideoSkeleton } from "@/app/student/_components/Skeletons";
+
 function getYoutubeId(url: string) {
     const match = url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)
     return match ? match[1] : url // fallback to full URL if no match
@@ -24,6 +26,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
     const playerRef = useRef<ReactPlayer>(null)
     const { progress, setProgress } = useVideoStore()
     const [playing, setPlaying] = useState(false)
+    const [loading, setLoading] = useState(true);
     const { width } = useWindowSize()
     const isMobile = width < 768
     const [isCompleted, setIsCompleted] = useState(
@@ -103,6 +106,17 @@ const VideoContent: React.FC<VideoContentProps> = ({
             isCompleted,
         ]
     )
+
+useEffect(() => {
+  if (chapterDetails && chapterDetails.id) {
+    setLoading(false);
+  }
+}, [chapterDetails]);
+
+    if (loading) {
+        return <VideoSkeleton/>;
+    }
+
 
     return (
         <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
