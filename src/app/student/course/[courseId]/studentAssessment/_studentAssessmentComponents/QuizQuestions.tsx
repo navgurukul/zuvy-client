@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Clock, CheckCircle, AlertCircle, Sun, Moon } from 'lucide-react'
+import { X, ChevronLeft, Clock, CheckCircle, AlertCircle, Sun, Moon } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
@@ -193,8 +193,9 @@ const QuizQuestions = ({
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <button className="flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 group">
-                                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                <span className="font-medium">Back to Assessment</span>
+                                {/* <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+                                <span className="font-medium">Back to Assessment</span> */}
+                                <X className="w-5 h-5 mt-5 ml-4" />
                             </button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-card border-border shadow-32dp">
