@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Users, Settings, Plus } from 'lucide-react'
 import { UserRole } from '@/utils/types/type'
@@ -8,8 +8,12 @@ import UserInviteSection from './UserInviteSection'
 import { UserManagementTable } from './UserManagementTable'
 import { columns, User } from './columns'
 import RoleManagementPanel from './RoleManagementPanel'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 const SettingsPage: React.FC = () => {
+    const pathname = usePathname()
+    const router = useRouter()
+    const searchParams = useSearchParams()
     const [activeTab, setActiveTab] = useState<'users' | 'roles'>('users')
     const [selectedRole, setSelectedRole] = useState<
         'Admin' | 'Ops' | 'Instructor'
@@ -18,6 +22,23 @@ const SettingsPage: React.FC = () => {
     const handleInviteGenerated = (role: UserRole, inviteLink: string) => {
         console.log(`${role} invite link generated:`, inviteLink)
         // You can add additional logic here, such as updating state or making API calls
+    }
+
+    const updateURL = useCallback(
+        (newTab: string) => {
+            const params = new URLSearchParams(searchParams.toString())
+            params.set('tab', newTab)
+            const newURL = `${window.location.pathname}${
+                params.toString() ? '?' + params.toString() : ''
+            }`
+            router.replace(newURL, { scroll: false })
+        },
+        [router]
+    )
+
+    const handleTabChange = (tab: 'users' | 'roles') => {
+        setActiveTab(tab)
+        updateURL(tab)
     }
 
     // Mock data for users table
@@ -78,7 +99,7 @@ const SettingsPage: React.FC = () => {
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-6">
                 <Button
-                    onClick={() => setActiveTab('users')}
+                    onClick={() => handleTabChange('users')}
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors ${
                         activeTab === 'users'
                             ? 'bg-primary text-white'
@@ -89,7 +110,7 @@ const SettingsPage: React.FC = () => {
                     Users
                 </Button>
                 <Button
-                    onClick={() => setActiveTab('roles')}
+                    onClick={() => handleTabChange('roles')}
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors
                         ${
                             activeTab === 'roles'
