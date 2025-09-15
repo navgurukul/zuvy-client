@@ -95,11 +95,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   );
 
 
-// useEffect(() => {
-//   if (chapterDetails) {
-//     setLoading(false)
-//   }
-// }, [chapterDetails])
+useEffect(() => {
+  if (chapterDetails) {
+    setLoading(false)
+  }
+}, [chapterDetails])
 
     if (loading) {
     return <ArticleSkeleton/>;
