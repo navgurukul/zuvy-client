@@ -200,11 +200,11 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     }
 
 
-useEffect(() => {
-  if (chapterDetails) {
-    setLoading(false)
-  }
-}, [chapterDetails])
+// useEffect(() => {
+//   if (chapterDetails) {
+//     setLoading(false)
+//   }
+// }, [chapterDetails])
 
 
 if (loading) {

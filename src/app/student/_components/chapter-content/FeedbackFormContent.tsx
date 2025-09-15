@@ -98,7 +98,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     }
 
       if (loading) {
-      return <FeedbackFormSkeleton/>;
+        return <FeedbackFormSkeleton/>;
     }
     const isCompleted = status === 'Completed'
 
@@ -465,7 +465,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 ))}
             </div>
 
-            {isCompleted ? (
+            {isCompleted? (
                 <div className="mt-8 mb-6">
                     <Button
                         type="submit"

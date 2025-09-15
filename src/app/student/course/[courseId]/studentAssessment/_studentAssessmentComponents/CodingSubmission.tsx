@@ -34,20 +34,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
   const isMobile = width < 768;
 
 
-  // if (!codingSubmissionsData) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen bg-background">
-  //       <div className="text-center">
-  //         <div className="animate-pulse">
-  //           <div className="w-8 h-8 bg-primary rounded-full mx-auto mb-4"></div>
-  //         </div>
-  //         <p className="text-lg font-medium text-foreground">Loading submission details...</p>
-  //         <p className="text-sm text-muted-foreground">Please wait while we fetch your coding submission</p>
-  //       </div>
-  //     </div>
-  //   )
-  // }
-
+ 
 
  if (loading) return <CodingSubmissionSkeleton/>
 

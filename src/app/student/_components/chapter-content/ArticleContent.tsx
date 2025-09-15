@@ -95,17 +95,15 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
   );
 
 
-useEffect(() => {
-  if (chapterDetails) {
-    setLoading(false)
-  }
-}, [chapterDetails])
+// useEffect(() => {
+//   if (chapterDetails) {
+//     setLoading(false)
+//   }
+// }, [chapterDetails])
 
     if (loading) {
     return <ArticleSkeleton/>;
   }
-
-  
 
   return (
     <div className={` bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0`}>
