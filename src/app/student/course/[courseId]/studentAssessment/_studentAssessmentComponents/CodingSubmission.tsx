@@ -160,8 +160,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
         
         {/* <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
         <span className="font-medium">Back to Results</span> */}
-         <X className="w-5 h-5 mt-5 ml-4" />
-
+        <X className="w-5 h-5" />
       </div>
         <Button
           variant="ghost"

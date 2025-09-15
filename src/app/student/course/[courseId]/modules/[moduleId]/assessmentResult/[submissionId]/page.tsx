@@ -108,7 +108,7 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                 >
                     {/* <ChevronLeft className="w-4 h-4 mr-2" />
                     Back */}
-                     <X className="w-5 h-5 mt-5 ml-4" />
+                     <X className="w-5 h-5" />
                 </Button>
                 <div className="bg-muted-light border border-border rounded-lg p-6 max-w-md mx-auto text-center">
                     <p className="text-muted-foreground">No assessment results found.</p>

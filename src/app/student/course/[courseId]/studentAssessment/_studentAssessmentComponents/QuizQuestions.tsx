@@ -192,11 +192,10 @@ const QuizQuestions = ({
                 <div className="flex items-center justify-between mb-8">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <button className="flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 group">
-                                {/* <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                <span className="font-medium">Back to Assessment</span> */}
-                                <X className="w-5 h-5 mt-5 ml-4" />
+                            <button className=" absolute top-8 left-8 flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 group">
+                                <X className="w-5 h-5" />
                             </button>
+   
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-card border-border shadow-32dp">
                             <AlertDialogHeader>
