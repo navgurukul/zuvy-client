@@ -193,44 +193,6 @@ const QuizContent: React.FC<QuizContentProps> = ({ chapterDetails, onChapterComp
   };
   
   
-  // if (loading) {
-  //   return (
-  //     <div className="h-full bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 overflow-y-auto">
-  //       <div className="max-w-4xl mx-auto p-6">
-  //         <div className="flex justify-between items-center mb-8">
-  //           <Skeleton className="h-8 w-1/2" />
-  //           <Skeleton className="h-6 w-24" />
-  //         </div>
-  //         <div className="space-y-6">
-  //           {[...Array(3)].map((_, i) => (
-  //             <div key={i} className="bg-card rounded-2xl p-6">
-  //               <div className="space-y-4">
-  //                 <div className="flex items-center justify-between">
-  //                   <Skeleton className="h-6 w-32" />
-  //                   <Skeleton className="h-6 w-20" />
-  //                 </div>
-  //                 <Skeleton className="h-6 w-3/4" />
-  //                 <div className="space-y-3">
-  //                   {[...Array(4)].map((_, j) => (
-  //                     <div key={j} className="flex items-center space-x-3 p-4 rounded-xl">
-  //                       <Skeleton className="h-4 w-4 rounded-full" />
-  //                       <Skeleton className="h-4 w-1/2" />
-  //                     </div>
-  //                   ))}
-  //                 </div>
-  //               </div>
-  //             </div>
-  //           ))}
-  //         </div>
-  //         <div className="flex justify-center mt-8">
-  //           <Skeleton className="h-12 w-32" />
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-
 if (loading) {
   return <QuizSkeleton/>;
 }

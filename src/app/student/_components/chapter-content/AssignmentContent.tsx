@@ -170,7 +170,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     });
   };
 
-  // if (loading) {
+  if (loading) {
     // return (
     //   <div className={`mx-auto space-y-6 ${isMobile ? 'p-4' : isSmallScreen ? 'p-6 max-w-3xl' : 'p-8 max-w-4xl'}`}>
     //     <div className="flex justify-between items-center">
@@ -186,7 +186,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     //     </div>
     //   </div>
     // );
-  // }
+  }
 
      if (loading) {
         return <AssignmentSkeleton/>;

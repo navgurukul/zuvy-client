@@ -107,12 +107,6 @@ const VideoContent: React.FC<VideoContentProps> = ({
         ]
     )
 
-useEffect(() => {
-  if (chapterDetails && chapterDetails.id) {
-    setLoading(false);
-  }
-}, [chapterDetails]);
-
     if (loading) {
         return <VideoSkeleton/>;
     }

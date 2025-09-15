@@ -16,7 +16,6 @@ import {UpcomingEvent} from '@/hooks/hookType';
 import { useCompletedClasses} from '@/hooks/useCompletedClasses';
 import {CompletedClass,Module} from '@/hooks/hookType';
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
-import CourseDashboardSkeleton from '@/app/student/_components/CourseDashboardSkeleton';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -24,6 +23,8 @@ import useWindowSize from "@/hooks/useHeightWidth";
 import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
 import {ModuleContentCounts,TopicItem} from '@/app/student/_pages/pageStudentType'
 import {formatUpcomingItem} from "@/utils/students"
+import {CourseDashboardSkeleton, CourseDashboardEventsSkeleton} from '@/app/student/_components/Skeletons';
+
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
@@ -1024,32 +1025,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 </CardHeader>
                 <CardContent className="pt-0">
                   {eventsLoading ? (
-                    // Loading state for events
-                    <div className="space-y-4">
-                      {[1, 2, 3].map((index) => (
-                        <div key={index} className="animate-pulse">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-shrink-0 mt-1">
-                              <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between gap-4 mb-2">
-                                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
-                              </div>
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                              </div>
-                              <div className="flex justify-end">
-                                <div className="h-4 bg-gray-200 rounded w-20"></div>
-                              </div>
-                            </div>
-                          </div>
-                          {index < 3 && (
-                            <div className="border-t border-border mt-4"></div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                    <CourseDashboardEventsSkeleton/>
                   ) : upcomingEventsData && upcomingEventsData.events.length > 0 ? (
                     <div className="space-y-4">
                       {upcomingEventsData.events.slice(0, 3).map((item: UpcomingEvent, index: number) => {

@@ -1,6 +1,14 @@
+"use client";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, FileText, TestTube2, Clock, MemoryStick } from 'lucide-react'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 export const VideoSkeleton = () => (
     <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
@@ -44,6 +52,7 @@ export const VideoSkeleton = () => (
     </div>
 )
 
+
 export const ArticleSkeleton = () => (
     <div className="bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
         <div className="max-w-4xl mx-auto space-y-6">
@@ -69,6 +78,7 @@ export const ArticleSkeleton = () => (
         </div>
     </div>
 )
+
 
 export const AssignmentSkeleton = () => {
     const isMobile =
@@ -108,6 +118,8 @@ export const AssignmentSkeleton = () => {
         </div>
     )
 }
+
+
 
 export const QuizSkeleton = () => (
     <div className="max-w-4xl mx-auto p-6">
@@ -177,6 +189,8 @@ export const QuizSkeleton = () => (
     </div>
 )
 
+
+
 export const AssessmentSkeleton = () => {
     return (
         <div className="h-full overflow-y-auto">
@@ -233,6 +247,8 @@ export const AssessmentSkeleton = () => {
 
 
 
+
+
 export const LiveClassSkeleton = ({
     type,
 }: {
@@ -284,6 +300,8 @@ export const LiveClassSkeleton = ({
 
 
 
+
+
 export const CodingContentChapterSkeleton = () => {
     return (
         <div className="min-h-[70vh] bg-background py-8 px-4 sm:px-0 animate-pulse">
@@ -328,6 +346,9 @@ export const CodingContentChapterSkeleton = () => {
     )
 }
 
+
+
+
 export const FeedbackFormSkeleton = () => {
     return (
         <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background px-2 sm:px-0">
@@ -370,6 +391,8 @@ export const FeedbackFormSkeleton = () => {
         </div>
     )
 }
+
+
 
 
 
@@ -450,61 +473,62 @@ export const CodingChallengeSkeleton = () => {
 
 
 
+// CodingSubmission
 
 export const CodingSubmissionSkeleton = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
+    <div className="min-h-screen bg-background p-6">
       {/* Header Section */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-2 w-full">
-          <div className="bg-gray-300 dark:bg-gray-700 animate-pulse h-5 w-40 rounded-md" />
+          <div className="bg-muted animate-pulse h-5 w-40 rounded-md" />
         </div>
-        <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse" />
+        <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
       </div>
 
       <div className="max-w-7xl mx-auto">
         {/* Status Card */}
-        <div className="bg-card border border-border rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="bg-background border border-border rounded-2xl p-8 mb-8 shadow-sm">
           <div className="flex items-start justify-between mb-6">
             <div className="space-y-2">
-              <div className="bg-gray-300 dark:bg-gray-700 animate-pulse h-6 w-56 rounded-md" />
-              <div className="bg-gray-200 dark:bg-gray-600 animate-pulse h-4 w-40 rounded-md" />
+              <div className="bg-muted animate-pulse h-6 w-56 rounded-md" />
+              <div className="bg-muted animate-pulse h-4 w-40 rounded-md" />
             </div>
-            <div className="bg-gray-300 dark:bg-gray-700 animate-pulse h-6 w-28 rounded-full" />
+            <div className="bg-muted animate-pulse h-6 w-28 rounded-full" />
           </div>
-          <div className="bg-gray-200 dark:bg-gray-600 animate-pulse h-20 w-full rounded-xl" />
+          <div className="bg-muted animate-pulse h-20 w-full rounded-xl" />
         </div>
 
         {/* Performance Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-gray-300 dark:bg-gray-700 animate-pulse h-28 rounded-xl" />
-          <div className="bg-gray-300 dark:bg-gray-700 animate-pulse h-28 rounded-xl" />
+          <div className="bg-muted animate-pulse h-28 rounded-xl" />
+          <div className="bg-muted animate-pulse h-28 rounded-xl" />
         </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Source Code Skeleton */}
-          <div className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden">
-            <div className="bg-gray-200 dark:bg-gray-700 animate-pulse h-14 w-full" />
-            <div className="bg-gray-300 dark:bg-gray-800 animate-pulse h-[600px] w-full" />
+          <div className="bg-background border border-border rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-muted animate-pulse h-14 w-full" />
+            <div className="bg-muted animate-pulse h-[600px] w-full" />
           </div>
 
           {/* Test Cases Skeleton */}
-          <div className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden">
-            <div className="bg-gray-200 dark:bg-gray-700 animate-pulse h-14 w-full" />
+          <div className="bg-background border border-border rounded-2xl shadow-sm overflow-hidden">
+            <div className="bg-muted animate-pulse h-14 w-full" />
             <div className="p-6 space-y-6">
               {[...Array(3)].map((_, i) => (
                 <div
                   key={i}
-                  className="border-2 border-gray-300 dark:border-gray-700 rounded-xl p-6 space-y-4 animate-pulse"
+                  className="border border-border rounded-xl p-6 space-y-4 animate-pulse bg-background"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="bg-gray-300 dark:bg-gray-700 h-5 w-32 rounded-md" />
-                    <div className="bg-gray-300 dark:bg-gray-700 h-6 w-20 rounded-full" />
+                    <div className="bg-muted h-5 w-32 rounded-md" />
+                    <div className="bg-muted h-6 w-20 rounded-full" />
                   </div>
-                  <div className="bg-gray-200 dark:bg-gray-600 h-16 w-full rounded-md" />
-                  <div className="bg-gray-200 dark:bg-gray-600 h-16 w-full rounded-md" />
-                  <div className="bg-gray-200 dark:bg-gray-600 h-12 w-full rounded-md" />
+                  <div className="bg-muted h-16 w-full rounded-md" />
+                  <div className="bg-muted h-16 w-full rounded-md" />
+                  <div className="bg-muted h-12 w-full rounded-md" />
                 </div>
               ))}
             </div>
@@ -514,6 +538,8 @@ export const CodingSubmissionSkeleton = () => {
     </div>
   );
 };
+
+
 
 
 
@@ -622,11 +648,6 @@ export const ModuleContentSkeleton = () => {
 
 
 
-
-
-
-
-
 // StudentDashboardSkeleton 
 
 export const StudentDashboardSkeleton = () => {
@@ -711,4 +732,507 @@ export const StudentDashboardSkeleton = () => {
     </div>
   );
 };
+
+
+
+
+
+
+export const CarouselSkeleton = () => {
+  return (
+    <Carousel className="w-full group ">
+      <CarouselContent className="-ml-2">
+        {[1, 2, 3].map((index) => (
+          <CarouselItem key={index} className="pl-2 md:basis-1/3 ">
+            <div className="w-full border rounded-lg p-3 h-full bg-primary-light animate-pulse">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="h-4 bg-muted rounded animate-pulse flex-1"></div>
+                    <div className="h-5 w-16 bg-muted rounded animate-pulse"></div>
+                  </div>
+                  <div className="h-3 bg-muted rounded animate-pulse w-3/4 mb-2"></div>
+                </div>
+              </div>
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
+      <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+    </Carousel>
+  );
+};
+
+
+
+
+
+
+
+export const CourseDashboardSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="w-full">
+        {/* Loading Skeleton for Course Information Banner */}
+        <div className="w-full rounded-b-lg shadow-8dp bg-gradient-to-br from-primary/8 via-background to-accent/8 border-b border-border/50">
+          <div className="max-w-7xl mx-auto p-6 md:p-8">
+            {/* Desktop Layout Skeleton */}
+            <div className="hidden md:flex flex-col md:flex-row items-start gap-6 mb-6">
+              <div className="flex-shrink-0">
+                <div className="w-32 h-32 rounded-lg bg-muted animate-pulse"></div>
+              </div>
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <div className="h-8 bg-muted rounded animate-pulse mb-2"></div>
+                    <div className="h-6 bg-muted rounded animate-pulse mb-4"></div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+                      <div className="h-4 bg-muted rounded animate-pulse w-24"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 bg-muted rounded animate-pulse w-32"></div>
+                    <div className="h-12 w-12 bg-muted rounded animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Layout Skeleton */}
+            <div className="md:hidden mb-6">
+              <div className="w-full h-40 rounded-lg bg-muted animate-pulse mb-4"></div>
+              <div className="h-8 bg-muted rounded animate-pulse mb-2"></div>
+              <div className="h-6 bg-muted rounded animate-pulse mb-4"></div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+                <div className="h-4 bg-muted rounded animate-pulse w-24"></div>
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-4 bg-muted rounded animate-pulse w-32"></div>
+                <div className="h-12 w-12 bg-muted rounded animate-pulse"></div>
+              </div>
+            </div>
+
+            {/* Progress Bar Skeleton */}
+            <div className="mb-6">
+              <div className="relative bg-muted rounded-full h-2 w-full animate-pulse"></div>
+            </div>
+
+            {/* Batch Information Skeleton */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-muted animate-pulse"></div>
+                <div>
+                  <div className="h-3 bg-muted rounded animate-pulse mb-1"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-muted animate-pulse"></div>
+                <div>
+                  <div className="h-3 bg-muted rounded animate-pulse mb-1"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded bg-muted animate-pulse"></div>
+                <div>
+                  <div className="h-3 bg-muted rounded animate-pulse mb-1"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2 space-y-8">
+              <div>
+                <div className="h-8 bg-muted rounded animate-pulse mb-6"></div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="border rounded-lg p-6">
+                      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                        <div className="flex-1">
+                          <div className="h-4 bg-muted rounded animate-pulse mb-2 w-24"></div>
+                          <div className="h-6 bg-muted rounded animate-pulse mb-2"></div>
+                          <div className="h-4 bg-muted rounded animate-pulse mb-3"></div>
+                        </div>
+                        <div className="hidden lg:block">
+                          <div className="h-10 bg-muted rounded animate-pulse w-32"></div>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <div className="relative bg-muted rounded-full h-2 w-full animate-pulse"></div>
+                      </div>
+                      <div className="lg:hidden mt-4">
+                        <div className="h-10 bg-muted rounded animate-pulse w-full"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="space-y-8">
+              <div className="border rounded-lg p-6">
+                <div className="h-6 bg-muted rounded animate-pulse mb-4"></div>
+                <div className="space-y-4">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-muted animate-pulse"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-muted rounded animate-pulse mb-2"></div>
+                        <div className="h-3 bg-muted rounded animate-pulse mb-2"></div>
+                        <div className="h-3 bg-muted rounded animate-pulse w-20"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-6">
+                <div className="h-6 bg-muted rounded animate-pulse mb-4"></div>
+                <div className="text-center mb-6">
+                  <div className="h-8 bg-muted rounded animate-pulse mx-auto mb-2 w-16"></div>
+                  <div className="h-4 bg-muted rounded animate-pulse mx-auto w-48"></div>
+                </div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="h-4 bg-muted rounded animate-pulse mb-1"></div>
+                        <div className="h-3 bg-muted rounded animate-pulse w-24"></div>
+                      </div>
+                      <div className="h-6 bg-muted rounded animate-pulse w-16"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+// app/student/_components/CourseDashboardPage
+
+export const CourseDashboardEventsSkeleton = () => {
+  return (
+    <div className="space-y-4">
+      {[1, 2, 3].map((index) => (
+        <div key={index} className="animate-pulse">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 mt-1">
+              <div className="w-10 h-10 bg-gray-200 rounded-lg"></div>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-start justify-between gap-4 mb-2">
+                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+              </div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+              <div className="flex justify-end">
+                <div className="h-4 bg-gray-200 rounded w-20"></div>
+              </div>
+            </div>
+          </div>
+          {index < 3 && <div className="border-t border-border mt-4"></div>}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
+
+
+
+
+// CourseSyllabusPage
+export const CourseSyllabusPageSkeleton= () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
+                      {/* Course Information Skeleton */}
+                      <Card className="mb-8 shadow-4dp">
+                          <CardContent className="p-6 md:p-8">
+                              <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
+                                  <div className="flex-1">
+                                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                                          <div className="flex-1">
+                                              <Skeleton className="h-8 w-3/4 mb-2" />
+                                              <Skeleton className="h-4 w-full mb-4" />
+                                              <div className="flex items-center gap-2 mb-4">
+                                                  <Skeleton className="w-8 h-8 rounded-full" />
+                                                  <Skeleton className="h-4 w-32" />
+                                              </div>
+                                          </div>
+                                          <Skeleton className="h-6 w-40" />
+                                      </div>
+                                  </div>
+                              </div>
+  
+                              {/* Course Metrics Skeleton */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                                  {[1, 2, 3].map((i) => (
+                                      <div
+                                          key={i}
+                                          className="flex items-center gap-3"
+                                      >
+                                          <Skeleton className="w-10 h-10 rounded-full" />
+                                          <div>
+                                              <Skeleton className="h-3 w-16 mb-1" />
+                                              <Skeleton className="h-4 w-24" />
+                                          </div>
+                                      </div>
+                                  ))}
+                              </div>
+                          </CardContent>
+                      </Card>
+  
+                      {/* Course Modules Skeleton */}
+                      <div>
+                          <Skeleton className="h-8 w-48 mb-6" />
+                          <div className="space-y-6">
+                              {[1, 2, 3].map((moduleIndex) => (
+                                  <Card key={moduleIndex} className="shadow-4dp">
+                                      <CardContent className="p-6">
+                                          <div className="mb-4">
+                                              <Skeleton className="h-6 w-2/3 mb-2" />
+                                              <Skeleton className="h-4 w-full mb-2" />
+                                              <Skeleton className="h-3 w-1/3" />
+                                          </div>
+  
+                                          <div className="space-y-3">
+                                              {[1, 2, 3, 4, 5].map(
+                                                  (chapterIndex) => (
+                                                      <div
+                                                          key={chapterIndex}
+                                                          className="border-l-2 border-border pl-4"
+                                                      >
+                                                          <div className="flex items-center gap-3 py-2">
+                                                              <Skeleton className="w-4 h-4" />
+                                                              <div className="flex-1">
+                                                                  <div className="flex items-center justify-between">
+                                                                      <div className="flex-1">
+                                                                          <Skeleton className="h-4 w-48 mb-1" />
+                                                                          <Skeleton className="h-3 w-32" />
+                                                                      </div>
+                                                                      <Skeleton className="h-3 w-16 ml-4" />
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                      </div>
+                                                  )
+                                              )}
+                                          </div>
+                                      </CardContent>
+                                  </Card>
+                              ))}
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          )
+}
+
+
+
+
+
+
+
+
+export const ProjectPageSkeleton= () => {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-heading font-bold mb-4">Loading Project...</h1>
+          <p className="text-muted-foreground">Please wait while we fetch the project details.</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+
+// CodingResult/Page.tsx
+export const CodingResultPageSkeleton=()=>{
+ return (
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/20">
+      <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-lg">
+        <div className="animate-pulse mb-6">
+            <div className="w-12 h-12 bg-primary rounded-full mx-auto"></div>
+          </div>
+          <h2 className="text-xl font-semibold text-foreground mb-2">Loading Submission</h2>
+          <p className="text-muted-foreground">Fetching your coding submission details...</p>
+      </div>
+    </div>
+  )
+}
+
+// quizResult/page.tsx
+
+
+export const QuizResultPageSkeleton=()=>{
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
+                <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-16dp max-w-md w-full">
+                    <div className="relative mb-6">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto flex items-center justify-center">
+                            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    </div>
+                    <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
+                    <p className="text-muted-foreground">Fetching your performance data...</p>
+                </div>
+            </div>
+        )
+    }
+
+
+
+
+
+  
+
+// submissionIdPage.tsx
+export const SubmissionIdPage=()=>{
+  return (
+        <div className="min-h-screen bg-background">
+                  <div className="text-left">
+                      <div className="mb-4 p-6">
+                          <Skeleton className="h-10 w-32" />
+                      </div>
+                  </div>
+                  <div className="max-w-4xl mx-auto p-6">
+                      {/* Header Skeleton */}
+                      <div className="mb-6 text-left">
+                          <Skeleton className="h-9 w-64 mb-2" />
+                          <Skeleton className="h-5 w-96" />
+                      </div>
+  
+                      {/* Score Card Skeleton */}
+                      <div className="mb-8">
+                          <div className="p-6 rounded-lg border shadow-8dp bg-card">
+                              <div className="flex items-center justify-between">
+                                  <div>
+                                      <Skeleton className="h-8 w-48 mb-2" />
+                                      <Skeleton className="h-6 w-72" />
+                                  </div>
+                                  <div className="text-right">
+                                      <Skeleton className="w-20 h-20 rounded-full" />
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+  
+                      {/* Coding Challenges Skeleton */}
+                      <div className="mb-8">
+                          <div className="mb-6">
+                              <Skeleton className="h-8 w-48 mb-2" />
+                              <div className="h-px bg-border"></div>
+                          </div>
+                          <div className="bg-card border border-border rounded-lg p-6 shadow-4dp">
+                              <div className="flex justify-between items-start mb-4">
+                                  <Skeleton className="h-6 w-64" />
+                                  <div className="flex items-center gap-2">
+                                      <Skeleton className="h-6 w-16 rounded-full" />
+                                      <Skeleton className="h-6 w-20 rounded-full" />
+                                  </div>
+                              </div>
+                              <div className="space-y-2 mb-4">
+                                  <div className="flex items-center gap-2">
+                                      <Skeleton className="h-4 w-12" />
+                                      <Skeleton className="h-4 w-20" />
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                      <Skeleton className="h-4 w-12" />
+                                      <Skeleton className="h-4 w-16" />
+                                  </div>
+                              </div>
+                              <div className="flex justify-end">
+                                  <Skeleton className="h-10 w-32" />
+                              </div>
+                          </div>
+                      </div>
+  
+                      {/* MCQ Skeleton */}
+                      <div className="mb-8">
+                          <div className="mb-6">
+                              <Skeleton className="h-8 w-56 mb-2" />
+                              <div className="h-px bg-border"></div>
+                          </div>
+                          <div className="bg-card border border-border rounded-lg p-6 shadow-4dp">
+                              <div className="flex justify-between items-start mb-4">
+                                  <Skeleton className="h-6 w-32" />
+                                  <div className="flex items-center gap-2">
+                                      <Skeleton className="h-6 w-20 rounded-full" />
+                                      <Skeleton className="h-6 w-16 rounded-full" />
+                                  </div>
+                              </div>
+                              <div className="mb-4">
+                                  <div className="flex items-center gap-2">
+                                      <Skeleton className="h-4 w-12" />
+                                      <Skeleton className="h-6 w-20" />
+                                  </div>
+                              </div>
+                              <div className="flex justify-end">
+                                  <Skeleton className="h-10 w-32" />
+                              </div>
+                          </div>
+                      </div>
+  
+                      {/* Open-Ended Skeleton */}
+                      <div className="mb-8">
+                          <div className="mb-6">
+                              <Skeleton className="h-8 w-52 mb-2" />
+                              <div className="h-px bg-border"></div>
+                          </div>
+                          <div className="bg-card border border-border rounded-lg p-6 shadow-4dp">
+                              <div className="flex justify-between items-start mb-4">
+                                  <Skeleton className="h-6 w-48" />
+                                  <Skeleton className="h-6 w-24 rounded-full" />
+                              </div>
+                              <div className="mb-4">
+                                  <div className="flex items-center gap-2">
+                                      <Skeleton className="h-4 w-16" />
+                                      <Skeleton className="h-4 w-12" />
+                                  </div>
+                              </div>
+                              <div className="flex justify-end">
+                                  <Skeleton className="h-10 w-32" />
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          )
+}
 

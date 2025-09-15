@@ -15,13 +15,13 @@ import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-
 import Link from "next/link";
 import Image from "next/image";
 import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '@/store/store';
-import {StudentDashboardSkeleton} from "@/app/student/_components/Skeletons";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
 import {UpcomingEvent,Bootcamp,TopicItem } from '@/app/student/_pages/pageStudentType'
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
 import {formatUpcomingItem} from "@/utils/students"
+import {StudentDashboardSkeleton, CarouselSkeleton} from "@/app/student/_components/Skeletons";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -245,30 +245,7 @@ const StudentDashboard = () => {
                     <div className="border-t border-border mt-6 mb-6"></div>
                     {/* Upcoming Items */}
                     {eventsLoading? (
-                      <Carousel className="w-full group ">
-                        <CarouselContent className="-ml-2">
-                          {[1, 2 ,3].map((index) => (
-                            <CarouselItem key={index} className="pl-2 md:basis-1/3 ">
-                              <div className="w-full border rounded-lg p-3 h-full bg-primary-light animate-pulse">
-                                <div className="flex items-start gap-3">
-                                  <div className="flex-shrink-0 mt-1">
-                                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-start justify-between gap-2 mb-1">
-                                      <div className="h-4 bg-muted rounded animate-pulse flex-1"></div>
-                                      <div className="h-5 w-16 bg-muted rounded animate-pulse"></div>
-                                    </div>
-                                    <div className="h-3 bg-muted rounded animate-pulse w-3/4 mb-2"></div>
-                                  </div>
-                                </div>
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Carousel>
+                      <CarouselSkeleton />
                                          ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
                      <div>
                        <Carousel className="w-full group">
