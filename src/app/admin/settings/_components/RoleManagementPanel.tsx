@@ -4,7 +4,6 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Edit, Trash2, Plus, Users } from 'lucide-react'
-// import SubPermissions from './_components/SubPermissions'
 
 interface RoleAction {
     id: number
@@ -395,15 +394,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         No permissions available
                                     </h4>
                                     <p className="text-gray-500 max-w-md">
-                                        This role action doesn't have any
+                                        This role action does not have any
                                         permissions defined yet
                                     </p>
                                 </div>
                             )}
                         </div>
-                        {/* <div className="flex-1 overflow-y-auto">
-                            <SubPermissions getSelectedAction={getSelectedAction}/>
-                        </div> */}
 
                         {/* Selected Permissions Summary */}
                         {selectedPermissions.size > 0 && (

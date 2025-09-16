@@ -4,10 +4,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Users, Settings, Plus } from 'lucide-react'
 import { UserRole } from '@/utils/types/type'
-import UserInviteSection from './UserInviteSection'
-import { UserManagementTable } from './UserManagementTable'
+import UserInviteSection from './_components/UserInviteSection'
+import { UserManagementTable } from './_components/UserManagementTable'
 import { columns, User } from './columns'
-import RoleManagementPanel from './RoleManagementPanel'
+import RoleManagementPanel from './_components/RoleManagementPanel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 const SettingsPage: React.FC = () => {
