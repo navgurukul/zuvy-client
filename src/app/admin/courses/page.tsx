@@ -441,7 +441,9 @@ const Courses: React.FC = () => {
                                     )}
                                 </>
                             ) : (
-                                <div>
+
+                                <div className="flex flex-col min-h-screen">
+                                  <div flex-1>
                                     <div className="flex flex-wrap justify-center gap-3">
                                         {courses.map((course, index) => {
 
@@ -483,6 +485,7 @@ const Courses: React.FC = () => {
                                             );
                                         })}
                                     </div>
+                                    <div className="fixed bottom-4 right-4">
                                     <DataTablePagination
                                         totalStudents={totalBootcamps}
                                         lastPage={lastPage}
@@ -496,6 +499,8 @@ const Courses: React.FC = () => {
                                             }
                                         }}
                                     />
+                                    </div>
+                                 </div>
                                 </div>
                             )}
                         </div>

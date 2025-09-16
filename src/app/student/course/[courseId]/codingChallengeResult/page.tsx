@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import { Spinner } from '@/components/ui/spinner';
+import {CodingSubmissionSkeleton} from "@/app/student/_components/Skeletons"
 import { 
   ChevronLeft, 
   Code2, 
@@ -70,17 +71,9 @@ const CodingResultContent = () => {
         }
     }, [questionId]);
     
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center">
-            <Spinner size="large" />
-            <p className="text-lg font-medium text-foreground mt-4">Loading submission details...</p>
-            <p className="text-sm text-muted-foreground">Please wait while we fetch your coding submission</p>
-        </div>
-      </div>
-    );
-  }
+    
+  if (loading) return <CodingSubmissionSkeleton />
+
 
   if (!questionId) {
   return (

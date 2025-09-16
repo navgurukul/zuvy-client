@@ -16,6 +16,7 @@ import { useRouter, usePathname, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
+import{formatValue} from "@/utils/students"
 import {
     Select,
     SelectContent,
@@ -124,31 +125,6 @@ const IDE: React.FC<IDEProps> = ({
         return result
     }
 
-    const formatValue = (value: any, type: string): string => {
-        if (type === 'jsonType') {
-            return JSON.stringify(value, null, 2)
-        }
-
-        if (Array.isArray(value)) {
-            if (type === 'arrayOfNum') {
-                return `[${value.join(', ')}]`
-            }
-            if (type === 'arrayOfStr') {
-                return `[${value.map((v) => `"${v}"`).join(', ')}]`
-            }
-            return `[${value.join(', ')}]`
-        }
-
-        switch (type) {
-            case 'int':
-            case 'float':
-                return value.toString()
-            case 'str':
-                return `"${value}"`
-            default:
-                return JSON.stringify(value)
-        }
-    }
 
     const handleSubmit = async (
         e: { preventDefault: () => void },
@@ -313,15 +289,13 @@ const IDE: React.FC<IDEProps> = ({
                         {/* Left: Back Button and Question Title */}
                         <div className="flex items-center space-x-4">
                             {isSubmitted ? <button onClick={onBack} className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
-                                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                <span className="font-medium">Back to Assessment</span>
+                                   <X className="w-5 h-5" />
                             </button> :
 
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <button className="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors duration-200 group bg-muted/50 hover:bg-muted px-3 py-2 rounded-lg">
-                                            <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                            <span className="font-medium">Back to Assessment</span>
+                                               <X className="w-5 h-5" />
                                         </button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="bg-card border-border shadow-32dp">
