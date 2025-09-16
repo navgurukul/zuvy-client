@@ -24,8 +24,25 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
+  
+
+
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const hasScrolledRef = useRef(false);
+
+
+
+
+
+useEffect(() => {
+  if (enhancedModule) {
+    setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
+  }
+}, [trackingData, moduleDetails, loading, error]);
+
+
+
+
 
   useEffect(() => {
     if (chapterId && !hasScrolledRef.current) {
