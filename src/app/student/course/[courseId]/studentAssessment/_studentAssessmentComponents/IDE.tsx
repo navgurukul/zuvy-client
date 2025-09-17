@@ -696,6 +696,12 @@ const IDE: React.FC<IDEProps> = ({
                                                                             <pre className="whitespace-pre-wrap break-all">{testCase?.stdOut || testCase?.stdout}</pre>
                                                                         </>
                                                                     )}
+                                                                    {testCase?.compileOutput && (
+                                                                        <>
+                                                                            <span className="font-semibold text-yellow-600 justify-self-end">Compile Msg:</span>
+                                                                            <pre className="text-yellow-600 whitespace-pre-wrap break-all">{testCase.compileOutput}</pre>
+                                                                        </>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
