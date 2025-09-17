@@ -1,3 +1,254 @@
+// import { isPlural } from '@/lib/utils'
+// import {
+//     BookOpenText,
+//     Clock1,
+//     SquareCode,
+//     FileQuestion,
+//     GripVertical,
+//     PencilLine,
+//     Trash2,
+//     Pencil,
+// } from 'lucide-react'
+// import React, { useCallback, useEffect, useState } from 'react'
+// import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
+// import { api } from '@/utils/axios.config'
+// import { useRouter } from 'next/navigation'
+// import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
+// import { toast } from '@/components/ui/use-toast'
+// import { Reorder, useDragControls } from 'framer-motion'
+// import {CurricullamCardProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+
+// const CurricullumCard = (props:CurricullamCardProps) => {
+//     const {
+//         editHandle,
+//         index,
+//         moduleId,
+//         courseId,
+//         name,
+//         order,
+//         description,
+//         quizCount,
+//         assignmentCount,
+//         timeAlloted,
+//         codingProblemsCount,
+//         articlesCount,
+//         typeId,
+//         fetchCourseModules,
+//         projectId,
+//         chapterId,
+//         isStarted,
+//         onDragStart,
+//         onDragEnd,
+//         showBorderFlash,
+//     } = props
+
+//     const router = useRouter()
+//     const dragControls = useDragControls()
+//     const [isDragging, setIsDragging] = useState(false)
+
+//     // Calculate time in weeks and days
+//     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
+
+//     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+
+//     const handleDeleteModal = () => {
+//         setDeleteModalOpen(true)
+//     }
+
+//     const handleDeleteModule = async () => {
+//         const response = await api
+//             .delete(`Content/deleteModule/${courseId}?moduleId=${moduleId}`)
+//             .then((response) => {
+//                 toast.success({
+//                     title: 'Success',
+//                     description: 'Module Deleted Successfully',
+//                 })
+//                 fetchCourseModules()
+//             })
+//             .catch((error) => {
+//                 toast.error({
+//                     title: 'Error',
+//                     description:
+//                         'There was an error while deleting. Please try again.',
+//                 })
+//             })
+//     }
+
+//     const handleModuleRoute = () => {
+//         if (typeId === 1) {
+//             router.push(
+//                 `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+//             )
+//         } else if (typeId === 2) {
+//             router.push(
+//                 `/admin/courses/${courseId}/module/${moduleId}/project/${projectId}`
+//             )
+//         }
+//     }
+
+//     return (
+//         <Reorder.Item
+//             value={props.value}
+//             dragListener={false}
+//             dragControls={dragControls}
+//             className={`select-none ${props.isStarted ? 'opacity-90' : ''}min-h-[120px] relative z-0`}
+//             whileDrag={{
+//             scale: 1.02,
+//             boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+//             zIndex: 999,
+//             x: 0,
+//             }}
+//             onDragStart={() => {
+//                 setIsDragging(true)
+//                 props.setDraggedModuleId(props.moduleId) // moduleId parent ko bhejna
+//                 onDragStart?.() // Call parent's drag start
+//             }}
+//             onDragEnd={() => {
+//                 setIsDragging(false)
+//                 props.setDraggedModuleId(null) // drag end pe reset karna
+//                 onDragEnd?.() // Call parent's drag end 
+//             }}
+//             transition={{ duration: 0.2 }}
+//         >
+//             <div
+//                 className={`${
+//                     props.typeId === 2 ? 'bg-yellow-100/80' : 'bg-muted'
+//                 } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]  transition-all duration-300 ${
+//                     showBorderFlash 
+//                         ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
+//                         : ''}`}
+//             >
+//                 <div className="w-full p-2" onClick={handleModuleRoute}>
+//                     <div className="flex mb-2 w-full justify-between">
+//                         <p className="text-md font-semibold capitalize text-black text-start">
+//                             {`Module ${order}`} : {name}
+//                         </p>
+//                         <div className="flex items-center gap-x-2">
+//                             <Trash2
+//                                 className="hover:text-destructive cursor-pointer"
+//                                 onClick={(e) => {
+//                                     e.stopPropagation()
+//                                     handleDeleteModal()
+//                                 }}
+//                             />
+//                             <Pencil
+//                                 className="hover:text-green-600 cursor-pointer"
+//                                 onClick={(e) => {
+//                                     e.stopPropagation()
+//                                     editHandle(moduleId)
+//                                 }}
+//                             />
+//                             <GripVertical
+//                                 style={{
+//                                     cursor: props.isStarted
+//                                         ? 'not-allowed'
+//                                         : isDragging
+//                                             ? 'grabbing'
+//                                             : 'grab',
+//                                 }}
+//                                 onPointerDown={
+//                                     !props.isStarted
+//                                         ? (e) => {
+//                                               e.stopPropagation()
+//                                               setIsDragging(true)
+//                                               dragControls.start(e)
+//                                           }
+//                                         : undefined
+//                                 }
+//                                 // onPointerUp={() => setIsDragging(false)}
+//                                 // onPointerLeave={() => setIsDragging(false)}
+//                                 onClick={(e) => e.stopPropagation()}
+//                             />
+//                         </div>
+//                     </div>
+//                     <p className="text-start mb-2">{description}</p>
+//                     <div className="flex flex-wrap justify-start gap-x-4">
+//                         <div className="flex items-center justify-start gap-x-2">
+//                             <Clock1 size={15} />
+//                             <p className="text-md font-semibold capitalize text-gray-600">
+//                                 {timeAllotedInWeeks > 1
+//                                     ? `${timeAllotedInWeeks} weeks`
+//                                     : `${timeAllotedInWeeks} week`}
+//                             </p>
+//                         </div>
+//                         {articlesCount > 0 ? (
+//                             <div className="flex items-center justify-start gap-x-2">
+//                                 <BookOpenText size={15} />
+//                                 <p className="text-md font-semibold capitalize text-gray-600">
+//                                     {articlesCount}{' '}
+//                                     {isPlural(articlesCount)
+//                                         ? 'Articles'
+//                                         : 'Article'}
+//                                 </p>
+//                             </div>
+//                         ) : null}
+//                         {assignmentCount > 0 ? (
+//                             <div className="flex items-center justify-start gap-x-2">
+//                                 <PencilLine size={15} />
+//                                 <p className="text-md font-semibold capitalize text-gray-600">
+//                                     {assignmentCount}{' '}
+//                                     {isPlural(assignmentCount)
+//                                         ? 'Assignments'
+//                                         : 'Assignment'}
+//                                 </p>
+//                             </div>
+//                         ) : null}
+//                         {quizCount > 0 ? (
+//                             <div className="flex items-center justify-start gap-x-2">
+//                                 <FileQuestion size={15} />
+//                                 <p className="text-md font-semibold capitalize text-gray-600">
+//                                     {quizCount}{' '}
+//                                     {isPlural(quizCount) ? 'Quizzes' : 'Quiz'}
+//                                 </p>
+//                             </div>
+//                         ) : null}
+//                         {codingProblemsCount > 0 ? (
+//                             <div className="flex items-center justify-start gap-x-2">
+//                                 <SquareCode size={15} />
+//                                 <p className="text-md font-semibold capitalize text-gray-600">
+//                                     {codingProblemsCount}{' '}
+//                                     {isPlural(codingProblemsCount)
+//                                         ? 'Coding Problems'
+//                                         : 'Coding Problem'}
+//                                 </p>
+//                             </div>
+//                         ) : null}
+//                     </div>
+//                 </div>
+//                 <DeleteConfirmationModal
+//                     isOpen={isDeleteModalOpen}
+//                     onClose={() => setDeleteModalOpen(false)}
+//                     onConfirm={() => {
+//                         handleDeleteModule()
+//                         setDeleteModalOpen(false)
+//                     }}
+//                     modalText={DELETE_MODULE_CONFIRMATION}
+//                     buttonText="Delete Module"
+//                     input={false}
+//                 />
+//             </div>
+//         </Reorder.Item>
+
+//     )
+// }
+
+// export default CurricullumCard
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// new design 
+
 import { isPlural } from '@/lib/utils'
 import {
     BookOpenText,
@@ -7,18 +258,29 @@ import {
     GripVertical,
     PencilLine,
     Trash2,
-    Pencil,
+    Edit,
+    FolderOpen,
+    ChevronDown,
+    Plus,
 } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { api } from '@/utils/axios.config'
 import { useRouter } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { Reorder, useDragControls } from 'framer-motion'
-import {CurricullamCardProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from '@/components/ui/collapsible'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { CurricullamCardProps } from '@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
-const CurricullumCard = (props:CurricullamCardProps) => {
+const CurricullumCard = (props: CurricullamCardProps) => {
     const {
         editHandle,
         index,
@@ -45,6 +307,8 @@ const CurricullumCard = (props:CurricullamCardProps) => {
     const router = useRouter()
     const dragControls = useDragControls()
     const [isDragging, setIsDragging] = useState(false)
+    const [isExpanded, setIsExpanded] = useState(false)
+    const [showAddContent, setShowAddContent] = useState(false)
 
     // Calculate time in weeks and days
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
@@ -86,65 +350,56 @@ const CurricullumCard = (props:CurricullamCardProps) => {
         }
     }
 
+    const toggleExpanded = () => {
+        setIsExpanded(!isExpanded)
+    }
+
+    const toggleAddContent = () => {
+        setShowAddContent(!showAddContent)
+    }
+
     return (
         <Reorder.Item
             value={props.value}
             dragListener={false}
             dragControls={dragControls}
-            className={`select-none ${props.isStarted ? 'opacity-90' : ''}min-h-[120px] relative z-0`}
+            className={`select-none ${props.isStarted ? 'opacity-90' : ''} relative z-0`}
             whileDrag={{
-            scale: 1.02,
-            boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
-            zIndex: 999,
-            x: 0,
+                scale: 1.02,
+                boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+                zIndex: 999,
+                x: 0,
             }}
             onDragStart={() => {
                 setIsDragging(true)
-                props.setDraggedModuleId(props.moduleId) // moduleId parent ko bhejna
-                onDragStart?.() // Call parent's drag start
+                props.setDraggedModuleId(props.moduleId)
+                onDragStart?.()
             }}
             onDragEnd={() => {
                 setIsDragging(false)
-                props.setDraggedModuleId(null) // drag end pe reset karna
-                onDragEnd?.() // Call parent's drag end 
+                props.setDraggedModuleId(null)
+                onDragEnd?.()
             }}
             transition={{ duration: 0.2 }}
         >
-            <div
-                className={`${
-                    props.typeId === 2 ? 'bg-yellow-100/80' : 'bg-muted'
-                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]  transition-all duration-300 ${
-                    showBorderFlash 
-                        ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
-                        : ''}`}
+            <Card
+                className={`shadow-sm my-3 w-full transition-all duration-300 ${
+                    showBorderFlash
+                        ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash'
+                        : ''
+                }`}
             >
-                <div className="w-full p-2" onClick={handleModuleRoute}>
-                    <div className="flex mb-2 w-full justify-between">
-                        <p className="text-md font-semibold capitalize text-black text-start">
-                            {`Module ${order}`} : {name}
-                        </p>
-                        <div className="flex items-center gap-x-2">
-                            <Trash2
-                                className="hover:text-destructive cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleDeleteModal()
-                                }}
-                            />
-                            <Pencil
-                                className="hover:text-green-600 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    editHandle(moduleId)
-                                }}
-                            />
-                            <GripVertical
+                <Collapsible open={isExpanded} onOpenChange={toggleExpanded}>
+                    <CardHeader className="pb-4">
+                        <div className="flex items-center gap-3">
+                            <div
+                                className="cursor-grab text-muted-foreground hover:text-foreground"
                                 style={{
                                     cursor: props.isStarted
                                         ? 'not-allowed'
                                         : isDragging
-                                            ? 'grabbing'
-                                            : 'grab',
+                                        ? 'grabbing'
+                                        : 'grab',
                                 }}
                                 onPointerDown={
                                     !props.isStarted
@@ -155,80 +410,102 @@ const CurricullumCard = (props:CurricullamCardProps) => {
                                           }
                                         : undefined
                                 }
-                                // onPointerUp={() => setIsDragging(false)}
-                                // onPointerLeave={() => setIsDragging(false)}
                                 onClick={(e) => e.stopPropagation()}
-                            />
-                        </div>
-                    </div>
-                    <p className="text-start mb-2">{description}</p>
-                    <div className="flex flex-wrap justify-start gap-x-4">
-                        <div className="flex items-center justify-start gap-x-2">
-                            <Clock1 size={15} />
-                            <p className="text-md font-semibold capitalize text-gray-600">
-                                {timeAllotedInWeeks > 1
-                                    ? `${timeAllotedInWeeks} weeks`
-                                    : `${timeAllotedInWeeks} week`}
-                            </p>
-                        </div>
-                        {articlesCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <BookOpenText size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {articlesCount}{' '}
-                                    {isPlural(articlesCount)
-                                        ? 'Articles'
-                                        : 'Article'}
-                                </p>
+                            >
+                                <GripVertical className="h-5 w-5" />
                             </div>
-                        ) : null}
-                        {assignmentCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <PencilLine size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {assignmentCount}{' '}
-                                    {isPlural(assignmentCount)
-                                        ? 'Assignments'
-                                        : 'Assignment'}
-                                </p>
-                            </div>
-                        ) : null}
-                        {quizCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <FileQuestion size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {quizCount}{' '}
-                                    {isPlural(quizCount) ? 'Quizzes' : 'Quiz'}
-                                </p>
-                            </div>
-                        ) : null}
-                        {codingProblemsCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <SquareCode size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {codingProblemsCount}{' '}
-                                    {isPlural(codingProblemsCount)
-                                        ? 'Coding Problems'
-                                        : 'Coding Problem'}
-                                </p>
-                            </div>
-                        ) : null}
-                    </div>
-                </div>
-                <DeleteConfirmationModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setDeleteModalOpen(false)}
-                    onConfirm={() => {
-                        handleDeleteModule()
-                        setDeleteModalOpen(false)
-                    }}
-                    modalText={DELETE_MODULE_CONFIRMATION}
-                    buttonText="Delete Module"
-                    input={false}
-                />
-            </div>
-        </Reorder.Item>
 
+                            <CollapsibleTrigger className="flex-1 flex items-center justify-between hover:bg-muted/50 p-2 rounded-md transition-colors">
+                                <div
+                                    className="text-left flex items-center gap-3"
+                                    onClick={handleModuleRoute}
+                                >
+                                    <div
+                                        className={`p-2 rounded-md ${
+                                            props.typeId === 2
+                                                ? 'bg-yellow-100 text-secondary'
+                                                : 'bg-primary/10 text-primary'
+                                        }`}
+                                    >
+                                        <FolderOpen className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-lg">
+                                            Module {order}: {name}
+                                        </h3>
+                                        <p className="text-muted-foreground text-sm">
+                                            {description}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            editHandle(moduleId)
+                                        }}
+                                        className="hover:text-green-600"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDeleteModal()
+                                        }}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+
+                                    <ChevronDown
+                                        className={cn(
+                                            'h-5 w-5 transition-transform',
+                                            isExpanded && 'rotate-180'
+                                        )}
+                                    />
+                                </div>
+                            </CollapsibleTrigger>
+                        </div>
+                    </CardHeader>
+
+                    <CollapsibleContent>
+                        <CardContent className="pt-0">
+                            <div className="space-y-4">
+                                {/* Add Content Button */}
+                                <Button
+                                    onClick={toggleAddContent}
+                                    variant="outline"
+                                    size="default"
+                                    className="w-full"
+                                >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Content
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </CollapsibleContent>
+                </Collapsible>
+            </Card>
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={() => {
+                    handleDeleteModule()
+                    setDeleteModalOpen(false)
+                }}
+                modalText={DELETE_MODULE_CONFIRMATION}
+                buttonText="Delete Module"
+                input={false}
+            />
+        </Reorder.Item>
     )
 }
 
