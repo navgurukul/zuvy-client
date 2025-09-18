@@ -29,8 +29,10 @@ import {
 import { getBatchData, getIsRowSelected } from '@/store/store'
 import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
 import AddLiveClasstoChapter from '@/app/admin/courses/[courseId]/module/_components/AddLiveClasstoChapter'
-import {DataTableProps,StudentData} from "@/app/_components/datatable/componentDatatable"
-
+import {
+    DataTableProps,
+    StudentData,
+} from '@/app/_components/datatable/componentDatatable'
 
 export function DataTable<TData, TValue>({
     columns,
@@ -95,7 +97,7 @@ export function DataTable<TData, TValue>({
                     )}
                 </div>
             )}
-        
+
             {!assignStudents && (
                 <div className="flex items-center justify-between mb-2">
                     <div>{customTopBar}</div>
