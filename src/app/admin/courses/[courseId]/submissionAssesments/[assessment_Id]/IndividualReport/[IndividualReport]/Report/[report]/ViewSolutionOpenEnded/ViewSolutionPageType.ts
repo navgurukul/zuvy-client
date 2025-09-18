@@ -15,6 +15,7 @@ export type PageOpenEndedQuestion = {
 }
 
 export type PageAssessmentData = {
+    answer: any
     id: number
     openEndedQuestionId: number
     assessmentOutsourseId: number
