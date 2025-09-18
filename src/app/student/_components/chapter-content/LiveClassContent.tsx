@@ -13,6 +13,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ReactPlayer, { ReactPlayerProps } from 'react-player'
 import { useVideoStore } from '@/store/store'
+import {LiveClassSkeleton} from "@/app/student/_components/Skeletons";
 
 const LiveClassContent: React.FC<LiveClassContentProps> = ({
     chapterDetails,
@@ -30,6 +31,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [showControls, setShowControls] = useState(true)
     const [localIsCompleted, setLocalIsCompleted] = useState(false)
+     const [loading, setLoading] = useState(true) 
 
     // Get session data
     const session = chapterDetails.sessions?.[0] || null
@@ -69,6 +71,10 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         }
     }, [])
 
+
+
+    
+
     // Update local state when chapter status changes
     useEffect(() => {
         setLocalIsCompleted(chapterDetails.status === 'Completed')
@@ -106,6 +112,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         return `${day}${getOrdinalSuffix(day)} ${month} ${year} at ${time}`
     }
 
+
     // Helper function to get time remaining
     const getTimeRemaining = (scheduledDateTime: Date) => {
         const now = new Date()
@@ -138,6 +145,20 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         return ` Class starts in ${minutes} minute${minutes > 1 ? 's' : ''}`
     }
 
+      // const youtubeId = isYouTube ? getYoutubeId(flatLinks[0]) : '';
+    const savedTime = session?.s3link?.includes('youtube')
+        ? progress[chapterDetails.id.toString()] || 0
+        : 0
+    const handleReady = useCallback(() => {
+        if (savedTime && playerRef.current) {
+            playerRef.current.seekTo(savedTime, 'seconds')
+        }
+        setPlaying(true)
+    }, [savedTime, setPlaying])
+
+    // Throttle saving progress every 2 seconds
+
+
     const handleProgress: ReactPlayerProps['onProgress'] = useCallback(
         (state: any) => {
             const now = Date.now()
@@ -166,6 +187,8 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         ]
     )
 
+    
+
     const toggleFullScreen = () => {
         if (!document.fullscreenElement && containerRef.current) {
             containerRef.current.requestFullscreen()
@@ -175,6 +198,19 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
             setIsFullscreen(false)
         }
     }
+
+
+useEffect(() => {
+  if (chapterDetails) {
+    setLoading(false)
+  }
+}, [chapterDetails])
+
+
+if (loading) {
+  return <LiveClassSkeleton type={'scheduled'} />
+}
+
 
     // If no session data, show empty state
     if (!session) {
@@ -411,7 +447,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                             allowFullScreen
                                             className="w-full h-full border-none"
                                         />
-                                    ) : (
+                                    ) : embedLink.includes('zoom') ? (
                                         <div
                                             ref={containerRef}
                                             className="relative w-full h-full"
@@ -419,6 +455,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                             <ReactPlayer
                                                 ref={playerRef}
                                                 url={embedLink}
+                                              
                                                 playing={playing}
                                                 controls={true}
                                                 width="100%"
@@ -440,7 +477,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                                 }}
                                                 // onPlay={'Play'}
                                             />
-                                            {!isCompleted && showControls && (
+                                            {!isCompleted && showControls &&   (
                                                 <div className="absolute inset-0 opacity-0 hover:opacity-100 flex gap-4 items-center justify-center bg-black/50 text-white">
                                                     <Button
                                                         onClick={() =>
@@ -465,11 +502,66 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
                                                 </div>
                                             )}
                                         </div>
-                                    )}
+                                    ) :    <div
+                                            ref={containerRef}
+                                            className="relative w-full h-full"
+                                        >
+                                            <ReactPlayer
+                                                ref={playerRef}
+                                                url={embedLink}
+                                                modestbranding={true}
+                                                rel={false}
+                                                playing={playing}
+                                                controls={isCompleted}
+                                                width="100%"
+                                                height="100%"
+                                                onReady={handleReady}
+                                                onProgress={handleProgress}
+                                                config={{
+                                                    file: {
+                                                        attributes: {
+                                                            controlsList:
+                                                                'nodownload noremoteplayback',
+                                                            disablePictureInPicture:
+                                                                true,
+                                                            onContextMenu: (
+                                                                e: any
+                                                            ) =>
+                                                                e.preventDefault(),
+                                                        },
+                                                    },
+                                                }}
+                                                // onPlay={'Play'}
+                                            />
+                                            {/* {!isCompleted && showControls &&   (
+                                                <div className="absolute inset-0 opacity-0 hover:opacity-100 flex gap-4 items-center justify-center bg-black/50 text-white">
+                                                    <Button
+                                                        onClick={() =>
+                                                            setPlaying(!playing)
+                                                        }
+                                                        className="bg-white/80 text-black  rounded-full px-4 py-2 shadow-lg"
+                                                    >
+                                                        {playing
+                                                            ? 'Pause'
+                                                            : 'Play'}
+                                                    </Button>
+                                                    <Button
+                                                        onClick={
+                                                            toggleFullScreen
+                                                        }
+                                                        className="bg-white/80 text-black rounded-full px-4 py-2 shadow-lg"
+                                                    >
+                                                        {!isFullscreen
+                                                            ? 'FullScreen'
+                                                            : 'Exit FullScreen'}
+                                                    </Button>
+                                                </div>
+                                            )} */}
+                                        </div>}
                                 </div>
 
                                 {!isCompleted &&
-                                    !embedLink.includes('zoom.us') && (
+                                    !embedLink.includes('zoom.us') && !embedLink.includes('youtube') && (
                                         <div className="mt-6">
                                             <Button
                                                 onClick={completeChapter}
@@ -505,5 +597,4 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         </div>
     )
 }
-
 export default LiveClassContent

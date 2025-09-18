@@ -4,6 +4,7 @@ import { OFFSET, POSITION } from './constant'
 import { fetchStudentsHandler } from './admin'
 import { getStoreStudentDataNew } from '@/store/store'
 import { showProctoringAlert } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/ProctoringAlerts'
+import { QuestionPanel } from '@/app/student/course/[courseId]/codingChallenge/components'
 
 export const fetchStudentData = async (
     id: number, 
@@ -497,3 +498,167 @@ export const formatToIST = (dateString: string | null | undefined) => {
     };
 
 // --------------------------------------------
+
+
+
+
+
+
+
+
+
+// --------------------------------------------QuestionPanel.tsx--------------------------------------------
+export const formatValue = (value: any, type: string): string => {
+  if (type === "jsonType") {
+    return JSON.stringify(value); 
+  }
+
+  if (Array.isArray(value)) {
+    if (type === "arrayOfNum") {
+      return `[${value.join(", ")}]`;
+    }
+    if (type === "arrayOfStr") {
+      return `[${value.map((v) => `"${v}"`).join(", ")}]`;
+    }
+    return `[${value.join(", ")}]`;
+  }
+
+  if (typeof value === "object" && value !== null) {
+    return JSON.stringify(value, null, 2);
+  }
+  switch (type) {
+    case "int":
+    case "float":
+      return value.toString();
+    case "str":
+      return `"${value}"`;
+    default:
+      return String(value);
+  }
+};
+
+
+
+
+
+
+
+
+// StudentDashboard.tsx
+
+export const formatUpcomingItem = (item: any) => {
+  // Helper function to parse and normalize date strings
+  const parseDate = (dateString: any) => {
+    if (!dateString) return null;
+    
+    let parsableDateString = dateString;
+    
+    // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
+    if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
+      parsableDateString = parsableDateString.replace(' ', 'T');
+      // Add colon to timezone if missing ("+00" becomes "+00:00")
+      if (parsableDateString.match(/[+-]\d{2}$/)) {
+        parsableDateString += ':00';
+      }
+    }
+    
+    const date = new Date(parsableDateString);
+    return isNaN(date.getTime()) ? null : date;
+  };
+
+  // Helper function to format countdown time
+  const formatCountdown = (diffTime: any, prefix = '') => {
+    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+
+    let timeString = '';
+    if (days > 0) {
+      timeString = `${days} day${days > 1 ? 's' : ''}${hours > 0 ? ` ${hours} hr${hours > 1 ? 's' : ''}` : ''}`;
+    } else if (hours > 0) {
+      timeString = `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` ${minutes} min${minutes > 1 ? 's' : ''}` : ''}`;
+    } else if (minutes > 0) {
+      timeString = `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else {
+      timeString = "Starting soon";
+    }
+
+    return prefix ? `${prefix} ${timeString}` : timeString;
+  };
+
+  // Get the appropriate date field based on event type
+  const getStartDate = (item:any) => {
+    if (item.type?.toLowerCase() === 'live class') {
+      return parseDate(item.startTime);
+    } else {
+      return parseDate(item.startDatetime);
+    }
+  };
+
+  const getEndDate = (item:any) => {
+    if (item.type?.toLowerCase() === 'live class') {
+      return parseDate(item.endTime);
+    } else if (item.type?.toLowerCase() === 'assignment') {
+      return parseDate(item.completionDate);
+    } else {
+      return parseDate(item.endDatetime);
+    }
+  };
+
+  const startDate = getStartDate(item);
+  const endDate = getEndDate(item);
+  const now = new Date();
+
+  // If we can't parse the start date, fall back to eventDate
+  if (!startDate) {
+    const eventDate = parseDate(item.eventDate);
+    if (!eventDate) {
+      return "Date not available";
+    }
+    const diffTime = eventDate.getTime() - now.getTime();
+    if (diffTime <= 0) {
+      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event has started";
+    }
+    return formatCountdown(diffTime, "Starts in");
+  }
+
+  const startTime = startDate.getTime();
+  const currentTime = now.getTime();
+
+  // Case 1: start date and time > current date
+  if (startTime > currentTime) {
+    const diffTime = startTime - currentTime;
+    return formatCountdown(diffTime, "Starts in");
+  }
+
+  // Case 2: start date and time < current date & end date & time is not null
+  if (startTime < currentTime && endDate) {
+    const endTime = endDate.getTime();
+    if (endTime > currentTime) {
+      const diffTime = endTime - currentTime;
+      return formatCountdown(diffTime, "Deadline in");
+    } else {
+      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event ended";
+    }
+  }
+
+  // Case 3: start date and time < current date & end date & time is null
+  if (startTime < currentTime && !endDate) {
+    // Format the start date for display
+    const options: any = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC'
+    };
+
+    const formattedDate = startDate.toLocaleDateString('en-US', options);
+    return `Due Date: ${formattedDate}`;
+  }
+
+  // Fallback
+  return "Status unavailable";
+};
+

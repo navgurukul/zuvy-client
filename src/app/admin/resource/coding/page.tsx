@@ -1,3 +1,4 @@
+
 'use client'
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { ChevronLeft, Search, X } from 'lucide-react'
@@ -49,25 +50,16 @@ import difficultyOptions from '@/app/utils'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { useSearchParams, useRouter } from 'next/navigation'
-import useDebounce from '@/hooks/useDebounce'
 import { ROWS_PER_PAGE } from '@/utils/constant'
 import {Tag,SearchSuggestion,Option} from "@/app/admin/resource/coding/adminResourceCodinType"
-
+import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
+import { SearchBox } from '@/utils/searchBox'
 
 const CodingProblems = () => {
     const router = useRouter();
     const { codingQuestions, setCodingQuestions } = getcodingQuestionState()
     const [allCodingQuestions, setAllCodingQuestions] = useState([])
-    const [searchTerm, setSearchTerm] = useState('')
-    const [confirmedSearch, setConfirmedSearch] = useState('')
-    const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([])
-    const [showSuggestions, setShowSuggestions] = useState(false)
-    const [isSearchFocused, setIsSearchFocused] = useState(false)
     const [areOptionsLoaded, setAreOptionsLoaded] = useState(false)
-    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
-
-    // Only debounce for suggestions, not for confirmed search
-    const debouncedSearchTerm = useDebounce(searchTerm, 300)
 
     const {
         isCodingEditDialogOpen,
@@ -83,7 +75,6 @@ const CodingProblems = () => {
     ])
     const { difficulty, setDifficulty } = getDifficulty()
 
-    // const activeFiltersCount = getActiveFiltersCount()
     const [loading, setLoading] = useState(true)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalCodingQuestion, setTotalCodingQuestion] = useState(0)
@@ -96,6 +87,69 @@ const CodingProblems = () => {
     }, [searchParams]);
     const [newTopic, setNewTopic] = useState<string>('')
     const [urlInitialized, setUrlInitialized] = useState(false)
+    const [isSearchActive, setIsSearchActive] = useState(false)
+    const [lastSearchQuery, setLastSearchQuery] = useState('')
+
+    // Custom hook for search with suggestions
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        const response = await api.get('/Content/allCodingQuestions', {
+            params: {
+                searchTerm: query
+            },
+        })
+        let questionsData = response.data;
+        if (response.data.data) questionsData = response.data.data;
+        if (response.data.questions) questionsData = response.data.questions;
+
+        if (!Array.isArray(questionsData)) {
+            console.error("Expected array but got:", typeof questionsData);
+            return [];
+        }
+
+        const suggestions = questionsData.map((question: SearchSuggestion) => ({
+            id: question.id,
+            title: question.title,
+            difficulty: question.difficulty || 'N/A',
+        }));
+        return suggestions;
+    }, []);
+
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        setIsSearchActive(!!query)
+        setLastSearchQuery(query)
+        
+        await filteredCodingQuestions(
+            setCodingQuestions,
+            offset,
+            position,
+            difficulty,
+            selectedOptions,
+            setTotalCodingQuestion,
+            setLastPage,
+            setTotalPages,
+            query,
+            ''
+        )
+    }, [offset, position, difficulty, selectedOptions]);
+
+    // Modified defaultFetchApi - no automatic calls
+    const defaultFetchApi = useCallback(async () => {
+        setIsSearchActive(false)
+        setLastSearchQuery('')
+        
+        await filteredCodingQuestions(
+            setCodingQuestions,
+            offset,
+            position,
+            difficulty,
+            selectedOptions,
+            setTotalCodingQuestion,
+            setLastPage,
+            setTotalPages,
+            '',
+            ''
+        )
+    }, [offset, position, difficulty, selectedOptions]);
 
     // First, load all tags and options
     async function getAllTags() {
@@ -129,10 +183,15 @@ const CodingProblems = () => {
 
         const urlParams = new URLSearchParams(window.location.search)
 
-        // Initialize search
-        const urlSearch = urlParams.get('search') || ''
-        setSearchTerm(urlSearch)
-        setConfirmedSearch(urlSearch)
+        // Initialize search query from URL
+        const urlSearch = urlParams.get('search')
+        if (urlSearch) {
+            setIsSearchActive(true)
+            setLastSearchQuery(urlSearch)
+        } else {
+            setIsSearchActive(false)
+            setLastSearchQuery('')
+        }
 
         // Initialize topics
         const urlTopics = urlParams.get('topics')
@@ -183,183 +242,39 @@ const CodingProblems = () => {
         initializeFromURL()
     }, [initializeFromURL])
 
-    // Fetch suggestions with debouncing - FIXED VERSION
-    useEffect(() => {
-        const fetchSuggestions = async () => {
-            // Clear suggestions if search term is too short
-            if (!debouncedSearchTerm || debouncedSearchTerm.length < 2) {
-                setSearchSuggestions([])
-                setIsLoadingSuggestions(false)
-                return
-            }
-
-            setIsLoadingSuggestions(true)
-
-            try {
-                const response = await api.get('/Content/allCodingQuestions', {
-                    params: {
-                        searchTerm: debouncedSearchTerm,
-                        limit: 8 // Add limit to get only top 8 suggestions
-                    },
-                })
-
-                console.log("Suggestions API response:", response.data)
-
-                // Handle different response structures
-                let questionsData = response.data;
-
-                // If the response has a data property, use that
-                if (response.data.data) {
-                    questionsData = response.data.data;
-                }
-
-                // If the response has a questions property, use that
-                if (response.data.questions) {
-                    questionsData = response.data.questions;
-                }
-
-                // Ensure questionsData is an array
-                if (!Array.isArray(questionsData)) {
-                    console.error("Expected array but got:", typeof questionsData);
-                    setSearchSuggestions([]);
-                    return;
-                }
-
-                const suggestions = questionsData
-                    .filter((question: SearchSuggestion) =>
-                        question.title &&
-                        question.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
-                    )
-                    .slice(0, 8)
-                    .map((question: SearchSuggestion) => ({
-                        id: question.id,
-                        title: question.title,
-                        difficulty: question.difficulty || 'N/A',
-                    }));
-
-                setSearchSuggestions(suggestions)
-            } catch (error) {
-                console.error('Error fetching suggestions:', error)
-                setSearchSuggestions([])
-            } finally {
-                setIsLoadingSuggestions(false)
-            }
-        }
-
-        fetchSuggestions()
-    }, [debouncedSearchTerm])
-
     useEffect(() => {
         const timer = setTimeout(() => setLoading(false), 1000)
         return () => clearTimeout(timer)
     }, [])
 
-    useEffect(() => {
-        if (urlInitialized && searchTerm.trim() === '' && confirmedSearch !== '') {
-            // User cleared input manually (not via X), so reset search filter
-            clearOnlySearchTerm()
-        }
-    }, [searchTerm, confirmedSearch, urlInitialized])
-
-    const handleTagOption = (option: Option) => {
-        if (option.value === '-1') {
-            setSelectedOptions([option])
+    const toggleOption = (
+        option: Option,
+        current: Option[],
+        setFn: (opts: Option[]) => void,
+        allValue: string
+      ) => {
+        if (option.value === allValue) {
+          setFn([option])
         } else {
-            if (selectedOptions.some(item => item.value === '-1')) {
-                setSelectedOptions([option])
-            } else {
-                if (selectedOptions.some(selected => selected.value === option.value)) {
-                    setSelectedOptions(
-                        selectedOptions.filter(selected => selected.value !== option.value)
-                    )
-                } else {
-                    setSelectedOptions([...selectedOptions, option])
-                }
-            }
+          if (current.some(item => item.value === allValue)) {
+            setFn([option])
+          } else if (current.some(item => item.value === option.value)) {
+            setFn(current.filter(item => item.value !== option.value))
+          } else {
+            setFn([...current, option])
+          }
         }
-    }
-
-    const handleDifficulty = (option: Option) => {
-        if (option.value === 'None') {
-            setDifficulty([option])
-        } else {
-            if (difficulty.some(item => item.value === 'None')) {
-                setDifficulty([option])
-            } else {
-                if (difficulty.some(item => item.value === option.value)) {
-                    setDifficulty(
-                        difficulty.filter(item => item.value !== option.value)
-                    )
-                } else {
-                    setDifficulty([...difficulty, option])
-                }
-            }
-        }
-    }
-
-    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setSearchTerm(value);
-
-        // Show suggestions when typing (if there's text and input is focused)
-        if (value.length > 0 && isSearchFocused) {
-            setShowSuggestions(true);
-        } else {
-            setShowSuggestions(false);
-        }
-    }
-
-    const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            setConfirmedSearch(searchTerm)
-            setShowSuggestions(false)
-            setCurrentPage(1)
-        }
-        // Hide suggestions on Escape
-        if (e.key === 'Escape') {
-            setShowSuggestions(false)
-        }
-    }
-
-    const handleSuggestionClick = (suggestion: SearchSuggestion) => {
-        setSearchTerm(suggestion.title)
-        setConfirmedSearch(suggestion.title)
-        setShowSuggestions(false)
-        setCurrentPage(1)
-    }
-
-    const handleSearchFocus = () => {
-        setIsSearchFocused(true)
-        // Show suggestions if there's text and suggestions available
-        if (searchTerm.length > 1 && searchSuggestions.length > 0) {
-            setShowSuggestions(true)
-        }
-    }
-
-    const handleSearchBlur = () => {
-        setIsSearchFocused(false)
-        // Use a longer timeout to allow clicking on suggestions
-        setTimeout(() => {
-            setShowSuggestions(false)
-        }, 200)
-    }
-
-    // Clear ALL filters (search, topics, difficulty)
-    const clearOnlySearchTerm = () => {
-        setSearchTerm('')
-        setConfirmedSearch('')
-        setShowSuggestions(false)
-        setCurrentPage(1)
-
-        const params = new URLSearchParams(window.location.search)
-        params.delete('search')
-
-        const newUrl = `${window.location.pathname}?${params.toString()}`
-        router.replace(newUrl)
-    }
+      }
+      
+      // usage:
+      const handleTagOption = (opt: Option) => toggleOption(opt, selectedOptions, setSelectedOptions, '-1')
+      const handleDifficulty = (opt: Option) => toggleOption(opt, difficulty, setDifficulty, 'None')
 
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
+            // Don't fetch if search is active
+            if (isSearchActive) return
+            
             try {
                 await filteredCodingQuestions(
                     setCodingQuestions,
@@ -370,7 +285,7 @@ const CodingProblems = () => {
                     setTotalCodingQuestion,
                     setLastPage,
                     setTotalPages,
-                    confirmedSearch,
+                    '', // Always empty for filter-based fetch
                     ''
                 )
             } catch (error) {
@@ -381,19 +296,28 @@ const CodingProblems = () => {
                 })
             }
         },
-        [confirmedSearch, selectedOptions, difficulty, position, offset]
+        [selectedOptions, difficulty, position, isSearchActive]
     )
 
-    // Fetch data only after URL is initialized
+    // Fetch data only after URL is initialized  
     useEffect(() => {
         if (!urlInitialized) return
 
         const fetchData = async () => {
             await getAllCodingQuestions(setAllCodingQuestions)
+        }
+        fetchData()
+    }, [urlInitialized])
+
+    // Modified: Only fetch when filters change and search is not active
+    useEffect(() => {
+        if (!urlInitialized || isSearchActive) return
+
+        const fetchData = async () => {
             await fetchCodingQuestions(offset)
         }
         fetchData()
-    }, [confirmedSearch, selectedOptions, difficulty, offset, urlInitialized, fetchCodingQuestions])
+    }, [urlInitialized, selectedOptions, difficulty, offset, fetchCodingQuestions, isSearchActive])
 
     // Add this effect to preserve URL parameters including pagination
     useEffect(() => {
@@ -406,17 +330,10 @@ const CodingProblems = () => {
         
         // Keep pagination related parameters (limit, page, offset etc.) that might be set by DataTablePagination
         currentParams.forEach((value, key) => {
-            if (!['search', 'topics', 'difficulty'].includes(key)) {
+            if (!['search','topics', 'difficulty'].includes(key)) {
                 params.set(key, value)
             }
         })
-
-        // Update search
-        if (confirmedSearch) {
-            params.set('search', confirmedSearch)
-        } else {
-            params.delete('search')
-        }
 
         // Update topics
         if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) {
@@ -440,13 +357,13 @@ const CodingProblems = () => {
         if (newUrl !== currentUrl) {
             router.replace(newUrl)
         }
-    }, [confirmedSearch, selectedOptions, difficulty, router, urlInitialized])
+    }, [selectedOptions, difficulty, router, urlInitialized])
 
     const getActiveFiltersCount = () => {
         let count = 0
         if (selectedOptions.length > 0 && !selectedOptions.some(opt => opt.value === '-1')) count++
         if (difficulty.length > 0 && !difficulty.some(diff => diff.value === 'None')) count++
-        if (confirmedSearch) count++
+        if (lastSearchQuery) count++
         return count
     }
 
@@ -471,56 +388,19 @@ const CodingProblems = () => {
                             <div className="flex justify-between">
                                 <div className="relative w-full">
                                     <div className="relative w-1/4">
-                                        <Input
-                                            placeholder="Problem Name..."
-                                            className="w-full p-2 my-6 input-with-icon pl-8"
-                                            value={searchTerm}
-                                            onChange={handleSearchInputChange}
-                                            onFocus={handleSearchFocus}
-                                            onBlur={handleSearchBlur}
-                                            onKeyDown={handleSearchInputKeyDown}
+                                        <SearchBox
+                                            placeholder="Search Question"
+                                            fetchSuggestionsApi={fetchSuggestionsApi}
+                                            fetchSearchResultsApi={fetchSearchResultsApi}
+                                            defaultFetchApi={defaultFetchApi}
+                                            getSuggestionLabel={(suggestion) => (
+                                                <div>
+                                                    <div className="font-medium">{suggestion.title}</div>
+                                                </div>
+                                            )}
+                                            getSuggestionValue={(suggestion) => suggestion.title}
+                                            inputWidth="w-full  my-6 "
                                         />
-                                        <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                            <Search className="text-gray-400" size={20} />
-                                        </div>
-                                        {(searchTerm || activeFiltersCount > 0) && (
-                                            <button
-                                                onClick={clearOnlySearchTerm}
-                                                className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
-                                            >
-                                                <X size={16} />
-                                            </button>
-                                        )}
-
-                                        {/* Fixed Suggestions dropdown */}
-                                        {showSuggestions && (
-                                            <div className="absolute z-50 w-full bg-white border border-gray-200 rounded-md shadow-lg top-full mt-1">
-                                                {isLoadingSuggestions ? (
-                                                    <div className="px-4 py-3 text-sm text-gray-500">
-                                                        Loading suggestions...
-                                                    </div>
-                                                ) : searchSuggestions.length > 0 ? (
-                                                    searchSuggestions.map((suggestion) => (
-                                                        <div
-                                                            key={suggestion.id}
-                                                            className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                                            onMouseDown={(e) => {
-                                                                e.preventDefault(); // Prevent input blur
-                                                                handleSuggestionClick(suggestion);
-                                                            }}
-                                                        >
-                                                            <p className="text-sm font-medium text-gray-900 truncate text-left">
-                                                                {suggestion.title}
-                                                            </p>
-                                                        </div>
-                                                    ))
-                                                ) : debouncedSearchTerm && debouncedSearchTerm.length >= 2 ? (
-                                                    <div className="px-4 py-3 text-sm text-gray-500">
-                                                        No suggestions found
-                                                    </div>
-                                                ) : null}
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
 

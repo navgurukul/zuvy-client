@@ -16,13 +16,14 @@ import CourseDeleteModal from '../../_components/CourseDeleteModal'
 import { getCourseData } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 import useBootcampSettings from '@/hooks/useBootcampSettings'
+import useBootcampDelete from '@/hooks/useBootcampDelete'
 import{PageProps} from "@/app/admin/courses/[courseId]/(courseTabs)/settings/courseSettingType"
 
 const Page = ({ params }: { params: PageProps}) => {
     const router = useRouter()
     const { courseData } = getCourseData()
     
-    // Use the custom hook
+    // Use the custom hooks
     const { 
         bootcampSettings, 
         loading, 
@@ -31,6 +32,12 @@ const Page = ({ params }: { params: PageProps}) => {
         updateSettings 
     } = useBootcampSettings(params.courseId)
     
+    const { 
+        deleteBootcamp, 
+        isDeleting, 
+        error: deleteError 
+    } = useBootcampDelete()
+    
     // Local state for form
     const [localSettings, setLocalSettings] = useState({
         type: '',
@@ -38,7 +45,6 @@ const Page = ({ params }: { params: PageProps}) => {
     })
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
-    const [isDeleting, setIsDeleting] = useState(false)
     const [isSaved, setIsSaved] = useState(false)
 
     // Update local state when bootcamp settings load
@@ -90,23 +96,20 @@ const Page = ({ params }: { params: PageProps}) => {
     }
 
     const handleDelete = async () => {
-        setIsDeleting(true)
-        try {
-            await api.delete(`/bootcamp/${courseData?.id}`).then((res) => {
-                toast.success({
-                    title: res.data.status,
-                    description: res.data.message,
-                })
-            })
-            router.push('/admin/courses')
-        } catch (error: any) {
+        if (!courseData?.id) {
             toast.error({
-                title: error.data.status,
-                description: error.data.message,
+                title: 'Error',
+                description: 'Course ID not found',
             })
-        } finally {
-            setIsDeleting(false)
+            return
+        }
+
+        try {
+            await deleteBootcamp(courseData.id.toString())
             setDeleteModalOpen(false)
+        } catch (error) {
+            // Error is already handled in the hook
+            console.error('Delete failed:', error)
         }
     }
 
@@ -265,19 +268,27 @@ const Page = ({ params }: { params: PageProps}) => {
                             Once you delete a course, there is no going back. This will permanently delete the course, all its content, 
                             student enrollments, and submission data.
                         </p>
+                        {/* Show delete error if any */}
+                        {deleteError && (
+                            <Alert variant="destructive" className="mt-3">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>{deleteError}</AlertDescription>
+                            </Alert>
+                        )}
                     </div>
                     <Button
                         variant="destructive"
                         onClick={() => setDeleteModalOpen(true)}
+                        disabled={isDeleting}
                         className="ml-4 mt-5 bg-destructive hover:bg-destructive-dark text-destructive-foreground"
                     >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Course
+                        {isDeleting ? 'Deleting...' : 'Delete Course'}
                     </Button>
                 </div>
             </div>
 
-            {/* Replace the old DeleteConfirmationModal with the new CourseDeleteModal */}
+            {/* Course Delete Modal */}
             <CourseDeleteModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
