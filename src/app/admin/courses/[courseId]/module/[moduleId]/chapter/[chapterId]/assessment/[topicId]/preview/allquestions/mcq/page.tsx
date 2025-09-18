@@ -18,7 +18,10 @@ import {
 } from '@/components/ui/form'
 import { useRouter } from 'next/navigation'
 import { addClassToCodeTags, fetchPreviewData } from '@/utils/admin'
-import {PageQuizQuestion, MCQParams} from "@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/mcq/ArticleMcqPageType"
+import {
+    PageQuizQuestion,
+    MCQParams,
+} from '@/app/admin/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/mcq/ArticleMcqPageType'
 
 const McqPreview = ({ params }: { params: MCQParams[] }) => {
     const router = useRouter()
@@ -52,7 +55,9 @@ const McqPreview = ({ params }: { params: MCQParams[] }) => {
                     onClick={router.back}
                 >
                     <ChevronLeft strokeWidth={2} size={24} />
-                    <h1 className="font-extrabold text-[15px]">All Questions</h1>
+                    <h1 className="font-extrabold text-[15px]">
+                        All Questions
+                    </h1>
                 </div>
                 {/* <div>
                     <Button>Shuffle Quiz Qs</Button>
@@ -63,7 +68,7 @@ const McqPreview = ({ params }: { params: MCQParams[] }) => {
                 <form className="flex flex-col items-center mt-10 text-left">
                     {/* Map through the quizzes and display them */}
                     {assessmentPreviewContent?.Quizzes?.map(
-                        (question:PageQuizQuestion, index: number) => (
+                        (question: PageQuizQuestion, index: number) => (
                             <FormField
                                 key={question.id}
                                 control={form.control}
@@ -84,35 +89,29 @@ const McqPreview = ({ params }: { params: MCQParams[] }) => {
                                             />
                                             {}
                                         </FormLabel>
+
                                         <FormControl>
                                             <RadioGroup
                                                 value={field.value}
                                                 onValueChange={field.onChange}
                                             >
-                                                {question?.quizVariants.length >
-                                                    0 &&
-                                                    Object.keys(
-                                                        question
-                                                            ?.quizVariants[0]
-                                                            ?.options
-                                                    ).map((key) => (
-                                                        <div
-                                                            key={key}
-                                                            className="flex items-center gap-2 mb-2"
-                                                        >
-                                                            <RadioGroupItem
-                                                                value={key}
-                                                            />
-                                                            <p>{Object.entries(question.quizVariants[0]?.options || {}).map(
-                                                        ([key, value]) => (
-                                                         <p key={key}>{value}</p>
-                                                    )
-                                                )}
-                                                            </p>
-                                                        </div>
-                                                    ))}
+                                                {Object.entries(
+                                                    question?.quizVariants[0]
+                                                        ?.options || {}
+                                                ).map(([key, value]) => (
+                                                    <div
+                                                        key={key}
+                                                        className="flex items-center gap-2 mb-2"
+                                                    >
+                                                        <RadioGroupItem
+                                                            value={key}
+                                                        />
+                                                        <span>{value}</span>
+                                                    </div>
+                                                ))}
                                             </RadioGroup>
                                         </FormControl>
+
                                         <FormMessage />
                                     </FormItem>
                                 )}
