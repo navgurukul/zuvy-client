@@ -42,7 +42,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { useStudentData } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/useStudentData'
 import { createColumns } from './columns'
-// import { DataTable } from './dataTable'
 import {
     Tooltip,
     TooltipContent,
@@ -69,6 +68,7 @@ const Page = ({ params }: { params: ParamsType }) => {
     const debouncedSearchStudent = useDebounce(searchStudent, 1000)
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [searchQuery, setSearchQuery] = useState('')
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(
@@ -170,6 +170,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
                 })
+                return false 
             } else {
                 const res = await api.post(`/batch`, convertedData)
                 setAssignStudents('')
@@ -184,6 +185,11 @@ const Page = ({ params }: { params: ParamsType }) => {
                     description: res.data.message,
                 })
                 getUnAssignedStudents()
+                
+                // Form reset and selected rows clear 
+                form.reset()
+                setSelectedRows([])
+                
                 return true
             }
         } catch (error: any) {
@@ -239,8 +245,27 @@ const Page = ({ params }: { params: ParamsType }) => {
     const columns = useMemo(() => createColumns(Number(capEnrollmentValue)), [capEnrollmentValue])
 
     const handleModal = (isOpen: boolean) => {
-        isOpen && form.reset()
-        setAssignStudents('')
+        setIsDialogOpen(isOpen)
+        if (isOpen) {
+            form.reset()
+        } else {
+            // Dialog close states reset 
+            setAssignStudents('')
+            setSelectedRows([])
+            setSearchStudent('')
+        }
+    }
+
+    // submit handler for Manual assignment 
+    const handleManualSubmit = async () => {
+        const isValid = await form.trigger() // Form validation check 
+        if (isValid) {
+            const values = form.getValues()
+            const success = await onSubmit(values)
+            if (success) {
+                setIsDialogOpen(false) // after Success dialog close
+            }
+        }
     }
     
     const renderModal = (emptyState: boolean) => {
@@ -266,7 +291,7 @@ const Page = ({ params }: { params: ParamsType }) => {
             )
         } else {
             return (
-                <Dialog onOpenChange={(isOpen) => handleModal(isOpen)}>
+                <Dialog open={isDialogOpen} onOpenChange={(isOpen) => handleModal(isOpen)}>
                     <DialogTrigger asChild>
                         <Button className="lg:max-w-[150px] w-full mt-5">
                             {emptyState ? '+ Create Batch' : 'New Batch'}
@@ -319,18 +344,17 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                 >
                                                     Back
                                                 </Button>
-                                                <DialogClose asChild>
-                                                    <Button
-                                                        className="w-3/2"
-                                                        type="submit"
-                                                        disabled={
-                                                            !form.formState
-                                                                .isValid
-                                                        }
-                                                    >
-                                                        Create batch
-                                                    </Button>
-                                                </DialogClose>
+                                                <Button
+                                                    className="w-3/2"
+                                                    type="button"
+                                                    onClick={handleManualSubmit}
+                                                    disabled={
+                                                        !form.formState
+                                                            .isValid
+                                                    }
+                                                >
+                                                    Create batch
+                                                </Button>
                                             </div>
                                         </>
                                     ) : (
@@ -409,8 +433,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                             />
                                             <FormField
                                                 control={form.control}
-                                                // name="capEnrollment"
-                                                name="assignLearners" // Changed name to make it unique
+                                                name="assignLearners"
                                                 render={({ field }) => (
                                                     <FormItem className="text-start">
                                                         <FormLabel>
@@ -425,10 +448,9 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                                 value={
                                                                     field.value ||
                                                                     ''
-                                                                } // Correct use of value
+                                                                }
                                                                 className="flex gap-4"
                                                             >
-                                                                {/* Option: All learners */}
                                                                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                                                                     <FormControl>
                                                                         <RadioGroupItem value="all" />
@@ -439,7 +461,6 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                                     </FormLabel>
                                                                 </FormItem>
 
-                                                                {/* Option: Assign manually */}
                                                                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                                                                     <FormControl>
                                                                         <RadioGroupItem value="manually" />
@@ -504,6 +525,7 @@ const Page = ({ params }: { params: ParamsType }) => {
             )
         }
     }
+
     if (courseData?.id) {
         return (
             <div>
@@ -612,6 +634,5 @@ const Page = ({ params }: { params: ParamsType }) => {
         )
     }
 }
-
 
 export default Page
