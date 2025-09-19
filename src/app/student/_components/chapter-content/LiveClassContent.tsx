@@ -13,6 +13,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ReactPlayer, { ReactPlayerProps } from 'react-player'
 import { useVideoStore } from '@/store/store'
+import {LiveClassSkeleton} from "@/app/student/_components/Skeletons";
 
 const LiveClassContent: React.FC<LiveClassContentProps> = ({
     chapterDetails,
@@ -30,6 +31,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [showControls, setShowControls] = useState(true)
     const [localIsCompleted, setLocalIsCompleted] = useState(false)
+     const [loading, setLoading] = useState(true) 
 
     // Get session data
     const session = chapterDetails.sessions?.[0] || null
@@ -69,6 +71,10 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         }
     }, [])
 
+
+
+    
+
     // Update local state when chapter status changes
     useEffect(() => {
         setLocalIsCompleted(chapterDetails.status === 'Completed')
@@ -105,6 +111,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
 
         return `${day}${getOrdinalSuffix(day)} ${month} ${year} at ${time}`
     }
+
 
     // Helper function to get time remaining
     const getTimeRemaining = (scheduledDateTime: Date) => {
@@ -191,6 +198,19 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
             setIsFullscreen(false)
         }
     }
+
+
+useEffect(() => {
+  if (chapterDetails) {
+    setLoading(false)
+  }
+}, [chapterDetails])
+
+
+if (loading) {
+  return <LiveClassSkeleton type={'scheduled'} />
+}
+
 
     // If no session data, show empty state
     if (!session) {
@@ -577,5 +597,4 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         </div>
     )
 }
-
 export default LiveClassContent

@@ -1020,4 +1020,5 @@ const Page = ({ params }: { params: ParamsType }) => {
     }
 }
 
+
 export default Page

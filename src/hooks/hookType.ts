@@ -685,3 +685,10 @@ export interface UseBootcampSettingsReturn {
   updateSettings: (settings: BootcampSettingsData) => Promise<void>;
   refetch: () => Promise<void>;
 }
+
+// useBootcampDelete.tsx
+export interface UseBootcampDeleteReturn {
+    deleteBootcamp: (bootcampId: string) => Promise<void>
+    isDeleting: boolean
+    error: string | null
+}

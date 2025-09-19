@@ -28,6 +28,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFeedbackForm, formSchema } from '@/hooks/useFeedbackForm'
 import {FeedbackFormContentProps,FeedbackQuestion,QuestionItem} from '@/app/student/_components/chapter-content/componentChapterType'
 import useWindowSize from '@/hooks/useHeightWidth'
+import {FeedbackFormSkeleton} from "@/app/student/_components/Skeletons";
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     chapterDetails,
@@ -64,6 +65,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             },
         })
 
+
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -95,10 +97,9 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
         }
     }
 
-    if (loading) {
-        return <div>Loading...</div>
+      if (loading) {
+        return <FeedbackFormSkeleton/>;
     }
-
     const isCompleted = status === 'Completed'
 
     return (
@@ -464,7 +465,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 ))}
             </div>
 
-            {isCompleted ? (
+            {isCompleted? (
                 <div className="mt-8 mb-6">
                     <Button
                         type="submit"

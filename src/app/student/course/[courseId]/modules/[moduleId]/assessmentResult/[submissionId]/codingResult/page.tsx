@@ -6,6 +6,7 @@ import CodingSubmission from '@/app/student/course/[courseId]/studentAssessment/
 import { useSearchParams } from 'next/navigation'
 import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
 import {AssessmentParams} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"
+import {CodingResultPageSkeleton} from "@/app/student/_components/Skeletons"
 const Page = ({ params }: { params: AssessmentParams }) => {
     const { studentData } = useLazyLoadedStudentData()
     const searchParams = useSearchParams()
@@ -21,18 +22,10 @@ const Page = ({ params }: { params: AssessmentParams }) => {
         questionId,
         enabled: !!studentData?.id // Only fetch when user data is available
     })    // Show loading state
+
+
     if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/20">
-                <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-lg">
-                    <div className="animate-pulse mb-6">
-                        <div className="w-12 h-12 bg-primary rounded-full mx-auto"></div>
-                    </div>
-                    <h2 className="text-xl font-semibold text-foreground mb-2">Loading Submission</h2>
-                    <p className="text-muted-foreground">Fetching your coding submission details...</p>
-                </div>
-            </div>
-        )
+        return<CodingResultPageSkeleton/>
     }
 
     // Show error state
