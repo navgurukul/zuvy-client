@@ -3,6 +3,8 @@ import {
     Layout,
     List,
     LogOut,
+    Layers,
+    Settings,
     Code,
     Home,
     Book,
@@ -12,111 +14,176 @@ import {
     Database,
 } from 'lucide-react'
 
+// const guestRoutes = [
+//     {
+//         icon: Layout,
+//         label: 'Dashboard',
+//         href: '/student',
+//         subtabs: [],
+//     },
+//     {
+//         icon: BookOpen,
+//         label: 'My Courses',
+//         href: '/student/courses',
+//         subtabs: [],
+//     },
+//     {
+//         icon: MonitorPlay,
+//         label: 'Class Recordings',
+//         href: '/student/recordings',
+//         subtabs: [],
+//     },
+//     // {
+//     //     icon: Code,
+//     //     label: 'Coding Playground',
+//     //     href: '/student/playground',
+//     //     subtabs: [],
+//     // },
+//     // {
+//     //   icon: Compass,
+//     //   label: "Explore",
+//     //   href: "/student/explore",
+//     // },
+//     // {
+//     //   icon: Code,
+//     //   label: "Playground",
+//     //   href: "/student/playground",
+//     // },
+//     // {
+//     //   icon: MessagesSquare,
+//     //   label: "Discussion",
+//     //   href: "/student/discussion",
+//     // },
+//     // {
+//     //   icon: MessageCircleQuestion,
+//     //   label: "Help",
+//     //   href: "/student/help",
+//     // },
+// ]
+
 const guestRoutes = [
     {
-        icon: Layout,
-        label: 'Dashboard',
+        name: 'Dashboard',
         href: '/student',
-        subtabs: [],
+        icon: Layout,
+        active: '/student',
     },
     {
-        icon: BookOpen,
-        label: 'My Courses',
+        name: 'My Courses',
         href: '/student/courses',
-        subtabs: [],
+        icon: BookOpen,
+        active: '/student/courses',
     },
     {
-        icon: MonitorPlay,
-        label: 'Class Recordings',
+        name: 'Class Recordings',
         href: '/student/recordings',
-        subtabs: [],
+        icon: MonitorPlay,
+        active: '/student/recordings',
     },
-    // {
-    //     icon: Code,
-    //     label: 'Coding Playground',
-    //     href: '/student/playground',
-    //     subtabs: [],
-    // },
-    // {
-    //   icon: Compass,
-    //   label: "Explore",
-    //   href: "/student/explore",
-    // },
-    // {
-    //   icon: Code,
-    //   label: "Playground",
-    //   href: "/student/playground",
-    // },
-    // {
-    //   icon: MessagesSquare,
-    //   label: "Discussion",
-    //   href: "/student/discussion",
-    // },
-    // {
-    //   icon: MessageCircleQuestion,
-    //   label: "Help",
-    //   href: "/student/help",
-    // },
 ]
+
+// const teacherRoutes = [
+//     {
+//         icon: List,
+//         label: 'Classes',
+//         href: '/instructor',
+//         subtabs: [],
+//     },
+//     {
+//         icon: BookOpen,
+//         label: 'Courses',
+//         href: '/instructor/courses',
+//         subtabs: [],
+//     },
+//     {
+//         icon: Video,
+//         label: 'Recording',
+//         href: '/instructor/recording',
+//         subtabs: [],
+//     },
+//     // {
+//     //     icon: BookOpen,
+//     //     label: 'Curricullum',
+//     //     href: '/instructor/curricullum',
+//     //     subtabs: [],
+//     // },
+//     // {
+//     //     icon: BarChart,
+//     //     label: 'Analytics',
+//     //     href: '/instructor/analytics',
+//     //     subtabs: [],
+//     // },
+// ]
 
 const teacherRoutes = [
     {
-        icon: List,
-        label: 'Classes',
+        name: 'Classes',
         href: '/instructor',
-        subtabs: [],
+        icon: List,
+        active: '/instructor',
     },
     {
-        icon: BookOpen,
-        label: 'Courses',
+        name: 'Courses',
         href: '/instructor/courses',
-        subtabs: [],
+        icon: BookOpen,
+        active: '/instructor/courses',
     },
     {
-        icon: Video,
-        label: 'Recording',
+        name: 'Recording',
         href: '/instructor/recording',
-        subtabs: [],
+        icon: Video,
+        active: '/instructor/recording',
     },
-    // {
-    //     icon: BookOpen,
-    //     label: 'Curricullum',
-    //     href: '/instructor/curricullum',
-    //     subtabs: [],
-    // },
-    // {
-    //     icon: BarChart,
-    //     label: 'Analytics',
-    //     href: '/instructor/analytics',
-    //     subtabs: [],
-    // },
 ]
 
+// const adminRoutes = [
+//     // { label: 'Home', icon: Home, href: '/admin', subtabs: [] },
+//     { label: 'Courses', icon: Book, href: '/admin/courses', subtabs: [] },
+//     {
+//         label: 'Resource Library',
+//         icon: Database,
+//         href: '',
+//         subtabs: [
+//             {
+//                 label: 'Coding Problems',
+//                 href: '/admin/resource/coding',
+//                 icon: Video,
+//             },
+//             { label: 'MCQs', href: '/admin/resource/mcq', icon: Video },
+//             {
+//                 label: 'Open-Ended Questions',
+//                 href: '/admin/resource/open-ended',
+//                 icon: Video,
+//             },
+//         ],
+//     },
+//     // { label: "Instructors", icon: Book, href: "/admin/instructor" },
+//     // { label: "Reports", icon: BarChart, href: "/admin/reports" },
+//     // { label: "Settings", icon: Cog, href: "/admin/settings" },
+//     // { label: "Help", icon: HelpCircle, href: "/admin/help" },
+// ]
+
 const adminRoutes = [
-    // { label: 'Home', icon: Home, href: '/admin', subtabs: [] },
-    { label: 'Courses', icon: Book, href: '/admin/courses', subtabs: [] },
     {
-        label: 'Resource Library',
-        icon: Database,
-        href: '',
-        subtabs: [
-            {
-                label: 'Coding Problems',
-                href: '/admin/resource/coding',
-                icon: Video,
-            },
-            { label: 'MCQs', href: '/admin/resource/mcq', icon: Video },
-            {
-                label: 'Open-Ended Questions',
-                href: '/admin/resource/open-ended',
-                icon: Video,
-            },
-        ],
+        name: 'Course Studio',
+        href: '/admin/courses',
+        icon: Layers,
+        active: '/admin/courses',
+        // pathname.startsWith('/admin/courses') ||
+        // pathname.startsWith('/admin'),
     },
-    // { label: "Instructors", icon: Book, href: "/admin/instructor" },
-    // { label: "Reports", icon: BarChart, href: "/admin/reports" },
-    // { label: "Settings", icon: Cog, href: "/admin/settings" },
-    // { label: "Help", icon: HelpCircle, href: "/admin/help" },
+    {
+        name: 'Content Bank',
+        href: '/admin/content-bank',
+        icon: Database,
+        active: '/admin/content-bank',
+    },
+    {
+        name: 'Roles and Permissions',
+        href: '/admin/settings',
+        icon: Settings,
+        active: '/admin/settings',
+    },
 ]
 
 const commonRoutes = [

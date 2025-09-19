@@ -12,30 +12,28 @@ import { toast } from '@/components/ui/use-toast'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, POSITION } from '@/utils/constant'
-import {BootcampData,Params,StudentPage,Chapter,APIResponse} from "@/app/admin/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType"
+import { BootcampData, Params, StudentPage, Chapter, APIResponse } from "@/app/admin/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType"
+import { SearchBox } from '@/utils/searchBox'
+type Props = {}
 
-const Page = ({ params }: { params: Params}) => {
-    const moduleId =
-        typeof window !== 'undefined' &&
-        new URLSearchParams(window.location.search).get('moduleId')
-    const router = useRouter()
-    const pathname = usePathname()
+const Page = ({ params }: any) => {
     const searchParams = useSearchParams()
-    // const moduleId = searchParams.get('moduleId')
-    const [assesmentData, setAssesmentData] = useState<any>()
+    const moduleId = searchParams.get('moduleId')
     const [studentStatus, setStudentStatus] = useState<any>()
-    const [totalSubmission, setTotalSubmission] = useState<any>()
-    const [notSubmitted, setNotSubmitted] = useState<any>()
-    const [chapterDetails, setChapterDetails] = useState<Chapter |null>(null)
-    const [bootcampData, setBootcampData] = useState<BootcampData|null>(null)
-
-    const [searchQuery, setSearchQuery] = useState<string>('') // What user types
-    const [appliedSearchQuery, setAppliedSearchQuery] = useState<string>('') // What actually filters the data
-    const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
+    const [chapterDetails, setChapterDetails] = useState<any>()
+    const [bootcampData, setBootcampData] = useState<any>()
     const [totalStudents, setTotalStudents] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     const [loading, setLoading] = useState(false)
+
+    // Separate state for overall statistics (NEVER changes during search)
+    const [overallStats, setOverallStats] = useState({
+        totalStudents: 0,
+        totalSubmissions: 0,
+        notSubmitted: 0,
+        isInitialized: false // Flag to track if stats are loaded
+    })
 
     // Get pagination params from URL
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
@@ -65,118 +63,104 @@ const Page = ({ params }: { params: Params}) => {
         },
     ]
 
-    // Get search suggestions from existing data - use searchQuery for suggestions
-    const searchSuggestions = useMemo(() => {
-        if (!searchQuery.trim() || !studentStatus?.length) return []
-    
-        const query = searchQuery.toLowerCase()
-        const suggestions: { name: string; email: string }[] = []
-    
-        const seen = new Set()
-    
-        studentStatus.forEach((student: StudentPage) => {
-            const nameMatch = student.name?.toLowerCase().includes(query)
-            const emailMatch = student.emailId?.toLowerCase().includes(query)
-    
-            if ((nameMatch || emailMatch) && !seen.has(student.emailId)) {
-                suggestions.push({ name: student.name, email: student.emailId })
-                seen.add(student.emailId)
-            }
-        })
-    
-        return suggestions.slice(0, 5)
-    }, [searchQuery, studentStatus])
-    
-    // Filter data based on appliedSearchQuery, not searchQuery
-    const filteredData = useMemo(() => {
-        if (!appliedSearchQuery.trim() || !studentStatus) {
-            return studentStatus || []
+    // Fetch overall statistics ONCE when component mounts - Fixed version
+    const fetchOverallStats = useCallback(async () => {
+        if (!moduleId || overallStats.isInitialized) return
+
+        try {
+            // Fetch ALL data to get correct overall statistics
+            const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=10&offset=0`
+            const response = await api.get(url)
+
+            const allStudents = response.data.combinedData || []
+            const submitted = allStudents.filter(
+                (student: any) => student.status === 'Submitted'
+            )
+            const notSubmittedData = allStudents.filter(
+                (student: any) => student.status !== 'Submitted'
+            )
+
+            setOverallStats({
+                totalStudents: response.data.totalAllStudents || allStudents.length,
+                totalSubmissions: submitted.length,
+                notSubmitted: notSubmittedData.length,
+                isInitialized: true
+            })
+        } catch (error) {
+            console.error('Error fetching overall stats:', error)
+            // Fallback: Set as initialized to prevent infinite retries
+            setOverallStats(prev => ({ ...prev, isInitialized: true }))
         }
+    }, [moduleId, params.courseId, params.StudentForm, overallStats.isInitialized])
 
-        const searchTerm = appliedSearchQuery.toLowerCase()
-        return studentStatus.filter((student: StudentPage) => {
-            const nameMatch = student.name && student.name.toLowerCase().includes(searchTerm)
-            const emailMatch = student.email && student.email.toLowerCase().includes(searchTerm)
-            return nameMatch || emailMatch
-        })
-    }, [studentStatus, appliedSearchQuery])
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        if (!moduleId || !query.trim()) return []
 
-    // Update URL with search parameter
-    const updateSearchInURL = useCallback((query: string) => {
-        const params = new URLSearchParams(searchParams.toString())
+        const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=5&offset=0&searchStudent=${encodeURIComponent(query)}`
+        const response = await api.get(url)
+        return (
+            response.data.combinedData?.map((student: any) => ({
+                id: student.id,
+                name: student.name,
+                email: student.emailId,
+                ...student,
+            })) || []
+        )
+    }, [params.courseId, params.StudentForm, moduleId])
 
-        if (query.trim()) {
-            params.set('search', query)
-        } else {
-            params.delete('search')
-        }
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        if (!moduleId) return []
+        setLoading(true)
+        const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=${position}&offset=${offset}&searchStudent=${encodeURIComponent(query)}`
+        const response = await api.get(url)
 
-        router.push(pathname + '?' + params.toString())
-    }, [searchParams, router, pathname])
+        const data = response.data.combinedData?.map((student: any) => ({
+            ...student,
+            bootcampId: params.courseId,
+            moduleId: response.data.moduleId,
+            chapterId: response.data.chapterId,
+            userId: student.id,
+            email: student.emailId,
+        })) || []
+        // Only update table-related state, NOT overallStats
+        setStudentStatus(data)
+        setTotalStudents(response.data.totalStudentsCount || 0)
+        setPages(response.data.totalPages || 0)
+        setLastPage(response.data.totalPages || 0)
+        return data
+    }, [params.courseId, params.StudentForm, moduleId, position, offset])
 
-    // Handle search input change - only update searchQuery, not appliedSearchQuery
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        setSearchQuery(value)
-        setShowSuggestions(value.trim().length > 0)
+    const defaultFetchApi = useCallback(async () => {
+        if (!moduleId) return []
+        setLoading(true)
+        const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=${position}&offset=${offset}`
+        const response = await api.get(url)
 
-        // If input is empty, clear search from URL and applied query
-        if (!value.trim()) {
-            setAppliedSearchQuery('') // Clear applied search when input is empty
-            updateSearchInURL('')
-        }
-    }
+        const data = response.data.combinedData?.map((student: any) => ({
+            ...student,
+            bootcampId: params.courseId,
+            moduleId: response.data.moduleId,
+            chapterId: response.data.chapterId,
+            userId: student.id,
+            email: student.emailId,
+        })) || []
 
-    // Handle search submission - apply the search query
-    const handleSearchSubmit = (query?: string) => {
-        const searchTerm = query || searchQuery
-        setAppliedSearchQuery(searchTerm) // Apply the search to filter data
-        setShowSuggestions(false)
-        updateSearchInURL(searchTerm)
-    }
-
-    // Handle suggestion click - apply the selected suggestion
-    const handleSuggestionClick = (suggestion: string) => {
-        setSearchQuery(suggestion)
-        setAppliedSearchQuery(suggestion) // Apply the selected suggestion to filter data
-        setShowSuggestions(false)
-        updateSearchInURL(suggestion)
-    }
-
-    // Handle clear search - clear both search queries
-    const handleClearSearch = () => {
-        setSearchQuery('')
-        setAppliedSearchQuery('') // Clear applied search
-        setShowSuggestions(false)
-        updateSearchInURL('')
-    }
-
-    // Handle Enter key press
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSearchSubmit()
-        } else if (e.key === 'Escape') {
-            setShowSuggestions(false)
-        }
-    }
-
-    // Initialize search from URL on component mount
-    useEffect(() => {
-        const searchFromURL = searchParams.get('search')
-        if (searchFromURL) {
-            setSearchQuery(searchFromURL)
-            setAppliedSearchQuery(searchFromURL) // Also apply it to filter data
-        }
-    }, [searchParams])
+        setStudentStatus(data)
+        setTotalStudents(response.data.totalStudentsCount || 0)
+        setPages(response.data.totalPages || 0)
+        setLastPage(response.data.totalPages || 0)
+        return data
+    }, [params.courseId, params.StudentForm, moduleId, position, offset])
 
     const getBootcampHandler = useCallback(async () => {
         try {
-            const res = await api.get<{ bootcamp: BootcampData}>(`/bootcamp/${params.courseId}`)
+            const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
-            toast.error({
+            toast({
                 title: 'Error',
-                description: 'Error fetching bootcamps:',
+                description: 'Error fetching bootcamps',
+                variant: 'destructive'
             })
         }
     }, [params.courseId])
@@ -186,71 +170,50 @@ const Page = ({ params }: { params: Params}) => {
             const res = await api.get(`/tracking/getChapterDetailsWithStatus/${params.StudentForm}`)
             setChapterDetails(res.data.trackingData)
         } catch (error) {
-            toast.error({
+            toast({
                 title: 'Error',
-                description: 'Error fetching Chapter details:',
+                description: 'Error fetching Chapter details',
+                variant: 'destructive'
             })
         }
     }, [params.StudentForm])
 
+    // For pagination - we need to modify this to work with search
     const getStudentFormDataHandler = useCallback(async (customOffset?: number) => {
-        if (!moduleId) return
+        const searchTerm = searchParams.get('search')
 
-        setLoading(true)
-        const currentOffset = customOffset !== undefined ? customOffset : offset
-
-        // Fix URL construction - remove the "1" before position
-        let url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=${position}&offset=${currentOffset}`
-
-        try {
-            const response = await api.get<APIResponse>(url)
-            const data = response.data.combinedData.map((student: StudentPage) => {
-                return {
-                    ...student,
-                    bootcampId: params.courseId,
-                    moduleId: response.data.moduleId,
-                    chapterId: response.data.chapterId,
-                    userId: student.id,
-                    email: student.emailId,
-                }
-            })
-
-            const submitted = response.data.combinedData.filter(
-                (student: StudentPage) => student.status === 'Submitted'
-            )
-            const notSubmitted = response.data.combinedData.filter(
-                (student: StudentPage) => student.status !== 'Submitted'
-            )
-
-            setStudentStatus(data)
-            setTotalSubmission(submitted)
-            setNotSubmitted(notSubmitted)
-            setTotalStudents(response.data.totalStudentsCount)
-            setPages(response.data.totalPages)
-            setLastPage(response.data.totalPages)
-        } catch (error) {
-            console.error('Error fetching courses:', error)
-            toast.error({
-                title: 'Error',
-                description: 'Error fetching student data',
-            })
-        } finally {
-            setLoading(false)
+        if (searchTerm) {
+            // If there's a search term, use search API
+            await fetchSearchResultsApi(searchTerm)
+        } else {
+            // Otherwise use default API
+            await defaultFetchApi()
         }
-    }, [params.courseId, params.StudentForm, moduleId, position, offset])
+    }, [searchParams, fetchSearchResultsApi, defaultFetchApi])
 
-    // Separate useEffect for initial data that doesn't depend on pagination
+    // Initial data fetch - fetch stats ONCE
     useEffect(() => {
-        getBootcampHandler()
-        getChapterDetails()
-    }, [getBootcampHandler, getChapterDetails])
+        const initializeData = async () => {
+            if (!moduleId) return
 
-    // Separate useEffect for pagination-dependent data
+            await Promise.all([
+                getBootcampHandler(),
+                getChapterDetails(),
+            ])
+
+            // Fetch overall stats only once, after other data is loaded
+            await fetchOverallStats()
+        }
+
+        initializeData()
+    }, [moduleId, getBootcampHandler, getChapterDetails, fetchOverallStats])
+
+    // Pagination effect - this will handle data fetching based on search state
     useEffect(() => {
-        if (moduleId) {
+        if (moduleId && overallStats.isInitialized) {
             getStudentFormDataHandler()
         }
-    }, [currentPage, position, moduleId]) // Remove getStudentFormDataHandler from deps
+    }, [currentPage, position, moduleId, overallStats.isInitialized, getStudentFormDataHandler])
 
     return (
         <>
@@ -259,117 +222,75 @@ const Page = ({ params }: { params: Params}) => {
             ) : (
                 <Skeleton className="h-4 w-4/6" />
             )}
-            <MaxWidthWrapper className="p-4 ">
+            <MaxWidthWrapper className="p-4">
                 <div className="flex flex-col gap-y-4">
                     <h1 className="text-start text-xl font-bold capitalize text-gray-600">
                         {chapterDetails?.title}
                     </h1>
 
-                    {studentStatus && !loading ? (
+                    {/* Statistics Cards - These NEVER change during search */}
+                    {overallStats.isInitialized ? (
                         <div className="text-start flex gap-x-3">
-                            <div className="p-4 rounded-lg shadow-md ">
+                            <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {studentStatus?.length}
+                                    {overallStats.totalStudents}
                                 </h1>
-                                <p className="text-gray-500 ">Total Students</p>
+                                <p className="text-gray-500">Total Students</p>
                             </div>
-                            <div className="p-4 rounded-lg shadow-md ">
+                            <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {totalSubmission?.length}
+                                    {overallStats.totalSubmissions}
                                 </h1>
-                                <p className="text-gray-500 ">
+                                <p className="text-gray-500">
                                     Submissions Received
                                 </p>
                             </div>
                             <div className="p-4 rounded-lg shadow-md">
                                 <h1 className="text-gray-600 font-semibold text-xl">
-                                    {notSubmitted?.length}
+                                    {overallStats.notSubmitted}
                                 </h1>
-                                <p className="text-gray-500 ">
+                                <p className="text-gray-500">
                                     Not Yet Submitted
                                 </p>
                             </div>
                         </div>
                     ) : (
-                        <div className="flex gap-x-20  ">
-                            <div className="gap-y-4">
-                                <Skeleton className="h-4 my-3 w-[300px]" />
-                                <div className="space-y-2 ">
-                                    <Skeleton className="h-[125px] w-[600px] rounded-xl" />
-                                </div>
-                            </div>
+                        <div className="flex gap-x-3">
+                            <Skeleton className="h-[85px] w-[200px] rounded-lg" />
+                            <Skeleton className="h-[85px] w-[200px] rounded-lg" />
+                            <Skeleton className="h-[85px] w-[200px] rounded-lg" />
                         </div>
                     )}
-
-                    {/* Search Input with Suggestions */}
                     <div className="relative w-1/3 my-6">
-                        <div className="relative">
-                            <Input
-                                placeholder="Search for Name, Email..."
-                                className="input-with-icon pl-8 pr-10"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                onKeyDown={handleKeyPress}
-                                onFocus={() => {
-                                    if (searchQuery.trim().length > 0) {
-                                        setShowSuggestions(true)
-                                    }
-                                }}
-                                onBlur={() => {
-                                    // Small delay to allow suggestion clicks to work
-                                    setTimeout(() => setShowSuggestions(false), 150)
-                                }}
-                            />
-                            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                <Search className="text-gray-400" size={20} />
-                            </div>
-                            {searchQuery && (
-                                <button
-                                    onClick={handleClearSearch}
-                                    className="absolute inset-y-0 right-0 pr-2 flex items-center hover:text-gray-600 transition-colors"
-                                    type="button"
-                                >
-                                    <X className="text-gray-400 hover:text-gray-600" size={20} />
-                                </button>
-                            )}
-                        </div>
+                        <SearchBox
+                            placeholder="Search by name or email"
+                            fetchSuggestionsApi={fetchSuggestionsApi}
+                            fetchSearchResultsApi={fetchSearchResultsApi}
+                            defaultFetchApi={defaultFetchApi}
+                            getSuggestionLabel={(s) => (
+                                <div>
+                                    <div className="font-medium">{s.name}</div>
+                                    <div className="text-sm text-gray-500">{s.email}</div>
+                                </div>
 
-                        {/* Search Suggestions Dropdown */}
-                        {showSuggestions && searchSuggestions.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 mt-1">
-                                {searchSuggestions.map((suggestion, index) => (
-                                    <button
-                                        key={index}
-                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700"
-                                        onClick={() => handleSuggestionClick(suggestion.name)}
-                                        onMouseDown={(e) => e.preventDefault()} // Prevents onBlur from firing before onClick
-                                        type="button"
-                                    >
-                                        <div className="font-medium">{suggestion.name}</div>
-                                        <div className="text-xs text-gray-500">{suggestion.email}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        )}
+                            )}
+                            inputWidth=""
+                        />
                     </div>
 
-                    <DataTable data={filteredData} columns={columns} />
+                    <DataTable data={studentStatus || []} columns={columns} />
                 </div>
-                <DataTablePagination
-                    totalStudents={totalStudents}
-                    lastPage={lastPage}
-                    pages={pages}
-                    fetchStudentData={getStudentFormDataHandler}
-                />
-            </MaxWidthWrapper>
 
-            {/* Click outside to close suggestions */}
-            {showSuggestions && (
-                <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setShowSuggestions(false)}
-                />
-            )}
+                {/* Show pagination only when data is loaded */}
+                {studentStatus && studentStatus.length > 0 && (
+                    <DataTablePagination
+                        totalStudents={totalStudents}
+                        lastPage={lastPage}
+                        pages={pages}
+                        fetchStudentData={getStudentFormDataHandler}
+                    />
+                )}
+            </MaxWidthWrapper>
         </>
     )
 }

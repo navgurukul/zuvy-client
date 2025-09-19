@@ -23,7 +23,7 @@ export const SidebarRoutes = () => {
 
     return (
         <div className="flex justify-between flex-col h-full">
-            <div>
+            {/* <div>
                 {routes.map((route) => (
                     <SidebarItem
                         key={route.href}
@@ -33,7 +33,7 @@ export const SidebarRoutes = () => {
                         subtabs={route.subtabs}
                     />
                 ))}
-            </div>
+            </div> */}
             <div>
                 {commonRoutes.map((route) => (
                     <SidebarItem

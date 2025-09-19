@@ -343,3 +343,11 @@ export interface ToggleSwitchProps {
     bootcampId: string
 }
 
+
+// CourseDeleteModal.tsx
+export interface CourseDeleteModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    loading?: boolean;
+}

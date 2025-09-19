@@ -13,9 +13,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import { cn } from '@/lib/utils'
 import Heading from '../_components/header'
 import NewCourseDialog from './_components/newCourseDialog'
 import { api, apiMeraki } from '@/utils/axios.config'
@@ -32,60 +30,107 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStudentData } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Spinner } from '@/components/ui/spinner'
-import { Course,CourseData,CoursesResponse} from "@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType"
+import {
+    Course,
+    CourseData,
+    CoursesResponse,
+} from '@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Users, Clock, BookOpen } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from '@/components/ui/select'
+import CourseCard from './_components/CourseCard'
+import { useAllCourses } from '@/hooks/useAllCourses'
+import { useBootcamps } from '@/hooks/useBootcamps'
+import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
+import {
+    useCalendarAccessAction,
+    useCalendarAccessCheck,
+} from '@/hooks/useCalendarAccess'
+
+const statusOptions = [
+    { value: 'all', label: 'All Status' },
+    { value: 'published', label: 'Published' },
+    { value: 'ongoing', label: 'Ongoing' },
+    { value: 'draft', label: 'Draft' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'archived', label: 'Archived' },
+]
+
 const Courses: React.FC = () => {
     // misc
     const router = useRouter()
     const searchParams = useSearchParams()
     const { studentData } = useStudentData()
+
+    // search state
     const searchInputRef = useRef<HTMLInputElement>(null)
-    const dropdownRef = useRef<HTMLDivElement>(null)
-    const searchContainerRef = useRef<HTMLDivElement>(null)
-
-    // state and variables
-    const [activeFilter, setActiveFilter] = useState<
-        'all' | 'active' | 'completed'
-    >('all')
-
-    // Initialize search query from URL params
     const [searchQuery, setSearchQuery] = useState<string>(
         searchParams.get('search') || ''
     )
-
-    // Separate debounced search only for suggestions
-    const debouncedSearchForSuggestions = useDebounce(searchQuery, 100)
-
-    // Track the actual search term that should trigger course fetching
     const [activeSearchTerm, setActiveSearchTerm] = useState<string>(
         searchParams.get('search') || ''
     )
+    const debouncedSearchForSuggestions = useDebounce(searchQuery, 100)
 
-    const [courses, setCourses] = useState<Course[]>([])
-    const [allCourses, setAllCourses] = useState<Course[]>([]) // Store all courses for search suggestions
+    // pagination & layout
+    // const position = useMemo(
+    //     () => searchParams.get('limit') || POSITION,
+    //     [searchParams]
+    // )
+    // ✅ derive once per render from a primitive, not the whole object
+    const limitParam = searchParams.get('limit')
+    const position: number = Number(limitParam ?? POSITION) || Number(POSITION)
+
+    const [currentPage, setCurrentPage] = useState(1)
+    const [offset, setOffset] = useState<number>(OFFSET)
+
+    // new course form
+    const [newCourseName, setNewCourseName] = useState<string>('')
+    const [newCourseDuration, setNewCourseDuration] = useState<string>('')
+
+    const [newCourseDescription, setNewCourseDescription] = useState<string>('')
+
+    // suggestions UI
     const [filteredSuggestions, setFilteredSuggestions] = useState<Course[]>([])
     const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
     const [selectedSuggestionIndex, setSelectedSuggestionIndex] =
         useState<number>(-1)
 
-    const position = useMemo(
-        () => searchParams.get('limit') || POSITION,
-        [searchParams]
-    )
-    const [currentPage, setCurrentPage] = useState(1)
-    const [totalBootcamps, setTotalBootcamps] = useState(0)
-    const [pages, setPages] = useState(0)
-    const [lastPage, setLastPage] = useState(0)
-    const [offset, setOffset] = useState<number>(OFFSET)
-    const [loading, setLoading] = useState(true)
-    const [newCourseName, setNewCourseName] = useState<string>('')
-    const [newCourseDescription, setNewCourseDescription] = useState<string>('')
-    const [hasAccess, setHasAccess] = useState<boolean>(true)
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    // === Hooks ===
+    const { allCourses, refetchAllCourses } = useAllCourses(true)
+    console.log('allCourses', allCourses)
+    const { courses, loading, totalBootcamps, totalPages, refetchBootcamps } =
+        useBootcamps({
+            limit: position,
+            searchTerm: activeSearchTerm,
+            offset,
+            auto: true,
+        })
+    console.log('courses', courses)
+    const { createBootcamp, creating } = useCreateBootcamp()
+    const { hasAccess, refetchAccess } = useCalendarAccessCheck(true)
+    const { giveAccess } = useCalendarAccessAction()
 
-    // func
-    // const handleFilterClick = (filter: 'all' | 'active' | 'completed') => {
-    //     setActiveFilter(filter)
-    // }
+    const dropdownRef = useRef<HTMLDivElement>(null)
+    const searchContainerRef = useRef<HTMLDivElement>(null)
+    const [statusFilter, setStatusFilter] = useState('all')
+
+    // state and variables
+    // const [activeFilter, setActiveFilter] = useState<
+    //     'all' | 'active' | 'completed'
+    // >('all')
+
+    // const [pages, setPages] = useState(0)
+    // const [lastPage, setLastPage] = useState(0)
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // Improved search filtering function for suggestions
     const filterCoursesByRelevance = (
@@ -150,42 +195,6 @@ const Courses: React.FC = () => {
             router.replace(newURL, { scroll: false })
         },
         [router, searchParams]
-    )
-
-    // Fetch all courses for search suggestions
-    const getAllCourses = useCallback(async () => {
-        try {
-            const response = await api.get<CoursesResponse>(`/bootcamp?limit=1000&offset=0`)
-            setAllCourses(response.data.data)
-        } catch (error) {
-            console.error('Error fetching all courses:', error)
-        }
-    }, [])
-
-    // Main function to fetch courses - only called when activeSearchTerm changes
-    const getBootcamp = useCallback(
-        async (offset: number) => {
-            let url = `/bootcamp?limit=${position}&offset=${offset}`
-
-            if (activeSearchTerm) {
-                url = `/bootcamp?limit=${position}&searchTerm=${encodeURIComponent(
-                    activeSearchTerm
-                )}`
-            }
-
-            try {
-                const response = await api.get<CoursesResponse>(url)
-                setCourses(response.data.data)
-                setTotalBootcamps(response.data.totalBootcamps)
-                setPages(response.data.totalPages)
-                setLastPage(response.data.totalPages)
-                setLoading(false)
-            } catch (error) {
-                console.error('Error fetching courses:', error)
-                setLoading(false)
-            }
-        },
-        [activeSearchTerm, position]
     )
 
     // Handle search input change - only affects suggestions, not course display
@@ -312,11 +321,6 @@ const Courses: React.FC = () => {
         }
     }, [debouncedSearchForSuggestions, allCourses])
 
-    // Fetch courses only when activeSearchTerm changes
-    useEffect(() => {
-        getBootcamp(offset)
-    }, [getBootcamp, offset])
-
     useEffect(() => {
         if (searchQuery.trim() === '') {
             // If user manually clears input, reset everything
@@ -324,15 +328,16 @@ const Courses: React.FC = () => {
         }
     }, [searchQuery])
 
-    // Initialize all courses
-    useEffect(() => {
-        getAllCourses()
-    }, [getAllCourses])
-
     const handleNewCourseNameChange = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         setNewCourseName(event.target.value)
+    }
+
+    const handleNewCourseDurationChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setNewCourseDuration(event.target.value)
     }
 
     const handleNewCourseDescriptionChange = (
@@ -355,29 +360,25 @@ const Courses: React.FC = () => {
                 title: 'Cannot Create A New Course',
                 description: 'Course Name Already Exists',
             })
-        } else {
-            try {
-                const response = await api.post('/bootcamp', courseData)
-                toast.success({
-                    title: response.data.status,
-                    description: response.data.message,
-                })
-                // Reset form after successful creation
-                setNewCourseName('')
-                setNewCourseDescription('')
-                getBootcamp(offset)
-                // Refresh all courses for suggestions
-                getAllCourses()
-                router.push(
-                    `/admin/courses/${response.data.bootcamp.id}/details`
-                )
-            } catch (error: any) {
-                toast.error({
-                    title: error?.data?.status || 'Error',
-                    description:
-                        error?.data?.message || 'Failed to create course',
-                })
-            }
+            return
+        }
+        try {
+            const data = await createBootcamp(courseData)
+            toast.success({
+                title: data.status,
+                description: data.message,
+            })
+            // Reset form after successful creation
+            setNewCourseName('')
+            setNewCourseDescription('')
+            await refetchBootcamps(offset) // same page refresh
+            await refetchAllCourses() // refresh suggestions
+            router.push(`/admin/courses/${data.bootcamp.id}/details`)
+        } catch (error: any) {
+            toast.error({
+                title: error?.data?.status || 'Error',
+                description: error?.data?.message || 'Failed to create course',
+            })
         }
     }
 
@@ -386,56 +387,45 @@ const Courses: React.FC = () => {
         localStorage.setItem('courseId', id.toString())
     }
 
-    useEffect(() => {
-        const getToken = async () => {
-            const response = await api.get(`/classes/check-calendar-access`)
-
-            if (response.data.status === 'not success') {
-                setHasAccess(false)
-            } else {
-                setHasAccess(true)
-            }
-        }
-        getToken()
-    }, [])
-
-    const calendarAccess = () => {
-        api.get('/classes', {
-            params: {
-                userID: studentData?.id,
-                email: studentData?.email,
-            },
-        }).then((response) => {
-            router.push(response.data.url)
-        })
+    const calendarAccess = async () => {
+        const url = await giveAccess(studentData?.id, studentData?.email)
+        router.push(url)
     }
 
     function getValidImageUrl(url: string): string | null {
-        if (typeof url !== "string" || url.trim() === "") {
-            return null;
+        if (typeof url !== 'string' || url.trim() === '') {
+            return null
         }
 
-        const trimmedUrl = url.trim();
+        const trimmedUrl = url.trim()
 
         // Check if it starts with valid protocol or relative path
         const isValidStart =
-            trimmedUrl.startsWith("/") ||
-            trimmedUrl.startsWith("http://") ||
-            trimmedUrl.startsWith("https://");
+            trimmedUrl.startsWith('/') ||
+            trimmedUrl.startsWith('http://') ||
+            trimmedUrl.startsWith('https://')
 
         // Check for common image extensions
-        const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".tiff"];
+        const imageExtensions = [
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.gif',
+            '.webp',
+            '.svg',
+            '.bmp',
+            '.tiff',
+        ]
         const hasValidExtension = imageExtensions.some((ext) =>
             trimmedUrl.toLowerCase().includes(ext)
-        );
+        )
 
         if (isValidStart && hasValidExtension) {
-            return trimmedUrl;
+            return trimmedUrl
         }
 
-        return '';
+        return ''
     }
-
 
     return (
         <>
@@ -444,66 +434,106 @@ const Courses: React.FC = () => {
                     <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
-                <div>
-                    <Heading title={'Courses'} />
-                    {/* <p className="text-3xl font-bold tracking-tight m-0">Courses</p> */}
-                    <div>
-                        {!hasAccess ? (
-                            <Alert
-                                variant="destructive"
-                                className="flex justify-between mt-5 items-center"
+                <div className="w-full">
+                    {!hasAccess ? (
+                        <Alert
+                            variant="destructive"
+                            className="flex justify-between mt-5 items-center container mx-auto max-w-7xl"
+                        >
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>
+                                Your calendar access has expired. Please log in
+                                again to gain access to the courses
+                            </AlertDescription>
+                            <Button
+                                onClick={calendarAccess}
+                                className="bg-success-dark opacity-75 font-semibold"
                             >
-                                {/* <AlertCircle className="h-4 w-4" /> */}
-                                <AlertTitle>Error</AlertTitle>
-                                <AlertDescription>
-                                    Your calendar access has expired. Please log
-                                    in again to gain access to the courses
-                                </AlertDescription>
-                                <Button
-                                    onClick={calendarAccess}
-                                    className="bg-success-dark opacity-75 font-semibold"
-                                >
-                                    Give access
-                                </Button>
-                            </Alert>
-                        ) : null}
-                        <div className="flex flex-col lg:flex-row justify-between items-center mt-6 gap-4">
-                            {/* Enhanced Search Input with Suggestions */}
-                            <div
-                                className="relative w-full lg:max-w-[500px]"
-                                ref={searchContainerRef}
-                            >
-                                <div className="relative">
-                                    <Input
-                                        ref={searchInputRef}
-                                        type="text"
-                                        placeholder="Search"
-                                        className="lg:max-w-[500px] w-full"
-                                        value={searchQuery}
-                                        onChange={handleSearchChange}
-                                        onKeyDown={handleKeyDown}
-                                        onFocus={() => {
-                                            if (
-                                                searchQuery.trim() &&
-                                                filteredSuggestions.length > 0
-                                            ) {
-                                                setShowSuggestions(true)
-                                            }
-                                        }}
-                                    />
-                                    {searchQuery && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
-                                            onClick={clearSearch}
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    )}
-                                </div>
+                                Give access
+                            </Button>
+                        </Alert>
+                    ) : null}
+                    <div className="container mx-auto px-6 pt-8 pb-2 max-w-7xl">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
+                            {/* Left: Title and Subtitle */}
+                            <div className="flex-1 min-w-[220px] text-start">
+                                <h1 className="text-3xl font-bold text-foreground mb-1">
+                                    Course Studio
+                                </h1>
+                                <p className="text-muted-foreground text-lg font-normal">
+                                    Create, manage, and monitor your educational
+                                    courses
+                                </p>
+                            </div>
 
-                                {/* Clean Search Suggestions Dropdown */}
+                            {/* Right: Create New Course Button */}
+                            <div className="flex-1 flex justify-end min-w-[220px]">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button className="text-white bg-primary font-semibold px-5 py-2 flex gap-2">
+                                            <Plus className="w-5" />
+                                            Create New Course
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogOverlay />
+                                    <NewCourseDialog
+                                        newCourseName={newCourseName}
+                                        newCourseDuration={newCourseDuration}
+                                        newCourseDescription={
+                                            newCourseDescription
+                                        }
+                                        handleNewCourseNameChange={
+                                            handleNewCourseNameChange
+                                        }
+                                        handleNewCourseDurationChange={
+                                            handleNewCourseDurationChange
+                                        }
+                                        handleNewCourseDescriptionChange={
+                                            handleNewCourseDescriptionChange
+                                        }
+                                        handleCreateCourse={handleCreateCourse}
+                                        isDialogOpen={isDialogOpen}
+                                    />
+                                </Dialog>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
+                            {/* Search Bar */}
+                            <div className="relative w-full sm:w-[500px] lg:w-[450px]">
+                                {/* Search Icon */}
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 mt-1 text-muted-foreground" />
+                                <Input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    placeholder="Search courses..."
+                                    className="lg:max-w-[800px] bg-card w-full pl-10 pr-10" // pl-10 for left padding (space for icon)
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    onKeyDown={handleKeyDown}
+                                    onFocus={() => {
+                                        if (
+                                            searchQuery.trim() &&
+                                            filteredSuggestions.length > 0
+                                        ) {
+                                            setShowSuggestions(true)
+                                        }
+                                    }}
+                                />
+
+                                {/* Clear Button */}
+                                {searchQuery && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
+                                        onClick={clearSearch}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                )}
+
+                                {/* Suggestions Dropdown */}
                                 {showSuggestions &&
                                     filteredSuggestions.length > 0 && (
                                         <div className="absolute top-full left-0 right-0 z-50 mt-1">
@@ -516,11 +546,8 @@ const Courses: React.FC = () => {
                                                                 'px-3 py-2.5 cursor-pointer text-sm transition-colors',
                                                                 'hover:bg-muted/50',
                                                                 index ===
-                                                                selectedSuggestionIndex &&
-                                                                'bg-muted',
-                                                                index !==
-                                                                filteredSuggestions.length -
-                                                                1
+                                                                    selectedSuggestionIndex &&
+                                                                    'bg-muted'
                                                             )}
                                                             onClick={() =>
                                                                 handleSuggestionClick(
@@ -544,30 +571,34 @@ const Courses: React.FC = () => {
                                     )}
                             </div>
 
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button className="text-white bg-success-dark opacity-75 font-semibold lg:max-w-[150px] w-full mt-5">
-                                        <Plus className="w-5 mr-2" />
-                                        <p>New Course</p>
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <NewCourseDialog
-                                    newCourseName={newCourseName}
-                                    newCourseDescription={newCourseDescription}
-                                    handleNewCourseNameChange={
-                                        handleNewCourseNameChange
-                                    }
-                                    handleNewCourseDescriptionChange={
-                                        handleNewCourseDescriptionChange
-                                    }
-                                    handleCreateCourse={handleCreateCourse}
-                                    isDialogOpen={isDialogOpen}
-                                />
-                            </Dialog>
+                            {/* Filter Dropdown */}
+                            <div className="mt-2">
+                                <Select
+                                    value={statusFilter}
+                                    onValueChange={(val) => {
+                                        setStatusFilter(val)
+                                        setCurrentPage(1)
+                                    }}
+                                >
+                                    <SelectTrigger className="w-[150px]">
+                                        <SelectValue placeholder="Status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {statusOptions.map((opt) => (
+                                            <SelectItem
+                                                key={opt.value}
+                                                value={opt.value}
+                                            >
+                                                {opt.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-
-                        <div className="my-5 flex justify-center items-center">
+                    </div>
+                    <div className="">
+                        <div className="mb-5 flex justify-center items-center">
                             {courses.length === 0 ? (
                                 <>
                                     {activeSearchTerm.length > 0 ? (
@@ -598,7 +629,7 @@ const Courses: React.FC = () => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="mt-24 ">
+                                        <div className="mt-24">
                                             <div>
                                                 <h4
                                                     className={
@@ -620,11 +651,17 @@ const Courses: React.FC = () => {
                                                         newCourseName={
                                                             newCourseName
                                                         }
+                                                        newCourseDuration={
+                                                            newCourseDuration
+                                                        }
                                                         newCourseDescription={
                                                             newCourseDescription
                                                         }
                                                         handleNewCourseNameChange={
                                                             handleNewCourseNameChange
+                                                        }
+                                                        handleNewCourseDurationChange={
+                                                            handleNewCourseDurationChange
                                                         }
                                                         handleNewCourseDescriptionChange={
                                                             handleNewCourseDescriptionChange
@@ -700,52 +737,48 @@ const Courses: React.FC = () => {
                                 </>
                             ) : (
                                 <div>
-                                    <div className="flex flex-wrap justify-center gap-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start">
                                         {courses.map((course, index) => {
-
-                                            const validImageUrl = getValidImageUrl(course.coverImage);
+                                            const validImageUrl =
+                                                getValidImageUrl(
+                                                    course.coverImage
+                                                )
 
                                             return (
-                                                <Card
-                                                    key={index}
-                                                    className={`h-max w-[400px] cursor-pointer hover:shadow-lg transition-shadow duration-200`}
-                                                    onClick={() =>
-                                                        handleCardClick(course.id)
+                                                <CourseCard
+                                                    key={course.id}
+                                                    course={course}
+                                                    validImageUrl={
+                                                        validImageUrl ?? ''
                                                     }
-                                                >
-                                                    <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                                                        <OptimizedImageWithFallback
-                                                            src={validImageUrl ?? ""}
-                                                            alt={course.name || "Course Image"}
-                                                            fallBackSrc="/logo_white.png"
-                                                        />
-                                                    </div>
-                                                    <div className="text-start px-4 py-3 bg-muted">
-                                                        <p className="capitalize mb-2 font-semibold">
-                                                            {course.name}
-                                                        </p>
-                                                        <div className="flex gap-2 items-center">
-                                                            <GraduationCap
-                                                                width={20}
-                                                            />
-                                                            <span className="text-sm font-semibold">
-                                                                {
-                                                                    course.students_in_bootcamp
-                                                                }{' '}
-                                                                Learners
-                                                            </span>
-                                                            {/* <span>{course.date}</span> */}
-                                                        </div>
-                                                    </div>
-                                                </Card>
-                                            );
+                                                    onClick={() =>
+                                                        handleCardClick(
+                                                            course.id
+                                                        )
+                                                    }
+                                                    statusOptions={
+                                                        statusOptions
+                                                    }
+                                                />
+                                            )
                                         })}
                                     </div>
-                                    <DataTablePagination
+                                    {/* <DataTablePagination
                                         totalStudents={totalBootcamps}
                                         lastPage={lastPage}
                                         pages={pages}
                                         fetchStudentData={getBootcamp}
+                                    /> */}
+                                    <DataTablePagination
+                                        totalStudents={totalBootcamps}
+                                        lastPage={totalPages}
+                                        pages={totalPages}
+                                        fetchStudentData={(
+                                            newOffset: number
+                                        ) => {
+                                            setOffset(newOffset)
+                                            refetchBootcamps(newOffset) // instead of getBootcamp(newOffset)
+                                        }}
                                     />
                                 </div>
                             )}
