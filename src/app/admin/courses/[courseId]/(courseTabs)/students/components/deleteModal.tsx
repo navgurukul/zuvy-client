@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -8,28 +8,27 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { fetchStudentsHandler } from '@/utils/admin'
+import { AlertCircle } from 'lucide-react'
 import {
     getStoreStudentDataNew,
-    getStoreStudentData,
     getIsRowSelected,
 } from '@/store/store'
-import{DeleteAlertDialogProps} from "@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
+import { DeleteModalDialogProps } from './courseStudentComponentType'
 
-export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
+export const DeleteModalDialog: React.FC<DeleteModalDialogProps> = ({
     title,
     description,
     userId,
     bootcampId,
-    fetchStudentData,
-    setSelectedRows,
+    isOpen,
+    onClose,
+    setSelectedRows, // Add this parameter
 }) => {
+    const [isDeleting, setIsDeleting] = useState(false)
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
     const {
         setStudents,
@@ -42,7 +41,10 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
         search,
     } = getStoreStudentDataNew()
 
-    async function deleteStudentHandler(userId: any, bootcampId: any) {
+    async function deleteStudentHandler() {
+        if (isDeleting) return
+        
+        setIsDeleting(true)
         try {
             let url = `/student/{userId}/${bootcampId}?`
             url += 'userId=' + userId.join('&userId=')
@@ -51,9 +53,8 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     title: 'User Deleted Successfully!',
                     description: res.data.message,
                 })
-                fetchStudentData && fetchStudentData()
                 fetchStudentsHandler({
-                    courseId: bootcampId,
+                    courseId: String(bootcampId),
                     limit,
                     offset,
                     searchTerm: search,
@@ -63,8 +64,16 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     setTotalStudents,
                     setCurrentPage,
                 })
-                // setSelectedRows([])
                 setIsRowUnSelected(!isRowUnSelected)
+                
+                // Clear selected rows after successful deletion
+                if (setSelectedRows) {
+                    setSelectedRows([])
+                }
+                
+                if (onClose) {
+                    onClose()
+                }
             })
         } catch (error: any) {
             toast.error({
@@ -72,30 +81,33 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
+        } finally {
+            setIsDeleting(false)
         }
     }
 
     return (
-        <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button className="bg-white text-red-400">
-                    <Trash2 />
-                </Button>
-            </AlertDialogTrigger>
+        <AlertDialog open={isOpen} onOpenChange={onClose}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>{title}</AlertDialogTitle>
+                    <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertCircle className="h-5 w-5 text-destructive" />
+                    {title}
+                </AlertDialogTitle>
                     <AlertDialogDescription>
                         {description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel className="!text-gray-600 hover:border-[rgb(81,134,114)]">Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isDeleting}>
+                        Cancel
+                    </AlertDialogCancel>
                     <AlertDialogAction
-                        className="bg-red-500"
-                        onClick={() => deleteStudentHandler(userId, bootcampId)}
+                        onClick={deleteStudentHandler}
+                        disabled={isDeleting}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                        Continue
+                        {isDeleting ? 'Deleting...' : 'Delete'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
@@ -103,4 +115,4 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     )
 }
 
-export default AlertDialogDemo
+export default DeleteModalDialog

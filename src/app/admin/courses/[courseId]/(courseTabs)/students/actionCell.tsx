@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import EditModal from './components/editModal'
 import { AlertDialogDemo } from './components/deleteModalNew'
+import DeleteModalDialog from './components/deleteModal'
 
 interface ActionCellProps {
     student: {
@@ -84,7 +85,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
             />
 
             {/* Delete Modal - Outside dropdown */}
-            <AlertDialogDemo
+            <DeleteModalDialog
                 userId={[Number(userId)]}
                 bootcampId={Number(bootcampId)}
                 title="Delete Student"
