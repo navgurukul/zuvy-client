@@ -31,7 +31,7 @@ function TabItem({ href, title, icon: Icon }: TabItemProps) {
       )}
     >
       {Icon && <Icon className="h-4 w-4" />}
-      <span className="hidden sm:block">{title}</span>
+      <span className="text-xs leading-tight">{title}</span>
     </Link>
   );
 }
