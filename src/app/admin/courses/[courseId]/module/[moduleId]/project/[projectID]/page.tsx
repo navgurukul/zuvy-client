@@ -536,8 +536,6 @@ export default function Project() {
     console.error(err)
   }
 }
-
-
     useEffect(() => {
         if (projectID) {
             fetchProjectDetails()
