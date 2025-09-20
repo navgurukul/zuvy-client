@@ -4,7 +4,7 @@ import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import type { UseCourseDetailsReturn, CourseDetailsData } from './hookType';
 
-const useCourseDetails = (): UseCourseDetailsReturn => {
+const useCourseData = (): UseCourseDetailsReturn => {
   const [courseData, setCourseData] = useState<CourseDetailsData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,4 +73,4 @@ const useCourseDetails = (): UseCourseDetailsReturn => {
   };
 };
 
-export default useCourseDetails;
+export default useCourseData;
