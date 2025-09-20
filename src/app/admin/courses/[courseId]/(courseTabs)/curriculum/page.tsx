@@ -621,7 +621,7 @@ function Page() {
                 <div className="flex flex-col items-center justify-center overflow-hidden">
                     {curriculum.length > 0 ? (
                         <Reorder.Group
-                            className="w-1/2"
+                            className="w-full px-2 md:px-0 max-w-4xl flex flex-col gap-y-4 my-4"
                             values={curriculum}
                             onReorder={handleReorderModules}
                             axis="y"
