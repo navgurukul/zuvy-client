@@ -8,7 +8,7 @@ import styles from '../../_components/cources.module.css'
 import TabItem from './TabItem'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import useCourseDetails from '@/hooks/useCourseDetails' // Import the new hook
+import useCourseData from '@/hooks/useCourseData'
 import {
     ArrowLeft,
     GraduationCap,
@@ -25,7 +25,7 @@ import {
 function CourseLayout() {
     const router = useRouter()
     const { courseId } = useParams()
-    const { courseData, loading, error, fetchCourseDetails } = useCourseDetails()
+    const { courseData, loading, error, fetchCourseDetails } = useCourseData()
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     const courseMenu = [

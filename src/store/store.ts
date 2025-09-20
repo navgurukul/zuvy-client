@@ -43,8 +43,8 @@ interface BatchData {
     bootcampId: number
     instructorId: number
     capEnrollment: number
-    // createdAt: string,
-    // updatedAt: string,
+    createdAt: string,
+    updatedAt: string,
     students_enrolled: number
 }
 

@@ -1,18 +1,19 @@
 'use client'
 import React, { useEffect, useState } from 'react'
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button'
 import { getAssesmentBackgroundColorClass } from '@/lib/utils'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
-import {FormComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import { FormComponentProps } from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 const FormComponent = ({
     bootcampId,
     moduleId,
     data,
     moduleName,
-}:FormComponentProps) => {
+}: FormComponentProps) => {
     const [totalStudents, setTotalStudents] = useState(0)
 
     useEffect(() => {
@@ -26,34 +27,31 @@ const FormComponent = ({
     }, [bootcampId])
 
     return (
-        <div className="lg:flex h-[220px] w-full shadow-[0_4px_4px_rgb(0,0,0,0.12)] my-5 rounded-md p-4">
+        <div className="bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
             <div className="flex flex-col w-full justify-between py-2 lg:mx-2">
-                <h1 className="text-lg text-start font-semibold text-gray-800 dark:text-white">
-                    {data.title}
-                </h1>
-                <p className="text-md text-start">{moduleName}</p>
-
-                <div className="flex  justify-between gap-x-2 w-full">
-                    <div className="flex items-center gap-x-2 justify-between">
-                        <div
-                            className={`h-3 w-3 rounded-full ${
-                                data.submitStudents / totalStudents > 0.8
-                                    ? 'bg-green-400'
-                                    : data.submitStudents / totalStudents >= 0.5
-                                    ? 'bg-orange-400'
-                                    : 'bg-red-500'
-                            }`}
-                        />
-                        <div className="text-base lg:text-lg font-medium text-gray-700">
-                            {data.submitStudents}/{totalStudents}
-                        </div>
-
-                        <p className="text-gray-700 font-normal text-md">
-                            Submissions
-                        </p>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-100 rounded-md">
+                        <MessageSquare className="w-4 h-4 text-gray-600" />
                     </div>
+                    <h3 className="font-medium text-base text-gray-900">{data.title}</h3>
                 </div>
-                <div className="flex items-center ml-auto">
+                <div className="flex items-center justify-between mt-4 text-sm">
+                    <div className="flex items-center gap-1">
+                        <Badge
+                            variant="outline"
+                            className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
+                        >
+                            {data.submitStudents} submissions
+                        </Badge>
+                    </div>
+                    <Badge
+                        variant="secondary"
+                        className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                    >
+                        {totalStudents - data.submitStudents} pending
+                    </Badge>
+                </div>
+                <div className="mt-4 flex justify-end">
                     {data.submitStudents > 0 ? (
                         <Link
                             href={{
@@ -67,10 +65,10 @@ const FormComponent = ({
                                 {' '}
                                 <Button
                                     variant="ghost"
-                                    className="text-green-700"
+                                    className="hover:bg-blue-600 hover:text-white transition-colors"                               
                                 >
                                     View Submissions
-                                    <ChevronRight size={20} />
+                                    <ChevronRight size={16}  className="ml-1" />
                                 </Button>
                             </h1>
                         </Link>
@@ -82,7 +80,7 @@ const FormComponent = ({
                                 disabled={data.submitStudents === 0}
                             >
                                 View Submissions
-                                <ChevronRight size={20} />
+                                <ChevronRight size={16}  className="ml-1" />
                             </Button>
                         </h1>
                     )}

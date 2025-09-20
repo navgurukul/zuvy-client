@@ -671,6 +671,28 @@ export interface UseUpcomingEventsReturn {
   error: string | null;
 }
 
+// useBootcampSettings.tsx
+export interface BootcampSettingsData {
+  type: string;
+  isModuleLocked: boolean;
+}
+
+export interface UseBootcampSettingsReturn {
+  bootcampSettings: BootcampSettingsData | null;
+  loading: boolean;
+  error: string | null;
+  updateError: string | null; // Add this
+  updateSettings: (settings: BootcampSettingsData) => Promise<void>;
+  refetch: () => Promise<void>;
+}
+
+// useBootcampDelete.tsx
+export interface UseBootcampDeleteReturn {
+    deleteBootcamp: (bootcampId: string) => Promise<void>
+    isDeleting: boolean
+    error: string | null
+}
+
 
 // useCourseDetails
 

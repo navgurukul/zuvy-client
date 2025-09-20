@@ -3,10 +3,12 @@ import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
+import { Badge } from '@/components/ui/badge'
 
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
+const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -49,7 +51,7 @@ export const columns: ColumnDef<Task>[] = [
             <DataTableColumnHeader column={column} title="Students Name" />
         ),
         cell: ({ row }) => (
-            <div className="w-[150px]">{row.getValue('name')}</div>
+            <div className="w-[150px] text-left">{row.getValue('name')}</div>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -68,6 +70,20 @@ export const columns: ColumnDef<Task>[] = [
                     <span className="max-w-[500px] truncate font-medium">
                         {row.getValue('emailId')}
                     </span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: 'batch',
+        header: 'Batch',
+        cell: ({ row }) => {
+            const index = row.index
+            return (
+                <div className="flex items-center justify-start">
+                <Badge variant="outline" className="text-black border-black-200">
+                    {mockBatches[index % mockBatches.length]}
+                </Badge>
                 </div>
             )
         },

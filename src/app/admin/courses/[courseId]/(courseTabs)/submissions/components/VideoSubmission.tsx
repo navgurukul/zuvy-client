@@ -2,11 +2,12 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Play } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { Badge } from '@/components/ui/badge';
 import Image from 'next/image'
-import {VideoSubmissions,VideoData} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
+import { VideoSubmissions, VideoData } from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const [videoData, setVideoData] = useState<VideoData | null>(null);
@@ -49,121 +50,111 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
             ) : (
                 videoData &&
                 Object.keys(videoData).map(
-                    (key) => 
-                        {
-                    if (['totalStudents', 'totalRows', 'message'].includes(key)) return null
-                    const videosArray: any[] = Array.isArray(videoData[key]) ? videoData[key] as any[] : [];
+                    (key) => {
+                        if (['totalStudents', 'totalRows', 'message'].includes(key)) return null
+                        const videosArray: any[] = Array.isArray(videoData[key]) ? videoData[key] as any[] : [];
 
-                    const filteredVideos = videosArray.filter((video:any) =>
-                        debouncedSearch
-                            ? (video.title || '').toLowerCase().includes(debouncedSearch.toLowerCase())
-                            : true
-                    )
-                    if (filteredVideos.length === 0) return null                    
-                    return (
-                        <div key={key}>
-                            <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
-                                Module - {key}
-                            </h2>
-                            <div className="grid md:grid-cols-3 gap-3">
-                                {filteredVideos.map((video: VideoSubmissions) => {
-                                    const isDisabled = video.completedStudents === 0
-                                    const submissionPercentage =
-                                        video.completedStudents > 0
-                                            ? videoData.totalStudents / video.completedStudents
-                                            : 0
-                                    return (
-                                        <div
-                                            className="relative lg:flex py-5 h-[120px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
-                                            key={video.id}
-                                        >
-                                            {/* Content */}
-                                            <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                <h1 className="w-1/2 text-start text-sm">
-                                                    {video.title}
-                                                </h1>
-                                                <h2 className="w-1/2 flex mt-2">
-                                                    <div className="text-start flex gap-x-2">
-                                                        <div className="flex items-center justify-center">
-                                                            <div
-                                                                className={`w-2 h-2 rounded-full flex items-center justify-center  ${
-                                                                    submissionPercentage >= 
-                                                                    0.8
-                                                                    ? 'bg-green-300'
-                                                                    : submissionPercentage <=
-                                                                          0.8 &&
-                                                                      submissionPercentage >=
-                                                                          0.5
-                                                                    ? 'bg-yellow-300'
-                                                                    : 'bg-red-500'
-                                                                }`}
-                                                            ></div>
+                        const filteredVideos = videosArray.filter((video: any) =>
+                            debouncedSearch
+                                ? (video.title || '').toLowerCase().includes(debouncedSearch.toLowerCase())
+                                : true
+                        )
+                        if (filteredVideos.length === 0) return null
+                        return (
+                            <div key={key}>
+                                <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
+                                    Module - {key}
+                                </h2>
+                                <div className="grid md:grid-cols-3 gap-3">
+                                    {filteredVideos.map((video: VideoSubmissions) => {
+                                        const isDisabled = video.completedStudents === 0
+                                        const submissionPercentage =
+                                            video.completedStudents > 0
+                                                ? videoData.totalStudents / video.completedStudents
+                                                : 0
+                                        return (
+                                            <div
+                                                className="bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                                                key={video.id}
+                                            >
+                                                {/* Content */}
+                                                <div className="font-semibold pl-3 flex w-full flex-col justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p- bg-gray-100 rounded-md">
+                                                            <Play className="w-4 h-4 text-gray-600" />
                                                         </div>
-                                                        <p className="text-sm">
-                                                            {
-                                                                video.completedStudents
-                                                            }
-                                                            /
-                                                            {
-                                                                videoData.totalStudents
-                                                            }
-                                                        </p>
-                                                        <h3 className="text-gray-400 text-sm font-semibold cursor-not-allowed">
-                                                            Submissions
-                                                        </h3>
+                                                        <h3 className="font-medium text-base text-gray-900">{video.title}</h3>
                                                     </div>
-                                                </h2>
+                                                    
+                                                </div>
+                                                <div className="flex items-center justify-between mt-4 text-sm">
+                                                    <div className="flex items-center gap-1">
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
+                                                        >
+                                                            {video.completedStudents} submissions
+                                                        </Badge>
+                                                    </div>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                                    >
+                                                        {videoData.totalStudents - video.completedStudents} pending
+                                                    </Badge>
+                                                </div>
+                                               
 
                                                 {/* Fix View Submissions button to right bottom corner */}
                                                 <div className="w-full flex justify-end">
-                                                    {video.completedStudents > 
-                                                    0 ? (
-                                                        <Button
-                                                            variant={
-                                                                'secondary'
-                                                            }
-                                                            className="flex items-center border-none hover:text-secondary hover:bg-popover"
-                                                        >
+                                                    {video.completedStudents >
+                                                        0 ? (
+                                                       
                                                             <Link
                                                                 href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
                                                             >
-                                                                View
-                                                                Submissions
-                                                            </Link>
-                                                            <ChevronRight 
+                                                                 <Button
+                                                            variant="ghost"
+                                                           className="hover:bg-blue-600 hover:text-white transition-colors mt-2"
+                                                        >
+                                                             View
+                                                             Submissions
+                                                             <ChevronRight
                                                                 size={
-                                                                    20
-                                                                } 
+                                                                    16
+                                                                }
+                                                                className="ml-1"
                                                             />
                                                         </Button>
+                                                        
+                                                            </Link>
+                                                            
                                                     ) : (
                                                         <Button
-                                                            variant={
-                                                                'secondary'
-                                                            }
-                                                            className="flex items-center border-none text-green-700 hover:text-green-800 hover:bg-popover"
+                                                            variant="ghost"
+                                                            className="flex items-center text-green-700 hover:bg-transparent"
                                                             disabled={
                                                                 true
                                                             }
                                                         >
-                                                            View 
+                                                            View
                                                             Submissions
-                                                            <ChevronRight 
-                                                            size={
-                                                                20
-                                                                } 
+                                                            <ChevronRight
+                                                                size={
+                                                                    16
+                                                                }
+                                                                className="ml-1"
                                                             />
                                                         </Button>
                                                     )}
                                                 </div>
                                             </div>
-                                        </div>
-                                    )
-                                })}
+                                        )
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    )
-                })
+                        )
+                    })
             )}
         </div>
     )
