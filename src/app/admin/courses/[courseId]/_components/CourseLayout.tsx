@@ -6,12 +6,8 @@ import { Tabs, TabsList } from '@/components/ui/tabs'
 
 import styles from '../../_components/cources.module.css'
 import TabItem from './TabItem'
-import { getCourseData } from '@/store/store'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { toast } from '@/components/ui/use-toast'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import useCourseDetails from '@/hooks/useCourseDetails' // Import the new hook
 import {
     ArrowLeft,
