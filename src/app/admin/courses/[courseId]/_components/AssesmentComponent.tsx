@@ -10,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {AssesmentComponentProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import { AssesmentComponentProps } from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 
 
 const AssesmentComponent = (props: AssesmentComponentProps) => {
@@ -146,17 +146,16 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                 <div className="flex flex-col gap-y-3 lg:gap-x-6 my-3 pb-3 flex-grow">
                     <div className="flex flex-row items-center gap-x-2">
                         <div
-                            className={`h-3 w-3 rounded-full ${
-                                props.studentsSubmitted /
+                            className={`h-3 w-3 rounded-full ${props.studentsSubmitted /
                                     props.totalSubmissions >
-                                0.8
+                                    0.8
                                     ? 'bg-green-400'
                                     : props.studentsSubmitted /
-                                          props.totalSubmissions >=
-                                      0.5
-                                    ? 'bg-orange-400'
-                                    : 'bg-red-500'
-                            }`}
+                                        props.totalSubmissions >=
+                                        0.5
+                                        ? 'bg-orange-400'
+                                        : 'bg-red-500'
+                                }`}
                         />
                         <div className="text-base lg:text-lg font-medium text-gray-700">
                             {props.studentsSubmitted}/{props.totalSubmissions}
@@ -175,7 +174,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                         </p>
                     </div>
                 </div>
-                <div className="flex flex-col  items-end absolute  justify-end bottom-4 right-0 ">
+                {/* <div className="flex flex-col  items-end absolute  justify-end bottom-4 right-0 ">
                     <Link
                         href={`/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
                         className="w-full h-full lg:w-auto"
@@ -190,7 +189,33 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                             </h1>
                         </Button>
                     </Link>
+                </div> */}
+                <div className="flex flex-col  items-end absolute  justify-end bottom-4 right-0 ">
+
+                    <Link
+                        href={
+                            props.qualifiedStudents > 0
+                                ? `/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`
+                                : "#"
+                        }
+                        className="w-full h-full lg:w-auto"
+                    >
+                        <Button
+                            variant="ghost"
+                            disabled={props.qualifiedStudents === 0} 
+                            className={`flex h-full justify-center items-center w-full lg:w-auto py-2 font-bold rounded-md transition-all duration-300 ${props.qualifiedStudents === 0
+                                ? "cursor-not-allowed text-gray-400"
+                                : "text-green-700"
+                                }`}
+                        >
+                            <h1 className="w-full text-center text-sm flex lg:text-right">
+                                View Submission
+                                <ChevronRight size={20} className="ml-2" />
+                            </h1>
+                        </Button>
+                    </Link>
                 </div>
+
             </div>
         </div>
     )

@@ -7,8 +7,8 @@ import {
     useSearchParams,
 } from 'next/navigation'
 import ErrorPage from 'next/error'
-
 import { Input } from '@/components/ui/input'
+
 import { Plus, Trash2 } from 'lucide-react'
 import { Pencil } from 'lucide-react'
 
@@ -56,9 +56,9 @@ import { ComboboxStudent } from '../../(courseTabs)/students/components/combobox
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 import { POSITION } from '@/utils/constant'
-import {StudentDataState,Batch,BatchOption,SelecteItem} from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
+import { StudentDataState, Batch, BatchOption, SelecteItem } from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
 import axios from 'axios'
-
+import { SearchBox } from '@/utils/searchBox'
 
 const BatchesInfo = ({
     params,
@@ -107,14 +107,14 @@ const BatchesInfo = ({
             isLast: false,
         },
         {
-            crumb: `${
-                studentData?.length > 0
+            crumb: `${studentData?.length > 0
                     ? studentData[0].batchName
                     : instructorsInfo.name
-            }`,
+                }`,
             isLast: true,
         },
     ]
+
     const formSchema = z.object({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
@@ -137,16 +137,16 @@ const BatchesInfo = ({
             // }
 
             (val) => {
-            const capEnrollmentValue = parseInt(val)
-            if (capEnrollmentValue > 100000) {
+                const capEnrollmentValue = parseInt(val)
+                if (capEnrollmentValue > 100000) {
+                    return {
+                        message: 'Cap Enrollment cannot exceed 100000.',
+                    }
+                }
                 return {
-                    message: 'Cap Enrollment cannot exceed 100000.',
+                    message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
                 }
             }
-            return {
-                message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
-            }
-        }
         ),
     })
 
@@ -159,6 +159,7 @@ const BatchesInfo = ({
         },
         mode: 'onChange',
     })
+
     useEffect(() => {
         form.setValue('name', instructorsInfo?.name || '')
         form.setValue(
@@ -179,10 +180,10 @@ const BatchesInfo = ({
     const isValid = formState.isValid
 
     const fetchBatches = useCallback(
-        async (courseId:string) => {
+        async (courseId: string) => {
             try {
                 const response = await api.get<{ data: Batch[] }>(`/bootcamp/batches/${courseId}`)
-                const batchData:BatchOption[] = response.data.data?.map((data: any) => {
+                const batchData: BatchOption[] = response.data.data?.map((data: any) => {
                     return {
                         value: data.id,
                         label: data.name,
@@ -230,14 +231,17 @@ const BatchesInfo = ({
         },
         [setInstructorInfo, router]
     )
+
     useEffect(() => {
         fetchInstructorInfo(params.batchId)
     }, [isFormOpen, fetchInstructorInfo, params.batchId])
+
     useEffect(() => {
         if (params.batchId) {
             fetchInstructorInfo(params.batchId)
         }
     }, [params.batchId, router, fetchInstructorInfo])
+
     const batchDeleteHandler = async () => {
         try {
             await api.delete(`/batch/${params.batchId}`)
@@ -276,7 +280,7 @@ const BatchesInfo = ({
                             setStudentData(response.data.modifiedStudentInfo)
 
                             //   }
-                        } catch (error) {}
+                        } catch (error) { }
                     }
                     fetchBatchesInfo()
                     fetchInstructorInfo(params.batchId)
@@ -288,6 +292,7 @@ const BatchesInfo = ({
             })
         }
     }
+
     useEffect(() => {
         const getBootCamp = async () => {
             await api
@@ -322,7 +327,7 @@ const BatchesInfo = ({
             setLastPage,
             setPages,
             setTotalStudents,
-            debouncedValue, // Ensure searchTerm is included as a dependency
+            debouncedValue,
         ]
     )
 
@@ -330,9 +335,44 @@ const BatchesInfo = ({
         fetchStudentData(offset)
     }, [offset, position, fetchStudentData])
 
-    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value)
-    }
+    // API functions for SearchBox
+    const fetchStudentSuggestions = useCallback(
+        async (query: string)=> {
+            try {
+                const endpoint = `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&searchTerm=${query}`
+                const response = await api.get<Batch>(endpoint)
+
+                // Transform student data to suggestions
+                return response.data.modifiedStudentInfo?.map((student: StudentDataPage) => ({
+                    ...student,
+                    id: student.userId,
+                    // Add any other fields you want to include in suggestions
+                })) || []
+            } catch (error) {
+                console.error('Error fetching student suggestions:', error)
+                return []
+            }
+        },
+        [params.courseId, params.batchId]
+    )
+
+    const performStudentSearch = useCallback(
+        async (query: string) => {
+            setSearch(query)
+            // The useEffect with debouncedValue will handle the actual search
+            return []
+        },
+        []
+    )
+
+    const loadDefaultStudents = useCallback(
+        async () => {
+            setSearch('')
+            fetchStudentData(0)
+            return []
+        },
+        [fetchStudentData]
+    )
 
     const userIds = selectedRows.map((item: SelecteItem) => item.userId)
 
@@ -539,12 +579,21 @@ const BatchesInfo = ({
                                 </div>
                             </div>
                         </div>
-                        <Input
-                            type="search"
-                            placeholder="Student Name, Email"
-                            className="w-1/2 my-12"
-                            onChange={handleSetSearch}
-                        />
+                        <div className="w-1/2 my-12">
+                            <SearchBox
+                                placeholder="Search by name or email..."
+                                fetchSuggestionsApi={fetchStudentSuggestions}
+                                fetchSearchResultsApi={performStudentSearch}
+                                defaultFetchApi={loadDefaultStudents}
+                                getSuggestionLabel={(suggestion) => (
+                                    <div className="flex flex-col">
+                                        <span className="font-medium">{suggestion.name}</span>
+                                        <span className="text-xs text-muted-foreground">{suggestion.email}</span>
+                                    </div>
+                                )}
+                                inputWidth="w-full"
+                            />
+                        </div>
                     </div>
                     <div className="flex m-4">
                         <div className="flex items-center mx-4 text-sm">

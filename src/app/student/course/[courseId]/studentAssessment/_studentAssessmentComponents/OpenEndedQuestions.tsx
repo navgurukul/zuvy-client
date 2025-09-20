@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Timer, Edit3, CheckCircle, AlertCircle } from 'lucide-react'
+import {X, ChevronLeft, Timer, Edit3, CheckCircle, AlertCircle } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
@@ -122,9 +122,8 @@ const OpenEndedQuestions = ({
                 <div className="flex items-center justify-between mb-8">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <button className="flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 group">
-                                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                <span className="font-medium">Back to Overview</span>
+                            <button className="absolute top-8 left-8 flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 group">
+                                 <X className="w-5 h-5"/>
                             </button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-card border-border shadow-32dp">
