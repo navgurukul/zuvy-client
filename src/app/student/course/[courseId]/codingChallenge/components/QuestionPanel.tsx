@@ -1,32 +1,7 @@
 import React from 'react';
 import { QuestionDetails, TestCase, Input } from '@/utils/types/coding-challenge';
 import{QuestionPanelProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
-
-const formatValue = (value: any, type: string): string => {
-    if (type === 'jsonType') {
-        return JSON.stringify(value, null, 2);
-    }
-
-    if (Array.isArray(value)) {
-        if (type === 'arrayOfNum') {
-            return `[${value.join(', ')}]`;
-        }
-        if (type === 'arrayOfStr') {
-            return `[${value.map((v) => `"${v}"`).join(', ')}]`;
-        }
-        return `[${value.join(', ')}]`;
-    }
-
-    switch (type) {
-        case 'int':
-        case 'float':
-            return value.toString();
-        case 'str':
-            return `"${value}"`;
-        default:
-            return JSON.stringify(value);
-    }
-};
+import{formatValue} from "@/utils/students"
 
 export function QuestionPanel({ questionDetails }: QuestionPanelProps) {
     return (

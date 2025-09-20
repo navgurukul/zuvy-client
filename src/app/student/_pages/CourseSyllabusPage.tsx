@@ -3,7 +3,8 @@
 import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+// import { Skeleton } from '@/components/ui/skeleton'
+import { CourseSyllabusPageSkeleton } from "@/app/student/_components/Skeletons";
 import {
     Video,
     BookOpen,
@@ -28,90 +29,7 @@ const CourseSyllabusPage = () => {
         useCourseSyllabus(courseId)
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-background">
-                <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
-                    {/* Course Information Skeleton */}
-                    <Card className="mb-8 shadow-4dp">
-                        <CardContent className="p-6 md:p-8">
-                            <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
-                                <div className="flex-1">
-                                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                                        <div className="flex-1">
-                                            <Skeleton className="h-8 w-3/4 mb-2" />
-                                            <Skeleton className="h-4 w-full mb-4" />
-                                            <div className="flex items-center gap-2 mb-4">
-                                                <Skeleton className="w-8 h-8 rounded-full" />
-                                                <Skeleton className="h-4 w-32" />
-                                            </div>
-                                        </div>
-                                        <Skeleton className="h-6 w-40" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Course Metrics Skeleton */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                                {[1, 2, 3].map((i) => (
-                                    <div
-                                        key={i}
-                                        className="flex items-center gap-3"
-                                    >
-                                        <Skeleton className="w-10 h-10 rounded-full" />
-                                        <div>
-                                            <Skeleton className="h-3 w-16 mb-1" />
-                                            <Skeleton className="h-4 w-24" />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Course Modules Skeleton */}
-                    <div>
-                        <Skeleton className="h-8 w-48 mb-6" />
-                        <div className="space-y-6">
-                            {[1, 2, 3].map((moduleIndex) => (
-                                <Card key={moduleIndex} className="shadow-4dp">
-                                    <CardContent className="p-6">
-                                        <div className="mb-4">
-                                            <Skeleton className="h-6 w-2/3 mb-2" />
-                                            <Skeleton className="h-4 w-full mb-2" />
-                                            <Skeleton className="h-3 w-1/3" />
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            {[1, 2, 3, 4, 5].map(
-                                                (chapterIndex) => (
-                                                    <div
-                                                        key={chapterIndex}
-                                                        className="border-l-2 border-border pl-4"
-                                                    >
-                                                        <div className="flex items-center gap-3 py-2">
-                                                            <Skeleton className="w-4 h-4" />
-                                                            <div className="flex-1">
-                                                                <div className="flex items-center justify-between">
-                                                                    <div className="flex-1">
-                                                                        <Skeleton className="h-4 w-48 mb-1" />
-                                                                        <Skeleton className="h-3 w-32" />
-                                                                    </div>
-                                                                    <Skeleton className="h-3 w-16 ml-4" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
+        return <CourseSyllabusPageSkeleton />;
     }
 
     if (error) {
