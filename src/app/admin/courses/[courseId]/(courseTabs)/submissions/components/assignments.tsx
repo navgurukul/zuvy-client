@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, ArrowDownToLine } from 'lucide-react'
+import { ChevronRight, ArrowDownToLine, FileText } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import jsPDF from 'jspdf'
@@ -10,7 +10,8 @@ import autoTable from 'jspdf-autotable'
 import Image from 'next/image'
 import { error } from 'console'
 import { nullable } from 'zod'
-import {AssignmentProps,AssignmentModuleData,AssignmentApiResponse} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
+import { AssignmentProps, AssignmentModuleData, AssignmentApiResponse } from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
+import { Badge } from '@/components/ui/badge';
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
@@ -94,7 +95,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
 
                 // Save the document
                 doc.save(`${assessments.chapterName}.pdf`)
-            } catch (error) {}
+            } catch (error) { }
         }
 
         fetchData()
@@ -140,32 +141,31 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
 
                                                 const submissionPercentage =
                                                     moduleData.submitStudents >
-                                                    0
+                                                        0
                                                         ? totalStudents /
-                                                          moduleData.submitStudents
+                                                        moduleData.submitStudents
                                                         : 0
                                                 return (
                                                     <div
-                                                        className="relative lg:flex py-5 h-[120px] w-full shadow-[0_4px_4px_rgb(1,1,0,0.12)] my-4 rounded-md p-3"
+                                                        className="relative bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full"
                                                         key={moduleData.id}
                                                     >
                                                         {/* Icon at the top-right */}
                                                         <div className="absolute top-5 pr-3 right-2 group">
                                                             <button
-                                                                className={`ml-2 cursor-pointer ${
-                                                                    isDisabled
-                                                                        ? 'text-gray-400'
-                                                                        : 'text-gray-500 hover:text-gray-700'
-                                                                }`}
+                                                                className={`ml-2 cursor-pointer ${isDisabled
+                                                                    ? 'text-gray-400'
+                                                                    : 'text-gray-500 hover:text-gray-700'
+                                                                    }`}
                                                                 onClick={
                                                                     isDisabled
                                                                         ? undefined
                                                                         : () =>
-                                                                              handleDownloadPdf(
-                                                                                  Number(
-                                                                                      chapterId
-                                                                                  )
-                                                                              )
+                                                                            handleDownloadPdf(
+                                                                                Number(
+                                                                                    chapterId
+                                                                                )
+                                                                            )
                                                                 }
                                                                 aria-label="Download full report"
                                                                 disabled={
@@ -187,63 +187,47 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
 
                                                         {/* Content */}
                                                         <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                            <h1 className="w-1/2 text-start text-sm">
-                                                                {
-                                                                    moduleData.title
-                                                                }
-                                                            </h1>
-                                                            <h2 className="w-1/2 flex mt-2">
-                                                                <div className="text-start flex gap-x-2">
-                                                                    <div className="flex items-center justify-center">
-                                                                        <div
-                                                                            className={`w-2 h-2 rounded-full flex items-center justify-center ${
-                                                                                submissionPercentage >=
-                                                                                0.8
-                                                                                    ? 'bg-green-300'
-                                                                                    : submissionPercentage <=
-                                                                                          0.8 &&
-                                                                                      submissionPercentage >=
-                                                                                          0.5
-                                                                                    ? 'bg-yellow-300'
-                                                                                    : 'bg-red-500'
-                                                                            }`}
-                                                                        ></div>
-                                                                    </div>
-                                                                    <p className="text-sm">
-                                                                        {
-                                                                            moduleData.submitStudents
-                                                                        }
-                                                                        /
-                                                                        {
-                                                                            totalStudents
-                                                                        }
-                                                                    </p>
-                                                                    <h3 className="text-gray-400 text-sm font-semibold cursor-not-allowed">
-                                                                        Submissions
-                                                                    </h3>
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="p-2 bg-gray-100 rounded-md">
+                                                                    <FileText className="w-4 h-4 text-gray-600" />
                                                                 </div>
-                                                            </h2>
-
+                                                                <h3 className="font-medium text-base text-gray-900">{moduleData.title}</h3>
+                                                            </div>
+                                                            <div className="flex items-center justify-between mt-4 text-sm">
+                                                                <div className="flex items-center gap-1">
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
+                                                                    >
+                                                                        {moduleData.submitStudents} submissions
+                                                                    </Badge>
+                                                                </div>
+                                                                <Badge
+                                                                    variant="secondary"
+                                                                    className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                                                >
+                                                                    {totalStudents - moduleData.submitStudents} pending
+                                                                </Badge>
+                                                            </div>
                                                             {/* Fix View Submissions button to right bottom corner */}
                                                             <div className="w-full flex justify-end">
-                                                                <Button
-                                                                    variant={
-                                                                        'secondary'
-                                                                    }
-                                                                    className="flex items-center text-green-700 border-none hover:text-green-700 hover:bg-popover"
+
+                                                                <Link
+                                                                    href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
                                                                 >
-                                                                    <Link
-                                                                        href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        className="hover:bg-blue-600 hover:text-white transition-colors mt-2"
                                                                     >
                                                                         View
                                                                         Submissions
-                                                                    </Link>
-                                                                    <ChevronRight
-                                                                        size={
-                                                                            20
-                                                                        }
-                                                                    />
-                                                                </Button>
+                                                                        <ChevronRight
+                                                                            size={16} className="ml-1"
+                                                                        />
+                                                                    </Button>
+
+                                                                </Link>
+
                                                             </div>
                                                         </div>
                                                     </div>

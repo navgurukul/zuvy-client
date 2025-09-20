@@ -3,11 +3,12 @@ import Image from 'next/image'
 
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
-
+import { Badge } from '@/components/ui/badge'
 import { Task } from '@/utils/data/schema'
 
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
+const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -81,7 +82,20 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
 
-
+    {
+        accessorKey: 'batch',
+        header: 'Batch',
+        cell: ({ row }) => {
+            const index = row.index
+            return (
+                <div className="flex items-center justify-start">
+                    <Badge variant="outline" className="bg-black-50 text-black border-black-200">
+                        {mockBatches[index % mockBatches.length]}
+                    </Badge>
+                </div>
+            )
+        },
+    },
     {
         id: 'actions',
         cell: ({ row }) => {

@@ -1,164 +1,46 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
-
 import { Task } from '@/utils/data/schema'
-import Link from 'next/link'
-import { DownloadIcon, FileText } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Clock, Eye, RefreshCw } from 'lucide-react'
+import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
 import ApproveReattempt from '@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
-import {
-    Tooltip,
-    TooltipTrigger,
-    TooltipContent,
-    TooltipProvider,
-} from '@/components/ui/tooltip'
+import Link from 'next/link'
+
+const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
 export const columns: ColumnDef<Task>[] = [
-    // {
-    //     accessorKey: 'profilePicture',
-    //     header: ({ column }) => (
-    //         <DataTableColumnHeader column={column} title="Profile Pitcure" />
-    //     ),
-    //     cell: ({ row }) => {
-    //         const student = row.original
-    //         const profilePitcure = student.profilePicture
-    //         const ImageContainer = () => {
-    //             return profilePitcure ? (
-    //                 <Image
-    //                     src={profilePitcure}
-    //                     alt="profilePic"
-    //                     height={10}
-    //                     width={30}
-    //                     className="rounded-[100%] ml-2"
-    //                 />
-    //             ) : (
-    //                 <Image
-    //                     src={
-    //                         'https://avatar.iran.liara.run/public/boy?username=Ash'
-    //                     }
-    //                     alt="profilePic"
-    //                     height={35}
-    //                     width={35}
-    //                     className="rounded-[50%] ml-2"
-    //                 />
-    //             )
-    //         }
-    //         return <div className="flex items-center">{ImageContainer()}</div>
-    //     },
-    //     enableSorting: false,
-    //     enableHiding: false,
-    // },
     {
-        accessorKey: 'name',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
-        ),
+        accessorKey: 'student',
+        header: 'Student',
         cell: ({ row }) => {
-            const name = row.original.name
-
+            const { name, email } = row.original
             return (
-                // <div className="flex ">
-                //     <span className="max-w-[500px] truncate font-medium capitalize">
-                //         {name}
-                //     </span>
-                // </div>
-
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div className="flex">
-                                <span
-                                    className="truncate max-w-[500px] cursor-pointer font-medium capitalize"
-                                    title=""
-                                >
-                                    {/* Only show first 20 characters */}
-                                    {name.length > 20
-                                        ? name.substring(0, 15) + '...'
-                                        : name}
-                                </span>
-                            </div>
-                        </TooltipTrigger>
-                        {name.length > 20 && (
-                            <TooltipContent>
-                                <p>{name}</p>
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
-                </TooltipProvider>
-            )
-        },
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: 'email',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
-        ),
-        cell: ({ row }) => {
-            const email = row.original.email
-
-            return (
-                // <div className="flex ">
-                //     <span className="max-w-[500px] truncate font-medium">
-                //         {email}
-                //     </span>
-                // </div>
-
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div className="flex ">
-                                <span
-                                    className="truncate max-w-[500px] cursor-pointer font-medium"
-                                    title=""
-                                >
-                                    {email.length > 25
-                                        ? email.substring(0, 18) + '...'
-                                        : email}
-                                </span>
-                            </div>
-                        </TooltipTrigger>
-                        {email.length > 25 && (
-                            <TooltipContent>
-                                <p>{email}</p>
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
-                </TooltipProvider>
-            )
-        },
-    },
-    {
-        accessorKey: 'time taken',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Time Taken" />
-        ),
-        cell: ({ row }) => {
-            const startedAt = row.original.startedAt
-            const submitedAt = row.original.submitedAt
-
-            let timeTaken
-
-            if (!submitedAt) {
-                timeTaken = 'N/A'
-            } else {
-                timeTaken = calculateTimeTaken(startedAt, submitedAt)
-            }
-
-            return (
-                <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium">
-                        {timeTaken}
-                    </span>
+                <div className="flex gap-3">
+                    <div>
+                        <div className="text-left font-medium text-black">{name}</div>
+                        <div className="text-left text-sm text-muted-foreground">{email}</div>
+                    </div>
                 </div>
             )
         },
     },
-
+    {
+        accessorKey: 'batch',
+        header: 'Batch',
+        cell: ({ row }) => {
+            const index = row.index
+            return (
+                <Badge variant="outline" className="text-black border-black-200">
+                    {mockBatches[index % mockBatches.length]}
+                </Badge>
+            )
+        },
+    },
     {
         accessorKey: 'startedAt',
         header: ({ column }) => (
@@ -168,7 +50,7 @@ export const columns: ColumnDef<Task>[] = [
             const startedAt = row.original.startedAt
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium ">
+                    <span className="max-w-[500px] truncate font-medium text-black">
                         {/* {startedAt ? new Date(startedAt).toLocaleString() : 'N/A'} */}
                         {startedAt
                             ? (() => {
@@ -201,7 +83,6 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
-
     {
         accessorKey: 'submitedAt',
         header: ({ column }) => (
@@ -211,7 +92,7 @@ export const columns: ColumnDef<Task>[] = [
             const submitedAt = row.original.submitedAt
             return (
                 <div className="flex">
-                    <span className="max-w-[500px] truncate font-medium ">
+                    <span className="max-w-[500px] truncate font-medium text-black">
                         {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
 
                         {submitedAt
@@ -245,134 +126,137 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
-
-    // {
-    //     accessorKey: 'submission date',
-    //     header: ({ column }) => (
-    //         <DataTableColumnHeader column={column} title="Submission Date" />
-    //     ),
-    //     cell: ({ row }) => {
-    //         const submitedAt = row.original.submitedAt
-    //         let submissionDate;
-
-    //         if(!submitedAt){
-    //              submissionDate = 'N/A';
-    //         }else{
-    //              submissionDate = getSubmissionDate(submitedAt);
-    //         }
-
-    //         return (
-    //             <div className="flex ">
-    //                 <span className="max-w-[500px] truncate font-medium">
-    //                     {submissionDate}
-    //                 </span>
-    //             </div>
-    //         )
-    //     },
-    // },
-
     {
-        accessorKey: 'isPassed',
+        accessorKey: 'time taken',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Qualified" />
+            <DataTableColumnHeader column={column} title="Time Taken" />
         ),
         cell: ({ row }) => {
-            // const isChecked = row.original.isChecked
-            const isQualified = row.original.isPassed
+            const startedAt = row.original.startedAt
+            const submitedAt = row.original.submitedAt
+
+            let timeTaken
+
+            if (!submitedAt) {
+                timeTaken = 'N/A'
+            } else {
+                timeTaken = calculateTimeTaken(startedAt, submitedAt)
+            }
+
             return (
-                <div className="flex ">
-                    <div className="max-w-[500px] truncate flex items-center gap-x-2 ml-1 font-medium">
-                        {isQualified ? (
-                            <div className="bg-secondary h-3 w-3 rounded-full" />
-                        ) : (
-                            <div className="bg-red-600 h-3 w-3 rounded-full " />
-                        )}
-                        {isQualified ? ' Passed' : 'Failed'}
-                    </div>
+                <div className="flex items-center gap-2 text-sm text-black">
+                    <Clock className="h-4 w-4 text-gray-400" />
+                    {timeTaken}
                 </div>
             )
         },
     },
     {
         accessorKey: 'percentage',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Percentage" />
-        ),
+        header: 'Score',
         cell: ({ row }) => {
-            const percentage = row.original.percentage
+            const score = row.original.percentage?.toFixed(2) || '0.00'
+            const isPassed = row.original.isPassed
             return (
-                <div className="flex ">
-                    <span className="font-semibold ml-4">
-                        {percentage ? `${percentage.toFixed(2)}%` : '0.00%'}
-                    </span>
-                </div>
+                <span className={`font-semibold ${isPassed ? 'text-green-600' : 'text-red-600'}`}>
+                    {score}%
+                </span>
             )
         },
     },
     {
-        accessorKey: 'No. of Attempts',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Attempts" />
-        ),
+        accessorKey: 'isPassed',
+        header: 'Qualified',
         cell: ({ row }) => {
+            const isPassed = row.original.isPassed
             return (
-                <div className="flex  w-10" key={row.original.email}>
-                    <span className="max-w-[500px] truncate font-medium ml-4">
-                        {(row?.original?.reattemptCount ?? 0) + 1}
-                    </span>
-                </div>
-            )
-        },
-    },
-    {
-        accessorKey: 'Approve Re-attempt',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Actions" />
-        ),
-        cell: ({ row }) => {
-            return (
-                <div className="flex  w-10" key={row.original.email}>
-                    <ApproveReattempt data={row.original} />
-                </div>
-            )
-        },
-    },
-
-    {
-        id: 'actions',
-        cell: ({ row }) => {
-            const { bootcampId, assessment_Id, userId, id } = row.original
-            const submitedAt = row.original.submitedAt
-            return (
-                <div className="flex ">
-                    <Link
-                        href={submitedAt ? `/admin/courses/${bootcampId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}` : '#'}
-                        className={submitedAt ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center` : `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center opacity-50 cursor-not-allowed`}
+                <div className="flex items-center gap-2">
+                    <div
+                        className={`h-2 w-2 rounded-full ${isPassed ? 'bg-green-500' : 'bg-red-500'
+                            }`}
+                    />
+                    <Badge
+                        variant="outline"
+                        className={
+                            isPassed
+                                ? 'bg-green-50 text-green-700 border-green-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
+                        }
                     >
-                        <FileText size={16} />
-                        <p className="text-[15px]"> View Report</p>
-                    </Link>
+                        {isPassed ? 'Yes' : 'No'}
+                    </Badge>
                 </div>
             )
         },
     },
     {
-        id: 'actions',
+        accessorKey: 'reattemptCount',
+        header: 'Attempts',
         cell: ({ row }) => {
-            const submitedAt = row.original.submitedAt
-
-            return (
-                <>
-                    <DownloadReport
+            const attempts = (row.original.reattemptCount ?? 0) + 1
+            return <span className="font-medium">{attempts}</span>
+        },
+    },
+    {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const { bootcampId, assessment_Id, userId, id, title, submitedAt } = row.original;
+      
+          const handleDownload = () => {
+            DownloadReport({
+              userInfo: {
+                userId: String(userId),
+                id: String(id),
+                title: title ?? '',
+              },
+              submitedAt,
+            });
+          };
+      
+          return (
+            <div className="flex items-center gap-3">
+              {/* Eye Icon */}
+              <Link
+                href={
+                  submitedAt
+                    ? `/admin/courses/${bootcampId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                    : '#'
+                }
+                className={
+                  submitedAt
+                    ? 'text-black hover:text-blue-600'
+                    : 'opacity-50 cursor-not-allowed'
+                }
+              >
+                <Eye className="h-4 w-4" />
+              </Link>
+      
+              {/* Download Icon */}
+              <DownloadReport
                      userInfo={{
                       userId: String(row.original.userId),
                       id: String(row.original.id),
                       title: row.original.title ?? ''
                     }}
                     submitedAt={submitedAt}
-                    />
-                </>
-            )
+             />
+              {/* Re-attempt Icon */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                onClick={() => {
+                  // Optional: handle re-attempt logic or open a modal
+                }}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+      
+              {/* Approve Re-Attempt Button */}
+              <ApproveReattempt data={row.original} />
+            </div>
+          );
         },
-    },
+      },
 ]
