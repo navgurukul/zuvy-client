@@ -24,14 +24,14 @@ function TabItem({ href, title, icon: Icon }: TabItemProps) {
     <Link
       href={href}
       className={cn(
-        "mx-1 px-14 py-2 text-sm font-medium rounded-sm flex items-center justify-center gap-2 transition-colors text-center",
+        "mx-1 px-9 py-2 text-sm font-medium rounded-sm flex items-center justify-center gap-2 transition-colors text-center",
         isActive 
           ? "bg-primary text-white" 
           : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
       )}
     >
       {Icon && <Icon className="h-4 w-4" />}
-      <span className="text-xs leading-tight">{title}</span>
+      <span className="text-sm leading-tight">{title}</span>
     </Link>
   );
 }
