@@ -6,9 +6,10 @@ import { Tabs, TabsList } from '@/components/ui/tabs'
 
 import styles from '../../_components/cources.module.css'
 import TabItem from './TabItem'
+import { getCourseData } from '@/store/store'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import useCourseData from '@/hooks/useCourseData' // Import the new hook
+import { toast } from '@/components/ui/use-toast'
 import {
     ArrowLeft,
     GraduationCap,
@@ -25,8 +26,7 @@ import {
 function CourseLayout() {
     const router = useRouter()
     const { courseId } = useParams()
-    const { courseData, loading, error, fetchCourseDetails } = useCourseData()
-    const [isModalOpen, setIsModalOpen] = useState(false)
+    const { courseData } = getCourseData()
 
     const courseMenu = [
         {
@@ -73,12 +73,46 @@ function CourseLayout() {
         },
     ]
 
-    useEffect(() => {
+    const handleFetch = async () => {
         if (courseId) {
-            const courseID = Array.isArray(courseId) ? courseId[0] : courseId
-            fetchCourseDetails(parseInt(courseID))
+            try {
+                const courseID = Array.isArray(courseId)
+                    ? courseId[0]
+                    : courseId
+                const success = await getCourseData
+                    .getState()
+                    .fetchCourseDetails(parseInt(courseID))
+                console.log('success', success)
+                if (!success) {
+                    console.log('Not true')
+                    router.push(`/admin/courses`)
+                    toast.info({
+                        title: 'Caution',
+                        description:
+                            'The Course has been deleted by another Admin',
+                    })
+                }
+            } catch (error) {
+                console.log('Caught in handleFetch', error)
+            }
         }
-    }, [courseId, fetchCourseDetails])
+    }
+
+    useEffect(() => {
+        const storedCourseId = localStorage.getItem('courseId')
+        // if (courseId && storedCourseId) {
+        //     // setCourseId(storedCourseId)
+        //     getCourseData
+        //         .getState()
+        //         .fetchCourseDetails(parseInt(storedCourseId))
+        // }
+        // if (courseId) {
+        //     const courseID = Array.isArray(courseId) ? courseId[0] : courseId
+        //     getCourseData.getState().fetchCourseDetails(parseInt(courseID))
+        //     console.log('yha se aa rha hai')
+        // }
+        handleFetch()
+    }, [])
 
     return (
         <>
@@ -133,20 +167,6 @@ function CourseLayout() {
                         />
                     </div>
                 </Tabs>
-                {/* <Tabs defaultValue="generalDetails" className="w-full">
-                    <div className="relative border-b-2 border-muted">
-                    <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
-                            {courseMenu.map(({ title, href, icon }) => (
-                                <TabItem
-                                    key={href}
-                                    title={title}
-                                    href={href}
-                                    icon={icon}
-                                />
-                            ))}
-                        </TabsList>
-                    </div>
-                </Tabs> */}
             </div>
 
         </>
