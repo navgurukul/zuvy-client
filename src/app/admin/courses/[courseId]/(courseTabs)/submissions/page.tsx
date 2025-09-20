@@ -552,7 +552,7 @@ const Page = ({ params }: { params: any }) => {
                                                                     <Link
                                                                         href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData?.[0]?.id}`}
                                                                     >
-                                                                        <Button variant={'ghost'} className="text-green-700 text-sm">
+                                                                        <Button variant={'ghost'} className="hover:bg-blue-600 hover:text-white transition-colors">
                                                                             View Submission{' '}
                                                                             <ChevronRight className="text-green-700" size={17} />
                                                                         </Button>

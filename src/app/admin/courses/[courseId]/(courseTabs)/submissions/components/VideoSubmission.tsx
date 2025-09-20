@@ -109,23 +109,26 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                 <div className="w-full flex justify-end">
                                                     {video.completedStudents >
                                                         0 ? (
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="flex items-center text-green-700 hover:bg-transparent"
-                                                        >
+                                                       
                                                             <Link
                                                                 href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
                                                             >
-                                                                View
-                                                                Submissions
-                                                            </Link>
-                                                            <ChevronRight
+                                                                 <Button
+                                                            variant="ghost"
+                                                           className="hover:bg-blue-600 hover:text-white transition-colors mt-2"
+                                                        >
+                                                             View
+                                                             Submissions
+                                                             <ChevronRight
                                                                 size={
                                                                     16
                                                                 }
                                                                 className="ml-1"
                                                             />
                                                         </Button>
+                                                        
+                                                            </Link>
+                                                            
                                                     ) : (
                                                         <Button
                                                             variant="ghost"

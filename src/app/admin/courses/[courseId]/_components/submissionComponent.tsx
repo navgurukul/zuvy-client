@@ -7,6 +7,8 @@ import { toast } from 'react-toastify'
 import { api } from '@/utils/axios.config'
 import { SubmissionComponentProps } from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button'
+
 
 
 const SubmissionComponent = (props: SubmissionComponentProps) => {
@@ -139,10 +141,13 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                 <Link
                                     href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
                                 >
-                                    <div className="w-full text-center text-sm flex lg:text-right text-green-700">
+                                    <Button
+                                    variant="ghost"
+                                    className="hover:bg-blue-600 hover:text-white transition-colors"                               
+                                >
                                         View Submissions
                                         <ChevronRight size={16} className="ml-1" />
-                                    </div>
+                                    </Button>
                                 </Link>
                             ) : (
                                 <div className="flex items-center text-sm font-medium text-gray-400 cursor-not-allowed">
@@ -152,7 +157,6 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                             )}
                         </div>
                     </div>
-                {/* </div> */}
             </div>
         </div>
     )

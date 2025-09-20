@@ -211,20 +211,23 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             </div>
                                                             {/* Fix View Submissions button to right bottom corner */}
                                                             <div className="w-full flex justify-end">
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    className="flex items-center text-green-700 hover:bg-transparent"
+
+                                                                <Link
+                                                                    href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
                                                                 >
-                                                                    <Link
-                                                                        href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        className="hover:bg-blue-600 hover:text-white transition-colors mt-2"
                                                                     >
                                                                         View
                                                                         Submissions
-                                                                    </Link>
-                                                                    <ChevronRight
-                                                                        size={16}  className="ml-1"
-                                                                    />
-                                                                </Button>
+                                                                        <ChevronRight
+                                                                            size={16} className="ml-1"
+                                                                        />
+                                                                    </Button>
+
+                                                                </Link>
+
                                                             </div>
                                                         </div>
                                                     </div>

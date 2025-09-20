@@ -92,19 +92,12 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
       <div className="w-full flex justify-end mt-2">
         <Link
           href={
-            props.qualifiedStudents > 0
-              ? `/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`
-              : "#"
+            `/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`
           }
         >
           <Button
             variant="ghost"
-            disabled={props.qualifiedStudents === 0}
-            className={`flex items-center font-semibold ${
-              props.qualifiedStudents === 0
-                ? 'cursor-not-allowed text-gray-400'
-                : 'text-green-700'
-            }`}
+            className="hover:bg-blue-600 hover:text-white transition-colors"
           >
             View Submission
             <ChevronRight size={16} className="ml-1" />

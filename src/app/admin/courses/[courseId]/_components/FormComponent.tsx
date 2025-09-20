@@ -65,7 +65,7 @@ const FormComponent = ({
                                 {' '}
                                 <Button
                                     variant="ghost"
-                                    className="text-green-700"
+                                    className="hover:bg-blue-600 hover:text-white transition-colors"                               
                                 >
                                     View Submissions
                                     <ChevronRight size={16}  className="ml-1" />
