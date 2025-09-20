@@ -6,111 +6,97 @@ import { Tabs, TabsList } from '@/components/ui/tabs'
 
 import styles from '../../_components/cources.module.css'
 import TabItem from './TabItem'
-import { getCourseData } from '@/store/store'
-import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { toast } from '@/components/ui/use-toast'
+import useCourseData from '@/hooks/useCourseData' // Import the new hook
+import {
+    ArrowLeft,
+    GraduationCap,
+    Calendar,
+    Info,
+    BookOpen,
+    Users,
+    Settings,
+    FileText,
+    Upload,
+    ExternalLink
+} from 'lucide-react'
 
 function CourseLayout() {
     const router = useRouter()
     const { courseId } = useParams()
-    const { courseData } = getCourseData()
-    // const [courseId, setCourseId] = useState<string>('')
+    const { courseData, loading, error, fetchCourseDetails } = useCourseData()
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
     const courseMenu = [
         {
             title: 'General Details',
             value: 'generalDetails',
             href: `/admin/courses/${courseData?.id}/details`,
-        },
-        {
-            title: 'Batches',
-            value: 'batches',
-            href: `/admin/courses/${courseData?.id}/batches`,
+            icon: Info,
         },
         {
             title: 'Curriculum',
             value: 'curriculum',
             href: `/admin/courses/${courseData?.id}/curriculum`,
-        },
-        {
-            title: 'Sessions',
-            value: 'sessions',
-            href: `/admin/courses/${courseData?.id}/sessions`,
-        },
-        {
-            title: 'Settings',
-            value: 'settings',
-            href: `/admin/courses/${courseData?.id}/settings`,
+            icon: BookOpen,
         },
         {
             title: 'Students',
             value: 'students',
             href: `/admin/courses/${courseData?.id}/students`,
+            icon: GraduationCap,
+        },
+        {
+            title: 'Batches',
+            value: 'batches',
+            href: `/admin/courses/${courseData?.id}/batches`,
+            icon: Users,
+        },
+        {
+            title: 'Sessions',
+            value: 'sessions',
+            href: `/admin/courses/${courseData?.id}/sessions`,
+            icon: Calendar,
         },
         {
             title: 'Submissions',
             value: 'submissions',
             href: `/admin/courses/${courseData?.id}/submissions`,
+            icon: FileText,
+        },
+        {
+            title: 'Settings',
+            value: 'settings',
+            href: `/admin/courses/${courseData?.id}/settings`,
+            icon: Settings,
         },
     ]
 
-    const handleFetch = async () => {
-        if (courseId) {
-            try {
-                const courseID = Array.isArray(courseId)
-                    ? courseId[0]
-                    : courseId
-                const success = await getCourseData
-                    .getState()
-                    .fetchCourseDetails(parseInt(courseID))
-                if (!success) {
-                    router.push(`/admin/courses`)
-                    toast.info({
-                        title: 'Caution',
-                        description:
-                            'The Course has been deleted by another Admin',
-                    })
-                }
-            } catch (error) {
-                console.log('Caught in handleFetch', error)
-            }
-        }
-    }
-
     useEffect(() => {
-        const storedCourseId = localStorage.getItem('courseId')
-        // if (courseId && storedCourseId) {
-        //     // setCourseId(storedCourseId)
-        //     getCourseData
-        //         .getState()
-        //         .fetchCourseDetails(parseInt(storedCourseId))
-        // }
-        // if (courseId) {
-        //     const courseID = Array.isArray(courseId) ? courseId[0] : courseId
-        //     getCourseData.getState().fetchCourseDetails(parseInt(courseID))
-        // }
-        handleFetch()
-    }, [])
+        if (courseId) {
+            const courseID = Array.isArray(courseId) ? courseId[0] : courseId
+            fetchCourseDetails(parseInt(courseID))
+        }
+    }, [courseId, fetchCourseDetails])
 
     return (
         <>
             {/* <Breadcrumb crumbs={crumbs} /> */}
             <Link
                 href={'/admin/courses'}
-                className="flex space-x-2 w-[120px] text-gray-800"
+                className="flex space-x-2 w-[180px] text-foreground mt-8"
             >
                 <ArrowLeft size={20} />
                 <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
-                    My Courses
+                    Back to Course Library
                 </p>
             </Link>
-            <h1 className="text-3xl text-start font-bold my-6 text-gray-600">
+            <h1 className="font-heading text-start font-bold text-3xl text-foreground my-8">
                 {courseData?.name}
             </h1>
 
-            <div className="relative w-full">
+            <div className="w-full">
                 <Tabs defaultValue="generalDetails" className="w-full">
                     <div
                         className="relative border-b-2 border-muted flex justify-start overflow-x-auto overflow-y-hidden"
@@ -125,14 +111,15 @@ function CourseLayout() {
                                 flex: '0 0 auto', // Prevent flex from shrinking or expanding
                             }}
                         >
-                            <TabsList className="rounded-none rounded-t-sm flex-nowrap">
-                                {courseMenu.map(({ title, href }) => (
-                                    <TabItem
-                                        key={href}
-                                        title={title}
-                                        href={href}
-                                    />
-                                ))}
+                            <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
+                                {courseMenu.map(({ title, href, icon }) => (
+                                <TabItem
+                                    key={href}
+                                    title={title}
+                                    href={href}
+                                    icon={icon}
+                                />
+                            ))}
                             </TabsList>
                         </div>
                         <div
@@ -146,7 +133,22 @@ function CourseLayout() {
                         />
                     </div>
                 </Tabs>
+                {/* <Tabs defaultValue="generalDetails" className="w-full">
+                    <div className="relative border-b-2 border-muted">
+                    <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
+                            {courseMenu.map(({ title, href, icon }) => (
+                                <TabItem
+                                    key={href}
+                                    title={title}
+                                    href={href}
+                                    icon={icon}
+                                />
+                            ))}
+                        </TabsList>
+                    </div>
+                </Tabs> */}
             </div>
+
         </>
     )
 }
