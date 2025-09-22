@@ -27,6 +27,8 @@ import {
     getCourseData,
 } from '@/store/store'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { ArrowLeft, Plus } from 'lucide-react'
 
 type Chapter = {
     chapterId: number
@@ -346,20 +348,35 @@ function Chapter() {
     // }, [currentChapter])
 
     return (
-        <div className="flex flex-col h-screen pb-20">
-            <div className="mb-5">
+        <div className="flex flex-col h-screen pb-20 bg-card">
+            {/* <div className="mb-5">
                 <BreadcrumbComponent crumbs={crumbs} />
-            </div>
+            </div> */}
+            <Link
+                href={'/admin/courses'}
+                className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
+            >
+                <ArrowLeft size={20} />
+                <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
+                    Back to Course
+                </p>
+            </Link>
+            <h1 className="font-heading text-start font-bold text-lg text-foreground">
+                Module Content
+            </h1>
+            <p className="font-heading text-start font-bold text-sm text-muted-foreground mb-4">
+                {moduleName}
+            </p>
             <div className="flex flex-col overflow-hidden">
                 <div className="flex">
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <Button
-                                className="py-2 px-2 h-full w-full mr-4 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border hover:bg-[rgb(81,134,114)] hover:text-white"
-                                onClick={handleAddChapter}
-                            >
-                                Add Chapter
-                            </Button>
+                            <div className="w-full mb-4 pb-4 pr-4 border-b border-gray-200">
+                                <Button variant="outline" className="py-2 px-2 h-full w-full mr-4">
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Add Chapter
+                                </Button>
+                            </div>
                         </DialogTrigger>
                         <DialogOverlay />
                         <DialogContent>

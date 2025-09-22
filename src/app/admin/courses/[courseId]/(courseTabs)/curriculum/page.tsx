@@ -17,6 +17,7 @@ import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
 import{CurriculumItem,ModuleData} from "@/app/admin/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType"
+import { Plus } from 'lucide-react'
 
 
 function Page() {
@@ -569,12 +570,16 @@ function Page() {
 
     return (
         <div className="w-full">
-            <div className="w-full flex justify-end pr-4">
-                <div>
+            <div className="w-full flex flex-col items-center justify-center">
+                <div className="w-full px-2 md:px-0 max-w-4xl flex flex-col gap-y-4 my-4">
+                    <h2 className="text-xl font-semibold">
+                        Course Curriculum
+                    </h2>
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
-                            <Button className="text-white bg-success-dark opacity-75">
-                                Add Module
+                            <Button className="text-white bg-primary">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Module / Project
                             </Button>
                         </DialogTrigger>
                         <DialogOverlay />

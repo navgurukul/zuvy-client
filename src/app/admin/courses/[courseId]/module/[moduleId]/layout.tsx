@@ -21,7 +21,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex w-full sticky top-0 h-3/5">
                     {/* <div className="w-full flex-none md:w-[25%]"> */}
                     {/* <div className="w-full flex-none md:w-[25%] sticky top-0 h-screen overflow-y-auto"> */}
-                    <div className='w-[22%]'> <Chapter /> </div>
+                    <div className='w-[22%] border-r border-gray-200'>
+                        <Chapter /> 
+                    </div>
                     <div className="w-[78%]">{children}</div>
                     {/* <div className=" flex w-screen sticky top-0 ">
                     </div> */}
