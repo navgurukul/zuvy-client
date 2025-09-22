@@ -52,21 +52,21 @@ function ChapterItem({
     const setTopicIcon = () => {
         switch (topicId) {
             case 1:
-                return <Video />
+                return <Video size={20} />
             case 2:
-                return <BookOpenText />
+                return <BookOpenText size={20} />
             case 3:
-                return <SquareCode />
+                return <SquareCode size={20} />
             case 4:
-                return <FileQuestion />
+                return <FileQuestion size={20} />
             case 5:
-                return <PencilLine />
+                return <PencilLine size={20} />
             case 6:
-                return <BookOpenCheck />
+                return <BookOpenCheck size={20} />
             case 8:
-                return <Play />
+                return <Play size={20} />
             default:
-                return <StickyNote />
+                return <StickyNote size={20} />
         }
     }
 
