@@ -37,7 +37,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Label } from '@/components/ui/label'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { api } from '@/utils/axios.config'
-import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
+import { getBatchData, getCourseData, getStoreStudentData, getDeleteStudentStore } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -59,10 +59,13 @@ import {
     Edit,
     UserCheck,
     Upload,
-    UserPlus
+    UserPlus,
+    Trash2
 } from 'lucide-react'
 import { StudentData, BatchSuggestion, StudentDataState, ParamsType } from "@/app/admin/courses/[courseId]/(courseTabs)/batches/courseBatchesType"
 import { SearchBox } from '@/utils/searchBox'
+import DeleteConfirmationModal from '../../_components/deleteModal'
+import Dropzone from '../../_components/dropzone'
 
 // Enhanced Batch interface to match new design
 interface EnhancedBatch {
@@ -83,11 +86,12 @@ const Page = ({ params }: { params: ParamsType }) => {
     const { courseData, fetchCourseDetails } = getCourseData()
     const { batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
+    const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
 
     // Other states
     const [loading, setLoading] = useState(true)
     const [assignStudents, setAssignStudents] = useState('')
-    const [manualAssignmentMethod, setManualAssignmentMethod] = useState('unassigned') // New state for assignment method
+    const [manualAssignmentMethod, setManualAssignmentMethod] = useState('unassigned')
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
     const [totalStudents, setTotalStudents] = useState([...students])
     const [searchStudent, setSearchStudent] = useState('')
@@ -95,16 +99,19 @@ const Page = ({ params }: { params: ParamsType }) => {
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [searchQuery, setSearchQuery] = useState('')
     const [csvFile, setCsvFile] = useState<File | null>(null)
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [singleStudentData, setSingleStudentData] = useState({
         name: '',
         email: '',
-        phone: ''
     })
     
     // New states for edit functionality
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [editingBatch, setEditingBatch] = useState<EnhancedBatch | null>(null)
     const [currentStep, setCurrentStep] = useState(1)
+    
+    // Delete states
+    const [batchToDelete, setBatchToDelete] = useState<EnhancedBatch | null>(null)
 
     // Helper function to get status color
     const getStatusColor = (status: string) => {
@@ -144,21 +151,24 @@ const Page = ({ params }: { params: ParamsType }) => {
             createdAt: batch.createdAt || '2024-01-15',
             updatedAt: batch.updatedAt || '2024-04-15',
         }))
+         .sort((a, b) => {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        })
     }, [batchData])
 
     const formatDate = (dateString: string): string => {
-    if (!dateString) return ''
-    
-    try {
-        const date = new Date(dateString)
-        // Format to YYYY-MM-DD only
-        return date.toISOString().split('T')[0]
-    } catch (error) {
-        console.error('Date formatting error:', error)
-        // Fallback: extract first 10 characters
-        return dateString.split('T')[0] || dateString.substring(0, 10)
+        if (!dateString) return ''
+        
+        try {
+            const date = new Date(dateString)
+            // Format to YYYY-MM-DD only
+            return date.toISOString().split('T')[0]
+        } catch (error) {
+            console.error('Date formatting error:', error)
+            // Fallback: extract first 10 characters
+            return dateString.split('T')[0] || dateString.substring(0, 10)
+        }
     }
-}
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(
@@ -194,7 +204,9 @@ const Page = ({ params }: { params: ParamsType }) => {
         name: z.string().min(3, {
             message: 'Batch name must be at least 3 characters.',
         }),
-        instructorEmail: z.string().email(),
+        instructorEmail: z.string().email({
+        message: 'Please enter a valid email address.',
+    }),
         bootcampId: z
             .string()
             .refine((bootcampId) => !isNaN(parseInt(bootcampId))),
@@ -224,13 +236,13 @@ const Page = ({ params }: { params: ParamsType }) => {
             capEnrollment: '',
             assignLearners: 'all',
         },
-        values: {
-            name: '',
-            instructorEmail: '',
-            bootcampId: courseData?.id.toString() ?? '',
-            capEnrollment: '',
-            assignLearners: 'all',
-        },
+        // values: {
+        //     name: '',
+        //     instructorEmail: '',
+        //     bootcampId: courseData?.id.toString() ?? '',
+        //     capEnrollment: '',
+        //     assignLearners: 'all',
+        // },
         mode: 'onChange',
     })
 
@@ -246,6 +258,33 @@ const Page = ({ params }: { params: ParamsType }) => {
         })
         setIsEditModalOpen(true)
         setCurrentStep(1)
+    }
+
+    // Handle delete batch
+    const handleDeleteBatch = (batch: EnhancedBatch) => {
+        setBatchToDelete(batch)
+        setDeleteModalOpen(true)
+    }
+
+    // Batch delete handler
+    const batchDeleteHandler = async () => {
+        if (!batchToDelete) return
+        
+        try {
+            await api.delete(`/batch/${batchToDelete.id}`)
+            toast.success({
+                title: 'Batch Deleted Successfully',
+            })
+            setDeleteModalOpen(false)
+            setBatchToDelete(null)
+            // Refresh batch data
+            defaultFetchApi()
+        } catch (error) {
+            toast.error({
+                title: 'Batch not Deleted',
+                description: 'An error occurred while deleting the batch'
+            })
+        }
     }
 
     // Handle update batch
@@ -281,8 +320,6 @@ const Page = ({ params }: { params: ParamsType }) => {
 
     // Handle view students - navigate to students with batch filter
     const handleViewStudents = (batchId: string | number, batchName: string) => {
-        // Navigate to students tab with batch pre-selected
-        
         router.push(`/admin/courses/${params.courseId}/students?batch=${batchId}`)
     }
 
@@ -306,86 +343,193 @@ const Page = ({ params }: { params: ParamsType }) => {
             [field]: value
         }))
     }
+// Fixed onSubmit function with proper manual assignment handling
+const onSubmit = async (values: z.infer<typeof formSchema>) => {
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        // If editing, use update handler
-        if (isEditModalOpen && editingBatch) {
-            return handleUpdateBatch(values)
-        }
-
-        // Original create logic
-        try {
-            let studentIds: number[] = []
-            let assignAll = true
-
-            // Handle different assignment methods
-            if (assignStudents === 'manually') {
-                if (manualAssignmentMethod === 'unassigned') {
-                    studentIds = selectedRows.map((student) => student.id)
-                    assignAll = studentIds.length === 0
-                } else if (manualAssignmentMethod === 'single') {
-                    // Handle single student creation logic here
-                    // You might need to create the student first, then get their ID
-                    assignAll = false
-                    // This would require additional API call to create student first
-                } else if (manualAssignmentMethod === 'csv') {
-                    // Handle CSV upload logic here
-                    assignAll = false
-                    // Parse CSV and extract student IDs or create students
-                }
-            }
-
-            const convertedData = {
-                name: values.name,
-                instructorEmail: values.instructorEmail,
-                bootcampId: +values.bootcampId,
-                capEnrollment: +values.capEnrollment,
-                assignAll: assignAll,
-                studentIds: studentIds,
-            }
-
-            const convertedName: string = convertedData.name
-                .replace(/\s+/g, '')
-                .toLowerCase()
-            const matchedBatchData = enhancedBatchData?.find(
-                (batchDataItem) =>
-                    convertedName === batchDataItem.name.toLowerCase()
-            )
-
-            if (matchedBatchData) {
-                toast.error({
-                    title: 'Cannot Create New Batch',
-                    description: 'This Batch Name Already Exists',
-                })
-            } else {
-                const res = await api.post(`/batch`, convertedData)
-                setAssignStudents('')
-                setManualAssignmentMethod('unassigned')
-                if (params.courseId) {
-                    defaultFetchApi()
-                    fetchStudentData(params.courseId, setStoreStudentData)
-                    fetchCourseDetails(params.courseId)
-                }
-                toast.success({
-                    title: res.data.status,
-                    description: res.data.message,
-                })
-                getUnAssignedStudents()
-                return true
-            }
-        } catch (error: any) {
-            setAssignStudents('')
-            setManualAssignmentMethod('unassigned')
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'An error occurred.',
-            })
-            console.error('Error creating batch:', error)
-            return false
-        }
+    console.log("=== DEBUGGING BOOTCAMP ID ISSUE ===")
+    console.log("courseData:", courseData)
+    console.log("params.courseId:", params.courseId)
+    console.log("form values:", values)
+    console.log("bootcampId from form:", values.bootcampId)
+    console.log("bootcampId parsed:", +values.bootcampId)
+    // If editing, use update handler
+    if (isEditModalOpen && editingBatch) {
+        return handleUpdateBatch(values)
     }
 
+    try {
+        let studentIds: number[] = []
+        let assignAll = true
+        let studentsToAdd: any[] = []// For single student or CSV upload
+
+        // Handle different assignment methods
+        if (assignStudents === 'manually') {
+            assignAll = false // Always false for manual assignment
+            
+            if (manualAssignmentMethod === 'unassigned') {
+                // Use selected rows from unassigned students
+                studentIds = selectedRows.map((student) => student.id)
+                
+                // If no students selected, don't create batch
+                if (studentIds.length === 0) {
+                    toast.error({
+                        title: 'No Students Selected',
+                        description: 'Please select at least one student to assign to the batch',
+                    })
+                    return false
+                }
+            } 
+            else if (manualAssignmentMethod === 'single') {
+                // Validate single student data
+                if (!singleStudentData.name.trim() || !singleStudentData.email.trim()) {
+                    toast.error({
+                        title: 'Incomplete Student Data',
+                        description: 'Please provide both student name and email',
+                    })
+                    return false
+                }
+                
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+                if (!emailRegex.test(singleStudentData.email)) {
+                    toast.error({
+                        title: 'Invalid Email',
+                        description: 'Please provide a valid email address',
+                    })
+                    return false
+                }
+                
+                studentsToAdd = [{
+                    name: singleStudentData.name.trim(),
+                    email: singleStudentData.email.trim(),
+                }]
+            } 
+            else if (manualAssignmentMethod === 'csv') {
+                 if (!studentData || !Array.isArray(studentData) || studentData.length === 0) {
+                    toast.error({
+                        title: 'No CSV Data',
+                        description: 'Please upload a valid CSV file with student data',
+                    })
+                    return false
+                }
+                studentsToAdd = studentData
+            }
+        }
+        
+        const bootcampId = parseInt(String(params.courseId));
+
+        if (isNaN(bootcampId) || bootcampId <= 0) {
+            console.error("Invalid courseId:", params.courseId)
+            toast({
+                title: 'Invalid Course ID',
+                description: 'Course ID is not valid. Please refresh the page.',
+                variant: 'destructive',
+            })
+            return false
+        }
+
+        // Create batch data
+        const batchPayload = {
+            name: values.name,
+            instructorEmail: values.instructorEmail,
+            bootcampId: bootcampId,
+            capEnrollment: +values.capEnrollment,
+            assignAll: assignAll,
+            studentIds: studentIds
+        }
+
+        console.log("=== BATCH PAYLOAD DEBUG ===")
+        console.log("batchPayload:", batchPayload)
+        console.log("bootcampId type:", typeof batchPayload.bootcampId)
+        console.log("bootcampId value:", batchPayload.bootcampId)
+
+
+        if (!batchPayload.name || !batchPayload.instructorEmail || !batchPayload.bootcampId || !batchPayload.capEnrollment) {
+            toast({
+                title: 'Missing Required Fields',
+                description: 'Please fill in all required fields',
+                variant: 'destructive',
+            })
+            return false
+        }
+        // Check for duplicate batch name
+        const convertedName = batchPayload.name.replace(/\s+/g, '').toLowerCase()
+        const matchedBatchData = enhancedBatchData?.find(
+            (batch) => convertedName === batch.name.replace(/\s+/g, '').toLowerCase()
+        )
+
+        if (matchedBatchData) {
+            toast.error({
+                title: 'Cannot Create New Batch',
+                description: 'This Batch Name Already Exists',
+            })
+            return false
+        }
+
+        // Create batch
+        const batchResponse = await api.post(`/batch`, batchPayload)
+        const newBatchId = batchResponse.data.data?.id || batchResponse.data.id
+
+         // If new students to add (single/CSV), add them to course and batch
+        if (studentsToAdd.length > 0) {
+            try {
+                // Use same API pattern as AddStudentsModal
+                const studentsPayload = {
+                    students: studentsToAdd
+                }
+                
+                // Add students to course with batch assignment
+                await api.post(
+                    `/bootcamp/students/${params.courseId}?batch_id=${newBatchId}`, 
+                    studentsPayload
+                )
+            } catch (error) {
+                console.error('Error adding students:', error)
+                // Batch created but students not added
+                toast.warning({
+                    title: 'Partial Success',
+                    description: 'Batch created but some students could not be added',
+                })
+            }
+        }
+        
+        // Reset all form states
+        setAssignStudents('')
+        setManualAssignmentMethod('unassigned')
+        setSelectedRows([])
+        setStudentData({})
+        setSingleStudentData({ name: '', email: '' })
+        
+        // Refresh data
+        if (params.courseId) {
+            fetchStudentData(params.courseId, setStoreStudentData)
+            fetchCourseDetails(params.courseId)
+            defaultFetchApi()
+        }
+        
+        toast.success({
+            title: 'Success',
+            description: 'Batch created successfully',
+        })
+        
+        getUnAssignedStudents()
+        return true
+        
+    } catch (error: any) {
+        // setAssignStudents('')
+        // setManualAssignmentMethod('unassigned')
+        // setSelectedRows([])
+       
+        
+        toast.error({
+            title: 'Failed',
+            description:
+                error.response?.data?.message || 'Failed to create batch.',
+        })
+        console.error('Error creating batch:', error)
+        return false
+    }
+}
     // Rest of the existing useEffect and other functions remain the same
     useEffect(() => {
         if (params.courseId) {
@@ -426,72 +570,67 @@ const Page = ({ params }: { params: ParamsType }) => {
     const columns = useMemo(() => createColumns(Number(capEnrollmentValue)), [capEnrollmentValue])
 
     const handleModal = (isOpen: boolean) => {
+        setIsCreateModalOpen(isOpen)
         if (!isOpen) {
-            form.reset()
-            setAssignStudents('')
-            setManualAssignmentMethod('unassigned')
-            setCsvFile(null)
-            setSingleStudentData({ name: '', email: '', phone: '' })
-            setEditingBatch(null)
-            setIsEditModalOpen(false)
-        }
+        // Form completely reset
+        form.reset({
+            name: '',
+            instructorEmail: '',
+            bootcampId: courseData?.id.toString() ?? '',
+            capEnrollment: '',
+            assignLearners: 'all',
+        })
+        
+        // All states reset
+        setAssignStudents('')
+        setManualAssignmentMethod('unassigned')
+        setCsvFile(null)
+        setSingleStudentData({ name: '', email: ''})
+        setEditingBatch(null)
+        setIsEditModalOpen(false)
+        setCurrentStep(1) 
+        setSelectedRows([]) 
+        setStudentData({}) 
+    }
     }
 
     // Render manual assignment method selection
     const renderManualAssignmentMethod = () => {
-        return (
-            <div className="space-y-4">
-                <div>
-                    <Label className="text-base font-medium">Choose Assignment Method</Label>
-                    <p className="text-sm text-muted-foreground">Select how you want to add students to this batch</p>
+        return  ( 
+        <div className="space-y-2">            
+            <RadioGroup 
+                value={manualAssignmentMethod} 
+                onValueChange={setManualAssignmentMethod}
+                className="flex gap-6"
+            >
+               <div className="flex flex-col space-y-1">
+                    <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="unassigned" id="unassigned" />
+                        <Label htmlFor="unassigned" className="font-medium cursor-pointer mt-5">
+                            Unassigned Students
+                        </Label>
+                    </div>
+                    {/* <p className="text-sm text-muted-foreground ">
+                        Unassigned Students in Records: {courseData?.unassigned_students || 0}
+                    </p> */}
                 </div>
                 
-                <RadioGroup 
-                    value={manualAssignmentMethod} 
-                    onValueChange={setManualAssignmentMethod}
-                    className="space-y-3"
-                >
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value="unassigned" id="unassigned" />
-                        <div className="flex-1">
-                            <Label htmlFor="unassigned" className="font-medium cursor-pointer">
-                                Select from Unassigned Students
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                Choose from existing unassigned students in the course
-                            </p>
-                        </div>
-                        <UserCheck className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value="single" id="single" />
-                        <div className="flex-1">
-                            <Label htmlFor="single" className="font-medium cursor-pointer">
-                                Add Single Student
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                Add a new student by entering their details manually
-                            </p>
-                        </div>
-                        <UserPlus className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value="csv" id="csv" />
-                        <div className="flex-1">
-                            <Label htmlFor="csv" className="font-medium cursor-pointer">
-                                Upload CSV File
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                Bulk upload students using a CSV file
-                            </p>
-                        </div>
-                        <Upload className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                </RadioGroup>
-            </div>
-        )
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="single" id="single" />
+                    <Label htmlFor="single" className="font-medium cursor-pointer mt-5">
+                        Add Single Student
+                    </Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="csv" id="csv" />
+                    <Label htmlFor="csv" className="font-medium cursor-pointer mt-5">
+                        Upload CSV
+                    </Label>
+                </div>
+            </RadioGroup>
+        </div>
+    )
     }
 
     // Render the selected assignment method content
@@ -500,6 +639,9 @@ const Page = ({ params }: { params: ParamsType }) => {
             case 'unassigned':
                 return (
                     <>
+                        <p className="text-sm text-muted-foreground ml-2">
+                         Unassigned Students in Records: {courseData?.unassigned_students || 0}
+                        </p>
                         <Input
                             type="search"
                             placeholder="Search students"
@@ -516,6 +658,11 @@ const Page = ({ params }: { params: ParamsType }) => {
                         <p className="pt-2 text-sm">
                             Total Learners Selected: {selectedRows.length}
                         </p>
+                        {selectedRows.length === 0 && (
+                        <p className="text-sm text-red-500">
+                            Please select at least one student
+                        </p>
+                    )}
                     </>
                 )
             
@@ -541,347 +688,387 @@ const Page = ({ params }: { params: ParamsType }) => {
                                 placeholder="Enter student email"
                             />
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="studentPhone">Student Phone</Label>
-                            <Input
-                                id="studentPhone"
-                                type="tel"
-                                value={singleStudentData.phone}
-                                onChange={(e) => handleSingleStudentChange('phone', e.target.value)}
-                                placeholder="Enter student phone number"
-                            />
-                        </div>
+                         {(!singleStudentData.name.trim() || !singleStudentData.email.trim()) && (
+                        <p className="text-sm text-red-500">
+                            Both name and email are required
+                        </p>
+                    )}
                     </div>
                 )
             
             case 'csv':
                 return (
-                    <div className="space-y-4">
-                        <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                            <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground mb-2">
-                                Upload a CSV file with student information
-                            </p>
-                            <Input
-                                type="file"
-                                accept=".csv"
-                                onChange={handleCsvFileChange}
-                                className="max-w-xs mx-auto"
-                            />
-                            {csvFile && (
-                                <p className="text-sm text-green-600 mt-2">
-                                    Selected: {csvFile.name}
-                                </p>
-                            )}
-                        </div>
-                        <div className="text-center">
-                            <Button variant="ghost" size="sm">
-                                Download Sample CSV
-                            </Button>
-                        </div>
+
+                     <div className="space-y-4">
+                    {/* Use Dropzone instead of manual file input */}
+                    <Dropzone
+                        studentData={studentData}
+                        setStudentData={setStudentData}
+                        className="px-5 py-2 border-dashed border-2 rounded-[10px] block"
+                    />
+                    <div className="text-center">
+                        <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                                // Download sample CSV
+                                const csvContent = "name,email\nJohn Doe,john@example.com\nJane Smith,jane@example.com"
+                                const blob = new Blob([csvContent], { type: 'text/csv' })
+                                const url = window.URL.createObjectURL(blob)
+                                const a = document.createElement('a')
+                                a.href = url
+                                a.download = 'sample_students.csv'
+                                a.click()
+                                window.URL.revokeObjectURL(url)
+                            }}
+                        >
+                            Download Sample CSV
+                        </Button>
                     </div>
+                </div>
                 )
             
             default:
                 return null
         }
     }
-    
+
+    const isManualAssignmentValid = () => {
+    if (manualAssignmentMethod === 'unassigned') {
+        return selectedRows.length > 0
+    } else if (manualAssignmentMethod === 'single') {
+        return singleStudentData.name.trim() && singleStudentData.email.trim()
+    } else if (manualAssignmentMethod === 'csv') {
+        return studentData && Array.isArray(studentData) && studentData.length > 0
+    }
+    return false
+}
+
     const renderModal = (emptyState: boolean) => {
-        if (courseData?.unassigned_students === 0) {
-            return (
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700">
-                            <Plus className="h-4 w-4 mr-2" />
-                            {emptyState ? 'Create New Batch' : 'Create New Batch'}
-                        </Button>
-                    </DialogTrigger>
-                    <DialogOverlay />
-                    <AddStudentsModal
-                        message={true}
-                        id={courseData?.id || 0}
-                        batch={false}
-                        batchData={batchData ? batchData?.length > 0 : false}
-                        batchId={0}
-                        setStudentData={setStudentData}
-                        studentData={studentData}
-                    />
-                </Dialog>
-            )
-        } else {
-            return (
-                <Dialog onOpenChange={(isOpen) => handleModal(isOpen)}>
-                    <DialogTrigger asChild>
-                        <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700">
-                            <Plus className="h-4 w-4 mr-2" />
-                            {emptyState ? 'Create New Batch' : 'Create New Batch'}
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-[800px] max-h-[90vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle className="text-xl font-semibold">
-                                {isEditModalOpen ? `Edit Batch - ${editingBatch?.name}` : 'Create New Batch'}
-                            </DialogTitle>
-                            <DialogDescription>
-                                {isEditModalOpen 
-                                    ? 'Update batch details and instructor information.'
-                                    : assignStudents === 'manually' 
-                                        ? 'Choose how you want to add students to this batch'
-                                        : `Unassigned Students in Records: ${courseData?.unassigned_students}`
-                                }
-                            </DialogDescription>
-                            <Form {...form}>
-                                <form
-                                    onSubmit={form.handleSubmit(onSubmit)}
-                                    className="space-y-8"
-                                >
-                                    {assignStudents === 'manually' && !isEditModalOpen ? (
-                                        <div className="space-y-6">
-                                            {/* Assignment Method Selection */}
-                                            {renderManualAssignmentMethod()}
-                                            
-                                            {/* Assignment Method Content */}
-                                            <div className="border-t pt-6">
-                                                {renderAssignmentMethodContent()}
-                                            </div>
-                                            
-                                            {/* Action Buttons */}
-                                            <div className="flex justify-between w-full pt-4 border-t">
+    if (courseData?.unassigned_students === 0) {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create New Batch
+                    </Button>
+                </DialogTrigger>
+                <DialogOverlay />
+                <AddStudentsModal
+                    message={true}
+                    id={courseData?.id || 0}
+                    batch={false}
+                    batchData={batchData ? batchData?.length > 0 : false}
+                    batchId={0}
+                    setStudentData={setStudentData}
+                    studentData={studentData}
+                />
+            </Dialog>
+        )
+    } else {
+        return (
+            <Dialog open={isCreateModalOpen} onOpenChange={(open) => {
+                    handleModal(open)
+                
+            }}>
+                <DialogTrigger asChild>
+                    <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700"
+                    onClick={() => {
+                            // Reset everything before opening
+                            form.reset({
+                                name: '',
+                                instructorEmail: '',
+                                bootcampId: courseData?.id.toString() ?? '',
+                                capEnrollment: '',
+                                assignLearners: 'all',
+                            })
+                            setAssignStudents('')
+                            setManualAssignmentMethod('unassigned')
+                            setCsvFile(null)
+                            setSingleStudentData({ name: '', email: ''})
+                            setSelectedRows([])
+                            setStudentData({})
+                            setIsCreateModalOpen(true)
+                        }}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create New Batch
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-[800px] max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-semibold">
+                            Create New Batch
+                        </DialogTitle>
+                        <DialogDescription>
+                            {assignStudents === 'manually' 
+                                ? 'Choose how you want to add students to this batch'
+                                : `Unassigned Students in Records: ${courseData?.unassigned_students}`
+                            }
+                        </DialogDescription>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                                {assignStudents === 'manually' ? (
+                                    <div className="space-y-6">
+                                        {/* Assignment Method Selection */}
+                                        {renderManualAssignmentMethod()}
+                                        
+                                        {/* Assignment Method Content */}
+                                        <div className="border-t pt-6">
+                                            {renderAssignmentMethodContent()}
+                                        </div>
+                                        
+                                        {/* Action Buttons */}
+                                        <div className="flex justify-between w-full pt-4 border-t">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setAssignStudents('')}
+                                            >
+                                                Back
+                                            </Button>
+                                            {/* <DialogClose asChild> */}
                                                 <Button
                                                     type="button"
-                                                    variant="outline"
-                                                    onClick={() => setAssignStudents('')}
+                                                    disabled={!form.formState.isValid || !isManualAssignmentValid()}
+                                                   onClick={async (e) => {
+                                                   e.preventDefault() // Prevent any default form submission
+                                                    const formData = form.getValues()
+                                                const success = await onSubmit(formData)
+                                                 if (success) {
+                                                   setIsCreateModalOpen(false)
+                                                     }
+                                                 }}
                                                 >
-                                                    Back
+                                                    Create Batch
                                                 </Button>
-                                                <DialogClose asChild>
+                                            {/* </DialogClose> */}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <FormField
+                                            control={form.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Batch Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Batch Name" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="instructorEmail"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Instructor Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="instructor@navgurukul.org"
+                                                            type="email"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={form.control}
+                                            name="capEnrollment"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Cap Enrollment</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            placeholder="Cap Enrollment (max: 100,000)"
+                                                            type="number"
+                                                            {...field}
+                                                            onChange={(e) => {
+                                                                const value = e.target.value
+                                                                if (value.length <= 6) {
+                                                                    field.onChange(e)
+                                                                }
+                                                            }}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        
+                                        <FormField
+                                            control={form.control}
+                                            name="assignLearners"
+                                            render={({ field }) => (
+                                                <FormItem className="text-start">
+                                                    <FormLabel>Assign Learners to Batch</FormLabel>
+                                                    <FormControl>
+                                                        <RadioGroup
+                                                            onValueChange={field.onChange}
+                                                            value={field.value || ''}
+                                                            className="flex gap-4"
+                                                        >
+                                                            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                                                <FormControl>
+                                                                    <RadioGroupItem value="all" />
+                                                                </FormControl>
+                                                                <FormLabel className="font-normal">All learners</FormLabel>
+                                                            </FormItem>
+                                                            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                                                <FormControl>
+                                                                    <RadioGroupItem value="manually" />
+                                                                </FormControl>
+                                                                <FormLabel className="font-normal">Assign manually</FormLabel>
+                                                            </FormItem>
+                                                        </RadioGroup>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        {assignLearners === 'all' && (
+                                            <FormDescription>
+                                                {`${courseData?.unassigned_students} ${courseData?.unassigned_students === 1 ? ' student' : ' students'} will be added to
+                                                this batch (Maximum current availability)`}
+                                            </FormDescription>
+                                        )}
+                                        
+                                        <div className="w-full flex flex-col items-end gap-y-5">
+                                            {assignLearners === 'all' ? (
+                                                // <DialogClose asChild>
                                                     <Button
+                                                        className="w-1/2"
                                                         type="submit"
                                                         disabled={!form.formState.isValid}
+                                                        onClick={async (e) => {
+                                                        e.preventDefault()
+                                                        const formData = form.getValues()
+                                                        const success = await onSubmit(formData)
+                                                        if (success) {
+                                                            setIsCreateModalOpen(false)
+                                                        }
+                                                    }}
                                                     >
-                                                        Create Batch
+                                                        Create batch
                                                     </Button>
-                                                </DialogClose>
-                                            </div>
+                                                // </DialogClose>
+                                            ) : (
+                                                <Button
+                                                    type="button"
+                                                    className="w-1/2"
+                                                    onClick={() => setAssignStudents('manually')}
+                                                    disabled={!form.formState.isValid}
+                                                >
+                                                    Next: Assign Learners to Batch
+                                                </Button>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <>
-                                            <FormField
-                                                control={form.control}
-                                                name="name"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Batch Name</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="Batch Name" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="instructorEmail"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Instructor Email</FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                placeholder="instructor@navgurukul.org"
-                                                                type="email"
-                                                                {...field}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name="capEnrollment"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Cap Enrollment</FormLabel>
-                                                        <FormControl>
-                                                            <Input
-                                                                placeholder="Cap Enrollment (max: 100,000)"
-                                                                type="number"
-                                                                {...field}
-                                                                onChange={(e) => {
-                                                                    const value = e.target.value
-                                                                    if (value.length <= 6) {
-                                                                        field.onChange(e)
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            
-                                            {!isEditModalOpen && (
-                                                <FormField
-                                                    control={form.control}
-                                                    name="assignLearners"
-                                                    render={({ field }) => (
-                                                        <FormItem className="text-start">
-                                                            <FormLabel>Assign Learners to Batch</FormLabel>
-                                                            <FormControl>
-                                                                <RadioGroup
-                                                                    onValueChange={field.onChange}
-                                                                    value={field.value || ''}
-                                                                    className="flex gap-4"
-                                                                >
-                                                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                                                                        <FormControl>
-                                                                            <RadioGroupItem value="all" />
-                                                                        </FormControl>
-                                                                        <FormLabel className="font-normal">All learners</FormLabel>
-                                                                    </FormItem>
-                                                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                                                                        <FormControl>
-                                                                            <RadioGroupItem value="manually" />
-                                                                        </FormControl>
-                                                                        <FormLabel className="font-normal">Assign manually</FormLabel>
-                                                                    </FormItem>
-                                                                </RadioGroup>
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            )}
-
-                                            {assignLearners === 'all' && !isEditModalOpen && (
-                                                <FormDescription>
-                                                    {`${courseData?.unassigned_students} ${courseData?.unassigned_students === 1 ? ' student' : ' students'} will be added to
-                                                    this batch (Maximum current availability)`}
-                                                </FormDescription>
-                                            )}
-                                            
-                                            <div className="w-full flex flex-col items-end gap-y-5">
-                                                {isEditModalOpen ? (
-                                                    <DialogClose asChild>
-                                                        <Button
-                                                            className="w-1/2"
-                                                            type="submit"
-                                                            disabled={!form.formState.isValid}
-                                                        >
-                                                            Update Batch
-                                                        </Button>
-                                                    </DialogClose>
-                                                ) : assignLearners === 'all' ? (
-                                                    <DialogClose asChild>
-                                                        <Button
-                                                            className="w-1/2"
-                                                            type="submit"
-                                                            disabled={!form.formState.isValid}
-                                                        >
-                                                            Create batch
-                                                        </Button>
-                                                    </DialogClose>
-                                                ) : (
-                                                    <Button
-                                                        type="button"
-                                                        className="w-1/2"
-                                                        onClick={() => setAssignStudents('manually')}
-                                                        disabled={!form.formState.isValid}
-                                                    >
-                                                        Next: Assign Learners to Batch
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </>
-                                    )}
-                                </form>
-                            </Form>
-                        </DialogHeader>
-                    </DialogContent>
-                </Dialog>
-            )
-        }
+                                    </>
+                                )}
+                            </form>
+                        </Form>
+                    </DialogHeader>
+                </DialogContent>
+            </Dialog>
+        )
     }
+}
 
-    // Edit Modal
-    const renderEditModal = () => (
-        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-            <DialogContent className="max-w-[600px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">
-                        Edit Batch - {editingBatch?.name}
-                    </DialogTitle>
-                    <DialogDescription>
-                        Update batch details and instructor information.
-                    </DialogDescription>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <FormField
-                                control={form.control}
-                                name="name"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Batch Name</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Batch Name" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="instructorEmail"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Instructor Email</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="instructor@navgurukul.org"
-                                                type="email"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="capEnrollment"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Cap Enrollment</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Cap Enrollment (max: 100,000)"
-                                                type="number"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <div className="flex justify-end gap-2 pt-4">
-                                <Button 
-                                    type="button"
-                                    variant="outline" 
-                                    onClick={() => setIsEditModalOpen(false)}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={!form.formState.isValid}>
-                                    Update Batch
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </DialogHeader>
-            </DialogContent>
-        </Dialog>
-    )
+const renderEditModal = () => (
+    <Dialog open={isEditModalOpen} onOpenChange={(isOpen) => {
+        setIsEditModalOpen(isOpen)
+        if (!isOpen) {
+            setEditingBatch(null)
+            form.reset({
+                name: '',
+                instructorEmail: '',
+                bootcampId: courseData?.id.toString() ?? '',
+                capEnrollment: '',
+                assignLearners: 'all',
+            })
+        }
+    }}>
+        <DialogContent className="max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+                <DialogTitle className="text-xl font-semibold">
+                    Edit Batch - {editingBatch?.name}
+                </DialogTitle>
+                <DialogDescription>
+                    Update batch details and instructor information.
+                </DialogDescription>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Batch Name</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Batch Name" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="instructorEmail"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Instructor Email</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="instructor@navgurukul.org"
+                                            type="email"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="capEnrollment"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Cap Enrollment</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Cap Enrollment (max: 100,000)"
+                                            type="number"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex justify-end gap-2 pt-4">
+                            <Button 
+                                type="button"
+                                variant="outline" 
+                                onClick={() => setIsEditModalOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={!form.formState.isValid}>
+                                Update Batch
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+            </DialogHeader>
+        </DialogContent>
+    </Dialog>
+)
 
     if (courseData?.id) {
         return (
@@ -910,7 +1097,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {(enhancedBatchData?.length ?? 0) > 0 ? (
                             enhancedBatchData?.map((batch: EnhancedBatch) => (
-                                <Card key={batch.id} className="hover:shadow-lg transition-all duration-200 flex flex-col w-[450px]">
+                                <Card key={batch.id} className="hover:shadow-lg transition-all duration-200 flex flex-col w-[380px]">
                                     <CardHeader className="pb-3">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1 text-left">
@@ -937,14 +1124,24 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                     {batch.status.replace('_', ' ')}
                                                 </Badge>
                                             </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-6 w-6 hover:bg-primary hover:text-white"
-                                                onClick={() => handleEditBatch(batch)}
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
+                                            <div className="flex gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6 hover:bg-primary hover:text-white"
+                                                    onClick={() => handleEditBatch(batch)}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6 "
+                                                    onClick={() => handleDeleteBatch(batch)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </CardHeader>
 
@@ -1015,10 +1212,26 @@ const Page = ({ params }: { params: ParamsType }) => {
 
                 {/* Edit Modal */}
                 {renderEditModal()}
+
+                {/* Delete Confirmation Modal */}
+                <DeleteConfirmationModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => {
+                        setDeleteModalOpen(false)
+                        setBatchToDelete(null)
+                    }}
+                    onConfirm={batchDeleteHandler}
+                    modalText="Type the batch name to confirm deletion"
+                    modalText2="Batch Name"
+                    input={true}
+                    buttonText="Delete Batch"
+                    instructorInfo={batchToDelete}
+                />
             </div>
         )
     }
-}
 
+    return null
+}
 
 export default Page
