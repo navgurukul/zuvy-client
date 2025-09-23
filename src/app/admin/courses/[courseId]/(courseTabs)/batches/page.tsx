@@ -346,12 +346,6 @@ const Page = ({ params }: { params: ParamsType }) => {
 // Fixed onSubmit function with proper manual assignment handling
 const onSubmit = async (values: z.infer<typeof formSchema>) => {
 
-    console.log("=== DEBUGGING BOOTCAMP ID ISSUE ===")
-    console.log("courseData:", courseData)
-    console.log("params.courseId:", params.courseId)
-    console.log("form values:", values)
-    console.log("bootcampId from form:", values.bootcampId)
-    console.log("bootcampId parsed:", +values.bootcampId)
     // If editing, use update handler
     if (isEditModalOpen && editingBatch) {
         return handleUpdateBatch(values)
@@ -438,11 +432,6 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
             studentIds: studentIds
         }
 
-        console.log("=== BATCH PAYLOAD DEBUG ===")
-        console.log("batchPayload:", batchPayload)
-        console.log("bootcampId type:", typeof batchPayload.bootcampId)
-        console.log("bootcampId value:", batchPayload.bootcampId)
-
 
         if (!batchPayload.name || !batchPayload.instructorEmail || !batchPayload.bootcampId || !batchPayload.capEnrollment) {
             toast({
@@ -516,9 +505,9 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
         return true
         
     } catch (error: any) {
-        // setAssignStudents('')
-        // setManualAssignmentMethod('unassigned')
-        // setSelectedRows([])
+        setAssignStudents('')
+        setManualAssignmentMethod('unassigned')
+        setSelectedRows([])
        
         
         toast.error({
@@ -533,9 +522,14 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // Rest of the existing useEffect and other functions remain the same
     useEffect(() => {
         if (params.courseId) {
+            console.log('Fetching course details for:', params.courseId)
             fetchCourseDetails(params.courseId)
         }
     }, [params.courseId, fetchCourseDetails])
+
+    useEffect(() => {
+    console.log('CourseData updated:', courseData)
+}, [courseData])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -579,6 +573,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
             bootcampId: courseData?.id.toString() ?? '',
             capEnrollment: '',
             assignLearners: 'all',
+            
         })
         
         // All states reset
@@ -610,9 +605,6 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                             Unassigned Students
                         </Label>
                     </div>
-                    {/* <p className="text-sm text-muted-foreground ">
-                        Unassigned Students in Records: {courseData?.unassigned_students || 0}
-                    </p> */}
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -745,7 +737,14 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
 }
 
     const renderModal = (emptyState: boolean) => {
-    if (courseData?.unassigned_students === 0) {
+
+     const shouldShowAddStudentModal = (
+        courseData?.unassigned_students === 0 || 
+        (!batchData || batchData.length === 0)
+    )
+   
+    if (shouldShowAddStudentModal) {
+       
         return (
             <Dialog>
                 <DialogTrigger asChild>
@@ -767,6 +766,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
             </Dialog>
         )
     } else {
+         
         return (
             <Dialog open={isCreateModalOpen} onOpenChange={(open) => {
                     handleModal(open)

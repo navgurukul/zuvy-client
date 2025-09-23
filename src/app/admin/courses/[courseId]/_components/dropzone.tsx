@@ -147,17 +147,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 'use client'
 
 import React, { useCallback, useState, useRef } from 'react'
@@ -225,11 +214,21 @@ const Dropzone = ({
         [handleDataFormat]
     )
 
+    // const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    //     accept: acceptedFiles,
+    //     onDrop,
+    //     noClick: true, // Disable click on the dropzone
+    // })
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
-        accept: acceptedFiles,
-        onDrop,
-        noClick: true, // Disable click on the dropzone
-    })
+    accept: {
+        'text/csv': ['.csv'],
+        'application/vnd.ms-excel': ['.csv']
+    },
+    onDrop,
+    noClick: true,
+    maxFiles: 1, 
+})
 
     // Function to handle button click
     const handleSelectFile = () => {
@@ -253,7 +252,7 @@ const Dropzone = ({
                             Upload a CSV file with student information
                         </p>
                         <Button 
-                            className="bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                            // className="bg-secondary text-secondary-foreground hover:bg-secondary/80" 
                             size="sm"
                             type="button"
                             onClick={handleSelectFile}
