@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import {CodingTopicsProps,CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
-
+import { Search } from 'lucide-react'
 
 const difficulties = ['Any Difficulty', 'Easy', 'Medium', 'Hard']
 
@@ -88,89 +88,100 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
     }
 
     return (
-        <div className="flex flex-col mb-5">
-            <Input
-                placeholder="Search By Name"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="w-full mb-2"
-            />
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mb-5">
+            {/* Search Bar */}
+            <div className='w-[70%]'>
+                <div className="relative w-full">
+                    {/* Search Icon */}
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                        type="text"
+                        placeholder="Search By Name"
+                        className="bg-white w-full pl-10 pr-10" // pl-10 for left padding (space for icon)
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                    />
+                </div>
+            </div>
 
-            <div className="dropDownsContainer flex gap-2">
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]"
-                        >
-                            {getTopicsButtonText()}
-                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-48 sm:w-56 p-0">
-                        <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 scrollbar-track-green-100">
-                            {tags?.map((tag) => {
-                                const isSelected = selectedTopics.some((t) => t?.id === tag?.id);
-                            return (
-                                <div
-                                    key={tag.id}
-                                    onClick={() => handleTopicChange(tag)}
-                                    className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
-                                        ${isSelected 
-                                            && "text-[rgb(81,134,114)]"}`}
-                                >
-                                    <Check
-                                        className={`mr-2 h-4 w-4 ${
-                                            selectedTopics.some(
-                                                (t) => t?.id === tag?.id
-                                            )
-                                                ? 'opacity-100'
-                                                : 'opacity-0'
-                                        }`}
-                                    />
-                                    {tag.tagName}
-                                </div>
-                            )})}
-                        </div>
-                    </PopoverContent>
-                </Popover>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]"
-                        >
-                            {getDifficultiesButtonText()}
-                            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-48 sm:w-56 p-0">
-                        <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 scrollbar-track-green-100">
-                            {difficulties.map((difficulty) => {
-                                const isSelected = selectedDifficulties.includes(difficulty);
-                            return(
-                                <div
-                                    key={difficulty}
-                                    onClick={() =>
-                                        handleDifficultyChange(difficulty)
-                                    }
-                                    className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
-                                        ${isSelected 
-                                            && "text-[rgb(81,134,114)]"}`}
-                                >
-                                    <Check
-                                        className={`mr-2 h-4 w-4 ${
-                                            selectedDifficulties.includes(
-                                                difficulty
-                                            )
-                                                ? 'opacity-100'
-                                                : 'opacity-0'
-                                        }`}
-                                    />
-                                    {difficulty}
-                                </div>
-                            )})}
-                        </div>
-                    </PopoverContent>
-                </Popover>
+            {/* Filter Dropdown */}
+            <div className='w-[30%]'>
+                <div className="dropDownsContainer flex gap-2 mt-2">
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]"
+                            >
+                                {getTopicsButtonText()}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-48 sm:w-56 p-0">
+                            <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 scrollbar-track-green-100">
+                                {tags?.map((tag) => {
+                                    const isSelected = selectedTopics.some((t) => t?.id === tag?.id);
+                                return (
+                                    <div
+                                        key={tag.id}
+                                        onClick={() => handleTopicChange(tag)}
+                                        className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
+                                            ${isSelected 
+                                                && "text-primary"}`}
+                                    >
+                                        <Check
+                                            className={`mr-2 h-4 w-4 ${
+                                                selectedTopics.some(
+                                                    (t) => t?.id === tag?.id
+                                                )
+                                                    ? 'opacity-100'
+                                                    : 'opacity-0'
+                                            }`}
+                                        />
+                                        {tag.tagName}
+                                    </div>
+                                )})}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button
+                                className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]"
+                            >
+                                {getDifficultiesButtonText()}
+                                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-48 sm:w-56 p-0">
+                            <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-green-400 scrollbar-track-green-100">
+                                {difficulties.map((difficulty) => {
+                                    const isSelected = selectedDifficulties.includes(difficulty);
+                                return(
+                                    <div
+                                        key={difficulty}
+                                        onClick={() =>
+                                            handleDifficultyChange(difficulty)
+                                        }
+                                        className={`flex items-center px-3 py-2 cursor-pointer hover:bg-gray-200
+                                            ${isSelected 
+                                                && "text-primary"}`}
+                                    >
+                                        <Check
+                                            className={`mr-2 h-4 w-4 ${
+                                                selectedDifficulties.includes(
+                                                    difficulty
+                                                )
+                                                    ? 'opacity-100'
+                                                    : 'opacity-0'
+                                            }`}
+                                        />
+                                        {difficulty}
+                                    </div>
+                                )})}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
+                </div>
             </div>
         </div>
     )

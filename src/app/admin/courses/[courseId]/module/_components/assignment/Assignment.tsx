@@ -57,6 +57,7 @@ import {
     ChapterDetailsResponse,
     EditorContent,
 } from '@/app/admin/courses/[courseId]/module/_components/assignment/moduleComponentAssignmentType'
+import { PencilLine } from 'lucide-react'
 
 const AddAssignent = ({
     content,
@@ -567,6 +568,11 @@ const AddAssignent = ({
                             )}
                         </div> */}
                     </div>
+                    <div className="flex items-center gap-2">
+                        <PencilLine size={15} className="transition-colors" />
+                        <p className="text-muted-foreground">Assignment</p>
+                    </div>
+
                     <Form {...form}>
                         <form
                             id="myForm"
@@ -798,23 +804,25 @@ const AddAssignent = ({
                                                 </div>
                                             )}
                                         {defaultValue === 'pdf' && (
-                                            <UploadArticle
-                                                loading={loading}
-                                                file={file}
-                                                setFile={setFile}
-                                                className=""
-                                                isPdfUploaded={ispdfUploaded}
-                                                pdfLink={pdfLink}
-                                                setIsPdfUploaded={
-                                                    setIsPdfUploaded
-                                                }
-                                                onDeletePdfhandler={
-                                                    onDeletePdfhandler
-                                                }
-                                                setDisableButton={
-                                                    setIsdisabledUploadButton
-                                                }
-                                            />
+                                            <div className="mt-4">
+                                                <UploadArticle
+                                                    loading={loading}
+                                                    file={file}
+                                                    setFile={setFile}
+                                                    className=""
+                                                    isPdfUploaded={ispdfUploaded}
+                                                    pdfLink={pdfLink}
+                                                    setIsPdfUploaded={
+                                                        setIsPdfUploaded
+                                                    }
+                                                    onDeletePdfhandler={
+                                                        onDeletePdfhandler
+                                                    }
+                                                    setDisableButton={
+                                                        setIsdisabledUploadButton
+                                                    }
+                                                />
+                                            </div>
                                         )}
                                     </div>
                                 </div>

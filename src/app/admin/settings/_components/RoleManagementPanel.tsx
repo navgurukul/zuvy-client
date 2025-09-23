@@ -202,8 +202,8 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                     onClick={() => onRoleChange('Admin')}
                     className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${
                         selectedRole === 'Admin'
-                            ? 'border-blue-500 text-gray-900'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                            ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                            : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                 >
                     <div className="w-3 h-3 rounded-full bg-orange-500"></div>
@@ -214,7 +214,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                     className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${
                         selectedRole === 'Ops'
                             ? 'border-blue-500 text-gray-900'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                            : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                 >
                     <div className="w-3 h-3 rounded-full bg-blue-500"></div>
@@ -225,7 +225,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                     className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${
                         selectedRole === 'Instructor'
                             ? 'border-blue-500 text-gray-900'
-                            : 'border-transparent text-gray-600 hover:text-gray-900'
+                            : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                 >
                     <div className="w-3 h-3 rounded-full bg-green-500"></div>

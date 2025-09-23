@@ -334,132 +334,132 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         )
     }
     return (
-        <div className="w-full pb-2 px-5">
-            {questionType !== 'settings' && (
-                <div className="flex items-center mb-5 w-full justify-between">
-                    <div className="w-2/6 flex justify-center align-middle items-center relative">
-                        <Input
-                            required
-                            onChange={(e) => {
-                                setChapterTitle(e.target.value)
-                            }}
-                            value={chapterTitle}
-                            // placeholder={content?.ModuleAssessment?.title}
-                            placeholder="Untitled Assessment"
-                            className="pl-1 pr-8 text-xl text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                            autoFocus
-                        />
-                        {chapterTitle.length == 0 && (
-                            <Pencil
-                                fill="true"
-                                fillOpacity={0.4}
-                                size={20}
-                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+        <div className="w-full pb-2">
+            <div className='px-5 border-b border-gray-200'>
+                {questionType !== 'settings' && (
+                    <div className="flex items-center mb-5 w-full justify-between">
+                        <div className="w-2/6 flex justify-center align-middle items-center relative">
+                            <Input
+                                required
+                                onChange={(e) => {
+                                    setChapterTitle(e.target.value)
+                                }}
+                                value={chapterTitle}
+                                // placeholder={content?.ModuleAssessment?.title}
+                                placeholder="Untitled Assessment"
+                                className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
                             />
-                        )}
-                    </div>
-
-                    {/* preview & settings buttons */}
-                    <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
-                        <div
-                            id="previewAssessment"
-                            onClick={previewAssessment}
-                            className="flex hover:bg-gray-300 rounded-md p-1"
-                        >
-                            <Eye size={18} />
-                            <h6 className="ml-1 text-sm">Preview</h6>
+                            {/* {chapterTitle.length == 0 && (
+                                <Pencil
+                                    fill="true"
+                                    fillOpacity={0.4}
+                                    size={20}
+                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                />
+                            )} */}
                         </div>
 
-                        <div
-                            onClick={handleSettingsButtonClick}
-                            id="settingsAssessment"
-                            className="flex hover:bg-gray-300 rounded-md p-1"
-                        >
-                            <Settings size={18} />
-                            <h6 className="mx-1 text-sm">Settings</h6>
+                        {/* preview & settings buttons */}
+                        <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
+                            {/* <div
+                                id="previewAssessment"
+                                onClick={previewAssessment}
+                                className="flex hover:bg-gray-300 rounded-md p-1"
+                            >
+                                <Eye size={18} />
+                                <h6 className="ml-1 text-sm">Preview</h6>
+                            </div> */}
+
+                            <div
+                                onClick={handleSettingsButtonClick}
+                                id="settingsAssessment"
+                                className="flex hover:bg-gray-300 rounded-md p-1"
+                            >
+                                <Settings size={18} />
+                                <h6 className="mx-1 text-sm">Settings</h6>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-            {/* select type of questions */}
-            {questionType !== 'settings' && (
-                <div className="flex gap-2 mb-5">
-                    <Button
-                        className={`${
-                            questionType === 'coding'
-                                ? 'bg-transparent text-[rgb(81,134,114)] border-b-4 border-[rgb(81,134,114)] rounded-none my-0 mx-2 p-0'
-                                : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                            }`}
-                        onClick={handleCodingButtonClick}
-                    >
-                        Coding Problems ({selectedCodingQuestions.length})
-                    </Button>
-                    <Button
-                        className={`${
-                            questionType === 'mcq'
-                                ? 'bg-transparent text-[rgb(81,134,114)] border-b-4 border-[rgb(81,134,114)] rounded-none my-0 mx-2 p-0'
-                                : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                            }`}
-                        onClick={handleMCQButtonClick}
-                    >
-                        MCQs ({selectedQuizQuestions.length})
-                    </Button>
-                    <Button
-                        className={`${
-                            questionType === 'open-ended'
-                                ? 'bg-transparent text-[rgb(81,134,114)] border-b-4 border-[rgb(81,134,114)] rounded-none my-0 mx-2 p-0'
-                                : 'bg-transparent text-[#6E6E6E] border-none my-0 mx-2 p-0'
-                            }`}
-                        onClick={handleOpenEndedButtonClick}
-                    >
-                        Open-Ended Questions (
-                        {selectedOpenEndedQuestions.length})
-                    </Button>
-                </div>
-            )}
-
-            {/* DropDown Filters for questions:- */}
-            {questionType !== 'settings' && (
-                <>
-                    <div className="flex mb-3">
-                        <CodingTopics
-                            searchTerm={searchQuestionsInAssessment}
-                            setSearchTerm={setSearchQuestionsInAssessment}
-                            tags={tags}
-                            selectedTopics={selectedTopics}
-                            setSelectedTopics={setSelectedTopics}
-                            selectedDifficulties={selectedDifficulties}
-                            setSelectedDifficulties={setSelectedDifficulties} selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                        
-                        />
+                )}
+                {/* select type of questions */}
+                {questionType !== 'settings' && (
+                    <div className="flex gap-2 mb-5 border-b border-gray-200 w-1/2">
+                        <Button
+                            className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
+                                questionType === 'coding'
+                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                            onClick={handleCodingButtonClick}
+                        >
+                            Coding Problems ({selectedCodingQuestions.length})
+                        </Button>
+                        <Button
+                            className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
+                                questionType === 'mcq'
+                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                            onClick={handleMCQButtonClick}
+                        >
+                            MCQs ({selectedQuizQuestions.length})
+                        </Button>
+                        <Button
+                            className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
+                                questionType === 'open-ended'
+                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                }`}
+                            onClick={handleOpenEndedButtonClick}
+                        >
+                            Open-Ended Questions (
+                            {selectedOpenEndedQuestions.length})
+                        </Button>
                     </div>
-                    <div className="flex justify-between w-2/3">
-                        <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
-                            {questionType === 'coding'
-                                ? 'Coding Problem Library'
-                                : questionType === 'mcq'
-                                    ? 'MCQ Library'
-                                    : questionType === 'open-ended'
-                                        ? 'Open-Ended Question Library'
-                                        : ''}
-                        </h3>
-                        <h1 className="text-left text-[15px] text-gray-600 font-bold mb-5 mr-3">
-                            Selected Questions
-                        </h1>
-                    </div>
-                </>
-            )}
-
-            <div className="h-full">
-                {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
-                <div
-                    className={`${
-                        questionType == 'settings'
-                            ? 'grid grid-cols-1'
-                            : 'grid grid-cols-[1fr_2px_1fr]'
-                        } h-screen `}
-                >
+                )}
+            </div>
+            <div className="px-5 pt-4 bg-card">
+                {/* DropDown Filters for questions:- */}
+                {questionType !== 'settings' && (
                     <>
-                        <div className="h-full ">
+                        <div className="flex mb-3">
+                            <CodingTopics
+                                searchTerm={searchQuestionsInAssessment}
+                                setSearchTerm={setSearchQuestionsInAssessment}
+                                tags={tags}
+                                selectedTopics={selectedTopics}
+                                setSelectedTopics={setSelectedTopics}
+                                selectedDifficulties={selectedDifficulties}
+                                setSelectedDifficulties={setSelectedDifficulties} selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                        
+                            />
+                        </div>
+                        <div className="flex justify-between w-2/3">
+                            <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
+                                {questionType === 'coding'
+                                    ? 'Coding Problem Library'
+                                    : questionType === 'mcq'
+                                        ? 'MCQ Library'
+                                        : questionType === 'open-ended'
+                                            ? 'Open-Ended Question Library'
+                                            : ''}
+                            </h3>
+                            <h1 className="text-left text-[15px] text-gray-600 font-bold mb-5 mr-3">
+                                Selected Questions
+                            </h1>
+                        </div>
+                    </>
+                )}
+
+                <div className="h-full">
+                    {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
+                    <div
+                        className={`${
+                            questionType == 'settings'
+                                ? 'grid grid-cols-1'
+                                : 'grid grid-cols-[1fr_2px_1fr]'
+                            } h-screen `}
+                    >
+                        <div className="h-full">
                             {questionType === 'coding' && (
                                 <CodingQuestions
                                     questions={filteredQuestions}
@@ -491,7 +491,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     tags={tags}
                                 />
                             )}
-                            {questionType === 'settings' && (
+                            {/* {questionType === 'settings' && (
                                 <div className="">
                                     <SettingsAssessment
                                         selectedCodingQuesIds={
@@ -529,54 +529,54 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         setIsNewQuestionAdded={setIsNewQuestionAdded}
                                     />
                                 </div>
-                            )}
+                            )} */}
                         </div>
-                    </>
 
-                    <Separator
-                        orientation="vertical"
-                        className="mx-4 w-[2px] h-96 rounded"
-                    />
+                        <Separator
+                            orientation="vertical"
+                            className="mx-4 w-[2px] h-96 ml-8 rounded bg-card"
+                        />
 
-                    {questionType !== 'settings' && (
-                        <div className='h-screen'>
-                            <ScrollArea className="h-96 px-2 pb-4">
-                                <ScrollBar orientation="vertical" className="" />
+                        {questionType !== 'settings' && (
+                            <div className='h-screen border-l border-gray-200 pl-4'>
+                                <ScrollArea className="h-96 px-2 pb-4">
+                                    <ScrollBar orientation="vertical" className="" />
 
-                                {selectedCodingQuesIds.length > 0 ||
-                                    selectedQuizQuesIds.length > 0 ||
-                                    selectedOpenEndedQuesIds.length > 0 ? (
-                                    <SelectedQuestions
-                                        selectedCodingQuestions={
-                                            selectedCodingQuestions
-                                        }
-                                        selectedQuizQuestions={
-                                            selectedQuizQuestions
-                                        }
-                                        selectedOpenEndedQuestions={
-                                            selectedOpenEndedQuestions
-                                        }
-                                        setSelectedCodingQuestions={
-                                            setSelectedCodingQuestions
-                                        }
-                                        setSelectedQuizQuestions={
-                                            setSelectedQuizQuestions
-                                        }
-                                        setSelectedOpenEndedQuestions={
-                                            setSelectedOpenEndedQuestions
-                                        }
-                                        questionType={questionType}
-                                        tags={tags}
-                                        setIsNewQuestionAdded = {setIsNewQuestionAdded}
-                                    />
-                                ) : (
-                                    <h1 className="text-left text-gray-600 text-[18px] italic pl-5">
-                                        No Selected questions
-                                    </h1>
-                                )}
-                            </ScrollArea>
-                        </div>
-                    )}
+                                    {selectedCodingQuesIds.length > 0 ||
+                                        selectedQuizQuesIds.length > 0 ||
+                                        selectedOpenEndedQuesIds.length > 0 ? (
+                                        <SelectedQuestions
+                                            selectedCodingQuestions={
+                                                selectedCodingQuestions
+                                            }
+                                            selectedQuizQuestions={
+                                                selectedQuizQuestions
+                                            }
+                                            selectedOpenEndedQuestions={
+                                                selectedOpenEndedQuestions
+                                            }
+                                            setSelectedCodingQuestions={
+                                                setSelectedCodingQuestions
+                                            }
+                                            setSelectedQuizQuestions={
+                                                setSelectedQuizQuestions
+                                            }
+                                            setSelectedOpenEndedQuestions={
+                                                setSelectedOpenEndedQuestions
+                                            }
+                                            questionType={questionType}
+                                            tags={tags}
+                                            setIsNewQuestionAdded = {setIsNewQuestionAdded}
+                                        />
+                                    ) : (
+                                        <h1 className="text-left text-gray-600 text-[18px] italic pl-5">
+                                            No Selected questions
+                                        </h1>
+                                    )}
+                                </ScrollArea>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

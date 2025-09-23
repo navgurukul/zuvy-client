@@ -621,17 +621,19 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                 </div>
                             )}
                             {defaultValue === 'pdf' && (
-                                <UploadArticle
-                                    loading={loading}
-                                    file={file}
-                                    setFile={setFile}
-                                    className=""
-                                    isPdfUploaded={ispdfUploaded}
-                                    pdfLink={pdfLink}
-                                    setIsPdfUploaded={setIsPdfUploaded}
-                                    onDeletePdfhandler={onDeletePdfhandler}
-                                    setDisableButton={setIsdisabledUploadButton}
-                                />
+                                <div className="mt-4">
+                                    <UploadArticle
+                                        loading={loading}
+                                        file={file}
+                                        setFile={setFile}
+                                        className=""
+                                        isPdfUploaded={ispdfUploaded}
+                                        pdfLink={pdfLink}
+                                        setIsPdfUploaded={setIsPdfUploaded}
+                                        onDeletePdfhandler={onDeletePdfhandler}
+                                        setDisableButton={setIsdisabledUploadButton}
+                                    />
+                                </div>
                             )}
                         </div>
                     </div>
