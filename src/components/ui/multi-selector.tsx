@@ -20,12 +20,12 @@ function Selector({
             {options.map((option: any) => (
                 <div
                     key={option.value}
-                    className={`flex items-center justify-between gap-2 p-2 hover:bg-gray-100 cursor-pointer rounded-md
+                    className={`flex items-center justify-between gap-2 p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-md
                         ${
                             selectedOptions.some(
                                 (selected: any) =>
                                     selected.value === option.value
-                            ) && 'text-[rgb(81,134,114)]'
+                            ) && 'bg-accent text-accent-foreground'
                         }`}
                     onClick={() => handleOptionClick(option)}
                 >
@@ -63,8 +63,8 @@ export default function MultiSelector({
         <>
             <Popover>
                 <PopoverTrigger asChild>
-                    <button className="flex w-full items-center text-lg justify-between rounded-md border border-[rgb(81,134,114)] px-4 py-2 text-left focus:outline-none">
-                        <span className="truncate text-[rgb(81,134,114)]">
+                    <button className="flex w-full items-center text-lg justify-between rounded-md border border-border px-4 py-1 mt-2 text-left focus:outline-none">
+                        <span className="truncate text-foreground">
                             {selectedCount > 0
                                 ? selectedCount === 1
                                     ? selectedOptions[0].label
@@ -73,11 +73,11 @@ export default function MultiSelector({
                                 ? 'All Topics'
                                 : 'All Difficulty'}
                         </span>
-                        <ChevronDown className="ml-2 h-5 w-5 text-[rgb(81,134,114)]" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
                 </PopoverTrigger>
                 <PopoverContent
-                    className={`w-full lg:w-[250px] p-2 border border-[rgb(81,134,114)]`}
+                    className={`w-full lg:w-[180px] p-2 shadow-4bp`}
                 >
                     {type === 'Topic' || type === 'Topics' ? (
                         <ScrollArea

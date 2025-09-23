@@ -31,7 +31,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
     {
         accessorKey: 'problemName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Problem Name" />
+            <DataTableColumnHeader column={column} title="Question" />
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
@@ -60,7 +60,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <div
                     className={cn(
-                        `flex items-center justify-end  ml-24 font-semibold text-secondary`,
+                        `flex items-center rounded-full border justify-center ml-24`,
                         difficultyColor(codingQuestion.difficulty)
                     )}
                 >
@@ -79,17 +79,47 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             <DataTableColumnHeader
                 className="flex justify-end"
                 column={column}
-                title="Usage"
+                title="Usage Count"
             />
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
 
             return (
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-center">
                     {codingQuestion?.usage
-                        ? codingQuestion?.usage + ' times'
-                        : 0 + ' times'}
+                        ? codingQuestion?.usage
+                        : 0 }
+                </div>
+            )
+        },
+        enableSorting: true,
+        enableHiding: true,
+    },
+    {
+        accessorKey: 'createdAt',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="flex justify-center"
+                column={column}
+                title="Created"
+            />
+        ),
+        cell: ({ row }) => {
+            const codingQuestion = row.original
+            const createdDate = codingQuestion.createdAt
+                ? new Date(codingQuestion.createdAt).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+                : 'N/A'
+
+            return (
+                <div className="flex items-center justify-center">
+                    <span className="text-sm">
+                        {createdDate}
+                    </span>
                 </div>
             )
         },
