@@ -762,6 +762,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                     batchId={0}
                     setStudentData={setStudentData}
                     studentData={studentData}
+                    modalType="both"
                 />
             </Dialog>
         )
