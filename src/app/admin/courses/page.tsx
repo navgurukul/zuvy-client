@@ -736,8 +736,15 @@ const Courses: React.FC = () => {
                                     )}
                                 </>
                             ) : (
+<<<<<<< HEAD
                                 <div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start">
+=======
+
+                                <div className="flex flex-col min-h-screen">
+                                  <div flex-1>
+                                    <div className="flex flex-wrap justify-center gap-3">
+>>>>>>> 836b8ea028d2a490c2012da95336490ae38bcdb2
                                         {courses.map((course, index) => {
                                             const validImageUrl =
                                                 getValidImageUrl(
@@ -763,7 +770,12 @@ const Courses: React.FC = () => {
                                             )
                                         })}
                                     </div>
+<<<<<<< HEAD
                                     {/* <DataTablePagination
+=======
+                                    <div className="fixed bottom-4 right-4">
+                                    <DataTablePagination
+>>>>>>> 836b8ea028d2a490c2012da95336490ae38bcdb2
                                         totalStudents={totalBootcamps}
                                         lastPage={lastPage}
                                         pages={pages}
@@ -780,6 +792,8 @@ const Courses: React.FC = () => {
                                             refetchBootcamps(newOffset) // instead of getBootcamp(newOffset)
                                         }}
                                     />
+                                    </div>
+                                 </div>
                                 </div>
                             )}
                         </div>

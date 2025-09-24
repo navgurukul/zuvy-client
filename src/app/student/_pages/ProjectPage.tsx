@@ -81,6 +81,7 @@ const ProjectPage = () => {
   }, [project]);
 
   if (loading) {
+<<<<<<< HEAD
     // return (
     //   <div className="min-h-screen bg-background">
     //     <div className="container mx-auto px-4 py-8">
@@ -91,6 +92,8 @@ const ProjectPage = () => {
     //     </div>
     //   </div>
     // );
+=======
+>>>>>>> 836b8ea028d2a490c2012da95336490ae38bcdb2
 
     return<ProjectPageSkeleton/>
   }

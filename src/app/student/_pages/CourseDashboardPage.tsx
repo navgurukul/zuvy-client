@@ -603,7 +603,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                 </div>
                                                 <div className="flex items-center justify-between mb-3">
                                                     <p className="text-sm font-medium">
-                                                        {eventType ===
+                                                        {/* {eventType ===
                                                             'Live Class' &&
                                                             `Scheduled on ${formatDate(
                                                                 item.eventDate
@@ -617,7 +617,8 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                             'Assignment' &&
                                                             `Due on ${formatDate(
                                                                 item.eventDate
-                                                            )}`}
+                                                            )}`} */}
+                                                            {formatUpcomingItem(item)}
                                                     </p>
                                                 </div>
                                                 <div className="flex justify-end">

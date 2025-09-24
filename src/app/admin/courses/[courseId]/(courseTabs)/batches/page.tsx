@@ -94,71 +94,7 @@ const Page = ({ params }: { params: ParamsType }) => {
     const debouncedSearchStudent = useDebounce(searchStudent, 1000)
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [searchQuery, setSearchQuery] = useState('')
-    const [csvFile, setCsvFile] = useState<File | null>(null)
-    const [singleStudentData, setSingleStudentData] = useState({
-        name: '',
-        email: '',
-        phone: ''
-    })
-    
-    // New states for edit functionality
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [editingBatch, setEditingBatch] = useState<EnhancedBatch | null>(null)
-    const [currentStep, setCurrentStep] = useState(1)
-
-    // Helper function to get status color
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'ongoing':
-                return 'bg-green-100 text-green-800 border-green-200'
-            case 'not_started':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-            case 'completed':
-                return 'bg-gray-100 text-gray-800 border-gray-200'
-            default:
-                return 'bg-gray-100 text-gray-800 border-gray-200'
-        }
-    }
-
-    // Helper function to determine batch status based on dates or enrollment
-    const determineBatchStatus = (batch: any): 'not_started' | 'ongoing' | 'completed' => {
-        if (batch.status) return batch.status
-        
-        // If no explicit status, determine based on student enrollment
-        if (batch.students_enrolled === 0) return 'not_started'
-        if (batch.students_enrolled >= batch.capEnrollment) return 'completed'
-        return 'ongoing'
-    }
-
-    // Convert batch data to enhanced format
-    const enhancedBatchData: EnhancedBatch[] = useMemo(() => {
-        if (!batchData) return []
-        
-        return batchData.map((batch: any) => ({
-            id: batch.id,
-            name: batch.name,
-            instructorEmail: batch.instructorEmail || 'instructor@example.com',
-            capEnrollment: batch.capEnrollment || 30,
-            students_enrolled: batch.students_enrolled || 0,
-            status: determineBatchStatus(batch),
-            createdAt: batch.createdAt || '2024-01-15',
-            updatedAt: batch.updatedAt || '2024-04-15',
-        }))
-    }, [batchData])
-
-    const formatDate = (dateString: string): string => {
-    if (!dateString) return ''
-    
-    try {
-        const date = new Date(dateString)
-        // Format to YYYY-MM-DD only
-        return date.toISOString().split('T')[0]
-    } catch (error) {
-        console.error('Date formatting error:', error)
-        // Fallback: extract first 10 characters
-        return dateString.split('T')[0] || dateString.substring(0, 10)
-    }
-}
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(
@@ -357,6 +293,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                     title: 'Cannot Create New Batch',
                     description: 'This Batch Name Already Exists',
                 })
+                return false 
             } else {
                 const res = await api.post(`/batch`, convertedData)
                 setAssignStudents('')
@@ -371,6 +308,11 @@ const Page = ({ params }: { params: ParamsType }) => {
                     description: res.data.message,
                 })
                 getUnAssignedStudents()
+                
+                // Form reset and selected rows clear 
+                form.reset()
+                setSelectedRows([])
+                
                 return true
             }
         } catch (error: any) {
@@ -426,164 +368,26 @@ const Page = ({ params }: { params: ParamsType }) => {
     const columns = useMemo(() => createColumns(Number(capEnrollmentValue)), [capEnrollmentValue])
 
     const handleModal = (isOpen: boolean) => {
-        if (!isOpen) {
+        setIsDialogOpen(isOpen)
+        if (isOpen) {
             form.reset()
+        } else {
+            // Dialog close states reset 
             setAssignStudents('')
-            setManualAssignmentMethod('unassigned')
-            setCsvFile(null)
-            setSingleStudentData({ name: '', email: '', phone: '' })
-            setEditingBatch(null)
-            setIsEditModalOpen(false)
+            setSelectedRows([])
+            setSearchStudent('')
         }
     }
 
-    // Render manual assignment method selection
-    const renderManualAssignmentMethod = () => {
-        return (
-            <div className="space-y-4">
-                <div>
-                    <Label className="text-base font-medium">Choose Assignment Method</Label>
-                    <p className="text-sm text-muted-foreground">Select how you want to add students to this batch</p>
-                </div>
-                
-                <RadioGroup 
-                    value={manualAssignmentMethod} 
-                    onValueChange={setManualAssignmentMethod}
-                    className="space-y-3"
-                >
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value="unassigned" id="unassigned" />
-                        <div className="flex-1">
-                            <Label htmlFor="unassigned" className="font-medium cursor-pointer">
-                                Select from Unassigned Students
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                Choose from existing unassigned students in the course
-                            </p>
-                        </div>
-                        <UserCheck className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value="single" id="single" />
-                        <div className="flex-1">
-                            <Label htmlFor="single" className="font-medium cursor-pointer">
-                                Add Single Student
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                Add a new student by entering their details manually
-                            </p>
-                        </div>
-                        <UserPlus className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    
-                    <div className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value="csv" id="csv" />
-                        <div className="flex-1">
-                            <Label htmlFor="csv" className="font-medium cursor-pointer">
-                                Upload CSV File
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                                Bulk upload students using a CSV file
-                            </p>
-                        </div>
-                        <Upload className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                </RadioGroup>
-            </div>
-        )
-    }
-
-    // Render the selected assignment method content
-    const renderAssignmentMethodContent = () => {
-        switch (manualAssignmentMethod) {
-            case 'unassigned':
-                return (
-                    <>
-                        <Input
-                            type="search"
-                            placeholder="Search students"
-                            className="w-full"
-                            value={searchStudent}
-                            onChange={handleSearchStudents}
-                        />
-                        <DataTable
-                            data={totalStudents}
-                            columns={columns}
-                            setSelectedRows={setSelectedRows}
-                            assignStudents={assignStudents}
-                        />
-                        <p className="pt-2 text-sm">
-                            Total Learners Selected: {selectedRows.length}
-                        </p>
-                    </>
-                )
-            
-            case 'single':
-                return (
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="studentName">Student Name *</Label>
-                            <Input
-                                id="studentName"
-                                value={singleStudentData.name}
-                                onChange={(e) => handleSingleStudentChange('name', e.target.value)}
-                                placeholder="Enter student name"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="studentEmail">Student Email *</Label>
-                            <Input
-                                id="studentEmail"
-                                type="email"
-                                value={singleStudentData.email}
-                                onChange={(e) => handleSingleStudentChange('email', e.target.value)}
-                                placeholder="Enter student email"
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="studentPhone">Student Phone</Label>
-                            <Input
-                                id="studentPhone"
-                                type="tel"
-                                value={singleStudentData.phone}
-                                onChange={(e) => handleSingleStudentChange('phone', e.target.value)}
-                                placeholder="Enter student phone number"
-                            />
-                        </div>
-                    </div>
-                )
-            
-            case 'csv':
-                return (
-                    <div className="space-y-4">
-                        <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                            <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground mb-2">
-                                Upload a CSV file with student information
-                            </p>
-                            <Input
-                                type="file"
-                                accept=".csv"
-                                onChange={handleCsvFileChange}
-                                className="max-w-xs mx-auto"
-                            />
-                            {csvFile && (
-                                <p className="text-sm text-green-600 mt-2">
-                                    Selected: {csvFile.name}
-                                </p>
-                            )}
-                        </div>
-                        <div className="text-center">
-                            <Button variant="ghost" size="sm">
-                                Download Sample CSV
-                            </Button>
-                        </div>
-                    </div>
-                )
-            
-            default:
-                return null
+    // submit handler for Manual assignment 
+    const handleManualSubmit = async () => {
+        const isValid = await form.trigger() // Form validation check 
+        if (isValid) {
+            const values = form.getValues()
+            const success = await onSubmit(values)
+            if (success) {
+                setIsDialogOpen(false) // after Success dialog close
+            }
         }
     }
     
@@ -611,7 +415,7 @@ const Page = ({ params }: { params: ParamsType }) => {
             )
         } else {
             return (
-                <Dialog onOpenChange={(isOpen) => handleModal(isOpen)}>
+                <Dialog open={isDialogOpen} onOpenChange={(isOpen) => handleModal(isOpen)}>
                     <DialogTrigger asChild>
                         <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700">
                             <Plus className="h-4 w-4 mr-2" />
@@ -663,6 +467,17 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                         Create Batch
                                                     </Button>
                                                 </DialogClose>
+                                                <Button
+                                                    className="w-3/2"
+                                                    type="button"
+                                                    onClick={handleManualSubmit}
+                                                    disabled={
+                                                        !form.formState
+                                                            .isValid
+                                                    }
+                                                >
+                                                    Create batch
+                                                </Button>
                                             </div>
                                         </div>
                                     ) : (
@@ -753,6 +568,51 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                     )}
                                                 />
                                             )}
+                                            <FormField
+                                                control={form.control}
+                                                name="assignLearners"
+                                                render={({ field }) => (
+                                                    <FormItem className="text-start">
+                                                        <FormLabel>
+                                                            Assign Learners to
+                                                            Batch
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <RadioGroup
+                                                                onValueChange={
+                                                                    field.onChange
+                                                                }
+                                                                value={
+                                                                    field.value ||
+                                                                    ''
+                                                                }
+                                                                className="flex gap-4"
+                                                            >
+                                                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                                                    <FormControl>
+                                                                        <RadioGroupItem value="all" />
+                                                                    </FormControl>
+                                                                    <FormLabel className="font-normal">
+                                                                        All
+                                                                        learners
+                                                                    </FormLabel>
+                                                                </FormItem>
+
+                                                                <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                                                                    <FormControl>
+                                                                        <RadioGroupItem value="manually" />
+                                                                    </FormControl>
+                                                                    <FormLabel className="font-normal">
+                                                                        Assign
+                                                                        manually
+                                                                    </FormLabel>
+                                                                </FormItem>
+                                                            </RadioGroup>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
 
                                             {assignLearners === 'all' && !isEditModalOpen && (
                                                 <FormDescription>
@@ -882,6 +742,7 @@ const Page = ({ params }: { params: ParamsType }) => {
             </DialogContent>
         </Dialog>
     )
+
 
     if (courseData?.id) {
         return (
@@ -1020,5 +881,356 @@ const Page = ({ params }: { params: ParamsType }) => {
     }
 }
 
-
 export default Page
+
+
+
+
+
+
+// 'use client'
+// import React, { useCallback, useEffect, useState, useMemo } from 'react'
+// import Image from 'next/image'
+// import { useRouter, useSearchParams } from 'next/navigation'
+// import { zodResolver } from '@hookform/resolvers/zod'
+// import { useForm } from 'react-hook-form'
+// import * as z from 'zod'
+
+// import { Input } from '@/components/ui/input'
+// import { Button } from '@/components/ui/button'
+// import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+// import {
+//     Dialog,
+//     DialogOverlay,
+//     DialogContent,
+//     DialogDescription,
+//     DialogHeader,
+//     DialogTitle,
+//     DialogTrigger,
+//     DialogClose,
+// } from '@/components/ui/dialog'
+// import {
+//     Form,
+//     FormControl,
+//     FormField,
+//     FormItem,
+//     FormLabel,
+//     FormMessage,
+//     FormDescription
+// } from '@/components/ui/form'
+// import { Badge } from '@/components/ui/badge'
+// import { toast } from '@/components/ui/use-toast'
+// import { Spinner } from '@/components/ui/spinner'
+// import AddStudentsModal from '../../_components/addStudentsmodal'
+// import { api } from '@/utils/axios.config'
+// import { getBatchData, getCourseData, getStoreStudentData } from '@/store/store'
+// import useDebounce from '@/hooks/useDebounce'
+// import { fetchStudentData } from '@/utils/students'
+// import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+// import { Users, Plus, Eye, Mail, Calendar, Edit } from 'lucide-react'
+// import { StudentData, ParamsType } from "@/app/admin/courses/[courseId]/(courseTabs)/batches/courseBatchesType"
+
+// // Helper Functions
+// const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString()
+// const getStatusColor = (status: string) => {
+//     switch (status) {
+//         case 'not_started': return 'bg-gray-200 text-gray-800'
+//         case 'ongoing': return 'bg-green-200 text-green-800'
+//         case 'completed': return 'bg-blue-200 text-blue-800'
+//         default: return 'bg-gray-200 text-gray-800'
+//     }
+// }
+
+// const Page = ({ params }: { params: ParamsType }) => {
+//     const router = useRouter()
+//     const searchParams = useSearchParams()
+//     const { students } = useStoreStudentData()
+//     const { courseData, fetchCourseDetails } = getCourseData()
+//     const { batchData, setBatchData } = getBatchData()
+//     const { setStoreStudentData } = getStoreStudentData()
+
+//     // State
+//     const [loading, setLoading] = useState(true)
+//     const [assignStudents, setAssignStudents] = useState('')
+//     const [manualAssignmentMethod, setManualAssignmentMethod] = useState('unassigned')
+//     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+//     const [totalStudents, setTotalStudents] = useState([...students])
+//     const [searchStudent, setSearchStudent] = useState('')
+//     const debouncedSearchStudent = useDebounce(searchStudent, 1000)
+//     const [studentData, setStudentData] = useState<any>({})
+//     const [searchQuery, setSearchQuery] = useState('')
+//     const [isDialogOpen, setIsDialogOpen] = useState(false)
+//     const [editingBatch, setEditingBatch] = useState<any>(null)
+//     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+//     const [csvFile, setCsvFile] = useState<File | null>(null)
+//     const [singleStudentData, setSingleStudentData] = useState<any>({})
+//     const [currentStep, setCurrentStep] = useState(1)
+
+//     const enhancedBatchData = batchData ?? []
+
+//     // API Callbacks
+//     const defaultFetchApi = useCallback(async () => {
+//         setSearchQuery('')
+//         const response = await api.get(`/bootcamp/batches/${params.courseId}`);
+//         setBatchData(response.data?.data || [])
+//         return response.data?.data || []
+//     }, [params.courseId, setBatchData])
+
+//     const fetchSuggestionsApi = useCallback(async (query: string) => {
+//         const response = await api.get(`/bootcamp/searchBatch/${params.courseId}?searchTerm=${query.trim()}`)
+//         return response.data || []
+//     }, [params.courseId])
+
+//     const fetchSearchResultsApi = useCallback(async (query: string) => {
+//         setSearchQuery(query)
+//         const response = await api.get(`/bootcamp/searchBatch/${params.courseId}?searchTerm=${query.trim()}`)
+//         setBatchData(response.data || [])
+//         return response.data || []
+//     }, [params.courseId, setBatchData])
+
+//     // Form Schema
+//     const formSchema = z.object({
+//         name: z.string().min(3),
+//         instructorEmail: z.string().email(),
+//         bootcampId: z.string().refine((id) => !isNaN(parseInt(id))),
+//         capEnrollment: z.string().refine(val => {
+//             const num = parseInt(val)
+//             return !isNaN(num) && num > 0 && num <= 100000
+//         }),
+//         assignLearners: z.string(),
+//     })
+
+//     const form = useForm<z.infer<typeof formSchema>>({
+//         resolver: zodResolver(formSchema),
+//         defaultValues: {
+//             name: '',
+//             instructorEmail: '',
+//             bootcampId: courseData?.id?.toString() ?? '',
+//             capEnrollment: '',
+//             assignLearners: 'all',
+//         },
+//         mode: 'onChange',
+//     })
+
+//     // Effects
+//     useEffect(() => {
+//         if (params.courseId) fetchCourseDetails(params.courseId)
+//     }, [params.courseId, fetchCourseDetails])
+
+//     useEffect(() => {
+//         const timer = setTimeout(() => setLoading(false), 1000)
+//         return () => clearTimeout(timer)
+//     }, [])
+
+//     const getUnAssignedStudents = useCallback(async () => {
+//         try {
+//             const res = await api.get(`/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`)
+//             setTotalStudents(res.data.data)
+//         } catch (err) {
+//             console.error(err)
+//         }
+//     }, [debouncedSearchStudent, params.courseId])
+
+//     useEffect(() => { getUnAssignedStudents() }, [getUnAssignedStudents])
+
+//     // Handlers
+//     const handleEditBatch = (batch: any) => {
+//         setEditingBatch(batch)
+//         form.reset({
+//             name: batch.name,
+//             instructorEmail: batch.instructorEmail,
+//             bootcampId: courseData?.id.toString() ?? '',
+//             capEnrollment: batch.capEnrollment.toString(),
+//             assignLearners: 'all',
+//         })
+//         setIsEditModalOpen(true)
+//         setCurrentStep(1)
+//     }
+
+//     const handleUpdateBatch = async (values: z.infer<typeof formSchema>) => {
+//         if (!editingBatch) return
+//         try {
+//             await api.put(`/batch/${editingBatch.id}`, {
+//                 name: values.name,
+//                 instructorEmail: values.instructorEmail,
+//                 capEnrollment: +values.capEnrollment,
+//             })
+//             defaultFetchApi()
+//             setIsEditModalOpen(false)
+//             setEditingBatch(null)
+//             toast.success({ title: 'Success', description: 'Batch updated successfully' })
+//         } catch (error: any) {
+//             toast.error({ title: 'Failed', description: error.response?.data?.message || 'Failed to update batch' })
+//         }
+//     }
+
+//     const handleViewStudents = (batchId: string | number) => {
+//         router.push(`/admin/courses/${params.courseId}/students?batch=${batchId}`)
+//     }
+
+//     const handleSearchStudents = (e: React.ChangeEvent<HTMLInputElement>) => setSearchStudent(e.target.value)
+//     const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//         const file = e.target.files?.[0]
+//         if (file && file.type === 'text/csv') setCsvFile(file)
+//         else toast.error({ title: 'Invalid File', description: 'Please select a valid CSV file' })
+//     }
+
+//     const handleManualSubmit = async () => {
+//         const isValid = await form.trigger()
+//         if (isValid) {
+//             const values = form.getValues()
+//             const success = await onSubmit(values)
+//             if (success) setIsDialogOpen(false)
+//         }
+//     }
+
+//     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+//         if (isEditModalOpen && editingBatch) return handleUpdateBatch(values)
+//         try {
+//             const convertedData = {
+//                 name: values.name,
+//                 instructorEmail: values.instructorEmail,
+//                 bootcampId: +values.bootcampId,
+//                 capEnrollment: +values.capEnrollment,
+//                 assignAll: values.assignLearners === 'all',
+//                 studentIds: selectedRows.map(s => s.id),
+//             }
+//             await api.post(`/batch`, convertedData)
+//             form.reset()
+//             setSelectedRows([])
+//             defaultFetchApi()
+//             fetchStudentData(params.courseId, setStoreStudentData)
+//             toast.success({ title: 'Success', description: 'Batch created successfully' })
+//             return true
+//         } catch (error: any) {
+//             toast.error({ title: 'Failed', description: error.response?.data?.message || 'Error creating batch' })
+//             return false
+//         }
+//     }
+
+//     const columns = useMemo(() => [], []) // Replace with createColumns logic if needed
+
+//     const handleModal = (isOpen: boolean) => {
+//         setIsDialogOpen(isOpen)
+//         if (isOpen) form.reset()
+//         else { setAssignStudents(''); setSelectedRows([]); setSearchStudent('') }
+//     }
+
+//     const renderManualAssignmentMethod = () => <div>Manual Assignment Placeholder</div>
+//     const renderAssignmentMethodContent = () => <div>Assignment Content Placeholder</div>
+
+//     // Modal JSX
+//     const renderModal = () => (
+//         <Dialog open={isDialogOpen} onOpenChange={handleModal}>
+//             <DialogTrigger asChild>
+//                 <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700">
+//                     <Plus className="h-4 w-4 mr-2" />
+//                     Create New Batch
+//                 </Button>
+//             </DialogTrigger>
+//             <DialogContent className="max-w-[800px] max-h-[90vh] overflow-y-auto">
+//                 <DialogHeader>
+//                     <DialogTitle>{isEditModalOpen ? `Edit Batch` : 'Create New Batch'}</DialogTitle>
+//                     <DialogDescription>
+//                         {isEditModalOpen ? 'Update batch details' : 'Add learners to the batch'}
+//                     </DialogDescription>
+//                     <Form {...form}>
+//                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+//                             <FormField control={form.control} name="name" render={({ field }) => (
+//                                 <FormItem>
+//                                     <FormLabel>Batch Name</FormLabel>
+//                                     <FormControl><Input {...field} /></FormControl>
+//                                     <FormMessage />
+//                                 </FormItem>
+//                             )} />
+//                             <FormField control={form.control} name="instructorEmail" render={({ field }) => (
+//                                 <FormItem>
+//                                     <FormLabel>Instructor Email</FormLabel>
+//                                     <FormControl><Input type="email" {...field} /></FormControl>
+//                                     <FormMessage />
+//                                 </FormItem>
+//                             )} />
+//                             <FormField control={form.control} name="capEnrollment" render={({ field }) => (
+//                                 <FormItem>
+//                                     <FormLabel>Cap Enrollment</FormLabel>
+//                                     <FormControl><Input type="number" {...field} /></FormControl>
+//                                     <FormMessage />
+//                                 </FormItem>
+//                             )} />
+//                             <div className="flex justify-end gap-2">
+//                                 <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+//                                 <Button type="submit" disabled={!form.formState.isValid}>{isEditModalOpen ? 'Update' : 'Create'}</Button>
+//                             </div>
+//                         </form>
+//                     </Form>
+//                 </DialogHeader>
+//             </DialogContent>
+//         </Dialog>
+//     )
+
+//     if (!courseData?.id) return null
+
+//     return (
+//         <div className="w-full space-y-6 pb-8">
+//             <div className="flex items-center justify-between">
+//                 <div>
+//                     <h2 className="text-xl font-semibold text-left">Batches</h2>
+//                     <p className="text-muted-foreground">Organize students into batches</p>
+//                 </div>
+//                 {renderModal()}
+//             </div>
+
+//             {loading ? (
+//                 <div className="flex justify-center items-center h-64">
+//                     <Spinner className="text-secondary" />
+//                 </div>
+//             ) : (
+//                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//                     {enhancedBatchData.length > 0 ? enhancedBatchData.map(batch => (
+//                         <Card key={batch.id} className="hover:shadow-lg flex flex-col w-[450px]">
+//                             <CardHeader className="pb-3 flex justify-between items-start">
+//                                 <div>
+//                                     <CardTitle className="text-lg font-semibold">{batch.name}</CardTitle>
+//                                     <Badge className={`capitalize text-xs ${getStatusColor(batch.status)}`}>{batch.status.replace('_', ' ')}</Badge>
+//                                 </div>
+//                                 <Button variant="ghost" size="icon" onClick={() => handleEditBatch(batch)}>
+//                                     <Edit className="h-4 w-4" />
+//                                 </Button>
+//                             </CardHeader>
+//                             <CardContent className="space-y-2">
+//                                 <div className="flex items-center gap-2 text-sm">
+//                                     <Mail className="h-4 w-4 text-muted-foreground" />
+//                                     <span>Instructor: {batch.instructorEmail}</span>
+//                                 </div>
+//                                 <div className="flex items-center gap-2 text-sm">
+//                                     <Users className="h-4 w-4 text-muted-foreground" />
+//                                     <span>Students: {batch.students_enrolled}/{batch.capEnrollment}</span>
+//                                 </div>
+//                                 {batch.createdAt && batch.updatedAt && (
+//                                     <div className="flex items-center gap-2 text-sm">
+//                                         <Calendar className="h-4 w-4 text-muted-foreground" />
+//                                         <span>Duration: {formatDate(batch.createdAt)} - {formatDate(batch.updatedAt)}</span>
+//                                     </div>
+//                                 )}
+//                             </CardContent>
+//                             <CardFooter>
+//                                 <Button variant="outline" size="sm" className="w-full" onClick={() => handleViewStudents(batch.id)}>
+//                                     <Eye className="h-4 w-4 mr-2" />
+//                                     View Students
+//                                 </Button>
+//                             </CardFooter>
+//                         </Card>
+//                     )) : (
+//                         <div className="col-span-full flex flex-col items-center py-12">
+//                             <Image src="/batches.svg" alt="create batch" width={100} height={100} />
+//                             <p className="text-center text-gray-600 mt-3">Start by creating the first batch for the course.</p>
+//                             {renderModal()}
+//                         </div>
+//                     )}
+//                 </div>
+//             )}
+//         </div>
+//     )
+// }
+
+// export default Page
