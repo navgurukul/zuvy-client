@@ -35,11 +35,11 @@ const QuestionBankDropdown = () => {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-56">
+      <DropdownMenuContent className="w-33">
         <Link
           href="/admin/question-bank/coding"
           className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm"
+            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left"
           )}
         >
           Coding Problems
@@ -48,7 +48,7 @@ const QuestionBankDropdown = () => {
         <Link
           href="/admin/question-bank/mcq"
           className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm"
+            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left"
           )}
         >
           MCQ
@@ -57,7 +57,7 @@ const QuestionBankDropdown = () => {
         <Link
           href="/admin/question-bank/open-ended"
           className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm"
+            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left"
           )}
         >
           Open Ended
