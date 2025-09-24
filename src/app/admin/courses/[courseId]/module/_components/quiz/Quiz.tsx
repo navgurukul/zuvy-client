@@ -209,9 +209,7 @@ function Quiz(props: QuizProps) {
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
-                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-
-                                    autoFocus
+                                    className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
                                 />
                                 {!inputValue && (
                                     <Pencil
@@ -223,19 +221,19 @@ function Quiz(props: QuizProps) {
                                 )}
                             </div>
                             <div className="flex items-center justify-between">
-                                <div
+                                {/* <div
                                     id="previewQuiz"
                                     onClick={previewQuiz}
                                     className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
                                 >
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
-                                </div>
+                                </div> */}
                                 {addQuestion?.length > 0 && (
                                     <div className="mt-5">
                                         <Button
                                             onClick={handleSaveQuiz}
-                                            className="bg-success-dark opacity-75"
+                                            className="bg-primary opacity-75"
                                         >
                                             Save
                                         </Button>
@@ -246,7 +244,7 @@ function Quiz(props: QuizProps) {
                     </div>
                 </div>
 
-                <div className="flex">
+                <div className="flex px-5 pt-4 bg-card">
                     <QuizLibrary
                         addQuestion={addQuestion}
                         handleAddQuestion={handleAddQuestion}

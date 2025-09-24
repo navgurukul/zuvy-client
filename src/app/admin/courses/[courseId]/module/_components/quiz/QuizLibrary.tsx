@@ -128,7 +128,7 @@ function QuizLibrary({
 
     return (
         <div className="w-full flex flex-col gap-3">
-            <div className="flex">
+            <div className="flex bg-red-500">
                 <CodingTopics
                     setSearchTerm={setSearch}
                     searchTerm={search}
