@@ -739,7 +739,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const renderModal = (emptyState: boolean) => {
 
      const shouldShowAddStudentModal = (
-        courseData?.unassigned_students === 0 || 
+        courseData?.unassigned_students === 0 ||  
         (!batchData || batchData.length === 0)
     )
    

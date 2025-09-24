@@ -187,14 +187,16 @@
 
 // export default AddStudentsModal
 
+
+
 'use client'
 // components/TwoOptionsModal.tsx
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Dropzone from './dropzone'
+import SingleStudentForm from './SingleStudentForm'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -208,17 +210,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { STUDENT_ONBOARDING_TYPES } from '@/utils/constant'
 import { Label } from '@/components/ui/label'
 import { getStoreStudentDataNew } from '@/store/store'
-import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
 import { AddStudentsModalProps } from '@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
 
 type StudentDataType = {
     name: string
@@ -241,31 +235,11 @@ const AddStudentsModal = ({
     studentData: StudentDataType
     setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>
 }) => {
-    type BatchType = { id: string | number; name: string }
-    const [localBatchData, setLocalBatchData] = useState<BatchType[]>([])
     const [selectedOption, setSelectedOption] = useState('1')
 
     const handleStudentUploadType = (value: string) => {
         setSelectedOption(value)
     }
-
-    // Fetch batches when modal opens for single student mode
-    useEffect(() => {
-        const fetchBatches = async () => {
-            if (modalType === 'single') {
-                try {
-                    const response = await api.get(`/bootcamp/batches/${id}`)
-                    console.log('Fetched batches:', response.data)
-                    setLocalBatchData(response.data.data || [])
-                } catch (error) {
-                    console.error('Error fetching batches:', error)
-                    setLocalBatchData([])
-                }
-            }
-        }
-
-        fetchBatches()
-    }, [id, modalType])
 
     // state and variables
     const {
@@ -280,11 +254,6 @@ const AddStudentsModal = ({
     } = getStoreStudentDataNew()
 
     const { fetchCourseDetails } = getCourseData()
-
-    const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setStudentData({ ...studentData, [name]: value })
-    }
 
     const courseId: string = id.toString()
 
@@ -362,121 +331,55 @@ const AddStudentsModal = ({
 
             {modalType === 'both' && (
                 <>
-                    <div className="flex items-center justify-start  ">
+                    <div className="flex items-center justify-start">
                         {STUDENT_ONBOARDING_TYPES.map(({ id, label }) => (
                             <RadioGroup
                                 key={id}
                                 value={selectedOption}
                                 onValueChange={handleStudentUploadType}
                             >
-                                <div className="flex   space-x-2 mr-4">
+                                <div className="flex space-x-2 mr-4">
                                     <RadioGroupItem value={id} id={id} />
                                     <Label htmlFor={id}>{label}</Label>
                                 </div>
                             </RadioGroup>
                         ))}
                     </div>
+                    
                     {selectedOption === '2' && (
-                        <div className="">
-                            <div className="text-left">
-                                <Label htmlFor="name">Name</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    value={studentData.name || ''}
-                                    onChange={handleSingleStudent}
-                                />
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    name="email"
-                                    value={studentData.email || ''}
-                                    onChange={handleSingleStudent}
-                                />
-                            </div>
-                        </div>
+                        <SingleStudentForm
+                            studentData={studentData}
+                            setStudentData={setStudentData}
+                            courseId={id}
+                            showBatchSelection={true}
+                        />
                     )}
+                    
                     {selectedOption === '1' && (
-                        <>
-                            <Dropzone
-                                studentData={studentData}
-                                setStudentData={setStudentData}
-                                className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block"
-                            />
-                        </>
+                        <Dropzone
+                            studentData={studentData}
+                            setStudentData={setStudentData}
+                            className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block"
+                        />
                     )}
                 </>
             )}
             
             {modalType === 'single' && (
-                <div className="space-y-4">
-                    <div className="text-left">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input
-                            id="name"
-                            name="name"
-                            value={studentData.name || ''}
-                            onChange={handleSingleStudent}
-                            placeholder="Enter student's full name"
-                            className="mt-1"
-                        />
-                    </div>
-
-                    <div className="text-left">
-                        <Label htmlFor="email">Email Address</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            value={studentData.email || ''}
-                            onChange={handleSingleStudent}
-                            placeholder="Enter student's email address"
-                            className="mt-1"
-                        />
-                    </div>
-
-                    <div className="text-left">
-                        <Label htmlFor="batch">Batch (Optional)</Label>
-                        <Select
-                            value={studentData.batchId || ''}
-                            onValueChange={(value) =>
-                                setStudentData({
-                                    ...studentData,
-                                    batchId: value,
-                                })
-                            }
-                        >
-                            <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="Select a batch" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {localBatchData && localBatchData.length > 0 ? (
-                                    localBatchData.map((batch) => (
-                                        <SelectItem
-                                            key={batch.id}
-                                            value={batch.id.toString()}
-                                        >
-                                            {batch.name}
-                                        </SelectItem>
-                                    ))
-                                ) : (
-                                    <SelectItem value="" disabled>
-                                        No batches available
-                                    </SelectItem>
-                                )}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
+                <SingleStudentForm
+                    studentData={studentData}
+                    setStudentData={setStudentData}
+                    courseId={id}
+                    showBatchSelection={true}
+                />
             )}
 
             {modalType === 'bulk' && (
-                <>
-                    <Dropzone
-                        studentData={studentData}
-                        setStudentData={setStudentData}
-                        className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block"
-                    />
-                </>
+                <Dropzone
+                    studentData={studentData}
+                    setStudentData={setStudentData}
+                    className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block"
+                />
             )}
 
             <DialogFooter>
