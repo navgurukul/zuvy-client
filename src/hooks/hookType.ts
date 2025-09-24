@@ -693,27 +693,3 @@ export interface UseBootcampDeleteReturn {
     error: string | null
 }
 
-
-// useCourseDetails
-
-export interface CourseDetailsData {
-  id: number;
-  name: string;
-  bootcampTopic: string;
-  description: string;
-  coverImage: string;
-  collaborator: string;
-  duration: string;
-  language: string;
-  startTime: string;
-  unassigned_students: number;
-}
-
-export interface UseCourseDetailsReturn {
-  courseData: CourseDetailsData | null;
-  loading: boolean;
-  error: string | null;
-  fetchCourseDetails: (courseId: number) => Promise<boolean>;
-  refetch: (courseId: number) => void;
-  clearData: () => void;
-}
