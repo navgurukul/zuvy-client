@@ -39,7 +39,7 @@ const QuestionBankDropdown = () => {
         <Link
           href="/admin/question-bank/coding"
           className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left"
+            "block w-full px-3 py-2 rounded text-black  hover:text-black  text-sm text-left hover:bg-gray-100"
           )}
         >
           Coding Problems
@@ -48,7 +48,7 @@ const QuestionBankDropdown = () => {
         <Link
           href="/admin/question-bank/mcq"
           className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left"
+            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left hover:bg-gray-100"
           )}
         >
           MCQ
@@ -57,7 +57,7 @@ const QuestionBankDropdown = () => {
         <Link
           href="/admin/question-bank/open-ended"
           className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left"
+            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left hover:bg-gray-100"
           )}
         >
           Open Ended
