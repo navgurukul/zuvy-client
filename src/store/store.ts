@@ -38,6 +38,8 @@ interface CourseData {
 }
 
 interface BatchData {
+    status: string
+    instructorEmail: ReactNode
     id: number
     name: string
     bootcampId: number
