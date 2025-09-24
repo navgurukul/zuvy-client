@@ -427,381 +427,225 @@ const Courses: React.FC = () => {
         return ''
     }
 
+
     return (
-        <>
-            {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-[rgb(81,134,114)]" />
+  <>
+    {loading ? (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner className="text-[rgb(81,134,114)]" />
+      </div>
+    ) : (
+      <div className="w-full">
+        {!hasAccess && (
+          <Alert
+            variant="destructive"
+            className="flex justify-between mt-5 items-center container mx-auto max-w-7xl"
+          >
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+              Your calendar access has expired. Please log in again to gain access to the courses
+            </AlertDescription>
+            <Button
+              onClick={calendarAccess}
+              className="bg-success-dark opacity-75 font-semibold"
+            >
+              Give access
+            </Button>
+          </Alert>
+        )}
+
+        <div className="container mx-auto px-6 pt-8 pb-2 max-w-7xl">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
+            {/* Left: Title and Subtitle */}
+            <div className="flex-1 min-w-[220px] text-start">
+              <h1 className="text-3xl font-bold text-foreground mb-1">Course Studio</h1>
+              <p className="text-muted-foreground text-lg font-normal">
+                Create, manage, and monitor your educational courses
+              </p>
+            </div>
+
+            {/* Right: Create New Course Button */}
+            <div className="flex-1 flex justify-end min-w-[220px]">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="text-white bg-primary font-semibold px-5 py-2 flex gap-2">
+                    <Plus className="w-5" />
+                    Create New Course
+                  </Button>
+                </DialogTrigger>
+                <DialogOverlay />
+                <NewCourseDialog
+                  newCourseName={newCourseName}
+                  newCourseDuration={newCourseDuration}
+                  newCourseDescription={newCourseDescription}
+                  handleNewCourseNameChange={handleNewCourseNameChange}
+                  handleNewCourseDurationChange={handleNewCourseDurationChange}
+                  handleNewCourseDescriptionChange={handleNewCourseDescriptionChange}
+                  handleCreateCourse={handleCreateCourse}
+                  isDialogOpen={isDialogOpen}
+                />
+              </Dialog>
+            </div>
+          </div>
+
+          {/* Search & Filter */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-[500px] lg:w-[450px]">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 mt-1 text-muted-foreground" />
+              <Input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Search courses..."
+                className="lg:max-w-[800px] bg-card w-full pl-10 pr-10"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => {
+                  if (searchQuery.trim() && filteredSuggestions.length > 0) {
+                    setShowSuggestions(true)
+                  }
+                }}
+              />
+
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
+                  onClick={clearSearch}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* Suggestions Dropdown */}
+              {showSuggestions && filteredSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1">
+                  <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
+                    {filteredSuggestions.map((course, index) => (
+                      <div
+                        key={course.id}
+                        className={cn(
+                          'px-3 py-2.5 cursor-pointer text-sm transition-colors',
+                          'hover:bg-muted/50',
+                          index === selectedSuggestionIndex && 'bg-muted'
+                        )}
+                        onClick={() => handleSuggestionClick(course)}
+                        onMouseEnter={() => setSelectedSuggestionIndex(index)}
+                      >
+                        <div className="capitalize font-medium text-foreground text-left">
+                          {course.name}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* Filter Dropdown */}
+            <div className="mt-2">
+              <Select
+                value={statusFilter}
+                onValueChange={(val) => {
+                  setStatusFilter(val)
+                  setCurrentPage(1)
+                }}
+              >
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
+
+        {/* Courses Display */}
+        <div className="mb-5 flex justify-center items-center">
+          {courses.length === 0 ? (
+            activeSearchTerm.length > 0 ? (
+              <div className="absolute h-screen">
+                <div className="relative top-[70%]">
+                  <Alert variant="destructive" className="flex flex-col items-center gap-3">
+                    <AlertTitle>No Course Found</AlertTitle>
+                    <AlertDescription>
+                      No course found with the name{' '}
+                      <span className="font-semibold">{activeSearchTerm}</span>
+                    </AlertDescription>
+                    <Button variant="outline" onClick={clearSearch} className="mt-2">
+                      Clear Search
+                    </Button>
+                  </Alert>
+                </div>
+              </div>
             ) : (
-                <div className="w-full">
-                    {!hasAccess ? (
-                        <Alert
-                            variant="destructive"
-                            className="flex justify-between mt-5 items-center container mx-auto max-w-7xl"
-                        >
-                            <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>
-                                Your calendar access has expired. Please log in
-                                again to gain access to the courses
-                            </AlertDescription>
-                            <Button
-                                onClick={calendarAccess}
-                                className="bg-success-dark opacity-75 font-semibold"
-                            >
-                                Give access
-                            </Button>
-                        </Alert>
-                    ) : null}
-                    <div className="container mx-auto px-6 pt-8 pb-2 max-w-7xl">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
-                            {/* Left: Title and Subtitle */}
-                            <div className="flex-1 min-w-[220px] text-start">
-                                <h1 className="text-3xl font-bold text-foreground mb-1">
-                                    Course Studio
-                                </h1>
-                                <p className="text-muted-foreground text-lg font-normal">
-                                    Create, manage, and monitor your educational
-                                    courses
-                                </p>
-                            </div>
+              <div className="mt-24 text-center">
+                <h4 className={styles.firstCourseText}>
+                  Create your first course and share with students
+                </h4>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="text-white bg-secondary">
+                      <Plus className="w-5 mr-2" />
+                      New Course
+                    </Button>
+                  </DialogTrigger>
+                  <DialogOverlay />
+                  <NewCourseDialog
+                    newCourseName={newCourseName}
+                    newCourseDuration={newCourseDuration}
+                    newCourseDescription={newCourseDescription}
+                    handleNewCourseNameChange={handleNewCourseNameChange}
+                    handleNewCourseDurationChange={handleNewCourseDurationChange}
+                    handleNewCourseDescriptionChange={handleNewCourseDescriptionChange}
+                    handleCreateCourse={handleCreateCourse}
+                    isDialogOpen={isDialogOpen}
+                  />
+                </Dialog>
+              </div>
+            )
+          ) : (
+            <div className="flex flex-col min-h-screen flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start">
+                {courses.map((course) => {
+                  const validImageUrl = getValidImageUrl(course.coverImage)
+                  return (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      validImageUrl={validImageUrl ?? ''}
+                      onClick={() => handleCardClick(course.id)}
+                      statusOptions={statusOptions}
+                    />
+                  )
+                })}
+              </div>
 
-                            {/* Right: Create New Course Button */}
-                            <div className="flex-1 flex justify-end min-w-[220px]">
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button className="text-white bg-primary font-semibold px-5 py-2 flex gap-2">
-                                            <Plus className="w-5" />
-                                            Create New Course
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogOverlay />
-                                    <NewCourseDialog
-                                        newCourseName={newCourseName}
-                                        newCourseDuration={newCourseDuration}
-                                        newCourseDescription={
-                                            newCourseDescription
-                                        }
-                                        handleNewCourseNameChange={
-                                            handleNewCourseNameChange
-                                        }
-                                        handleNewCourseDurationChange={
-                                            handleNewCourseDurationChange
-                                        }
-                                        handleNewCourseDescriptionChange={
-                                            handleNewCourseDescriptionChange
-                                        }
-                                        handleCreateCourse={handleCreateCourse}
-                                        isDialogOpen={isDialogOpen}
-                                    />
-                                </Dialog>
-                            </div>
-                        </div>
+              <DataTablePagination
+                totalStudents={totalBootcamps}
+                lastPage={totalPages}
+                pages={totalPages}
+                fetchStudentData={(newOffset: number) => {
+                  setOffset(newOffset)
+                  refetchBootcamps(newOffset)
+                }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+  </>
+)
 
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
-                            {/* Search Bar */}
-                            <div className="relative w-full sm:w-[500px] lg:w-[450px]">
-                                {/* Search Icon */}
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 mt-1 text-muted-foreground" />
-                                <Input
-                                    ref={searchInputRef}
-                                    type="text"
-                                    placeholder="Search courses..."
-                                    className="lg:max-w-[800px] bg-card w-full pl-10 pr-10" // pl-10 for left padding (space for icon)
-                                    value={searchQuery}
-                                    onChange={handleSearchChange}
-                                    onKeyDown={handleKeyDown}
-                                    onFocus={() => {
-                                        if (
-                                            searchQuery.trim() &&
-                                            filteredSuggestions.length > 0
-                                        ) {
-                                            setShowSuggestions(true)
-                                        }
-                                    }}
-                                />
-
-                                {/* Clear Button */}
-                                {searchQuery && (
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
-                                        onClick={clearSearch}
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                )}
-
-                                {/* Suggestions Dropdown */}
-                                {showSuggestions &&
-                                    filteredSuggestions.length > 0 && (
-                                        <div className="absolute top-full left-0 right-0 z-50 mt-1">
-                                            <div className="bg-white border border-border rounded-md shadow-lg overflow-hidden">
-                                                {filteredSuggestions.map(
-                                                    (course, index) => (
-                                                        <div
-                                                            key={course.id}
-                                                            className={cn(
-                                                                'px-3 py-2.5 cursor-pointer text-sm transition-colors',
-                                                                'hover:bg-muted/50',
-                                                                index ===
-                                                                    selectedSuggestionIndex &&
-                                                                    'bg-muted'
-                                                            )}
-                                                            onClick={() =>
-                                                                handleSuggestionClick(
-                                                                    course
-                                                                )
-                                                            }
-                                                            onMouseEnter={() =>
-                                                                setSelectedSuggestionIndex(
-                                                                    index
-                                                                )
-                                                            }
-                                                        >
-                                                            <div className="capitalize font-medium text-foreground text-left">
-                                                                {course.name}
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
-                            </div>
-
-                            {/* Filter Dropdown */}
-                            <div className="mt-2">
-                                <Select
-                                    value={statusFilter}
-                                    onValueChange={(val) => {
-                                        setStatusFilter(val)
-                                        setCurrentPage(1)
-                                    }}
-                                >
-                                    <SelectTrigger className="w-[150px]">
-                                        <SelectValue placeholder="Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {statusOptions.map((opt) => (
-                                            <SelectItem
-                                                key={opt.value}
-                                                value={opt.value}
-                                            >
-                                                {opt.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="">
-                        <div className="mb-5 flex justify-center items-center">
-                            {courses.length === 0 ? (
-                                <>
-                                    {activeSearchTerm.length > 0 ? (
-                                        <div className="absolute h-screen">
-                                            <div className="relative top-[70%]">
-                                                <Alert
-                                                    variant="destructive"
-                                                    className="flex flex-col items-center gap-3"
-                                                >
-                                                    <AlertTitle>
-                                                        No Course Found
-                                                    </AlertTitle>
-                                                    <AlertDescription>
-                                                        No course found with the
-                                                        name{' '}
-                                                        <span className="font-semibold">
-                                                            {activeSearchTerm}
-                                                        </span>
-                                                    </AlertDescription>
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={clearSearch}
-                                                        className="mt-2"
-                                                    >
-                                                        Clear Search
-                                                    </Button>
-                                                </Alert>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="mt-24">
-                                            <div>
-                                                <h4
-                                                    className={
-                                                        styles.firstCourseText
-                                                    }
-                                                >
-                                                    Create your first course and
-                                                    share with students
-                                                </h4>
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <Button className="text-white bg-secondary">
-                                                            <Plus className="w-5 mr-2" />
-                                                            <p>New Course</p>
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogOverlay />
-                                                    <NewCourseDialog
-                                                        newCourseName={
-                                                            newCourseName
-                                                        }
-                                                        newCourseDuration={
-                                                            newCourseDuration
-                                                        }
-                                                        newCourseDescription={
-                                                            newCourseDescription
-                                                        }
-                                                        handleNewCourseNameChange={
-                                                            handleNewCourseNameChange
-                                                        }
-                                                        handleNewCourseDurationChange={
-                                                            handleNewCourseDurationChange
-                                                        }
-                                                        handleNewCourseDescriptionChange={
-                                                            handleNewCourseDescriptionChange
-                                                        }
-                                                        handleCreateCourse={
-                                                            handleCreateCourse
-                                                        }
-                                                        isDialogOpen={
-                                                            isDialogOpen
-                                                        }
-                                                    />
-                                                </Dialog>
-                                            </div>
-                                            <div className="flex justify-center my-10">
-                                                <Separator className="w-1/2" />
-                                            </div>
-                                            <p className={styles.needHelpText}>
-                                                Need help getting started?
-                                                Checkout the tutorials below
-                                            </p>
-                                            <div className=" m-0 flex items-center justify-center space-x-4">
-                                                <Link href={''}>
-                                                    <Image
-                                                        src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D"
-                                                        alt="Placeholder Image"
-                                                        className=" object-contain rounded-md"
-                                                        height={48}
-                                                        width={300}
-                                                    />
-                                                    <div className="px-1 py-4">
-                                                        <div className="text-start mb-2">
-                                                            {' '}
-                                                            How to create a new
-                                                            course
-                                                        </div>
-                                                    </div>
-                                                </Link>
-                                                <Link href={''}>
-                                                    <Image
-                                                        src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D"
-                                                        alt="Placeholder Image"
-                                                        className=" object-contain rounded-md"
-                                                        height={48}
-                                                        width={300}
-                                                    />
-                                                    <div className="px-1 py-4">
-                                                        <div className="text-start mb-2">
-                                                            {' '}
-                                                            Adding students in a
-                                                            course
-                                                        </div>
-                                                    </div>
-                                                </Link>
-                                                <Link href={''}>
-                                                    <Image
-                                                        src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Ym9va3N8ZW58MHx8MHx8fDA%3D"
-                                                        alt="Placeholder Image"
-                                                        className=" object-contain rounded-md"
-                                                        height={48}
-                                                        width={300}
-                                                    />
-                                                    <div className="px-1 py-4">
-                                                        <div className="text-start mb-2">
-                                                            {' '}
-                                                            Check attendance of
-                                                            the classes
-                                                        </div>
-                                                    </div>
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-<<<<<<< HEAD
-                                <div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start">
-=======
-
-                                <div className="flex flex-col min-h-screen">
-                                  <div flex-1>
-                                    <div className="flex flex-wrap justify-center gap-3">
->>>>>>> 836b8ea028d2a490c2012da95336490ae38bcdb2
-                                        {courses.map((course, index) => {
-                                            const validImageUrl =
-                                                getValidImageUrl(
-                                                    course.coverImage
-                                                )
-
-                                            return (
-                                                <CourseCard
-                                                    key={course.id}
-                                                    course={course}
-                                                    validImageUrl={
-                                                        validImageUrl ?? ''
-                                                    }
-                                                    onClick={() =>
-                                                        handleCardClick(
-                                                            course.id
-                                                        )
-                                                    }
-                                                    statusOptions={
-                                                        statusOptions
-                                                    }
-                                                />
-                                            )
-                                        })}
-                                    </div>
-<<<<<<< HEAD
-                                    {/* <DataTablePagination
-=======
-                                    <div className="fixed bottom-4 right-4">
-                                    <DataTablePagination
->>>>>>> 836b8ea028d2a490c2012da95336490ae38bcdb2
-                                        totalStudents={totalBootcamps}
-                                        lastPage={lastPage}
-                                        pages={pages}
-                                        fetchStudentData={getBootcamp}
-                                    /> */}
-                                    <DataTablePagination
-                                        totalStudents={totalBootcamps}
-                                        lastPage={totalPages}
-                                        pages={totalPages}
-                                        fetchStudentData={(
-                                            newOffset: number
-                                        ) => {
-                                            setOffset(newOffset)
-                                            refetchBootcamps(newOffset) // instead of getBootcamp(newOffset)
-                                        }}
-                                    />
-                                    </div>
-                                 </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
-    )
 }
 
 export default Courses
