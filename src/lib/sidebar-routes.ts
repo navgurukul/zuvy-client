@@ -173,10 +173,10 @@ const adminRoutes = [
         // pathname.startsWith('/admin'),
     },
     {
-        name: 'Content Bank',
-        href: '/admin/content-bank',
+        name: 'Question Bank',
+        href: '/admin/question-bank',
         icon: Database,
-        active: '/admin/content-bank',
+        active: '/admin/question-bank',
     },
     {
         name: 'Roles and Permissions',

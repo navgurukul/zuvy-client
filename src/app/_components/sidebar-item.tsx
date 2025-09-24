@@ -97,3 +97,10 @@ export const SidebarItem = ({
 
     return label === 'Resource Library' ? content : <SheetClose asChild>{content}</SheetClose>
 }
+
+
+
+
+
+
+

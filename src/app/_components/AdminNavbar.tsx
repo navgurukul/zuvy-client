@@ -24,10 +24,10 @@ const AdminNavbar = ({ children }: AdminNavbarProps) => {
                 pathname.startsWith('/admin'),
         },
         {
-            name: 'Content Bank',
-            href: '/admin/content-bank',
+            name: 'Question Bank',
+            href: '/admin/question-bank',
             icon: Database,
-            active: pathname.startsWith('/admin/content-bank'),
+            active: pathname.startsWith('/admin/question-bank'),
         },
         {
             name: 'Roles and Permissions',
