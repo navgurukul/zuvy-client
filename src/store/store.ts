@@ -39,7 +39,7 @@ interface CourseData {
 
 interface BatchData {
     status: string
-    instructorEmail: ReactNode
+    instructorEmail:any
     id: number
     name: string
     bootcampId: number
