@@ -2,7 +2,7 @@
 
 // React and third-party libraries
 import React, { useEffect, useState, useCallback } from 'react'
-import { Plus, X, CalendarIcon } from 'lucide-react'
+import { PlusCircle, X, CalendarIcon, Trash2 } from 'lucide-react'
 
 // Internal imports
 import { Input } from '@/components/ui/input'
@@ -187,7 +187,7 @@ const FormSection: React.FC<FormSectionProps> = ({
     }, [selectedSection, index, form, questionData])
 
     return (
-        <div>
+        <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-8">
             <Select
                 onValueChange={(e) => {
                     handleSectionType(e, index)
@@ -224,7 +224,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                             // deleteQuestion(index)
                         }}
                     >
-                        <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
+                        <Trash2 className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
                     </button>
                 </div>
             </Select>
@@ -321,12 +321,12 @@ const FormSection: React.FC<FormSectionProps> = ({
             {(questionData.typeId === 1 || questionData.typeId === 2) && (
                 <div className="flex justify-end">
                     <Button
-                        variant={'secondary'}
+                        // variant={'secondary'}
                         type="button"
                         onClick={addOption}
-                        className="gap-x-2 border-none text-[rgb(81,134,114)] hover:text-[rgb(81,134,114)] hover:bg-popover"
+                        className="gap-x-2 h-6 border-none"
                     >
-                        <Plus /> Add Option
+                        <PlusCircle size={15} /> Add Option
                     </Button>
                 </div>
             )}

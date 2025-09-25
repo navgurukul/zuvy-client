@@ -443,43 +443,43 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     <div className="w-2/6 flex justify-start align-middle items-center relative">
                         <p className="text-2xl font-bold">{title}</p>
                         {/* {!title && (
-                                                    <Pencil
-                                                        fill="true"
-                                                        fillOpacity={0.4}
-                                                        size={20}
-                                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                                    />
-                              )} */}
+                            <Pencil
+                                fill="true"
+                                fillOpacity={0.4}
+                                size={20}
+                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                            />
+                        )} */}
                     </div>
 
                     {/* <div className="flex justify-end mt-5">
                         <div className="flex items-center justify-between mr-2">
-                                                    {defaultValue ===
-                                                        'editor' ? (
-                                                        <div
-                                                            id="previewArticle"
-                                                            onClick={
-                                                                previewArticle
-                                                            }
-                                                            className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                                        >
-                                                            <Eye size={18} />
-                                                            <h6 className="ml-1 text-sm">
-                                                                Preview Article
-                                                            </h6>
-                                                        </div>
-                                                    ) : (
-                                                        <div
-                                                            id="previewArticle"
-                                                            onClick={previewPdf}
-                                                            className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                                        >
-                                                            <Eye size={18} />
-                                                            <h6 className="ml-1 text-sm">
-                                                                Preview PDF
-                                                            </h6>
-                                                        </div>
-                                                    )}
+                            {defaultValue ===
+                                'editor' ? (
+                                <div
+                                    id="previewArticle"
+                                    onClick={
+                                        previewArticle
+                                    }
+                                    className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                >
+                                    <Eye size={18} />
+                                    <h6 className="ml-1 text-sm">
+                                        Preview Article
+                                    </h6>
+                                </div>
+                            ) : (
+                                <div
+                                    id="previewArticle"
+                                    onClick={previewPdf}
+                                    className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                >
+                                    <Eye size={18} />
+                                    <h6 className="ml-1 text-sm">
+                                        Preview PDF
+                                    </h6>
+                                </div>
+                            )}
                         </div>
                     </div> */}
                 </div>

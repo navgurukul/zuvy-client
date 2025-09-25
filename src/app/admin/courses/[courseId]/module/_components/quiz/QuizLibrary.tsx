@@ -129,12 +129,8 @@ function QuizLibrary({
     }, [quizData, addQuestion, handleAddQuestion])
 
     return (
-        <div className="w-full flex flex-col gap-3">
-            
-            <div className="w-full h-max-content ">
-                <h2 className="text-left text-gray-600 text-[15px] font-semibold">
-                    MCQ Library
-                </h2>
+        <div className="w-full flex flex-col gap-3">            
+            <div className="w-full h-max-content mt-4">
                 {renderQuizList}
             </div>
         </div>

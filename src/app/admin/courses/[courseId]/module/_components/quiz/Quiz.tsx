@@ -20,7 +20,6 @@ import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {QuizProps,ChapterDetailsResponse} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 import useDebounce from '@/hooks/useDebounce'
-import QuizList from './QuizList'
 import CodingTopics from '../codingChallenge/CodingTopics'
 
 function Quiz(props: QuizProps) {
@@ -284,17 +283,6 @@ function Quiz(props: QuizProps) {
         )
     }
 
-    // const renderQuizList = useMemo(() => {
-    //     return (
-    //         <QuizList
-    //             addQuestion={addQuestion}
-    //             handleAddQuestion={handleAddQuestion}
-    //             questionData={quizData.allQuestions}
-    //             tags={tags}
-    //         />
-    //     )
-    // }, [quizData, addQuestion, handleAddQuestion])
-
     if (isDataLoading) {
         return (
             <div className="px-5">
@@ -353,28 +341,23 @@ function Quiz(props: QuizProps) {
                             </div>
                         </div>
                     </div>
-                </div>
-
-                
-                    
-                    <div className="flex bg-red-500">
-                        <CodingTopics
-                            setSearchTerm={setSearch}
-                            searchTerm={search}
-                            tags={tags}
-                            selectedTopics={selectedOptions}
-                            setSelectedTopics={setSelectedOptions}
-                            selectedDifficulties={selectedDifficulty}
-                            setSelectedDifficulties={setSelectedDifficulty} 
-                            selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                
-                        />
-                    </div>
+                </div>   
+                <div className="px-5 pt-4 bg-card">
+                    <CodingTopics
+                        setSearchTerm={setSearch}
+                        searchTerm={search}
+                        tags={tags}
+                        selectedTopics={selectedOptions}
+                        setSelectedTopics={setSelectedOptions}
+                        selectedDifficulties={selectedDifficulty}
+                        setSelectedDifficulties={setSelectedDifficulty} 
+                        selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                
+                    />
                     <div className="w-full h-max-content ">
-                        <h2 className="text-left text-gray-600 text-[15px] font-semibold">
+                        <h2 className="text-left mt-4 text-gray-600 text-[15px] font-semibold">
                             MCQ Library
                         </h2>
-                        <div className="flex px-5 pt-4 bg-card">
-                            {/* {renderQuizList} */}
+                        <div className="flex">
                             <QuizLibrary
                                 addQuestion={addQuestion}
                                 handleAddQuestion={handleAddQuestion}
@@ -382,14 +365,10 @@ function Quiz(props: QuizProps) {
                                 quizData={quizData}
                             />
                         
-                            <Separator
-                                orientation="vertical"
-                                className="mx-4 w-[2px] h-96 mt-36 rounded"
-                            />
-                            <div className="w-full">
+                            <div className="w-full border-l border-gray-200 ml-4 pl-4">
                                 <div>
                                     <div className="flex flex-col items-center justify-between">
-                                        <div className="flex justify-between w-full mt-36">
+                                        <div className="flex justify-between w-full">
                                             <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
                                                 Selected Question
                                             </h2>
@@ -424,6 +403,7 @@ function Quiz(props: QuizProps) {
                             </div>
                         </div>
                     </div>
+                </div>
             </div>
         </div>
     )

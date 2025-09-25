@@ -58,7 +58,6 @@ const SelectQuizQuestions = ({
                                                     { textLength: 40 }
                                                 )}
                                             </h2>
-
                                         </div>
 
                                         <Dialog>

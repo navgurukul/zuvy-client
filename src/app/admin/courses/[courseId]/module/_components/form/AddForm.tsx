@@ -5,7 +5,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Pencil, Plus } from 'lucide-react'
+import { Pencil, PlusCircle } from 'lucide-react'
 
 // Internal imports
 import { Button } from '@/components/ui/button'
@@ -294,7 +294,11 @@ const AddForm: React.FC<AddFormProps> = ({
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
             <ScrollBar className="h-dvh " orientation="vertical" />
-            <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2">
+            {/* <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2"> */}
+            <div className="flex flex-col gap-y-8 px-5 justify-center mx-auto w-full max-w-[52rem] bg-card rounded-lg shadow-sm border">    
+                <div className="w-2/6 flex justify-start align-middle items-center relative pt-4">
+                    <p className="text-2xl font-bold">Create Feedback Form</p>
+                </div>
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
@@ -306,8 +310,11 @@ const AddForm: React.FC<AddFormProps> = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        <div className="flex justify-between items-center">
+                                        {/* <div className="flex justify-between items-center">
                                             <div className="w-2/6 flex justify-center align-middle items-center relative">
+                                                <p className="flex text-left text-lg mt-4">
+                                                    Title
+                                                </p>
                                                 <Input
                                                     required
                                                     {...field}
@@ -318,8 +325,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                                         field.onChange(e)
                                                     }}
                                                     placeholder="Untitled Form"
-                                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                    autoFocus
+                                                    className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
                                                 />
                                                 {!titles && (
                                                     <Pencil
@@ -338,9 +344,26 @@ const AddForm: React.FC<AddFormProps> = ({
                                                     Save
                                                 </Button>
                                             </div>
-                                        </div>
+                                        </div> */}
+                                        <>
+                                            <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                                               Form Title
+                                            </FormLabel>
+                                            <Input
+                                                required
+                                                {...field}
+                                                onChange={(e) => {
+                                                    setTitles(
+                                                        e.target.value
+                                                    )
+                                                    field.onChange(e)
+                                                }}
+                                                placeholder="Untitled Form"
+                                                className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                            />
+                                        </>
                                     </FormControl>
-                                    <div className="flex items-center justify-between">
+                                    {/* <div className="flex items-center justify-between">
                                         <div
                                             id="previewForm"
                                             onClick={previewForm}
@@ -351,7 +374,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                                 Preview
                                             </h6>
                                         </div>
-                                    </div>
+                                    </div> */}
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -367,7 +390,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            className="w-[450px] px-3 py-2 border text-gray-600 rounded-md"
+                                            className="w-full px-3 py-2 border text-gray-600 rounded-md"
                                             placeholder="Add Description"
                                         />
                                     </FormControl>
@@ -375,6 +398,22 @@ const AddForm: React.FC<AddFormProps> = ({
                                 </FormItem>
                             )}
                         />
+
+                        <div className='flex justify-between items-center'>
+                            <p className='font-bold'>Questions</p>
+                            <div className="flex justify-start">
+                            <Button
+                                // variant={'secondary'}
+                                // variant="outline"
+                                type="button"
+                                onClick={addQuestion}
+                                className="gap-x-2 border-none border"
+                                // className="gap-x-2 border-none border hover:text-[rgb(81,134,114)] hover:bg-popover"
+                            >
+                                <PlusCircle size={15} /> Add Question
+                            </Button>
+                        </div>
+                        </div>
 
                         {questions.map((item, index) => (
                             <FormSection
@@ -389,12 +428,10 @@ const AddForm: React.FC<AddFormProps> = ({
 
                         <div className="flex justify-start">
                             <Button
-                                variant={'secondary'}
-                                type="button"
-                                onClick={addQuestion}
-                                className="gap-x-2 border-none text-[rgb(81,134,114)] hover:text-[rgb(81,134,114)] hover:bg-popover"
+                                type="submit"
+                                className="w-3/3 bg-success-dark opacity-75"
                             >
-                                <Plus /> Add Question
+                                Create
                             </Button>
                         </div>
                     </form>
