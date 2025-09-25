@@ -1,3 +1,86 @@
+// "use client"
+
+// import {
+//   DropdownMenu,
+//   DropdownMenuTrigger,
+//   DropdownMenuContent,
+// } from "@/components/ui/dropdown-menu"
+// import { Database } from "lucide-react"
+// import Link from "next/link"
+// import { Button } from "@/components/ui/button"
+// import { cn } from "@/lib/utils"
+// import { usePathname } from "next/navigation"
+
+// const QuestionBankDropdown = () => {
+//   const pathname = usePathname()
+
+//   const isActive = (path: string) => pathname.startsWith(path)
+
+//   return (
+//     <DropdownMenu>
+//       <DropdownMenuTrigger asChild>
+//         <Button
+//           variant="ghost"
+//           className={cn(
+//             "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium",
+//             isActive("/admin/question-bank")
+           
+
+//           ? "bg-blue-600 text-white shadow-sm"
+//         : "text-gray-700 hover:text-black hover:bg-gray-100"
+
+//           )}
+//         >
+//           <Database className="h-4 w-4" />
+//           <span>Question Bank</span>
+//         </Button>
+
+//       </DropdownMenuTrigger>
+
+//       <DropdownMenuContent className="w-33">
+//         <Link
+//           href="/admin/question-bank/coding"
+//           className={cn(
+//             "block w-full px-3 py-2 rounded text-black  hover:text-black  text-sm text-left hover:bg-gray-100",
+//           )}
+//         >
+//           Coding Problems
+//         </Link>
+
+//         <Link
+//           href="/admin/question-bank/mcq"
+//           className={cn(
+//             "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left hover:bg-gray-100"
+//           )}
+//         >
+//           MCQ
+//         </Link>
+
+//         <Link
+//           href="/admin/question-bank/open-ended"
+//           className={cn(
+//             "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left hover:bg-gray-100"
+//           )}
+//         >
+//           Open Ended
+//         </Link>
+//       </DropdownMenuContent>
+//     </DropdownMenu>
+//   )
+// }
+
+// export default QuestionBankDropdown
+
+
+
+
+
+
+
+
+
+
+
 "use client"
 
 import {
@@ -13,8 +96,12 @@ import { usePathname } from "next/navigation"
 
 const QuestionBankDropdown = () => {
   const pathname = usePathname()
+  console.log(pathname)
 
-  const isActive = (path: string) => pathname.startsWith(path)
+  // ✅ Match /admin/question-bank and all its subroutes
+  const isActive =
+    pathname === "/admin/resource/" ||
+    pathname.startsWith("/admin/resource/")
 
   return (
     <DropdownMenu>
@@ -23,11 +110,9 @@ const QuestionBankDropdown = () => {
           variant="ghost"
           className={cn(
             "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium",
-            isActive("/admin/question-bank")
-
-          ? "bg-blue-600 text-white shadow-sm"
-        : "text-gray-700 hover:text-black hover:bg-gray-100"
-
+            isActive
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-gray-700 hover:text-black hover:bg-gray-100"
           )}
         >
           <Database className="h-4 w-4" />
@@ -35,30 +120,22 @@ const QuestionBankDropdown = () => {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-33">
+      <DropdownMenuContent className="w-36">
         <Link
-          href="/admin/question-bank/coding"
-          className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black  text-sm text-left hover:bg-gray-100"
-          )}
+          href="/admin/resource/coding"
+          className="block w-full px-3 py-2 rounded text-black hover:text-black text-sm text-left hover:bg-gray-100"
         >
           Coding Problems
         </Link>
-
         <Link
-          href="/admin/question-bank/mcq"
-          className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left hover:bg-gray-100"
-          )}
+          href="/admin/resource/mcq"
+          className="block w-full px-3 py-2 rounded text-black hover:text-black text-sm text-left hover:bg-gray-100"
         >
           MCQ
         </Link>
-
         <Link
-          href="/admin/question-bank/open-ended"
-          className={cn(
-            "block w-full px-3 py-2 rounded text-black  hover:text-black text-sm text-left hover:bg-gray-100"
-          )}
+          href="/admin/resource/open-ended"
+          className="block w-full px-3 py-2 rounded text-black hover:text-black text-sm text-left hover:bg-gray-100"
         >
           Open Ended
         </Link>
@@ -68,8 +145,3 @@ const QuestionBankDropdown = () => {
 }
 
 export default QuestionBankDropdown
-
-
-
-
-
