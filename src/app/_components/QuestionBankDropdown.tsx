@@ -30,10 +30,11 @@ const QuestionBankDropdown = () => {
           <Button
             variant="ghost"
             className={cn(
-              "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium",
+              // "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium",
+               "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium focus-visible:ring-0 focus-visible:outline-none",
               open
                 ? "bg-gray-300 text-black"
-                : isActive
+                 : isActive
                 ? "bg-blue-600 text-white shadow-sm"
                 : "text-gray-700 hover:text-black hover:bg-gray-100"
             )}
