@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
-import { Pencil, Trash2, Eye } from 'lucide-react'
+import { Edit, Trash2, Eye } from 'lucide-react'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
@@ -11,6 +11,7 @@ import {
     getDeleteCodingQuestion,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
+    getCodingQuestionTags,
     getSelectedOptions,
     getDifficulty,
     getOffset,
@@ -37,7 +38,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             const codingQuestion = row.original
 
             return (
-                <span className="text-start w-full flex ">
+                <span className="text-start w-[400px] flex ">
                     {codingQuestion.title}
                 </span>
             )
@@ -46,10 +47,36 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         enableHiding: true,
     },
     {
+        accessorKey: 'tagId',
+        header: ({ column }) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Topic" 
+            />
+        ),
+        cell: ({ row }) => {
+            const codingQuestion = row.original
+            const { tags } = getCodingQuestionTags()
+            
+            // Find the topic name based on tagId
+            const topicName = tags.find(tag => tag.id === codingQuestion.tagId)?.tagName || 'Unknown Topic'
+
+            return (
+                <div className="flex items-center">
+                    <span className="text-sm font-medium rounded-md">
+                        {topicName}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
+        enableHiding: true,
+    },
+    {
         accessorKey: 'difficulty',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="flex justify-end ml-28"
+                className="flex justify-end"
                 column={column}
                 title="Difficulty"
             />
@@ -60,11 +87,11 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <div
                     className={cn(
-                        `flex items-center rounded-full border justify-center ml-24`,
+                        `flex items-center rounded-full border justify-center`,
                         difficultyColor(codingQuestion.difficulty)
                     )}
                 >
-                    <span className="text-left mr-10 w-4">
+                    <span className="text-center">
                         {codingQuestion.difficulty}
                     </span>
                 </div>
@@ -79,7 +106,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             <DataTableColumnHeader
                 className="flex justify-end"
                 column={column}
-                title="Usage Count"
+                title="Usage"
             />
         ),
         cell: ({ row }) => {
@@ -184,9 +211,9 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <>
                     <div className="flex">
-                        <Pencil
+                        <Edit
                             className="cursor-pointer mr-5"
-                            size={20}
+                            size={18}
                             onClick={() => {
                                 handleEditCodingQuestion(
                                     codingQuestion,
@@ -207,7 +234,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                 )
                             }}
                             className="text-destructive cursor-pointer"
-                            size={20}
+                            size={18}
                         />
                         <DeleteConfirmationModal
                             isOpen={isDeleteModalOpen}

@@ -36,6 +36,7 @@ import { create } from 'domain'
 import {TestCaseInput,TestCases} from "@/app/admin/resource/_components/adminResourceComponentType"
 import { Input as PostcssInput} from 'postcss'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useEditCodingQuestion } from '@/hooks/useEditCodingQuestion'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -96,6 +97,9 @@ export default function EditCodingQuestionForm() {
     ])
 
     let outputObjectRef = useRef('' as any);
+
+    // Use the hook
+    const { editQuestion, loading, error } = useEditCodingQuestion()
 
     const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
     const [activeTab, setActiveTab] = useState("details")
@@ -474,32 +478,6 @@ export default function EditCodingQuestionForm() {
         },
     })
 
-    async function editCodingQuestion(data: any) {
-        try {
-            const response = await api.put(
-                `codingPlatform/update-question/${editCodingQuestionId}`,
-                data
-            )
-
-            toast.success({
-                title: 'Success',
-                description: 'Question Updated Successfully',
-            })
-            
-            // Dialog को close करो
-            setIsCodingEditDialogOpen(false)
-            
-            // Data refresh करो
-            getAllCodingQuestions(setCodingQuestions)
-            
-        } catch (error: any) {
-            toast.error({
-                title: 'Error',
-                description: error?.response?.data?.message || 'An error occurred',
-            })
-        }
-    }
-
     useEffect(() => {
         if (selectCodingQuestion.length > 0) {
           const question = selectCodingQuestion[0];
@@ -542,7 +520,7 @@ export default function EditCodingQuestionForm() {
       }, []);
 
 
-    const handleEditSubmit = (values: z.infer<typeof formSchema>) => {
+    const handleEditSubmit = async (values: z.infer<typeof formSchema>) => {
 
         let hasErrors =  showSyntaxErrors(testCases);
 
@@ -675,8 +653,26 @@ export default function EditCodingQuestionForm() {
             content: {},
         };
 
-        editCodingQuestion(formattedData);
-        getAllCodingQuestions(setCodingQuestions);
+        // Final check to ensure all test cases are valid
+        if (formattedData.testCases.length !== testCases.length) {
+            toast.error({
+                title: 'Invalid Test Cases',
+                description: 'Some test cases contain invalid data. Please correct them before submitting.',
+            });
+            return;
+        }
+
+        // Use hook instead of direct API call
+        const success = await editQuestion(editCodingQuestionId, formattedData);
+
+        if (success) {
+            // Close dialog
+            setIsCodingEditDialogOpen(false);
+            
+            // Refresh data
+            getAllCodingQuestions(setCodingQuestions);
+        }
+        // Error case automatically handled by hook
     };
 
     return (
@@ -766,21 +762,21 @@ export default function EditCodingQuestionForm() {
                                                 defaultValue={field.value}
                                                 className="flex space-y-1"
                                             >
-                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                                     <FormControl>
-                                                        <RadioGroupItem value="Easy" className="text-black border-black" />
+                                                        <RadioGroupItem value="Easy" className="text-primary border-primary" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">Easy</FormLabel>
                                                 </FormItem>
-                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                                     <FormControl>
-                                                        <RadioGroupItem value="Medium" className="text-black border-black" />
+                                                        <RadioGroupItem value="Medium" className="text-primary border-primary" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">Medium</FormLabel>
                                                 </FormItem>
-                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                                     <FormControl>
-                                                        <RadioGroupItem value="Hard" className="text-black border-black" />
+                                                        <RadioGroupItem value="Hard" className="text-primary border-primary" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">Hard</FormLabel>
                                                 </FormItem>
@@ -981,7 +977,7 @@ export default function EditCodingQuestionForm() {
 
                                 <Button
                                     type="button"
-                                    className="mt-4 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
+                                    className="mt-4 text-primary bg-background hover:bg-accent hover:text-accent-foreground"
                                     onClick={handleAddTestCase}
                                 >
                                     <Plus size={20} className="mr-2" />

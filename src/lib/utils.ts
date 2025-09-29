@@ -31,11 +31,11 @@ export function isPlural(count: number): boolean {
 export function difficultyColor(difficulty: string): string {
     switch (difficulty?.toLowerCase()) {
         case 'easy':
-            return 'bg-success-light text-success-dark border-success'
+            return 'bg-success-light text-success border-success'
         case 'medium':
-            return 'bg-warning-light text-warning-dark border-warning'
+            return 'bg-warning-light text-warning border-warning'
         case 'hard':
-            return 'bg-destructive-light text-destructive-dark border-destructive'
+            return 'bg-destructive-light text-destructive border-destructive'
         default:
             return 'bg-muted text-muted-foreground'
     }

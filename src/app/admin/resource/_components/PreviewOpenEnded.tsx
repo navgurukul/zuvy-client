@@ -26,7 +26,7 @@ const [tagName, setTagName] = useState<string | null>(null)
     return (
         <div className="w-full max-h-[500px]">
             <DialogHeader className="">
-                <DialogTitle className="text-xl font-bold text-gray-600">
+                <DialogTitle className="text-xl font-bold text-foreground">
                     Question Preview
                     {tagName && (
                         <span className="text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] ml-2 py-1 px-[8px]">
@@ -48,15 +48,15 @@ const [tagName, setTagName] = useState<string | null>(null)
                 {/* Render question description */}
                 <ScrollArea className="pr-4">
                     <div>
-                        <h4 className="font-semibold text-lg mb-5 text-gray-600">
+                        <h4 className="font-semibold text-lg mb-5 text-foreground">
                             Title and Description:
                         </h4>
                         <div className="text-left flex gap-2 mb-2">
-                            <span className="font-bold flex text-gray-600">
+                            <span className="font-bold flex text-foreground">
                                 <h6>Q.</h6>
                             </span>
                             <div
-                                className={` text-wrap text-[16px] text-gray-600 ${
+                                className={` text-wrap text-[16px] text-foreground ${
                                     question.question.includes('pre') &&
                                     'overflow-scroll'
                                 } `}

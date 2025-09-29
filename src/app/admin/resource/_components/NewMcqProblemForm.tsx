@@ -850,7 +850,7 @@ setStoreQuizData(quizData);
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Easy"
-                                                className="translate-y-[2px] border-black"
+                                                className="translate-y-[2px] border-primary"
                                             />
                                             <FormLabel className="text-lg">
                                                 Easy
@@ -877,7 +877,7 @@ setStoreQuizData(quizData);
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Medium"
-                                                className="translate-y-[2px] border-black"
+                                                className="translate-y-[2px] border-primary"
                                             />
                                             <FormLabel className="text-lg">
                                                 Medium
@@ -903,7 +903,7 @@ setStoreQuizData(quizData);
                                                     field.onChange(newValue)
                                                 }}
                                                 aria-label="Select Hard"
-                                                className="translate-y-[2px] border-black"
+                                                className="translate-y-[2px] border-primary"
                                             />
                                             <FormLabel className="text-lg">
                                                 Hard
@@ -1016,8 +1016,9 @@ setStoreQuizData(quizData);
                         <Button
                             type="button"
                             // onClick={generateMCQUsingGemini}
+                            variant={'outline'}
                             onClick={handleClear}
-                            className="flex items-center bg-gray-300 text-black"
+                            className="flex items-center"
                         >
                             Cancel
                         </Button>
@@ -1025,7 +1026,7 @@ setStoreQuizData(quizData);
                             type="button"
                             // onClick={generateMCQUsingGemini}
                             onClick={generateQuestions}
-                            className="flex items-center bg-success-dark opacity-75"
+                            className="flex items-center bg-primary hover:bg-primary-dark"
                         >
                             {loadingAI ? (
                                 <>

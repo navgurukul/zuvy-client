@@ -30,6 +30,7 @@ import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
 import { NewCodingProblemFormProps } from "@/app/admin/resource/_components/adminResourceComponentType"
+import { useCreateCodingQuestion } from '@/hooks/useCreateCodingQuestion'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -84,6 +85,9 @@ export default function NewCodingProblemForm({
     offset,
     position,
 }: NewCodingProblemFormProps) {
+    // Custom hook
+    const { createQuestion, loading, error } = useCreateCodingQuestion()
+
     const [testCases, setTestCases] = useState([
         {
             id: 1,
@@ -413,7 +417,7 @@ export default function NewCodingProblemForm({
         return true;
     };
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
 
         let hasErrors = showSyntaxErrors(testCases);
 
@@ -554,26 +558,11 @@ export default function NewCodingProblemForm({
             return;
         }
 
-        createCodingQuestion(formattedData);
-        filteredCodingQuestions(
-            setCodingQuestions,
-            offset,
-            position,
-            difficulty,
-            selectedOptions
-        );
-    }
+        // Use hook instead of direct API call
+        const success = await createQuestion(formattedData);
 
-    async function createCodingQuestion(data: any) {
-        try {
-            const response = await api.post(`codingPlatform/create-question`, data)
-
-            toast.success({
-                title: 'Success',
-                description: 'Question Created Successfully',
-            })
-
-            // Form reset करो
+        if (success) {
+            // Reset form only on success
             form.reset({
                 title: '',
                 problemStatement: '',
@@ -581,19 +570,17 @@ export default function NewCodingProblemForm({
                 difficulty: 'Easy',
                 topics: 0,
                 testCases: [],
-            })
+            });
 
-            // Test cases भी reset करो
             setTestCases([{
                 id: 1,
                 inputs: [{ id: Date.now(), type: 'int', value: '' }],
                 output: { type: 'int', value: '' }
-            }])
+            }]);
 
-            // Dialog को close करो
-            setIsDialogOpen(false)
+            setIsDialogOpen(false);
 
-            // Data refresh करो
+            // Refresh data
             await filteredCodingQuestions(
                 setCodingQuestions,
                 offset,
@@ -602,19 +589,13 @@ export default function NewCodingProblemForm({
                 selectedOptions,
                 '',
                 ''
-            )
-        } catch (error: any) {
-            toast.error({
-                title: 'Error',
-                description: error?.response?.data?.message || 'An error occurred',
-            })
-            // Error के case में dialog open रखो
+            );
         }
     }
 
 
     return (
-        <main className="flex flex-col p-3 w-full items-center text-foreground">
+        <main className="flex flex-col p-3 w-full h-[600px] items-center text-foreground">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
@@ -690,25 +671,25 @@ export default function NewCodingProblemForm({
                                                 defaultValue={field.value}
                                                 className="flex space-y-1"
                                             >
-                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                                     <FormControl>
-                                                        <RadioGroupItem value="Easy" className="text-black border-black" />
+                                                        <RadioGroupItem value="Easy" className="text-primary border-primary" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Easy
                                                     </FormLabel>
                                                 </FormItem>
-                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                                     <FormControl>
-                                                        <RadioGroupItem value="Medium" className="text-black border-black" />
+                                                        <RadioGroupItem value="Medium" className="text-primary border-primary" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Medium
                                                     </FormLabel>
                                                 </FormItem>
-                                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                                     <FormControl>
-                                                        <RadioGroupItem value="Hard" className="text-black border-black" />
+                                                        <RadioGroupItem value="Hard" className="text-primary border-primary" />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
                                                         Hard
@@ -913,7 +894,7 @@ export default function NewCodingProblemForm({
 
                                 <Button
                                     type="button"
-                                    className="mt-4 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
+                                    className="mt-4 text-primary bg-background hover:bg-accent hover:text-accent-foreground"
                                     onClick={handleAddTestCase}
                                 >
                                     <Plus size={20} className="mr-2" />

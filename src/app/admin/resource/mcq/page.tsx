@@ -28,8 +28,16 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { POSITION, OFFSET } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import { 
+    Dialog, 
+    DialogOverlay,
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogTrigger 
+} from '@/components/ui/dialog'
 import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
@@ -80,12 +88,13 @@ const Mcqs = (props: Props) => {
     const [totalPages, setTotalPages] = useState(0)
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
-    const [mcqType, setMcqType] = useState<string>('')
+    const [mcqType, setMcqType] = useState<string>('oneatatime')
     const [newTopic, setNewTopic] = useState<string>('')
     const [options, setOptions] = useState<PageOption[]>([
         { value: '-1', label: 'All Topics' },
     ])
     const [loading, setLoading] = useState(true)
+    const [isCreateMcqDialogOpen, setIsCreateMcqDialogOpen] = useState(false)
 
     // Zustand stores
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
@@ -431,8 +440,8 @@ const Mcqs = (props: Props) => {
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 
-    const renderComponent = () => {
-        switch (mcqType) {
+    const renderTabContent = (tabValue: string) => {
+        switch (tabValue) {
             case 'bulk':
                 return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
             case 'oneatatime':
@@ -441,18 +450,18 @@ const Mcqs = (props: Props) => {
                         <NewMcqForm
                             setIsMcqModalOpen={setIsMcqModalOpen}
                             tags={tags}
-                            closeModal={closeModal}
+                            closeModal={() => setIsCreateMcqDialogOpen(false)}
                             setStoreQuizData={setStoreQuizData}
                             getAllQuizQuesiton={filteredQuizQuestions}
                         />
                     </div>
                 )
-            case 'AI':
+            case 'ai':
                 return (
                     <div className="flex items-start justify-center w-full">
                         <NewMcqProblemForm
                             tags={tags}
-                            closeModal={closeModal}
+                            closeModal={() => setIsCreateMcqDialogOpen(false)}
                             setStoreQuizData={setStoreQuizData}
                             getAllQuizQuesiton={filteredQuizQuestions}
                             setIsMcqModalOpen={setIsMcqModalOpen}
@@ -466,7 +475,7 @@ const Mcqs = (props: Props) => {
                         <NewMcqForm
                             setIsMcqModalOpen={setIsMcqModalOpen}
                             tags={tags}
-                            closeModal={closeModal}
+                            closeModal={() => setIsCreateMcqDialogOpen(false)}
                             setStoreQuizData={setStoreQuizData}
                             getAllQuizQuesiton={filteredQuizQuestions}
                         />
@@ -477,120 +486,85 @@ const Mcqs = (props: Props) => {
 
     return (
         <>
-            {isEditQuizModalOpen && (
-                <div>
-                    <div
-                        className="flex cursor-pointer p-5 text-[rgb(81,134,114)]"
-                        onClick={() => setIsEditModalOpen(false)}
+            {/* Edit Modal */}
+            <Dialog open={isEditQuizModalOpen} onOpenChange={setIsEditModalOpen}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Edit MCQ Question</DialogTitle>
+                    </DialogHeader>
+                    <EditMcqForm
+                        tags={tags}
+                        closeModal={() => setIsEditModalOpen(false)}
+                        setStoreQuizData={setStoreQuizData}
+                        getAllQuizQuesiton={filteredQuizQuestions}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Create MCQ Modal with Tabs */}
+            <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Create New MCQ</DialogTitle>
+                    </DialogHeader>
+                    
+                    <Tabs 
+                        value={mcqType} 
+                        onValueChange={setMcqType}
+                        className="w-full"
                     >
-                        <ChevronLeft />
-                        <h6 className="text-[15px]">MCQ Problems</h6>
-                    </div>
-                    <div className="flex flex-col items-center justify-center">
-                        <h1 className="text-lg mb-4 ml-4 font-semibold text-start w-[590px] justify-start text-gray-600">
-                            Edit MCQ
-                        </h1>
-                        <EditMcqForm
-                            tags={tags}
-                            closeModal={closeModal}
-                            setStoreQuizData={setStoreQuizData}
-                            getAllQuizQuesiton={filteredQuizQuestions}
-                        />
-                    </div>
-                </div>
-            )}
-            {isMcqModalOpen && (
-                <div className=" ">
-                    <div
-                        className="flex cursor-pointer items-center text-[rgb(81,134,114)]"
-                        onClick={() =>
-                            setIsMcqModalOpen((prevState) => !prevState)
-                        }
-                    >
-                        <ChevronLeft />
-                        <h6>MCQ Problems</h6>
-                    </div>
-                    <div className="flex flex-col items-center justify-center text-gray-600">
-                        <div>
-                            <RadioGroup
-                                className="flex flex-col items-center w-full  "
-                                defaultValue="oneatatime"
-                                onValueChange={(value) => setMcqType(value)}
+                        <TabsList className="grid w-full grid-cols-3 mb-6">
+                            <TabsTrigger 
+                                value="oneatatime" 
+                                className="text-sm font-medium"
                             >
-                                <div className="flex w-[630px] flex-col items-start justify-start ml-4 gap-3">
-                                    <h1 className="font-semibold text-3xl mb-4 ">
-                                        New MCQ
-                                    </h1>
-                                    <div className="flex gap-x-6 ">
-                                        <div className="flex  space-x-2">
-                                            <RadioGroupItem
-                                                value="bulk"
-                                                id="r1"
-                                                className="text-[rgb(81,134,114)] border-black mt-1"
-                                            />
-                                            <Label
-                                                className="font-semibold text-md"
-                                                htmlFor="r1"
-                                            >
-                                                Bulk
-                                            </Label>
-                                        </div>
-                                        <div className="flex  space-x-2">
-                                            <RadioGroupItem
-                                                value="oneatatime"
-                                                id="r2"
-                                                className="text-[rgb(81,134,114)] border-black mt-1"
-                                            />
-                                            <Label
-                                                className="font-semibold text-md"
-                                                htmlFor="r2"
-                                            >
-                                                One At A Time
-                                            </Label>
-                                        </div>
-                                        <div className="flex space-x-2 pr-2">
-                                            <RadioGroupItem
-                                                value="AI"
-                                                id="r2"
-                                                className="text-[rgb(81,134,114)] border-black mt-1"
-                                            />
-                                            <Label
-                                                className="font-semibold text-lg"
-                                                htmlFor="r2"
-                                            >
-                                                Generate with AI
-                                            </Label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </RadioGroup>
-                            {renderComponent()}
-                        </div>
-                    </div>
-                </div>
-            )}
-            {!isMcqModalOpen && !isEditQuizModalOpen && (
+                                One At A Time
+                            </TabsTrigger>
+                            <TabsTrigger 
+                                value="bulk" 
+                                className="text-sm font-medium"
+                            >
+                                Bulk Upload
+                            </TabsTrigger>
+                            <TabsTrigger 
+                                value="ai" 
+                                className="text-sm font-medium"
+                            >
+                                Generate with AI
+                            </TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="oneatatime" className="mt-0">
+                            {renderTabContent('oneatatime')}
+                        </TabsContent>
+
+                        <TabsContent value="bulk" className="mt-0">
+                            {renderTabContent('bulk')}
+                        </TabsContent>
+
+                        <TabsContent value="ai" className="mt-0">
+                            {renderTabContent('ai')}
+                        </TabsContent>
+                    </Tabs>
+                </DialogContent>
+            </Dialog>
+
+            {/* Remove the old edit page logic and keep only the main content */}
+            {!isMcqModalOpen && (
                 <MaxWidthWrapper className="h-screen">
-                    <h1 className="text-left font-semibold text-2xl text-gray-600">
-                        Resource Library - MCQs
-                    </h1>
-                    <div className="flex justify-between">
-                        <div className="relative w-1/4">
-                            <SearchBox
-                                placeholder="Search for Question"
-                                fetchSuggestionsApi={fetchSuggestionsApi}
-                                fetchSearchResultsApi={fetchSearchResultsApi}
-                                defaultFetchApi={defaultFetchApi}
-                                getSuggestionLabel={(suggestion) => suggestion.question}
-                                getSuggestionValue={(suggestion) => suggestion.question}
-                                inputWidth="w-full my-6"
-                                onSearchChange={handleSearchChange}
-                            /> 
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 className="text-left font-heading font-bold text-3xl text-foreground">
+                                Content Bank - MCQ Questions
+                            </h1>
                         </div>
                         <div className="flex flex-row items-center gap-2">
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full mt-5">
+                                    <Button
+                                        variant={'outline'}
+                                        className="lg:max-w-[150px] w-full mt-5"
+                                    >
                                         <p>Create Topic</p>
                                     </Button>
                                 </DialogTrigger>
@@ -601,18 +575,31 @@ const Mcqs = (props: Props) => {
                                     handleCreateTopic={handleCreateTopic}
                                 />
                             </Dialog>
-                            <Button
-                                onClick={() =>
-                                    setIsMcqModalOpen((prevState) => !prevState)
-                                }
-                                className="mt-5 bg-success-dark opacity-75"
-                            >
-                                + Create MCQ
-                            </Button>
+                            <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button className="mt-5 bg-primary hover:bg-primary-dark shadow-4dp">
+                                        + Create MCQ
+                                    </Button>
+                                </DialogTrigger>
+                            </Dialog>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="w-full lg:w-[250px]">
+                 
+                    <div className="flex items-center gap-4 mb-6">
+                        <div>
+                            <SearchBox
+                                placeholder="Search for Question"
+                                fetchSuggestionsApi={fetchSuggestionsApi}
+                                fetchSearchResultsApi={fetchSearchResultsApi}
+                                defaultFetchApi={defaultFetchApi}
+                                getSuggestionLabel={(suggestion) => suggestion.question}
+                                getSuggestionValue={(suggestion) => suggestion.question}
+                                inputWidth="w-[350px]"
+                                onSearchChange={handleSearchChange}
+                            /> 
+                        </div>
+
+                        <div className="w-[180px] flex-shrink-0">
                             <MultiSelector
                                 selectedCount={difficultyCount}
                                 options={difficultyOptions}
@@ -625,7 +612,7 @@ const Mcqs = (props: Props) => {
                                 }
                             />
                         </div>
-                        <div className="w-full lg:w-[250px]">
+                        <div className="w-[180px] flex-shrink-0">
                             <MultiSelector
                                 selectedCount={selectedTagCount}
                                 options={options}
@@ -633,8 +620,9 @@ const Mcqs = (props: Props) => {
                                 handleOptionClick={handleTagOption}
                                 type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
                             />
-                        </div>
+                        </div>    
                     </div>
+                    
 
                     <DataTable
                         data={quizData}
@@ -654,4 +642,5 @@ const Mcqs = (props: Props) => {
         </>
     )
 }
+
 export default Mcqs

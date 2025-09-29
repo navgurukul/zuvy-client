@@ -12,6 +12,7 @@ import {
     getOpenEndedDifficulty,
     getOffset,
     getPosition,
+    getCodingQuestionTags,
 } from '@/store/store'
 import {
     deleteOpenEndedQuestion,
@@ -44,12 +45,38 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             const openEndedQuestion = row.original
 
             return (
-                <div className="flex items-center">
+                <div className="text-left text-md p-1 w-[550px] text-sm hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis">
                     {openEndedQuestion.question}
                 </div>
             )
         },
         enableSorting: false,
+        enableHiding: true,
+    },
+    {
+        accessorKey: 'tagId',
+        header: ({ column }) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Topic" 
+            />
+        ),
+        cell: ({ row }) => {
+            const openEndedQuestion = row.original
+            const { tags } = getCodingQuestionTags()
+            
+            // Find the topic name based on tagId
+            const topicName = tags.find(tag => tag.id === openEndedQuestion.tagId)?.tagName || 'Unknown Topic'
+
+            return (
+                <div className="flex items-center">
+                    <span className="text-sm font-medium text-start">
+                        {topicName}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
         enableHiding: true,
     },
     {
@@ -63,7 +90,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             return (
                 <div
                     className={cn(
-                        `flex items-center font-semibold text-secondary`,
+                        `flex items-center rounded-full border justify-center px-1`,
                         difficultyColor(openEndedQuestion.difficulty)
                     )}
                 >
@@ -78,7 +105,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         accessorKey: 'usage',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-center"
+                className="text-center w-22"
                 column={column}
                 title="Usage"
             />
@@ -86,7 +113,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
         cell: ({ row }: { row: any }) => {
             const usage = row.original.usage
 
-            return <div className="mr-7 font-semibold">{usage}</div>
+            return <div className="text-center font-semibold">{usage}</div>
         },
         enableSorting: false,
         enableHiding: true,
@@ -158,9 +185,9 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                             open={isOpenEndDialogOpen}
                         >
                             <DialogTrigger>
-                                <Pencil
+                                <Edit
                                     className="cursor-pointer mr-5"
-                                    size={20}
+                                    size={18}
                                     onClick={() => {
                                         handleEditOpenEndedQuestion(
                                             openEndedQuestion,
@@ -203,7 +230,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                                 )
                             }}
                             className="text-destructive cursor-pointer"
-                            size={20}
+                            size={18}
                         />
                         <DeleteConfirmationModal
                             isOpen={isDeleteModalOpen}
