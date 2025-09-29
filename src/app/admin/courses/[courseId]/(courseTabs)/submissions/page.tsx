@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowDownToLine, ChevronRight, FileText, CheckSquare, Code, MessageSquare, ClipboardCheck, BookOpen, Play } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, FileText, CheckSquare, Code, MessageSquare, ClipboardCheck, BookOpen, Play, Video } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import Link from 'next/link'
@@ -13,6 +13,7 @@ import FormComponent from '../../_components/FormComponent'
 import Assignments from './components/assignments'
 import AssesmentSubmissionComponent from './components/AssesmentSubmission'
 import PraticeProblemsComponent from './components/PraticeProblemsComponent'
+import LiveClassSubmission from './components/LiveClassSubmission'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import VideoSubmission from './components/VideoSubmission'
@@ -30,6 +31,7 @@ interface SearchSuggestion {
     | 'form'
     | 'assignments'
     | 'video'
+    | 'live'
 }
 
 // Define submission types with icons
@@ -40,7 +42,8 @@ const submissionTypes = [
     { id: 'projects', label: 'Projects', icon: BookOpen },
     { id: 'form', label: 'Feedback Forms', icon: MessageSquare },
     { id: 'practice', label: 'Practice Problems', icon: Code },
-    { id: 'video', label: 'Videos', icon: Play },
+    { id: 'video', label: 'Videos', icon: Video },
+    { id: 'live', label: 'Live Classes', icon: Play },
 ]
 
 const Page = ({ params }: { params: any }) => {
@@ -54,6 +57,7 @@ const Page = ({ params }: { params: any }) => {
     const [totalStudents, setTotalStudents] = useState(0)
     const [bootcampModules, setBootcampModules] = useState<any[]>([])
     const [formData, setFormData] = useState<any[]>([])
+    const [liveClassData, setLiveClassData] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [appliedSearchQuery, setAppliedSearchQuery] = useState(searchParams.get('search') || '')
 
@@ -224,6 +228,32 @@ const Page = ({ params }: { params: any }) => {
                     console.error('Error fetching videos for suggestions:', error)
                 }
                 break
+            
+            case 'live':
+                try {
+                    const liveRes = await api.get(
+                        `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}?searchLiveClass=${encodeURIComponent(searchTerm)}`
+                    )
+                    if (liveRes.data) {
+                        Object.values(liveRes.data).forEach((liveClassGroup: any) => {
+                            if (Array.isArray(liveClassGroup)) {
+                                liveClassGroup.forEach((liveClass: any) => {
+                                    const title = liveClass.title || ''
+                                    if (title.toLowerCase().includes(term)) {
+                                        newSuggestions.push({
+                                            id: liveClass.id,
+                                            title: title,
+                                            type: 'live',
+                                        })
+                                    }
+                                })
+                            }
+                        })
+                    }
+                } catch (error) {
+                    console.error('Error fetching live classes for suggestions:', error)
+                }
+                break
         }
 
         // Limit suggestions to 8 items and remove duplicates
@@ -332,11 +362,28 @@ const Page = ({ params }: { params: any }) => {
             })
         }
     }, [params.courseId, appliedSearchQuery, activeTab])
+
+    const getLiveClassData = useCallback(async () => {
+    try {
+        let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}`
+        if (appliedSearchQuery && activeTab === 'live') {
+            url += `&searchLiveClass=${encodeURIComponent(appliedSearchQuery)}`
+        }
+
+        const res = await api.get(url)
+        const trackingData = res.data?.data?.trackingData || []
+        setLiveClassData(trackingData)
+        setTotalStudents(res.data?.data?.totalStudents || 0)
+    } catch (error) {
+        setLiveClassData([])
+        setTotalStudents(0)
+    }
+}, [params.courseId, appliedSearchQuery, activeTab])
     useEffect(() => {
         if (!params.courseId) return
         if (activeTab === 'projects') getProjectsData()
         if (activeTab === 'form') getFormData()
-    }, [params.courseId, activeTab, getProjectsData, getFormData])
+    }, [params.courseId, activeTab, getProjectsData, getFormData, getLiveClassData])
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -628,6 +675,12 @@ const Page = ({ params }: { params: any }) => {
                                             debouncedSearch={appliedSearchQuery}
                                             courseId={params.courseId}
                                         />
+                                    )}
+                                    {activeTab === 'live' && (
+                                      <LiveClassSubmission
+                                         debouncedSearch={appliedSearchQuery}
+                                         courseId={params.courseId}
+                                       />
                                     )}
                                 </div>
                             </TabsContent>
