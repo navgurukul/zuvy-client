@@ -31,7 +31,7 @@ export default function RootLayout({
         return ''
     }
 
-    console.log('adminAssessmentPreviewRoute', adminAssessmentPreviewRoute)
+    // console.log('adminAssessmentPreviewRoute', adminAssessmentPreviewRoute)
 
     return (
         <div className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
@@ -57,6 +57,8 @@ export default function RootLayout({
                 //         )}
                 //     </div>
                 // </AdminNavbar>
+
+                
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
