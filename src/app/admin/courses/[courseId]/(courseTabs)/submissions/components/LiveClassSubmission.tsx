@@ -27,7 +27,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
             setLoading(true)
             let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${courseId}`
             if (debouncedSearch) {
-                url += `&searchLiveClass=${encodeURIComponent(debouncedSearch)}`
+                url += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
             }
 
             const res = await api.get(url)
@@ -52,7 +52,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
         if (courseId) {
             getLiveClassData()
         }
-    }, [courseId, getLiveClassData])
+    }, [courseId, debouncedSearch, getLiveClassData])
 
     const handleDownloadPdf = async (liveClassId: string, liveClassTitle: string) => {
         try {
