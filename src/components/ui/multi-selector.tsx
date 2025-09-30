@@ -63,7 +63,7 @@ export default function MultiSelector({
         <>
             <Popover>
                 <PopoverTrigger asChild>
-                    <button className="flex w-full items-center text-lg justify-between rounded-md border border-border px-4 py-1 mt-2 text-left focus:outline-none">
+                    <button className="flex w-full items-center text-sm justify-between rounded-md border border-border px-4 py-2 mt-2 text-left focus:outline-none">
                         <span className="truncate text-foreground">
                             {selectedCount > 0
                                 ? selectedCount === 1
@@ -77,7 +77,7 @@ export default function MultiSelector({
                     </button>
                 </PopoverTrigger>
                 <PopoverContent
-                    className={`w-full lg:w-[180px] p-2 shadow-4bp`}
+                    className={`w-full lg:w-[180px] p-2 shadow-4bp text-sm`}
                 >
                     {type === 'Topic' || type === 'Topics' ? (
                         <ScrollArea
