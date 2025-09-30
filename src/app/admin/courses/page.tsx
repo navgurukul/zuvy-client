@@ -54,7 +54,7 @@ import {
     useCalendarAccessAction,
     useCalendarAccessCheck,
 } from '@/hooks/useCalendarAccess'
-import PermissionsComponent from './[courseId]/permissions/coursePermission'
+import {PermissionsComponent} from './[courseId]/permissions/coursePermission'
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },

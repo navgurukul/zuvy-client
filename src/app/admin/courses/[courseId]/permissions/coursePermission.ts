@@ -9,7 +9,7 @@ interface PermissionsComponentProps {
   permissions: coursePermissions;
 }
 
-const PermissionsComponent: React.FC<PermissionsComponentProps> = ({ permissions }) => {
+ export const PermissionsComponent: React.FC<PermissionsComponentProps> = ({ permissions }) => {
   const router = useRouter();
 
   useEffect(() => {
@@ -29,4 +29,4 @@ const PermissionsComponent: React.FC<PermissionsComponentProps> = ({ permissions
   return null;
 };
 
-export default PermissionsComponent;
+
