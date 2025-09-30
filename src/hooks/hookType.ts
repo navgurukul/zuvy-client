@@ -693,3 +693,11 @@ export interface UseBootcampDeleteReturn {
     error: string | null
 }
 
+export interface coursePermissions {
+  createCourse: boolean;
+  viewCourse: boolean;
+  editCourse: boolean;
+  deleteCourse: boolean;
+  viewContent: boolean;
+  viewRolesAndPermissions: boolean;
+};

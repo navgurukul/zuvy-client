@@ -1,3 +1,4 @@
+import { coursePermissions } from "@/hooks/hookType";
 import { ReactNode } from "react";
 
 export interface PageParams{
@@ -95,4 +96,5 @@ export interface CoursesResponse {
   data: Course[];
   totalBootcamps: number;
   totalPages: number;
+  permissions: coursePermissions
 }
