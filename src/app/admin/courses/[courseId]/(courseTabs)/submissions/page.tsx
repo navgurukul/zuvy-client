@@ -232,12 +232,12 @@ const Page = ({ params }: { params: any }) => {
             case 'live':
                 try {
                     const liveRes = await api.get(
-                        `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}?searchLiveClass=${encodeURIComponent(searchTerm)}`
+                        `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}&searchTerm=${encodeURIComponent(searchTerm)}`
                     )
-                    if (liveRes.data) {
-                        Object.values(liveRes.data).forEach((liveClassGroup: any) => {
-                            if (Array.isArray(liveClassGroup)) {
-                                liveClassGroup.forEach((liveClass: any) => {
+                    if (liveRes.data?.data?.trackingData) {
+                        liveRes.data.data.trackingData.forEach((module: any) => {
+                            if (module.moduleChapterData && Array.isArray(module.moduleChapterData)) {
+                                module.moduleChapterData.forEach((liveClass: any) => {
                                     const title = liveClass.title || ''
                                     if (title.toLowerCase().includes(term)) {
                                         newSuggestions.push({
@@ -364,26 +364,28 @@ const Page = ({ params }: { params: any }) => {
     }, [params.courseId, appliedSearchQuery, activeTab])
 
     const getLiveClassData = useCallback(async () => {
-    try {
-        let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}`
-        if (appliedSearchQuery && activeTab === 'live') {
-            url += `&searchLiveClass=${encodeURIComponent(appliedSearchQuery)}`
-        }
+        try {
+            let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${params.courseId}`
+            if (appliedSearchQuery && activeTab === 'live') {
+                url += `&searchTerm=${encodeURIComponent(appliedSearchQuery)}`
+            }
 
-        const res = await api.get(url)
-        const trackingData = res.data?.data?.trackingData || []
-        setLiveClassData(trackingData)
-        setTotalStudents(res.data?.data?.totalStudents || 0)
-    } catch (error) {
-        setLiveClassData([])
-        setTotalStudents(0)
-    }
-}, [params.courseId, appliedSearchQuery, activeTab])
+            const res = await api.get(url)
+            const trackingData = res.data?.data?.trackingData || []
+            setLiveClassData(trackingData)
+            setTotalStudents(res.data?.data?.totalStudents || 0)
+        } catch (error) {
+            setLiveClassData([])
+            setTotalStudents(0)
+        }
+    }, [params.courseId, appliedSearchQuery, activeTab])
+
     useEffect(() => {
         if (!params.courseId) return
         if (activeTab === 'projects') getProjectsData()
         if (activeTab === 'form') getFormData()
-    }, [params.courseId, activeTab, getProjectsData, getFormData, getLiveClassData])
+        if (activeTab === 'live') getLiveClassData()
+    }, [params.courseId, activeTab, appliedSearchQuery, getProjectsData, getFormData, getLiveClassData])
 
     useEffect(() => {
         const timer = setTimeout(() => {
