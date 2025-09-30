@@ -43,8 +43,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 </span>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
     {
         accessorKey: 'tagId',
@@ -70,7 +69,6 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             )
         },
         enableSorting: true,
-        enableHiding: true,
     },
     {
         accessorKey: 'difficulty',
@@ -97,8 +95,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                 </div>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
     {
         accessorKey: 'usage',
@@ -121,7 +118,6 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             )
         },
         enableSorting: true,
-        enableHiding: true,
     },
     {
         accessorKey: 'createdAt',
@@ -151,7 +147,6 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             )
         },
         enableSorting: true,
-        enableHiding: true,
     },
     {
         id: 'actions1',

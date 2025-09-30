@@ -71,8 +71,7 @@ export const columns: ColumnDef<quiz>[] = [
                 />
             )
         },
-        enableSorting: false,
-        enableHiding: false,
+        enableSorting: true,
     },
 
     {
@@ -101,8 +100,7 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
     {
         accessorKey: 'tagId',
@@ -129,7 +127,6 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: true,
-        enableHiding: true,
     },
     {
         accessorKey: 'difficulty',
@@ -153,8 +150,7 @@ export const columns: ColumnDef<quiz>[] = [
                 </p>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
     {
         accessorKey: 'usage',
@@ -173,8 +169,7 @@ export const columns: ColumnDef<quiz>[] = [
                 </p>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
     {
         accessorKey: 'createdAt',
@@ -204,7 +199,6 @@ export const columns: ColumnDef<quiz>[] = [
             )
         },
         enableSorting: true,
-        enableHiding: true,
     },
     {
         id: 'actions1',
@@ -239,7 +233,6 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
-        enableHiding: true,
     },
 
     {
@@ -275,7 +268,6 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
-        enableHiding: true,
     },
     {
         id: 'actions3',
@@ -339,6 +331,5 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
-        enableHiding: true,
     },
 ]

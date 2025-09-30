@@ -376,7 +376,7 @@ const OpenEndedQuestions = (props: Props) => {
                             <div className="flex items-center justify-between mb-6">
                                 <div>
                                     <h1 className="text-left font-heading font-bold text-3xl text-foreground">
-                                        Content Bank - Open-Ended-Questions
+                                        Content Bank - Open-Ended Questions
                                     </h1>
                                 </div>
                                 

@@ -399,12 +399,12 @@ const Mcqs = (props: Props) => {
     )
 
     // Effect to fetch data when filters change
-    // useEffect(() => {
-    //     if (options.length > 0) {
-    //         const searchFilter = searchParams.get('search') || ''
-    //         fetchCodingQuestions(offset, searchFilter)
-    //     }
-    // }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions])
+    useEffect(() => {
+        if (options.length > 0) {
+            const searchFilter = searchParams.get('search') || ''
+            fetchCodingQuestions(offset, searchFilter)
+        }
+    }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions])
 
     const handleNewTopicChange = (
         event: React.ChangeEvent<HTMLInputElement>
