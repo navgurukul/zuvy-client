@@ -1,4 +1,3 @@
-
 'use client'
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { ChevronLeft, Search, X } from 'lucide-react'
@@ -51,7 +50,7 @@ import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ROWS_PER_PAGE } from '@/utils/constant'
-import {Tag,SearchSuggestion,Option} from "@/app/admin/resource/coding/adminResourceCodinType"
+import { Tag, SearchSuggestion, Option } from "@/app/admin/resource/coding/adminResourceCodinType"
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
 
@@ -89,6 +88,8 @@ const CodingProblems = () => {
     const [urlInitialized, setUrlInitialized] = useState(false)
     const [isSearchActive, setIsSearchActive] = useState(false)
     const [lastSearchQuery, setLastSearchQuery] = useState('')
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    // const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
     // Custom hook for search with suggestions
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -117,7 +118,7 @@ const CodingProblems = () => {
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setIsSearchActive(!!query)
         setLastSearchQuery(query)
-        
+
         await filteredCodingQuestions(
             setCodingQuestions,
             offset,
@@ -136,7 +137,7 @@ const CodingProblems = () => {
     const defaultFetchApi = useCallback(async () => {
         setIsSearchActive(false)
         setLastSearchQuery('')
-        
+
         await filteredCodingQuestions(
             setCodingQuestions,
             offset,
@@ -252,29 +253,29 @@ const CodingProblems = () => {
         current: Option[],
         setFn: (opts: Option[]) => void,
         allValue: string
-      ) => {
+    ) => {
         if (option.value === allValue) {
-          setFn([option])
-        } else {
-          if (current.some(item => item.value === allValue)) {
             setFn([option])
-          } else if (current.some(item => item.value === option.value)) {
-            setFn(current.filter(item => item.value !== option.value))
-          } else {
-            setFn([...current, option])
-          }
+        } else {
+            if (current.some(item => item.value === allValue)) {
+                setFn([option])
+            } else if (current.some(item => item.value === option.value)) {
+                setFn(current.filter(item => item.value !== option.value))
+            } else {
+                setFn([...current, option])
+            }
         }
-      }
-      
-      // usage:
-      const handleTagOption = (opt: Option) => toggleOption(opt, selectedOptions, setSelectedOptions, '-1')
-      const handleDifficulty = (opt: Option) => toggleOption(opt, difficulty, setDifficulty, 'None')
+    }
+
+    // usage:
+    const handleTagOption = (opt: Option) => toggleOption(opt, selectedOptions, setSelectedOptions, '-1')
+    const handleDifficulty = (opt: Option) => toggleOption(opt, difficulty, setDifficulty, 'None')
 
     const fetchCodingQuestions = useCallback(
         async (offset: number) => {
             // Don't fetch if search is active
             if (isSearchActive) return
-            
+
             try {
                 await filteredCodingQuestions(
                     setCodingQuestions,
@@ -324,13 +325,13 @@ const CodingProblems = () => {
         if (!urlInitialized) return
 
         const params = new URLSearchParams(window.location.search)
-        
+
         // Preserve existing URL parameters that are not handled by other effects
         const currentParams = new URLSearchParams(window.location.search)
-        
+
         // Keep pagination related parameters (limit, page, offset etc.) that might be set by DataTablePagination
         currentParams.forEach((value, key) => {
-            if (!['search','topics', 'difficulty'].includes(key)) {
+            if (!['search', 'topics', 'difficulty'].includes(key)) {
                 params.set(key, value)
             }
         })
@@ -375,39 +376,22 @@ const CodingProblems = () => {
                 <div className="flex justify-center items-center h-screen">
                     <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
-            ) : isCodingEditDialogOpen ? (
-                <EditCodingQuestionForm />
             ) : (
                 <div>
                     {allCodingQuestions.length > 0 && !isCodingDialogOpen ? (
                         <MaxWidthWrapper>
-                            <h1 className="text-left font-semibold text-2xl text-gray-600">
-                                Resource Library - Coding Problems
-                            </h1>
-
-                            <div className="flex justify-between">
-                                <div className="relative w-full">
-                                    <div className="relative w-1/4">
-                                        <SearchBox
-                                            placeholder="Search Question"
-                                            fetchSuggestionsApi={fetchSuggestionsApi}
-                                            fetchSearchResultsApi={fetchSearchResultsApi}
-                                            defaultFetchApi={defaultFetchApi}
-                                            getSuggestionLabel={(suggestion) => (
-                                                <div>
-                                                    <div className="font-medium">{suggestion.title}</div>
-                                                </div>
-                                            )}
-                                            getSuggestionValue={(suggestion) => suggestion.title}
-                                            inputWidth="w-full  my-6 "
-                                        />
-                                    </div>
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <h1 className="text-left font-heading font-bold text-3xl text-foreground">
+                                        Content Bank - Coding Problems
+                                    </h1>
                                 </div>
-
                                 <div className="flex flex-row items-center gap-2">
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full">
+                                            <Button
+                                                variant="outline"
+                                                className="lg:max-w-[150px] w-full shadow-4dp">
                                                 <p>Create Topic</p>
                                             </Button>
                                         </DialogTrigger>
@@ -433,18 +417,52 @@ const CodingProblems = () => {
                                         />
                                     </Dialog>
 
-                                    <Button className='bg-success-dark opacity-75'
-                                        onClick={() =>
-                                            setIsCodingDialogOpen(true)
-                                        }
-                                    >
-                                        + Create Problems
-                                    </Button>
+                                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button className='bg-primary hover:bg-primary-dark shadow-4dp'>
+                                                + Create Problems
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                            <DialogHeader>
+                                                <DialogTitle>Create New Coding Problem</DialogTitle>
+                                            </DialogHeader>
+                                            <NewCodingProblemForm
+                                                tags={tags}
+                                                setIsDialogOpen={setIsDialogOpen}
+                                                filteredCodingQuestions={filteredCodingQuestions}
+                                                setCodingQuestions={setCodingQuestions}
+                                                selectedOptions={selectedOptions}
+                                                difficulty={difficulty}
+                                                offset={offset}
+                                                position={position}
+                                            />
+                                        </DialogContent>
+                                    </Dialog>
+
+
+
                                 </div>
                             </div>
 
                             <div className="flex items-center gap-4 mb-6">
-                                <div className="w-full lg:w-[250px]">
+                                <div>
+                                    <SearchBox
+                                        placeholder="Search..."
+                                        fetchSuggestionsApi={fetchSuggestionsApi}
+                                        fetchSearchResultsApi={fetchSearchResultsApi}
+                                        defaultFetchApi={defaultFetchApi}
+                                        getSuggestionLabel={(suggestion) => (
+                                            <div>
+                                                <div className="font-medium">{suggestion.title}</div>
+                                            </div>
+                                        )}
+                                        getSuggestionValue={(suggestion) => suggestion.title}
+                                        inputWidth="w-[350px]"
+                                    />
+                                </div>
+
+                                <div className="w-[180px] flex-shrink-0">
                                     <MultiSelector
                                         selectedCount={difficulty.filter(d => d.value !== 'None').length}
                                         options={difficultyOptions}
@@ -453,7 +471,8 @@ const CodingProblems = () => {
                                         type="Difficulty"
                                     />
                                 </div>
-                                <div className="w-full lg:w-[250px]">
+
+                                <div className="w-[180px] flex-shrink-0">
                                     <MultiSelector
                                         selectedCount={selectedOptions.filter(o => o.value !== '-1').length}
                                         options={options}
@@ -476,7 +495,7 @@ const CodingProblems = () => {
                                 !isCodingEditDialogOpen &&
                                 codingQuestions.length === 0 && (
                                     <>
-                                        <h1 className="text-left font-semibold text-2xl text-gray-600">
+                                        <h1 className="text-left font-semibold text-2xl text-foreground">
                                             Resource Library - Coding Problems
                                         </h1>
                                         <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
@@ -492,35 +511,51 @@ const CodingProblems = () => {
                                                 No coding problems have been created
                                                 yet. Start by adding the first one
                                             </h2>
-                                            <Button
-                                                className="bg-success-dark opacity-75"
-                                                onClick={() =>
-                                                    setIsCodingDialogOpen(true)
-                                                }
-                                            >
-                                                + Create Problems
-                                            </Button>
+
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button className='bg-primary hover:bg-primary-dark shadow-4dp'>
+                                                        + Create Problems
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Create New Coding Problem</DialogTitle>
+                                                    </DialogHeader>
+                                                    <NewCodingProblemForm
+                                                        tags={tags}
+                                                        setIsDialogOpen={(open: boolean) => {
+                                                            // Dialog will close automatically when open is false
+                                                            if (!open) {
+                                                                // Refresh the data after creating
+                                                                fetchCodingQuestions(offset)
+                                                            }
+                                                        }}
+                                                        filteredCodingQuestions={filteredCodingQuestions}
+                                                        setCodingQuestions={setCodingQuestions}
+                                                        selectedOptions={selectedOptions}
+                                                        difficulty={difficulty}
+                                                        offset={offset}
+                                                        position={position}
+                                                    />
+                                                </DialogContent>
+                                            </Dialog>
+
                                         </MaxWidthWrapper>
                                     </>
                                 )}
-
-                            {isCodingDialogOpen && !isCodingEditDialogOpen && (
-                                <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
-                                    <div onClick={() => setIsCodingDialogOpen(false)}
-                                        className="text-[rgb(81,134,114)] cursor-pointer self-start flex">
-                                        {' '}
-                                        <ChevronLeft /> Coding Problems
-                                    </div>
-                                    <NewCodingProblemForm
-                                        tags={tags}
-                                        setIsDialogOpen={setIsCodingDialogOpen}
-                                        filteredCodingQuestions={filteredCodingQuestions}
-                                        setCodingQuestions={setCodingQuestions}
-                                    />
-                                </MaxWidthWrapper>
-                            )}
                         </>
                     )}
+
+                    {/* Edit Dialog */}
+                    <Dialog open={isCodingEditDialogOpen} onOpenChange={setIsCodingEditDialogOpen}>
+                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle>Edit Coding Problem</DialogTitle>
+                            </DialogHeader>
+                            <EditCodingQuestionForm />
+                        </DialogContent>
+                    </Dialog>
 
                     {!isCodingDialogOpen && !isCodingEditDialogOpen && (
                         <DataTablePagination

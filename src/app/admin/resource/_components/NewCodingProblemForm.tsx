@@ -23,12 +23,14 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs' // Add this import
 import { Plus, PlusCircleIcon, X } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
-import {NewCodingProblemFormProps} from "@/app/admin/resource/_components/adminResourceComponentType"
+import { NewCodingProblemFormProps } from "@/app/admin/resource/_components/adminResourceComponentType"
+import { useCreateCodingQuestion } from '@/hooks/useCreateCodingQuestion'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -82,7 +84,10 @@ export default function NewCodingProblemForm({
     difficulty,
     offset,
     position,
-}:NewCodingProblemFormProps) {
+}: NewCodingProblemFormProps) {
+    // Custom hook
+    const { createQuestion, loading, error } = useCreateCodingQuestion()
+
     const [testCases, setTestCases] = useState([
         {
             id: 1,
@@ -92,13 +97,14 @@ export default function NewCodingProblemForm({
     ])
 
     const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false);
+    const [activeTab, setActiveTab] = useState("details")
 
     let outputObjectRef = useRef('' as any);
 
     function formatFloat(num: string | number): string | number {
-    const parsed = parseFloat(num as string);
-    return parsed % 1 === 0 ? parsed.toFixed(1) : parsed;
-}
+        const parsed = parseFloat(num as string);
+        return parsed % 1 === 0 ? parsed.toFixed(1) : parsed;
+    }
 
 
     const getAvailableInputTypes = (testCaseIndex: number) => {
@@ -411,9 +417,9 @@ export default function NewCodingProblemForm({
         return true;
     };
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
 
-      let hasErrors =  showSyntaxErrors(testCases);
+        let hasErrors = showSyntaxErrors(testCases);
 
         // If there are validation errors, return early and don't submit
         if (hasErrors) {
@@ -552,332 +558,368 @@ export default function NewCodingProblemForm({
             return;
         }
 
-        createCodingQuestion(formattedData);
-        filteredCodingQuestions(
-            setCodingQuestions,
-            offset,
-            position,
-            difficulty,
-            selectedOptions
-        );
-    }
+        // Use hook instead of direct API call
+        const success = await createQuestion(formattedData);
 
-    async function createCodingQuestion(data: any) {
-        try {
-            const response = await api.post(`codingPlatform/create-question`, data)
+        if (success) {
+            // Reset form only on success
+            form.reset({
+                title: '',
+                problemStatement: '',
+                constraints: '',
+                difficulty: 'Easy',
+                topics: 0,
+                testCases: [],
+            });
 
-            toast.success({
-                title: 'Success',
-                description: 'Question Created Successfully',
-            })
-            setIsDialogOpen(false)
-        } catch (error: any) {
-            toast.error({
-                title: 'Error',
-                description: error?.response?.data?.message || 'An error occurred',
-            })
+            setTestCases([{
+                id: 1,
+                inputs: [{ id: Date.now(), type: 'int', value: '' }],
+                output: { type: 'int', value: '' }
+            }]);
+
+            setIsDialogOpen(false);
+
+            // Refresh data
+            await filteredCodingQuestions(
+                setCodingQuestions,
+                offset,
+                position,
+                difficulty,
+                selectedOptions,
+                '',
+                ''
+            );
         }
     }
 
 
     return (
-        <main className="flex flex-col p-3 w-full items-center text-gray-600">
+        <main className="flex flex-col p-3 w-full h-[600px] items-center text-foreground">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(handleSubmit)}
-                    className="w-2/4 flex flex-col gap-4"
+                    className="w-full flex flex-col gap-4"
                 >
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                            <FormItem className="text-left">
-                                <FormLabel>Title</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Title" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="details">Details</TabsTrigger>
+                            <TabsTrigger value="testcases">Test Cases</TabsTrigger>
+                        </TabsList>
 
-                    <FormField
-                        control={form.control}
-                        name="problemStatement"
-                        render={({ field }) => (
-                            <FormItem className="text-left">
-                                <FormLabel>Problem Statement</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Write the Detailed Description Here"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                        {/* Details Tab */}
+                        <TabsContent value="details" className="space-y-4 mt-6">
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem className="text-left">
+                                        <FormLabel>Title</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Title" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                    <FormField
-                        control={form.control}
-                        name="constraints"
-                        render={({ field }) => (
-                            <FormItem className="text-left">
-                                <FormLabel>Constraints</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Write the Constraints Here"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                            <FormField
+                                control={form.control}
+                                name="problemStatement"
+                                render={({ field }) => (
+                                    <FormItem className="text-left">
+                                        <FormLabel>Problem Statement</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Write the Detailed Description Here"
+                                                className="min-h-[120px]"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                    <FormField
-                        control={form.control}
-                        name="difficulty"
-                        render={({ field }) => (
-                            <FormItem className="space-y-3 text-left">
-                                <FormLabel>Difficulty</FormLabel>
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                        className="flex space-y-1"
-                                    >
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Easy" className="text-black border-black" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Easy
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Medium" className="text-black border-black" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Medium
-                                            </FormLabel>
-                                        </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
-                                            <FormControl>
-                                                <RadioGroupItem value="Hard" className="text-black border-black" />
-                                            </FormControl>
-                                            <FormLabel className="font-normal">
-                                                Hard
-                                            </FormLabel>
-                                        </FormItem>
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                            <FormField
+                                control={form.control}
+                                name="constraints"
+                                render={({ field }) => (
+                                    <FormItem className="text-left">
+                                        <FormLabel>Constraints</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder="Write the Constraints Here"
+                                                className="min-h-[100px]"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                    <FormField
-                        control={form.control}
-                        name="topics"
-                        render={({ field }) => (
-                            <FormItem className="text-left w-full">
-                                <FormLabel>Topics</FormLabel>
-                                <Select
-                                    onValueChange={(value) => {
-                                        const selectedTag = tags.find(
-                                            (tag: any) => tag?.tagName === value
-                                        )
-                                        if (selectedTag) {
-                                            field.onChange(selectedTag.id)
-                                        }
-                                    }}
-                                >
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Choose Topic" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {tags.map((tag: any) => (
-                                            <SelectItem
-                                                key={tag.id}
-                                                value={tag?.tagName}
+                            <FormField
+                                control={form.control}
+                                name="difficulty"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-3 text-left">
+                                        <FormLabel>Difficulty</FormLabel>
+                                        <FormControl>
+                                            <RadioGroup
+                                                onValueChange={field.onChange}
+                                                defaultValue={field.value}
+                                                className="flex space-y-1"
                                             >
-                                                {tag?.tagName}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="Easy" className="text-primary border-primary" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Easy
+                                                    </FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="Medium" className="text-primary border-primary" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Medium
+                                                    </FormLabel>
+                                                </FormItem>
+                                                <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
+                                                    <FormControl>
+                                                        <RadioGroupItem value="Hard" className="text-primary border-primary" />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                        Hard
+                                                    </FormLabel>
+                                                </FormItem>
+                                            </RadioGroup>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                    <div className="text-left">
-                        <FormLabel className=''>Test Cases</FormLabel>
-                        {testCases.map((testCase, testCaseIndex) => (
-                            <div key={testCase.id} className="my-4 p-3 border rounded border-green-100 bg-green-50">
-                                {/* Input Section */}
-                                <div className="mb-4">
-                                    <h2 className='text-sm font-semibold mb-2'>Input</h2>
-                                    <div className="space-y-2">
-                                        {testCase.inputs.map((input, inputIndex) => (
-                                            <div key={input.id} className="flex items-center gap-2">
-                                                <InputTypeSelect
-                                                    testCaseIndex={testCaseIndex}
-                                                    inputIndex={inputIndex}
-                                                    currentType={input.type}
-                                                />
-
-                                                <Input
-                                                    placeholder={getPlaceholder(input.type)}
-                                                    value={input.value}
-                                                    onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
-                                                    className={input.type === 'jsonType' ? 'hidden' : ''} // Hide regular input for JSON type
-                                                />
-                                                {input.type === 'jsonType' && (
-                                                    <Textarea
-                                                        required
-                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
-                                                        value={input.value}
-                                                        onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
-                                                        className="mt-2 overflow-auto"
-                                                    />
-                                                )}
-
-                                                {testCase.inputs.length > 1 && testCaseIndex === 0 && (
-                                                    <X
-                                                        className="cursor-pointer"
-                                                        onClick={() => {
-                                                            if (testCaseIndex === 0) {
-                                                                const newTestCases = testCases.map(tc => ({
-                                                                    ...tc,
-                                                                    inputs: tc.inputs.filter((_, idx) => idx !== inputIndex)
-                                                                }));
-                                                                setTestCases(newTestCases);
-                                                            } else {
-                                                                handleRemoveInput(testCase.id, input.id);
-                                                            }
-                                                        }}
-                                                    />
-                                                )}
-                                            </div>
-                                        ))}
-                                        {testCaseIndex === 0 && (
-                                            <Button
-                                                type="button"
-                                                onClick={() => handleAddInputType(testCase.id)}
-                                                className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
-                                                disabled={testCase.inputs.length >= inputTypes.length}
-                                            >
-                                                <Plus size={16} className="mr-2" />
-                                                Add Input
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Output Section */}
-                                <div>
-                                    <h2 className='text-sm font-semibold mb-2'>Output</h2>
-                                    <div className="flex items-center gap-2">
+                            <FormField
+                                control={form.control}
+                                name="topics"
+                                render={({ field }) => (
+                                    <FormItem className="text-left w-full">
+                                        <FormLabel>Topics</FormLabel>
                                         <Select
-                                            value={testCase.output.type}
-                                            onValueChange={(newType) => {
-                                                if (testCaseIndex === 0) {
-                                                    const newTestCases = testCases.map(tc => ({
-                                                        ...tc,
-                                                        output: { ...tc.output, type: newType, value: '' }
-                                                    }));
-                                                    setTestCases(newTestCases);
+                                            onValueChange={(value) => {
+                                                const selectedTag = tags.find(
+                                                    (tag: any) => tag?.tagName === value
+                                                )
+                                                if (selectedTag) {
+                                                    field.onChange(selectedTag.id)
                                                 }
                                             }}
-                                            disabled={testCaseIndex !== 0}
                                         >
-                                            <SelectTrigger className="w-[180px]">
-                                                <SelectValue placeholder="Output Type" />
-                                            </SelectTrigger>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Choose Topic" />
+                                                </SelectTrigger>
+                                            </FormControl>
                                             <SelectContent>
-                                                {outputTypes.map(type => (
-                                                    <SelectItem key={type} value={type}>
-                                                        {type}
+                                                {tags.map((tag: any) => (
+                                                    <SelectItem
+                                                        key={tag.id}
+                                                        value={tag?.tagName}
+                                                    >
+                                                        {tag?.tagName}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                                        {testCase.output.type === 'jsonType' ? (
-                                            <Textarea
-                                                required
-                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
-                                                value={testCase.output.value}
-                                                onChange={(e) => {
-                                                    const newValue = e.target.value;
-                                                    if (!validateFieldValue(newValue, testCase.output.type)) {
-                                                        return;
-                                                    }
-                                                    const newTestCases = [...testCases];
-                                                    newTestCases[testCaseIndex].output.value = newValue;
-                                                    setTestCases(newTestCases);
-                                                }}
-                                                className="flex-grow overflow-auto"
-                                            />
-                                        ) : (
-                                            <Input
-                                                placeholder={getPlaceholder(testCase.output.type)}
-                                                value={testCase.output.value}
-                                                onChange={(e) => {
-                                                    const newValue = e.target.value;
-                                                    // First check if it's a single value type (int, float, str)
-                                                    if (['int', 'float', 'str'].includes(testCase.output.type)) {
-                                                        if (!validateOutputValue(newValue, testCase.output.type)) {
-                                                            return;
+                        </TabsContent>
+
+                        {/* Test Cases Tab */}
+                        <TabsContent value="testcases" className="space-y-4 mt-6">
+                            <div className="text-left">
+                                {testCases.map((testCase, testCaseIndex) => (
+                                    <div key={testCase.id} className="my-4 p-4 border rounded-lg border-green-100 bg-green-50">
+                                        <h3 className="text-lg font-semibold mb-3 text-foreground">
+                                            Test Case {testCaseIndex + 1}
+                                        </h3>
+                                        
+                                        {/* Input Section */}
+                                        <div className="mb-4">
+                                            <h4 className='text-sm font-semibold mb-2'>Input</h4>
+                                            <div className="space-y-2">
+                                                {testCase.inputs.map((input, inputIndex) => (
+                                                    <div key={input.id} className="flex items-center gap-2">
+                                                        <InputTypeSelect
+                                                            testCaseIndex={testCaseIndex}
+                                                            inputIndex={inputIndex}
+                                                            currentType={input.type}
+                                                        />
+
+                                                        <Input
+                                                            placeholder={getPlaceholder(input.type)}
+                                                            value={input.value}
+                                                            onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
+                                                            className={input.type === 'jsonType' ? 'hidden' : ''} 
+                                                        />
+                                                        {input.type === 'jsonType' && (
+                                                            <Textarea
+                                                                required
+                                                                placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                                value={input.value}
+                                                                onChange={(e) => handleInputChange(e, testCaseIndex, inputIndex, testCases, setTestCases)}
+                                                                className="mt-2 overflow-auto"
+                                                            />
+                                                        )}
+
+                                                        {testCase.inputs.length > 1 && testCaseIndex === 0 && (
+                                                            <X
+                                                                className="cursor-pointer text-red-500 hover:text-red-700"
+                                                                onClick={() => {
+                                                                    if (testCaseIndex === 0) {
+                                                                        const newTestCases = testCases.map(tc => ({
+                                                                            ...tc,
+                                                                            inputs: tc.inputs.filter((_, idx) => idx !== inputIndex)
+                                                                        }));
+                                                                        setTestCases(newTestCases);
+                                                                    } else {
+                                                                        handleRemoveInput(testCase.id, input.id);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                ))}
+                                                {testCaseIndex === 0 && (
+                                                    <Button
+                                                        type="button"
+                                                        onClick={() => handleAddInputType(testCase.id)}
+                                                        className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
+                                                        disabled={testCase.inputs.length >= inputTypes.length}
+                                                    >
+                                                        <Plus size={16} className="mr-2" />
+                                                        Add Input
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Output Section */}
+                                        <div>
+                                            <h4 className='text-sm font-semibold mb-2'>Output</h4>
+                                            <div className="flex items-center gap-2">
+                                                <Select
+                                                    value={testCase.output.type}
+                                                    onValueChange={(newType) => {
+                                                        if (testCaseIndex === 0) {
+                                                            const newTestCases = testCases.map(tc => ({
+                                                                ...tc,
+                                                                output: { ...tc.output, type: newType, value: '' }
+                                                            }));
+                                                            setTestCases(newTestCases);
                                                         }
-                                                    }
-                                                    // Then check the general format
-                                                    else if (!validateFieldValue(newValue, testCase.output.type)) {
-                                                        return;
-                                                    }
-                                                    const newTestCases = [...testCases];
-                                                    newTestCases[testCaseIndex].output.value = newValue;
-                                                    setTestCases(newTestCases);
-                                                }}
-                                                className="flex-grow"
-                                            />
+                                                    }}
+                                                    disabled={testCaseIndex !== 0}
+                                                >
+                                                    <SelectTrigger className="w-[180px]">
+                                                        <SelectValue placeholder="Output Type" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {outputTypes.map(type => (
+                                                            <SelectItem key={type} value={type}>
+                                                                {type}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+
+                                                {testCase.output.type === 'jsonType' ? (
+                                                    <Textarea
+                                                        required
+                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                        value={testCase.output.value}
+                                                        onChange={(e) => {
+                                                            const newValue = e.target.value;
+                                                            if (!validateFieldValue(newValue, testCase.output.type)) {
+                                                                return;
+                                                            }
+                                                            const newTestCases = [...testCases];
+                                                            newTestCases[testCaseIndex].output.value = newValue;
+                                                            setTestCases(newTestCases);
+                                                        }}
+                                                        className="flex-grow overflow-auto"
+                                                    />
+                                                ) : (
+                                                    <Input
+                                                        placeholder={getPlaceholder(testCase.output.type)}
+                                                        value={testCase.output.value}
+                                                        onChange={(e) => {
+                                                            const newValue = e.target.value;
+                                                            if (['int', 'float', 'str'].includes(testCase.output.type)) {
+                                                                if (!validateOutputValue(newValue, testCase.output.type)) {
+                                                                    return;
+                                                                }
+                                                            }
+                                                            else if (!validateFieldValue(newValue, testCase.output.type)) {
+                                                                return;
+                                                            }
+                                                            const newTestCases = [...testCases];
+                                                            newTestCases[testCaseIndex].output.value = newValue;
+                                                            setTestCases(newTestCases);
+                                                        }}
+                                                        className="flex-grow"
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {testCases.length > 1 && (
+                                            <Button
+                                                variant="ghost"
+                                                className="mt-4 text-destructive hover:text-destructive"
+                                                onClick={() => handleRemoveTestCase(testCase.id)}
+                                            >
+                                                <X size={16} className="mr-2" />
+                                                Remove Test Case
+                                            </Button>
                                         )}
                                     </div>
-                                </div>
+                                ))}
 
-                                {testCases.length > 1 && (
-                                    <Button
-                                        variant="ghost"
-                                        className="mt-4 text-destructive hover:text-destructive"
-                                        onClick={() => handleRemoveTestCase(testCase.id)}
-                                    >
-                                        <X size={16} className="mr-2" />
-                                        Remove Test Case
-                                    </Button>
-                                )}
+                                <Button
+                                    type="button"
+                                    className="mt-4 text-primary bg-background hover:bg-accent hover:text-accent-foreground"
+                                    onClick={handleAddTestCase}
+                                >
+                                    <Plus size={20} className="mr-2" />
+                                    Add Test Case
+                                </Button>
                             </div>
-                        ))}
 
-                        <Button
-                            type="button"
-                            className="mt-2 text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
-                            onClick={handleAddTestCase}
-                        >
-                            <Plus size={20} className="mr-2" />
-                            Add Test Case
-                        </Button>
-                    </div>
-
-                    <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
-                            Create Question
-                        </Button>
-                    </div>
+                            {/* Navigation & Submit Buttons */}
+                            <div className="flex justify-end">
+                                
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsDialogOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" className="bg-primary hover:bg-primary-dark">
+                                        Create Question
+                                    </Button>
+                                </div>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
                 </form>
             </Form>
         </main>
