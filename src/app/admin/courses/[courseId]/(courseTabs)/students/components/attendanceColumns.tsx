@@ -105,6 +105,66 @@ const updateAttendanceStatus = async (
     }
 }
 
+// Separate component for the update status cell
+const UpdateStatusCell = ({ 
+    classData, 
+    courseId, 
+    studentId 
+}: { 
+    classData: ClassData
+    courseId: string
+    studentId: string
+}) => {
+    const [isUpdating, setIsUpdating] = useState(false)
+    const [currentStatus, setCurrentStatus] = useState(classData.attendanceStatus.toLowerCase())
+    const isPresent = currentStatus === 'present'
+    
+    const handleStatusToggle = async (checked: boolean) => {
+        setIsUpdating(true)
+        const newStatus = checked ? 'present' : 'absent'
+        const previousStatus = currentStatus
+        
+        // Optimistic update
+        setCurrentStatus(newStatus)
+        
+        const success = await updateAttendanceStatus(
+            courseId, 
+            classData.id, 
+            studentId, 
+            newStatus
+        )
+        
+        if (!success) {
+            // Revert on failure
+            setCurrentStatus(previousStatus)
+        }
+        
+        setIsUpdating(false)
+    }
+    
+    return (
+        <div className="flex items-center justify-start min-w-[100px] space-x-3">
+            <div className="flex items-center space-x-2">
+                <Switch
+                    checked={isPresent}
+                    onCheckedChange={handleStatusToggle}
+                    disabled={isUpdating}
+                    className={`
+                        data-[state=checked]:bg-primary 
+                        data-[state=unchecked]:bg-muted
+                        ${isUpdating ? 'opacity-70' : ''}
+                    `}
+                />
+                {isUpdating && (
+                    <span className="text-xs text-muted-foreground">
+                        Updating...
+                    </span>
+                )}
+            </div>
+        </div>
+    )
+}
+
 export const createAttendanceColumns = (
     courseId: string, 
     studentId: string, 
@@ -211,50 +271,13 @@ export const createAttendanceColumns = (
         ),
         cell: ({ row }) => {
             const classData = row.original
-            const [isUpdating, setIsUpdating] = useState(false)
-            const [currentStatus, setCurrentStatus] = useState(classData.attendanceStatus.toLowerCase())
-            const isPresent = currentStatus === 'present'
-            
-            const handleStatusToggle = async (checked: boolean) => {
-                
-                setIsUpdating(true)
-                const newStatus = checked ? 'present' : 'absent'
-                const previousStatus = currentStatus
-                
-                // Optimistic update
-                setCurrentStatus(newStatus)
-                
-                const success = await updateAttendanceStatus(
-                    courseId, 
-                    classData.id, 
-                    studentId, 
-                    newStatus
-                )
-                
-                if (!success) {
-                    // Revert on failure
-                    setCurrentStatus(previousStatus)
-                } else {
-                    // Update original data for consistency
-                    row.original.attendanceStatus = newStatus
-                }
-                
-                setIsUpdating(false)
-            }
             
             return (
-                <div className="flex items-center justify-start min-w-[100px] space-x-3">
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            checked={isPresent}
-                            onCheckedChange={handleStatusToggle}
-                            className={`
-                                data-[state=checked]:bg-primary 
-                                data-[state=unchecked]:bg-muted
-                            `}
-                        />
-                    </div>
-                </div>
+                <UpdateStatusCell 
+                    classData={classData}
+                    courseId={courseId}
+                    studentId={studentId}
+                />
             )
         },
         enableSorting: false,

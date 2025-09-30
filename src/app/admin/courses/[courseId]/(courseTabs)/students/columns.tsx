@@ -372,6 +372,46 @@ import EditModal from './components/editModal'
 import { Input } from '@/components/ui/input'
 import ActionCell from './actionCell' // Import the new ActionCell component
 
+// Create a separate component for the student name cell that can use hooks
+const StudentNameCell = ({ row }: { row: any }) => {
+    const { userId } = row.original
+    const { isStudent, setIsStudent } = getEditStudent()
+    const { studentData, setStudentData } = getStudentData()
+    const router = useRouter()
+    const params = useParams()
+    
+    const handleSingleStudent = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const { name, value } = e.target
+        setStudentData({ ...studentData, [name]: value })
+    }
+    
+    const handleStudentClick = () => {
+        router.push(`/admin/courses/${params.courseId}/${userId}`)
+    }
+    
+    return (
+        <>
+            {isStudent === userId ? (
+                <Input
+                    id="name"
+                    name="name"
+                    value={studentData.name}
+                    onChange={handleSingleStudent}
+                />
+            ) : (
+                <div 
+                    className="w-[150px] text-left text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
+                    onClick={handleStudentClick}
+                >
+                    {row.getValue('name')}
+                </div>
+            )}
+        </>
+    )
+}
+
 export const columns: ColumnDef<Task>[] = [
     {
         id: 'select',
@@ -409,44 +449,7 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Students Name" />
         ),
-        cell: ({ row }) => {
-            const { userId } = row.original
-            const { isStudent, setIsStudent } = getEditStudent()
-            const { studentData, setStudentData } = getStudentData()
-            const router = useRouter()
-            const params = useParams()
-            
-            const handleSingleStudent = (
-                e: React.ChangeEvent<HTMLInputElement>
-            ) => {
-                const { name, value } = e.target
-                setStudentData({ ...studentData, [name]: value })
-            }
-            
-            const handleStudentClick = () => {
-                router.push(`/admin/courses/${params.courseId}/${userId}`) // Updated path
-            }
-            
-            return (
-                <>
-                    {isStudent === userId ? (
-                        <Input
-                            id="name"
-                            name="name"
-                            value={studentData.name}
-                            onChange={handleSingleStudent}
-                        />
-                    ) : (
-                        <div 
-                            className="w-[150px] text-left text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
-                            onClick={handleStudentClick}
-                        >
-                            {row.getValue('name')}
-                        </div>
-                    )}
-                </>
-            )
-        },
+        cell: ({ row }) => <StudentNameCell row={row} />,
         enableSorting: true,
         enableHiding: true,
     },
@@ -568,6 +571,7 @@ export const columns: ColumnDef<Task>[] = [
                 </div>
             )
         },
+        enableSorting: true,
     },
     {
         accessorKey: 'attendance',
@@ -620,6 +624,7 @@ export const columns: ColumnDef<Task>[] = [
                 </div>
             )
         },
+        enableSorting: true,
     },
     {
         accessorKey: 'lastActive',
@@ -660,6 +665,7 @@ export const columns: ColumnDef<Task>[] = [
                 </div>
             )
         },
+        enableSorting: true,
     },
     {
         accessorKey: 'status',
