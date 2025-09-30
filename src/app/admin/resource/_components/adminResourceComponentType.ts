@@ -220,6 +220,7 @@ export interface NewOpenEndedQuestionFormProps {
   difficulty?: string;
   offset?: number;
   position?: string;
+  onQuestionCreated?: () => void;
 }
 
 export interface DialogBoxProps {

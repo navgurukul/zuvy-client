@@ -130,7 +130,10 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                     <Dialog>
                         <DialogTrigger asChild>
                             <button>
-                                <Eye className="cursor-pointer" />
+                                <Eye 
+                                    size={18}
+                                    className="cursor-pointer" 
+                                />
                             </button>
                         </DialogTrigger>
                         <DialogContent className="w-full">

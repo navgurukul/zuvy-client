@@ -706,7 +706,7 @@ export default function NewCodingProblemForm({
                                 control={form.control}
                                 name="topics"
                                 render={({ field }) => (
-                                    <FormItem className="text-left w-full">
+                                    <FormItem className="text-left w-full !mb-12">
                                         <FormLabel>Topics</FormLabel>
                                         <Select
                                             onValueChange={(value) => {
@@ -742,7 +742,7 @@ export default function NewCodingProblemForm({
                         </TabsContent>
 
                         {/* Test Cases Tab */}
-                        <TabsContent value="testcases" className="space-y-4 mt-6">
+                        <TabsContent value="testcases" className="space-y-4 mt-6 mb-12">
                             <div className="text-left">
                                 {testCases.map((testCase, testCaseIndex) => (
                                     <div key={testCase.id} className="my-4 p-4 border rounded-lg border-green-100 bg-green-50">

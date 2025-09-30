@@ -821,24 +821,24 @@ setStoreQuizData(quizData);
                     className="max-w-2xl mx-auto w-full flex flex-col gap-6 h-full"
                 >
 
-                <Card className="bg-primary-light/20 border-primary-light">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      <span className="font-medium text-primary">AI-Powered MCQ Generation</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Generate high-quality multiple choice questions automatically. Select difficulty levels and topics to get started.
-                    </p>
-                  </CardContent>
-                </Card>
+                    <Card className="bg-primary-light/20 border-primary-light">
+                    <CardContent className="p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="h-4 w-4 text-primary" />
+                        <span className="font-medium text-primary">AI-Powered MCQ Generation</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                        Generate high-quality multiple choice questions automatically. Select difficulty levels and topics to get started.
+                        </p>
+                    </CardContent>
+                    </Card>
 
                     <FormField
                         control={form.control}
                         name="difficulty"
                         render={({ field }) => (
-                            <FormItem className="flex items-center space-x-6">
-                                <FormLabel className="text-lg font-semibold mt-8">
+                            <FormItem className="flex items-center space-x-6 text-foreground">
+                                <FormLabel className="text-sm font-semibold mt-8">
                                     Difficulty
                                 </FormLabel>
                                 {/* Checkbox options */}
@@ -865,7 +865,7 @@ setStoreQuizData(quizData);
                                                 aria-label="Select Easy"
                                                 className="translate-y-[2px] border-primary"
                                             />
-                                            <FormLabel className="text-lg">
+                                            <FormLabel className="text-sm">
                                                 Easy
                                             </FormLabel>
                                         </FormItem>
@@ -892,7 +892,7 @@ setStoreQuizData(quizData);
                                                 aria-label="Select Medium"
                                                 className="translate-y-[2px] border-primary"
                                             />
-                                            <FormLabel className="text-lg">
+                                            <FormLabel className="text-sm">
                                                 Medium
                                             </FormLabel>
                                         </FormItem>
@@ -918,7 +918,7 @@ setStoreQuizData(quizData);
                                                 aria-label="Select Hard"
                                                 className="translate-y-[2px] border-primary"
                                             />
-                                            <FormLabel className="text-lg">
+                                            <FormLabel className="text-sm">
                                                 Hard
                                             </FormLabel>
                                         </FormItem>
@@ -930,8 +930,8 @@ setStoreQuizData(quizData);
                         )}
                     />
 
-                    <div className="flex flex-col gap-4">
-                        <p className="text-lg font-semibold text-start">
+                    <div className="flex flex-col gap-4 text-foreground">
+                        <p className="text-sm font-semibold text-start">
                             Topic Name and No. of Questions
                         </p>
                         {fields.map((field, index) => (
@@ -1023,7 +1023,7 @@ setStoreQuizData(quizData);
                         </Button>
                     </div>
 
-                    <div className="border-t border-gray-300"></div>
+                    <div className="border-t border-muted"></div>
 
                     <div className="flex justify-end items-center gap-4">
                         <Button

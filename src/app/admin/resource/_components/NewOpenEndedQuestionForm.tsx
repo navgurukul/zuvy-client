@@ -43,7 +43,8 @@ function NewOpenEndedQuestionForm({
     selectedOptions,
     difficulty,
     offset,
-    position
+    position,
+    onQuestionCreated // Add this new prop
 }: NewOpenEndedQuestionFormProps) {
     // Use the hook
     const { createOpenEndedQuestion, loading, error } = useCreateOpenEndedQuestion()
@@ -78,14 +79,19 @@ function NewOpenEndedQuestionForm({
             // Close dialog
             setIsDialogOpen(false)
 
-            // Refresh data
-            await filteredOpenEndedQuestions(
-                setOpenEndedQuestions,
-                offset,
-                position,
-                difficulty,
-                selectedOptions
-            )
+            // Call the refresh callback from parent
+            if (onQuestionCreated) {
+                onQuestionCreated()
+            } else {
+                // Fallback: use the old method if callback not provided
+                await filteredOpenEndedQuestions(
+                    setOpenEndedQuestions,
+                    offset || 0,
+                    position || 10,
+                    difficulty || [],
+                    selectedOptions || []
+                )
+            }
         }
         // Error case automatically handled by hook
     }

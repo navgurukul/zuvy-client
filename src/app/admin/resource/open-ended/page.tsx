@@ -257,9 +257,10 @@ const OpenEndedQuestions = (props: Props) => {
         })
     }, [])
 
-    const refreshData = useCallback(async () => {
-    await fetchCodingQuestions(offset)
-}, [fetchCodingQuestions, offset])
+    // Add this refresh function
+    const refreshQuestions = useCallback(async () => {
+        await fetchCodingQuestions(offset)
+    }, [fetchCodingQuestions, offset])
 
 
     const handleTopicClick = (value: string) => {
@@ -415,6 +416,11 @@ const OpenEndedQuestions = (props: Props) => {
                                                     setIsDialogOpen={setIsDialogOpen}
                                                     filteredOpenEndedQuestions={filteredOpenEndedQuestions}
                                                     setOpenEndedQuestions={setOpenEndedQuestions}
+                                                    selectedOptions={selectedOptions}
+                                                    // difficulty={difficulty}
+                                                    offset={offset}
+                                                    position={position}
+                                                    onQuestionCreated={refreshQuestions} 
                                                 />
                                             </div>
                                         </DialogContent>
@@ -498,6 +504,11 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={setIsDialogOpen}
                                                 filteredOpenEndedQuestions={filteredOpenEndedQuestions}
                                                 setOpenEndedQuestions={setOpenEndedQuestions}
+                                                selectedOptions={selectedOptions}
+                                                // difficulty={difficulty}
+                                                offset={offset}
+                                                position={position}
+                                                onQuestionCreated={refreshQuestions} 
                                             />
                                         </div>
                                     </DialogContent>

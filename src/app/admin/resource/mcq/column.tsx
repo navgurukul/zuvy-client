@@ -219,7 +219,10 @@ export const columns: ColumnDef<quiz>[] = [
                     <Dialog>
                         <DialogTrigger>
                             {!selectedRows && (
-                                <Eye className="cursor-pointer" />
+                                <Eye 
+                                    size={18}
+                                    className="cursor-pointer" 
+                                />
                             )}
                         </DialogTrigger>
                         <DialogContent className="w-full">
@@ -227,6 +230,7 @@ export const columns: ColumnDef<quiz>[] = [
                                 quizQuestionId={quizQuestionId}
                                 assesmentSide={true}
                                 tags={tags}
+                                tagId={row.original.tagId} // Add this line
                             />
                         </DialogContent>
                     </Dialog>
