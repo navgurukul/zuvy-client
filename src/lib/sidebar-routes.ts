@@ -175,7 +175,7 @@ const adminRoutes = [
         // pathname.startsWith('/admin'),
     },
     {
-        name: 'Content Bank',
+        name: 'Question Bank',
         href: '/admin/content-bank',
         icon: Database,
         active: '/admin/content-bank',

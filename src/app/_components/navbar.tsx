@@ -152,6 +152,7 @@ import { getUserInitials } from '@/utils/common'
 import { useThemeStore } from '@/store/store'
 import { Moon, Sun } from 'lucide-react'
 import ProfileDropDown from '@/components/ProfileDropDown'
+import QuestionBankDropdown from "@/app/_components/QuestionBankDropdown"
 
 //Test
 const Navbar = () => {
@@ -277,6 +278,9 @@ const Navbar = () => {
                                 return null
 
                             return (
+                                <>
+                                {
+                                    item.name!="Question Bank" &&
                                 <Link
                                     key={item.name}
                                     href={item.href}
@@ -290,6 +294,9 @@ const Navbar = () => {
                                     <Icon className="h-4 w-4" />
                                     <span>{item.name}</span>
                                 </Link>
+                        }
+                                {item.name=="Question Bank" && <QuestionBankDropdown/>}
+                                </>
                             )
                         })}
                     </nav>
@@ -446,6 +453,7 @@ const Navbar = () => {
                     </div>
                 </div> */}
             </div>
+            {/* <QuestionBankDropdown /> */}
         </nav>
     )
 }
