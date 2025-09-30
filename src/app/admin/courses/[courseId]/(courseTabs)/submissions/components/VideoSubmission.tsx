@@ -37,14 +37,15 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (
                 <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h5 className="text-center font-semibold text-[17px]">
-                        No Video Found
-                    </h5>
+                    <p className="text-center text-muted-foreground max-w-md">
+                        No Video submissions available from the students yet. Please wait until the first submission
+                    </p>
                     <Image
-                        src="/emptyStates/curriculum.svg"
-                        alt="No Video Found"
-                        width={400}
-                        height={400}
+                      src="/emptyStates/empty-submissions.png"
+                      alt="No Video Found"
+                      width={120}
+                      height={120}
+                      className="mb-6"
                     />
                 </div>
             ) : (

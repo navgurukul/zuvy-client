@@ -622,17 +622,18 @@ const Page = ({ params }: { params: any }) => {
                                                 })}
                                             </div>
                                         ) : (
-                                            <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                                                <h1 className="text-center font-semibold text-[1.063rem]">
+                                            <div className="flex flex-col items-center justify-center ">
+                                                <p className="text-center text-muted-foreground max-w-md">
                                                     {appliedSearchQuery
                                                         ? `No Projects Found for "${appliedSearchQuery}"`
-                                                        : 'No Projects Found'}
-                                                </h1>
+                                                        : 'No Projects submissions available from the students yet. Please wait until the first submission'}
+                                                </p>
                                                 <Image
-                                                    src="/emptyStates/curriculum.svg"
+                                                    src="/emptyStates/empty-submissions.png"
                                                     alt="No Projects Found"
-                                                    width={400}
-                                                    height={400}
+                                                    width={120}
+                                                    height={120}
+                                                    className="mb-6"
                                                 />
                                             </div>
                                         ))}
@@ -653,14 +654,15 @@ const Page = ({ params }: { params: any }) => {
                                                 )
                                             ) : (
                                                 <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                                                    <h1 className="text-center font-semibold text-[1.063rem]">
-                                                        {appliedSearchQuery ? `No Forms Found for "${appliedSearchQuery}"` : 'No Forms Found'}
-                                                    </h1>
+                                                    <p className="text-center text-muted-foreground max-w-md">
+                                                        {appliedSearchQuery ? `No Forms Found for "${appliedSearchQuery}"` : 'No Forms submissions available from the students yet. Please wait until the first submission'}
+                                                    </p>
                                                     <Image
-                                                        src="/emptyStates/curriculum.svg"
+                                                        src="/emptyStates/empty-submissions.png"
                                                         alt="No Forms Found"
-                                                        width={400}
-                                                        height={400}
+                                                        width={120}
+                                                        height={120}
+                                                        className="mb-6"
                                                     />
                                                 </div>
                                             )}

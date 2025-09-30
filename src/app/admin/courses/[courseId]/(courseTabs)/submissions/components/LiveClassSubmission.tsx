@@ -117,17 +117,17 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
     if (allLiveClasses.length === 0) {
         return (
-            <div className="w-full flex flex-col justify-center items-center h-96">
-                <h1 className="text-center font-semibold text-[1.063rem]">
+            <div className="w-full flex flex-col justify-center items-center h-4/5">
+                <p className="text-center text-muted-foreground max-w-md">
                     {debouncedSearch
                         ? `No Live Classes Found for "${debouncedSearch}"`
-                        : 'No Live Classes Found'}
-                </h1>
+                        : ' No Live Classes submissions available from the students yet. Please wait until the first submission'}
+                </p>
                 <Image
-                    src="/emptyStates/curriculum.svg"
+                    src="/emptyStates/empty-submissions.png"
                     alt="No Live Classes Found"
-                    width={400}
-                    height={400}
+                    width={120}
+                    height={120}
                 />
             </div>
         )
