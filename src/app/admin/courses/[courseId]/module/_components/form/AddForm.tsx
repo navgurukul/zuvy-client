@@ -302,7 +302,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 <Form {...form}>
                     <form
                         onSubmit={form.handleSubmit(onSubmit)}
-                        className="w-full items-left justify-left flex flex-col space-y-8"
+                        className="w-full items-left justify-left flex flex-col space-y-8 pb-4"
                     >
                         <FormField
                             control={form.control}
@@ -402,17 +402,17 @@ const AddForm: React.FC<AddFormProps> = ({
                         <div className='flex justify-between items-center'>
                             <p className='font-bold'>Questions</p>
                             <div className="flex justify-start">
-                            <Button
-                                // variant={'secondary'}
-                                // variant="outline"
-                                type="button"
-                                onClick={addQuestion}
-                                className="gap-x-2 border-none border"
-                                // className="gap-x-2 border-none border hover:text-[rgb(81,134,114)] hover:bg-popover"
-                            >
-                                <PlusCircle size={15} /> Add Question
-                            </Button>
-                        </div>
+                                <Button
+                                    // variant={'secondary'}
+                                    // variant="outline"
+                                    type="button"
+                                    onClick={addQuestion}
+                                    className="gap-x-2 border-none border"
+                                    // className="gap-x-2 border-none border hover:text-[rgb(81,134,114)] hover:bg-popover"
+                                >
+                                    <PlusCircle size={15} /> Add Question
+                                </Button>
+                            </div>
                         </div>
 
                         {questions.map((item, index) => (
@@ -429,7 +429,7 @@ const AddForm: React.FC<AddFormProps> = ({
                         <div className="flex justify-start">
                             <Button
                                 type="submit"
-                                className="w-3/3 bg-success-dark opacity-75"
+                                className="w-3/3 bg-primary"
                             >
                                 Create
                             </Button>

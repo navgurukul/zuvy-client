@@ -34,8 +34,8 @@ export default function RootLayout({
     console.log('adminAssessmentPreviewRoute', adminAssessmentPreviewRoute)
 
     return (
-        <div className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
-        {/* <div> */}
+        // <div className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
+        <div>
             {user.email.length == 0 ? (
                 <div className="flex items-center justify-center h-[680px]">
                     <Spinner className="text-[rgb(81,134,114)]" />
