@@ -1,12 +1,12 @@
-'use client'
+    'use client'
 // External imports
 import React, { useState, useEffect, useRef } from 'react'
 import * as z from 'zod'
 import { useForm, useFieldArray, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Sparkles } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Card, CardHeader, CardFooter } from '@/components/ui/card'
+import { Card, CardHeader, CardFooter, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn, difficultyQuestionBgColor } from '@/lib/utils'
 
@@ -820,6 +820,19 @@ setStoreQuizData(quizData);
                     onSubmit={form.handleSubmit(handleSubmitForm)}
                     className="max-w-2xl mx-auto w-full flex flex-col gap-6 h-full"
                 >
+
+                <Card className="bg-primary-light/20 border-primary-light">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-primary">AI-Powered MCQ Generation</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Generate high-quality multiple choice questions automatically. Select difficulty levels and topics to get started.
+                    </p>
+                  </CardContent>
+                </Card>
+
                     <FormField
                         control={form.control}
                         name="difficulty"
