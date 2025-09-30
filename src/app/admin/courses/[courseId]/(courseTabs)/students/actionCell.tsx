@@ -44,7 +44,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
                     <DropdownMenuItem 
                         onClick={() => {
                             setDropdownOpen(false)
-                            router.push(`/admin/courses/${bootcampId}/students?view=details&studentId=${userId}`)
+                            router.push(`/admin/courses/${bootcampId}/${userId}`) // Updated path - removed 'students' from URL
                         }}
                         className="focus:text-blue-600"
                     >

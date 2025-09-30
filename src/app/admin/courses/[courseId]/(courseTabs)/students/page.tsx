@@ -1,18 +1,18 @@
 // 'use client'
-// import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
+
 // import React, { useState, useEffect, useCallback } from 'react'
+// import { useSearchParams, useRouter } from 'next/navigation'
 // import Image from 'next/image'
-// import { ArrowLeft, ArrowRight, ChevronDown, Plus } from 'lucide-react'
+// import { ArrowLeft, ArrowRight, ChevronDown, Plus, FileSpreadsheet, UserPlus } from 'lucide-react'
 
 // import { Button } from '@/components/ui/button'
 // import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 // import { Input } from '@/components/ui/input'
-// import { DataTable } from '@/app/_components/datatable/data-table'
+// import { DataTable } from '../../../../../_components/datatable/data-table'
 // import { ROWS_PER_PAGE } from '@/utils/constant'
 // import AddStudentsModal from '../../_components/addStudentsmodal'
 // import { columns } from './columns'
 // import { getBatchData } from '@/store/store'
-// import { useRouter } from 'next/navigation'
 // import { useStudentData } from './components/useStudentData'
 // import { ComboboxStudent } from './components/comboboxStudentDataTable'
 // import { api } from '@/utils/axios.config'
@@ -20,6 +20,14 @@
 // import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 // import axios from 'axios'
 // import { toast } from '@/components/ui/use-toast'
+// import { SearchBox } from '@/utils/searchBox'
+// import {
+//     Select,
+//     SelectContent,
+//     SelectItem,
+//     SelectTrigger,
+//     SelectValue,
+// } from "@/components/ui/select"
 
 // export type StudentData = {
 //     email: string
@@ -30,6 +38,7 @@
 //     batchId: number
 //     progress: number
 //     profilePicture: string
+//     enrolledDate?: string | null
 // }
 
 // interface Student {
@@ -39,9 +48,12 @@
 
 // type StudentDataState = Student[]
 
-// const Page = ({ params }: { params: any }) => {
+// const StudentsPage = ({ params }: { params: any }) => {
+//     const searchParams = useSearchParams()
 //     const router = useRouter()
-//     // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(params.courseId)
+//     const view = searchParams.get('view')
+//     const studentId = searchParams.get('studentId')
+
 //     const {
 //         students,
 //         totalPages,
@@ -50,12 +62,7 @@
 //         offset,
 //         search,
 //         totalStudents,
-//         suggestions, // Use suggestions instead of students for autocomplete
 //         setStudents,
-//         handleSetSearch,
-//         commitSearch,
-//         internalSearch,
-//         debouncedInternalSearch,
 //         fetchStudentData,
 //     } = useStudentData(params.courseId)
 
@@ -63,10 +70,59 @@
 //     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
 //     const [studentData, setStudentData] = useState<StudentDataState | any>({})
 //     const [isOpen, setIsOpen] = useState(false)
-//     const [showSuggestions, setShowSuggestions] = useState(false)
+//     const [isSingleStudentOpen, setIsSingleStudentOpen] = useState(false)
+//     const [batchFilter, setBatchFilter] = useState<string>('')
+//     const [statusFilter, setStatusFilter] = useState<string>('')
 
-//     const filteredSuggestions = suggestions.slice(0, 6)
-
+//     const fetchSuggestionsApi = useCallback(async (query: string) => {
+//         const response = await api.get(
+//           `/bootcamp/students/${params.courseId}?searchTerm=${query}`
+//         );
+//         // Map StudentData to include id property for Suggestion interface
+//         const suggestions = (response.data.modifiedStudentInfo || []).map(
+//           (student: StudentData) => ({
+//             ...student,
+//             id: student.userId, // Map userId to id for Suggestion interface
+//           })
+//         );
+//         return suggestions;
+//       }, [params.courseId]);
+      
+//       const fetchSearchResultsApi = useCallback(
+//         async (query: string) => {
+//           const response = await api.get(
+//             `/bootcamp/students/${params.courseId}?limit=${limit}&offset=0&searchTerm=${query}`
+//           );
+//           setStudents(response.data.modifiedStudentInfo || []);
+//           setSelectedRows([]);
+//           return response.data;
+//         },
+//         [params.courseId, limit, setStudents]
+//       );
+      
+//       const defaultFetchApi = useCallback(
+//         async () => {
+//           // Check if there's a search query in URL params
+//           const urlSearchParams = new URLSearchParams(window.location.search);
+//           const searchQuery = urlSearchParams.get("search");
+//           let response;
+//           if (searchQuery) {
+//             // If there's a search query, fetch search results instead of default data
+//             response = await api.get(
+//               `/bootcamp/students/${params.courseId}?limit=${limit}&offset=0&searchTerm=${searchQuery}`
+//             );
+//           } else {
+//             // Fetch default data when no search
+//             response = await api.get(
+//               `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
+//             );
+//           }
+//           setStudents(response.data.modifiedStudentInfo || []);
+//           setSelectedRows([]);
+//           return response.data;
+//         },
+//         [params.courseId, limit, offset, setStudents, router]
+//       );      
 //     // Reset selectedRows when course changes
 //     useEffect(() => {
 //         setSelectedRows([])
@@ -108,142 +164,136 @@
 
 //     const userIds = selectedRows.map((item: any) => item.userId)
 
-//     //     if (loadingCourseCheck) {
-//     //       return (
-//     //       <div className="flex justify-center items-center h-full mt-20">
-//     //        <Spinner className="text-secondary" />
-//     //      </div>
-//     //      )
-//     //    }
+//     // Conditional rendering based on view parameter (Student folder style)
+//     if (view === 'details' && studentId) {
+//         return (
+//             <StudentDetailsView 
+//                 courseId={params.courseId}
+//                 studentId={studentId}
+//                 onBack={() => {
+//                     router.push(`/admin/courses/${params.courseId}/students`)
+//                 }}
+//             />
+//         )
+//     }
 
-//     //    if (isCourseDeleted) {
-//     //     return (
-//     //      <div className="flex flex-col justify-center items-center h-full mt-20">
-//     //        <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-//     //       <p className="text-lg text-red-600 mt-4">This course has been deleted.</p>
-//     //       <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-//     //         Back to Courses
-//     //       </Button>
-//     //      </div>
-//     //    )
-//     //   }
-
+//     // Normal table view (default)
 //     return (
-//         <div className="text-gray-600">
+//         <div className="text-gray-800">
+//             <div className="text-start">
+//                 <h2 className="font-heading text-xl font-semibold">Students</h2>
+//                 <p className="text-muted-foreground">
+//                     Manage student enrollments and track their progress
+//                 </p>
+//             </div>
 //             <div>
 //                 <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
 //                     <div className="relative w-full md:w-1/2 lg:w-1/4">
-//                         <Input
-//                             type="search"
-//                             placeholder="Search"
-//                             className="w-full"
-//                             value={internalSearch}
-//                             onChange={(e) => {
-//                                 handleSetSearch(e)
-//                                 setShowSuggestions(true)
-
-//                                 // If cleared, commit search but don't reset pagination
-//                                 if (e.target.value.trim() === '') {
-//                                     commitSearch('')
-//                                     setShowSuggestions(false)
-//                                 }
-//                             }}
-//                             onKeyDown={(e) => {
-//                                 if (
-//                                     e.key === 'Enter' &&
-//                                     internalSearch.trim()
-//                                 ) {
-//                                     commitSearch(internalSearch.trim())
-//                                     setShowSuggestions(false)
-//                                 }
-//                             }}
-//                             onFocus={() => setShowSuggestions(true)}
-//                             onBlur={() =>
-//                                 setTimeout(() => setShowSuggestions(false), 200)
-//                             }
-//                         />
-
-//                         {showSuggestions && filteredSuggestions.length > 0 && (
-//                             <div className="absolute z-50 w-full bg-white border border-border rounded-md mt-1 shadow-lg">
-//                                 {/* {filteredSuggestions.map(
-//                                     (student: StudentData, i: number) => (
-//                                         <div
-//                                             key={i}
-//                                             className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
-//                                             onClick={() => {
-//                                                 handleSetSearch(student.name)
-//                                                 commitSearch(student.name)
-//                                                 setShowSuggestions(false)
-//                                             }}
-//                                         >
-//                                             {student.name}
-//                                         </div>
-//                                     )
-//                                 )} */}
-//                                 {filteredSuggestions.map((student: StudentData, i: number) => (
-//                                     <div
-//                                         key={i}
-//                                         className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-left"
-//                                         onClick={() => {
-//                                             handleSetSearch(student.name)
-//                                             commitSearch(student.name)
-//                                             setShowSuggestions(false)
-//                                         }}
-//                                     >
-//                                         <div className="font-medium">{student.name}</div>
-//                                         <div className="text-sm text-gray-500">{student.email}</div>
-//                                     </div>
-//                                 ))}
-
+//                          <SearchBox
+//                         placeholder="Search students..."
+//                         fetchSuggestionsApi={fetchSuggestionsApi}
+//                         fetchSearchResultsApi={fetchSearchResultsApi}
+//                         defaultFetchApi={defaultFetchApi}
+//                         getSuggestionLabel={(student) => (
+//                             <div>
+//                                 <div className="font-medium">{student.name}</div>
+//                                 <div className="text-sm text-gray-500">{student.email}</div>
 //                             </div>
+
 //                         )}
+//                         inputWidth="w-full"
+//                     />
 //                     </div>
 
-//                     <div className="flex flex-col md:flex-row items-center gap-x-2 gap-y-4">
-//                         {selectedRows.length > 0 && (
-//                             <>
-//                                 <AlertDialogDemo
-//                                     setSelectedRows={setSelectedRows}
-//                                     userId={userIds}
-//                                     bootcampId={batchData && params.courseId}
-//                                     title="Are you absolutely sure?"
-//                                     description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
-//                                 />
-//                                 <ComboboxStudent
-//                                     batchData={newBatchData || []}
-//                                     bootcampId={batchData && params.courseId}
-//                                     selectedRows={selectedRows}
-//                                     fetchStudentData={fetchStudentDataForBatch}
-//                                 />
-//                             </>
-//                         )}
-//                         <Dialog
-//                             open={isOpen}
-//                             onOpenChange={(open) => {
-//                                 setIsOpen(open)
-//                                 if (!open) {
-//                                     // Modal is closing → reset studentData
-//                                     setStudentData({ name: '', email: '' })
-//                                 }
-//                             }}
-//                         >
-//                             <DialogTrigger asChild>
-//                                 <Button className="gap-x-2 bg-success-dark opacity-75">
-//                                     <Plus /> Add Students
-//                                 </Button>
-//                             </DialogTrigger>
-//                             <DialogOverlay />
-//                             <AddStudentsModal
-//                                 message={false}
-//                                 id={params.courseId || 0}
-//                                 batch={false}
-//                                 batchId={0}
-//                                 setStudentData={setStudentData}
-//                                 studentData={studentData}
-//                             />
-//                         </Dialog>
-//                     </div>
+//                   {/* Filters Row (on mobile both in one row) */}
+//                   <div className="flex w-full flex-row sm:flex-row items-center gap-x-3 gap-y-2 md:w-auto">
+//                     {/* Batch Filter */}
+//                     <Select value={batchFilter} onValueChange={setBatchFilter}>
+//                       <SelectTrigger className="w-full sm:w-[160px] text-sm">
+//                         <SelectValue placeholder="All Batches" />
+//                       </SelectTrigger>
+//                       <SelectContent>
+//                         <SelectItem value="all">All Batches</SelectItem>
+//                         <SelectItem value="batch1">Batch A</SelectItem>
+//                         <SelectItem value="batch2">Batch B</SelectItem>
+//                         <SelectItem value="batch3">Batch C</SelectItem>
+//                       </SelectContent>
+//                     </Select>
+
+//                     {/* Status Filter */}
+//                     <Select value={statusFilter} onValueChange={setStatusFilter}>
+//                       <SelectTrigger className="w-full sm:w-[160px] text-sm">
+//                         <SelectValue placeholder="All Status" />
+//                       </SelectTrigger>
+//                       <SelectContent>
+//                         <SelectItem value="all">All Status</SelectItem>
+//                         <SelectItem value="active">Active</SelectItem>
+//                         <SelectItem value="dropout">Dropout</SelectItem>
+//                         <SelectItem value="graduate">Graduate</SelectItem>
+//                       </SelectContent>
+//                     </Select>
+//                   </div>
+
+//                   {/* Action Buttons Row (on mobile both in one row) */}
+//                   <div className="flex w-full flex-row md:flex-row items-center gap-x-4 gap-y-2 md:w-auto">
+//                     {/* Add Single Student Button */}
+//                     <Dialog
+//                       open={isSingleStudentOpen}
+//                       onOpenChange={(open) => {
+//                         setIsSingleStudentOpen(open)
+//                         if (!open) {
+//                           setStudentData({ name: '', email: '' })
+//                         }
+//                       }}
+//                     >
+//                       <DialogTrigger asChild>
+//                         <Button className="flex-1 text-gray-800 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+//                           <UserPlus className="h-4 w-4 mr-2" />
+//                           Add Single Student
+//                         </Button>
+//                       </DialogTrigger>
+//                       <DialogOverlay />
+//                       <AddStudentsModal
+//                         message={false}
+//                         id={params.courseId || 0}
+//                         batch={false}
+//                         batchId={0}
+//                         setStudentData={setStudentData}
+//                         studentData={studentData}
+//                         modalType="single"
+//                       />
+//                     </Dialog>
+
+//                     {/* Bulk Upload Button */}
+//                     <Dialog
+//                       open={isOpen}
+//                       onOpenChange={(open) => {
+//                         setIsOpen(open)
+//                         if (!open) {
+//                           setStudentData({ name: '', email: '' })
+//                         }
+//                       }}
+//                     >
+//                       <DialogTrigger asChild>
+//                         <Button className="flex-1 bg-primary hover:bg-primary-dark shadow-4dp">
+//                           <FileSpreadsheet className="h-4 w-4 mr-2" />
+//                           Bulk Upload
+//                         </Button>
+//                       </DialogTrigger>
+//                       <DialogOverlay />
+//                       <AddStudentsModal
+//                         message={false}
+//                         id={params.courseId || 0}
+//                         batch={false}
+//                         batchId={0}
+//                         setStudentData={setStudentData}
+//                         studentData={studentData}
+//                         modalType="bulk"
+//                       />
+//                     </Dialog>
+//                   </div>
 //                 </div>
+
 
 //                 <div>
 //                     <div className="mt-5">
@@ -266,14 +316,8 @@
 //         </div>
 //     )
 // }
-// export default Page
 
-
-
-
-
-
-
+// export default StudentsPage
 
 
 
@@ -321,7 +365,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import StudentDetailsView from './components/StudentDetailsView'
 
 export type StudentData = {
     email: string
@@ -345,8 +388,6 @@ type StudentDataState = Student[]
 const StudentsPage = ({ params }: { params: any }) => {
     const searchParams = useSearchParams()
     const router = useRouter()
-    const view = searchParams.get('view')
-    const studentId = searchParams.get('studentId')
 
     const {
         students,
@@ -366,57 +407,99 @@ const StudentsPage = ({ params }: { params: any }) => {
     const [isOpen, setIsOpen] = useState(false)
     const [isSingleStudentOpen, setIsSingleStudentOpen] = useState(false)
     const [batchFilter, setBatchFilter] = useState<string>('')
-    const [statusFilter, setStatusFilter] = useState<string>('')
+    const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
+    const [statusFilter, setStatusFilter] = useState<string>('all')
+
+    // Fetch data with filters
+    const fetchFilteredData = useCallback(async () => {
+        try {
+            let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
+            
+            // Add enrolled date filter if not 'all'
+            if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+                url += `&enrolledDate=${enrolledDateFilter}`
+            }
+            
+            // Add status filter if not 'all'
+            if (statusFilter && statusFilter !== 'all') {
+                url += `&status=${statusFilter}`
+            }
+            
+            // Add search if exists
+            const urlSearchParams = new URLSearchParams(window.location.search)
+            const searchQuery = urlSearchParams.get("search")
+            if (searchQuery) {
+                url += `&searchTerm=${searchQuery}`
+            }
+            
+            const response = await api.get(url)
+            setStudents(response.data.modifiedStudentInfo || [])
+            setSelectedRows([])
+            
+        } catch (error) {
+            console.error('Error fetching filtered data:', error)
+            toast({
+                title: 'Error',
+                description: 'Failed to fetch student data',
+                variant: 'destructive'
+            })
+        }
+    }, [params.courseId, limit, offset, enrolledDateFilter, statusFilter, setStudents])
+
+    // Apply filters when they change
+    useEffect(() => {
+        fetchFilteredData()
+    }, [enrolledDateFilter, statusFilter, fetchFilteredData])
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
-        const response = await api.get(
-          `/bootcamp/students/${params.courseId}?searchTerm=${query}`
-        );
-        // Map StudentData to include id property for Suggestion interface
+        let url = `/bootcamp/students/${params.courseId}?searchTerm=${query}`
+        
+        // Add current filters to suggestions
+        if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+            url += `&enrolledDate=${enrolledDateFilter}`
+        }
+        if (statusFilter && statusFilter !== 'all') {
+            url += `&status=${statusFilter}`
+        }
+        
+        const response = await api.get(url)
         const suggestions = (response.data.modifiedStudentInfo || []).map(
           (student: StudentData) => ({
             ...student,
-            id: student.userId, // Map userId to id for Suggestion interface
+            id: student.userId,
           })
         );
         return suggestions;
-      }, [params.courseId]);
+    }, [params.courseId, enrolledDateFilter, statusFilter]);
       
-      const fetchSearchResultsApi = useCallback(
+    const fetchSearchResultsApi = useCallback(
         async (query: string) => {
-          const response = await api.get(
-            `/bootcamp/students/${params.courseId}?limit=${limit}&offset=0&searchTerm=${query}`
-          );
-          setStudents(response.data.modifiedStudentInfo || []);
-          setSelectedRows([]);
-          return response.data;
+            let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=0&searchTerm=${query}`
+            
+            // Add current filters to search
+            if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+                url += `&enrolledDate=${enrolledDateFilter}`
+            }
+            if (statusFilter && statusFilter !== 'all') {
+                url += `&status=${statusFilter}`
+            }
+            
+            const response = await api.get(url)
+            setStudents(response.data.modifiedStudentInfo || [])
+            setSelectedRows([])
+            return response.data
         },
-        [params.courseId, limit, setStudents]
-      );
+        [params.courseId, limit, setStudents, enrolledDateFilter, statusFilter]
+    );
       
-      const defaultFetchApi = useCallback(
+    const defaultFetchApi = useCallback(
         async () => {
-          // Check if there's a search query in URL params
-          const urlSearchParams = new URLSearchParams(window.location.search);
-          const searchQuery = urlSearchParams.get("search");
-          let response;
-          if (searchQuery) {
-            // If there's a search query, fetch search results instead of default data
-            response = await api.get(
-              `/bootcamp/students/${params.courseId}?limit=${limit}&offset=0&searchTerm=${searchQuery}`
-            );
-          } else {
-            // Fetch default data when no search
-            response = await api.get(
-              `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
-            );
-          }
-          setStudents(response.data.modifiedStudentInfo || []);
-          setSelectedRows([]);
-          return response.data;
+            await fetchFilteredData()
+            return { modifiedStudentInfo: students }
         },
-        [params.courseId, limit, offset, setStudents, router]
-      );      
+        [fetchFilteredData, students]
+    );
+
     // Reset selectedRows when course changes
     useEffect(() => {
         setSelectedRows([])
@@ -458,21 +541,27 @@ const StudentsPage = ({ params }: { params: any }) => {
 
     const userIds = selectedRows.map((item: any) => item.userId)
 
-    // Conditional rendering based on view parameter (Student folder style)
-    if (view === 'details' && studentId) {
-        return (
-            <StudentDetailsView 
-                courseId={params.courseId}
-                studentId={studentId}
-                onBack={() => {
-                    // Remove query params and go back to table view
-                    router.push(`/admin/courses/${params.courseId}/students`)
-                }}
-            />
-        )
+    // Handle enrolled date filter change
+    const handleEnrolledDateFilterChange = (value: string) => {
+        setEnrolledDateFilter(value)
+        // Reset to first page when filter changes
+        const urlParams = new URLSearchParams(window.location.search)
+        urlParams.delete('page')
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+        window.history.replaceState({}, '', newUrl)
     }
 
-    // Normal table view (default)
+    // Handle status filter change
+    const handleStatusFilterChange = (value: string) => {
+        setStatusFilter(value)
+        // Reset to first page when filter changes
+        const urlParams = new URLSearchParams(window.location.search)
+        urlParams.delete('page')
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+        window.history.replaceState({}, '', newUrl)
+    }
+
+    // Normal table view (no conditional rendering needed)
     return (
         <div className="text-gray-800">
             <div className="text-start">
@@ -491,19 +580,18 @@ const StudentsPage = ({ params }: { params: any }) => {
                         defaultFetchApi={defaultFetchApi}
                         getSuggestionLabel={(student) => (
                             <div>
-                                <div className="font-medium">{student.name}</div>
-                                <div className="text-sm text-gray-500">{student.email}</div>
+                                <div className="font-medium text-foreground">{student.name}</div>
+                                <div className="text-sm text-muted-foreground">{student.email}</div>
                             </div>
 
                         )}
-                        inputWidth="w-full"
+                        inputWidth="w-[380px]"
                     />
                     </div>
 
-                  {/* Filters Row (on mobile both in one row) */}
-                  <div className="flex w-full flex-row sm:flex-row items-center gap-x-3 gap-y-2 md:w-auto">
+                  <div className="flex w-full flex-row mt-2 sm:flex-row items-center gap-x-3 gap-y-2 md:w-auto">
                     {/* Batch Filter */}
-                    <Select value={batchFilter} onValueChange={setBatchFilter}>
+                    {/* <Select value={batchFilter} onValueChange={setBatchFilter}>
                       <SelectTrigger className="w-full sm:w-[160px] text-sm">
                         <SelectValue placeholder="All Batches" />
                       </SelectTrigger>
@@ -513,10 +601,27 @@ const StudentsPage = ({ params }: { params: any }) => {
                         <SelectItem value="batch2">Batch B</SelectItem>
                         <SelectItem value="batch3">Batch C</SelectItem>
                       </SelectContent>
+                    </Select> */}
+
+                    {/* Enrolled Date Filter - Working */}
+                    <Select value={enrolledDateFilter} onValueChange={handleEnrolledDateFilterChange}>
+                      <SelectTrigger className="w-full sm:w-[160px] text-sm">
+                        <SelectValue placeholder="All Dates" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Dates</SelectItem>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="yesterday">Yesterday</SelectItem>
+                        <SelectItem value="last7days">Last 7 Days</SelectItem>
+                        <SelectItem value="last30days">Last 30 Days</SelectItem>
+                        <SelectItem value="last3months">Last 3 Months</SelectItem>
+                        <SelectItem value="last6months">Last 6 Months</SelectItem>
+                        <SelectItem value="lastyear">Last Year</SelectItem>
+                      </SelectContent>
                     </Select>
 
-                    {/* Status Filter */}
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    {/* Status Filter - Working */}
+                    <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
                       <SelectTrigger className="w-full sm:w-[160px] text-sm">
                         <SelectValue placeholder="All Status" />
                       </SelectTrigger>
@@ -530,7 +635,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                   </div>
 
                   {/* Action Buttons Row (on mobile both in one row) */}
-                  <div className="flex w-full flex-row md:flex-row items-center gap-x-4 gap-y-2 md:w-auto">
+                  <div className="flex w-full flex-row mt-2 md:flex-row items-center gap-x-4 gap-y-2 md:w-auto">
                     {/* Add Single Student Button */}
                     <Dialog
                       open={isSingleStudentOpen}
@@ -604,7 +709,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                         totalStudents={totalStudents}
                         lastPage={totalPages}
                         pages={totalPages}
-                        fetchStudentData={fetchStudentData}
+                        fetchStudentData={fetchFilteredData} // Use filtered fetch function
                     />
                 </div>
             </div>

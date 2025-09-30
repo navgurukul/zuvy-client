@@ -354,7 +354,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 import { ColumnDef } from '@tanstack/react-table'
 
@@ -413,12 +413,20 @@ export const columns: ColumnDef<Task>[] = [
             const { userId } = row.original
             const { isStudent, setIsStudent } = getEditStudent()
             const { studentData, setStudentData } = getStudentData()
+            const router = useRouter()
+            const params = useParams()
+            
             const handleSingleStudent = (
                 e: React.ChangeEvent<HTMLInputElement>
             ) => {
                 const { name, value } = e.target
                 setStudentData({ ...studentData, [name]: value })
             }
+            
+            const handleStudentClick = () => {
+                router.push(`/admin/courses/${params.courseId}/${userId}`) // Updated path
+            }
+            
             return (
                 <>
                     {isStudent === userId ? (
@@ -429,7 +437,12 @@ export const columns: ColumnDef<Task>[] = [
                             onChange={handleSingleStudent}
                         />
                     ) : (
-                        <div className="w-[150px] text-left text-gray-800">{row.getValue('name')}</div>
+                        <div 
+                            className="w-[150px] text-left text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
+                            onClick={handleStudentClick}
+                        >
+                            {row.getValue('name')}
+                        </div>
                     )}
                 </>
             )
@@ -649,29 +662,29 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'studentStatus',
+        accessorKey: 'status',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            const studentStatus = row.original.studentStatus || 'active'
+            const studentStatus = row.original.status || 'active'
             
             const getStatusConfig = (status: string) => {
                 switch (status.toLowerCase()) {
                     case 'active':
                         return {
                             label: 'Active',
-                            className: 'bg-primary text-primary-foreground border-primary',
+                            className: 'bg-primary text-muted border-primary',
                         }
                     case 'dropout':
                         return {
                             label: 'Dropout',
-                            className: 'bg-destructive text-destructive-foreground border-destructive',
+                            className: 'bg-destructive text-muted border-destructive',
                         }
                     case 'graduate':
                         return {
                             label: 'Graduate',
-                            className: 'bg-warning text-warning-foreground border-warning',
+                            className: 'bg-secondary text-muted border-secondary',
                         }
                     default:
                         return {
@@ -695,6 +708,7 @@ export const columns: ColumnDef<Task>[] = [
             const studentStatus = row.getValue(id) as string
             return value.includes(studentStatus?.toLowerCase() || 'active')
         },
+        enableSorting: true,
     },
     {
         id: 'actions',
