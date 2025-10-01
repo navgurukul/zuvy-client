@@ -119,7 +119,7 @@ function CourseLayout() {
             {/* <Breadcrumb crumbs={crumbs} /> */}
             <Link
                 href={'/admin/courses'}
-                className="flex space-x-2 w-[180px] text-foreground mt-8"
+                className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ArrowLeft size={20} />
                 <p className="ml-1 inline-flex text-sm font-medium md:ml-2">

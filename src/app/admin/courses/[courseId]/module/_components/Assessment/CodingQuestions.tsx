@@ -37,7 +37,7 @@ const CodingQuestions = ({
                     return (
                         <div
                             key={question.id}
-                            className="py-5 pr-5 pl-2 rounded-sm border-b border-gray-200 mb-4"
+                            className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
                         >
                             <div className="flex justify-between text-start items-center w-full">
                                 <div className="w-full">
@@ -98,7 +98,7 @@ const CodingQuestions = ({
                                                           setIsNewQuestionAdded
                                                         );
                                                       }}
-                                                        className="text-[rgb(81,134,114)] cursor-pointer"
+                                                        className="text-primary cursor-pointer"
                                                         size={20}
                                                     />
                                                 )}
@@ -110,7 +110,7 @@ const CodingQuestions = ({
                                     </p>
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                            <p className="font-bold text-sm mt-2 text-primary cursor-pointer">
                                                 View Full Description
                                             </p>
                                         </DialogTrigger>
