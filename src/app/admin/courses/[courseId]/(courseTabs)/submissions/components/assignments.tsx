@@ -107,17 +107,18 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                 assignmentData?.every(
                     (data) => data.moduleChapterData.length === 0
                 ) ? (
-                    <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                        <h5 className="text-center font-semibold text-[1.063rem]">
-                            No Assignment Found
-                        </h5>
+                     <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                        <p className="text-center text-muted-foreground max-w-md">
+                            No Assignment found.
+                        </p>
                         <Image
-                            src="/emptyStates/curriculum.svg"
-                            alt="No Assessment Found"
-                            width={400}
-                            height={400}
+                          src="/emptyStates/empty-submissions.png"
+                          alt="No Assessment Found"
+                          width={120}
+                          height={120}
+                          className="mb-6"
                         />
-                    </div>
+                     </div>
                 ) : (
                     assignmentData?.map((data) => {
                         const moduleDataLength = data.moduleChapterData.length
@@ -240,15 +241,16 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                     })
                 )
             ) : (
-                <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h5 className="text-center font-semibold text-[1.063rem]">
-                        No Assignment Found
-                    </h5>
+               <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                    <p className="text-center text-muted-foreground max-w-md">
+                        No Assignment submissions available from the students yet. Please wait until the first submission
+                    </p>
                     <Image
-                        src="/emptyStates/curriculum.svg"
-                        alt="No Assessment Found"
-                        width={400}
-                        height={400}
+                      src="/emptyStates/empty-submissions.png"
+                      alt="No Assessment Found"
+                      width={120}
+                      height={120}
+                      className="mb-6"
                     />
                 </div>
             )}
