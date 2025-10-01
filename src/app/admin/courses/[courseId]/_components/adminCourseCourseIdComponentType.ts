@@ -8,7 +8,7 @@ export type AddStudentsModalProps = {
   batchData?: boolean;
   studentData: { name: string; email: string };
   setStudentData: (data: { name: string; email: string }) => void;
-  modalType?: "bulk" | "single"; // Add this line
+  modalType?: "bulk" | "single" | 'both'; // Add this line
 };
 
 

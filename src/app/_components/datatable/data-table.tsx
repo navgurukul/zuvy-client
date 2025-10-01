@@ -106,7 +106,7 @@ export function DataTable<TData, TValue>({
                     </div>
                 </div>
             )}
-            <div className="rounded-md border text-gray-600">
+            <div className="rounded-md border">
                 <Table>
                     <TableHeader className={assignStudents && 'hidden'}>
                         {table.getHeaderGroups().map((headerGroup) => (
