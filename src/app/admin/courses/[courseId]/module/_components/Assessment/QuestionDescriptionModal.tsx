@@ -15,14 +15,14 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                 <DialogTitle className="text-xl text-foreground font-bold">Coding Problem Preview
 
                     {tagName && (
-                        <span className="text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] ml-2 py-1 px-[8px]">
+                        <span className="text-[12px] text-success bg-success-foreground rounded-[100px] ml-2 py-1 px-[8px]">
                             {tagName}
                         </span>
                     )}
 
                     <span
                         className={cn(
-                            `text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] ml-2 py-1 px-[8px]`,
+                            `text-[12px] text-success bg-success-foreground rounded-[100px] ml-2 py-1 px-[8px]`,
                             difficultyColor(question.difficulty), // Text color
                             difficultyBgColor(question.difficulty) // Background color
                         )}
@@ -40,7 +40,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                         <h4 className="font-semibold text-foreground text-lg">Title and Description:</h4>
 
                         <p className="text-foreground">
-                            <span className="font-semibold text-lg">{question.title}: </span>{question.description}</p>
+                            <span className="font-semibold text-sm">{question.title}: </span>{question.description}</p>
                     </div>
 
                     {/* Conditional rendering based on question type */}
@@ -132,8 +132,8 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
 
                                         {/* Output */}
                                         <div>
-                                            <strong className='text-foreground text-[18px]'>Output:</strong>
-                                            <pre className="ml-4 bg-gray-100 p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
+                                            <strong className='text-foreground text-lg'>Output:</strong>
+                                            <pre className="ml-4 bg-muted p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
                                                 {(() => {
                                                     const { parameterType, parameterValue } = testCase.expectedOutput;
                                                     if (["str", "int", "float", "bool"].includes(parameterType))
