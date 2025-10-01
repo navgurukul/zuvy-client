@@ -1,6 +1,6 @@
 'use client'
 
-import { EditIcon, Eye, Pencil, Settings } from 'lucide-react'
+import { EditIcon, Eye, Pencil, Settings, ArrowRight } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,10 +18,11 @@ import SelectedQuestions from '@/app/admin/courses/[courseId]/module/_components
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore } from '@/store/store'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
 import {AddAssessmentProps,McqAccumulator,CodingQuestiones } from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+
 const AddAssessment: React.FC<AddAssessmentProps> = ({
     chapterData,
     content,
@@ -30,6 +31,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     topicId,
     activeChapterTitle,
 }) => {
+    const searchParams = useSearchParams()
+    const initialTab = searchParams.get('tab') || ''
     const [isDataLoading, setIsDataLoading] = useState(true) 
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
@@ -99,6 +102,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         useState<Object>({})
     const hasLoaded = useRef(false)
 
+    useEffect(() => {
+        if (initialTab === 'setting') {
+            setQuestionType('settings')
+        }
+    }, [initialTab])
+
     const handleCodingButtonClick = () => {
         setQuestionType('coding')
         setSearchQuestionsInAssessment('')
@@ -141,6 +150,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
+        router.push(`/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`)
     }
 
     function previewAssessment() {
@@ -375,8 +385,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 id="settingsAssessment"
                                 className="flex hover:bg-gray-300 rounded-md p-1"
                             >
-                                <Settings size={18} />
-                                <h6 className="mx-1 text-sm">Settings</h6>
+                                {/* <Settings size={18} />
+                                <h6 className="mx-1 text-sm">Settings</h6> */}
+                                <h6 className="mx-1 text-sm">Next</h6>
+                                <ArrowRight size={20} />
                             </div>
                         </div>
                     </div>
@@ -491,7 +503,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     tags={tags}
                                 />
                             )}
-                            {/* {questionType === 'settings' && (
+                            {questionType === 'settings' && (
                                 <div className="">
                                     <SettingsAssessment
                                         selectedCodingQuesIds={
@@ -529,7 +541,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                         setIsNewQuestionAdded={setIsNewQuestionAdded}
                                     />
                                 </div>
-                            )} */}
+                            )}
                         </div>
 
                         <Separator

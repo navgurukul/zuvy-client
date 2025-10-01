@@ -974,7 +974,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                     placeholder={
                                                         'Untitled Video'
                                                     }
-                                                    className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
+                                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                                 />
                                                 {/* {!videoTitle && (
                                                     <Pencil
@@ -1034,12 +1034,12 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                         )}
                                     </div>
 
-                                    <div className="mt-6">
+                                    {/* <div className="mt-6">
                                         <p className="font-medium text-start text-2xl mb-2">
                                             Recording available for the live
                                             class
                                         </p>
-                                    </div>
+                                    </div> */}
                                 </div>
                             </div>
 

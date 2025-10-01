@@ -353,12 +353,12 @@ function Chapter() {
                 <BreadcrumbComponent crumbs={crumbs} />
             </div> */}
             <Link
-                href={'/admin/courses'}
+                href={`/admin/courses/${courseId}/curriculum`}
                 className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
             >
                 <ArrowLeft size={20} />
                 <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
-                    Back to Course
+                    Back to Curriculum
                 </p>
             </Link>
             <h1 className="font-heading text-start font-bold text-lg text-foreground">

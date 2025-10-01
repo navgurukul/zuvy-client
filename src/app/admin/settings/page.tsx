@@ -97,7 +97,7 @@ const SettingsPage: React.FC = () => {
     return (
         <div className="py-2 bg-white min-h-screen">
             {/* Tab Navigation */}
-            <div className="flex gap-1 mb-6">
+            <div className="flex gap-1 mb-2">
                 <Button
                     onClick={() => handleTabChange('users')}
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors ${
@@ -127,9 +127,9 @@ const SettingsPage: React.FC = () => {
             {activeTab === 'users' && (
                 <>
                     {/* Invite Users via Link Section */}
-                    <UserInviteSection
+                    {/* <UserInviteSection
                         onInviteGenerated={handleInviteGenerated}
-                    />
+                    /> */}
 
                     {/* Users Management Section */}
                     <div className="py-8">

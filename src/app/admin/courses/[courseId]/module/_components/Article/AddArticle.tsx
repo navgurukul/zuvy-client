@@ -439,10 +439,53 @@ const AddArticle: React.FC<AddArticleProps> = ({
     return (
         <div className="px-5 flex-1 overflow-y-auto space-y-2 pr-2">
             <div className="w-full ">
-                <div className="flex justify-between items-center">
-                    <div className="w-2/6 flex justify-start align-middle items-center relative">
-                        <p className="text-2xl font-bold">{title}</p>
-                        {/* {!title && (
+                {/* <div className="flex justify-between items-center"> */}
+                {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
+                {/* <p className="text-2xl font-bold">{title}</p> */}
+                <Form {...form}>
+                    <form
+                        id="myForm"
+                        onSubmit={form.handleSubmit(editArticleContent)}
+                        className=""
+                    >
+                        <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormControl>
+                                        <>
+                                            <Input
+                                                {...field}
+                                                value={title} // Explicitly set value
+                                                onChange={(e) => {
+                                                    // FIXED: Always update the same title state
+                                                    setTitle(e.target.value)
+                                                    field.onChange(e)
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        e.preventDefault()
+                                                    }
+                                                }}
+                                                placeholder={
+                                                    defaultValue === 'editor'
+                                                        ? 'Untitled Article'
+                                                        : 'Untitled PDF'
+                                                }
+                                                className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                // className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                // className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                            />
+                                        </>
+                                    </FormControl>
+                                    <FormMessage className="h-5" />
+                                </FormItem>
+                            )}
+                        />
+                    </form>
+                </Form>
+                {/* {!title && (
                             <Pencil
                                 fill="true"
                                 fillOpacity={0.4}
@@ -450,9 +493,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                 className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                             />
                         )} */}
-                    </div>
+                {/* </div> */}
 
-                    {/* <div className="flex justify-end mt-5">
+                {/* <div className="flex justify-end mt-5">
                         <div className="flex items-center justify-between mr-2">
                             {defaultValue ===
                                 'editor' ? (
@@ -482,7 +525,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                             )}
                         </div>
                     </div> */}
-                </div>
+                {/* </div> */}
                 <div className="flex items-center gap-2 ml-4 pb-4">
                     <BookOpenText size={20} className="transition-colors" />
                     <p className="text-muted-foreground">Article</p>
@@ -553,7 +596,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                             <p className="text-xl text-start font-semibold">
                                 Article Details
                             </p>
-                            <Form {...form}>
+                            {/* <Form {...form}>
                                 <form
                                     id="myForm"
                                     onSubmit={form.handleSubmit(
@@ -598,7 +641,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                                     ? 'Untitled Article'
                                                                     : 'Untitled PDF'
                                                             }
-                                                            className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                            className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                            // className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
                                                             // className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                                         />
                                                     </>
@@ -608,12 +652,12 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                         )}
                                     />
                                 </form>
-                            </Form>
+                            </Form> */}
                             {defaultValue === 'editor' && (
                                 <div className="mt-2 text-start">
-                                    <p className="flex text-left text-lg mt-6 mb-2">
+                                    {/* <p className="flex text-left text-lg mt-6 mb-2">
                                         Description
-                                    </p>
+                                    </p> */}
                                     <RemirrorTextEditor
                                         initialContent={initialContent}
                                         setInitialContent={setInitialContent}
@@ -631,7 +675,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                         pdfLink={pdfLink}
                                         setIsPdfUploaded={setIsPdfUploaded}
                                         onDeletePdfhandler={onDeletePdfhandler}
-                                        setDisableButton={setIsdisabledUploadButton}
+                                        setDisableButton={
+                                            setIsdisabledUploadButton
+                                        }
                                     />
                                 </div>
                             )}
@@ -642,7 +688,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 <div className="flex justify-end mt-5">
                     {defaultValue === 'editor' ? (
                         <Button
-                            className="bg-success-dark opacity-75"
+                            className="bg-primary text-primary-foreground hover:bg-primary/90"
                             type="submit"
                             form="myForm"
                             disabled={!hasEditorContent || isSaving}

@@ -527,58 +527,98 @@ const AddAssignent = ({
         <div className="px-5">
             <>
                 <div className="w-full ">
-                    <div className="flex justify-between items-center">
-                        <div className="w-2/6 flex justify-start align-middle items-center relative">
-                            <p className="text-2xl font-bold">{title}</p>
-                        </div>
-                        {/* {!titles && ( // Show pencil icon only when the title is empty
-                            <Pencil
-                                fill="true"
-                                fillOpacity={0.4}
-                                size={20}
-                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                            />
-                        )} */}
-                        {/* <div className="flex items-center justify-between mr-2">
-                            {defaultValue === 'editor' ? (
-                                <div
-                                    id="previewAssignment"
-                                    onClick={previewAssignment}
-                                    className="flex hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                >
-                                    <Eye size={18} />
-                                    <h6 className="ml-1 text-sm text-gray-600">
-                                        Preview Assignment
-                                    </h6>
-                                </div>
-                            ) : (
-                                <div
-                                    id="previewAssignment"
-                                    onClick={previewPdf}
-                                    className={`flex hover:bg-gray-300 rounded-md p-1 cursor-pointer ${!ispdfUploaded
-                                        ? 'opacity-50 pointer-events-none'
-                                        : ''
-                                        }`}
-                                >
-                                    <Eye size={18} />
-                                    <h6 className="ml-1 text-sm text-gray-600">
-                                        Preview PDF
-                                    </h6>
-                                </div>
-                            )}
-                        </div> */}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <PencilLine size={15} className="transition-colors" />
-                        <p className="text-muted-foreground">Assignment</p>
-                    </div>
-
                     <Form {...form}>
                         <form
                             id="myForm"
                             onSubmit={form.handleSubmit(editAssignmentContent)}
                             className=" "
                         >
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col gap-0">
+                                        <FormControl>
+                                            <>
+                                                <Input
+                                                    {...field}
+                                                    onChange={(
+                                                        e
+                                                    ) => {
+                                                        setTitles(
+                                                            e.target
+                                                                .value
+                                                        )
+                                                        field.onChange(
+                                                            e
+                                                        )
+                                                    }}
+                                                    onKeyDown={(
+                                                        e
+                                                    ) => {
+                                                        if (
+                                                            e.key ===
+                                                            'Enter'
+                                                        ) {
+                                                            e.preventDefault()
+                                                        }
+                                                    }}
+                                                    placeholder="Untitled Assignment"
+                                                    className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                    // autoFocus
+                                                />
+                                            </>
+                                        </FormControl>
+                                        <FormMessage className="h-5" />
+                                    </FormItem>
+                                )}
+                            />
+                            {/* {!titles && ( // Show pencil icon only when the title is empty
+                                <Pencil
+                                    fill="true"
+                                    fillOpacity={0.4}
+                                    size={20}
+                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                />
+                            )} */}
+                            {/* <div className="flex items-center justify-between mr-2">
+                                    {defaultValue === 'editor' ? (
+                                        <div
+                                            id="previewAssignment"
+                                            onClick={previewAssignment}
+                                            className="flex hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                        >
+                                            <Eye size={18} />
+                                            <h6 className="ml-1 text-sm text-gray-600">
+                                                Preview Assignment
+                                            </h6>
+                                        </div>
+                                    ) : (
+                                        <div
+                                            id="previewAssignment"
+                                            onClick={previewPdf}
+                                            className={`flex hover:bg-gray-300 rounded-md p-1 cursor-pointer ${!ispdfUploaded
+                                                ? 'opacity-50 pointer-events-none'
+                                                : ''
+                                                }`}
+                                        >
+                                            <Eye size={18} />
+                                            <h6 className="ml-1 text-sm text-gray-600">
+                                                Preview PDF
+                                            </h6>
+                                        </div>
+                                    )}
+                            </div> */}
+                            <div className="flex items-center gap-2">
+                                <PencilLine size={15} className="transition-colors" />
+                                <p className="text-muted-foreground">Assignment</p>
+                            </div>
+                            {/* <Form {...form}>
+                                <form
+                                    id="myForm"
+                                    onSubmit={form.handleSubmit(editAssignmentContent)}
+                                    className=" "
+                                > */}
                             <div className="">
                                 <RadioGroup
                                     className="flex items-center gap-x-6 mt-4"
@@ -648,7 +688,7 @@ const AddAssignent = ({
                                             Assignment Details
                                         </p>
                                         <div className='flex gap-4'>
-                                            <div className="w-[70%]">
+                                            {/* <div className="w-[70%]">
                                                 <FormField
                                                     control={form.control}
                                                     name="title"
@@ -692,7 +732,7 @@ const AddAssignent = ({
                                                         </FormItem>
                                                     )}
                                                 />
-                                            </div>
+                                            </div> */}
                                             <div className="w-[30%]">
                                                 <FormField
                                                     control={form.control}
@@ -712,7 +752,7 @@ const AddAssignent = ({
                                                                 <Popover>
                                                                     <PopoverTrigger asChild>
                                                                         <div className="w-full">
-                                                                             <p className="flex text-left text-lg mt-4 mb-2">
+                                                                            <p className="flex text-left text-lg mt-4 mb-2">
                                                                                 Choose Deadline Date*
                                                                             </p>
                                                                             <div
@@ -827,33 +867,34 @@ const AddAssignent = ({
                                     </div>
                                 </div>
                             </div>
+                                {/* </form>
+                            </Form> */}
+                            <div className="flex justify-end mt-5">
+                                {defaultValue === 'editor' ? (
+                                    <Button
+                                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                                        type="submit"
+                                        form="myForm"
+                                        disabled={!hasEditorContent || isSaving}
+                                    >
+                                        {isSaving ? 'Saving...' : 'Save'}
+                                    </Button>
+                                ) : (
+                                    <div>
+                                        <Button
+                                            className="bg-success-dark opacity-75"
+                                            type="button"
+                                            onClick={onFileUpload}
+                                            disabled={!disabledUploadButton}
+                                        >
+                                            {/* Upload PDF */}
+                                            {isSaving ? 'Saving...' : 'Save'}
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
                         </form>
                     </Form>
-
-                    <div className="flex justify-end mt-5">
-                        {defaultValue === 'editor' ? (
-                            <Button
-                                className="bg-success-dark opacity-75"
-                                type="submit"
-                                form="myForm"
-                                disabled={!hasEditorContent || isSaving}
-                            >
-                                {isSaving ? 'Saving...' : 'Save'}
-                            </Button>
-                        ) : (
-                            <div>
-                                <Button
-                                    className="bg-success-dark opacity-75"
-                                    type="button"
-                                    onClick={onFileUpload}
-                                    disabled={!disabledUploadButton}
-                                >
-                                    {/* Upload PDF */}
-                                    {isSaving ? 'Saving...' : 'Save'}
-                                </Button>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </>
         </div>
