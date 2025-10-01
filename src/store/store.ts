@@ -73,6 +73,7 @@ export interface quiz {
     tagId: number
     usage: number
     quizVariants: any[]
+    createdAt: string
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
@@ -665,8 +666,8 @@ type editCodingQuestionDialogs = {
     setIsCodingDialogOpen: (newValue: boolean) => void
     isCodingEditDialogOpen: boolean
     setIsCodingEditDialogOpen: (newValue: boolean) => void
-    editCodingQuestionId: null
-    setEditCodingQuestionId: (newValue: any) => void
+    editCodingQuestionId: number | null
+    setEditCodingQuestionId: (newValue: number | null) => void
     isQuestionUsed: boolean
     setIsQuestionUsed: (newValue: boolean) => void
 }
@@ -682,7 +683,7 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
             set({ isCodingEditDialogOpen: newValue })
         },
         editCodingQuestionId: null,
-        setEditCodingQuestionId: (newValue: any) => {
+        setEditCodingQuestionId: (newValue: number | null) => {
             set({ editCodingQuestionId: newValue })
         },
         isQuestionUsed: false,

@@ -12,7 +12,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
         <DialogContent className="max-w-2xl p-6">
         <div className="max-w-2xl p-6 ">
             <DialogHeader>
-                <DialogTitle className="text-xl text-gray-600 font-bold">Coding Problem Preview
+                <DialogTitle className="text-xl text-foreground font-bold">Coding Problem Preview
 
                     {tagName && (
                         <span className="text-[12px] text-[#518672] bg-[#DCE7E3] rounded-[100px] ml-2 py-1 px-[8px]">
@@ -37,9 +37,9 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                 <ScrollArea className="h-96 pr-4">
                     <ScrollBar orientation="vertical" />
                     <div>
-                        <h4 className="font-semibold text-gray-600 text-lg">Title and Description:</h4>
+                        <h4 className="font-semibold text-foreground text-lg">Title and Description:</h4>
 
-                        <p className="text-gray-700">
+                        <p className="text-foreground">
                             <span className="font-semibold text-lg">{question.title}: </span>{question.description}</p>
                     </div>
 
@@ -48,28 +48,28 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
                         <div>
                             {/* Problem Statement */}
                             <div>
-                                <h4 className="font-semibold text-gray-600 text-lg mb-1">Problem Statement:</h4>
-                                <p className="text-gray-700 mb-3">
+                                <h4 className="font-semibold text-foreground text-lg mb-1">Problem Statement:</h4>
+                                <p className="text-foreground mb-3">
                                     {question.description}
                                 </p>
                             </div>
 
                             {/* Constraints */}
                             <div>
-                                <h4 className="font-semibold text-gray-600 text-lg mb-1">Constraints:</h4>
-                                <p className="text-gray-700 mb-3">{question.constraints}</p>
+                                <h4 className="font-semibold text-foreground text-lg mb-1">Constraints:</h4>
+                                <p className="text-foreground mb-3">{question.constraints}</p>
                             </div>
 
                             {/* Function Name */}
                             <div>
-                                <h4 className="font-semibold text-gray-600 text-lg mb-3">Function Name to Start With: <span className="font-light text-base">minJumps</span></h4>
+                                <h4 className="font-semibold text-foreground text-lg mb-3">Function Name to Start With: <span className="font-light text-base">minJumps</span></h4>
 
                             </div>
 
 
                             {/* Input */}
                             <div>
-                                <h4 className="font-semibold text-gray-600 text-lg mb-3">Input: <span className="font-light text-base">
+                                <h4 className="font-semibold text-foreground text-lg mb-3">Input: <span className="font-light text-base">
                                     Array of integers arr and integer n (size of array)
                                 </span></h4>
 
@@ -77,7 +77,7 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
 
                             {/* Output */}
                             <div>
-                                <h4 className="font-semibold text-gray-600 text-lg mb-3">Output: <span className="font-light text-base">
+                                <h4 className="font-semibold text-foreground text-lg mb-3">Output: <span className="font-light text-base">
                                     Minimum number of jumps to reach destination (-1 if impossible)
                                 </span></h4>
                                 
@@ -85,15 +85,15 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
 
                             {/* Test Cases */}
                             <div>
-                                <h4 className="font-semibold text-gray-600 text-lg">Test Cases:</h4>
+                                <h4 className="font-semibold text-foreground text-lg">Test Cases:</h4>
                                 {question.testCases.map((testCase: { id: Key | null | undefined; inputs: any[]; expectedOutput: { parameterType: any; parameterValue: any; }; }, index: number) => (
                                     <div key={testCase.id} className="px-4">
-                                        <h5 className="font-semibold text-gray-600 text-[16px]">Example {index + 1}:</h5>
+                                        <h5 className="font-semibold text-foreground text-[16px]">Example {index + 1}:</h5>
 
                                         {/* Input */}
                                         <div className="mb-2">
-                                            <strong className='text-gray-600 text-[18px]'>Input:</strong>
-                                            <pre className="ml-4 bg-gray-100 p-2 rounded-md text-gray-600 text-sm whitespace-pre-wrap">
+                                            <strong className='text-foreground text-[18px]'>Input:</strong>
+                                            <pre className="ml-4 bg-gray-100 p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
                                                 {testCase.inputs.map((input: { parameterType: any; parameterValue: any; }, idx: Key | null | undefined) => {
                                                     const { parameterType, parameterValue } = input;
                                                     let formattedValue = "";
@@ -132,8 +132,8 @@ const QuestionDescriptionModal = ({ question, type, tagName }: QuestionDescripti
 
                                         {/* Output */}
                                         <div>
-                                            <strong className='text-gray-600 text-[18px]'>Output:</strong>
-                                            <pre className="ml-4 bg-gray-100 p-2 rounded-md text-gray-600 text-sm whitespace-pre-wrap">
+                                            <strong className='text-foreground text-[18px]'>Output:</strong>
+                                            <pre className="ml-4 bg-gray-100 p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
                                                 {(() => {
                                                     const { parameterType, parameterValue } = testCase.expectedOutput;
                                                     if (["str", "int", "float", "bool"].includes(parameterType))

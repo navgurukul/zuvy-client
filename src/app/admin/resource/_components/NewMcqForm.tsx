@@ -184,7 +184,7 @@ export default function NewMcqForm({
                                                     <FormControl className="">
                                                         <RadioGroupItem
                                                             value={difficulty}
-                                                            className="text-[rgb(81,134,114)] border-black"
+                                                            className="text-primary border-primary"
                                                         />
                                                     </FormControl>
                                                     <FormLabel className="font-normal text-md ">
@@ -271,7 +271,7 @@ export default function NewMcqForm({
                             <Button
                                 key={field.id}
                                 className={`${activeVariantIndex === index
-                                        ? 'border-b-4 border-[rgb(81,134,114)] text-[rgb(81,134,114)] text-md'
+                                        ? 'border-b-4 border-primary text-primary text-md'
                                         : ''
                                     } rounded-none`}
                                 variant="ghost"
@@ -349,7 +349,7 @@ export default function NewMcqForm({
                                                     >
                                                         <FormControl>
                                                             <RadioGroupItem
-                                                                className="text-black border-black"
+                                                                className="text-primary border-primary"
                                                                 value={optionIndex.toString()}
                                                             />
                                                         </FormControl>
@@ -414,7 +414,7 @@ export default function NewMcqForm({
                                         onClick={() =>
                                             appendOption({ optionText: '' })
                                         }
-                                        className="text-left text-[rgb(81,134,114)] font-semibold text-md"
+                                        className="text-left text-primary font-semibold text-md"
                                     >
                                         + Add Option
                                     </Button>
@@ -429,7 +429,7 @@ export default function NewMcqForm({
                             <TooltipTrigger asChild>
                                 <div className="flex flex-col justify-end items-end w-[550px] cursor-not-allowed opacity-50">
                                     <Button
-                                        className="bg-success-dark opacity-75"
+                                        className="bg-primary hover:bg-primary-dark"
                                         type="submit"
                                         disabled
                                     >
@@ -445,7 +445,7 @@ export default function NewMcqForm({
                 ) : (
                     <div className="flex flex-col justify-end items-end w-[550px]">
                         <Button
-                            className="bg-success-dark opacity-75"
+                            className="bg-primary hover:bg-primary-dark"
                             type="submit"
                         >
                             Add Question

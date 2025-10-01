@@ -12,7 +12,7 @@ import {
     getSelectedMCQOptions,
     quiz,
 } from '@/store/store'
-import { Edit, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Edit, Eye, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
 import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
@@ -71,8 +71,7 @@ export const columns: ColumnDef<quiz>[] = [
                 />
             )
         },
-        enableSorting: false,
-        enableHiding: false,
+        enableSorting: true,
     },
 
     {
@@ -90,7 +89,7 @@ export const columns: ColumnDef<quiz>[] = [
 
             return (
                 <div
-                    className="text-left text-md p-1 w-[900px] font-[16px] hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                    className="text-left text-md p-1 w-[460px] text-sm hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
                     style={{
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
@@ -101,35 +100,39 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
     {
-        accessorKey: 'usage',
+        accessorKey: 'tagId',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-[17px]"
+                className="flex text-left"
                 column={column}
-                title="Usage"
+                title="Topic"
             />
         ),
         cell: ({ row }) => {
-            const usage = row.original.usage
+            const quiz = row.original
+            const { tags } = getCodingQuestionTags() 
+            
+            // Find tag name from Tag ID
+            const tagName = tags.find(tag => tag.id === quiz.tagId)?.tagName || 'No Topic'
+
             return (
-                <p className={` text-left ml-5 text-[15px] font-semibold `}>
-                    {usage}
-                </p>
+                <div className="flex text-left">
+                    <span className="text-foreground rounded-md text-sm font-medium">
+                        {tagName}
+                    </span>
+                </div>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
-
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="text-[17px]"
+                className=""
                 column={column}
                 title="Difficulty"
             />
@@ -139,7 +142,7 @@ export const columns: ColumnDef<quiz>[] = [
 
             return (
                 <p
-                    className={` text-left ml-3 text-[15px] font-semibold  ${difficultyColor(
+                    className={`flex items-center rounded-full border justify-center  ${difficultyColor(
                         difficulty
                     )}`}
                 >
@@ -147,10 +150,56 @@ export const columns: ColumnDef<quiz>[] = [
                 </p>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
+    {
+        accessorKey: 'usage',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-center w-[100px]"
+                column={column}
+                title="Usage"
+            />
+        ),
+        cell: ({ row }) => {
+            const usage = row.original.usage
+            return (
+                <p className={` text-center font-semibold `}>
+                    {usage}
+                </p>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'createdAt',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="flex justify-center"
+                column={column}
+                title="Created"
+            />
+        ),
+        cell: ({ row }) => {
+            const quiz = row.original
+            const createdDate = quiz.createdAt
+                ? new Date(quiz.createdAt).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+                : 'N/A'
 
+            return (
+                <div className="flex items-center justify-center">
+                    <span className="text-sm text-foreground">
+                        {createdDate}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
+    },
     {
         id: 'actions1',
         header: ({ column }) => (
@@ -184,7 +233,6 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
-        enableHiding: true,
     },
 
     {
@@ -210,17 +258,16 @@ export const columns: ColumnDef<quiz>[] = [
                 <div className="flex">
                     <div>
                         {!selectedRows && (
-                            <Pencil
+                            <Edit
                                 onClick={() => editQuizHandler(quizQuestionid)}
                                 className="cursor-pointer mr-5"
-                                size={20}
+                                size={18}
                             />
                         )}
                     </div>
                 </div>
             )
         },
-        enableHiding: true,
     },
     {
         id: 'actions3',
@@ -257,7 +304,7 @@ export const columns: ColumnDef<quiz>[] = [
                                 )
                             }}
                             className="text-destructive cursor-pointer"
-                            size={20}
+                            size={18}
                         />
                     )}
                     <DeleteConfirmationModal
@@ -284,6 +331,5 @@ export const columns: ColumnDef<quiz>[] = [
                 </div>
             )
         },
-        enableHiding: true,
     },
 ]

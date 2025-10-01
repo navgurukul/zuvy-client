@@ -57,6 +57,7 @@ export const codingQuestionSchema = z.object({
     createdAt: z.string(),
     updatedAt: z.string(),
     usage: z.number(),
+    tagId: z.string(),
 })
 
 export type CodingQuestion = z.infer<typeof codingQuestionSchema>
