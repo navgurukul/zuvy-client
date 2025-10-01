@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 const SimpleAdminNavbar = () => {
     const pathname = usePathname()
 
+    
     const navigationItems = [
         {
             name: 'Course Studio',

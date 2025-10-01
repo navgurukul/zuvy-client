@@ -168,9 +168,8 @@ const adminRoutes = [
         name: 'Course Studio',
         href: '/admin/courses',
         icon: Layers,
-        active: '/admin/courses',
-        // pathname.startsWith('/admin/courses') ||
-        // pathname.startsWith('/admin'),
+        active: (pathname: string) => 
+        pathname === '/admin/courses' || pathname.startsWith('/admin/courses/'),
     },
     {
         name: 'Question Bank',
