@@ -106,8 +106,14 @@
 
 // export default Navbar
 
-'use client'
 
+
+
+
+
+
+
+'use client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
@@ -152,7 +158,7 @@ import { getUserInitials } from '@/utils/common'
 import { useThemeStore } from '@/store/store'
 import { Moon, Sun } from 'lucide-react'
 import ProfileDropDown from '@/components/ProfileDropDown'
-import QuestionBankDropdown from "@/app/_components/QuestionBankDropdown"
+import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 
 //Test
 const Navbar = () => {
@@ -254,25 +260,31 @@ const Navbar = () => {
                     <nav className="flex items-center space-x-1">
                         {routes.map((item) => {
                             const Icon = item.icon
+                            const isActive =
+                                typeof item.active === 'function'
+                                    ? item.active(pathname)
+                                    : item.active === pathname
+
                             return (
                                 <>
-                                {
-                                    item.name!="Question Bank" &&
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={cn(
-                                        'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
-                                        item.active === pathname
-                                            ? 'bg-blue-600 text-white shadow-sm'
-                                            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                                    {item.name !== 'Question Bank' && (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={cn(
+                                                'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
+                                                isActive
+                                                    ? 'bg-blue-600 text-white shadow-sm'
+                                                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                                            )}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            <span>{item.name}</span>
+                                        </Link>
                                     )}
-                                >
-                                    <Icon className="h-4 w-4" />
-                                    <span>{item.name}</span>
-                                </Link>
-                        }
-                                {item.name=="Question Bank" && <QuestionBankDropdown/>}
+                                    {item.name === 'Question Bank' && (
+                                        <QuestionBankDropdown />
+                                    )}
                                 </>
                             )
                         })}
