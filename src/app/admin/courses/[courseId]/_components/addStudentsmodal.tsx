@@ -135,10 +135,9 @@
 //                     <RadioGroup
 //                         key={id}
 //                         value={selectedOption}
-//                         onValueChange={handleStudentUploadType}
-//                     >
+//                         onValueChange={handleStudentUploadType}                    >
 //                         <div className="flex   space-x-2 mr-4">
-//                             <RadioGroupItem value={id} id={id} className='text-black border-black' />
+//                             <RadioGroupItem value={id} id={id}  />
 //                             <Label htmlFor={id}>{label}</Label>
 //                         </div>
 //                     </RadioGroup>
@@ -175,7 +174,7 @@
 //             )}
 //             <DialogFooter>
 //                 <DialogClose asChild>
-//                     <Button type="submit" onClick={handleSubmit} className='bg-success-dark opacity-75'>
+//                     <Button type="submit" onClick={handleSubmit}>
 //                         {selectedOption === '2'
 //                             ? 'Add Student'
 //                             : 'Add Students'}
@@ -190,37 +189,14 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 'use client'
 // components/TwoOptionsModal.tsx
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Dropzone from './dropzone'
+import SingleStudentForm from './SingleStudentForm'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -230,25 +206,19 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { STUDENT_ONBOARDING_TYPES } from '@/utils/constant'
 import { Label } from '@/components/ui/label'
 import { getStoreStudentDataNew } from '@/store/store'
-import { useStudentData } from '../(courseTabs)/students/components/useStudentData'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { getCourseData } from '@/store/store'
-import {AddStudentsModalProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { AddStudentsModalProps } from '@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
 type StudentDataType = {
-    name: string;
-    email: string;
-    batchId?: string;
-};
+    name: string
+    email: string
+    batchId?: string
+}
 
 const AddStudentsModal = ({
     id,
@@ -259,33 +229,18 @@ const AddStudentsModal = ({
     batchData,
     studentData,
     setStudentData,
-    modalType = "bulk",
-}: AddStudentsModalProps & { 
-    modalType?: "bulk" | "single";
-    studentData: StudentDataType;
-    setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>;
+    modalType = 'bulk',
+}: AddStudentsModalProps & {
+    modalType?: 'bulk' | 'single' | 'both'
+    studentData: StudentDataType
+    setStudentData: React.Dispatch<React.SetStateAction<StudentDataType>>
 }) => {
-    type BatchType = { id: string | number; name: string };
-    const [localBatchData, setLocalBatchData] = useState<BatchType[]>([]);
-    
-    // Fetch batches when modal opens for single student mode
-    useEffect(() => {
-        const fetchBatches = async () => {
-            if (modalType === 'single') {
-                try {
-                    const response = await api.get(`/bootcamp/batches/${id}`);
-                    console.log('Fetched batches:', response.data);
-                    setLocalBatchData(response.data.data || []);
-                } catch (error) {
-                    console.error('Error fetching batches:', error);
-                    setLocalBatchData([]);
-                }
-            }
-        };
-        
-        fetchBatches();
-    }, [id, modalType]);
-    
+    const [selectedOption, setSelectedOption] = useState('1')
+
+    const handleStudentUploadType = (value: string) => {
+        setSelectedOption(value)
+    }
+
     // state and variables
     const {
         setStudents,
@@ -300,11 +255,6 @@ const AddStudentsModal = ({
 
     const { fetchCourseDetails } = getCourseData()
 
-    const handleSingleStudent = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setStudentData({ ...studentData, [name]: value })
-    }
-
     const courseId: string = id.toString()
 
     const handleSubmit = async () => {
@@ -312,13 +262,17 @@ const AddStudentsModal = ({
             students:
                 modalType === 'bulk'
                     ? studentData
-                    : [{ 
-                        email: studentData.email, 
-                        name: studentData.name,
-                        ...(studentData.batchId && { batchId: studentData.batchId })
-                    }],
+                    : [
+                          {
+                              email: studentData.email,
+                              name: studentData.name,
+                              ...(studentData.batchId && {
+                                  batchId: studentData.batchId,
+                              }),
+                          },
+                      ],
         }
-        
+
         if (transformedObject) {
             const requestBody = transformedObject
             try {
@@ -355,7 +309,7 @@ const AddStudentsModal = ({
     }
 
     return (
-        <DialogContent className='text-black'>
+        <DialogContent className="text-black">
             <DialogHeader>
                 <DialogTitle>
                     {message
@@ -374,73 +328,67 @@ const AddStudentsModal = ({
                         : ''}
                 </span>
             </DialogHeader>
-            
-            {modalType === 'single' && (
-                <div className="space-y-4">
-                    <div className="text-left">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input
-                            id="name"
-                            name="name"
-                            value={studentData.name || ''}
-                            onChange={handleSingleStudent}
-                            placeholder="Enter student's full name"
-                            className="mt-1"
-                        />
+
+            {modalType === 'both' && (
+                <>
+                    <div className="flex items-center justify-start">
+                        {STUDENT_ONBOARDING_TYPES.map(({ id, label }) => (
+                            <RadioGroup
+                                key={id}
+                                value={selectedOption}
+                                onValueChange={handleStudentUploadType}
+                            >
+                                <div className="flex space-x-2 mr-4">
+                                    <RadioGroupItem value={id} id={id} />
+                                    <Label htmlFor={id}>{label}</Label>
+                                </div>
+                            </RadioGroup>
+                        ))}
                     </div>
                     
-                    <div className="text-left">
-                        <Label htmlFor="email">Email Address</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            value={studentData.email || ''}
-                            onChange={handleSingleStudent}
-                            placeholder="Enter student's email address"
-                            className="mt-1"
+                    {selectedOption === '2' && (
+                        <SingleStudentForm
+                            studentData={studentData}
+                            setStudentData={setStudentData}
+                            courseId={id}
+                            showBatchSelection={true}
                         />
-                    </div>
-
-                    <div className="text-left">
-                        <Label htmlFor="batch">Batch (Optional)</Label>
-                        <Select 
-                            value={studentData.batchId || ''} 
-                            onValueChange={(value) => setStudentData({...studentData, batchId: value})}
-                        >
-                            <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="Select a batch" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {localBatchData && localBatchData.length > 0 ? (
-                                    localBatchData.map((batch) => (
-                                        <SelectItem key={batch.id} value={batch.id.toString()}>
-                                            {batch.name}
-                                        </SelectItem>
-                                    ))
-                                ) : (
-                                    <SelectItem value="" disabled>
-                                        No batches available
-                                    </SelectItem>
-                                )}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-            )}
-            
-            {modalType === 'bulk' && (
-                <>
-                    <Dropzone
-                        studentData={studentData}
-                        setStudentData={setStudentData}
-                        className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block"
-                    />
+                    )}
+                    
+                    {selectedOption === '1' && (
+                        <Dropzone
+                            studentData={studentData}
+                            setStudentData={setStudentData}
+                            className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block"
+                        />
+                    )}
                 </>
             )}
             
+            {modalType === 'single' && (
+                <SingleStudentForm
+                    studentData={studentData}
+                    setStudentData={setStudentData}
+                    courseId={id}
+                    showBatchSelection={true}
+                />
+            )}
+
+            {modalType === 'bulk' && (
+                <Dropzone
+                    studentData={studentData}
+                    setStudentData={setStudentData}
+                    className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block"
+                />
+            )}
+
             <DialogFooter>
                 <DialogClose asChild>
-                    <Button type="submit" onClick={handleSubmit} className='bg-primary hover:bg-primary-dark shadow-4dp'>
+                    <Button
+                        type="submit"
+                        onClick={handleSubmit}
+                        className="bg-primary hover:bg-primary-dark shadow-4dp"
+                    >
                         {modalType === 'single'
                             ? 'Add Student'
                             : 'Upload Students'}

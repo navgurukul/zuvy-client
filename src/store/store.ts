@@ -45,7 +45,11 @@ interface BatchData {
     capEnrollment: number
     createdAt: string,
     updatedAt: string,
+    status: string,
+    startDate: string | null  
+    endDate: string | null  
     students_enrolled: number
+    instructorEmail: string 
 }
 
 interface StoreCourseData {
@@ -58,6 +62,8 @@ interface StoreBatchData {
     batchData: BatchData[] | null
     setBatchData: (newValue: BatchData[]) => void
     fetchBatches: (courseId: number) => void
+    totalBatches?: number 
+    totalPages?: number 
 }
 
 export interface quiz {
@@ -120,9 +126,13 @@ export const getBatchData = create<StoreBatchData>((set) => ({
         try {
             const response = await api.get(`/bootcamp/batches/${courseId}`)
             const data = response.data
-            set({ batchData: data.data })
+            set({ batchData: data.data,
+                totalBatches: data.totalBatches,
+                totalPages: data.totalPages
+             })
         } catch (error) {
             console.error('Error fetching batches', error)
+            set({ batchData: [] }) 
         }
     },
 }))
