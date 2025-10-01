@@ -54,6 +54,7 @@ import {
     useCalendarAccessAction,
     useCalendarAccessCheck,
 } from '@/hooks/useCalendarAccess'
+import {PermissionsComponent} from './[courseId]/permissions/coursePermission'
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -69,6 +70,9 @@ const Courses: React.FC = () => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { studentData } = useStudentData()
+     const queryObject: Record<string, string> = {};
+
+
 
     // search state
     const searchInputRef = useRef<HTMLInputElement>(null)
@@ -105,8 +109,7 @@ const Courses: React.FC = () => {
         useState<number>(-1)
 
     // === Hooks ===
-    const { allCourses, refetchAllCourses } = useAllCourses(true)
-    console.log('allCourses', allCourses)
+    const { allCourses, refetchAllCourses, permissions } = useAllCourses(true)
     const { courses, loading, totalBootcamps, totalPages, refetchBootcamps } =
         useBootcamps({
             limit: position,
@@ -427,6 +430,16 @@ const Courses: React.FC = () => {
         return ''
     }
 
+    PermissionsComponent({ permissions })
+    permissions &&  searchParams.forEach((value, key) => {
+    queryObject[key] = value;
+  });
+
+
+
+
+
+
     return (
         <>
             {loading ? (
@@ -435,6 +448,7 @@ const Courses: React.FC = () => {
                 </div>
             ) : (
                 <div className="w-full">
+                  
                     {!hasAccess ? (
                         <Alert
                             variant="destructive"
@@ -469,10 +483,11 @@ const Courses: React.FC = () => {
                             {/* Right: Create New Course Button */}
                             <div className="flex-1 flex justify-end min-w-[220px]">
                                 <Dialog>
+
                                     <DialogTrigger asChild>
-                                        <Button className="text-white bg-primary font-semibold px-5 py-2 flex gap-2">
+                                        <Button className={`text-white bg-primary font-semibold px-5 py-2 flex gap-2 ${queryObject.createCourse === 'false' && 'invisible'} `}>
                                             <Plus className="w-5" />
-                                            Create New Course
+                                            Create New Course 
                                         </Button>
                                     </DialogTrigger>
                                     <DialogOverlay />

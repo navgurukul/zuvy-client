@@ -121,7 +121,7 @@ import Sidebar from './sidebar'
 import { Bell, Menu, Search } from 'lucide-react'
 import { getUser } from '@/store/store'
 import { cn } from '@/lib/utils'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { MobileNavbarRoutes } from './navbar-routes'
@@ -165,6 +165,17 @@ const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const { user, setUser } = getUser()
     const pathname = usePathname()
+    const searchParams = useSearchParams()
+
+    // Get all query params as an object
+    const queryObject: Record<string, string> = {}
+
+    searchParams.forEach((value, key) => {
+        queryObject[key] = value
+    })
+
+    const { viewRolesAndPermission, viewContent } = queryObject
+
     // const rolesList =
     //     user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
 
@@ -260,6 +271,17 @@ const Navbar = () => {
                     <nav className="flex items-center space-x-1">
                         {routes.map((item) => {
                             const Icon = item.icon
+                            const canViewContent = viewContent === 'true'
+                            const canViewRoles =
+                                viewRolesAndPermission === 'true'
+
+                            if (item.name === 'Content Bank' && !canViewContent)
+                                return null
+                            if (
+                                item.name === 'Roles and Permissions' &&
+                                !canViewRoles
+                            )
+                                return null
                             const isActive =
                                 typeof item.active === 'function'
                                     ? item.active(pathname)
