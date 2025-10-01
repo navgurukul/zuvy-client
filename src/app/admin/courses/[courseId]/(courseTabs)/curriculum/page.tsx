@@ -571,11 +571,13 @@ function Page() {
     return (
         <div className="w-full">
             <div className="w-full flex flex-col items-center justify-center">
-                <div className="w-full px-2 md:px-0 max-w-4xl flex flex-col gap-y-4 my-4">
-                    <h2 className="text-xl font-semibold">
+                <div className="w-full px-2 md:px-0 max-w-4xl flex flex-col gap-y-4 mt-4">
+                   <div className='w-full flex justify-between items-center'>
+                     <h2 className="text-xl font-semibold">
                         Course Curriculum
                     </h2>
-                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                   <div>
+                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
                             <Button className="text-white bg-primary">
                                 <Plus className="mr-2 h-4 w-4" />
@@ -596,6 +598,8 @@ function Page() {
                             isLoading={isLoading}
                         />
                     </Dialog>
+                   </div>
+                   </div>
                 </div>
             </div>
 
