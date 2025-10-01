@@ -340,7 +340,14 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ArrowLeft, ArrowRight, ChevronDown, Plus, FileSpreadsheet, UserPlus } from 'lucide-react'
+import {
+    ArrowLeft,
+    ArrowRight,
+    ChevronDown,
+    Plus,
+    FileSpreadsheet,
+    UserPlus,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
@@ -406,7 +413,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
     const [isOpen, setIsOpen] = useState(false)
     const [isSingleStudentOpen, setIsSingleStudentOpen] = useState(false)
-    const [batchFilter, setBatchFilter] = useState<string>('')
+    const [lastActiveFilter, setLastActiveFilter] = useState<string>('all')
     const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
     const [statusFilter, setStatusFilter] = useState<string>('all')
 
@@ -573,127 +580,168 @@ const StudentsPage = ({ params }: { params: any }) => {
             <div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
                     <div className="relative w-full md:w-1/2 lg:w-1/4">
-                         <SearchBox
-                        placeholder="Search students..."
-                        fetchSuggestionsApi={fetchSuggestionsApi}
-                        fetchSearchResultsApi={fetchSearchResultsApi}
-                        defaultFetchApi={defaultFetchApi}
-                        getSuggestionLabel={(student) => (
-                            <div>
-                                <div className="font-medium text-foreground">{student.name}</div>
-                                <div className="text-sm text-muted-foreground">{student.email}</div>
-                            </div>
-
-                        )}
-                        inputWidth="w-[380px]"
-                    />
+                        <SearchBox
+                            placeholder="Search students..."
+                            fetchSuggestionsApi={fetchSuggestionsApi}
+                            fetchSearchResultsApi={fetchSearchResultsApi}
+                            defaultFetchApi={defaultFetchApi}
+                            getSuggestionLabel={(student) => (
+                                <div>
+                                    <div className="font-medium">
+                                        {student.name}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        {student.email}
+                                    </div>
+                                </div>
+                            )}
+                            inputWidth="w-full"
+                        />
                     </div>
 
-                  <div className="flex w-full flex-row mt-2 sm:flex-row items-center gap-x-3 gap-y-2 md:w-auto">
-                    {/* Batch Filter */}
-                    {/* <Select value={batchFilter} onValueChange={setBatchFilter}>
-                      <SelectTrigger className="w-full sm:w-[160px] text-sm">
-                        <SelectValue placeholder="All Batches" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Batches</SelectItem>
-                        <SelectItem value="batch1">Batch A</SelectItem>
-                        <SelectItem value="batch2">Batch B</SelectItem>
-                        <SelectItem value="batch3">Batch C</SelectItem>
-                      </SelectContent>
-                    </Select> */}
+                    {/* Action Buttons Row (on mobile both in one row) */}
+                    <div className="flex w-full flex-row mt-2 md:flex-row items-center gap-x-4 gap-y-2 md:w-auto">
+                        {/* Add Single Student Button */}
+                        <Dialog
+                            open={isSingleStudentOpen}
+                            onOpenChange={(open) => {
+                                setIsSingleStudentOpen(open)
+                                if (!open) {
+                                    setStudentData({ name: '', email: '' })
+                                }
+                            }}
+                        >
+                            <DialogTrigger asChild>
+                                <Button className="flex-1 text-gray-800 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+                                    <UserPlus className="h-4 w-4 mr-2" />
+                                    Add Single Student
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <AddStudentsModal
+                                message={false}
+                                id={params.courseId || 0}
+                                batch={false}
+                                batchId={0}
+                                setStudentData={setStudentData}
+                                studentData={studentData}
+                                modalType="single"
+                            />
+                        </Dialog>
 
-                    {/* Enrolled Date Filter - Working */}
-                    <Select value={enrolledDateFilter} onValueChange={handleEnrolledDateFilterChange}>
-                      <SelectTrigger className="w-full sm:w-[160px] text-sm">
-                        <SelectValue placeholder="All Dates" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Dates</SelectItem>
-                        <SelectItem value="today">Today</SelectItem>
-                        <SelectItem value="yesterday">Yesterday</SelectItem>
-                        <SelectItem value="last7days">Last 7 Days</SelectItem>
-                        <SelectItem value="last30days">Last 30 Days</SelectItem>
-                        <SelectItem value="last3months">Last 3 Months</SelectItem>
-                        <SelectItem value="last6months">Last 6 Months</SelectItem>
-                        <SelectItem value="lastyear">Last Year</SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    {/* Status Filter - Working */}
-                    <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                      <SelectTrigger className="w-full sm:w-[160px] text-sm">
-                        <SelectValue placeholder="All Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="dropout">Dropout</SelectItem>
-                        <SelectItem value="graduate">Graduate</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Action Buttons Row (on mobile both in one row) */}
-                  <div className="flex w-full flex-row mt-2 md:flex-row items-center gap-x-4 gap-y-2 md:w-auto">
-                    {/* Add Single Student Button */}
-                    <Dialog
-                      open={isSingleStudentOpen}
-                      onOpenChange={(open) => {
-                        setIsSingleStudentOpen(open)
-                        if (!open) {
-                          setStudentData({ name: '', email: '' })
-                        }
-                      }}
-                    >
-                      <DialogTrigger asChild>
-                        <Button className="flex-1 text-gray-800 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Add Single Student
-                        </Button>
-                      </DialogTrigger>
-                      <DialogOverlay />
-                      <AddStudentsModal
-                        message={false}
-                        id={params.courseId || 0}
-                        batch={false}
-                        batchId={0}
-                        setStudentData={setStudentData}
-                        studentData={studentData}
-                        modalType="single"
-                      />
-                    </Dialog>
-
-                    {/* Bulk Upload Button */}
-                    <Dialog
-                      open={isOpen}
-                      onOpenChange={(open) => {
-                        setIsOpen(open)
-                        if (!open) {
-                          setStudentData({ name: '', email: '' })
-                        }
-                      }}
-                    >
-                      <DialogTrigger asChild>
-                        <Button className="flex-1 bg-primary hover:bg-primary-dark shadow-4dp">
-                          <FileSpreadsheet className="h-4 w-4 mr-2" />
-                          Bulk Upload
-                        </Button>
-                      </DialogTrigger>
-                      <DialogOverlay />
-                      <AddStudentsModal
-                        message={false}
-                        id={params.courseId || 0}
-                        batch={false}
-                        batchId={0}
-                        setStudentData={setStudentData}
-                        studentData={studentData}
-                        modalType="bulk"
-                      />
-                    </Dialog>
-                  </div>
+                        {/* Bulk Upload Button */}
+                        <Dialog
+                            open={isOpen}
+                            onOpenChange={(open) => {
+                                setIsOpen(open)
+                                if (!open) {
+                                    setStudentData({ name: '', email: '' })
+                                }
+                            }}
+                        >
+                            <DialogTrigger asChild>
+                                <Button className="flex-1 bg-primary hover:bg-primary-dark shadow-4dp">
+                                    <FileSpreadsheet className="h-4 w-4 mr-2" />
+                                    Bulk Upload
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <AddStudentsModal
+                                message={false}
+                                id={params.courseId || 0}
+                                batch={false}
+                                batchId={0}
+                                setStudentData={setStudentData}
+                                studentData={studentData}
+                                modalType="bulk"
+                            />
+                        </Dialog>
+                    </div>
                 </div>
 
+                {/* Filters Row (on mobile both in one row) */}
+                <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 md:gap-y-0 mt-5">
+                    {/* Status Filter */}
+                    <div className="w-full sm:w-[160px]">
+                        <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+                            <SelectTrigger className="text-sm w-full">
+                                <SelectValue placeholder="All Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="dropout">Dropout</SelectItem>
+                                <SelectItem value="graduate">Graduate</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Enrolled Date filter*/}
+                    <div className="w-full sm:w-[160px]">
+                        <Select value={enrolledDateFilter} onValueChange={handleEnrolledDateFilterChange}>
+                            <SelectTrigger className="text-sm w-full">
+                                <SelectValue placeholder="Enrolled Dates" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Enrolled</SelectItem>
+                                <SelectItem value="today">Today</SelectItem>
+                                <SelectItem value="yesterday">Yesterday</SelectItem>
+                                <SelectItem value="last7days">Last 7 Days</SelectItem>
+                                <SelectItem value="last30days">Last 30 Days</SelectItem>
+                                <SelectItem value="last3months">Last 3 Months</SelectItem>
+                                <SelectItem value="last6months">Last 6 Months</SelectItem>
+                                <SelectItem value="lastyear">Last Year</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Last Active Filter */}
+                    <div className="w-full sm:w-[160px]">
+                        <Select
+                            value={lastActiveFilter}
+                            onValueChange={setLastActiveFilter}
+                        >
+                            <SelectTrigger className="text-sm w-full">
+                                <SelectValue placeholder="Last Active" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Active</SelectItem>
+                                <SelectItem value="today">Today</SelectItem>
+                                <SelectItem value="yesterday">
+                                    Yesterday
+                                </SelectItem>
+                                <SelectItem value="thisWeek">
+                                    This Week
+                                </SelectItem>
+                                <SelectItem value="thisMonth">
+                                    This Month
+                                </SelectItem>
+                                <SelectItem value="older">Older</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* Search Box */}
+                    <div className="relative w-full md:w-1/2 lg:w-1/4">
+                        <SearchBox
+                            placeholder="Search students by Attendance..."
+                            fetchSuggestionsApi={fetchSuggestionsApi}
+                            fetchSearchResultsApi={fetchSearchResultsApi}
+                            defaultFetchApi={defaultFetchApi}
+                            getSuggestionLabel={(student) => (
+                                <div>
+                                    <div className="font-medium">
+                                        {student.name}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        {student.email}
+                                    </div>
+                                </div>
+                            )}
+                            inputWidth="w-full"
+                        />
+                    </div>
+                </div>
 
                 <div>
                     <div className="mt-5">
@@ -716,5 +764,4 @@ const StudentsPage = ({ params }: { params: any }) => {
         </div>
     )
 }
-
 export default StudentsPage

@@ -329,28 +329,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 'use client'
 
 import Image from 'next/image'
@@ -511,8 +489,8 @@ export const columns: ColumnDef<Task>[] = [
                         batchName={batchName}
                         userId={userId}
                         bootcampId={bootcampId}
-                        batchId={batchId} 
-                        fetchStudentData={undefined}                    
+                        batchId={batchId}
+                        fetchStudentData={undefined}
                     />
                 </div>
             )
@@ -525,28 +503,26 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const enrolledDate = row.original.enrolledDate
-            
+
             const formatEnrolledDate = (dateString: string | null) => {
                 if (!dateString) return 'Not available'
-                
+
                 const date = new Date(dateString)
-                
+
                 if (isNaN(date.getTime())) return 'Invalid date'
-                
-                return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                })
+
+                const year = date.getFullYear()
+                const month = String(date.getMonth() + 1).padStart(2, '0')
+                const day = String(date.getDate()).padStart(2, '0')
+
+                return `${year}-${month}-${day}`
             }
 
             const formattedDate = formatEnrolledDate(enrolledDate ?? null)
 
             return (
                 <div className="flex items-center text-gray-800">
-                    <span className="text-sm">
-                        {formattedDate}
-                    </span>
+                    <span className="text-sm">{formattedDate}</span>
                 </div>
             )
         },
@@ -627,39 +603,51 @@ export const columns: ColumnDef<Task>[] = [
         enableSorting: true,
     },
     {
-        accessorKey: 'lastActive',
+        accessorKey: 'lastActiveDate',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Last Active" />
         ),
         cell: ({ row }) => {
-            const lastActive = row.original.lastActive
-            
+            const lastActive = row.original.lastActiveDate
+
             const formatDate = (dateString: string | null) => {
                 if (!dateString) return 'Never'
-                
+
                 const date = new Date(dateString)
                 const now = new Date()
-                const diffTime = Math.abs(now.getTime() - date.getTime())
+                // const diffTime = Math.abs(now.getTime() - date.getTime())
+                const diffTime = now.getTime() - date.getTime()
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-                
+
                 if (diffDays === 0) return 'Today'
                 if (diffDays === 1) return 'Yesterday'
                 if (diffDays <= 7) return `${diffDays} days ago`
-                if (diffDays <= 30) return `${Math.floor(diffDays / 7)} weeks ago`
-                
+                if (diffDays <= 30)
+                    return `${Math.floor(diffDays / 7)} weeks ago`
+
                 return date.toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
-                    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+                    year:
+                        date.getFullYear() !== now.getFullYear()
+                            ? 'numeric'
+                            : undefined,
                 })
             }
 
             const formattedDate = formatDate(lastActive ?? null)
-            const isRecent = lastActive && new Date(lastActive) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            const isRecent =
+                lastActive &&
+                new Date(lastActive) >
+                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
             return (
                 <div className="flex items-center space-x-2 text-gray-800">
-                    <span className={`text-sm ${isRecent ? 'text-green-700' : 'text-gray-600'}`}>
+                    <span
+                        className={`text-sm ${
+                            isRecent ? 'text-green-700' : 'text-gray-600'
+                        }`}
+                    >
                         {formattedDate}
                     </span>
                 </div>
@@ -667,6 +655,7 @@ export const columns: ColumnDef<Task>[] = [
         },
         enableSorting: true,
     },
+
     {
         accessorKey: 'status',
         header: ({ column }) => (
@@ -695,7 +684,8 @@ export const columns: ColumnDef<Task>[] = [
                     default:
                         return {
                             label: 'Unknown',
-                            className: 'bg-muted text-muted-foreground border-muted',
+                            className:
+                                'bg-muted text-muted-foreground border-muted',
                         }
                 }
             }
@@ -704,7 +694,9 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex items-center justify-start">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.className}`}>
+                    <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.className}`}
+                    >
                         {statusConfig.label}
                     </span>
                 </div>
@@ -716,6 +708,7 @@ export const columns: ColumnDef<Task>[] = [
         },
         enableSorting: true,
     },
+
     {
         id: 'actions',
         cell: ({ row }) => {
