@@ -989,6 +989,7 @@ export const getEditStudent = create<editStudent>((set) => ({
 }))
 
 type StudentInfo = {
+    status: any
     email: string
     name: string
 }

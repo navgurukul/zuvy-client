@@ -329,28 +329,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 'use client'
 
 import Image from 'next/image'
@@ -370,7 +348,7 @@ import { AlertDialogDemo } from './components/deleteModalNew'
 import { Checkbox } from '@/components/ui/checkbox'
 import EditModal from './components/editModal'
 import { Input } from '@/components/ui/input'
-import ActionCell from './actionCell' // Import the new ActionCell component
+import ActionCell from './actionCell'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -429,7 +407,9 @@ export const columns: ColumnDef<Task>[] = [
                             onChange={handleSingleStudent}
                         />
                     ) : (
-                        <div className="w-[150px] text-left text-gray-800">{row.getValue('name')}</div>
+                        <div className="w-[150px] text-left text-gray-800">
+                            {row.getValue('name')}
+                        </div>
                     )}
                 </>
             )
@@ -495,8 +475,8 @@ export const columns: ColumnDef<Task>[] = [
                         batchName={batchName}
                         userId={userId}
                         bootcampId={bootcampId}
-                        batchId={batchId} 
-                        fetchStudentData={undefined}                    
+                        batchId={batchId}
+                        fetchStudentData={undefined}
                     />
                 </div>
             )
@@ -509,28 +489,26 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const enrolledDate = row.original.enrolledDate
-            
+
             const formatEnrolledDate = (dateString: string | null) => {
                 if (!dateString) return 'Not available'
-                
+
                 const date = new Date(dateString)
-                
+
                 if (isNaN(date.getTime())) return 'Invalid date'
-                
-                return date.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric'
-                })
+
+                const year = date.getFullYear()
+                const month = String(date.getMonth() + 1).padStart(2, '0')
+                const day = String(date.getDate()).padStart(2, '0')
+
+                return `${year}-${month}-${day}`
             }
 
             const formattedDate = formatEnrolledDate(enrolledDate ?? null)
 
             return (
                 <div className="flex items-center text-gray-800">
-                    <span className="text-sm">
-                        {formattedDate}
-                    </span>
+                    <span className="text-sm">{formattedDate}</span>
                 </div>
             )
         },
@@ -609,74 +587,92 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'lastActive',
+        accessorKey: 'lastActiveDate',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Last Active" />
         ),
         cell: ({ row }) => {
-            const lastActive = row.original.lastActive
-            
+            const lastActive = row.original.lastActiveDate
+
             const formatDate = (dateString: string | null) => {
                 if (!dateString) return 'Never'
-                
+
                 const date = new Date(dateString)
                 const now = new Date()
-                const diffTime = Math.abs(now.getTime() - date.getTime())
+                // const diffTime = Math.abs(now.getTime() - date.getTime())
+                const diffTime = now.getTime() - date.getTime()
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-                
+
                 if (diffDays === 0) return 'Today'
                 if (diffDays === 1) return 'Yesterday'
                 if (diffDays <= 7) return `${diffDays} days ago`
-                if (diffDays <= 30) return `${Math.floor(diffDays / 7)} weeks ago`
-                
+                if (diffDays <= 30)
+                    return `${Math.floor(diffDays / 7)} weeks ago`
+
                 return date.toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
-                    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+                    year:
+                        date.getFullYear() !== now.getFullYear()
+                            ? 'numeric'
+                            : undefined,
                 })
             }
 
             const formattedDate = formatDate(lastActive ?? null)
-            const isRecent = lastActive && new Date(lastActive) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+            const isRecent =
+                lastActive &&
+                new Date(lastActive) >
+                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
             return (
                 <div className="flex items-center space-x-2 text-gray-800">
-                    <span className={`text-sm ${isRecent ? 'text-green-700' : 'text-gray-600'}`}>
+                    <span
+                        className={`text-sm ${
+                            isRecent ? 'text-green-700' : 'text-gray-600'
+                        }`}
+                    >
                         {formattedDate}
                     </span>
                 </div>
             )
         },
     },
+
     {
-        accessorKey: 'studentStatus',
+        accessorKey: 'status',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Status" />
         ),
         cell: ({ row }) => {
-            const studentStatus = row.original.studentStatus || 'active'
-            
+            const studentStatus = row.original.status || 'active'
+            console.log(studentStatus, row.original)
+
             const getStatusConfig = (status: string) => {
                 switch (status.toLowerCase()) {
                     case 'active':
                         return {
                             label: 'Active',
-                            className: 'bg-primary text-primary-foreground border-primary',
+                            className:
+                                'bg-primary text-primary-foreground border-primary',
                         }
                     case 'dropout':
                         return {
                             label: 'Dropout',
-                            className: 'bg-destructive text-destructive-foreground border-destructive',
+                            className:
+                                'bg-destructive text-destructive-foreground border-destructive',
                         }
                     case 'graduate':
                         return {
                             label: 'Graduate',
-                            className: 'bg-warning text-warning-foreground border-warning',
+                            className:
+                                'bg-warning text-warning-foreground border-warning',
                         }
                     default:
                         return {
                             label: 'Unknown',
-                            className: 'bg-muted text-muted-foreground border-muted',
+                            className:
+                                'bg-muted text-muted-foreground border-muted',
                         }
                 }
             }
@@ -685,7 +681,9 @@ export const columns: ColumnDef<Task>[] = [
 
             return (
                 <div className="flex items-center justify-start">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.className}`}>
+                    <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.className}`}
+                    >
                         {statusConfig.label}
                     </span>
                 </div>
@@ -696,6 +694,7 @@ export const columns: ColumnDef<Task>[] = [
             return value.includes(studentStatus?.toLowerCase() || 'active')
         },
     },
+
     {
         id: 'actions',
         cell: ({ row }) => {
