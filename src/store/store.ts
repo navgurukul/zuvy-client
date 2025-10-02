@@ -1012,6 +1012,7 @@ type studentData = {
 
 export const getStudentData = create<studentData>((set) => ({
     studentData: {
+        status: '',
         email: '',
         name: '',
     },

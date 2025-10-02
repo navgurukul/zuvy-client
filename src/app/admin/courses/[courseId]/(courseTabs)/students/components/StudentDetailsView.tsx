@@ -246,7 +246,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             <div className="flex items-center gap-4 flex-wrap justify-start">
                 {/* Search Bar */}
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 mt-1 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search by class name..."
                         value={searchTerm}
