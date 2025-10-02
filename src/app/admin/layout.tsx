@@ -1,7 +1,6 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import AdminNavbar from '../_components/AdminNavbar'
 
 import { usePathname } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
@@ -43,21 +42,7 @@ export default function RootLayout({
                   (user.rolesList.length > 0 &&
                       user.rolesList[0] !== 'admin')) ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Admin'} />
-            ) : (
-                // <AdminNavbar>
-                //     <div className={`${isAssessmentRouteClasses(pathname)}`}>
-                //         {!adminAssessmentPreviewRoute && (
-                //             <div className="pt-16">
-                //                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
-                //             </div>
-                //         )}
-                //         {adminAssessmentPreviewRoute && (
-                //             <MaxWidthWrapper>{children}</MaxWidthWrapper>
-                //         )}
-                //     </div>
-                // </AdminNavbar>
-
-                
+            ) : (                
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
