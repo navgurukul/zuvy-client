@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {PageParams,BootcampData,IndividualStudentData,ProjectSubmissionDetails} from "@/app/admin/courses/[courseId]/submissionProjects/[StudentsProjects]/IndividualReport/IndividualReportPageType"
 
@@ -17,34 +16,6 @@ const Page = ({ params }: PageParams) => {
     const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [submittedDate, setSubmittedDate] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
-
-    const crumbs = [
-        {
-            crumb: 'My Courses',
-            href: `/admin/courses`,
-            isLast: false,
-        },
-        {
-            crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: 'Submission - Projects',
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: indiviDualStudentData?.projectSubmissionDetails?.title,
-            href: `/admin/courses/${params.courseId}/submissionProjects/${params.StudentsProjects}`,
-            isLast: false,
-        },
-        {
-            crumb: indiviDualStudentData?.projectSubmissionDetails
-                ?.projectTrackingData[0].userDetails.name,
-            isLast: true,
-        },
-    ]
 
     const getIndividualStudentData = useCallback(async () => {
         await api
@@ -115,18 +86,16 @@ const Page = ({ params }: PageParams) => {
     if (indiviDualStudentData) {
         return (
             <div className="min-h-screen font-semibold bg-background">
-                <BreadcrumbComponent crumbs={crumbs} />
-                
                 {/* Back Button */}
                 <MaxWidthWrapper>
                    <div className="flex items-center gap-4 mb-8">
                         <Button
                             variant="ghost"
                             onClick={() => router.back()}                        
-                            className="hover:underline text-primary hover:text-primary hover:bg-transparent transition-colors"
+                            className="hover:bg-transparent hover:text-primary transition-colors"
                             >
                             <ArrowLeft className="h-4 w-4 mr-2" />
-                            <span  className="font-semibold" >Back to Projects Submission</span>
+                            Back to Projects Submission
                         </Button>
                      </div>
                 </MaxWidthWrapper>

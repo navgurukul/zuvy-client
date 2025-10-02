@@ -73,7 +73,7 @@ const PraticeProblemsComponent = ({ courseId, debouncedSearch }: PractieProblemP
                     ) : null
                 )
             ) : (
-                <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                <div className="flex flex-col justify-center items-center">
                     <p className="text-center text-muted-foreground max-w-md">
                        No Practice problems submissions available from the students yet. Please wait until the first submission
                     </p>

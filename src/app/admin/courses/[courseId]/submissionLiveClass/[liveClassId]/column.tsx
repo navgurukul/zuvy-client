@@ -76,19 +76,19 @@ export const columns: ColumnDef<any>[] = [
         },
     },
     {
-                accessorKey: 'batch',
-                header: 'Batch',
-                cell: ({ row }) => {
-                    const index = row.index
-                    return (
-                        <div className="flex items-center justify-start">
-                            <Badge variant="outline" className="text-black border-black-200">
-                                {mockBatches[index % mockBatches.length]}
-                            </Badge>
-                        </div>
-                    )
-                },
-            },
+        accessorKey: 'batch',
+        header: 'Batch',
+        cell: ({ row }) => {
+            const index = row.index
+            return (
+                <div className="flex items-center justify-start">
+                    <Badge variant="outline" className="text-black border-black-200">
+                        {mockBatches[index % mockBatches.length]}
+                    </Badge>
+                </div>
+            )
+        },
+    },
     {
         accessorKey: 'startTime',
         header: ({ column }) => (
@@ -159,8 +159,8 @@ export const columns: ColumnDef<any>[] = [
                     <Badge 
                         className={
                             isPresent 
-                                ? "text-green-600 bg-green-100" 
-                                : "text-red-600 bg-red-100"
+                                ? "text-green-600 bg-green-100 hover:bg-muted" 
+                                : "text-red-600 bg-red-100 hover:bg-muted"
                         }
                     >
                         {status}
