@@ -107,7 +107,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
             transition={{ duration: 0.2 }}
         >
             <Card
-                className={`shadow-sm my-3 w-full cursor-pointer transition-all duration-300 ${
+                className={`shadow-sm my-2 w-full cursor-pointer transition-all duration-300 ${
                     showBorderFlash
                         ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash'
                         : ''
@@ -176,7 +176,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                                         e.stopPropagation()
                                         editHandle(moduleId)
                                     }}
-                                    className="hover:text-green-600"
+                                    className="hover:text-muted-foreground hover:bg-gray-200"
                                 >
                                     <Edit className="h-4 w-4" />
                                 </Button>

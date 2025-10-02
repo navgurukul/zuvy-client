@@ -21,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <div className='w-[22%] border-r border-gray-200'>
                         <Chapter /> 
                     </div>
-                    <div className="w-[78%]">{children}</div>
+                    <div className="w-[78%] pt-2">{children}</div>
                 </div>
             )}
         </div>

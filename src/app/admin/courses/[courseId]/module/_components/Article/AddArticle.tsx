@@ -446,7 +446,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     <form
                         id="myForm"
                         onSubmit={form.handleSubmit(editArticleContent)}
-                        className=""
+                        className="mr-4 mb-1"
                     >
                         <FormField
                             control={form.control}
@@ -474,8 +474,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                         : 'Untitled PDF'
                                                 }
                                                 className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                // className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                // className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                             />
                                         </>
                                     </FormControl>
@@ -526,12 +524,12 @@ const AddArticle: React.FC<AddArticleProps> = ({
                         </div>
                     </div> */}
                 {/* </div> */}
-                <div className="flex items-center gap-2 ml-4 pb-4">
+                <div className="flex items-center gap-2 ml-1 pb-4">
                     <BookOpenText size={20} className="transition-colors" />
                     <p className="text-muted-foreground">Article</p>
                 </div>
 
-                <div className="ml-4">
+                <div className="ml-1 mr-4">
                     <RadioGroup
                         className="flex items-center gap-x-6"
                         onValueChange={(value) => setDefaultValue(value)}

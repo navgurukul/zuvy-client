@@ -330,7 +330,7 @@ function Chapter() {
     // }, [currentChapter])
 
     return (
-        <div className="flex flex-col h-screen pb-20 bg-card pl-4">
+        <div className="flex flex-col h-screen pb-20 bg-card pl-4 pt-2">
             <Link
                 href={`/admin/courses/${courseId}/curriculum`}
                 className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
