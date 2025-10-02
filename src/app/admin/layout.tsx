@@ -19,6 +19,7 @@ export default function RootLayout({
 }) {
     const pathname = usePathname()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
+    const isFullWidthRoute = pathname.includes('/module') || pathname.includes('/project') || adminAssessmentPreviewRoute;
     const { user, setUser } = getUser()
     const rolesList = user && user.rolesList.length > 0 && user.rolesList[0]
 
@@ -31,11 +32,8 @@ export default function RootLayout({
         return ''
     }
 
-    // console.log('adminAssessmentPreviewRoute', adminAssessmentPreviewRoute)
-
     return (
-        // <div className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
-        <div>
+        <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
             {user.email.length == 0 ? (
                 <div className="flex items-center justify-center h-[680px]">
                     <Spinner className="text-[rgb(81,134,114)]" />
