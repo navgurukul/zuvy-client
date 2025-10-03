@@ -124,28 +124,6 @@ const Page = ({ params }: any) => {
         return assessments
     }, [params.assessment_Id, params.courseId, offset, position])
 
-    const crumbs = [
-        {
-            crumb: 'My Courses',
-            href: `/admin/courses`,
-            isLast: false,
-        },
-        {
-            crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: 'Submission - Assesments',
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: assesmentData?.title,
-            isLast: false,
-        },
-    ]
-
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
@@ -202,103 +180,100 @@ const Page = ({ params }: any) => {
         searchParams.get('search')])
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
-            <MaxWidthWrapper className="p-6 max-w-7xl">
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <Button
-                        variant="ghost"
-                        onClick={() => router.back()}
-                        className="hover:bg-blue-600 hover:text-white transition-colors"
-                    >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Course Submissions
-                    </Button>
-                </div>
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
+                <Button
+                    variant="ghost"
+                    onClick={() => router.back()}
+                    className="hover:bg-transparent hover:text-primary transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Course Submissions
+                </Button>
+            </div>
 
-                {/* Assessment Info Card */}
-                <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
-                    <CardHeader className="bg-muted">
-                        <CardTitle className="text-2xl text-gray-800 text-left">
-                            {assesmentData?.title || 'Loading...'}
-                        </CardTitle>
+            {/* Assessment Info Card */}
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                <CardHeader className="bg-muted">
+                    <CardTitle className="text-2xl text-gray-800 text-left">
+                        {assesmentData?.title || 'Loading...'}
+                    </CardTitle>
 
-                    </CardHeader>
-                    <CardContent className="bg-muted">
-                            <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                                <div className="text-left">
-                                    <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                                    <div className="text-lg font-semibold">{assesmentData?.totalSubmitedStudents || 0}</div>
-                                </div>
-
-                               
-
-                                <div className="text-left">
-                                    <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                                    <div className="text-xl font-semibold text-gray-900">Assessments</div>
-                                </div>
-
-                                <div className="text-left">
-                                    <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                                    <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
-                                </div>
-                                <div className="text-left">
-                                    <label className="font-medium text-muted-foreground">Batch Filter</label>
-                                    <Select
-                                        value={selectedBatch}
-                                        onValueChange={setSelectedBatch}
-                                    >
-                                        <SelectTrigger className="w-full mt-1">
-                                            <SelectValue placeholder="All Batches" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Batches</SelectItem>
-                                            {batchOptions.map((batch, index) => (
-                                                <SelectItem key={index} value={batch}>{batch}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-
-                                    </Select>
-                                </div>
+                </CardHeader>
+                <CardContent className="bg-muted">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                            <div className="text-left">
+                                <div className="font-medium text-muted-foreground">Total Submissions:</div>
+                                <div className="text-lg font-semibold">{assesmentData?.totalSubmitedStudents || 0}</div>
                             </div>
-                    </CardContent>
-                </Card>
-                <Card className="bg-muted">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-xl text-gray-800">
-                                Student Submissions
-                            </CardTitle>
+
+                            
+
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
+                                <div className="text-xl font-semibold text-gray-900">Assessments</div>
+                            </div>
+
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Course ID:</div>
+                                <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                            </div>
+                            <div className="text-left">
+                                <label className="font-medium text-muted-foreground">Batch Filter</label>
+                                <Select
+                                    value={selectedBatch}
+                                    onValueChange={setSelectedBatch}
+                                >
+                                    <SelectTrigger className="w-full mt-1">
+                                        <SelectValue placeholder="All Batches" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Batches</SelectItem>
+                                        {batchOptions.map((batch, index) => (
+                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+
+                                </Select>
+                            </div>
                         </div>
-                    </CardHeader>
-                    <div className="relative w-1/3 p-4">
-                        <SearchBox
-                            placeholder="Search by name or email"
-                            fetchSuggestionsApi={fetchSuggestionsApi}
-                            fetchSearchResultsApi={fetchSearchResultsApi}
-                            defaultFetchApi={defaultFetchApi}
-                            getSuggestionLabel={(s) => (
-                                <div>
-                                    <div className="font-medium">{s.name}</div>
-                                    <div className="text-sm text-gray-500">{s.email}</div>
-                                </div>
-                            )}
-                            inputWidth=""
-                        />
+                </CardContent>
+            </Card>
+            <Card className="bg-muted">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl text-gray-800">
+                            Student Submissions
+                        </CardTitle>
                     </div>
-                    <CardContent className="p-0">
-                        <DataTable data={dataTableAssesment} columns={columns} />
-                    </CardContent>
-                </Card>
-                <div className="p-6 border-t">
-                    <DataTablePagination
-                        totalStudents={totalStudents}
-                        pages={totalPages}
-                        lastPage={lastPage}
-                        fetchStudentData={getStudentAssesmentDataHandler}
+                </CardHeader>
+                <div className="relative w-1/3 p-4">
+                    <SearchBox
+                        placeholder="Search by name or email"
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(s) => (
+                            <div>
+                                <div className="font-medium">{s.name}</div>
+                                <div className="text-sm text-gray-500">{s.email}</div>
+                            </div>
+                        )}
+                        inputWidth=""
                     />
                 </div>
-            </MaxWidthWrapper>
+                <CardContent className="p-0">
+                    <DataTable data={dataTableAssesment} columns={columns} />
+                </CardContent>
+            </Card>
+            <div className="p-6 border-t">
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    pages={totalPages}
+                    lastPage={lastPage}
+                    fetchStudentData={getStudentAssesmentDataHandler}
+                />
+            </div>
         </>
     )
 }

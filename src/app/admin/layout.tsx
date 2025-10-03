@@ -1,7 +1,6 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import AdminNavbar from '../_components/AdminNavbar'
 
 import { usePathname } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
@@ -19,6 +18,7 @@ export default function RootLayout({
 }) {
     const pathname = usePathname()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
+    const isFullWidthRoute = pathname.includes('/module') || pathname.includes('/project') || adminAssessmentPreviewRoute;
     const { user, setUser } = getUser()
     const rolesList = user && user.rolesList.length > 0 && user.rolesList[0]
 
@@ -31,11 +31,8 @@ export default function RootLayout({
         return ''
     }
 
-    // console.log('adminAssessmentPreviewRoute', adminAssessmentPreviewRoute)
-
     return (
-        // <div className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
-        <div>
+        <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
             {user.email.length == 0 ? (
                 <div className="flex items-center justify-center h-[680px]">
                     <Spinner className="text-[rgb(81,134,114)]" />
@@ -45,21 +42,7 @@ export default function RootLayout({
                   (user.rolesList.length > 0 &&
                       user.rolesList[0] !== 'admin')) ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Admin'} />
-            ) : (
-                // <AdminNavbar>
-                //     <div className={`${isAssessmentRouteClasses(pathname)}`}>
-                //         {!adminAssessmentPreviewRoute && (
-                //             <div className="pt-16">
-                //                 <MaxWidthWrapper>{children}</MaxWidthWrapper>
-                //             </div>
-                //         )}
-                //         {adminAssessmentPreviewRoute && (
-                //             <MaxWidthWrapper>{children}</MaxWidthWrapper>
-                //         )}
-                //     </div>
-                // </AdminNavbar>
-
-                
+            ) : (                
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 

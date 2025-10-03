@@ -9,7 +9,6 @@ import { b64DecodeUnicode } from '@/utils/base64'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn, difficultyColor } from '@/lib/utils'
 import { FileText, ArrowLeft } from 'lucide-react'
-import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { PageParams, CodingSubmission, ApiResponse } from "@/app/admin/courses/[courseId]/submissionProblems/individualCodingSubbmission/CodingSubmissionType"
@@ -36,37 +35,6 @@ const Page = ({ params }: PageParams) => {
 
     const parsedCrumbData = crumbData ? JSON.parse(crumbData) : []
 
-    const crumbs = useMemo(
-        () => [
-            {
-                crumb: 'My Courses',
-                href: `/admin/courses`,
-                isLast: false,
-            },
-            {
-                crumb: parsedCrumbData[0],
-                href: `/admin/courses/${params.courseId}/submissions`,
-                isLast: false,
-            },
-            // {
-            //     crumb: 'Submission - Practice Problems',
-            //     href: `/admin/courses/${params.courseId}/submissions`,
-            //     isLast: false,
-            // },
-            {
-                crumb: parsedCrumbData[1],
-                href: `/admin/courses/${params.courseId}/submissionProblems/${moduleId}`,
-                isLast: false,
-            },
-            {
-                crumb: 'Individual Coding Submission',
-                href: ``,
-                isLast: true,
-            },
-        ],
-        [params, parsedCrumbData]
-    )
-
     const fetchCodingSubbmissionDataHandler = useCallback(async () => {
         try {
             await api
@@ -91,13 +59,12 @@ const Page = ({ params }: PageParams) => {
         <>
             {codingSubmissiondata && (
                 <div>
-                    <BreadcrumbComponent crumbs={crumbs} />
                     <MaxWidthWrapper className="flex flex-col gap-y-4 text-gray-600">
                         <div className="flex items-center gap-4 mb-8">
                             <Button
                                 variant="ghost"
                                 onClick={() => router.back()}
-                                className="hover:bg-blue-600 hover:text-white transition-colors"
+                                className="hover:bg-transparent hover:text-primary transition-colors"
                             >
                                 <ArrowLeft className="h-4 w-4 mr-2" />
                                 Back to Course Submissions

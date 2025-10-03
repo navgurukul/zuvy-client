@@ -87,13 +87,13 @@ const index = Math.floor(Math.random() * (5 - 1 + 1)) + 1
           <h3 className="font-semibold text-start text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors flex-1">
             {course.name}
           </h3>
-          <Badge 
+          {/* <Badge 
             variant="outline" 
             className={cn("capitalize text-xs", getStatusColor(status))}
           >
             {status}
-            {/* {course.status} */}
-          </Badge>
+            {course.status}
+          </Badge> */}
         </div>
       </CardContent>
       

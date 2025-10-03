@@ -126,7 +126,7 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex space-x-2">
                     <Button
                         variant={'ghost'}
-                        className="text-lg font-bold"
+                        className="text-lg font-bold  hover:bg-muted"
                         disabled={isSubmitted}
                     >
                         <Link

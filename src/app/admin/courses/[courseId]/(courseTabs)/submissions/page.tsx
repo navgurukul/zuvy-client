@@ -622,7 +622,7 @@ const Page = ({ params }: { params: any }) => {
                                                 })}
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col items-center justify-center ">
+                                            <div className="flex flex-col items-center justify-center">
                                                 <p className="text-center text-muted-foreground max-w-md">
                                                     {appliedSearchQuery
                                                         ? `No Projects Found for "${appliedSearchQuery}"`
@@ -638,9 +638,10 @@ const Page = ({ params }: { params: any }) => {
                                             </div>
                                         ))}
                                     {activeTab === 'form' && (
-                                        <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
+                                        <div className="grid relative gap-8 mt-4 md:mt-8">
                                             {formData.length > 0 ? (
-                                                formData.map((item: any) =>
+                                               <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3"> 
+                                                {formData.map((item: any) =>
                                                     (item.moduleChapterData || []).map((data: any, index: any) => (
                                                         <FormComponent
                                                             key={`${item.id}-${index}`}
@@ -651,9 +652,11 @@ const Page = ({ params }: { params: any }) => {
                                                             debouncedSearch={appliedSearchQuery}
                                                         />
                                                     ))
-                                                )
+                                                )}
+                                                </div>
                                             ) : (
-                                                <div className="w-screen flex flex-col justify-center items-center h-4/5">
+                                                
+                                                <div className="flex flex-col justify-center items-center">
                                                     <p className="text-center text-muted-foreground max-w-md">
                                                         {appliedSearchQuery ? `No Forms Found for "${appliedSearchQuery}"` : 'No Forms submissions available from the students yet. Please wait until the first submission'}
                                                     </p>

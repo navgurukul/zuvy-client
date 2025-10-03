@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import ChapterModal from '@/app/admin/courses/[courseId]/module/_components/ChapterModal'
-import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import {
     getChapterContentState,
     getChapterDataState,
@@ -101,23 +100,6 @@ function Chapter() {
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { courseData, fetchCourseDetails } = getCourseData()
     const draggedChapterRef = useRef<number | null>(null)
-
-    const crumbs = [
-        {
-            crumb: 'Courses',
-            href: '/admin/courses',
-            isLast: false,
-        },
-        {
-            crumb: `${courseData?.name}-Curriculum`,
-            href: `/admin/courses/${courseId}/curriculum`,
-            isLast: false,
-        },
-        {
-            crumb: moduleName,
-            isLast: true,
-        },
-    ]
 
     useEffect(() => {
         if (courseData?.name === "") fetchCourseDetails(courseID)
@@ -348,10 +330,7 @@ function Chapter() {
     // }, [currentChapter])
 
     return (
-        <div className="flex flex-col h-screen pb-20 bg-card">
-            {/* <div className="mb-5">
-                <BreadcrumbComponent crumbs={crumbs} />
-            </div> */}
+        <div className="flex flex-col h-screen pb-20 bg-card pl-4 pt-2">
             <Link
                 href={`/admin/courses/${courseId}/curriculum`}
                 className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
