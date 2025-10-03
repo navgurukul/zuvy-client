@@ -23,7 +23,6 @@ const Page = ({ params }: { params: AssessmentParams }) => {
         enabled: !!studentData?.id // Only fetch when user data is available
     })    // Show loading state
 
-
     if (loading) {
         return<CodingResultPageSkeleton/>
     }
@@ -57,7 +56,7 @@ const Page = ({ params }: { params: AssessmentParams }) => {
         )
     }return (
         <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-            <CodingSubmission codingSubmissionsData={codingSubmissionsData} />
+            <CodingSubmission codingSubmissionsData={codingSubmissionsData} loading={loading} />
         </div>
     )
 }

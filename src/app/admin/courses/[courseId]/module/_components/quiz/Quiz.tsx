@@ -386,7 +386,7 @@ function Quiz(props: QuizProps) {
                                             )}
                                         </div>
                                     </div>
-                                    <ScrollArea className="h-96 pr-3 pb-10">
+                                    <ScrollArea className="h-96 pr-3">
                                         {addQuestion?.map(
                                             (questions: QuizDataLibrary, index: number) => (
                                                 <QuizModal

@@ -26,16 +26,12 @@ import { useThemeStore } from '@/store/store'
 import useWindowSize from '@/hooks/useHeightWidth'
 import {CodingSubmissionSkeleton} from "@/app/student/_components/Skeletons"
 
-const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: CodingSubmissionData | null }) => {
+const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmissionsData: CodingSubmissionData | null, loading: boolean }) => {
   const router = useRouter()
   const { isDark, toggleTheme } = useThemeStore();
-  const [loading, setLoading] = useState(true);
 
   const { width } = useWindowSize();
   const isMobile = width < 768;
-
-
- 
 
  if (loading) return <CodingSubmissionSkeleton/>
 
