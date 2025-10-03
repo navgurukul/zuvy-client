@@ -49,7 +49,7 @@ const SelectedProblems = ({
                                 (tag: CodingTopicsTag) => tag.id == selectedQuestion?.tagId
                             )
                             return (
-                                <div key={selectedQuestion?.id}>
+                                <div key={selectedQuestion?.id} className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4">
                                     <div className="flex items-center gap-2 justify-between w-full">
                                         <h3 className="font-bold text-[16px] text-gray-600">
                                             {selectedQuestion.title}
@@ -84,7 +84,7 @@ const SelectedProblems = ({
                                     </p>
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                            <p className="font-bold text-sm mt-2 text-primary cursor-pointer">
                                                 View Full Description
                                             </p>
                                         </DialogTrigger>

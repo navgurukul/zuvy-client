@@ -43,9 +43,13 @@ interface BatchData {
     bootcampId: number
     instructorId: number
     capEnrollment: number
-    // createdAt: string,
-    // updatedAt: string,
+    createdAt: string,
+    updatedAt: string,
+    status: string,
+    startDate: string | null  
+    endDate: string | null  
     students_enrolled: number
+    instructorEmail: string 
 }
 
 interface StoreCourseData {
@@ -58,6 +62,8 @@ interface StoreBatchData {
     batchData: BatchData[] | null
     setBatchData: (newValue: BatchData[]) => void
     fetchBatches: (courseId: number) => void
+    totalBatches?: number 
+    totalPages?: number 
 }
 
 export interface quiz {
@@ -73,6 +79,7 @@ export interface quiz {
     tagId: number
     usage: number
     quizVariants: any[]
+    createdAt: string
 }
 
 export const getCourseData = create<StoreCourseData>((set) => ({
@@ -119,9 +126,13 @@ export const getBatchData = create<StoreBatchData>((set) => ({
         try {
             const response = await api.get(`/bootcamp/batches/${courseId}`)
             const data = response.data
-            set({ batchData: data.data })
+            set({ batchData: data.data,
+                totalBatches: data.totalBatches,
+                totalPages: data.totalPages
+             })
         } catch (error) {
             console.error('Error fetching batches', error)
+            set({ batchData: [] }) 
         }
     },
 }))
@@ -665,8 +676,8 @@ type editCodingQuestionDialogs = {
     setIsCodingDialogOpen: (newValue: boolean) => void
     isCodingEditDialogOpen: boolean
     setIsCodingEditDialogOpen: (newValue: boolean) => void
-    editCodingQuestionId: null
-    setEditCodingQuestionId: (newValue: any) => void
+    editCodingQuestionId: number | null
+    setEditCodingQuestionId: (newValue: number | null) => void
     isQuestionUsed: boolean
     setIsQuestionUsed: (newValue: boolean) => void
 }
@@ -682,7 +693,7 @@ export const getEditCodingQuestionDialogs = create<editCodingQuestionDialogs>(
             set({ isCodingEditDialogOpen: newValue })
         },
         editCodingQuestionId: null,
-        setEditCodingQuestionId: (newValue: any) => {
+        setEditCodingQuestionId: (newValue: number | null) => {
             set({ editCodingQuestionId: newValue })
         },
         isQuestionUsed: false,

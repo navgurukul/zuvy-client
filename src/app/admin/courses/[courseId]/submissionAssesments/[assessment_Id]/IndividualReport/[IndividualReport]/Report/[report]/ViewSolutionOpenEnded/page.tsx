@@ -7,8 +7,43 @@ import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore } from '@/store/store'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
-import {PageSubmissionData,PageAssessmentData, paramsType,BootcampData} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionOpenEnded/ViewSolutionPageType"
+import type { PageAssessmentData, PageSubmissionData, BootcampData } from './ViewSolutionPageType'
 
+type SubmissionData = {
+    id: number
+    userId: number
+    answer: string
+    questionId: number
+    submitAt: string
+    assessmentSubmissionId: number
+}
+
+type OpenEndedQuestion = {
+    id: number
+    question: string
+    difficulty: string
+}
+
+type AssessmentData = {
+    id: number
+    openEndedQuestionId: number
+    assessmentOutsourseId: number
+    bootcampId: number
+    moduleId: number
+    chapterId: number
+    createdAt: string
+    submissionsData: SubmissionData[]
+    OpenEndedQuestion: OpenEndedQuestion
+    answer: string
+}
+
+export type paramsType = {
+    courseId: string
+    assessment_Id: string
+    IndividualReport: string
+    report: string
+    CodingSolution: number
+}
 
 const Page = ({ params }: { params: paramsType }) => {
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()

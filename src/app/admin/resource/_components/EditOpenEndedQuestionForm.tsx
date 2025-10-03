@@ -108,6 +108,28 @@ function EditOpenEndedQuestionForm({
                     onSubmit={form.handleSubmit(handleSubmit)}
                     className="max-w-md w-full flex flex-col gap-4"
                 >
+
+                    <FormField
+                        control={form.control}
+                        name="questionDescription"
+                        render={({ field }) => {
+                            return (
+                                <FormItem className="text-left">
+                                    <FormLabel>
+                                        Write the Question Descriptions
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            placeholder="Write your Question here"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )
+                        }}
+                    />
+
                     <FormField
                         control={form.control}
                         name="difficulty"
@@ -122,25 +144,25 @@ function EditOpenEndedQuestionForm({
                                         <FormLabel className="mt-5">
                                             Difficulty
                                         </FormLabel>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                             <FormControl>
-                                                <RadioGroupItem value="Easy" className="text-black border-black" />
+                                                <RadioGroupItem value="Easy" className="text-primary border-primary" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Easy
                                             </FormLabel>
                                         </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                             <FormControl>
-                                                <RadioGroupItem value="Medium" className="text-black border-black" />
+                                                <RadioGroupItem value="Medium" className="text-primary border-primary" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Medium
                                             </FormLabel>
                                         </FormItem>
-                                        <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormItem className="flex items-center space-x-1 space-y-0 ml-2">
                                             <FormControl>
-                                                <RadioGroupItem value="Hard" className="text-black border-black" />
+                                                <RadioGroupItem value="Hard" className="text-primary border-primary" />
                                             </FormControl>
                                             <FormLabel className="font-normal">
                                                 Hard
@@ -213,28 +235,8 @@ function EditOpenEndedQuestionForm({
                         }}
                     />
 
-                    <FormField
-                        control={form.control}
-                        name="questionDescription"
-                        render={({ field }) => {
-                            return (
-                                <FormItem className="text-left">
-                                    <FormLabel>
-                                        Write the Question Descriptions
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Write your Question here"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )
-                        }}
-                    />
                     <div className="flex justify-end">
-                        <Button type="submit" className="w-1/2 bg-success-dark opacity-75">
+                        <Button type="submit" className="w-1/2 bg-primary hover:bg-primary-dark shadow-4dp">
                             Edit Open-Ended Question
                         </Button>
                     </div>

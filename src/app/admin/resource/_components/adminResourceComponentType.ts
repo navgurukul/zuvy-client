@@ -146,7 +146,7 @@ export interface NewCodingProblemFormProps {
   filteredCodingQuestions:any
   setCodingQuestions:any
   selectedOptions?: Record<string, any>; 
-  difficulty?: string;
+  difficulty?: { label: string; value: string }[];
   offset?: number;
   position?: string;
 }
@@ -220,6 +220,7 @@ export interface NewOpenEndedQuestionFormProps {
   difficulty?: string;
   offset?: number;
   position?: string;
+  onQuestionCreated?: () => void;
 }
 
 export interface DialogBoxProps {

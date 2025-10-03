@@ -257,6 +257,12 @@ const OpenEndedQuestions = (props: Props) => {
         })
     }, [])
 
+    // Add this refresh function
+    const refreshQuestions = useCallback(async () => {
+        await fetchCodingQuestions(offset)
+    }, [fetchCodingQuestions, offset])
+
+
     const handleTopicClick = (value: string) => {
         const tag = tags.find((t) => t.tagName === value) || { tagName: 'All Topics', id: -1 }
         setSelectedTag(tag)
@@ -368,25 +374,19 @@ const OpenEndedQuestions = (props: Props) => {
                 <div>
                     {allOpenEndedQuestions?.length > 0 ? (
                         <MaxWidthWrapper>
-                            <h1 className="text-left font-semibold text-2xl text-gray-600">
-                                Resource Library - Open-Ended-Questions
-                            </h1>
-                            <div className="flex justify-between">
-                                <div className="relative w-1/4">
-                                    <SearchBox
-                                        placeholder="Search Question"
-                                        fetchSuggestionsApi={fetchSuggestionsApi}
-                                        fetchSearchResultsApi={fetchSearchResultsApi}
-                                        defaultFetchApi={defaultFetchApi}
-                                        getSuggestionLabel={(suggestion) => suggestion.question}
-                                        getSuggestionValue={(suggestion) => suggestion.question}
-                                        inputWidth="w-full my-6"
-                                    />
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h1 className="text-left font-heading font-bold text-3xl text-foreground">
+                                        Content Bank - Open-Ended Questions
+                                    </h1>
                                 </div>
+                                
                                 <div className="flex flex-row items-center gap-2">
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <Button className="text-white bg-success-dark opacity-75 lg:max-w-[150px] w-full">
+                                            <Button 
+                                                variant={'outline'}
+                                                className="lg:max-w-[150px] w-full">
                                                 <p>Create Topic</p>
                                             </Button>
                                         </DialogTrigger>
@@ -402,7 +402,7 @@ const OpenEndedQuestions = (props: Props) => {
                                         open={isDialogOpen}
                                     >
                                         <DialogTrigger asChild>
-                                            <Button className='bg-success-dark opacity-75'> Create Question</Button>
+                                            <Button className='bg-primary hover:bg-primary-dark shadow-4dp'> Create Question</Button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[500px]">
                                             <DialogHeader>
@@ -416,37 +416,48 @@ const OpenEndedQuestions = (props: Props) => {
                                                     setIsDialogOpen={setIsDialogOpen}
                                                     filteredOpenEndedQuestions={filteredOpenEndedQuestions}
                                                     setOpenEndedQuestions={setOpenEndedQuestions}
+                                                    selectedOptions={selectedOptions}
+                                                    // difficulty={difficulty}
+                                                    offset={offset}
+                                                    position={position}
+                                                    onQuestionCreated={refreshQuestions} 
                                                 />
                                             </div>
                                         </DialogContent>
                                     </Dialog>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <div className="w-full lg:w-[250px]">
+                            
+                            <div className="flex items-center gap-4 mb-6">
+                                <div>
+                                    <SearchBox
+                                        placeholder="Search Question"
+                                        fetchSuggestionsApi={fetchSuggestionsApi}
+                                        fetchSearchResultsApi={fetchSearchResultsApi}
+                                        defaultFetchApi={defaultFetchApi}
+                                        getSuggestionLabel={(suggestion) => suggestion.question}
+                                        getSuggestionValue={(suggestion) => suggestion.question}
+                                        inputWidth="w-[350px]"
+                                    />
+                                </div>
+                                
+                                <div className="w-[180px] flex-shrink-0">
                                     <MultiSelector
                                         selectedCount={difficultyCount}
                                         options={difficultyOptions}
                                         selectedOptions={difficulty}
                                         handleOptionClick={handleDifficulty}
-                                        type={
-                                            difficultyCount > 1
-                                                ? 'Difficulties'
-                                                : 'Difficulty'
-                                        }
+                                        type={difficultyCount > 1 ? 'Difficulties' : 'Difficulty'}
                                     />
                                 </div>
-                                <div className="w-full lg:w-[250px]">
+                                
+                                <div className="w-[180px] flex-shrink-0">
                                     <MultiSelector
                                         selectedCount={selectedTagCount}
                                         options={options}
                                         selectedOptions={selectedOptions}
                                         handleOptionClick={handleTagOption}
-                                        type={
-                                            selectedTagCount > 1
-                                                ? 'Topics'
-                                                : 'Topic'
-                                        }
+                                        type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
                                     />
                                 </div>
                             </div>
@@ -458,7 +469,7 @@ const OpenEndedQuestions = (props: Props) => {
                         </MaxWidthWrapper>
                     ) : (
                         <>
-                            <h1 className="text-left font-semibold text-2xl text-gray-600">
+                            <h1 className="text-left font-semibold text-2xl text-foreground">
                                 Resource Library - Open-Ended-Questions
                             </h1>
                             <MaxWidthWrapper className="flex flex-col justify-center items-center gap-5">
@@ -493,6 +504,11 @@ const OpenEndedQuestions = (props: Props) => {
                                                 setIsDialogOpen={setIsDialogOpen}
                                                 filteredOpenEndedQuestions={filteredOpenEndedQuestions}
                                                 setOpenEndedQuestions={setOpenEndedQuestions}
+                                                selectedOptions={selectedOptions}
+                                                // difficulty={difficulty}
+                                                offset={offset}
+                                                position={position}
+                                                onQuestionCreated={refreshQuestions} 
                                             />
                                         </div>
                                     </DialogContent>

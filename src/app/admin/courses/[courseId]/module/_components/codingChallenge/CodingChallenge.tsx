@@ -23,6 +23,8 @@ import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {CodingChallangesQuestion,ChallangesProps, CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 import { AnyARecord } from 'dns'
+import { SquareCode } from 'lucide-react'
+
 function CodingChallenge({
     content,
     activeChapterTitle,
@@ -259,186 +261,195 @@ function CodingChallenge({
     }
     return (
         <>
-            <div className="px-5" key={contentKey}>
+            <div key={contentKey}>
                 {/* SearchBar component */}
-                <div className="flex flex-col items-start mb-15">
-                    <div className="flex justify-between items-center w-full">
-                        <div className="w-2/6 flex justify-center align-middle items-center relative">
-                            <Input
-                                required
-                                onChange={handleTitleChange}
-                                value={chapterTitle}
-                                placeholder="Untitled Coding Problem"
-                                className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                autoFocus
-                            />
-                            {!chapterTitle && (
-                                <Pencil
-                                    fill="true"
-                                    fillOpacity={0.4}
-                                    size={20}
-                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                <div className='px-5 pb-4 border-b border-gray-200'>
+                    <div className="flex flex-col items-start mb-15">
+                        <div className="flex justify-between items-center w-full">
+                            <div className="w-2/4 flex justify-center align-middle items-center relative">
+                                <Input
+                                    required
+                                    onChange={handleTitleChange}
+                                    value={chapterTitle}
+                                    placeholder="Untitled Coding Problem"
+                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                 />
-                            )}
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <div
-                                id="previewCodingChallenge"
-                                onClick={previewCodingChallenge}
-                                className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
-                            >
-                                <Eye size={18} />
-                                <h6 className="ml-1 text-sm">Preview</h6>
+                                {!chapterTitle && (
+                                    <Pencil
+                                        fill="true"
+                                        fillOpacity={0.4}
+                                        size={20}
+                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                    />
+                                )}
                             </div>
-                            {selectedQuestions?.length > 0 && (
-                                <Button
-                                    onClick={handleSaveClick}
-                                    className="mt-5 bg-success-dark opacity-75"
+                            <div className="flex items-center justify-between">
+                                {/* <div
+                                    id="previewCodingChallenge"
+                                    onClick={previewCodingChallenge}
+                                    className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
                                 >
-                                    Save
-                                </Button>
-                            )}
+                                    <Eye size={18} />
+                                    <h6 className="ml-1 text-sm">Preview</h6>
+                                </div> */}
+                                {selectedQuestions?.length > 0 && (
+                                    <Button
+                                        onClick={handleSaveClick}
+                                        className="mt-5 bg-primary opacity-75"
+                                    >
+                                        Save
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pb-4">
+                            <SquareCode size={20} className="transition-colors" />
+                            <p className="text-muted-foreground">Coding Problems</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2">
-                    <div className="">
-                        <div className="flex">
-                            <CodingTopics
-                                setSearchTerm={setSearchTerm}
-                                searchTerm={searchTerm}
-                                selectedTopics={selectedOptions}
-                                setSelectedTopics={setSelectedOptions}
-                                selectedDifficulties={selectedDifficulty}
-                                setSelectedDifficulties={setSelectedDifficulty}
-                                tags={tags} selectedQuestions={undefined} setSelectedQuestions={function (value: React.SetStateAction<AnyARecord[]>): void {
-                                    throw new Error('Function not implemented.')
-                                } } content={undefined} moduleId={''} chapterTitle={''}                            />
-                        </div>
-                        <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
-                            Coding Library
-                        </h1>
+                <div className="px-5 pt-4 bg-card">
+                    <CodingTopics
+                        setSearchTerm={setSearchTerm}
+                        searchTerm={searchTerm}
+                        selectedTopics={selectedOptions}
+                        setSelectedTopics={setSelectedOptions}
+                        selectedDifficulties={selectedDifficulty}
+                        setSelectedDifficulties={setSelectedDifficulty}
+                        tags={tags} 
+                        selectedQuestions={undefined} 
+                        setSelectedQuestions={function (value: React.SetStateAction<AnyARecord[]>): void {
+                            throw new Error('Function not implemented.')
+                        } } 
+                        content={undefined} 
+                        moduleId={''} 
+                        chapterTitle={''}                            
+                    />
+                    <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
+                        Coding Library
+                    </h1>
+                
+                    <div className="grid grid-cols-2">
                         <div className="">
-                            <ScrollArea className="h-screen pb-80">
-                                {filteredQuestions?.map((question: any) => {
-                                    const selectedTagName = tags?.filter(
-                                        (tag: any) => tag.id == question.tagId
-                                    )
-                                    return (
-                                        <div
-                                            key={question.id}
-                                            className={`rounded-sm py-5 pr-5`}
-                                        >
-                                            <div className="flex justify-between text-start items-center w-full">
-                                                <div className="w-full">
-                                                    <div className="flex items-center gap-2 justify-between">
-                                                        <h2 className="font-bold text-[16px] text-gray-600">
-                                                            {ellipsis(
-                                                                question.title,
-                                                                30
-                                                            )}
-                                                        </h2>
-
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-sm text-[#518672] bg-[#DCE7E3] py-1 rounded-2xl px-2">
-                                                                {
-                                                                    selectedTagName[0]
-                                                                        ?.tagName
-                                                                }
-                                                            </span>
-
-                                                            <span
-                                                                className={cn(
-                                                                    `text-sm rounded-xl p-1 `,
-                                                                    difficultyColor(
-                                                                        question.difficulty
-                                                                    ), // Text color
-                                                                    difficultyBgColor(
-                                                                        question.difficulty
-                                                                    ) // Background color
+                            <div className="">
+                                <ScrollArea className="h-screen pb-80">
+                                    {filteredQuestions?.map((question: any) => {
+                                        const selectedTagName = tags?.filter(
+                                            (tag: any) => tag.id == question.tagId
+                                        )
+                                        return (
+                                            <div
+                                                key={question.id}
+                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                                            >
+                                                <div className="flex justify-between text-start items-center w-full">
+                                                    <div className="w-full">
+                                                        <div className="flex items-center gap-2 justify-between">
+                                                            <h2 className="font-bold text-[16px] text-gray-600">
+                                                                {ellipsis(
+                                                                    question.title,
+                                                                    30
                                                                 )}
-                                                            >
-                                                                {
-                                                                    question.difficulty
-                                                                }
-                                                            </span>
+                                                            </h2>
 
-                                                            <div>
-                                                                {selectedQuestions?.some(
-                                                                    (
-                                                                        selectedQuestion
-                                                                    ) =>
-                                                                        selectedQuestion?.id ===
-                                                                        question.id
-                                                                ) ? (
-                                                                    <svg
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        width="20"
-                                                                        height="20"
-                                                                        viewBox="0 0 24 24"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        strokeWidth="2"
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        className="lucide lucide-circle-check"
-                                                                    >
-                                                                        <circle
-                                                                            cx="12"
-                                                                            cy="12"
-                                                                            r="10"
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-sm text-[#518672] bg-[#DCE7E3] py-1 rounded-2xl px-2">
+                                                                    {
+                                                                        selectedTagName[0]
+                                                                            ?.tagName
+                                                                    }
+                                                                </span>
+
+                                                                <span
+                                                                    className={cn(
+                                                                        `text-sm rounded-xl p-1 `,
+                                                                        difficultyColor(
+                                                                            question.difficulty
+                                                                        ), // Text color
+                                                                        difficultyBgColor(
+                                                                            question.difficulty
+                                                                        ) // Background color
+                                                                    )}
+                                                                >
+                                                                    {
+                                                                        question.difficulty
+                                                                    }
+                                                                </span>
+
+                                                                <div>
+                                                                    {selectedQuestions?.some(
+                                                                        (
+                                                                            selectedQuestion
+                                                                        ) =>
+                                                                            selectedQuestion?.id ===
+                                                                            question.id
+                                                                    ) ? (
+                                                                        <svg
+                                                                            xmlns="http://www.w3.org/2000/svg"
+                                                                            width="20"
+                                                                            height="20"
+                                                                            viewBox="0 0 24 24"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            strokeWidth="2"
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            className="lucide lucide-circle-check"
+                                                                        >
+                                                                            <circle
+                                                                                cx="12"
+                                                                                cy="12"
+                                                                                r="10"
+                                                                            />
+                                                                            <path d="m9 12 2 2 4-4" />
+                                                                        </svg>
+                                                                    ) : (
+                                                                        <PlusCircle
+                                                                            onClick={() => {
+                                                                                setSelectedQuestions(
+                                                                                    [
+                                                                                        question,
+                                                                                    ]
+                                                                                )
+                                                                            }}
+                                                                            className="text-primary cursor-pointer"
+                                                                            size={
+                                                                                20
+                                                                            }
                                                                         />
-                                                                        <path d="m9 12 2 2 4-4" />
-                                                                    </svg>
-                                                                ) : (
-                                                                    <PlusCircle
-                                                                        onClick={() => {
-                                                                            setSelectedQuestions(
-                                                                                [
-                                                                                    question,
-                                                                                ]
-                                                                            )
-                                                                        }}
-                                                                        className="text-[rgb(81,134,114)] cursor-pointer"
-                                                                        size={
-                                                                            20
-                                                                        }
-                                                                    />
-                                                                )}
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div className="w-full">
-                                                        <p className="text-gray-600 text-[15px] mt-1">
-                                                            {ellipsis(
-                                                                question.description,
-                                                                60
-                                                            )}
-                                                        </p>
-                                                    </div>
-                                                    <Dialog>
-                                                        <DialogTrigger asChild>
-                                                            <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
-                                                                View Full
-                                                                Description
+                                                        <div className="w-full">
+                                                            <p className="text-gray-600 text-[15px] mt-1">
+                                                                {ellipsis(
+                                                                    question.description,
+                                                                    60
+                                                                )}
                                                             </p>
-                                                        </DialogTrigger>
-                                                        <DialogOverlay />
-                                                        <QuestionDescriptionModal
-                                                            question={question}
-                                                            type="coding"
-                                                        />
-                                                    </Dialog>
+                                                        </div>
+                                                        <Dialog>
+                                                            <DialogTrigger asChild>
+                                                                <p className="font-bold text-sm mt-2 text-primary cursor-pointer">
+                                                                    View Full Description
+                                                                </p>
+                                                            </DialogTrigger>
+                                                            <DialogOverlay />
+                                                            <QuestionDescriptionModal
+                                                                question={question}
+                                                                type="coding"
+                                                            />
+                                                        </Dialog>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )
-                                })}
-                            </ScrollArea>
+                                        )
+                                    })}
+                                </ScrollArea>
+                            </div>
                         </div>
-                    </div>
-                    <div className="mt-36">
                         {/* FORCE RE-RENDER: Pass contentKey as key */}
                         <SelectedProblems
                             key={contentKey}
@@ -455,7 +466,8 @@ function CodingChallenge({
                                 throw new Error('Function not implemented.')
                             } } selectedDifficulties={[]} setSelectedDifficulties={function (value: React.SetStateAction<string[]>): void {
                                 throw new Error('Function not implemented.')
-                            } }                        />
+                            } }                        
+                        />
                     </div>
                 </div>
             </div>

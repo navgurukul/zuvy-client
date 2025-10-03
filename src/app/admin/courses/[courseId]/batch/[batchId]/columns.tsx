@@ -275,6 +275,8 @@ export const columns: ColumnDef<Task>[] = [
                             bootcampId={bootcampId}
                             name={name}
                             email={email}
+                            isOpen={false}
+                            onClose={() => {}}
                         />
                     </div>
                 </>

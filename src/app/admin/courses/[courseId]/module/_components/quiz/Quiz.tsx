@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react'
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizLibrary'
-import {QuizDataLibrary,LibraryOptions} from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
+import { QuizDataLibrary, LibraryOption} from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/admin/courses/[courseId]/module/_components/quiz/QuizModal'
@@ -19,6 +19,9 @@ import { ArrowUpRightSquare, Pencil } from 'lucide-react'
 import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {QuizProps,ChapterDetailsResponse} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
+import useDebounce from '@/hooks/useDebounce'
+import CodingTopics from '../codingChallenge/CodingTopics'
+import { FileQuestion } from 'lucide-react'
 
 function Quiz(props: QuizProps) {
     const router = useRouter()
@@ -26,7 +29,7 @@ function Quiz(props: QuizProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [addQuestion, setAddQuestion] = useState<QuizDataLibrary[]>([])
     const [questionId, setQuestionId] = useState()
-    const { quizData, setStoreQuizData } = getAllQuizData()
+    // const { quizData, setStoreQuizData } = getAllQuizData()
     const [quizTitle, setQuizTitle] = useState('')
     const [inputValue, setInputValue] = useState(props.activeChapterTitle)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
@@ -36,6 +39,103 @@ function Quiz(props: QuizProps) {
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
     const [savedQuestions, setSavedQuestions] = useState<QuizDataLibrary[]>([])
+        const [search, setSearch] = useState<string>('')
+        const debouncedSeatch = useDebounce(search, 1000)
+        const [selectedOptions, setSelectedOptions] = useState<LibraryOption[]>([
+            { id: -1, tagName: 'All Topics' },
+        ])
+        const [selectedDifficulty, setSelectedDifficulty] = useState([
+            'Any Difficulty',
+        ])
+        const [quizData, setQuizData] = useState<{
+            allQuestions:  QuizDataLibrary[]
+            easyQuestions:  QuizDataLibrary[]
+            mediumQuestions:  QuizDataLibrary[]
+            hardQuestions:  QuizDataLibrary[]
+        }>({
+            allQuestions: [],
+            easyQuestions: [],
+            mediumQuestions: [],
+            hardQuestions: [],
+        })
+    
+        const fetchQuizQuestions = useCallback(
+            async (
+                searchTerm: string = '',
+                selectedOptions: any[],
+                selectedDifficulty: any[]
+            ) => {
+                try {
+                    let url = '/Content/allQuizQuestions'
+    
+                    const queryParams = []
+    
+                    let selectedTagIds = ''
+                    selectedOptions.forEach((topic: any) => {
+                        if (topic.id !== -1 && topic.id !== 0) {
+                            // Skip 'All Topics'
+                            selectedTagIds += `&tagId=${topic.id}`
+                        }
+                    })
+    
+                    // Handle multiple selected difficulties, but ignore 'Any Difficulty'
+                    let selectedDiff = ''
+                    selectedDifficulty.forEach((difficulty: string) => {
+                        if (difficulty !== 'Any Difficulty') {
+                            selectedDiff += `&difficulty=${difficulty}`
+                        }
+                    })
+    
+                    if (selectedTagIds.length > 0) {
+                        queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
+                    }
+                    if (selectedDiff.length > 0) {
+                        queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
+                    }
+                    if (searchTerm) {
+                        queryParams.push(`searchTerm=${searchTerm}`)
+                    }
+    
+                    // Combine query parameters into the URL
+                    if (queryParams.length > 0) {
+                        url += '?' + queryParams.join('&')
+                    }
+    
+                    const response = await api.get(url)
+    
+                    const allQuestions: QuizDataLibrary[] = response?.data?.data
+    
+                    const easyQuestions = allQuestions.filter(
+                        (question) => question.difficulty === 'Easy'
+                    )
+                    const mediumQuestions = allQuestions.filter(
+                        (question) => question.difficulty === 'Medium'
+                    )
+                    const hardQuestions = allQuestions.filter(
+                        (question) => question.difficulty === 'Hard'
+                    )
+    
+                    setQuizData({
+                        allQuestions,
+                        easyQuestions,
+                        mediumQuestions,
+                        hardQuestions,
+                    })
+                } catch (error) {
+                    console.error('Error fetching quiz questions:', error)
+                }
+            },
+            [debouncedSeatch, selectedOptions, selectedDifficulty]
+        )
+    
+        useEffect(() => {
+            fetchQuizQuestions(debouncedSeatch, selectedOptions, selectedDifficulty)
+        }, [
+            debouncedSeatch,
+            fetchQuizQuestions,
+            selectedOptions,
+            selectedDifficulty,
+        ])
 
     const handleAddQuestion = (data: QuizDataLibrary[]) => {
         const uniqueData = data.filter((question: QuizDataLibrary) => {
@@ -196,12 +296,12 @@ function Quiz(props: QuizProps) {
     
     return (
         <div>
-            <div className="px-5">
-                <div className="flex flex-row items-center justify-start gap-x-6 mb-5">
-                    <div className="w-full flex flex-col items-start gap-3">
+            <div className="">
+                <div className="flex flex-row items-center justify-start gap-x-6 mb-5 mx-5">
+                    <div className="w-full flex flex-col items-start">
                         {/* Input Field */}
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                            <div className="w-2/4 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -209,9 +309,7 @@ function Quiz(props: QuizProps) {
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
-                                    className="pl-1 pr-8 text-xl text-left text-gray-600 font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-
-                                    autoFocus
+                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                 />
                                 {!inputValue && (
                                     <Pencil
@@ -223,19 +321,19 @@ function Quiz(props: QuizProps) {
                                 )}
                             </div>
                             <div className="flex items-center justify-between">
-                                <div
+                                {/* <div
                                     id="previewQuiz"
                                     onClick={previewQuiz}
                                     className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
                                 >
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
-                                </div>
+                                </div> */}
                                 {addQuestion?.length > 0 && (
                                     <div className="mt-5">
                                         <Button
                                             onClick={handleSaveQuiz}
-                                            className="bg-success-dark opacity-75"
+                                            className="bg-primary opacity-75"
                                         >
                                             Save
                                         </Button>
@@ -243,53 +341,71 @@ function Quiz(props: QuizProps) {
                                 )}
                             </div>
                         </div>
+                        <div className="flex items-center gap-2">
+                            <FileQuestion size={20} className="transition-colors" />
+                            <p className="text-muted-foreground">Coding Problems</p>
+                        </div>
                     </div>
-                </div>
-
-                <div className="flex">
-                    <QuizLibrary
-                        addQuestion={addQuestion}
-                        handleAddQuestion={handleAddQuestion}
+                </div>   
+                <div className="px-5 pt-4 bg-card">
+                    <CodingTopics
+                        setSearchTerm={setSearch}
+                        searchTerm={search}
                         tags={tags}
+                        selectedTopics={selectedOptions}
+                        setSelectedTopics={setSelectedOptions}
+                        selectedDifficulties={selectedDifficulty}
+                        setSelectedDifficulties={setSelectedDifficulty} 
+                        selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                
                     />
-                    <Separator
-                        orientation="vertical"
-                        className="mx-4 w-[2px] h-96 mt-36 rounded"
-                    />
-                    <div className="w-full">
-                        <div>
-                            <div className="flex flex-col items-center justify-between">
-                                <div className="flex justify-between w-full mt-36">
-                                    <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
-                                        Selected Question
-                                    </h2>
-                                </div>
-                                <div className="text-left w-full">
-                                    {addQuestion?.length === 0 && (
-                                        <h1 className="text-left text-gray-600 text-[15px] italic">
-                                            No Selected Questions
-                                        </h1>
-                                    )}
+                    <div className="w-full h-max-content ">
+                        <h2 className="text-left mt-4 ml-1 text-gray-600 text-[15px] font-semibold">
+                            MCQ Library
+                        </h2>
+                        <div className="flex">
+                            <QuizLibrary
+                                addQuestion={addQuestion}
+                                handleAddQuestion={handleAddQuestion}
+                                tags={tags}
+                                quizData={quizData}
+                            />
+                        
+                            <div className="w-full border-l border-gray-200 ml-4 pl-4">
+                                <div>
+                                    <div className="flex flex-col items-center justify-between">
+                                        <div className="flex justify-between w-full">
+                                            <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
+                                                Selected Question
+                                            </h2>
+                                        </div>
+                                        <div className="text-left w-full">
+                                            {addQuestion?.length === 0 && (
+                                                <h1 className="text-left text-gray-600 text-[15px] italic">
+                                                    No Selected Questions
+                                                </h1>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <ScrollArea className="h-96 pr-3 pb-10">
+                                        {addQuestion?.map(
+                                            (questions: QuizDataLibrary, index: number) => (
+                                                <QuizModal
+                                                    key={index}
+                                                    tags={tags}
+                                                    data={questions}
+                                                    addQuestion={addQuestion}
+                                                    removeQuestionById={
+                                                        removeQuestionById
+                                                    }
+                                                    saveQuizQuestionHandler={
+                                                        saveQuizQuestionHandler
+                                                    }
+                                                />
+                                            )
+                                        )}
+                                    </ScrollArea>
                                 </div>
                             </div>
-                            <ScrollArea className="h-96 pr-3 pb-10">
-                                {addQuestion?.map(
-                                    (questions: QuizDataLibrary, index: number) => (
-                                        <QuizModal
-                                            key={index}
-                                            tags={tags}
-                                            data={questions}
-                                            addQuestion={addQuestion}
-                                            removeQuestionById={
-                                                removeQuestionById
-                                            }
-                                            saveQuizQuestionHandler={
-                                                saveQuizQuestionHandler
-                                            }
-                                        />
-                                    )
-                                )}
-                            </ScrollArea>
                         </div>
                     </div>
                 </div>
