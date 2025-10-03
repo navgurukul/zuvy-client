@@ -274,7 +274,7 @@ function Quiz(props: QuizProps) {
             })
         }
 
-        // If questions are selected and saved, proceed with preview
+        // If questions are selected and saved
         setQuizPreviewContent({
             ...props.content,
             quizQuestionDetails: addQuestion,
