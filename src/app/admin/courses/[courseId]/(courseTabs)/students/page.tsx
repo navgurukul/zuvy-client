@@ -100,12 +100,12 @@ const StudentsPage = ({ params }: { params: any }) => {
             }
             
             // Add last active filter if not 'all'
-            if (lastActiveFilter && lastActiveFilter !== 'all') {
-                const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-                if (lastActiveDate) {
-                    url += `&lastActiveDate=${lastActiveDate}`
-                }
-            }
+            // if (lastActiveFilter && lastActiveFilter !== 'all') {
+            //     const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
+            //     if (lastActiveDate) {
+            //         url += `&lastActiveDate=${lastActiveDate}`
+            //     }
+            // }
             
             // Add attendance filter if not empty
             if (attendanceFilter && attendanceFilter.trim() !== '') {
@@ -133,52 +133,52 @@ const StudentsPage = ({ params }: { params: any }) => {
     }, [params.courseId, limit, offset, enrolledDateFilter, statusFilter, lastActiveFilter, attendanceFilter, setStudents])
 
     // Update this helper function to handle new options
-    const convertLastActiveFilterToDate = (filter: string): string | null => {
-        const today = new Date()
-        const formatDate = (date: Date) => date.toISOString().split('T')[0] // YYYY-MM-DD format
+    // const convertLastActiveFilterToDate = (filter: string): string | null => {
+    //     const today = new Date()
+    //     const formatDate = (date: Date) => date.toISOString().split('T')[0] // YYYY-MM-DD format
         
-        switch (filter) {
-            case 'today':
-                return formatDate(today)
+    //     switch (filter) {
+    //         case 'today':
+    //             return formatDate(today)
             
-            case 'yesterday':
-                const yesterday = new Date(today)
-                yesterday.setDate(today.getDate() - 1)
-                return formatDate(yesterday)
+    //         case 'yesterday':
+    //             const yesterday = new Date(today)
+    //             yesterday.setDate(today.getDate() - 1)
+    //             return formatDate(yesterday)
             
-            case 'thisWeek':
-                const startOfWeek = new Date(today)
-                startOfWeek.setDate(today.getDate() - today.getDay()) // Start of current week (Sunday)
-                return formatDate(startOfWeek)
+    //         case 'thisWeek':
+    //             const startOfWeek = new Date(today)
+    //             startOfWeek.setDate(today.getDate() - today.getDay()) // Start of current week (Sunday)
+    //             return formatDate(startOfWeek)
             
-            case 'thisMonth':
-                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-                return formatDate(startOfMonth)
+    //         case 'thisMonth':
+    //             const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    //             return formatDate(startOfMonth)
             
-            case 'last3months':
-                const last3Months = new Date(today)
-                last3Months.setMonth(today.getMonth() - 3)
-                return formatDate(last3Months)
+    //         case 'last3months':
+    //             const last3Months = new Date(today)
+    //             last3Months.setMonth(today.getMonth() - 3)
+    //             return formatDate(last3Months)
             
-            case 'last6months':
-                const last6Months = new Date(today)
-                last6Months.setMonth(today.getMonth() - 6)
-                return formatDate(last6Months)
+    //         case 'last6months':
+    //             const last6Months = new Date(today)
+    //             last6Months.setMonth(today.getMonth() - 6)
+    //             return formatDate(last6Months)
             
-            case 'lastyear':
-                const lastYear = new Date(today)
-                lastYear.setFullYear(today.getFullYear() - 1)
-                return formatDate(lastYear)
+    //         case 'lastyear':
+    //             const lastYear = new Date(today)
+    //             lastYear.setFullYear(today.getFullYear() - 1)
+    //             return formatDate(lastYear)
             
-            case 'older':
-                const twoYearsAgo = new Date(today)
-                twoYearsAgo.setFullYear(today.getFullYear() - 2)
-                return formatDate(twoYearsAgo)
+    //         case 'older':
+    //             const twoYearsAgo = new Date(today)
+    //             twoYearsAgo.setFullYear(today.getFullYear() - 2)
+    //             return formatDate(twoYearsAgo)
             
-            default:
-                return null
-        }
-    }
+    //         default:
+    //             return null
+    //     }
+    // }
 
     // Add this helper function alongside convertLastActiveFilterToDate
     const convertEnrolledDateFilterToDate = (filter: string): string | null => {
@@ -247,12 +247,12 @@ const StudentsPage = ({ params }: { params: any }) => {
         if (statusFilter && statusFilter !== 'all') {
             url += `&status=${statusFilter}`
         }
-        if (lastActiveFilter && lastActiveFilter !== 'all') {
-            const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-            if (lastActiveDate) {
-                url += `&lastActiveDate=${lastActiveDate}`
-            }
-        }
+        // if (lastActiveFilter && lastActiveFilter !== 'all') {
+        //     const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
+        //     if (lastActiveDate) {
+        //         url += `&lastActiveDate=${lastActiveDate}`
+        //     }
+        // }
         if (attendanceFilter && attendanceFilter.trim() !== '') {
             url += `&attendance=${attendanceFilter.trim()}`
         }
@@ -282,12 +282,12 @@ const StudentsPage = ({ params }: { params: any }) => {
             if (statusFilter && statusFilter !== 'all') {
                 url += `&status=${statusFilter}`
             }
-            if (lastActiveFilter && lastActiveFilter !== 'all') {
-                const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-                if (lastActiveDate) {
-                    url += `&lastActiveDate=${lastActiveDate}`
-                }
-            }
+            // if (lastActiveFilter && lastActiveFilter !== 'all') {
+            //     const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
+            //     if (lastActiveDate) {
+            //         url += `&lastActiveDate=${lastActiveDate}`
+            //     }
+            // }
             if (attendanceFilter && attendanceFilter.trim() !== '') {
                 url += `&attendance=${attendanceFilter.trim()}`
             }
@@ -370,14 +370,14 @@ const StudentsPage = ({ params }: { params: any }) => {
     }
 
     // Handle last active filter change
-    const handleLastActiveFilterChange = (value: string) => {
-        setLastActiveFilter(value)
-        // Reset to first page when filter changes
-        const urlParams = new URLSearchParams(window.location.search)
-        urlParams.delete('page')
-        const newUrl = `${window.location.pathname}?${urlParams.toString()}`
-        window.history.replaceState({}, '', newUrl)
-    }
+    // const handleLastActiveFilterChange = (value: string) => {
+    //     setLastActiveFilter(value)
+    //     // Reset to first page when filter changes
+    //     const urlParams = new URLSearchParams(window.location.search)
+    //     urlParams.delete('page')
+    //     const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+    //     window.history.replaceState({}, '', newUrl)
+    // }
 
     // Add handler for attendance filter change
     const handleAttendanceFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -555,7 +555,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                     </div>
 
                     {/* Last Active Filter */}
-                    <div className="w-full sm:w-[160px] mt-2">
+                    {/* <div className="w-full sm:w-[160px] mt-2">
                         <Select
                             value={lastActiveFilter}
                             onValueChange={handleLastActiveFilterChange}
@@ -575,7 +575,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                                 <SelectItem value="older">Older</SelectItem>
                             </SelectContent>
                         </Select>
-                    </div>
+                    </div> */}
 
                     {/* Attendance Filter - NEW */}
                     <div className="w-full sm:w-[160px]">
