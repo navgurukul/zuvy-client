@@ -176,6 +176,9 @@ const Navbar = () => {
 
     const { viewRolesAndPermission, viewContent } = queryObject
 
+    // const rolesList =
+    //     user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+
     const isAdmin = pathname?.includes('/admin')
     const isTeacher = pathname?.includes('/instructor')
     const routes = isAdmin
@@ -183,6 +186,28 @@ const Navbar = () => {
         : isTeacher
         ? teacherRoutes
         : guestRoutes
+
+    // const navigationItems = [
+    //     {
+    //         name: 'Course Studio',
+    //         href: '/admin/courses',
+    //         icon: Layers,
+    //         active:
+    //             pathname.startsWith('/admin/courses')
+    //     },
+    //     {
+    //         name: 'Content Bank',
+    //         href: '/admin/content-bank',
+    //         icon: Database,
+    //         active: pathname.startsWith('/admin/content-bank'),
+    //     },
+    //     {
+    //         name: 'Roles and Permissions',
+    //         href: '/admin/settings',
+    //         icon: Settings,
+    //         active: pathname.startsWith('/admin/settings'),
+    //     },
+    // ]
 
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -200,6 +225,28 @@ const Navbar = () => {
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
             <div className="flex h-16 items-center justify-between px-6">
                 <div className="flex items-center gap-8">
+                    {/* <Sheet>
+                        <SheetTrigger>
+                            <div className="bg-white p-4 rounded-r-lg">
+                                <Menu />
+                            </div>
+                        </SheetTrigger>
+                        <SheetContent
+                            side="left"
+                            className="w-[280px] sm:w-[540px]"
+                        >
+                            <Sidebar />
+                        </SheetContent>
+                    </Sheet>
+                    <Link href={`/${rolesList}`} className="flex z-40 ">
+                        <Image
+                            src={'/logo.PNG'}
+                            alt="logo"
+                            // className="py-2"
+                            width={'70'}
+                            height={'70'}
+                        />
+                    </Link> */}
                     {/* Logo and Brand */}
                     <Link href="/admin" className="flex items-center space-x-3">
                         <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
@@ -210,6 +257,14 @@ const Navbar = () => {
                         <h3 className="font-bold text-gray-900 text-xl">
                             Zuvy Admin
                         </h3>
+                        {/* <div className="flex">
+                            <span className="font-semibold text-gray-900 text-lg">
+                                Zuvy
+                            </span>
+                            <span className="font-semibold text-gray-700 text-lg">
+                                Admin
+                            </span>
+                        </div> */}
                     </Link>
 
                     {/* Navigation Items */}
@@ -274,6 +329,79 @@ const Navbar = () => {
                     </Button>
 
                     {/* Admin Avatar with Dropdown */}
+
+                    {/* <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Avatar className="h-7 w-7 sm:h-8 sm:w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                                <AvatarImage
+                                    src={studentData?.profile_picture}
+                                    alt="Student"
+                                />
+                                <AvatarFallback className="bg-gray-200 text-muted-foreground text-md font-medium">
+                                    {getUserInitials('Poonam Singh Bagh')}
+                                </AvatarFallback>
+                            </Avatar>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            className="w-56 text-left"
+                            align="end"
+                        >
+                            <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-sm font-medium leading-none">
+                                        {studentData?.name}
+                                    </p>
+                                    <p className="text-xs leading-none text-muted-foreground">
+                                        {studentData?.email}
+                                    </p>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel className="font-normal">
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-xs text-muted-foreground">
+                                        Role
+                                    </p>
+                                    <p className="text-sm capitalize">
+                                        {studentData?.rolesList?.join(', ')}
+                                    </p>
+                                </div>
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                onClick={handleLogoutClick}
+                                className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600 cursor-pointer"
+                            >
+                                <span>Logout</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <AlertDialog
+                        open={showLogoutDialog}
+                        onOpenChange={setShowLogoutDialog}
+                    >
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                    Are you sure you want to logout?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    You will be signed out of your account and
+                                    redirected to the login page.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                    onClick={handleLogout}
+                                    className="bg-primary hover:bg-primary-dark"
+                                >
+                                    Logout
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog> */}
+
                     <ProfileDropDown
                         studentData={studentData}
                         handleLogoutClick={handleLogoutClick}
@@ -281,8 +409,62 @@ const Navbar = () => {
                         setShowLogoutDialog={setShowLogoutDialog}
                         handleLogout={handleLogout}
                     />
+
+                    {/* Logout Button */}
+                    {/* <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 text-red-500 hover:text-white hover:bg-red-500 rounded-lg transition-all duration-200"
+                        title="Logout"
+                        aria-label="Logout"
+                    >
+                        <LogOut className="h-5 w-5" />
+                    </Button> */}
                 </div>
+
+                {/* <div className="mr-2 px-2">
+                    <div className="sm:items-center space-x-4 hidden md:flex">
+                        <Link href="/profile">
+                            <Avatar>
+                                <AvatarImage
+                                    src={studentData?.profile_picture}
+                                    alt="user profile pic"
+                                />
+                                <AvatarFallback>
+                                    {
+                                        <Image
+                                            src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                            alt="user_profile_pic"
+                                            width={30}
+                                            height={30}
+                                        />
+                                    }
+                                </AvatarFallback>
+                            </Avatar>
+                        </Link>
+                    </div>
+                    <div className="md:hidden">
+                        <Link href="/profile">
+                            <Avatar>
+                                <AvatarImage
+                                    src={studentData?.profile_picture}
+                                />
+                                <AvatarFallback>
+                                    {
+                                        <Image
+                                            src="https://avatar.iran.liara.run/public/boy?username=Ash"
+                                            alt="user_profile_pic"
+                                            width={30}
+                                            height={30}
+                                        />
+                                    }
+                                </AvatarFallback>
+                            </Avatar>
+                        </Link>
+                    </div>
+                </div> */}
             </div>
+            {/* <QuestionBankDropdown /> */}
         </nav>
     )
 }

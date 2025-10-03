@@ -14,8 +14,7 @@ const SettingsPage: React.FC = () => {
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
-    const initialTab = searchParams.get('tab') || 'users'
-    const [activeTab, setActiveTab] = useState(initialTab)
+    const [activeTab, setActiveTab] = useState<'users' | 'roles'>('users')
     const [selectedRole, setSelectedRole] = useState<
         'Admin' | 'Ops' | 'Instructor'
     >('Admin')
@@ -24,10 +23,6 @@ const SettingsPage: React.FC = () => {
         console.log(`${role} invite link generated:`, inviteLink)
         // You can add additional logic here, such as updating state or making API calls
     }
-
-    useEffect(() => {
-        if (initialTab) setActiveTab(initialTab)
-    }, [initialTab])
 
     const updateURL = useCallback(
         (newTab: string) => {

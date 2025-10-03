@@ -21,7 +21,6 @@ import { useRouter } from 'next/navigation'
 import {QuizProps,ChapterDetailsResponse} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 import useDebounce from '@/hooks/useDebounce'
 import CodingTopics from '../codingChallenge/CodingTopics'
-import { FileQuestion } from 'lucide-react'
 
 function Quiz(props: QuizProps) {
     const router = useRouter()
@@ -296,12 +295,12 @@ function Quiz(props: QuizProps) {
     
     return (
         <div>
-            <div className="">
-                <div className="flex flex-row items-center justify-start gap-x-6 mb-5 mx-5">
-                    <div className="w-full flex flex-col items-start">
+            <div className="px-5">
+                <div className="flex flex-row items-center justify-start gap-x-6 mb-5">
+                    <div className="w-full flex flex-col items-start gap-3">
                         {/* Input Field */}
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-2/4 flex justify-center align-middle items-center relative">
+                            <div className="w-2/6 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -309,7 +308,7 @@ function Quiz(props: QuizProps) {
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
-                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                    className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
                                 />
                                 {!inputValue && (
                                     <Pencil
@@ -341,10 +340,6 @@ function Quiz(props: QuizProps) {
                                 )}
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <FileQuestion size={20} className="transition-colors" />
-                            <p className="text-muted-foreground">Coding Problems</p>
-                        </div>
                     </div>
                 </div>   
                 <div className="px-5 pt-4 bg-card">
@@ -359,7 +354,7 @@ function Quiz(props: QuizProps) {
                         selectedQuestions={undefined} setSelectedQuestions={undefined} content={undefined} moduleId={''} chapterTitle={''}                
                     />
                     <div className="w-full h-max-content ">
-                        <h2 className="text-left mt-4 ml-1 text-gray-600 text-[15px] font-semibold">
+                        <h2 className="text-left mt-4 text-gray-600 text-[15px] font-semibold">
                             MCQ Library
                         </h2>
                         <div className="flex">

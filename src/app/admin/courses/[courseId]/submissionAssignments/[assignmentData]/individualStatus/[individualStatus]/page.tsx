@@ -17,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { api } from '@/utils/axios.config'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {BootcampData,PageParams,IndividualStudentData} from "@/app/admin/courses/[courseId]/submissionAssignments/[assignmentData]/individualStatus/IndividualStatusType"
@@ -30,6 +31,33 @@ const Page = ({ params }: PageParams) => {
     const [initialContent, setInitialContent] = useState()
 
     const [url, setUrl] = useState<string>('')
+    const crumbs = [
+        {
+            crumb: 'My Courses',
+            href: `/admin/courses`,
+            isLast: false,
+        },
+        {
+            crumb: bootcampData?.name,
+            href: `/admin/courses/${params.courseId}/submissions`,
+            isLast: false,
+        },
+        {
+            crumb: 'Submission - Assignments',
+            href: `/admin/courses/${params.courseId}/submissions`,
+            isLast: false,
+        },
+        {
+            crumb: assignmentTitle,
+            href: `/admin/courses/${params.courseId}/submissionAssignments/${params.assignmentData}`,
+            isLast: false,
+        },
+        {
+            crumb: individualStudentData?.user?.name,
+            // href: '',
+            isLast: true,
+        },
+    ]
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -122,7 +150,9 @@ const Page = ({ params }: PageParams) => {
 
     return (
         <>
-            {!individualStudentData && (
+            {individualStudentData ? (
+                <BreadcrumbComponent crumbs={crumbs} />
+            ) : (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
@@ -136,7 +166,7 @@ const Page = ({ params }: PageParams) => {
                     <Button
                         variant="ghost"
                         onClick={() => router.back()}
-                        className="hover:bg-transparent hover:text-primary transition-colors"
+                        className="hover:bg-blue-600 hover:text-white transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Course Submissions

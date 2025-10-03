@@ -50,6 +50,10 @@ import CourseCard from './_components/CourseCard'
 import { useAllCourses } from '@/hooks/useAllCourses'
 import { useBootcamps } from '@/hooks/useBootcamps'
 import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
+import {
+    useCalendarAccessAction,
+    useCalendarAccessCheck,
+} from '@/hooks/useCalendarAccess'
 import {PermissionsComponent} from './[courseId]/permissions/coursePermission'
 
 const statusOptions = [
@@ -113,7 +117,10 @@ const Courses: React.FC = () => {
             offset,
             auto: true,
         })
+    console.log('courses', courses)
     const { createBootcamp, creating } = useCreateBootcamp()
+    const { hasAccess, refetchAccess } = useCalendarAccessCheck(true)
+    const { giveAccess } = useCalendarAccessAction()
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const searchContainerRef = useRef<HTMLDivElement>(null)
@@ -383,6 +390,11 @@ const Courses: React.FC = () => {
         localStorage.setItem('courseId', id.toString())
     }
 
+    const calendarAccess = async () => {
+        const url = await giveAccess(studentData?.id, studentData?.email)
+        router.push(url)
+    }
+
     function getValidImageUrl(url: string): string | null {
         if (typeof url !== 'string' || url.trim() === '') {
             return null
@@ -436,7 +448,26 @@ const Courses: React.FC = () => {
                 </div>
             ) : (
                 <div className="w-full">
-                    <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl">
+                  
+                    {!hasAccess ? (
+                        <Alert
+                            variant="destructive"
+                            className="flex justify-between mt-5 items-center container mx-auto max-w-7xl"
+                        >
+                            <AlertTitle>Error</AlertTitle>
+                            <AlertDescription>
+                                Your calendar access has expired. Please log in
+                                again to gain access to the courses
+                            </AlertDescription>
+                            <Button
+                                onClick={calendarAccess}
+                                className="bg-success-dark opacity-75 font-semibold"
+                            >
+                                Give access
+                            </Button>
+                        </Alert>
+                    ) : null}
+                    <div className="container mx-auto px-6 pt-8 pb-2 max-w-7xl">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
                             {/* Left: Title and Subtitle */}
                             <div className="flex-1 min-w-[220px] text-start">
@@ -510,7 +541,7 @@ const Courses: React.FC = () => {
                                     <Button
                                         variant="ghost"
                                         size="sm"
-                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted hover:text-foreground mt-1"
+                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
                                         onClick={clearSearch}
                                     >
                                         <X className="h-4 w-4" />
@@ -556,7 +587,7 @@ const Courses: React.FC = () => {
                             </div>
 
                             {/* Filter Dropdown */}
-                            {/* <div className="mt-2">
+                            <div className="mt-2">
                                 <Select
                                     value={statusFilter}
                                     onValueChange={(val) => {
@@ -578,7 +609,7 @@ const Courses: React.FC = () => {
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </div> */}
+                            </div>
                         </div>
                     </div>
                     <div className="">

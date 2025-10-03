@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
+import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { getOffset } from '@/store/store'
@@ -176,100 +178,103 @@ const Page = ({ params }: any) => {
     
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
-            </div>
-            
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
-                <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
-                        {liveClassData?.title}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="bg-muted">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                        <div className="text-left">
-                            <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                            <div className="text-lg font-semibold">
-                                {totalStudents || 0}
-                            </div>
-                        </div>
-                        <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                            <div className="text-xl font-semibold text-gray-900">Live Class</div>
-                        </div>
+            <BreadcrumbComponent crumbs={crumbs} />
+            <MaxWidthWrapper className="p-6 max-w-7xl">
+                <div className="flex items-center gap-4 mb-8">
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.back()}
+                        className="hover:bg-blue-600 hover:text-white transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </div>
 
-                        <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Course ID:</div>
-                            <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
-                        </div>
-                        <div className="text-left">
-                            <label className="font-medium text-muted-foreground">Batch Filter</label>
-                            <Select
-                                value={selectedBatch}
-                                onValueChange={setSelectedBatch}
-                            >
-                                <SelectTrigger className="w-full mt-1">
-                                    <SelectValue placeholder="All Batches" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Batches</SelectItem>
-                                    {batchOptions.map((batch, index) => (
-                                        <SelectItem key={index} value={batch}>{batch}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-            
-            <Card className="bg-muted">
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-gray-800">
-                            Student Submissions
+                <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                    <CardHeader>
+                        <CardTitle className="text-2xl text-gray-800 text-left">
+                            {liveClassData?.title}
                         </CardTitle>
-                    </div>
-                </CardHeader>
-
-                <div className="relative w-1/3 p-4">
-                    <SearchBox
-                        placeholder="Search by name or email"
-                        fetchSuggestionsApi={fetchSuggestionsApi}
-                        fetchSearchResultsApi={fetchSearchResultsApi}
-                        defaultFetchApi={defaultFetchApi}
-                        getSuggestionLabel={(s) => (
-                            <div>
-                                <div className="font-medium">{s.name}</div>
-                                <div className="text-sm text-gray-500">{s.email}</div>
+                    </CardHeader>
+                    <CardContent className="bg-muted">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                            <div className="text-left">
+                                <div className="font-medium text-muted-foreground">Total Submissions:</div>
+                                <div className="text-lg font-semibold">
+                                    {totalStudents || 0}
+                                </div>
                             </div>
-                        )}
-                        inputWidth=""
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
+                                <div className="text-xl font-semibold text-gray-900">Live Class</div>
+                            </div>
+
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Course ID:</div>
+                                <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                            </div>
+                            <div className="text-left">
+                                <label className="font-medium text-muted-foreground">Batch Filter</label>
+                                <Select
+                                    value={selectedBatch}
+                                    onValueChange={setSelectedBatch}
+                                >
+                                    <SelectTrigger className="w-full mt-1">
+                                        <SelectValue placeholder="All Batches" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Batches</SelectItem>
+                                        {batchOptions.map((batch, index) => (
+                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                
+                <Card className="bg-muted">
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-xl text-gray-800">
+                                Student Submissions
+                            </CardTitle>
+                        </div>
+                    </CardHeader>
+
+                    <div className="relative w-1/3 p-4">
+                        <SearchBox
+                            placeholder="Search by name or email"
+                            fetchSuggestionsApi={fetchSuggestionsApi}
+                            fetchSearchResultsApi={fetchSearchResultsApi}
+                            defaultFetchApi={defaultFetchApi}
+                            getSuggestionLabel={(s) => (
+                                <div>
+                                    <div className="font-medium">{s.name}</div>
+                                    <div className="text-sm text-gray-500">{s.email}</div>
+                                </div>
+                            )}
+                            inputWidth=""
+                        />
+                    </div>
+                    
+                    <CardContent className="p-0">
+                        <DataTable data={dataTableLiveClass} columns={columns} />
+                    </CardContent>
+                </Card>
+
+                {/* Pagination */}
+                <div className="p-6 border-t">
+                    <DataTablePagination
+                        totalStudents={totalStudents}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        fetchStudentData={handlePaginationFetch}
                     />
                 </div>
-                
-                <CardContent className="p-0">
-                    <DataTable data={dataTableLiveClass} columns={columns} />
-                </CardContent>
-            </Card>
-
-            {/* Pagination */}
-            <div className="p-6 border-t">
-                <DataTablePagination
-                    totalStudents={totalStudents}
-                    pages={totalPages}
-                    lastPage={lastPage}
-                    fetchStudentData={handlePaginationFetch}
-                />
-            </div>
+            </MaxWidthWrapper>
         </>
     )
 }
