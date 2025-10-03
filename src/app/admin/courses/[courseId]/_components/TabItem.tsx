@@ -24,7 +24,7 @@ function TabItem({ href, title, icon: Icon }: TabItemProps) {
     <Link
       href={href}
       className={cn(
-        "mx-1 text-sm px-9 py-2 font-medium rounded-sm flex items-center justify-center gap-1 transition-colors text-center",
+        "mx-1 text-sm px-9 py-2 font-medium rounded-sm flex items-center justify-center gap-2 transition-colors text-center",
         isActive 
           ? "bg-primary text-white" 
           : "text-muted-foreground hover:text-foreground hover:bg-muted/50"

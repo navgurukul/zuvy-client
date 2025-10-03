@@ -23,8 +23,6 @@ import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {CodingChallangesQuestion,ChallangesProps, CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 import { AnyARecord } from 'dns'
-import { SquareCode } from 'lucide-react'
-
 function CodingChallenge({
     content,
     activeChapterTitle,
@@ -266,13 +264,13 @@ function CodingChallenge({
                 <div className='px-5 pb-4 border-b border-gray-200'>
                     <div className="flex flex-col items-start mb-15">
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-2/4 flex justify-center align-middle items-center relative">
+                            <div className="w-2/6 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={handleTitleChange}
                                     value={chapterTitle}
                                     placeholder="Untitled Coding Problem"
-                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                    className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
                                 />
                                 {!chapterTitle && (
                                     <Pencil
@@ -301,10 +299,6 @@ function CodingChallenge({
                                     </Button>
                                 )}
                             </div>
-                        </div>
-                        <div className="flex items-center gap-2 pb-4">
-                            <SquareCode size={20} className="transition-colors" />
-                            <p className="text-muted-foreground">Coding Problems</p>
                         </div>
                     </div>
                 </div>

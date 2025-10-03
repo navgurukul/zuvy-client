@@ -637,7 +637,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                         <Input
                             type="search"
                             placeholder="Search students"
-                            className="w-full mb-3"
+                            className="w-full"
                             value={searchStudent}
                             onChange={handleSearchStudents}
                         />
@@ -648,7 +648,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                             assignStudents={assignStudents}
                         />
                         <p className="pt-2 text-sm">
-                            Total Learners Selected: {selectedRows.length} / {capEnrollmentValue}
+                            Total Learners Selected: {selectedRows.length}
                         </p>
                         {selectedRows.length === 0 && (
                         <p className="text-sm text-red-500">

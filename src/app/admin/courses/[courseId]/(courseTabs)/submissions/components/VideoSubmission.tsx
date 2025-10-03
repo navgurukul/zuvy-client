@@ -36,7 +36,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (
-                <div className="flex flex-col justify-center items-center">
+                <div className="w-screen flex flex-col justify-center items-center h-4/5">
                     <p className="text-center text-muted-foreground max-w-md">
                         No Video submissions available from the students yet. Please wait until the first submission
                     </p>
