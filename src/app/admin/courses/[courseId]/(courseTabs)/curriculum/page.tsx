@@ -90,7 +90,7 @@ function Page() {
         if (moduleId && courseData?.id) {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
-                    const data = res.data.find(
+                    const data = res?.data?.modules?.find(
                         (item:  ModuleData ) => moduleId === item.id
                     )
                     setSelectedModuleData(data)
@@ -177,7 +177,7 @@ function Page() {
         if (isEditOpen && moduleId && courseData?.id) {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
-                    const data = res.data.find(
+                    const data = res?.data?.modules?.find(
                         (module: any) => module.id === moduleId
                     )
                     setSelectedModuleData(data) // Set the selected module's data
@@ -340,7 +340,7 @@ function Page() {
             const response = await api.get(
                 `/content/allModules/${courseData.id}`
             )
-            const modulesWithStartedFlag = response.data.map((module: ModuleData) => ({
+            const modulesWithStartedFlag = response?.data?.modules?.map((module: ModuleData) => ({
                 ...module,
                 isStarted: false,
             }))
