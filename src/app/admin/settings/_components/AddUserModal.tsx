@@ -2,32 +2,34 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Users, Settings, Plus, GraduationCap, Shield, Cog } from 'lucide-react'
+import { GraduationCap, Shield, Cog } from 'lucide-react'
 import {
-    Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
     DialogFooter,
     DialogClose,
-    DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useRoles } from '@/hooks/useRoles'
+import { api } from '@/utils/axios.config'
 
 type AddUserModalProps = {
   refetchUsers: () => void;
 };
 
 type RoleCardProps = {
+    id: number
     icon: React.ReactNode
-    title: 'Admin' | 'Ops' | 'Instructor'
+    title: any
     description: string
     selected?: boolean
-    onSelect?: (role: 'Admin' | 'Ops' | 'Instructor') => void
+    onSelect?: (role: any) => void
 }
 
 const RoleCard: React.FC<RoleCardProps> = ({
+    id,
     icon,
     title,
     description,
@@ -37,7 +39,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
     return (
         <button
             type="button"
-            onClick={() => onSelect && onSelect(title)}
+            onClick={() => onSelect && onSelect(id)}
             className={`w-full text-left border rounded-lg p-4 transition-colors ${
                 selected
                     ? 'border-blue-600 bg-blue-50'
@@ -55,7 +57,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
                     {icon}
                 </div>
                 <div>
-                    <div className="font-medium text-gray-900">{title}</div>
+                    <div className="font-medium text-gray-900 capitalize">{title}</div>
                     <div className="text-sm text-gray-500 mt-1">
                         {description}
                     </div>
@@ -67,9 +69,8 @@ const RoleCard: React.FC<RoleCardProps> = ({
 
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
-    const [pendingUserRole, setPendingUserRole] = useState<
-        'Admin' | 'Ops' | 'Instructor' | null
-    >(null)
+    const { roles, loading: rolesLoading } = useRoles()
+    const [pendingUserRole, setPendingUserRole] = useState(null)
     const [newUser, setNewUser] = useState<{ name: string; email: string }>({
         name: '',
         email: '',
@@ -84,6 +85,39 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
         newUser.name.trim().length > 0 &&
         newUser.email.trim().length > 0 &&
         !!pendingUserRole
+
+    const getRoleIcon = useCallback((role: string) => {
+        switch (role) {
+            case 'admin':
+                return <Shield className="w-5 h-5" />
+            case 'ops':
+                return <Cog className="w-5 h-5" />
+            case 'instructor':
+                return <GraduationCap className="w-5 h-5" />
+            default:
+                return  <Cog className="w-5 h-5" />
+        }
+    }, [])
+
+    const handleAddUser = async () => {
+        if (!canSubmit) return
+
+        const payload = {
+            name: newUser.name.trim(),
+            email: newUser.email.trim(),
+            roleId: pendingUserRole,
+        }
+
+        await api.post('/rbac/addUsers', payload)
+
+        // Reset form
+        setNewUser({
+            name: '',
+            email: '',
+        })
+        setPendingUserRole(null)
+        refetchUsers()
+    }
 
     return (
         <DialogContent className="max-w-3xl">
@@ -131,51 +165,22 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
                         Select Role *
                     </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                        {/* Admin */}
-                        <RoleCard
-                            icon={
-                                <Shield className="w-5 h-5" />
-                            }
-                            title="Admin"
-                            description="Users who have full access to all functions of the platform"
-                            selected={
-                                pendingUserRole ===
-                                'Admin'
-                            }
-                            onSelect={
-                                setPendingUserRole
-                            }
-                        />
-                        {/* Ops */}
-                        <RoleCard
-                            icon={
-                                <Cog className="w-5 h-5" />
-                            }
-                            title="Ops"
-                            description="Users who see day to day operations of the courses for Zuvy"
-                            selected={
-                                pendingUserRole ===
-                                'Ops'
-                            }
-                            onSelect={
-                                setPendingUserRole
-                            }
-                        />
-                        {/* Instructor */}
-                        <RoleCard
-                            icon={
-                                <GraduationCap className="w-5 h-5" />
-                            }
-                            title="Instructor"
-                            description="Users who teach the live classes in the courses and check submissions"
-                            selected={
-                                pendingUserRole ===
-                                'Instructor'
-                            }
-                            onSelect={
-                                setPendingUserRole
-                            }
-                        />
+                        {roles.map((role) => (
+                            <RoleCard
+                                key={role.id}
+                                id={role.id}
+                                icon={getRoleIcon(role.name)}
+                                title={role.name}
+                                description={role.description}
+                                selected={
+                                    pendingUserRole ===
+                                    role.id
+                                }
+                                onSelect={
+                                    setPendingUserRole
+                                }
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
@@ -193,30 +198,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
                     <Button
                         className="bg-primary hover:bg-blue-700"
                         disabled={!canSubmit}
-                        onClick={async () => {
-                            const payload = {
-                                name: newUser.name.trim(),
-                                email: newUser.email.trim(),
-                                role: pendingUserRole,
-                            }
-                            console.log(
-                                'Add User payload:',
-                                payload
-                            )
-
-                            // TODO: Replace with actual API call to create user
-                            // await api.post('/rbac/create/user', payload)
-
-                            // Reset form
-                            setNewUser({
-                                name: '',
-                                email: '',
-                            })
-                            setPendingUserRole(null)
-
-                            // Refresh users list
-                            // refetchUsers()
-                        }}
+                        onClick={handleAddUser}
                     >
                         Add User
                     </Button>
@@ -226,6 +208,4 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
     )
 }
 
-
 export default AddUserModal
-

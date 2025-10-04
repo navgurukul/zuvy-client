@@ -29,6 +29,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Search } from 'lucide-react'
+import { useRoles } from '@/hooks/useRoles'
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -45,6 +46,9 @@ export function UserManagementTable<TData, TValue>({
         {}
     )
     const [rowSelection, setRowSelection] = useState({})
+
+    // Fetch roles from API
+    const { roles, loading: rolesLoading } = useRoles()
 
     const table = useReactTable({
         data,
@@ -95,7 +99,7 @@ export function UserManagementTable<TData, TValue>({
                         }
                         onValueChange={(value) =>
                             table
-                                .getColumn('role')
+                                .getColumn('roleName')
                                 ?.setFilterValue(value === 'all' ? '' : value)
                         }
                     >
@@ -104,11 +108,17 @@ export function UserManagementTable<TData, TValue>({
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Roles</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="ops">Ops</SelectItem>
-                            <SelectItem value="instructor">
-                                Instructor
-                            </SelectItem>
+                            {rolesLoading ? (
+                                <SelectItem value="loading" disabled>
+                                    Loading roles...
+                                </SelectItem>
+                            ) : (
+                                roles.map((role) => (
+                                    <SelectItem key={role.id} value={role.name} className='capitalize'>
+                                        {role.name}
+                                    </SelectItem>
+                                ))
+                            )}
                         </SelectContent>
                     </Select>
                 </div>

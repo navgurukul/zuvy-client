@@ -11,6 +11,33 @@ import {
 } from '@/components/ui/select'
 import { Edit, Trash2 } from 'lucide-react'
 import { UserRole } from '@/utils/types/type'
+import { useRoles } from '@/hooks/useRoles'
+
+// Role Cell Component
+const RoleCell = ({ role }: { role: string }) => {
+    const { roles, loading: rolesLoading } = useRoles()
+
+    return (
+        <Select defaultValue={role?.toLowerCase()}>
+            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm">
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                {rolesLoading ? (
+                    <SelectItem value="loading" disabled>
+                        Loading...
+                    </SelectItem>
+                ) : (
+                    roles.map((roleOption) => (
+                        <SelectItem key={roleOption.id} value={roleOption.name} className='capitalize'>
+                            {roleOption.name}
+                        </SelectItem>
+                    ))
+                )}
+            </SelectContent>
+        </Select>
+    )
+}
 
 export interface User {
     id: number
@@ -43,18 +70,7 @@ export const columns: ColumnDef<User>[] = [
         header: 'Role',
         cell: ({ row }) => {
             const role = row.getValue('roleName') as string
-            return (
-                <Select defaultValue={role?.toLowerCase()}>
-                    <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="ops">Ops</SelectItem>
-                        <SelectItem value="instructor">Instructor</SelectItem>
-                    </SelectContent>
-                </Select>
-            )
+            return <RoleCell role={role} />
         },
     },
     {
