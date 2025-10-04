@@ -5,7 +5,17 @@ export interface StudentPage{
 
 export type StudentDataState = StudentPage[]
 
-
+export type StudentData = {
+    email: string
+    id:number
+    name: string
+    userId: number
+    bootcampId: number
+    batchName: string
+    batchId: number
+    progress: number
+    profilePicture: string
+}
 
 
 export interface Batch {

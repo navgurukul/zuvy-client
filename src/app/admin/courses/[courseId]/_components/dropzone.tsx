@@ -93,7 +93,7 @@ const Dropzone = ({
                             Upload a CSV file with student information
                         </p>
                         <Button 
-                            className="bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                            className="bg-primary text-primary-foreground hover:bg-primary/90" 
                             size="sm"
                             type="button"
                             onClick={handleSelectFile}

@@ -1,5 +1,6 @@
 export type StudentDataPage = {
     email: string
+    id:number
     name: string
     userId: number
     bootcampId: number
