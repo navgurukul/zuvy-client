@@ -110,8 +110,6 @@ export function useBootcamps({
 
     const doFetch = useCallback(
         async (off: number) => {
-            console.log('BBBBBB')
-
             const key = buildKey(off)
 
             // If we are already fetching this exact key, or it already finished, skip

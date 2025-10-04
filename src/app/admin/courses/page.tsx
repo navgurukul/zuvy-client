@@ -423,11 +423,6 @@ const Courses: React.FC = () => {
     queryObject[key] = value;
   });
 
-
-
-
-
-
     return (
         <>
             {loading ? (

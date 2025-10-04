@@ -12,6 +12,8 @@ import RoleManagementPanel from './_components/RoleManagementPanel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useAllUsers } from '@/hooks/useAllUsers'
 import AddUserModal from './_components/AddUserModal'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import { OFFSET, POSITION } from '@/utils/constant'
 
 const SettingsPage: React.FC = () => {
     const pathname = usePathname()
@@ -23,9 +25,10 @@ const SettingsPage: React.FC = () => {
         'Admin' | 'Ops' | 'Instructor'
     >('Admin')
 
-    // Pagination state
-    const [currentPage, setCurrentPage] = useState(1)
-    const [pageSize] = useState(10)
+    // Pagination state - get from URL params
+    const [offset, setOffset] = useState<number>(OFFSET)
+    const limitParam = searchParams.get('limit')
+    const position: number = Number(limitParam ?? POSITION) || Number(POSITION)
 
     // Fetch users from API
     const {
@@ -35,7 +38,7 @@ const SettingsPage: React.FC = () => {
         totalRows,
         totalPages,
         refetchUsers,
-    } = useAllUsers(true, currentPage, pageSize)
+    } = useAllUsers({ initialFetch: true, limit: position, searchTerm: '', offset })
 
     const handleInviteGenerated = (role: UserRole, inviteLink: string) => {
         console.log(`${role} invite link generated:`, inviteLink)
@@ -121,7 +124,7 @@ const SettingsPage: React.FC = () => {
                                         Add User
                                     </Button>
                                 </DialogTrigger>
-                                <AddUserModal refetchUsers={refetchUsers} />
+                                <AddUserModal refetchUsers={() => refetchUsers(offset)} />
                             </Dialog>
                         </div>
 
@@ -136,7 +139,7 @@ const SettingsPage: React.FC = () => {
                             <div className="flex flex-col items-center py-8 text-red-600">
                                 <div>Error loading users</div>
                                 <Button
-                                    onClick={() => refetchUsers()}
+                                    onClick={() => refetchUsers(offset)}
                                     variant="outline"
                                     className="mt-2"
                                 >
@@ -151,73 +154,18 @@ const SettingsPage: React.FC = () => {
                                 />
 
                                 {/* Pagination */}
-                                {totalPages > 1 && (
-                                    <div className="flex items-center justify-between mt-6">
-                                        <div className="text-sm text-gray-700">
-                                            Showing{' '}
-                                            {(currentPage - 1) * pageSize + 1}{' '}
-                                            to{' '}
-                                            {Math.min(
-                                                currentPage * pageSize,
-                                                totalRows
-                                            )}{' '}
-                                            of {totalRows} users
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() =>
-                                                    setCurrentPage((prev) =>
-                                                        Math.max(prev - 1, 1)
-                                                    )
-                                                }
-                                                disabled={currentPage === 1}
-                                            >
-                                                Previous
-                                            </Button>
-                                            <div className="flex items-center gap-1">
-                                                {Array.from(
-                                                    { length: totalPages },
-                                                    (_, i) => i + 1
-                                                ).map((page) => (
-                                                    <Button
-                                                        key={page}
-                                                        variant={
-                                                            currentPage === page
-                                                                ? 'default'
-                                                                : 'outline'
-                                                        }
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            setCurrentPage(page)
-                                                        }
-                                                        className="w-8 h-8 p-0"
-                                                    >
-                                                        {page}
-                                                    </Button>
-                                                ))}
-                                            </div>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() =>
-                                                    setCurrentPage((prev) =>
-                                                        Math.min(
-                                                            prev + 1,
-                                                            totalPages
-                                                        )
-                                                    )
-                                                }
-                                                disabled={
-                                                    currentPage === totalPages
-                                                }
-                                            >
-                                                Next
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
+                                <DataTablePagination
+                                    totalStudents={totalRows}
+                                    lastPage={totalPages}
+                                    pages={totalPages}
+                                    // fetchStudentData={handlePaginationChange}
+                                    fetchStudentData={(
+                                            newOffset: number
+                                        ) => {
+                                            setOffset(newOffset)
+                                            refetchUsers(newOffset) // instead of getBootcamp(newOffset)
+                                        }}
+                                />
                             </>
                         )}
                     </div>

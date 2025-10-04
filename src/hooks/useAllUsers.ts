@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { api } from '@/utils/axios.config'
 
 export interface User {
@@ -26,7 +26,18 @@ export interface UsersResponse {
     }
 }
 
-export function useAllUsers(initialFetch = true, page = 1, limit = 10) {
+type UseAllUsersArgs = {
+    limit: number | string
+    searchTerm: string
+    offset: number
+    initialFetch?: boolean
+}
+
+export function useAllUsers({
+    initialFetch,
+    limit,
+    searchTerm,
+    offset}: UseAllUsersArgs) {
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
@@ -39,22 +50,22 @@ export function useAllUsers(initialFetch = true, page = 1, limit = 10) {
         deleteUser: false,
     })
 
+    const stableLimit = useMemo(() => {
+        const n = typeof limit === 'string' ? Number(limit) : limit
+        return Number.isFinite(n) ? n : 10
+    }, [limit])
+
     const getAllUsers = useCallback(
-        async (pageNum = page) => {
+        async (offset: number) => {
             try {
-                setLoading(true)
-                // For now, fetch all users since the API might not support pagination
-                const res = await api.get<UsersResponse>('/rbac/get/all/users')
-                const allUsers = res.data.data || []
+                // setLoading(true)
+                setLoading(false)
+                const res = await api.get<UsersResponse>(`/rbac/get/all/users?limit=${stableLimit}&offset=${offset}`)
+                const allUsers = res.data || []
 
-                // Client-side pagination
-                const startIndex = (pageNum - 1) * limit
-                const endIndex = startIndex + limit
-                const paginatedUsers = allUsers.slice(startIndex, endIndex)
-
-                setUsers(paginatedUsers)
-                setTotalRows(allUsers.length)
-                setTotalPages(Math.ceil(allUsers.length / limit))
+                setUsers(allUsers.data)
+                setTotalRows(allUsers.totalRows)
+                setTotalPages(allUsers.totalPages)
 
                 if (res.data.permissions) {
                     setPermissions(res.data.permissions)
@@ -71,8 +82,8 @@ export function useAllUsers(initialFetch = true, page = 1, limit = 10) {
     )
 
     useEffect(() => {
-        if (initialFetch) getAllUsers(page)
-    }, [initialFetch, getAllUsers, page])
+        if (initialFetch) getAllUsers(offset)
+    }, [initialFetch, getAllUsers, offset, searchTerm, stableLimit])
 
     return {
         users,
