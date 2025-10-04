@@ -2,13 +2,16 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Users, Settings, Plus } from 'lucide-react'
+import { Users, Settings, Plus, GraduationCap, Shield, Cog } from 'lucide-react'
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { UserRole } from '@/utils/types/type'
 import UserInviteSection from './_components/UserInviteSection'
 import { UserManagementTable } from './_components/UserManagementTable'
 import { columns, User } from './columns'
 import RoleManagementPanel from './_components/RoleManagementPanel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useAllUsers } from '@/hooks/useAllUsers'
+import AddUserModal from './_components/AddUserModal'
 
 const SettingsPage: React.FC = () => {
     const pathname = usePathname()
@@ -19,6 +22,20 @@ const SettingsPage: React.FC = () => {
     const [selectedRole, setSelectedRole] = useState<
         'Admin' | 'Ops' | 'Instructor'
     >('Admin')
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1)
+    const [pageSize] = useState(10)
+
+    // Fetch users from API
+    const {
+        users,
+        loading: usersLoading,
+        error: usersError,
+        totalRows,
+        totalPages,
+        refetchUsers,
+    } = useAllUsers(true, currentPage, pageSize)
 
     const handleInviteGenerated = (role: UserRole, inviteLink: string) => {
         console.log(`${role} invite link generated:`, inviteLink)
@@ -46,58 +63,7 @@ const SettingsPage: React.FC = () => {
         updateURL(tab)
     }
 
-    // Mock data for users table
-    const users: User[] = [
-        {
-            id: 1,
-            name: 'Sarah Johnson',
-            email: 'sarah.johnson@zuvy.org',
-            role: 'Admin',
-            dateAdded: 'Jan 20, 2024',
-        },
-        {
-            id: 2,
-            name: 'Mike Chen',
-            email: 'mike.chen@zuvy.org',
-            role: 'Ops',
-            dateAdded: 'Feb 1, 2024',
-        },
-        {
-            id: 3,
-            name: 'Emily Davis',
-            email: 'emily.davis@zuvy.org',
-            role: 'Ops',
-            dateAdded: 'Feb 5, 2024',
-        },
-        {
-            id: 4,
-            name: 'Alex Rodriguez',
-            email: 'alex.rodriguez@zuvy.org',
-            role: 'Instructor',
-            dateAdded: 'Feb 10, 2024',
-        },
-        {
-            id: 5,
-            name: 'Lisa Park',
-            email: 'lisa.park@zuvy.org',
-            role: 'Instructor',
-            dateAdded: 'Feb 15, 2024',
-        },
-        {
-            id: 6,
-            name: 'David Wilson',
-            email: 'david.wilson@zuvy.org',
-            role: 'Instructor',
-            dateAdded: 'Feb 20, 2024',
-        },
-        {
-            id: 7,
-            name: 'Anna Thompson',
-            email: 'anna.thompson@zuvy.org',
-            role: 'Ops',
-            dateAdded: 'Feb 25, 2024',
-        },
-    ]
+    // Users are now fetched from API via useAllUsers hook
 
     return (
         <div className="py-2 bg-white min-h-screen">
@@ -148,14 +114,112 @@ const SettingsPage: React.FC = () => {
                                     organization
                                 </p>
                             </div>
-                            <Button className="bg-primary hover:bg-blue-700 text-white">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add User
-                            </Button>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className="bg-primary hover:bg-blue-700 text-white">
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        Add User
+                                    </Button>
+                                </DialogTrigger>
+                                <AddUserModal refetchUsers={refetchUsers} />
+                            </Dialog>
                         </div>
 
                         {/* User Management DataTable */}
-                        <UserManagementTable columns={columns} data={users} />
+                        {usersLoading ? (
+                            <div className="flex justify-center items-center py-8">
+                                <div className="animate-pulse">
+                                    Loading users...
+                                </div>
+                            </div>
+                        ) : usersError ? (
+                            <div className="flex flex-col items-center py-8 text-red-600">
+                                <div>Error loading users</div>
+                                <Button
+                                    onClick={() => refetchUsers()}
+                                    variant="outline"
+                                    className="mt-2"
+                                >
+                                    Retry
+                                </Button>
+                            </div>
+                        ) : (
+                            <>
+                                <UserManagementTable
+                                    columns={columns}
+                                    data={users}
+                                />
+
+                                {/* Pagination */}
+                                {totalPages > 1 && (
+                                    <div className="flex items-center justify-between mt-6">
+                                        <div className="text-sm text-gray-700">
+                                            Showing{' '}
+                                            {(currentPage - 1) * pageSize + 1}{' '}
+                                            to{' '}
+                                            {Math.min(
+                                                currentPage * pageSize,
+                                                totalRows
+                                            )}{' '}
+                                            of {totalRows} users
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setCurrentPage((prev) =>
+                                                        Math.max(prev - 1, 1)
+                                                    )
+                                                }
+                                                disabled={currentPage === 1}
+                                            >
+                                                Previous
+                                            </Button>
+                                            <div className="flex items-center gap-1">
+                                                {Array.from(
+                                                    { length: totalPages },
+                                                    (_, i) => i + 1
+                                                ).map((page) => (
+                                                    <Button
+                                                        key={page}
+                                                        variant={
+                                                            currentPage === page
+                                                                ? 'default'
+                                                                : 'outline'
+                                                        }
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            setCurrentPage(page)
+                                                        }
+                                                        className="w-8 h-8 p-0"
+                                                    >
+                                                        {page}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setCurrentPage((prev) =>
+                                                        Math.min(
+                                                            prev + 1,
+                                                            totalPages
+                                                        )
+                                                    )
+                                                }
+                                                disabled={
+                                                    currentPage === totalPages
+                                                }
+                                            >
+                                                Next
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </div>
                 </>
             )}

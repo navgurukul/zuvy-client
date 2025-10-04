@@ -90,7 +90,7 @@ export function UserManagementTable<TData, TValue>({
                     <Select
                         value={
                             (table
-                                .getColumn('role')
+                                .getColumn('roleName')
                                 ?.getFilterValue() as string) ?? 'all'
                         }
                         onValueChange={(value) =>

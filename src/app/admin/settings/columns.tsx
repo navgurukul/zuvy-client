@@ -14,10 +14,11 @@ import { UserRole } from '@/utils/types/type'
 
 export interface User {
     id: number
+    roleId: number
+    userId: number
     name: string
     email: string
-    role: UserRole
-    dateAdded: string
+    roleName: string
 }
 
 export const columns: ColumnDef<User>[] = [
@@ -38,13 +39,12 @@ export const columns: ColumnDef<User>[] = [
         ),
     },
     {
-        accessorKey: 'role',
+        accessorKey: 'roleName',
         header: 'Role',
         cell: ({ row }) => {
-            const role = row.getValue('role') as UserRole
-
+            const role = row.getValue('roleName') as string
             return (
-                <Select defaultValue={role.toLowerCase()}>
+                <Select defaultValue={role?.toLowerCase()}>
                     <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm">
                         <SelectValue />
                     </SelectTrigger>
