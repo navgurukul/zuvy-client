@@ -1,6 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { ArrowDownToLine, ChevronRight, ClipboardCheck } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, ClipboardCheck,Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import {
@@ -21,10 +21,10 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
       <div className="flex items-start justify-between">
         {/* Icon + Title */}
         <div className="flex items-center gap-2">
-          <div className="bg-gray-100 p-2 rounded-md">
-            <ClipboardCheck className="h-4 w-4 text-gray-600" />
+          <div className="bg-muted p-2 rounded-md">
+            <ClipboardCheck className="h-4 w-4" />
           </div>
-          <h3 className="font-medium text-base text-gray-900">
+          <h3 className="font-medium text-base">
             {props.title}
           </h3>
         </div>
@@ -90,7 +90,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
         </Badge>
       </div>
       <div className="w-full flex justify-end mt-2">
-        <Link
+      <Link
           href={
             `/admin/courses/${props.bootcampId}/submissionAssesments/${props.id}`
           }

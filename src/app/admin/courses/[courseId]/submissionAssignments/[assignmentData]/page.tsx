@@ -99,16 +99,17 @@ const Page = ({ params }: { params: any }) => {
     const totalStudents = bootcampData?.students_in_bootcamp - bootcampData?.unassigned_students
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
-            </div>
+            <MaxWidthWrapper className="p-6 max-w-7xl">
+                <div className="flex items-center gap-4 mb-8">
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.back()}                        
+                        className="hover:bg-transparent hover:text-primary transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </div>
 
             {/* Assessment Info Card */}
             <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
@@ -184,6 +185,7 @@ const Page = ({ params }: { params: any }) => {
                     <DataTable data={assignmentData} columns={columns} />
                 </CardContent>
             </Card>
+            </MaxWidthWrapper>
         </>
     )
 }
