@@ -105,7 +105,7 @@
 //             const projectTitle = response.data.project[0].title
 //             setTitle(projectTitle)
 //             setLastSavedTitle(projectTitle)
-            
+
 //             const content = response.data.project[0].instruction.description
 //             const parsedContent = JSON.parse(content)
 //             setInitialContent(parsedContent)
@@ -133,7 +133,7 @@
 //         const currentContent = initialContent ? JSON.stringify(initialContent) : ''
 //         const titleChanged = title !== lastSavedTitle
 //         const contentChanged = currentContent !== lastSavedContent
-        
+
 //         setHasUnsavedChanges(titleChanged || contentChanged)
 //     }, [title, initialContent, lastSavedTitle, lastSavedContent])
 
@@ -163,7 +163,7 @@
 //                 isLock: projectData?.project[0].isLock,
 //                 deadline: deadlineDate,
 //             })
-         
+
 //             // Update last saved states
 //             setLastSavedTitle(title)
 //             setLastSavedContent(initialContentString)
@@ -185,7 +185,7 @@
 //     // Function to check if content is empty
 //     const isContentEmpty = () => {
 //         if (!initialContent) return true
-        
+
 //         // Check if content has any actual content
 //         // Type assertion to access the doc property safely
 //         const content = initialContent as any
@@ -201,7 +201,7 @@
 //             })
 //             return !hasContent
 //         }
-        
+
 //         return true
 //     }
 
@@ -236,7 +236,7 @@
 //         const currentContentString = initialContent
 //             ? JSON.stringify(initialContent)
 //             : ''
-    
+
 //         // Only run auto-save logic if user has saved before
 //         if (
 //             hasUserSavedBefore && 
@@ -252,10 +252,10 @@
 //                         isLock: projectData?.project[0].isLock,
 //                         deadline: projectData?.project[0].deadline,
 //                     })
-    
+
 //                     setLastSavedContent(currentContentString)
 //                     setHasUnsavedChanges(false)
-    
+
 //                     toast.success({
 //                         title: 'Auto-saved',
 //                         description:
@@ -265,7 +265,7 @@
 //                     console.error('Auto-save failed:', err)
 //                 }
 //             }
-    
+
 //             autoSave()
 //         }
 //     }, [initialContent])
@@ -430,7 +430,7 @@ import {
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
-import { ArrowUpRightSquare, CalendarIcon } from 'lucide-react'
+import { ArrowUpRightSquare, CalendarIcon, Eye, ArrowLeft } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -438,12 +438,12 @@ import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams } from 'next/navigation'
 // import ProjectPreview from '../_components/ProjectPreview'
-import { Eye } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
 import { RemirrorJSON } from 'remirror'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
-import {ProjectDataProject,ProjectData} from "@/app/admin/courses/[courseId]/module/[moduleId]/project/projectProjectIdPageType"
+import { ProjectDataProject, ProjectData } from "@/app/admin/courses/[courseId]/module/[moduleId]/project/projectProjectIdPageType"
 
 
 export default function Project() {
@@ -500,42 +500,42 @@ export default function Project() {
     })
 
 
-   const fetchProjectDetails = async () => {
-    try {
-    const response = await api.get(`Content/project/${projectID}?bootcampId=${courseId}`)
-    const project = response.data.project[0]
+    const fetchProjectDetails = async () => {
+        try {
+            const response = await api.get(`Content/project/${projectID}?bootcampId=${courseId}`)
+            const project = response.data.project[0]
 
-    setProjectData(response.data)
-    setTitle(project.title)
-    setLastSavedTitle(project.title)
+            setProjectData(response.data)
+            setTitle(project.title)
+            setLastSavedTitle(project.title)
 
-    const parsedContent = JSON.parse(project.instruction.description)
-    setInitialContent(parsedContent)
-    setLastSavedContent(JSON.stringify(parsedContent))
-    let selectedDate: Date | undefined = undefined
-    if (project.deadline) {
-  const deadlineDate = new Date(project.deadline)
-  selectedDate = new Date(
-    Date.UTC(
-      deadlineDate.getFullYear(),
-      deadlineDate.getMonth(),
-      deadlineDate.getDate()
-    )
-  )
-}
-    // Reset form with API data
-    form.reset({
-      title: project.title,
-      startDate: selectedDate,
-    })
+            const parsedContent = JSON.parse(project.instruction.description)
+            setInitialContent(parsedContent)
+            setLastSavedContent(JSON.stringify(parsedContent))
+            let selectedDate: Date | undefined = undefined
+            if (project.deadline) {
+                const deadlineDate = new Date(project.deadline)
+                selectedDate = new Date(
+                    Date.UTC(
+                        deadlineDate.getFullYear(),
+                        deadlineDate.getMonth(),
+                        deadlineDate.getDate()
+                    )
+                )
+            }
+            // Reset form with API data
+            form.reset({
+                title: project.title,
+                startDate: selectedDate,
+            })
 
-    // Ensure Calendar sees the updated date
-    if (selectedDate) form.setValue("startDate", selectedDate)
+            // Ensure Calendar sees the updated date
+            if (selectedDate) form.setValue("startDate", selectedDate)
 
-  } catch (err) {
-    console.error(err)
-  }
-}
+        } catch (err) {
+            console.error(err)
+        }
+    }
     useEffect(() => {
         if (projectID) {
             fetchProjectDetails()
@@ -547,18 +547,18 @@ export default function Project() {
         const currentContent = initialContent ? JSON.stringify(initialContent) : ''
         const titleChanged = title !== lastSavedTitle
         const contentChanged = currentContent !== lastSavedContent
-        
+
         setHasUnsavedChanges(titleChanged || contentChanged)
     }, [title, initialContent, lastSavedTitle, lastSavedContent])
 
     async function editProject(data: any) {
-       function convertToISO(date: Date): string {
-        if (!date || isNaN(date.getTime())) {
-           throw new Error('Invalid date')
+        function convertToISO(date: Date): string {
+            if (!date || isNaN(date.getTime())) {
+                throw new Error('Invalid date')
+            }
+            // directly convert to ISO string (UTC)
+            return date.toISOString()
         }
-    // directly convert to ISO string (UTC)
-    return date.toISOString()
-}
 
         const deadlineDate = convertToISO(data.startDate)
 
@@ -572,7 +572,7 @@ export default function Project() {
                 isLock: projectData?.project[0].isLock,
                 deadline: deadlineDate,
             })
-         
+
             // Update last saved states
             setLastSavedTitle(title)
             setLastSavedContent(initialContentString)
@@ -594,7 +594,7 @@ export default function Project() {
     // Function to check if content is empty
     const isContentEmpty = () => {
         if (!initialContent) return true
-        
+
         // Check if content has any actual content
         // Type assertion to access the doc property safely
         const content = initialContent as any
@@ -602,7 +602,7 @@ export default function Project() {
             // If content array is empty or contains only empty paragraphs
             const hasContent = content.doc.content.some((node: any) => {
                 if (node.type === 'paragraph' && node.content) {
-                    return node.content.some((textNode: any) => 
+                    return node.content.some((textNode: any) =>
                         textNode.text && textNode.text.trim().length > 0
                     )
                 }
@@ -610,7 +610,7 @@ export default function Project() {
             })
             return !hasContent
         }
-        
+
         return true
     }
 
@@ -645,10 +645,10 @@ export default function Project() {
         const currentContentString = initialContent
             ? JSON.stringify(initialContent)
             : ''
-    
+
         // Only run auto-save logic if user has saved before
         if (
-            hasUserSavedBefore && 
+            hasUserSavedBefore &&
             lastSavedContent !== '' &&
             contentIsEmpty &&
             hasUnsavedChanges
@@ -661,10 +661,10 @@ export default function Project() {
                         isLock: projectData?.project[0].isLock,
                         deadline: projectData?.project[0].deadline,
                     })
-    
+
                     setLastSavedContent(currentContentString)
                     setHasUnsavedChanges(false)
-    
+
                     toast.success({
                         title: 'Auto-saved',
                         description:
@@ -674,15 +674,24 @@ export default function Project() {
                     console.error('Auto-save failed:', err)
                 }
             }
-    
+
             autoSave()
         }
     }, [initialContent])
 
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
-            <div className="flex flex-col mt-5">
+            {/* <BreadcrumbComponent crumbs={crumbs} /> */}
+            <div className="flex flex-col mt-10 lg:mx-44 mx-10">
+                <Link
+                    href={`/admin/courses/${courseId}/curriculum`}
+                    className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
+                >
+                    <ArrowLeft size={20} />
+                    <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
+                        Back to Curriculum
+                    </p>
+                </Link>
                 <div className="w-full ">
                     {/* {showPreview ? (
                         <ProjectPreview
@@ -704,10 +713,10 @@ export default function Project() {
                                     <FormItem>
                                         {/* <FormLabel></FormLabel> */}
                                         <FormControl>
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex justify-between items-center text-foreground">
                                                 <Input
                                                     placeholder="Untitled Article"
-                                                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                                                    className="p-0 text-2xl w-2/5 text-left font-semibold outline-none border-none focus-visible:ring-0 capitalize"
                                                     {...field}
                                                     {...form.register('title')}
                                                     onChange={(e) =>
@@ -717,7 +726,7 @@ export default function Project() {
                                                 <div
                                                     id="previewProject"
                                                     onClick={previewProject}
-                                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                    className="flex w-[90px] hover:bg-primary hover:text-primary-foreground rounded-md p-1 cursor-pointer mr-4"
                                                 >
                                                     <Eye size={18} />
                                                     <h6 className="ml-1 text-sm">
@@ -730,74 +739,81 @@ export default function Project() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="startDate"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col justify-start gap-x-2 text-left">
-                                        <FormLabel className="m-0">
-                                            <span className="text-xl">
-                                                Choose Deadline Date
-                                            </span>
-                                            <span className="text-red-500">
-                                                *
-                                            </span>{' '}
-                                        </FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={`w-[230px]  text-left font-normal ${
-                                                            !field.value &&
-                                                            'text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {field.value
-                                                            ? format(
-                                                                  field.value,
-                                                                  'EEEE, MMMM d, yyyy'
-                                                              )
-                                                            : 'Pick a date'}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date: any) =>
-                                                        date <=
-                                                        addDays(new Date(), -1)
-                                                    } // Disable past dates
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                         </form>
                     </Form>
                     {/* </>
                     )} */}
                 </div>
-                <div className="text-left">
-                    <RemirrorTextEditor
-                        initialContent={initialContent}
-                        setInitialContent={setInitialContent}
-                    />
+
+                <div className="bg-card border rounded-lg p-6 space-y-6">
+                    {/* Deadline Date */}
+                    <Form {...form}>
+                        <FormField
+                            control={form.control}
+                            name="startDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col justify-start gap-x-2 text-left">
+                                    <FormLabel className="m-0">
+                                        <span className="text-lg">
+                                            Choose Deadline Date
+                                        </span>
+                                        <span className="text-foreground">
+                                            *
+                                        </span>{' '}
+                                    </FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={'outline'}
+                                                    className={`w-[230px] text-left font-normal ${!field.value &&
+                                                        'text-muted-foreground'
+                                                        }`}
+                                                >
+                                                    {field.value
+                                                        ? format(
+                                                            field.value,
+                                                            'EEEE, MMMM d, yyyy'
+                                                        )
+                                                        : 'Pick a date'}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-auto p-0"
+                                            align="start"
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date: any) =>
+                                                    date <=
+                                                    addDays(new Date(), -1)
+                                                }
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </Form>
+
+                    {/* Remirror Editor */}
+                    <div className="text-left">
+                        <RemirrorTextEditor
+                            initialContent={initialContent}
+                            setInitialContent={setInitialContent}
+                        />
+                    </div>
                 </div>
-                <div className="flex justify-end mt-5">
+                <div className="flex justify-end my-5">
                     <Button type="submit" form="myForm"
-                    disabled={isContentEmpty()}
-                    className={isContentEmpty() ? 'opacity-50 cursor-not-allowed' : ''}
+                        disabled={isContentEmpty()}
+                        className={isContentEmpty() ? 'opacity-50 cursor-not-allowed' : ''}
                     >
                         Save
                     </Button>

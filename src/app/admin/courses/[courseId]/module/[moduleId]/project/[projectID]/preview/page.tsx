@@ -66,32 +66,32 @@ const ProjectPreview = () => {
 
     return (
         <>
-            <div className="fixed top-0 left-0 right-0 h-12 bg-[#518672] flex items-center justify-center z-50">
-                <h1 className="text-center text-[16px] text-[#FFFFFF]">
+            <div className="fixed top-0 left-0 right-0 h-12 bg-accent flex items-center justify-center z-50">
+                <h1 className="text-center text-[16px] text-accent-foreground">
                     You are in the Admin Preview Mode.
                 </h1>
             </div>
 
-            <div className="min-h-screen bg-gray-50 pt-12">
+            <div className="min-h-screen pt-12">
                 <div className="fixed top-16 left-4 z-40">
                     <Button variant={'ghost'} onClick={goBack}>
                         <ArrowLeft size={20} />
-                        <p className="ml-1 text-sm font-medium text-gray-800">
+                        <p className="ml-1 text-sm font-medium">
                             Go back
                         </p>
                     </Button>
                 </div>
 
                 {/* Right Section: Editor */}
-                <div className="flex justify-center items-start min-h-screen pt-16 px-4">
-                    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                <div className="flex justify-center items-start min-h-screen pt-16 px-4 bg-background">
+                    <div className="w-full max-w-4xl mx-auto rounded-lg bg-card shadow-lg p-8">
                         <div className="mb-8 text-center">
-                            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                            <h1 className="text-2xl font-semibold text-foreground mb-2">
                                 {projectPreviewContent?.project[0]
                                     ? projectPreviewContent?.project[0].title
                                     : 'No Title yet'}
                             </h1>
-                            <p className="text-lg font-semibold text-gray-600">
+                            <p className="text-lg font-semibold text-muted-foreground">
                                 Deadline: {formattedDate}
                             </p>
                         </div>

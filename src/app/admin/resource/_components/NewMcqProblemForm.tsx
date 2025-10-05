@@ -1,4 +1,4 @@
-    'use client'
+'use client'
 // External imports
 import React, { useState, useEffect, useRef } from 'react'
 import * as z from 'zod'
@@ -131,12 +131,28 @@ const NewMcqProblemForm = ({
     const sleep = (ms: number) =>
         new Promise((resolve) => setTimeout(resolve, ms))
 
-    const handleCreateQuizQuestion = async (requestBody:NewMcqRequestBodyType) => {
+    const handleCreateQuizQuestion = async (
+        requestBody: NewMcqRequestBodyType
+    ) => {
+        if (!requestBody.quizzes || requestBody.quizzes.length === 0) {
+            toast.error({
+                title: 'No questions to save',
+                description: 'Please generate or add questions before saving.',
+            })
+            return
+        }
         try {
             const res = await api.post(`/Content/quiz`, requestBody)
-            setIsMcqModalOpen(false)
+
+            // Close modal and refresh data after successful save
+            closeModal() // Use closeModal to close the dialog
             setMcqType('')
             handleClear()
+
+            // Refresh quiz data
+            const quizData = await getAllQuizQuesiton()
+            setStoreQuizData(quizData)
+
             toast.success({
                 title: res.data.status || 'Success',
                 description: res.data.message || 'Quiz Question Created',
@@ -249,7 +265,7 @@ const NewMcqProblemForm = ({
             }
 
             const response = await axios.post(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
                 requestBodyAI,
                 {
                     headers: {
@@ -386,13 +402,12 @@ const NewMcqProblemForm = ({
                         ],
                     }
                     setGeneratedQuestions(generatedQuestions)
-
                     setRequestBody(requestBody)
-                    // await handleCreateQuizQuestion(requestBody)
-                    const quizData = await getAllQuizQuesiton(); // ✅ No arguments here
-setStoreQuizData(quizData); 
-                    // await getAllQuizQuesiton(setStoreQuizData)
-                    closeModal()
+                    
+                    // Remove these lines - don't close modal automatically
+                    // const quizData = await getAllQuizQuesiton();
+                    // setStoreQuizData(quizData); 
+                    // closeModal()
                 }
 
                 toast.success({
@@ -420,7 +435,7 @@ setStoreQuizData(quizData);
     const bulkGenerateMCQUsingGemini = async () => {
         setBulkLoading(true)
         setLoadingAI(true)
-        setGeneratedCount(0) // Reset generated count
+        setGeneratedCount(0)
         try {
             const difficulties = form.getValues('difficulty')
             const topicId = form.getValues('topics')
@@ -538,7 +553,7 @@ setStoreQuizData(quizData);
 
                     try {
                         const response = await axios.post(
-                            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+                            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
                             requestBodyAI,
                             {
                                 headers: {
@@ -704,7 +719,7 @@ setStoreQuizData(quizData);
                     description: `Only ${generatedQuestions.length} unique MCQs were generated.`,
                 })
             } else {
-                toast.error({
+                toast.success({
                     title: 'Success',
                     description: `${generatedQuestions.length} MCQs generated and saved successfully.`,
                 })
@@ -731,10 +746,11 @@ setStoreQuizData(quizData);
 
                 setGeneratedQuestions(generatedQuestions)
                 setRequestBody(requestBody)
-                const quizData = await getAllQuizQuesiton();
-                setStoreQuizData(quizData); 
-                // await getAllQuizQuesiton(setStoreQuizData)
-                closeModal()
+                
+                // Remove these lines - don't close modal automatically
+                // const quizData = await getAllQuizQuesiton();
+                // setStoreQuizData(quizData); 
+                // closeModal()
             }
         } catch (error: any) {
             console.error('Error generating bulk MCQs:', error)

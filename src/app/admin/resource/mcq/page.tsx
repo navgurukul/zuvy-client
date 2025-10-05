@@ -163,8 +163,8 @@ const Mcqs = (props: Props) => {
     
                         // Truncate the question for display purposes
                         // const truncatedText = plainText.length > 100 ? plainText.substring(0, 15) + '...' : plainText
-                        const truncatedText = plainText.length > 15
-                        ? plainText.split(' ').slice(0, 2).join(' ') + '...'
+                        const truncatedText = plainText.length > 20
+                        ? plainText.split(' ').slice(0, 6).join(' ') + '...'
                         : plainText                        // Get topic name from tags (backend should ideally return topic name too)
 
                         const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
@@ -443,7 +443,13 @@ const Mcqs = (props: Props) => {
     const renderTabContent = (tabValue: string) => {
         switch (tabValue) {
             case 'bulk':
-                return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
+                return (
+                    <BulkUploadMcq
+                        closeModal={() => setIsCreateMcqDialogOpen(false)}
+                        setStoreQuizData={setStoreQuizData}
+                        getAllQuizQuesiton={() => filteredQuizQuestions(setStoreQuizData)}
+                    />
+                )
             case 'oneatatime':
                 return (
                     <div className="flex items-start justify-center w-full">
@@ -588,7 +594,7 @@ const Mcqs = (props: Props) => {
                     <div className="flex items-center gap-4 mb-6">
                         <div>
                             <SearchBox
-                                placeholder="Search for Question"
+                                placeholder="Search Questions"
                                 fetchSuggestionsApi={fetchSuggestionsApi}
                                 fetchSearchResultsApi={fetchSearchResultsApi}
                                 defaultFetchApi={defaultFetchApi}
