@@ -1,15 +1,12 @@
 'use client'
-import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useEffect, useRef, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
-import axios from 'axios'
-import { Spinner } from '@/components/ui/spinner'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { CalendarIcon, Upload, Trash2 } from 'lucide-react'
+import Cropper from 'react-cropper'
+// import 'cropperjs/dist/cropper.css'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +19,7 @@ import {
 } from '@/components/ui/form'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -30,19 +28,15 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import Cropper from 'react-cropper'
-import 'cropperjs/dist/cropper.css'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
-import { cn } from '@/lib/utils'
 import { LANGUAGES } from '@/utils/constant'
-import { getCourseData, getStoreStudentData } from '@/store/store'
-import { api} from '@/utils/axios.config'
-import{CourseData,PageParams} from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
+import { useCourseDetails } from '@/hooks/useCourseDetails'
+import { PageParams } from "@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType"
 
 const FormSchema = z.object({
-    name: z.string().min(1, 'Please enter the course name.'),
-    bootcampTopic: z.string().min(1, 'Please specify the course topic.'),
-    description: z.string().min(1, 'Please add a course description.'),
+    name: z.string().min(3, 'Please enter a course name (minimum 3 characters).').max(100, 'Course name cannot exceed 100 characters.'),
+    bootcampTopic: z.string().optional(),
+    description: z.string().min(10, 'Please add a course description (minimum 10 characters).'),
     duration: z.string().min(1, 'Please enter the course duration.'),
     language: z.string().min(1, 'Please select the language.'),
     startTime: z.date({
@@ -52,35 +46,31 @@ const FormSchema = z.object({
     collaborator: z.string().optional(),
 })
 
-function Page({ params }: { params: PageParams}) {
-    const router = useRouter()
+function GeneralDetailsPage({ params }: { params: PageParams }) {
     const [image, setImage] = useState<string | null>(null)
     const [cropper, setCropper] = useState<Cropper | null>(null)
     const [isCropping, setIsCropping] = useState(false)
     const [croppedImage, setCroppedImage] = useState<string | null>(null)
     const [isCalendarOpen, setCalendarOpen] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Collaborator image states
-    const [collaboratorImage, setCollaboratorImage] = useState<string | null>(
-        null
-    )
-
-    const [collaboratorCropper, setCollaboratorCropper] =
-        useState<Cropper | null>(null)
+    const [collaboratorImage, setCollaboratorImage] = useState<string | null>(null)
+    const [collaboratorCropper, setCollaboratorCropper] = useState<Cropper | null>(null)
     const [isCollaboratorCropping, setIsCollaboratorCropping] = useState(false)
-    const [croppedCollaboratorImage, setCroppedCollaboratorImage] = useState<
-        string | null
-    >(null)
-    
-
-    // New state for collaborator type
+    const [croppedCollaboratorImage, setCroppedCollaboratorImage] = useState<string | null>(null)
     const [collaboratorType, setCollaboratorType] = useState<'text' | 'image'>('text')
+    const collaboratorFileInputRef = useRef<HTMLInputElement>(null)
 
-    const { courseData, setCourseData } = getCourseData()
-    const { setStoreStudentData } = getStoreStudentData()
-    // const { isCourseDeleted, loadingCourseCheck } = useCourseExistenceCheck(
-    //     params.courseId
-    // )
+    // Hook se sab kuch get kar rahe hain - API logic hook mein hai
+    const { 
+        isLoading, 
+        isImageUploading, 
+        courseData, 
+        updateCourseDetails, 
+        validateImageFile 
+    } = useCourseDetails()
+
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -95,21 +85,15 @@ function Page({ params }: { params: PageParams}) {
         },
     })
 
-    // Helper function to check if string is an image URL
-    const isImageUrl = (str: string) => {
-        if (!str) return false
-        // Check if string contains image file extensions or is a URL
-        const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg|bmp)$/i
-        const isUrl =
-            str.startsWith('http') ||
-            str.startsWith('https') ||
-            str.startsWith('data:image')
-        return imageExtensions.test(str) || isUrl
+    // Helper function to check if URL is image
+    const isImageUrl = (url: string | undefined) => {
+        if (!url) return false
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg']
+        return imageExtensions.some(ext => url.toLowerCase().includes(ext)) || url.startsWith('data:image/')
     }
 
     // Reset all image states function
     const resetImageStates = () => {
-        // Cover image states
         setImage(null)
         setCropper(null)
         setIsCropping(false)
@@ -146,6 +130,7 @@ function Page({ params }: { params: PageParams}) {
         }
     }, [])
 
+    // Populate form when courseData changes
     useEffect(() => {
         if (courseData) {
             // Reset image states first to ensure clean slate
@@ -157,11 +142,9 @@ function Page({ params }: { params: PageParams}) {
                 description: courseData.description || '',
                 coverImage: courseData.coverImage || '',
                 collaborator: courseData.collaborator || '',
-                duration: courseData.duration || '',
+                duration: courseData.duration?.toString() || '', 
                 language: courseData.language || '',
-                startTime: courseData.startTime
-                    ? new Date(courseData.startTime)
-                    : undefined,
+                startTime: courseData.startTime ? new Date(courseData.startTime) : undefined,
             })
 
             // Set cover image if exists
@@ -180,6 +163,15 @@ function Page({ params }: { params: PageParams}) {
         }
     }, [courseData, form])
 
+    // Check if switching should be allowed
+    const canSwitchToText = () => {
+       return !croppedCollaboratorImage && !form.getValues('collaborator')
+    }
+
+    const canSwitchToImage = () => {
+     const currentValue = form.getValues('collaborator')
+     return !currentValue || currentValue.trim() === ''
+    }
     // Handle collaborator type change
     const handleCollaboratorTypeChange = (type: 'text' | 'image') => {
         setCollaboratorType(type)
@@ -195,171 +187,26 @@ function Page({ params }: { params: PageParams}) {
         }
     }
 
-    // Check if switching should be allowed
-    const canSwitchToText = () => {
-        return !croppedCollaboratorImage && !form.getValues('collaborator')
-    }
-
-    const canSwitchToImage = () => {
-        const currentValue = form.getValues('collaborator')
-        return !currentValue || currentValue.trim() === ''
-    }
-
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        try {
-            let coverImage = data.coverImage || ''
-            let collaborator = data.collaborator || ''
-
-            // Handle cover image upload
-            if (croppedImage && croppedImage !== courseData?.coverImage) {
-                const response = await fetch(croppedImage)
-                const blob = await response.blob()
-                const file = new File([blob], 'cropped-cover-image.png', {
-                    type: 'image/png',
-                })
-
-                const formData = new FormData()
-                formData.append('images', file) // Changed from 'image' to 'images' to match first file
-
-                const res = await api.post(
-                    '/Content/curriculum/upload-images',
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    }
-                )
-                
-                // Updated to match response structure from first file
-                const uploadedUrls = Array.isArray(res.data?.urls) ? res.data.urls : []
-                if (uploadedUrls.length === 0) {
-                    toast.error({
-                        title: 'error',
-                        description: 'File uploaded but no URLs returned',
-                    })
-                    return
-                }
-                coverImage = uploadedUrls[0]
-            } else if (croppedImage) {
-                coverImage = croppedImage
-            }
-
-            // Handle collaborator image upload (only if type is image and there's a cropped image)
-            if (
-                collaboratorType === 'image' &&
-                croppedCollaboratorImage &&
-                croppedCollaboratorImage !== courseData?.collaborator
-            ) {
-                const response = await fetch(croppedCollaboratorImage)
-                const blob = await response.blob()
-                const file = new File(
-                    [blob],
-                    'cropped-collaborator-image.png',
-                    {
-                        type: 'image/png',
-                    }
-                )
-
-                const formData = new FormData()
-                formData.append('images', file) // Changed from 'image' to 'images' to match first file
-
-                const res = await api.post(
-                    '/Content/curriculum/upload-images',
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    }
-                )
-                
-                // Updated to match response structure from first file
-                const uploadedUrls = Array.isArray(res.data?.urls) ? res.data.urls : []
-                if (uploadedUrls.length === 0) {
-                    toast.error({
-                        title: 'error',
-                        description: 'File uploaded but no URLs returned',
-                    })
-                    return
-                }
-                collaborator = uploadedUrls[0]
-            } else if (collaboratorType === 'image' && croppedCollaboratorImage) {
-                collaborator = croppedCollaboratorImage
-            }
-
-            await api
-                .patch(
-                    `/bootcamp/${courseData?.id}`,
-                    {
-                        ...data,
-                        coverImage,
-                        collaborator: collaborator,
-                    },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                )
-                .then((res) => {
-                    const {
-                        id,
-                        name,
-                        bootcampTopic,
-                        description,
-                        coverImage,
-                        collaborator,
-                        startTime,
-                        duration,
-                        language,
-                        unassigned_students,
-                    } = res.data.updatedBootcamp[0]
-                    setCourseData({
-                        id,
-                        name,
-                        bootcampTopic,
-                        description,
-                        coverImage,
-                        collaborator,
-                        startTime,
-                        duration,
-                        language,
-                        unassigned_students,
-                    })
-                    toast.success({
-                        title: res.data.status,
-                        description: res.data.message,
-                    })
-                })
-        } catch (error) {
-            toast.error({
-                title: 'Failed',
-            })
+        const success = await updateCourseDetails(data, croppedImage)
+        if (!success) {
+            return
         }
+
+        // Handle collaborator image upload (only if type is image and there's a cropped image)
+        // Note: Ye logic aapko apne updateCourseDetails function mein add karna padega
+        // ya separately handle karna padega based on your API structure
     }
 
-    const fileInputRef = useRef<HTMLInputElement>(null)
-    const collaboratorFileInputRef = useRef<HTMLInputElement>(null)
-
-    const handleButtonClick = () => {
-        fileInputRef.current?.click()
-    }
-
-    const handleCollaboratorButtonClick = () => {
-        collaboratorFileInputRef.current?.click()
-    }
-
-    const handleFileChange = async (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
+    // Image upload handler - validation hook se kar rahe hain
+    const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
-        if (file) {
+        if (file && validateImageFile(file)) {
             const reader = new FileReader()
             reader.onloadend = () => {
                 setImage(reader.result as string)
                 setIsCropping(true)
-                setCroppedImage(null) // Reset cropped image when new image is selected
+                setCroppedImage(null)
             }
             reader.readAsDataURL(file)
         }
@@ -369,12 +216,12 @@ function Page({ params }: { params: PageParams}) {
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         const file = event.target.files?.[0]
-        if (file) {
+        if (file && validateImageFile(file)) {
             const reader = new FileReader()
             reader.onloadend = () => {
                 setCollaboratorImage(reader.result as string)
                 setIsCollaboratorCropping(true)
-                setCroppedCollaboratorImage(null) // Reset cropped image when new image is selected
+                setCroppedCollaboratorImage(null)
             }
             reader.readAsDataURL(file)
         }
@@ -386,10 +233,22 @@ function Page({ params }: { params: PageParams}) {
                 width: 800,
                 height: 400,
             })
-            setCroppedImage(croppedCanvas.toDataURL())
+            const croppedImageData = croppedCanvas.toDataURL()
+            setCroppedImage(croppedImageData)
             setIsCropping(false)
-            setImage(null) // Clear the original image after cropping
+            setImage(null)
         }
+    }
+
+    const handleRemoveImage = () => {
+        setCroppedImage(null)
+        setImage(null)
+        setIsCropping(false)
+        form.setValue('coverImage', '')
+    }
+
+    const handleCollaboratorButtonClick = () => {
+        collaboratorFileInputRef.current?.click()
     }
 
     const handleCollaboratorCrop = () => {
@@ -400,452 +259,424 @@ function Page({ params }: { params: PageParams}) {
             })
             setCroppedCollaboratorImage(croppedCanvas.toDataURL())
             setIsCollaboratorCropping(false)
-            setCollaboratorImage(null) // Clear the original image after cropping
+            setCollaboratorImage(null)
         }
     }
 
-    // if (loadingCourseCheck) {
-    //   return (
-    //     <div className="flex justify-center items-center h-full mt-20">
-    //       <Spinner className="text-secondary" />
-    //     </div>
-    //   )
-    // }
-
-    // if (isCourseDeleted) {
-    //   return (
-    //     <div className="flex flex-col justify-center items-center h-full mt-20">
-    //       <Image src="/images/undraw_select-option_6wly.svg" width={350} height={350} alt="Deleted" />
-    //       <p className="text-lg text-red-600 mt-4">This course has been deleted !</p>
-    //       <Button onClick={() => router.push('/admin/courses')} className="mt-6 bg-secondary">
-    //         Back to Courses
-    //       </Button>
-    //     </div>
-    //   )
-    // }
+    // Duration validation function
+    const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        if (value === '') {
+            return value
+        }
+        const isValidInteger = /^\d+$/.test(value)
+        if (!isValidInteger) {
+            toast.error({
+                title: 'Invalid Integer',
+                description: 'Please enter a valid integer value',
+            })
+            return
+        }
+        if (parseInt(value, 10) <= 0) {
+            toast.error({
+                title: 'Invalid Value',
+                description: 'Duration must be greater than 0',
+            })
+            return
+        }
+        return value
+    }
 
     return (
-        <div className="max-w-[400px] m-auto text-gray-600">
+        <div className="w-full max-w-none space-y-6">
+            <h2 className="font-heading text-xl font-semibold text-left ml-1">General Details</h2>
+            
             <Form {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                >
-                    <div
-                        className="image-container bg-muted flex justify-center items-center rounded-sm my-3 overflow-hidden"
-                        style={{ height: '200px', width: '400px' }}
-                    >
-                        {isCropping && image ? (
-                            <Cropper
-                                src={image}
-                                style={{ height: 200, width: '100%' }}
-                                aspectRatio={16 / 9}
-                                onInitialized={(instance) =>
-                                    setCropper(instance)
-                                }
-                            />
-                        ) : croppedImage ? (
-                            <img src={croppedImage} alt="Cropped Preview" className="w-full h-full object-cover" />
-                        ) : (
-                            <OptimizedImageWithFallback
-                                src={
-                                    courseData?.coverImage || '/logo_white.png'
-                                }
-                                alt={courseData?.name || 'Cover Image'}
-                                fallBackSrc={'/logo_white.png'}
-                            />
-                        )}
-                    </div>
-                    <Input
-                        id="picture"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        ref={fileInputRef}
-                    />
-                    <div className="flex gap-2">
-                        <Button
-                            className="text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
-                            type="button"
-                            onClick={handleButtonClick}
-                        >
-                            {croppedImage ? 'Change Course Image' : 'Upload Course Image'}
-                        </Button>
-                        {isCropping && image && (
-                            <Button
-                                onClick={handleCrop}
-                                variant={'outline'}
-                                type="button"
-                            >
-                                Crop Image
-                            </Button>
-                        )}
-                    </div>
-
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem className="text-start">
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Enter Bootcamp Name"
-                                        {...(field || '')}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="bootcampTopic"
-                        render={({ field }) => (
-                            <FormItem className="text-start">
-                                <FormLabel>Topic</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Enter Bootcamp Topic"
-                                        {...(field || '')}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem className="text-start">
-                                <FormLabel>Description</FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        placeholder="Enter Course Description"
-                                        rows={4}
-                                        {...(field || '')}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* Updated Collaborator Section with Radio Buttons */}
-                    <FormField
-                        control={form.control}
-                        name="collaborator"
-                        render={({ field }) => (
-                            <FormItem className="text-start">
-                                <FormLabel>Collaborator</FormLabel>
-
-                                {/* Radio buttons for collaborator type */}
-                                <div className="mb-3">
-                                    <RadioGroup
-                                        value={collaboratorType}
-                                        onValueChange={(value: 'text' | 'image') =>
-                                            handleCollaboratorTypeChange(value)
-                                        }
-                                        className="flex gap-4"
-                                    >
-                                        <div className="flex flex-row items-center space-x-2">
-                                            <RadioGroupItem
-                                                value="text"
-                                                className="text-black border-black"
-                                                disabled={!canSwitchToText() && collaboratorType !== 'text'}
-                                            />
-                                            <label
-                                                className={`text-sm font-medium ${!canSwitchToText() && collaboratorType !== 'text'
-                                                        ? 'text-gray-400 cursor-not-allowed'
-                                                        : 'cursor-pointer'
-                                                    }`}
-                                            >
-                                                Text
-                                            </label>
-                                        </div>
-                                        <div className="flex flex-row items-center space-x-2">
-                                            <RadioGroupItem
-                                                value="image"
-                                                className="text-black border-black"
-                                                disabled={!canSwitchToImage() && collaboratorType !== 'image'}
-                                            />
-                                            <label
-                                                className={`text-sm font-medium ${!canSwitchToImage() && collaboratorType !== 'image'
-                                                        ? 'text-gray-400 cursor-not-allowed'
-                                                        : 'cursor-pointer'
-                                                    }`}
-                                            >
-                                                Image
-                                            </label>
-                                        </div>
-                                    </RadioGroup>
-                                </div>
-
-                                {/* Render based on selected type */}
-                                {collaboratorType === 'image' ? (
-                                    <>
-                                        <div className="mb-3">
-                                            <div 
-                                                className="image-container bg-muted flex justify-center items-center rounded-sm overflow-hidden"
-                                                style={{ height: '200px', width: '400px' }}
-                                            >
-                                                {isCollaboratorCropping && collaboratorImage ? (
-                                                    <Cropper
-                                                        src={collaboratorImage}
-                                                        style={{ height: 200, width: '100%' }}
-                                                        aspectRatio={16 / 9}
-                                                        onInitialized={(instance) =>
-                                                            setCollaboratorCropper(instance)
-                                                        }
-                                                    />
-                                                ) : croppedCollaboratorImage ? (
-                                                    <img
-                                                        src={croppedCollaboratorImage}
-                                                        alt="Collaborator Preview"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : (
-                                                    // <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
-                                                    //     No image selected
-                                                    // </div>
-
-                                                    <OptimizedImageWithFallback
-                                                       src={
-                                                         courseData?.coverImage || '/logo_white.png'
-                                                       }
-                                                       alt={courseData?.name || 'Cover Image'}
-                                                       fallBackSrc={'/logo_white.png'}
-                                                    />
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* File input (hidden) */}
-                                        <Input
-                                            id="collaborator-picture"
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={
-                                                handleCollaboratorFileChange
-                                            }
-                                            className="hidden"
-                                            ref={collaboratorFileInputRef}
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        {/* Images Section - Course Image and Collaborator Image */}
+                        <div className="space-y-4">
+                            {/* Course Image */}
+                            <div>
+                                <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted relative group">
+                                    {isCropping && image ? (
+                                        <Cropper
+                                            src={image}
+                                            style={{ height: '100%', width: '100%' }}
+                                            aspectRatio={16 / 9}
+                                            onInitialized={(instance) => setCropper(instance)}
                                         />
-
-                                        <div className="space-y-2">
-                                            <div className="flex gap-2">
-                                                <Button
-                                                    variant="outline"
-                                                    type="button"
-                                                    onClick={
-                                                        handleCollaboratorButtonClick
-                                                    }
-                                                    size="sm"
-                                                    disabled={isCollaboratorCropping}
-                                                >
-                                                    {croppedCollaboratorImage ? 'Change Image' : 'Upload Image'}
-                                                </Button>
-
-                                                {isCollaboratorCropping && collaboratorImage && (
-                                                    <Button
-                                                        onClick={
-                                                            handleCollaboratorCrop
-                                                        }
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                    >
-                                                        Crop Image
-                                                    </Button>
-                                                )}
-
-                                                {/* Remove Image Button */}
-                                                {croppedCollaboratorImage && !isCollaboratorCropping && (
-                                                    <Button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setCroppedCollaboratorImage(null)
-                                                            setCollaboratorImage(null)
-                                                            setIsCollaboratorCropping(false)
-                                                            form.setValue('collaborator', '')
-                                                        }}
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="border-red-300 text-red-600 hover:text-red-700 hover:border-red-400 hover:bg-red-50 transition-colors"
-                                                    >
-                                                        Remove Image
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    // Text input
-                                    <div className="space-y-2">
-                                        <FormControl>
-                                            <Input
-                                                placeholder="Enter collaborator text"
-                                                maxLength={80}
-                                                {...field}
-                                                value={field.value || ''}
+                                    ) : croppedImage ? (
+                                        <img 
+                                            src={croppedImage} 
+                                            alt="Course preview"
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
+                                            <OptimizedImageWithFallback
+                                                src={'/logo_white.png'}
+                                                alt={'Course Image'}
+                                                fallBackSrc={'/logo_white.png'}
                                             />
-                                        </FormControl>
+                                        </div>
+                                    )}
+                                    
+                                    {!isCropping && (
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <Button 
+                                                variant="secondary" 
+                                                size="sm" 
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                disabled={isImageUploading}
+                                            >
+                                                <Upload className="h-4 w-4 mr-2" />
+                                                {isImageUploading ? 'Uploading...' : 'Upload New Image'}
+                                            </Button>
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="sr-only"
+                                                ref={fileInputRef}
+                                            />
+                                            {croppedImage && (
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={handleRemoveImage}
+                                                    type="button"
+                                                    disabled={isImageUploading}
+                                                >
+                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                    Remove Image
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                
+                                {isCropping && image && (
+                                    <div className="flex gap-2 mt-2">
+                                        <Button onClick={handleCrop} variant="outline" type="button">
+                                            Crop Image
+                                        </Button>
+                                        <Button 
+                                            onClick={() => {
+                                                setIsCropping(false)
+                                                setImage(null)
+                                            }} 
+                                            variant="ghost" 
+                                            type="button"
+                                        >
+                                            Cancel
+                                        </Button>
                                     </div>
                                 )}
+                            </div>
 
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="startTime"
-                        render={({ field }) => (
-                            <FormItem className="text-start">
-                                <FormLabel>Date of Commencement</FormLabel>
-                                <Popover
-                                    open={isCalendarOpen}
-                                    onOpenChange={setCalendarOpen}
-                                >
-                                    <PopoverTrigger asChild>
-                                        <FormControl>
-                                            <Button
-                                                className={cn(
-                                                    'pl-3 text-left font-normal w-full text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]',
-                                                    !field.value &&
-                                                    'text-muted-foreground'
-                                                )}
-                                            >
-                                                {field.value
-                                                    ? format(field.value, 'PPP')
-                                                    : 'Pick a date'}
-                                                <CalendarIcon className="h-4 w-4 text-muted-foreground ml-auto" />
-                                            </Button>
-                                        </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent>
-                                        <Calendar
-                                            mode="single"
-                                            selected={field.value}
-                                            onSelect={(date) => {
-                                                if (date) {
-                                                    field.onChange(date)
-                                                    setCalendarOpen(false)
+                            {/* Collaborator Section */}
+                            <FormField
+                                control={form.control}
+                                name="collaborator"
+                                render={({ field }) => (
+                                    <FormItem className="text-start">
+                                      <FormLabel className="font-semibold">Collaborator</FormLabel>
+                                        <div className="mb-3">
+                                            <RadioGroup
+                                                value={collaboratorType}
+                                                onValueChange={(value: 'text' | 'image') =>
+                                                    handleCollaboratorTypeChange(value)
                                                 }
-                                            }}
-                                            disabled={(date) =>{
-                                                // date < new Date()
-                                                const today = new Date();
-                                                today.setHours(0, 0, 0, 0);
-                                                 return date < today;
-                                            }}
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="duration"
-                        render={({ field }) => (
-                            <FormItem className="text-start">
-                                <FormLabel>Duration</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        type="text"
-                                        placeholder="Enter Duration in Weeks"
-                                        value={field.value}
-                                        onChange={(e) => {
-                                            const value = e.target.value
-
-                                            // Allow empty string
-                                            if (value === '') {
-                                                field.onChange(value)
-                                                return
-                                            }
-
-                                            // Validate integer
-                                            const isValidInteger = /^\d+$/.test(
-                                                value
-                                            )
-                                            if (!isValidInteger) {
-                                                toast.error({
-                                                    title: 'Invalid Integer',
-                                                    description:
-                                                        'Please enter a valid integer value',
-                                                })
-                                                return
-                                            }
-
-                                            if (parseInt(value, 10) <= 0) {
-                                                 toast.error({
-                                                   title: 'Invalid Value',
-                                                  description: 'Duration must be greater than 0',
-                                                })
-                                                return
-                                            }
-
-                                            field.onChange(value)
-                                        }}
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="language"
-                        render={({ field }) => (
-                            <FormItem className="text-start">
-                                <FormLabel>Language</FormLabel>
-                                <FormControl>
-                                    <RadioGroup
-                                        onValueChange={field.onChange}
-                                        value={field.value || ''} // Use value instead of defaultValue
-                                        className="flex gap-4"
-                                    >
-                                        {LANGUAGES.map((language, index) => (
-                                            <FormItem
-                                                key={index}
-                                                className="flex flex-row items-center space-x-3 space-y-0"
+                                                className="flex gap-4"
                                             >
+                                                <div className="flex flex-row items-center space-x-2 space-y-0">
+                                                    <RadioGroupItem value="text" 
+                                                     disabled={!canSwitchToText() && collaboratorType !== 'text'}
+                                                    />
+                                                   <Label className={`text-sm font-medium cursor-pointer ${!canSwitchToText() && collaboratorType !== 'text' ? 'text-gray-400 cursor-not-allowed' : ''}`}>
+                                                      Text
+                                                   </Label>
+                                                </div>
+                                                <div className="flex flex-row items-center space-x-2 space-y-0">
+                                                    <RadioGroupItem value="image"
+                                                     disabled={!canSwitchToImage() && collaboratorType !== 'image'}
+                                                    />
+                                                    <Label className="text-sm font-medium cursor-pointer">Image</Label>
+                                                </div>
+                                            </RadioGroup>
+                                        </div>
+
+                                        {collaboratorType === 'image' ? (
+                                            <>
+                                                <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted relative group">
+                                                    {isCollaboratorCropping && collaboratorImage ? (
+                                                        <Cropper
+                                                            src={collaboratorImage}
+                                                            style={{ height: '100%', width: '100%' }}
+                                                            aspectRatio={16 / 9}
+                                                            onInitialized={(instance) => setCollaboratorCropper(instance)}
+                                                        />
+                                                    ) : croppedCollaboratorImage ? (
+                                                        <img src={croppedCollaboratorImage} alt="Collaborator Preview" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
+                                                            <OptimizedImageWithFallback
+                                                                src={'/logo_white.png'}
+                                                                alt={'Collaborator Image'}
+                                                                fallBackSrc={'/logo_white.png'}
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {!isCollaboratorCropping && (
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                            <Button 
+                                                                variant="secondary" 
+                                                                size="sm" 
+                                                                type="button"
+                                                                onClick={handleCollaboratorButtonClick}
+                                                                disabled={isImageUploading}
+                                                            >
+                                                                <Upload className="h-4 w-4 mr-2" />
+                                                                {croppedCollaboratorImage ? 'Change Image' : 'Upload Image'}
+                                                            </Button>
+                                                            {croppedCollaboratorImage && (
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    size="sm"
+                                                                    onClick={() => {
+                                                                        setCroppedCollaboratorImage(null)
+                                                                        setCollaboratorImage(null)
+                                                                        setIsCollaboratorCropping(false)
+                                                                        form.setValue('collaborator', '')
+                                                                    }}
+                                                                    type="button"
+                                                                    disabled={isImageUploading}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                                    Remove Image
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <Input
+                                                    id="collaborator-picture"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleCollaboratorFileChange}
+                                                    className="hidden"
+                                                    ref={collaboratorFileInputRef}
+                                                />
+                                                
+                                                {isCollaboratorCropping && collaboratorImage && (
+                                                    <div className="flex gap-2 mt-2">
+                                                        <Button onClick={handleCollaboratorCrop} variant="outline" type="button">
+                                                            Crop Image
+                                                        </Button>
+                                                        <Button 
+                                                            onClick={() => {
+                                                                setIsCollaboratorCropping(false)
+                                                                setCollaboratorImage(null)
+                                                            }} 
+                                                            variant="ghost" 
+                                                            type="button"
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        ) : (
+                                            <div className="space-y-2">
                                                 <FormControl>
-                                                    <RadioGroupItem
-                                                        value={language}
-                                                        className="text-black border-black"
+                                                    <Input
+                                                        placeholder="Enter collaborator text"
+                                                        maxLength={80}
+                                                        {...field}
+                                                        value={field.value || ''}
                                                     />
                                                 </FormControl>
-                                                <FormLabel className="font-normal">
-                                                    {language}
-                                                </FormLabel>
-                                            </FormItem>
-                                        ))}
-                                    </RadioGroup>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                                            </div>
+                                        )}
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
 
-                    <Button
-                        className="bg-success-dark opacity-75"
-                        type="submit"
-                    >
-                        Save
-                    </Button>
+                        {/* Form Fields Section */}
+                        <div className="lg:col-span-2 space-y-4">
+                            {/* Course Title */}
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem className="text-start">
+                                        <Label htmlFor="name" className="font-semibold">Course Title</Label>
+                                        <FormControl>
+                                            <Input
+                                                id="name"
+                                                placeholder="Enter course title"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Description */}
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem className="text-start">
+                                        <Label htmlFor="description" className="font-semibold">Description</Label>
+                                        <FormControl>
+                                            <Textarea
+                                                id="description"
+                                                placeholder="Enter course description"
+                                                className="min-h-[120px]"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {/* Duration and Start Date Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Duration */}
+                                <FormField
+                                    control={form.control}
+                                    name="duration"
+                                    render={({ field }) => (
+                                        <FormItem className="text-start">
+                                            <Label htmlFor="duration" className="font-semibold">Duration (weeks)</Label>
+                                            <FormControl>
+                                                <Input
+                                                    id="duration"
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="Duration in weeks"
+                                                    value={field.value}
+                                                    onChange={(e) => {
+                                                        const validatedValue = handleDurationChange(e)
+                                                        if (validatedValue !== undefined) {
+                                                            field.onChange(validatedValue)
+                                                        }
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                {/* Start Date */}
+                                <FormField
+                                    control={form.control}
+                                    name="startTime"
+                                    render={({ field }) => (
+                                        <FormItem className="text-start">
+                                            <Label htmlFor="startTime" className="font-semibold">Course Start Date</Label>
+                                            <Popover open={isCalendarOpen} onOpenChange={setCalendarOpen}>
+                                                <PopoverTrigger asChild>
+                                                    <FormControl>
+                                                        <div className="relative">
+                                                            <Input
+                                                                id="startTime"
+                                                                value={field.value ? format(field.value, 'dd-MM-yyyy') : ''}
+                                                                placeholder="Select start date"
+                                                                className="cursor-pointer"
+                                                                readOnly
+                                                            />
+                                                            <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                                        </div>
+                                                    </FormControl>
+                                                </PopoverTrigger>
+                                                <PopoverContent>
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={field.value}
+                                                        onSelect={(date) => {
+                                                            if (date) {
+                                                                field.onChange(date)
+                                                                setCalendarOpen(false)
+                                                            }
+                                                        }}
+                                                        disabled={(date) => {
+                                                            const today = new Date()
+                                                            today.setHours(0, 0, 0, 0)
+                                                            return date < today
+                                                        }}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            {/* Language Selection */}
+                            <FormField
+                                control={form.control}
+                                name="language"
+                                render={({ field }) => (
+                                    <FormItem className="text-start">
+                                        <Label className="text-sm font-semibold">Course Language</Label>
+                                        <FormControl>
+                                            <RadioGroup
+                                                onValueChange={field.onChange}
+                                                value={field.value || ''}
+                                                className="flex gap-6"
+                                            >
+                                                {LANGUAGES.map((language, index) => (
+                                                    <FormItem
+                                                        key={index}
+                                                        className="flex flex-row items-center space-x-2 space-y-0"
+                                                    >
+                                                        <FormControl>
+                                                            <RadioGroupItem
+                                                                value={language}
+                                                                id={language.toLowerCase()}
+                                                            />
+                                                        </FormControl>
+                                                        <Label 
+                                                            htmlFor={language.toLowerCase()}
+                                                            className="font-normal cursor-pointer"
+                                                        >
+                                                            {language}
+                                                        </Label>
+                                                    </FormItem>
+                                                ))}
+                                            </RadioGroup>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-2 border-t">
+                        <Button 
+                            type="submit" 
+                            className="bg-primary hover:bg-primary-dark mb-5"
+                            disabled={isLoading || isImageUploading}
+                        >
+                            {isLoading ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>
     )
 }
 
-export default Page
+export default GeneralDetailsPage

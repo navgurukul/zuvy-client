@@ -176,7 +176,7 @@ const QuizResults = ({
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground font-medium">Points</p>
-                                <p className="text-2xl font-bold text-foreground">{totalMarks}/{Math.ceil(maxMarks)}</p>
+                                <p className="text-2xl font-bold text-foreground">{totalMarks.toFixed(2)}/{Math.ceil(maxMarks)}</p>
                             </div>
                         </div>
                     </div>

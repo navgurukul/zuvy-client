@@ -7,11 +7,17 @@ import Image from 'next/image'
 import useDebounce from '@/hooks/useDebounce'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import {AssessmentSubmissions,StudentAssessmentSubmission,APIResponses} from "@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType"
+import {
+    AssessmentSubmissions,
+    StudentAssessmentSubmission,
+    APIResponses,
+} from '@/app/admin/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 // import assesmentNotfound from @/public
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
-    const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(null)
+    const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(
+        null
+    )
     const debouncedSearch = useDebounce(searchTerm, 300)
 
     const getAssessments = useCallback(async () => {
@@ -34,7 +40,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         getAssessments()
     }, [getAssessments])
 
-    const handleDownloadPdf = async (assessment:AssessmentSubmissions) => {
+    const handleDownloadPdf = async (assessment: AssessmentSubmissions) => {
         if (!assessment) return
 
         const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
@@ -92,22 +98,24 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 { header: 'Copy Pasted', dataKey: 'copyPaste' },
             ]
 
-            const rows = assessments.map((student: StudentAssessmentSubmission) => ({
-                name: student.name || 'N/A',
-                email: student.email || 'N/A',
-                qualified: student.isPassed ? 'Yes' : 'No',
-                percentage: `${(student.percentage || 0).toFixed(2)}%`,
-                codingScore:
-                    assessment.totalCodingQuestions > 0
-                        ? (student.codingScore || 0).toFixed(2)
-                        : undefined,
-                mcqScore:
-                    assessment.totalMcqQuestions > 0
-                        ? (student.mcqScore || 0).toFixed(2)
-                        : undefined,
-                tabChange: student.tabChange || 0,
-                copyPaste: student.copyPaste || 0,
-            }))
+            const rows = assessments.map(
+                (student: StudentAssessmentSubmission) => ({
+                    name: student.name || 'N/A',
+                    email: student.email || 'N/A',
+                    qualified: student.isPassed ? 'Yes' : 'No',
+                    percentage: `${(student.percentage || 0).toFixed(2)}%`,
+                    codingScore:
+                        assessment.totalCodingQuestions > 0
+                            ? (student.codingScore || 0).toFixed(2)
+                            : undefined,
+                    mcqScore:
+                        assessment.totalMcqQuestions > 0
+                            ? (student.mcqScore || 0).toFixed(2)
+                            : undefined,
+                    tabChange: student.tabChange || 0,
+                    copyPaste: student.copyPaste || 0,
+                })
+            )
 
             autoTable(doc, {
                 head: [columns.map((col) => col.header)],
@@ -180,20 +188,22 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 'Copy Pasted',
             ]
 
-            const rows = assessments.map((student: StudentAssessmentSubmission) => [
-                student.name || 'N/A',
-                student.email || 'N/A',
-                student.isPassed ? 'Yes' : 'No',
-                `${(student.percentage || 0).toFixed(2)}%`,
-                ...(assessment.totalCodingQuestions > 0
-                    ? [(student.codingScore || 0).toFixed(2)]
-                    : []),
-                ...(assessment.totalMcqQuestions > 0
-                    ? [(student.mcqScore || 0).toFixed(2)]
-                    : []),
-                student.tabChange || 0,
-                student.copyPaste || 0,
-            ])
+            const rows = assessments.map(
+                (student: StudentAssessmentSubmission) => [
+                    student.name || 'N/A',
+                    student.email || 'N/A',
+                    student.isPassed ? 'Yes' : 'No',
+                    `${(student.percentage || 0).toFixed(2)}%`,
+                    ...(assessment.totalCodingQuestions > 0
+                        ? [(student.codingScore || 0).toFixed(2)]
+                        : []),
+                    ...(assessment.totalMcqQuestions > 0
+                        ? [(student.mcqScore || 0).toFixed(2)]
+                        : []),
+                    student.tabChange || 0,
+                    student.copyPaste || 0,
+                ]
+            )
 
             const csvContent = [
                 headers.join(','),
@@ -231,10 +241,12 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                     </h2>
                                     <div className="grid md:grid-cols-3 gap-3">
                                         {assesments[key].map(
-                                            (assessment:AssessmentSubmissions) => (
+                                            (
+                                                assessment: AssessmentSubmissions
+                                            ) => (
                                                 <AssesmentComponent
                                                     key={assessment.id}
-                                                   id={Number(assessment.id)}
+                                                    id={Number(assessment.id)}
                                                     title={assessment.title}
                                                     codingChallenges={
                                                         assessment.totalCodingQuestions
@@ -278,63 +290,36 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                             )
                     )
                 ) : (
-                    <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                        <h5 className="text-center font-semibold text-[17px]">
-                            No Assessment Found
-                        </h5>
+                    <div className="flex flex-col justify-center items-center">
+                        <p className="text-center text-muted-foreground max-w-md">
+                            No Assessment submissions available from the
+                            students yet. Please wait until the first
+                            submission.
+                        </p>
                         <Image
-                            src="/emptyStates/curriculum.svg"
+                            src="/emptyStates/empty-submissions.png"
                             alt="No Assessment Found"
-                            width={400}
-                            height={400}
+                            width={120}
+                            height={120}
+                            className="mb-6"
                         />
                     </div>
                 )
             ) : (
-                <div className="w-screen flex flex-col justify-center items-center h-4/5">
-                    <h5 className="text-center font-semibold text-[17px]">
-                        No Assessment Found
-                    </h5>
+                <div className="flex flex-col justify-center items-center">
+                    <p className="text-center text-muted-foreground max-w-md">
+                        No Assessment submissions available from the students
+                        yet. Please wait until the first submission.
+                    </p>
                     <Image
-                        src="/emptyStates/curriculum.svg"
+                        src="/emptyStates/empty-submissions.png"
                         alt="No Assessment Found"
-                        width={400}
-                        height={400}
+                        width={120}
+                        height={120}
+                        className="mb-6"
                     />
                 </div>
             )}
-
-            {/* Popup Modal */}
-            {/* {showPopup && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white p-6 rounded shadow-lg text-center w-[90%] max-w-md relative">
-                        <button
-                            onClick={handlePopupClose}
-                            className="absolute text-2xl top-2 right-2 text-gray-500 hover:text-gray-700"
-                            aria-label="Close"
-                        >
-                            x
-                        </button>
-                        <h2 className="text-lg font-semibold mb-4">
-                            Download full report
-                        </h2>
-                        <div className="flex justify-center gap-4 mt-10">
-                            <button
-                                onClick={handleDownloadPdf}
-                                className="px-4 py-2 bg-secondary text-white rounded-md"
-                            >
-                                Download PDF
-                            </button>
-                            <button
-                                onClick={handleDownloadCsv}
-                                className="px-4 py-2 bg-secondary text-white rounded-md"
-                            >
-                                Download CSV
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )} */}
         </div>
     )
 }

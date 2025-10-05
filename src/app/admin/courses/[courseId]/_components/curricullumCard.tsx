@@ -1,24 +1,18 @@
 import { isPlural } from '@/lib/utils'
-import {
-    BookOpenText,
-    Clock1,
-    SquareCode,
-    FileQuestion,
-    GripVertical,
-    PencilLine,
-    Trash2,
-    Pencil,
-} from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
+import { GripVertical, Trash2, Edit, FolderOpen } from 'lucide-react'
+import React, { useState } from 'react'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
 import { api } from '@/utils/axios.config'
 import { useRouter } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { Reorder, useDragControls } from 'framer-motion'
-import {CurricullamCardProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { CurricullamCardProps } from '@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
-const CurricullumCard = (props:CurricullamCardProps) => {
+const CurricullumCard = (props: CurricullamCardProps) => {
     const {
         editHandle,
         index,
@@ -91,144 +85,131 @@ const CurricullumCard = (props:CurricullamCardProps) => {
             value={props.value}
             dragListener={false}
             dragControls={dragControls}
-            className={`select-none ${props.isStarted ? 'opacity-90' : ''}min-h-[120px] relative z-0`}
+            className={`select-none ${
+                props.isStarted ? 'opacity-90' : ''
+            } relative z-0`}
             whileDrag={{
-            scale: 1.02,
-            boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
-            zIndex: 999,
-            x: 0,
+                scale: 1.02,
+                boxShadow: '0px 10px 20px rgba(0,0,0,0.15)',
+                zIndex: 999,
+                x: 0,
             }}
             onDragStart={() => {
                 setIsDragging(true)
-                props.setDraggedModuleId(props.moduleId) // moduleId parent ko bhejna
-                onDragStart?.() // Call parent's drag start
+                props.setDraggedModuleId(props.moduleId)
+                onDragStart?.()
             }}
             onDragEnd={() => {
                 setIsDragging(false)
-                props.setDraggedModuleId(null) // drag end pe reset karna
-                onDragEnd?.() // Call parent's drag end 
+                props.setDraggedModuleId(null)
+                onDragEnd?.()
             }}
             transition={{ duration: 0.2 }}
         >
-            <div
-                className={`${
-                    props.typeId === 2 ? 'bg-yellow-100/80' : 'bg-muted'
-                } my-3 p-3 flex rounded-xl relative group select-none cursor-pointer w-full min-h-[120px]  transition-all duration-300 ${
-                    showBorderFlash 
-                        ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
-                        : ''}`}
+            <Card
+                className={`shadow-sm my-2 w-full cursor-pointer transition-all duration-300 ${
+                    showBorderFlash
+                        ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash'
+                        : ''
+                }`}
             >
-                <div className="w-full p-2" onClick={handleModuleRoute}>
-                    <div className="flex mb-2 w-full justify-between">
-                        <p className="text-md font-semibold capitalize text-black text-start">
-                            {`Module ${order}`} : {name}
-                        </p>
-                        <div className="flex items-center gap-x-2">
-                            <Trash2
-                                className="hover:text-destructive cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleDeleteModal()
-                                }}
-                            />
-                            <Pencil
-                                className="hover:text-green-600 cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    editHandle(moduleId)
-                                }}
-                            />
-                            <GripVertical
-                                style={{
-                                    cursor: props.isStarted
-                                        ? 'not-allowed'
-                                        : isDragging
-                                            ? 'grabbing'
-                                            : 'grab',
-                                }}
-                                onPointerDown={
-                                    !props.isStarted
-                                        ? (e) => {
-                                              e.stopPropagation()
-                                              setIsDragging(true)
-                                              dragControls.start(e)
-                                          }
-                                        : undefined
-                                }
-                                // onPointerUp={() => setIsDragging(false)}
-                                // onPointerLeave={() => setIsDragging(false)}
-                                onClick={(e) => e.stopPropagation()}
-                            />
+                <CardHeader className="pb-4">
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="cursor-grab text-muted-foreground hover:text-foreground"
+                            style={{
+                                cursor: props.isStarted
+                                    ? 'not-allowed'
+                                    : isDragging
+                                    ? 'grabbing'
+                                    : 'grab',
+                            }}
+                            onPointerDown={
+                                !props.isStarted
+                                    ? (e) => {
+                                          e.stopPropagation()
+                                          setIsDragging(true)
+                                          dragControls.start(e)
+                                      }
+                                    : undefined
+                            }
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <GripVertical className="h-5 w-5" />
                         </div>
-                    </div>
-                    <p className="text-start mb-2">{description}</p>
-                    <div className="flex flex-wrap justify-start gap-x-4">
-                        <div className="flex items-center justify-start gap-x-2">
-                            <Clock1 size={15} />
-                            <p className="text-md font-semibold capitalize text-gray-600">
-                                {timeAllotedInWeeks > 1
-                                    ? `${timeAllotedInWeeks} weeks`
-                                    : `${timeAllotedInWeeks} week`}
-                            </p>
-                        </div>
-                        {articlesCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <BookOpenText size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {articlesCount}{' '}
-                                    {isPlural(articlesCount)
-                                        ? 'Articles'
-                                        : 'Article'}
-                                </p>
-                            </div>
-                        ) : null}
-                        {assignmentCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <PencilLine size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {assignmentCount}{' '}
-                                    {isPlural(assignmentCount)
-                                        ? 'Assignments'
-                                        : 'Assignment'}
-                                </p>
-                            </div>
-                        ) : null}
-                        {quizCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <FileQuestion size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {quizCount}{' '}
-                                    {isPlural(quizCount) ? 'Quizzes' : 'Quiz'}
-                                </p>
-                            </div>
-                        ) : null}
-                        {codingProblemsCount > 0 ? (
-                            <div className="flex items-center justify-start gap-x-2">
-                                <SquareCode size={15} />
-                                <p className="text-md font-semibold capitalize text-gray-600">
-                                    {codingProblemsCount}{' '}
-                                    {isPlural(codingProblemsCount)
-                                        ? 'Coding Problems'
-                                        : 'Coding Problem'}
-                                </p>
-                            </div>
-                        ) : null}
-                    </div>
-                </div>
-                <DeleteConfirmationModal
-                    isOpen={isDeleteModalOpen}
-                    onClose={() => setDeleteModalOpen(false)}
-                    onConfirm={() => {
-                        handleDeleteModule()
-                        setDeleteModalOpen(false)
-                    }}
-                    modalText={DELETE_MODULE_CONFIRMATION}
-                    buttonText="Delete Module"
-                    input={false}
-                />
-            </div>
-        </Reorder.Item>
 
+                        <div className="flex-1 flex items-center justify-between hover:bg-muted/50 p-2 rounded-md transition-colors">
+                            <div
+                                className="text-left flex items-center gap-3"
+                                onClick={handleModuleRoute}
+                            >
+                                <div
+                                    className={`p-2 rounded-md ${
+                                        props.typeId === 2
+                                            ? 'bg-yellow-100 text-secondary'
+                                            : 'bg-primary/10 text-primary'
+                                    }`}
+                                >
+                                    <FolderOpen className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-lg">
+                                        Module {order}: {name}
+                                    </h3>
+                                    <p className="text-muted-foreground text-[1rem]">
+                                        {description}
+                                    </p>
+                                    <p className="text-muted-foreground text-sm">
+                                        Duration:{' '}
+                                        {timeAllotedInWeeks > 1
+                                            ? `${timeAllotedInWeeks} weeks`
+                                            : `${timeAllotedInWeeks} week`}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        editHandle(moduleId)
+                                    }}
+                                    className="hover:text-muted-foreground hover:bg-gray-200"
+                                >
+                                    <Edit className="h-4 w-4" />
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleDeleteModal()
+                                    }}
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+
+            <DeleteConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={() => {
+                    handleDeleteModule()
+                    setDeleteModalOpen(false)
+                }}
+                modalText={DELETE_MODULE_CONFIRMATION}
+                buttonText="Delete Module"
+                input={false}
+            />
+        </Reorder.Item>
     )
 }
 

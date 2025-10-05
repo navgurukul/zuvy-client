@@ -7,7 +7,9 @@ import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-co
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
+const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
@@ -79,7 +81,20 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
-
+    {
+        accessorKey: 'batch',
+        header: 'Batch',
+        cell: ({ row }) => {
+            const index = row.index
+            return (
+                <div className="flex items-center justify-start">
+                    <Badge variant="outline" className="bg-gray-100 border border-gray-200">
+                        {mockBatches[index % mockBatches.length]}
+                    </Badge>
+                </div>
+            )
+        },
+    },
     {
         accessorKey: 'status',
         header: ({ column }) => (

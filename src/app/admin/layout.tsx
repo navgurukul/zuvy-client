@@ -1,16 +1,15 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import StudentNavbar from '../_components/navbar'
 
 import { usePathname } from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 
-
 import '../globals.css'
 import { useEffect } from 'react'
+import StudentNavbar from '../_components/navbar'
 
 export default function RootLayout({
     children,
@@ -19,6 +18,7 @@ export default function RootLayout({
 }) {
     const pathname = usePathname()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
+    const isFullWidthRoute = pathname.includes('/module') || pathname.includes('/project') || adminAssessmentPreviewRoute;
     const { user, setUser } = getUser()
     const rolesList = user && user.rolesList.length > 0 && user.rolesList[0]
 
@@ -32,7 +32,7 @@ export default function RootLayout({
     }
 
     return (
-        <div>
+        <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
             {user.email.length == 0 ? (
                 <div className="flex items-center justify-center h-[680px]">
                     <Spinner className="text-[rgb(81,134,114)]" />
@@ -42,7 +42,7 @@ export default function RootLayout({
                   (user.rolesList.length > 0 &&
                       user.rolesList[0] !== 'admin')) ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Admin'} />
-            ) : (
+            ) : (                
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 

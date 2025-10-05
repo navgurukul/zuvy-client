@@ -13,6 +13,9 @@ export const taskSchema = z.object({
     batchName: z.string(),
     attendance: z.number(),
     status: z.string(),
+    lastActive: z.string().nullable().optional(), // Add this for last active date
+    studentStatus: z.enum(['active', 'dropout', 'graduate']).optional(), // Add this for student status
+    enrolledDate: z.string().nullable().optional(), // Add this for enrolled date
     reattemptCount: z.number().optional(),
     isChecked: z.boolean(),
     userEmail: z.string(),
@@ -54,6 +57,7 @@ export const codingQuestionSchema = z.object({
     createdAt: z.string(),
     updatedAt: z.string(),
     usage: z.number(),
+    tagId: z.string(),
 })
 
 export type CodingQuestion = z.infer<typeof codingQuestionSchema>

@@ -25,7 +25,7 @@ function QuizList({
     tags: any
 }) {
     return (
-        <ScrollArea className="h-[580px] w-full pb-10">
+        <ScrollArea className="h-[25.5rem] w-full  pr-3">
             {questionData.map((question:QuizListQuestion) => {
                 const isSelected = addQuestion?.some(
                     (quest: QuizListQuestion) => quest?.id === question.id
@@ -42,10 +42,10 @@ function QuizList({
 
                 return (
                     <div
-                        // className="flex flex-col justify-between"
+                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mt-4"
                         key={question.id}
                     >
-                        <div className="flex items-center justify-between border-b border-gray-200 py-4">
+                        <div className="flex items-center justify-between w-full">
                             <div className="w-full space-y-2 ">
                                 <div className="flex justify-between items-center gap-x-2">
                                     <h1 className="scroll-m-20 text-base text-gray-600 font-semibold tracking-tight lg:text-lg">
@@ -97,7 +97,7 @@ function QuizList({
                                             ) : (
                                                 <PlusCircle
                                                     size={20}
-                                                    className="text-[rgb(81,134,114)] cursor-pointer "
+                                                    className="text-primary cursor-pointer "
                                                     onClick={handleClick}
                                                 />
                                             )}
@@ -107,8 +107,8 @@ function QuizList({
 
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <p className=" text-left font-bold text-sm  text-[#518672] cursor-pointer">
-                                            View Description
+                                        <p className=" text-left font-bold text-sm  text-primary cursor-pointer">
+                                            View Full Description
                                         </p>
                                     </DialogTrigger>
                                     <DialogOverlay />

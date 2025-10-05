@@ -17,6 +17,7 @@ import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import axios from 'axios'
 import{CurriculumItem,ModuleData} from "@/app/admin/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType"
+import { Plus } from 'lucide-react'
 
 
 function Page() {
@@ -89,7 +90,7 @@ function Page() {
         if (moduleId && courseData?.id) {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
-                    const data = res.data.find(
+                    const data = res?.data?.modules?.find(
                         (item:  ModuleData ) => moduleId === item.id
                     )
                     setSelectedModuleData(data)
@@ -176,7 +177,7 @@ function Page() {
         if (isEditOpen && moduleId && courseData?.id) {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
-                    const data = res.data.find(
+                    const data = res?.data?.modules?.find(
                         (module: any) => module.id === moduleId
                     )
                     setSelectedModuleData(data) // Set the selected module's data
@@ -339,7 +340,7 @@ function Page() {
             const response = await api.get(
                 `/content/allModules/${courseData.id}`
             )
-            const modulesWithStartedFlag = response.data.map((module: ModuleData) => ({
+            const modulesWithStartedFlag = response?.data?.modules?.map((module: ModuleData) => ({
                 ...module,
                 isStarted: false,
             }))
@@ -569,12 +570,18 @@ function Page() {
 
     return (
         <div className="w-full">
-            <div className="w-full flex justify-end pr-4">
-                <div>
-                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <div className="w-full flex flex-col items-center justify-center">
+                <div className="w-full px-2 md:px-0 max-w-4xl flex flex-col gap-y-4 mt-4">
+                   <div className='w-full flex justify-between items-center'>
+                     <h2 className="text-xl font-semibold">
+                        Course Curriculum
+                    </h2>
+                   <div>
+                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
-                            <Button className="text-white bg-success-dark opacity-75">
-                                Add Module
+                            <Button className="text-white bg-primary">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Module / Project
                             </Button>
                         </DialogTrigger>
                         <DialogOverlay />
@@ -591,6 +598,8 @@ function Page() {
                             isLoading={isLoading}
                         />
                     </Dialog>
+                   </div>
+                   </div>
                 </div>
             </div>
 
@@ -621,7 +630,7 @@ function Page() {
                 <div className="flex flex-col items-center justify-center overflow-hidden">
                     {curriculum.length > 0 ? (
                         <Reorder.Group
-                            className="w-1/2"
+                            className="w-full px-2 md:px-0 max-w-4xl flex flex-col my-4"
                             values={curriculum}
                             onReorder={handleReorderModules}
                             axis="y"
