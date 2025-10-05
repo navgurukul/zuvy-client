@@ -4,7 +4,7 @@ import { api } from '@/utils/axios.config'
 import type {
     Course,
     CoursesResponse,
-} from '@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+} from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import { coursePermissions } from './hookType'
 
 export function useAllCourses(initialFetch = true) {
@@ -42,5 +42,11 @@ export function useAllCourses(initialFetch = true) {
         if (initialFetch) getAllCourses()
     }, [initialFetch, getAllCourses])
 
-    return { allCourses, loading, error, refetchAllCourses: getAllCourses , permissions }
+    return {
+        allCourses,
+        loading,
+        error,
+        refetchAllCourses: getAllCourses,
+        permissions,
+    }
 }

@@ -159,9 +159,11 @@ import { useThemeStore } from '@/store/store'
 import { Moon, Sun } from 'lucide-react'
 import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
+import { useRoles } from '@/hooks/useRoles'
 
 //Test
 const Navbar = () => {
+    const { roles } = useRoles()
     const { studentData } = useLazyLoadedStudentData()
     const { user, setUser } = getUser()
     const pathname = usePathname()
@@ -174,10 +176,18 @@ const Navbar = () => {
         queryObject[key] = value
     })
 
+    const role = user.rolesList[0]
+    console.log('user in navbar', user.rolesList[0])
+    console.log('roles in navbar', roles)
+
     const { viewRolesAndPermission, viewContent } = queryObject
 
+    // const isAdmin = pathname?.includes(role)
     const isAdmin = pathname?.includes('/admin')
     const isTeacher = pathname?.includes('/instructor')
+    // const routes = isAdmin
+    //     ? adminRoutes(role)
+    //     : guestRoutes
     const routes = isAdmin
         ? adminRoutes
         : isTeacher

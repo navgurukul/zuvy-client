@@ -5,6 +5,8 @@ export function middleware(request: NextRequest) {
     // const userData = request.cookies.get("secure_typeuser")?.value ?? "false";
     // const user = userData === "false" ? "false" : atob(userData);
 
+    
+
     const path = request.nextUrl.href
     const redirectedUrl = request.cookies.get('redirectedUrl')?.value ?? false
     const userData = request.cookies.get('secure_typeuser')?.value ?? 'false'

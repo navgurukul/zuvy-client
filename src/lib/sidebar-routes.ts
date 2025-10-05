@@ -14,8 +14,6 @@ import {
     Database,
 } from 'lucide-react'
 
-
-
 // const guestRoutes = [
 //     {
 //         icon: Layout,
@@ -165,12 +163,39 @@ const teacherRoutes = [
 //     // { label: "Help", icon: HelpCircle, href: "/admin/help" },
 // ]
 
+// const adminRoutes = (role: string) => [
+//     {
+//         name: 'Course Studio',
+//         href: `/${role}/courses`,
+//         icon: Layers,
+//         active: (pathname: string) =>
+//             pathname === `/${role}/courses` ||
+//             pathname.startsWith(`/${role}/courses/`),
+//     },
+//     {
+//         name: 'Question Bank',
+//         href: `/${role}/content-bank`,
+//         icon: Database,
+//         active: (pathname: string) =>
+//             pathname === `/${role}/content-bank` ||
+//             pathname.startsWith(`/${role}/content-bank/`),
+//     },
+//     {
+//         name: 'Roles and Permissions',
+//         href: `/${role}/settings`,
+//         icon: Settings,
+//         active: (pathname: string) =>
+//             pathname === `/${role}/settings` ||
+//             pathname.startsWith(`/${role}/settings/`),
+//     },
+// ]
+
 const adminRoutes = [
     {
         name: 'Course Studio',
         href: '/admin/courses',
         icon: Layers,
-        active: (pathname: string) => 
+        active: (pathname: string) =>
         pathname === '/admin/courses' || pathname.startsWith('/admin/courses/'),
     },
     {

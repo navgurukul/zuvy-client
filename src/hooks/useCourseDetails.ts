@@ -2,21 +2,23 @@ import { useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { getCourseData } from '@/store/store'
-import { 
+import {
     CourseDetailsFormData,
-    UpdateCourseResponse, 
-    ImageUploadResponse 
-} from '@/app/admin/courses/[courseId]/(courseTabs)/details/courseDetailType'
+    UpdateCourseResponse,
+    ImageUploadResponse,
+} from '@/app/[admin]/courses/[courseId]/(courseTabs)/details/courseDetailType'
 
 export const useCourseDetails = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [isImageUploading, setIsImageUploading] = useState(false)
     const { courseData, setCourseData } = getCourseData()
 
-    const uploadImage = async (croppedImage: string): Promise<string | null> => {
+    const uploadImage = async (
+        croppedImage: string
+    ): Promise<string | null> => {
         try {
             setIsImageUploading(true)
-            
+
             const response = await fetch(croppedImage)
             const blob = await response.blob()
             const file = new File([blob], 'cropped-cover-image.png', {
@@ -27,14 +29,16 @@ export const useCourseDetails = () => {
             formData.append('images', file)
 
             const res = await api.post<ImageUploadResponse>(
-                '/Content/curriculum/upload-images', 
-                formData, 
+                '/Content/curriculum/upload-images',
+                formData,
                 {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 }
             )
-            
-            const uploadedUrls = Array.isArray(res.data?.urls) ? res.data.urls : []
+
+            const uploadedUrls = Array.isArray(res.data?.urls)
+                ? res.data.urls
+                : []
             if (uploadedUrls.length === 0) {
                 toast.error({
                     title: 'Error',
@@ -56,12 +60,12 @@ export const useCourseDetails = () => {
     }
 
     const updateCourseDetails = async (
-        data: CourseDetailsFormData, 
+        data: CourseDetailsFormData,
         croppedImage?: string | null
     ): Promise<boolean> => {
         try {
             setIsLoading(true)
-            
+
             let coverImage = data.coverImage || ''
 
             // Handle cover image upload if there's a new cropped image
@@ -88,27 +92,36 @@ export const useCourseDetails = () => {
             )
 
             const {
-                id, name, bootcampTopic, description, coverImage: updatedCoverImage,
-                collaborator, startTime, duration, language, unassigned_students,
+                id,
+                name,
+                bootcampTopic,
+                description,
+                coverImage: updatedCoverImage,
+                collaborator,
+                startTime,
+                duration,
+                language,
+                unassigned_students,
             } = response.data.updatedBootcamp[0]
-            
+
             // CourseData interface ke according setCourseData call - type conversion properly
             setCourseData({
-                id: Number(id), 
-                name, 
-                bootcampTopic, 
-                description, 
+                id: Number(id),
+                name,
+                bootcampTopic,
+                description,
                 coverImage: updatedCoverImage,
-                collaborator, 
-                startTime, 
-                duration, 
-                language, 
+                collaborator,
+                startTime,
+                duration,
+                language,
                 unassigned_students,
             })
-            
+
             toast.success({
                 title: response.data.status,
-                description: response.data.message || 'Changes saved successfully',
+                description:
+                    response.data.message || 'Changes saved successfully',
             })
 
             return true
