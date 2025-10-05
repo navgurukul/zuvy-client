@@ -10,6 +10,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+
+
 export const VideoSkeleton = () => (
     <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
         <div className="max-w-4xl mx-auto">
@@ -244,6 +246,7 @@ export const AssessmentSkeleton = () => {
         </div>
     )
 }
+
 
 
 
@@ -1109,8 +1112,6 @@ export const QuizResultPageSkeleton=()=>{
                             <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
-                    <p className="text-muted-foreground">Fetching your performance data...</p>
                 </div>
             </div>
         )
