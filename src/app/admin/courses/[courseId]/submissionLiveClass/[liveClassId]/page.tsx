@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { getOffset } from '@/store/store'
@@ -176,35 +177,37 @@ const Page = ({ params }: any) => {
     
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
-            </div>
-            
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
-                <CardHeader>
-                    <CardTitle className="text-2xl text-gray-800 text-left">
-                        {liveClassData?.title}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="bg-muted">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                        <div className="text-left">
-                            <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                            <div className="text-lg font-semibold">
-                                {totalStudents || 0}
+        <div className="min-h-screen flex justify-center">
+            <MaxWidthWrapper className="p-6 max-w-7xl">
+                <div className="flex items-center gap-4 mb-8">
+                    <Button
+                        variant="ghost"
+                        onClick={() => router.back()}
+                        className="hover:bg-blue-600 hover:text-white transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </div>
+
+                <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                    <CardHeader>
+                        <CardTitle className="text-2xl text-gray-800 text-left">
+                            {liveClassData?.title}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="bg-muted">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                            <div className="text-left">
+                                <div className="font-medium text-muted-foreground">Total Submissions:</div>
+                                <div className="text-lg font-semibold">
+                                    {totalStudents || 0}
+                                </div>
                             </div>
-                        </div>
-                        <div className="text-left">
-                            <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
-                            <div className="text-xl font-semibold text-gray-900">Live Class</div>
-                        </div>
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
+                                <div className="text-xl font-semibold text-gray-900">Live Class</div>
+                            </div>
 
                         <div className="text-left">
                             <div className="text-sm text-gray-600 mb-1">Course ID:</div>
@@ -261,15 +264,17 @@ const Page = ({ params }: any) => {
                 </CardContent>
             </Card>
 
-            {/* Pagination */}
-            <div className="p-6 border-t">
-                <DataTablePagination
-                    totalStudents={totalStudents}
-                    pages={totalPages}
-                    lastPage={lastPage}
-                    fetchStudentData={handlePaginationFetch}
-                />
-            </div>
+                {/* Pagination */}
+                <div className="p-6 border-t">
+                    <DataTablePagination
+                        totalStudents={totalStudents}
+                        pages={totalPages}
+                        lastPage={lastPage}
+                        fetchStudentData={handlePaginationFetch}
+                    />
+                </div>
+            </MaxWidthWrapper>
+        </div>
         </>
     )
 }

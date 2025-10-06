@@ -56,47 +56,53 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
     const handleDownloadPdf = async (liveClassId: string, liveClassTitle: string) => {
         try {
-            const apiUrl = `/submission/livesession/students?liveClassId=${liveClassId}&bootcampId=${courseId}`
+            const apiUrl = `/submission/livesession/zuvy_livechapter_student_submission/${liveClassId}`
             const response = await api.get(apiUrl)
-            const students = response.data?.liveClassSubmissionData?.liveClassTrackingData || []
+
+            const sessionData = response.data?.data?.[0] // First session object
+            const students = sessionData?.studentAttendanceRecords || []
 
             const doc = new jsPDF()
 
             doc.setFontSize(18)
             doc.text('Live Class Submission Report', 14, 15)
-            doc.setFontSize(15)
-            doc.text('List of Students:', 14, 23)
+            doc.setFontSize(14)
+            doc.text(`Title: ${liveClassTitle}`, 14, 22)
+            doc.text('Student Attendance:', 14, 30)
 
-            const columns = [
-                { header: 'Name', dataKey: 'userName' },
-                { header: 'Email', dataKey: 'userEmail' },
-            ]
+            const columns = ['Name', 'Email', 'Status', 'Duration (min)']
 
-            const rows = students.map((student: any) => ({
-                name: student.userName || 'N/A',
-                email: student.userEmail || 'N/A',
-            }))
+            const rows = students.map((record: any) => {
+                return [
+                    record.user?.name || 'N/A',
+                    record.user?.email || 'N/A',
+                    record.status || 'N/A',
+                    (record.duration / 60).toFixed(2), // converting seconds to minutes (optional)
+                ]
+            })
 
+            // Draw table
             autoTable(doc, {
-                head: [columns.map((col) => col.header)],
-                body: rows.map((row: any) => [row.name, row.email]),
-                startY: 25,
+                head: [columns],
+                body: rows,
+                startY: 35,
                 margin: { horizontal: 10 },
                 styles: { overflow: 'linebreak', halign: 'center' },
                 headStyles: { fillColor: [22, 160, 133] },
                 theme: 'grid',
             })
 
-            doc.save(`${liveClassTitle || 'live-class'}.pdf`)
-        } catch (error) {
+            // Save PDF
+            doc.save(`${liveClassTitle || 'live-class-report'}.pdf`)
+        } catch (error: any) {
             console.error('Error generating PDF:', error)
-            toast({
+            toast.error({
                 title: 'Error',
-                description: 'Failed to generate PDF',
-                variant: 'destructive',
+                description: error?.response?.data?.message || 'Failed to generate PDF',
             })
         }
     }
+
 
     if (loading) {
         return (
@@ -143,20 +149,26 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                         key={liveClass.id}
                         className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
                     >
+
                         <button
-                            onClick={
-                                submissions > 0
-                                    ? () => handleDownloadPdf(liveClass.id, liveClass.title)
-                                    : undefined
-                            }
-                            className={`absolute top-2 right-2 z-10 transform cursor-pointer ${
-                                submissions > 0 ? 'hover:text-gray-700' : 'text-gray-400'
-                            }`}
-                            title="Download Report"
+                            onClick={() => {
+                                if (submissions > 0) {
+                                    handleDownloadPdf(liveClass.id, liveClass.title)
+                                }
+                            }}
+                            className={`absolute top-2 right-2 z-10 transform ${submissions > 0
+                                    ? 'hover:text-gray-700 cursor-pointer'
+                                    : 'text-gray-400 cursor-not-allowed'
+                                }`}
+                            title={submissions > 0 ? 'Download Report' : 'No submissions yet'}
                             disabled={submissions === 0}
                         >
-                            <ArrowDownToLine size={20} className="text-gray-500" />
+                            <ArrowDownToLine
+                                size={20}
+                                className={submissions > 0 ? 'text-gray-500' : 'text-gray-300'}
+                            />
                         </button>
+
 
                         <div className="flex flex-col w-full">
                             <div className="flex items-center gap-3">

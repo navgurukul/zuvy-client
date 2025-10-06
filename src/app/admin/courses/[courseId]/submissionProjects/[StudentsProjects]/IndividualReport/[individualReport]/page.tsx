@@ -85,7 +85,7 @@ const Page = ({ params }: PageParams) => {
 
     if (indiviDualStudentData) {
         return (
-            <div className="min-h-screen font-semibold bg-background">
+            <div className="min-h-screen font-semibold bg-background">                
                 {/* Back Button */}
                 <MaxWidthWrapper>
                    <div className="flex items-center gap-4 mb-8">

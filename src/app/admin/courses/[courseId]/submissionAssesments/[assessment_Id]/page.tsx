@@ -306,6 +306,7 @@ const Page = ({ params }: any) => {
 
     return (
         <>
+        <div className="min-h-screen flex justify-center">
             <MaxWidthWrapper className="p-6 max-w-7xl">
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
@@ -411,6 +412,7 @@ const Page = ({ params }: any) => {
                     />
                 </div>
             </MaxWidthWrapper>
+            </div>
         </>
     )
 }

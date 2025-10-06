@@ -88,6 +88,7 @@ const Page = ({ params }: any) => {
 
     return (
         <>
+         <div className="min-h-screen flex justify-center">
             <MaxWidthWrapper className="p-6 max-w-7xl">
                 <div className="flex items-center gap-4 mb-8">
                     <Button
@@ -173,6 +174,7 @@ const Page = ({ params }: any) => {
                     </CardContent>
                 </Card>
             </MaxWidthWrapper>
+        </div>
         </>
     )
 }
