@@ -27,7 +27,7 @@ const CodingQuestions = ({
       };
 
     return (
-        <ScrollArea className="h-3/5  w-full pr-5 pb-32">
+        <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
             {/* <ScrollBar orientation="vertical" className="h-3/4" /> */}
             <div className="h-screen">
                 {questions.map((question: CodingQuestiones) => {

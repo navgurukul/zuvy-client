@@ -333,7 +333,7 @@ function CodingChallenge({
                     <div className="grid grid-cols-2">
                         <div className="">
                             <div className="">
-                                <ScrollArea className="h-screen pb-80">
+                                <ScrollArea className="h-[calc(100vh-170px)] pb-44  pr-4">
                                     {filteredQuestions?.map((question: any) => {
                                         const selectedTagName = tags?.filter(
                                             (tag: any) => tag.id == question.tagId
