@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Papa from 'papaparse'
 import { Upload } from 'lucide-react'
 import { X } from 'lucide-react'
 import Link from 'next/link'
 import {DropzoneProps} from "@/app/admin/courses/[courseId]/_components/adminCourseCourseIdComponentType"
+import { Button } from '@/components/ui/button'
 
 const Dropzone = ({
     className,
@@ -15,6 +16,7 @@ const Dropzone = ({
     acceptedFiles = 'text/csv',
 }: DropzoneProps) => {
     // misc
+    const inputRef = useRef<HTMLInputElement>(null)
 
     // state and variables
     const [fileName, setFileName] = useState('')
@@ -66,25 +68,39 @@ const Dropzone = ({
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         accept: acceptedFiles,
         onDrop,
+        noClick: true, // Disable click on the dropzone
     })
+
+    // Function to handle button click
+    const handleSelectFile = () => {
+        if (inputRef.current) {
+            inputRef.current.click()
+        }
+    }
 
     return (
         <>
             <div {...getRootProps({ className: className })}>
-                <input {...getInputProps()} />
+                <input {...getInputProps()} ref={inputRef} />
                 {isDragActive ? (
-                    <div className="h-[150px]">
+                    <div className="h-[150px] flex items-center justify-center">
                         <p>Drop the files here ...</p>
                     </div>
                 ) : (
-                    <div className="p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full ">
-                        <Upload className="mb-[20px]" />
-                        <p className=" mx-3 font-semibold">
-                            Upload Or Drag File
+                    <div className="p-2 text-muted-foreground gap-y-4 flex flex-col justify-center items-center w-full h-full ">
+                        <Upload className="h-8 w-8" />
+                        <p className="text-sm">
+                            Upload a CSV file with student information
                         </p>
-                        <p className="text-gray-400">
-                            .csv files are supported
-                        </p>
+                        <Button 
+                            className="bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                            size="sm"
+                            type="button"
+                            onClick={handleSelectFile}
+                        >
+                            <Upload className="h-4 w-4 mr-2" />
+                            Select CSV File
+                        </Button>
                     </div>
                 )}
             </div>

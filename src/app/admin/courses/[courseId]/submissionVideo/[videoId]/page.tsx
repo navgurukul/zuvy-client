@@ -1,279 +1,176 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState, useMemo } from 'react'
-import { Search, X } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
-import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { SearchBox } from '@/utils/searchBox'
 
 type Props = {}
 
 const Page = ({ params }: any) => {
     const router = useRouter()
-    const pathname = usePathname()
-    const searchParams = useSearchParams()
-    
     const [videoData, setVideoData] = useState<any>()
-    const [searchQuery, setSearchQuery] = useState<string>(searchParams.get('search') || '')
-    const [activeSearch, setActiveSearch] = useState<string>(searchParams.get('search') || '')
-    const [showSuggestions, setShowSuggestions] = useState<boolean>(false)
-    const [isInputFocused, setIsInputFocused] = useState<boolean>(false)
-    const [dataTableVideo, setDataTableVideo] = useState<any>([])
+    const [dataTableVideo, setDataTableVideo] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
-    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [loading, setLoading] = useState<boolean>(false)
+    const [selectedBatch, setSelectedBatch] = useState('All Batches')
 
-    // Update URL with search parameter
-    const updateSearchInURL = useCallback((query: string) => {
-        const params = new URLSearchParams(searchParams.toString())
-        
-        if (query.trim()) {
-            params.set('search', query)
-        } else {
-            params.delete('search')
-        }
-        
-        router.push(pathname + '?' + params.toString())
-    }, [searchParams, router, pathname])
-
-    const crumbs = [
-        {
-            crumb: 'My Courses',
-            href: `/admin/courses`,
-            isLast: false,
-        },
-        {
-            crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: videoData?.title || 'Loading...',
-            // href: '',
-            isLast: true,
-        },
+    // Dummy batch data
+    const batchOptions = [
+        'All Batches',
+        'Full Stack Batch 2024-A',
+        'Full Stack Batch 2024-B',
+        'Data Science Batch 2024-A',
+        'UI/UX Design Batch 2024-A',
+        'Mobile Development Batch 2024-A'
     ]
 
-    // Get search suggestions from existing data
-    const searchSuggestions = useMemo(() => {
-        if (!searchQuery.trim() || !dataTableVideo.length) return []
-        
-        const suggestions: { name: string; email: string }[] = []
-        const query = searchQuery.toLowerCase()
-        
-        dataTableVideo.forEach((student: any) => {
-            const nameMatch = student.name && student.name.toLowerCase().includes(query)
-            const emailMatch = student.email && student.email.toLowerCase().includes(query)
-            
-            if (nameMatch || emailMatch) {
-                // Avoid duplicates
-                const exists = suggestions.some(s => s.name === student.name && s.email === student.email)
-                if (!exists) {
-                    suggestions.push({
-                        name: student.name || '',
-                        email: student.email || ''
-                    })
-                }
-            }
-        })
-        
-        return suggestions.slice(0, 5)
-    }, [searchQuery, dataTableVideo])
+    // API functions for the hook - exactly like your pattern
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        if (!query.trim()) return []
 
-    // Handle search input change
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        const isAddingText = value.length > searchQuery.length
-        
-        setSearchQuery(value)
-        setShowSuggestions(isAddingText && value.trim().length > 0)
-    }
+        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${encodeURIComponent(query)}&limit=5&offset=0`
+        const response = await api.get(url)
+        return response.data.submittedStudents?.map((student: any) => ({
+            id: student.id,
+            name: student.name,
+            email: student.email,
+            ...student
+        })) || []
+    }, [params.videoId])
 
-    // Handle suggestion click - use name for input and URL
-    const handleSuggestionClick = (suggestion: { name: string; email: string }) => {
-        const displayValue = suggestion.name || suggestion.email // Fallback to email if no name
-        setSearchQuery(displayValue)
-        setActiveSearch(displayValue)
-        setShowSuggestions(false)
-        updateSearchInURL(displayValue)
-    }
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        setLoading(true)
 
-    // Handle clear search
-    const handleClearSearch = () => {
-        setSearchQuery('')
-        setActiveSearch('')
-        setShowSuggestions(false)
-        updateSearchInURL('')
-    }
-    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            setActiveSearch(searchQuery)
-            setShowSuggestions(false)
-            updateSearchInURL(searchQuery.trim()) // even if empty
-        } else if (e.key === 'Escape') {
-            setShowSuggestions(false)
-        }
-    }
-    
+        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${encodeURIComponent(query)}&limit=10&offset=0`
+        const response = await api.get(url)
+
+        const students = response.data.submittedStudents || []
+        setDataTableVideo(students)
+        setVideoData(response.data.moduleVideochapter)
+
+        setLoading(false)
+    }, [params.videoId])
+
+    const defaultFetchApi = useCallback(async () => {
+        setLoading(true)
+
+        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}`
+        const response = await api.get(url)
+
+        const students = response.data.submittedStudents || []
+        setDataTableVideo(students)
+        setVideoData(response.data.moduleVideochapter)
+
+        setLoading(false)
+    }, [params.videoId])
 
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
             setBootcampData(res.data.bootcamp)
         } catch (error) {
-            console.error('API Error:', error)
+            console.error('Error fetching bootcamp data:', error)
         }
     }, [params.courseId])
 
-    const getStudentVideoDataHandler = useCallback(async () => {
-        try {
-            setIsLoading(true)
-            const endpoint = activeSearch
-                ? `admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${activeSearch}`
-                : `admin/moduleChapter/students/chapter_id${params.videoId}`
-
-            const res = await api.get(endpoint)
-            setVideoData(res.data.moduleVideochapter)
-            setDataTableVideo(res.data.submittedStudents || [])
-        } catch (error) {
-            console.error('API Error:', error)
-            setDataTableVideo([])
-        } finally {
-            setIsLoading(false)
-        }
-    }, [params.videoId, activeSearch])
-
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                await Promise.all([
-                    getStudentVideoDataHandler(),
-                    getBootcampHandler(),
-                ])
-            } catch (error) {
-                console.error('Error in fetching data:', error)
-            }
-        }
-
-        fetchData()
-    }, [getStudentVideoDataHandler, getBootcampHandler])
-
-    // Initialize from URL
-    useEffect(() => {
-        const searchFromURL = searchParams.get('search')
-        if (searchFromURL) {
-            setSearchQuery(searchFromURL)
-            setActiveSearch(searchFromURL)
-        }
-    }, [searchParams])
+        getBootcampHandler()
+    }, [getBootcampHandler])
     
-    useEffect(() => {
-        if (!searchQuery.trim() && activeSearch) {
-            setActiveSearch('')
-            updateSearchInURL('')
-        }
-    }, [searchQuery])
-    
-
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
-            <MaxWidthWrapper className="p-4">
-                <div className="flex flex-col gap-y-4">
-                    <h1 className="text-start text-xl font-bold capitalize text-gray-600">
+            <div className="flex items-center gap-4 mb-8">
+                <Button
+                    variant="ghost"
+                    onClick={() => router.back()}
+                    className="hover:bg-transparent hover:text-primary transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Course Submissions
+                </Button>
+            </div>
+
+            {/* Assessment Info Card */}
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                <CardHeader>
+                    <CardTitle className="text-2xl text-gray-800 text-left">
                         {videoData?.title || 'Loading...'}
-                    </h1>
-
-                    {/* Stats cards */}
-                    <div className="text-start flex gap-x-3">
-                        <div className="p-4 rounded-lg shadow-md ">
-                            <h1 className="text-gray-600 font-semibold text-xl">
-                                {videoData?.totalStudents || 0}
-                            </h1>
-                            <p className="text-gray-500">Total Students</p>
-                        </div>
-                        <div className="p-4 rounded-lg shadow-md">
-                            <h1 className="text-gray-600 font-semibold text-xl">
-                                {videoData?.totalSubmittedStudents || 0}
-                            </h1>
-                            <p className="text-gray-500">Watched Entire Video</p>
-                        </div>
-                        <div className="p-4 rounded-lg shadow-md">
-                            <h1 className="text-gray-600 font-semibold text-xl">
-                                {((videoData?.totalStudents || 0) - (videoData?.totalSubmittedStudents || 0)).toString()}
-                            </h1>
-                            <p className="text-gray-500">Not Yet Watched</p>
-                        </div>
-                    </div>
-
-                    {/* Search input */}
-                    <div className="relative w-1/3">
-                        <div className="relative">
-                            <Input
-                                placeholder="Search by name or email"
-                                className="input-with-icon pl-8 pr-10"
-                                value={searchQuery}
-                                onChange={handleSearchChange}
-                                onKeyDown={handleKeyPress}
-                                onFocus={() => {
-                                    setIsInputFocused(true)
-                                    if (searchQuery.trim().length > 0) {
-                                        setShowSuggestions(true)
-                                    }
-                                }}
-                                onBlur={() => {
-                                    setIsInputFocused(false)
-                                    setTimeout(() => setShowSuggestions(false), 200)
-                                    
-                                    // New: if input is cleared manually and user didn't press Enter
-                                    if (!searchQuery.trim() && activeSearch) {
-                                        setActiveSearch('')
-                                        updateSearchInURL('')
-                                    }
-                                }}
-                                
-                            />
-                            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                <Search className="text-gray-400" size={20} />
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="bg-muted">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                            <div className="text-left">
+                                <div className="font-medium text-muted-foreground">Total Submissions:</div>
+                                <div className="text-lg font-semibold">{videoData?.totalStudents || 0}</div>
                             </div>
-                            {searchQuery && (
-                                <button
-                                    onClick={handleClearSearch}
-                                    className="absolute inset-y-0 right-0 pr-2 flex items-center hover:text-gray-600 transition-colors"
-                                    type="button"
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
+                                <div className="text-xl font-semibold text-gray-900">Video</div>
+                            </div>
+
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Course ID:</div>
+                                <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
+                            </div>
+                            <div className="text-left">
+                                <label className="font-medium text-muted-foreground">Batch Filter</label>
+                                <Select
+                                    value={selectedBatch}
+                                    onValueChange={setSelectedBatch}
                                 >
-                                    <X className="text-gray-400 hover:text-gray-600" size={20} />
-                                </button>
-                            )}
-                        </div>
+                                    <SelectTrigger className="w-full mt-1">
+                                        <SelectValue placeholder="All Batches" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Batches</SelectItem>
+                                        {batchOptions.map((batch, index) => (
+                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
+                                        ))}
+                                    </SelectContent>
 
-                        {/* Suggestions dropdown */}
-                        {showSuggestions && isInputFocused && searchQuery.trim().length > 0 && searchSuggestions.length > 0 && (
-                            <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg mt-1">
-                                {searchSuggestions.map((suggestion, index) => (
-                                    <button
-                                        key={index}
-                                        className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors text-sm text-gray-700"
-                                        onClick={() => handleSuggestionClick(suggestion)}
-                                        onMouseDown={(e) => e.preventDefault()}
-                                        type="button"
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{suggestion.name}</span>
-                                            <span className="text-xs text-gray-500">{suggestion.email}</span>
-                                        </div>
-                                    </button>
-                                ))}
+                                </Select>
                             </div>
-                        )}
+                        </div>
+                </CardContent>
+            </Card>
+            <Card className="bg-muted">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl text-gray-800">
+                            Student Submissions
+                        </CardTitle>
                     </div>
-                    <DataTable data={dataTableVideo} columns={columns} />
+                </CardHeader>
+
+                <div className="relative w-1/3 p-4" >
+                    <SearchBox
+                        placeholder="Search by name or email"
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(s) => (
+                            <div>
+                                <div className="font-medium">{s.name}</div>
+                                <div className="text-sm text-gray-500">{s.email}</div>
+                            </div>
+
+                        )}
+                        inputWidth=""
+                    />
                 </div>
-            </MaxWidthWrapper>
+                <CardContent className="p-0">
+                    <DataTable data={dataTableVideo} columns={columns} />
+                </CardContent>
+            </Card>
         </>
     )
 }

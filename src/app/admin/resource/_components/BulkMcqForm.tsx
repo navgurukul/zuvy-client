@@ -44,9 +44,9 @@ const BulkUploadMcq = ({ setIsMcqModalOpen }: BulkMcqProps) => {
     }
 
     return (
-        <main className="flex flex-col ml-6 items-start w-full  ">
+        <main className="flex flex-col items-center w-full  ">
             <form onSubmit={handleSubmit} className="w-2/3 space-y-6">
-                <div className="flex flex-col justify-center  items-center">
+                <div className="flex flex-col justify-center items-center">
                     <DropzoneforMcq
                         mcqSide={true}
                         className="px-5 py-2 mt-10 border-dashed border-2 rounded-[10px] block w-[450px]"
@@ -56,7 +56,7 @@ const BulkUploadMcq = ({ setIsMcqModalOpen }: BulkMcqProps) => {
                 </div>
 
                 <div className="flex justify-end  w-full">
-                    <Button className="bg-success-dark opacity-75" type="submit">
+                    <Button className="bg-primary hover:bg-primary-dark" type="submit">
                         Add Questions
                     </Button>
                 </div>

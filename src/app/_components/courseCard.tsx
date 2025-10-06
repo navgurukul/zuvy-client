@@ -14,6 +14,7 @@ import {
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { useRouter, useParams } from 'next/navigation'
+import {CourseCardProps,ChapterTrackingResponse} from "@/app/_components/componentType"
 
 function CourseCard({
     param,
@@ -29,21 +30,7 @@ function CourseCard({
     quizCount,
     typeId,
     projectId,
-}: {
-    param: string
-    name: string
-    description: string
-    id: number
-    isLock: boolean
-    progress: number
-    timeAlloted: number
-    articlesCount: number
-    assignmentCount: number
-    codingProblemsCount: number
-    quizCount: number
-    typeId: number
-    projectId: number
-}) {
+}:CourseCardProps) {
     const router = useRouter()
     const { viewcourses, moduleID } = useParams()
     const [chapterId, setChapterId] = useState<any>()
@@ -52,7 +39,7 @@ function CourseCard({
 
     const getChapterId = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<ChapterTrackingResponse>(
                 `tracking/getAllChaptersWithStatus/${id}`
             )
             setChapterId(response.data.trackingData[0].id)

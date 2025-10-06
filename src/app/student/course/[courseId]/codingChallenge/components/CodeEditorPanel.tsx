@@ -5,7 +5,6 @@ import { CodingLanguage } from '@/utils/types/coding-challenge';
 import { useThemeStore } from '@/store/store';
 import{CodeEditorPanelProps} from '@/app/student/course/[courseId]/codingChallenge/components/courseCodingComponentType'
 
-
 export function CodeEditorPanel({
     currentCode,
     language,

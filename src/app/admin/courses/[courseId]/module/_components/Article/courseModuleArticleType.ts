@@ -1,6 +1,6 @@
 export interface AddArticleProps {
-    content: ContentArticle[];  
-    courseId: string | number;  
+    content: ContentArticle; 
+    courseId:any;  
     articleUpdateOnPreview: boolean;  
     setArticleUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>;  
 }
@@ -15,6 +15,7 @@ export interface ContentDetailAddArticle{
 
 
 export interface ContentArticle{
+    doc: any;
     id: string
     moduleId: string
     topicId: number

@@ -1,7 +1,7 @@
+
 'use client'
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import Image from 'next/image'
-import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
@@ -10,21 +10,19 @@ import { setStoreBatchValue } from '@/store/store'
 import RecordingCard from '../../_components/RecordingCard'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import useDebounce from '@/hooks/useDebounce'
 import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
 import ClassCardSkeleton from '../../_components/classCardSkeleton'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { X } from 'lucide-react'
 import axios from 'axios'
-import{State,ClassType,ParamsType,CourseClassItem} from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
-
+import { State, ClassType, ParamsType, CourseClassItem } from "@/app/admin/courses/[courseId]/(courseTabs)/sessions/courseSessionType"
+import { SearchBox } from '@/utils/searchBox'
 
 function Page({ params }: ParamsType) {
     const router = useRouter()
     const searchParams = useSearchParams()
-    // const [isCourseDeleted, setIsCourseDeleted] = useState(false)
+    
     const [classes, setClasses] = useState<CourseClassItem[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()
@@ -40,29 +38,73 @@ function Page({ params }: ParamsType) {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [lastPage, setLastPage] = useState<number>(0)
-    const [search, setSearch] = useState<string>('')
     const [loading, setLoading] = useState(true)
     const [checkopenSessionForm, setOpenSessionForm] = useState(true)
     const [modulesData, setModulesData] = useState<any>([])
-    const debouncedSearch = useDebounce(search, 1000)
+    const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('') // Track current search
 
-    const [searchInitialized, setSearchInitialized] = useState(false)
-    const [suggestions, setSuggestions] = useState<any[]>([])
-    const [showSuggestions, setShowSuggestions] = useState(false)
-    const [isSuggestionClicked, setIsSuggestionClicked] = useState(false)
-    const [searchLoading, setSearchLoading] = useState(false)
-    const [allClassesData, setAllClassesData] = useState<any[]>([]) // Store all classes
+    // Core API function that handles all data fetching
+    const fetchClassesData = useCallback(
+        async (offsetParam: number = offset, searchQuery: string = '') => {
+            let url = `/classes/all/${params.courseId}?limit=${position}&offset=${offsetParam}`
+            const lastUpdatedTab = localStorage.getItem("sessionTab") || activeTab
+            
+            url += `&status=${lastUpdatedTab}`
+            if (batchId) url += `&batchId=${batchId}`
+            if (searchQuery) url += `&searchTerm=${encodeURIComponent(searchQuery)}`
 
-    useEffect(() => {
-        const searchFromURL = searchParams.get('search') || ''
-        setSearch(searchFromURL)
-        // If there's a search term in URL, treat it as if user selected it
-        if (searchFromURL) {
-            setIsSuggestionClicked(true)
+            try {
+                const response = await api.get(url)
+                setClasses(response.data.classes)
+                setTotalStudents(response.data.total_items)
+                setPages(response.data.total_pages)
+                setLastPage(response.data.total_items)
+                setLoading(false)
+                return response.data
+            } catch (error) {
+                console.error('Error fetching classes:', error)
+                setLoading(false)
+                return null
+            }
+        },
+        [params.courseId, batchId, position, activeTab, offset]
+    )
+
+    // Hook APIs
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        if (!query.trim()) return []
+        
+        let url = `/classes/all/${params.courseId}?limit=10&offset=0`
+        const lastUpdatedTab = localStorage.getItem("sessionTab") || activeTab
+        url += `&status=${lastUpdatedTab}`
+
+        if (batchId) url += `&batchId=${batchId}`
+        if (query) url += `&searchTerm=${encodeURIComponent(query)}`
+
+        try {
+            const response = await api.get(url)
+            return response.data.classes || []
+        } catch (error) {
+            console.error('Error fetching suggestions:', error)
+            return []
         }
-        setSearchInitialized(true)
-    }, [searchParams])
+    }, [params.courseId, batchId, activeTab])
 
+    const fetchSearchResultsApi = useCallback(
+        async (query: string, offsetParam = offset) => {
+            setCurrentSearchQuery(query) // Update current search query
+            return await fetchClassesData(offsetParam, query)
+        },
+        [fetchClassesData, offset]
+    )
+
+    const defaultFetchApi = useCallback(
+        async (offsetParam = offset) => {
+            setCurrentSearchQuery('') // Clear current search query
+            return await fetchClassesData(offsetParam, '')
+        },
+        [fetchClassesData, offset]
+    )
     const handleComboboxChange = (value: string) => {
         setBatchId(value)
         setbatchValueData(value)
@@ -71,42 +113,12 @@ function Page({ params }: ParamsType) {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
         localStorage.setItem('sessionTab', tab)
-    }
-
-    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        setSearch(value)
+        setClasses([]) // Clear existing classes immediately
+        
+        // Fetch new data for the selected tab without loading state
+        fetchClassesData(0, currentSearchQuery)
+        setOffset(0)
         setCurrentPage(1)
-        setShowSuggestions(true)
-        setSearchLoading(true)
-
-        setIsSuggestionClicked(false) // Reset suggestion click state
-
-        // Only update URL when user selects a suggestion or presses enter
-        // Don't update URL on every keystroke
-        if (value === '') {
-            // Clear URL when search is empty
-            const params = new URLSearchParams(window.location.search)
-            params.delete('search')
-            router.replace(`?${params.toString()}`)
-        }
-    }
-
-    // Add this new function to handle when user presses Enter
-    const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            const value = (e.target as HTMLInputElement).value
-            setIsSuggestionClicked(true)
-            setShowSuggestions(false)
-
-            const params = new URLSearchParams(window.location.search)
-            if (value) {
-                params.set('search', value)
-            } else {
-                params.delete('search')
-            }
-            router.replace(`?${params.toString()}`)
-        }
     }
 
     const tabs = ['completed', 'upcoming', 'ongoing']
@@ -118,86 +130,38 @@ function Page({ params }: ParamsType) {
         }
     }, [])
 
-    const getHandleAllClasses = useCallback(
-        async (offset: number) => {
-            let baseUrl = `/classes/all/${params.courseId}?limit=${position}&offset=${offset}`
+    // Initial data load - only call when component mounts
+    useEffect(() => {
+        const initialQuery = searchParams.get('search') || ''
+        if (initialQuery) {
+            setCurrentSearchQuery(initialQuery)
+            fetchClassesData(offset, initialQuery)
+        } else {
+            fetchClassesData(offset, '')
+        }
+    }, []) // Only run on mount
 
-            const lastUpdatedTab = localStorage.getItem('sessionTab')
-
-            if (batchId) {
-                baseUrl += `&batchId=${batchId}`
-            }
-
-            baseUrl += `&status=${lastUpdatedTab || activeTab}`
-
-            try {
-                const res = await api.get(baseUrl)
-                let allClasses = res.data.classes
-
-                // Store all classes data
-                setAllClassesData(allClasses)
-
-                let filteredClasses = allClasses
-
-                // Filter classes based on search term - fix the logic here
-                if (
-                    debouncedSearch &&
-                    (isSuggestionClicked || searchParams.get('search'))
-                ) {
-                    filteredClasses = allClasses.filter((cls: CourseClassItem) =>
-                        cls?.title
-                            ?.toLowerCase()
-                            .includes(debouncedSearch.toLowerCase())
-                    )
-                }
-
-                // Only show classes if they match the active tab status
-                if (
-                    allClasses.length > 0 &&
-                    activeTab === allClasses[0]?.status
-                ) {
-                    setClasses(filteredClasses)
-                } else {
-                    setClasses([])
-                }
-
-                setTotalStudents(res.data.total_items)
-                setPages(res.data.total_pages)
-                setLastPage(res.data.total_items)
-                setLoading(false)
-                setSearchLoading(false)
-            } catch (error) {
-                console.error('Error fetching classes:', error)
-                setLoading(false)
-                setSearchLoading(false)
-            }
-        },
-        [
-            batchId,
-            activeTab,
-            debouncedSearch,
-            params.courseId,
-            position,
-            isSuggestionClicked,
-            searchParams,
-        ]
-    )
+    // Re-fetch when dependencies change (but respect current search state)
+    useEffect(() => {
+        if (params.courseId) {
+            fetchClassesData(0, currentSearchQuery)
+            setOffset(0)
+            setCurrentPage(1)
+        }
+    }, [batchId, activeTab])
 
     useEffect(() => {
         const fetchStudents = async () => {
             try {
-                await api
-                    .get(`bootcamp/students/${params.courseId}`)
-                    .then((res) => {
-                        setStudents(res.data.totalNumberOfStudents)
-                    })
+                const res = await api.get(`bootcamp/students/${params.courseId}`)
+                setStudents(res.data.totalNumberOfStudents)
             } catch (error) {
                 console.error(error)
             }
         }
-
         fetchStudents()
     }, [params.courseId])
+
     useEffect(() => {
         let timeouts: NodeJS.Timeout[] = []
 
@@ -213,7 +177,7 @@ function Page({ params }: ParamsType) {
 
                 if (delay > 0) {
                     const timeout = setTimeout(() => {
-                        getHandleAllClasses(offset)
+                        fetchClassesData(offset, currentSearchQuery)
                     }, delay)
                     timeouts.push(timeout)
                 } else {
@@ -225,33 +189,30 @@ function Page({ params }: ParamsType) {
         return () => {
             timeouts.forEach(clearTimeout)
         }
-    }, [activeTab, offset, getHandleAllClasses])
+    }, [activeTab, classes, offset, fetchClassesData, currentSearchQuery])
 
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
-            await api
-                .get(`/bootcamp/batches/${params.courseId}`)
-                .then((response) => {
-                    const transformedData = response.data.data.map(
-                        (item: { id: number; name: string}) => ({
-                            value: item.id.toString(),
-                            label: item.name,
-                        })
-                    )
-                    setBootcampData(transformedData)
-                })
-                .catch((error) => {
-                    console.error('Error fetching data:', error)
-                })
+            try {
+                const response = await api.get(`/bootcamp/batches/${params.courseId}`)
+                const transformedData = response.data.data.map(
+                    (item: { id: number; name: string }) => ({
+                        value: item.id.toString(),
+                        label: item.name,
+                    })
+                )
+                setBootcampData(transformedData)
+            } catch (error) {
+                console.error('Error fetching data:', error)
+            }
         }
     }, [params.courseId])
+
     const getAllModulesDetails = async () => {
         if (!params.courseId) return
 
         try {
-            const response = await api.get(
-                `/content/allModules/${params.courseId}`
-            )
+            const response = await api.get(`/content/allModules/${params.courseId}`)
             setModulesData(response.data)
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -259,46 +220,13 @@ function Page({ params }: ParamsType) {
                     router.push(`/admin/courses`)
                     toast.info({
                         title: 'Caution',
-                        description:
-                            'The Course has been deleted by another Admin',
+                        description: 'The Course has been deleted by another Admin',
                     })
                 }
             }
             console.error('Failed to fetch modules data:', error)
         }
     }
-
-    useEffect(() => {
-        if (searchInitialized) {
-            getHandleAllClasses(offset)
-        }
-    }, [getHandleAllClasses, offset, searchInitialized])
-
-    const handleSuggestionClick = (title: string) => {
-        setSearch(title)
-        setShowSuggestions(false)
-        setIsSuggestionClicked(true)
-        setCurrentPage(1)
-        setSearchLoading(false)
-
-        const params = new URLSearchParams(window.location.search)
-        params.set('search', title)
-        router.replace(`?${params.toString()}`)
-    }
-
-    // Generate suggestions from all classes data, not just filtered classes
-    useEffect(() => {
-        if (search.trim() !== '' && allClassesData.length > 0) {
-            const filtered = allClassesData
-                .filter((cls) =>
-                    cls?.title?.toLowerCase().includes(search.toLowerCase())
-                )
-                .slice(0, 5)
-            setSuggestions(filtered)
-        } else {
-            setSuggestions([])
-        }
-    }, [search, allClassesData])
 
     useEffect(() => {
         getHandleAllBootcampBatches()
@@ -309,8 +237,7 @@ function Page({ params }: ParamsType) {
         if (bootcampData.length === 0) {
             toast.info({
                 title: 'Caution',
-                description:
-                    'There are no batches currently please create them and assign students to them first',
+                description: 'There are no batches currently please create them and assign students to them first',
             })
             setOpenSessionForm(false)
         }
@@ -318,42 +245,20 @@ function Page({ params }: ParamsType) {
         if (students === 0) {
             toast.info({
                 title: 'Caution',
-                description:
-                    'There are no batches currently please create them and assign students to them first',
+                description: 'There are no batches currently please create them and assign students to them first',
             })
             setOpenSessionForm(false)
         }
     }
 
-    // if (loadingCourseCheck) {
-    //     return (
-    //         <div className="flex justify-center items-center h-full mt-20">
-    //             <Spinner className="text-secondary" />
-    //         </div>
-    //     )
-    // }
-
-    // if (isCourseDeleted) {
-    //     return (
-    //         <div className="flex flex-col justify-center items-center h-full mt-20">
-    //             <Image
-    //                 src="/images/undraw_select-option_6wly.svg"
-    //                 width={350}
-    //                 height={350}
-    //                 alt="Deleted"
-    //             />
-    //             <p className="text-lg text-red-600 mt-4">
-    //                 This course has been deleted !
-    //             </p>
-    //             <Button
-    //                 onClick={() => router.push('/admin/courses')}
-    //                 className="mt-6 bg-secondary"
-    //             >
-    //                 Back to Courses
-    //             </Button>
-    //         </div>
-    //     )
-    // }
+    // Updated pagination handler
+    const getHandleAllClasses = useCallback(
+        async (newOffset: number) => {
+            setOffset(newOffset)
+            await fetchClassesData(newOffset, currentSearchQuery)
+        },
+        [fetchClassesData, currentSearchQuery]
+    )
 
     return (
         <>
@@ -378,62 +283,18 @@ function Page({ params }: ParamsType) {
                     </div>
                     <div className="flex flex-col lg:flex-row justify-between items-center">
                         <div className="relative w-full lg:max-w-[500px]">
-                            <div className="relative">
-                                <Input
-                                    type="text"
-                                    placeholder="Search Classes"
-                                    value={search}
-                                    onChange={handleSetSearch}
-                                    className="pr-10"
-                                    onFocus={() => {
-                                        if (search) setShowSuggestions(true)
-                                    }}
-                                    onKeyDown={handleSearchSubmit}
-                                />
-                                {search && (
-                                    <Button
-                                        onClick={() => {
-                                            setSearch('')
-                                            setOffset(0)
-                                            setCurrentPage(1)
-                                            setSuggestions([])
-                                            setShowSuggestions(false)
-                                            setIsSuggestionClicked(false)
-
-                                            const params = new URLSearchParams(
-                                                window.location.search
-                                            )
-                                            params.delete('search')
-                                            router.replace(
-                                                `?${params.toString()}`
-                                            )
-                                        }}
-                                        variant="ghost"
-                                        size="sm"
-                                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-muted"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                )}
-                            </div>
-                            {/* Suggestions */}
-                            {showSuggestions && suggestions.length > 0 && (
-                                <div className="absolute z-50 bg-white border border-gray-200 mt-1 rounded-md w-full max-w-[500px] shadow-md">
-                                    {suggestions.map((item, idx) => (
-                                        <div
-                                            key={idx}
-                                            onClick={() =>
-                                                handleSuggestionClick(
-                                                    item.title
-                                                )
-                                            }
-                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-left"
-                                        >
-                                            {item.title}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            <SearchBox
+                                placeholder="Search Classes"
+                                fetchSuggestionsApi={fetchSuggestionsApi}
+                                fetchSearchResultsApi={fetchSearchResultsApi}
+                                defaultFetchApi={defaultFetchApi}
+                                getSuggestionLabel={(s) => (
+                                    <div>
+                                        <div className="font-medium">{s.title}</div>
+                                    </div>
+                                )}                            
+                                inputWidth="relative lg:w-[400px] w-full"
+                            />
                         </div>
                     </div>
                     <div className="flex justify-start gap-6 my-6">
@@ -459,62 +320,41 @@ function Page({ params }: ParamsType) {
                     ) : (
                         <div>
                             {classes.length > 0 &&
-                                (activeTab === classes[0].status ? (
+                                (activeTab === classes[0]?.status ? (
                                     <>
                                         <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
-                                            {classes.map(
-                                                (classData:any, index: any) =>
-                                                    activeTab ===
-                                                    classData.status ? (
-                                                        activeTab ===
-                                                        'completed' ? (
-                                                            <div
-                                                                key={classData}
-                                                            >
-                                                                <RecordingCard
-                                                                    classData={
-                                                                        classData
-                                                                    }
-                                                                    isAdmin
-                                                                />
-                                                            </div>
-                                                        ) : (
-                                                            <div
-                                                                key={classData}
-                                                            >
-                                                                <ClassCard
-                                                                    classData={
-                                                                        classData
-                                                                    }
-                                                                    classType={
-                                                                        activeTab
-                                                                    }
-                                                                    getClasses={
-                                                                        getHandleAllClasses
-                                                                    }
-                                                                    activeTab={
-                                                                        activeTab
-                                                                    }
-                                                                    studentSide={
-                                                                        false
-                                                                    }
-                                                                />
-                                                            </div>
-                                                        )
+                                            {classes.map((classData: any, index: any) =>
+                                                activeTab === classData.status ? (
+                                                    activeTab === 'completed' ? (
+                                                        <div key={classData.id || index}>
+                                                            <RecordingCard
+                                                                classData={classData}
+                                                                isAdmin
+                                                            />
+                                                        </div>
                                                     ) : (
-                                                        <div key={classData}>
-                                                            <ClassCardSkeleton />
+                                                        <div key={classData.id || index}>
+                                                            <ClassCard
+                                                                classData={classData}
+                                                                classType={activeTab}
+                                                                getClasses={getHandleAllClasses}
+                                                                activeTab={activeTab}
+                                                                studentSide={false}
+                                                            />
                                                         </div>
                                                     )
+                                                ) : (
+                                                    <div key={classData}>
+                                                        <ClassCardSkeleton />
+                                                    </div>
+                                                )
                                             )}
                                         </div>
                                         <DataTablePagination
                                             totalStudents={totalStudents}
                                             lastPage={lastPage}
                                             pages={pages}
-                                            fetchStudentData={
-                                                getHandleAllClasses
-                                            }
+                                            fetchStudentData={getHandleAllClasses}
                                         />
                                     </>
                                 ) : (
@@ -525,9 +365,7 @@ function Page({ params }: ParamsType) {
                             {classes.length === 0 && (
                                 <div className="w- flex mb-10 items-center flex-col gap-y-3 justify-center text-center mt-2">
                                     <Image
-                                        src={
-                                            '/emptyStates/undraw_online_learning_re_qw08.svg'
-                                        }
+                                        src={'/emptyStates/undraw_online_learning_re_qw08.svg'}
                                         height={200}
                                         width={200}
                                         alt="batchEmpty State"

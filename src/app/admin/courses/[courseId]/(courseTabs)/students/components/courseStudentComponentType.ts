@@ -36,6 +36,15 @@ export interface ComboxAlertDialogProps{
     bootcampId: any
 }
 
+// deleteModal.tsx
 
-
+export interface DeleteModalDialogProps {
+    title: string
+    description: string
+    userId: number[]
+    bootcampId: number
+    isOpen?: boolean
+    onClose?: () => void
+    setSelectedRows?: React.Dispatch<React.SetStateAction<any[]>> // Add this line
+}
 

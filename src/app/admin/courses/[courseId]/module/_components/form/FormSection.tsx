@@ -2,7 +2,7 @@
 
 // React and third-party libraries
 import React, { useEffect, useState, useCallback } from 'react'
-import { Plus, X, CalendarIcon } from 'lucide-react'
+import { PlusCircle, X, CalendarIcon, Trash2 } from 'lucide-react'
 
 // Internal imports
 import { Input } from '@/components/ui/input'
@@ -41,7 +41,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { ellipsis } from '@/lib/utils'
-import {FormSectionProps} from "@/app/admin/courses/[courseId]/module/_components/form/ModuleFormType"
+import { FormSectionProps } from '@/app/admin/courses/[courseId]/module/_components/form/ModuleFormType'
 
 const getQuestionType = (typeId: number) => {
     switch (typeId) {
@@ -187,45 +187,50 @@ const FormSection: React.FC<FormSectionProps> = ({
     }, [selectedSection, index, form, questionData])
 
     return (
-        <div>
+        <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white">
+            <div className="flex flex-row justify-between">
+                <p className="flex text-left text-md text-gray-600 font-semibold mb-1">
+                    Question {index + 1}
+                </p>
+                <button
+                    type="button"
+                    onClick={(e) => {
+                        e.preventDefault()
+                        deleteQuestion(item.id)
+                        // deleteQuestion(index)
+                    }}
+                >
+                    <Trash2 className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
+                </button>
+            </div>
+
             <Select
                 onValueChange={(e) => {
                     handleSectionType(e, index)
                 }}
             >
-                <div className="flex flex-row justify-between">
-                    <div className="mt-5">
-                        <SelectTrigger
-                            className="w-[175px] focus:ring-0 mb-3"
-                            disabled={!questionData.questionType}
-                        >
-                            <SelectValue
-                                placeholder={getQuestionType(item.typeId)}
-                            />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                {sectionType.map((section: any) => (
-                                    <SelectItem
-                                        key={section.questionType}
-                                        value={section.questionType}
-                                    >
-                                        {section.questionType}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
-                        </SelectContent>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.preventDefault()
-                            deleteQuestion(item.id)
-                            // deleteQuestion(index)
-                        }}
+                {/* <div className="flex flex-row justify-between"> */}
+                <div className="mt-5">
+                    <SelectTrigger
+                        className="w-[175px] focus:ring-0 mb-3"
+                        disabled={!questionData.questionType}
                     >
-                        <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
-                    </button>
+                        <SelectValue
+                            placeholder={getQuestionType(item.typeId)}
+                        />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            {sectionType.map((section: any) => (
+                                <SelectItem
+                                    key={section.questionType}
+                                    value={section.questionType}
+                                >
+                                    {section.questionType}
+                                </SelectItem>
+                            ))}
+                        </SelectGroup>
+                    </SelectContent>
                 </div>
             </Select>
 
@@ -234,37 +239,26 @@ const FormSection: React.FC<FormSectionProps> = ({
                 name={`questions.${index}.question`}
                 render={({ field }) => (
                     <FormItem>
-                        <div className="flex flex-row justify-between">
-                            <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
-                                Question {index + 1}
-                            </FormLabel>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name={`questions.${index}.isRequired`}
-                                                render={({ field }) => (
-                                                    <Switch
-                                                        // checked={field.value}
-                                                        checked={
-                                                            questionData.isRequired
-                                                        }
-                                                        onCheckedChange={
-                                                            field.onChange
-                                                        }
-                                                    />
-                                                )}
-                                            />
-                                        </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="font-semibold">
-                                        Make the question as required by turning
-                                        it on
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
+                        <div className="flex flex-row justify-between mt-4">
+                            <p className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                                Question Type
+                            </p>
+                            <div className="flex flex-row justify-end gap-4">
+                                <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                                    Required
+                                </FormLabel>
+                                <FormField
+                                    control={form.control}
+                                    name={`questions.${index}.isRequired`}
+                                    render={({ field }) => (
+                                        <Checkbox
+                                            // checked={field.value}
+                                            checked={questionData.isRequired}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    )}
+                                />
+                            </div>
                         </div>
                         <FormControl>
                             <Input
@@ -319,14 +313,14 @@ const FormSection: React.FC<FormSectionProps> = ({
                 ))}
 
             {(questionData.typeId === 1 || questionData.typeId === 2) && (
-                <div className="flex justify-end">
+                <div className="flex justify-end mt-4">
                     <Button
-                        variant={'secondary'}
+                        // variant={'secondary'}
                         type="button"
                         onClick={addOption}
-                        className="gap-x-2 border-none text-[rgb(81,134,114)] hover:text-[rgb(81,134,114)] hover:bg-popover"
+                        className="h-8 border-none"
                     >
-                        <Plus /> Add Option
+                        <PlusCircle size={15} /> Add Option
                     </Button>
                 </div>
             )}

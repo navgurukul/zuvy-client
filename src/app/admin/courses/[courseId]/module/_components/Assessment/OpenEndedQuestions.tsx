@@ -9,7 +9,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
-import {OpenEndedQuestiones, OpenEndedQuestionesProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {OpenEndedQuestiones, OpenEndedQuestionesProps, Tag} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const OpenEndedQuestions = ({
     questions,
@@ -22,12 +22,12 @@ const OpenEndedQuestions = ({
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
             {questions.map((question: OpenEndedQuestiones) => {
                 const tag = tags?.find(
-                    (tag: any) => tag?.id === question?.tagId
+                    (tag:Tag) => tag?.id === question?.tagId
                 )
                 return (
                     <div
                         key={question.id}
-                        className="py-5 pl-2 pr-5 rounded-sm border-b border-gray-200 mb-4"
+                        className="py-4 px-8 pr-5 rounded-lg border border-gray-200 bg-white mb-4"
                     >
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">
@@ -61,7 +61,7 @@ const OpenEndedQuestions = ({
                                 </p>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                        <p className="font-bold text-sm mt-2 text-primary cursor-pointer">
                                             View Full Description
                                         </p>
                                     </DialogTrigger>
@@ -108,7 +108,7 @@ const OpenEndedQuestions = ({
                                                 ])
                                             }
                                         }}
-                                        className="text-[rgb(81,134,114)] cursor-pointer"
+                                        className="text-primary cursor-pointer"
                                         size={20}
                                     />
                                 )}

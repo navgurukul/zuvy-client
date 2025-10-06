@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/command";
 import {DataTableFacetedFilterProps} from "@/app/_components/datatable/componentDatatable"
 
-
-
 export function DataTableFacetedFilter<TData, TValue>({
   column,
   title,

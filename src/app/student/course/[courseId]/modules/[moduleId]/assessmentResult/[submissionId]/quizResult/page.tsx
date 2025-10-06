@@ -9,7 +9,8 @@ import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import { useQuizResults } from '@/hooks/useQuizResults'
 import { useThemeStore } from '@/store/store'
 import { Button } from '@/components/ui/button'
-
+import {MCQResult} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/quizResult/modulesAssessmentQuixResultType"
+import{QuizResultsSkeleton} from "@/app/student/_components/Skeletons"
 const QuizResults = ({
     params,
 }: {
@@ -42,23 +43,10 @@ const QuizResults = ({
     ) || 0
     const percentage = maxMarks > 0 ? Math.ceil((totalMarks / maxMarks) * 100) : 0
 
-    // Show loading state
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
-                <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-16dp max-w-md w-full">
-                    <div className="relative mb-6">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto flex items-center justify-center">
-                            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
-                    <p className="text-muted-foreground">Fetching your performance data...</p>
-                </div>
-            </div>
-        )
-    }
 
+    if (loading || !quizResults) {
+       return <QuizResultsSkeleton />;
+    }
     // Show error state
     if (error) {
         return (
@@ -105,8 +93,7 @@ const QuizResults = ({
                         onClick={() => router.back()}
                         className="inline-flex items-center space-x-2 text-primary hover:text-primary-dark mb-8 transition-colors duration-200 cursor-pointer group"
                     >
-                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                        <span className="font-medium">Back to Results</span>
+                         <X className="w-5 h-5 mt-5 ml-4" />
                     </div>
                     
                     <div className="text-center bg-card border border-border rounded-2xl p-12 shadow-8dp">
@@ -126,8 +113,7 @@ const QuizResults = ({
                         onClick={() => router.back()}
                         className="inline-flex text-left w-full m-3 items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
                     >
-                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                        <span className="font-medium">Back to Results</span>
+                         <X className="w-5 h-5 mt-5 ml-4" />
                     </div>
                     <Button
           variant="ghost"
@@ -149,9 +135,10 @@ const QuizResults = ({
                     
                     <div className="flex items-center space-x-3">
                         <Award className="w-6 h-6 text-primary" />
-                        <h1 className="text-2xl font-bold text-foreground">Quiz Results</h1>
+                        <h1 className="text-2xl font-bold text-foreground">Quiz Results</h1> 
                     </div>
                 </div>
+
 
                 {/* Performance Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -186,7 +173,7 @@ const QuizResults = ({
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground font-medium">Points</p>
-                                <p className="text-2xl font-bold text-foreground">{totalMarks}/{Math.ceil(maxMarks)}</p>
+                                <p className="text-2xl font-bold text-foreground">{totalMarks.toFixed(2)}/{Math.ceil(maxMarks)}</p>
                             </div>
                         </div>
                     </div>
@@ -206,7 +193,7 @@ const QuizResults = ({
 
                 {/* Questions */}
                 <div className="space-y-6">
-                    {quizResults?.mcqs.map((result: any, index: number) => (
+                    {quizResults?.mcqs.map((result: MCQResult, index: number) => (
                         <div
                             key={result.quizId}
                             className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden"

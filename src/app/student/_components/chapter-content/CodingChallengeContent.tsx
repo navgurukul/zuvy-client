@@ -8,6 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
 import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
+import {CodingContentChapterSkeleton} from "@/app/student/_components/Skeletons";
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -51,6 +52,7 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       setCodingQuestions([]);
     } finally {
       setLoading(false);
+        // setTimeout(() => setLoading(false), 1500);
     }
   }, [chapterDetails.id, chapterDetails.status]);
 
@@ -124,15 +126,12 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       </div>
     </div>
   );
+
   
   if (loading) {
-      return (
-          <div className="flex flex-col items-center justify-center py-16 h-full">
-              <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-              <p className="text-muted-foreground text-lg">Loading Challenge...</p>
-          </div>
-      );
+    return <CodingContentChapterSkeleton/>;
   }
+
 
   if (isCompleted) {
       return <CodingChallengeResult chapterDetails={chapterDetails} submissionResults={submissionResults} />;

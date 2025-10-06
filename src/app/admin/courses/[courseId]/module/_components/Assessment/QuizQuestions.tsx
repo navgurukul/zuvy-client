@@ -13,7 +13,7 @@ import QuestionDescriptionModal from './QuestionDescriptionModal'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
 import { MCQQuestion } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
-import { CodingQuestionsProps } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
+import { CodingQuestionsProps, Tag } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 
 const QuizQuestions = ({
     questions,
@@ -41,7 +41,7 @@ const QuizQuestions = ({
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
             {questions.map((question: MCQQuestion) => {
                 const tag = tags?.find(
-                    (tag: any) => tag?.id === question?.tagId
+                    (tag: Tag) => tag?.id === question?.tagId
                 )
                 const questionText =
                     question?.quizVariants?.[0]?.question || question.question
@@ -49,7 +49,7 @@ const QuizQuestions = ({
                 return (
                     <div
                         key={question.id}
-                        className={`py-5 pl-2 pr-5 rounded-sm border-b border-gray-200 mb-4`}
+                        className={`py-4 px-8 pr-5 rounded-lg border border-gray-200 bg-white mb-4`}
                     >
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">
@@ -122,29 +122,16 @@ const QuizQuestions = ({
                                                             setIsNewQuestionAdded
                                                         )
                                                     }}
-                                                    className="text-[rgb(81,134,114)] cursor-pointer"
+                                                    className="text-primary cursor-pointer"
                                                     size={20}
                                                 />
                                             )}
                                         </div>
                                     </div>
                                 </div>
-                                {/* <div className="w-full">
-                                    <p className="text-[#4A4A4A] mt-1 font-[14px">
-                                        {ellipsis(question.question, 60)}
-                                    </p>
-                                    <div className="text-[#4A4A4A] mt-1 font-[14px] overflow-hidden text-ellipsis font-semibold"
-                                        style={{
-                                            display: '-webkit-box',
-                                            WebkitLineClamp: 3,
-                                            WebkitBoxOrient: 'vertical',
-                                        }}>
-                                        {renderQuestionContent(question)}
-                                    </div>
-                                </div> */}
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                        <p className="font-bold text-sm mt-2 text-primary cursor-pointer">
                                             View Full Description
                                         </p>
                                     </DialogTrigger>

@@ -7,9 +7,8 @@ import { ArrowLeft, Camera } from 'lucide-react'
 import { useLazyLoadedStudentData } from '@/store/store'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-type Props = {}
 
-function Page({}: Props) {
+function Page() {
     const { studentData } = useLazyLoadedStudentData()
     const router = useRouter()
 

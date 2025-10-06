@@ -1,7 +1,11 @@
 export interface newCourseDialogProps {
     newCourseName: string
+    newCourseDuration: string
     newCourseDescription: string
     handleNewCourseNameChange: (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => void
+    handleNewCourseDurationChange: (
         event: React.ChangeEvent<HTMLInputElement>
     ) => void
     handleNewCourseDescriptionChange: (
@@ -13,6 +17,7 @@ export interface newCourseDialogProps {
 
 export interface CourseData {
     name: string
+    duration: string
     description?: string
     collaborator?: string
 }

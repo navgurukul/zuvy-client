@@ -137,7 +137,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                 <Button
                                     variant={'outline'}
                                     type="button"
-                                    className=" p-2 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4  bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                                    className=" p-2 inline-flex justify-center rounded-md border shadow-sm px-4 text-base font-medium  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
                                     onClick={onClose}
                                     disabled={loading}
                                 >
@@ -147,14 +147,14 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                 </Button>
                                 {loading ? (
                                     <Button variant={'destructive'} disabled>
-                                        <Spinner className="mr-2 text-black h-12  animate-spin w-1/3" />
+                                        <Spinner className="mr-2 h-12 animate-spin w-1/3" />
                                         Deleting Session
                                     </Button>
                                 ) : (
                                     <Button
                                         variant={'destructive'}
                                         type="button"
-                                        className=" p-2 inline-flex justify-center  rounded-md border border-transparent shadow-sm px-4  bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
+                                        className="shadow-4dp p-2 inline-flex justify-center rounded-md border border-transparent px-4 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive sm:text-sm"
                                         onClick={handleConfirm}
                                     >
                                         {buttonText}

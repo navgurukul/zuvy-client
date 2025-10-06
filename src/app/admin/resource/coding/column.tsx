@@ -3,7 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { CodingQuestion } from '@/utils/data/schema'
-import { Pencil, Trash2, Eye } from 'lucide-react'
+import { Edit, Trash2, Eye } from 'lucide-react'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
 import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
@@ -11,6 +11,7 @@ import {
     getDeleteCodingQuestion,
     getEditCodingQuestionDialogs,
     getcodingQuestionState,
+    getCodingQuestionTags,
     getSelectedOptions,
     getDifficulty,
     getOffset,
@@ -31,25 +32,49 @@ export const columns: ColumnDef<CodingQuestion>[] = [
     {
         accessorKey: 'problemName',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Problem Name" />
+            <DataTableColumnHeader column={column} title="Question" />
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
 
             return (
-                <span className="text-start w-full flex ">
+                <span className="text-start w-[400px] flex ">
                     {codingQuestion.title}
                 </span>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'tagId',
+        header: ({ column }) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Topic" 
+            />
+        ),
+        cell: ({ row }) => {
+            const codingQuestion = row.original
+            const { tags } = getCodingQuestionTags()
+            
+            // Find the topic name based on tagId
+            const topicName = tags.find(tag => tag.id === codingQuestion.tagId)?.tagName || 'Unknown Topic'
+
+            return (
+                <div className="flex items-center">
+                    <span className="text-sm font-medium rounded-md">
+                        {topicName}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
     },
     {
         accessorKey: 'difficulty',
         header: ({ column }) => (
             <DataTableColumnHeader
-                className="flex justify-end ml-28"
+                className="flex justify-end"
                 column={column}
                 title="Difficulty"
             />
@@ -60,18 +85,17 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <div
                     className={cn(
-                        `flex items-center justify-end  ml-24 font-semibold text-secondary`,
+                        `flex items-center rounded-full border justify-center`,
                         difficultyColor(codingQuestion.difficulty)
                     )}
                 >
-                    <span className="text-left mr-10 w-4">
+                    <span className="text-center">
                         {codingQuestion.difficulty}
                     </span>
                 </div>
             )
         },
-        enableSorting: false,
-        enableHiding: true,
+        enableSorting: true,
     },
     {
         accessorKey: 'usage',
@@ -86,15 +110,43 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             const codingQuestion = row.original
 
             return (
-                <div className="flex items-center justify-end">
+                <div className="flex items-center justify-center">
                     {codingQuestion?.usage
-                        ? codingQuestion?.usage + ' times'
-                        : 0 + ' times'}
+                        ? codingQuestion?.usage
+                        : 0 }
                 </div>
             )
         },
         enableSorting: true,
-        enableHiding: true,
+    },
+    {
+        accessorKey: 'createdAt',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="flex justify-center"
+                column={column}
+                title="Created"
+            />
+        ),
+        cell: ({ row }) => {
+            const codingQuestion = row.original
+            const createdDate = codingQuestion.createdAt
+                ? new Date(codingQuestion.createdAt).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+                : 'N/A'
+
+            return (
+                <div className="flex items-center justify-center">
+                    <span className="text-sm">
+                        {createdDate}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
     },
     {
         id: 'actions1',
@@ -113,7 +165,10 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                     <Dialog>
                         <DialogTrigger asChild>
                             <button>
-                                <Eye className="cursor-pointer" />
+                                <Eye 
+                                    size={18}
+                                    className="cursor-pointer" 
+                                />
                             </button>
                         </DialogTrigger>
                         <QuestionDescriptionModal
@@ -154,9 +209,9 @@ export const columns: ColumnDef<CodingQuestion>[] = [
             return (
                 <>
                     <div className="flex">
-                        <Pencil
+                        <Edit
                             className="cursor-pointer mr-5"
-                            size={20}
+                            size={18}
                             onClick={() => {
                                 handleEditCodingQuestion(
                                     codingQuestion,
@@ -177,7 +232,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                                 )
                             }}
                             className="text-destructive cursor-pointer"
-                            size={20}
+                            size={18}
                         />
                         <DeleteConfirmationModal
                             isOpen={isDeleteModalOpen}

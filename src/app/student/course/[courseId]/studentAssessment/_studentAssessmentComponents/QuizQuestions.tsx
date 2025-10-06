@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ChevronLeft, Clock, CheckCircle, AlertCircle, Sun, Moon } from 'lucide-react'
+import { X, ChevronLeft, Clock, CheckCircle, AlertCircle, Sun, Moon } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
@@ -32,6 +32,7 @@ import {
 import { cn, difficultyColor } from '@/lib/utils'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import { useThemeStore } from '@/store/store'
+import {Question} from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const QuizQuestions = ({
     onBack,
@@ -85,7 +86,7 @@ const QuizQuestions = ({
 
     useEffect(() => {
         const defaultValues = {
-            answers: questions?.data?.mcqs?.map((question: any) =>
+            answers: questions?.data?.mcqs?.map((question:Question) =>
                 question.submissionsData && question.submissionsData.length > 0
                     ? question.submissionsData[0].chosenOption.toString()
                     : ''
@@ -162,7 +163,7 @@ const QuizQuestions = ({
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
+        <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 pb-8 relative bottom-0 left-0 right-0">
             <div className="max-w-4xl mx-auto p-6">
                 {/* Alert Modal for No Selection */}
                 <AlertDialog open={isAlertModal}>
@@ -191,10 +192,10 @@ const QuizQuestions = ({
                 <div className="flex items-center justify-between mb-8">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <button className="flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 group">
-                                <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                                <span className="font-medium">Back to Assessment</span>
+                            <button className=" absolute top-8 left-8 flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 group">
+                                <X className="w-5 h-5" />
                             </button>
+   
                         </AlertDialogTrigger>
                         <AlertDialogContent className="bg-card border-border shadow-32dp">
                             <AlertDialogHeader>

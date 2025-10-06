@@ -4,7 +4,7 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '@/app/admin/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
-import {setSelectedCodingQuestionsProps,SelectTag,SelectQuestion} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {setSelectedCodingQuestionsProps,Tag,SelectQuestion} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const SelectCodingQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
@@ -26,10 +26,10 @@ const SelectCodingQuestions = ({
     return (
         <div className="w-full">
             {selectedQuestions.map((question: SelectQuestion) => {
-                const tag = tags?.find((tag:SelectTag) => tag.id === question.tagId)
+                const tag = tags?.find((tag:Tag) => tag.id === question.tagId)
 
                 return (
-                    <div key={question.id} className="p-5 rounded-sm border-b border-gray-200 mb-4">
+                    <div key={question.id} className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4">
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <div className="flex items-center justify-between w-full">
@@ -58,7 +58,7 @@ const SelectCodingQuestions = ({
                                 </p>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
+                                        <p className="font-bold text-sm mt-2 text-primary cursor-pointer text-left">
                                             View Full Description
                                         </p>
                                     </DialogTrigger>

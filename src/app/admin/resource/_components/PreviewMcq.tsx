@@ -6,7 +6,7 @@ import useGetMCQs from '@/hooks/useGetMcq'
 import DOMPurify from 'dompurify'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
-import {PreviewMcqProps,Tags,QuizVariant} from "@/app/admin/resource/_components/adminResourceComponentType"
+import { PreviewMcqProps, Tags, QuizVariant } from "@/app/admin/resource/_components/adminResourceComponentType"
 
 const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: PreviewMcqProps) => {
     const { quizData, difficulty, tagName } = useGetMCQs({
@@ -16,6 +16,21 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: PreviewMcqPr
     })
     const [activeTab, setActiveTab] = useState<string | null>(null)
     const [codeSnippet, setCodeSnippet] = useState<any>()
+
+    // Fix the tag name logic
+    const getDisplayTagName = () => {
+        if (assesmentSide) {
+            // For assessment side, find tag from tags array using tagId
+            const foundTag = tags?.find((tag: Tags) => tag.id === tagId)
+            return foundTag?.tagName || 'No Topic'
+        } else {
+            // For other cases, use the tagName from hook
+            return tagName || 'No Topic'
+        }
+    }
+
+    const displayTagName = getDisplayTagName()
+
     const codeBlockClass =
         'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
@@ -80,17 +95,16 @@ const PreviewMCQ = ({ quizQuestionId, tags, assesmentSide, tagId }: PreviewMcqPr
         return updatedHtml
     }
 
-    const newTagName = tags?.filter((tag:Tags) => tag.id == tagId)
+    const newTagName = tags?.filter((tag: Tags) => tag.id == tagId)
 
     return (
         <div className="w-full max-h-[500px] flex flex-col">
             <DialogHeader className="flex-shrink-0">
-                <div className="flex gap-x-3 text-gray-600">
+                <div className="flex gap-x-3 text-foreground">
                     Question Preview{' '}
                     <div className="flex gap-x-3 items-center">
-                        <span className="font-md text-[14px] text-[rgb(81,134,114)] bg-green-200 px-2  py-0.5 my-0.5 rounded-md">
-                            {assesmentSide ? tagName : newTagName?.[0]?.tagName}
-
+                        <span className="font-md text-[14px] text-success bg-success-foreground px-2 py-0.5 my-0.5 rounded-md">
+                            {displayTagName}
                         </span>
                         <span
                             className={`font-normal text-[14px] px-2 py-0.5 my-0.5 rounded-md ${difficultyColor(

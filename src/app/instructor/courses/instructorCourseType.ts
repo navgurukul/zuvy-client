@@ -3,3 +3,12 @@ export interface EnrolledCourse {
     id: number
     name: string
 }
+
+export interface ModuleDetail {
+  id: number;
+  name: string;
+}
+
+export interface GetChaptersWithStatusResponse {
+  moduleDetails: ModuleDetail[];
+}

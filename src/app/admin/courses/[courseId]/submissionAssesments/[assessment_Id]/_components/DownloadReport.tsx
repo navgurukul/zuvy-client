@@ -5,9 +5,10 @@ import { format } from 'date-fns'
 import { color } from 'framer-motion'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { ArrowBigDownDash } from 'lucide-react'
+import { ArrowBigDownDash,Download } from 'lucide-react'
+import {PracticeCode,ReportData,DownloadReportProps }from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/submissionComponentDownloadType"
 
-const DownloadReport = ({ userInfo, submitedAt }: any) => {
+const DownloadReport = ({ userInfo, submitedAt }: DownloadReportProps) => {
     const { userId, id, title } = userInfo
 
     const formatDate = (dateString: string) => {
@@ -30,7 +31,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
         }
     }
 
-    async function generatePDF(reportData: any) {
+    async function generatePDF(reportData: ReportData) {
         const doc = new jsPDF()
 
         // Add Assessment Summary at the Top
@@ -154,7 +155,7 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
 
         // Create an array to hold all rows for the table
         const tableData = reportData.PracticeCode.map(
-            (practiceCode: any, index: any) => [
+            (practiceCode: PracticeCode, index: number) => [
                 `Q${index + 1}. ${practiceCode.questionDetail.title}`,
                 practiceCode.status == 'Accepted'
                     ? 'Correct Answer'
@@ -194,8 +195,8 @@ const DownloadReport = ({ userInfo, submitedAt }: any) => {
                 onClick={handleDownload}
                 className={ submitedAt ? `max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center` : `max-w-[500px] text-secondary font-medium flex items-center opacity-50 cursor-not-allowed`}
             >
-                <ArrowBigDownDash className="mr-2" />
-                Download Report
+                <Download className="h-4 w-4 text-black"/>
+                {/* Download Report */}
             </button>
         </div>
     )

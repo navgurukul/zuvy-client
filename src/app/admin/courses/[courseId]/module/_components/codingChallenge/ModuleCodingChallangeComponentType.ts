@@ -6,6 +6,7 @@ export interface ChallangesExample {
 }
 
 export interface CodingChallangesQuestion{
+    tagId: number
     id: number
     title: string
     description: string
@@ -39,15 +40,6 @@ export interface CodeProps {
     content: ChallangesContent
 }
 
-export type ChallangesTag ={
-    id: number
-    tagName: string
-}
-
-export interface ChallangesOption {
-    tagName: string
-    id: number
-}
 
 
 export interface ChallangesProps{

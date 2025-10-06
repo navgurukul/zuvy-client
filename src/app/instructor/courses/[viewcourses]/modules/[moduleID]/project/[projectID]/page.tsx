@@ -4,6 +4,7 @@ import React, { useCallback, useEffect } from 'react'
 // import Projects from '@/app/student/courses/[viewcourses]/modules/_components/Projects'
 import { useParams } from 'next/navigation'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import{GetChaptersWithStatusResponse} from "@/app/instructor/courses/instructorCourseType"
 import {
     useLazyLoadedStudentData,
     getParamBatchId,
@@ -37,7 +38,7 @@ export default function Project() {
 
     const getModule = useCallback(async () => {
         try {
-            const response = await api.get(
+            const response = await api.get<GetChaptersWithStatusResponse>(
                 `tracking/getAllChaptersWithStatus/${moduleID}`
             )
             setModuleName(response.data.moduleDetails[0].name)

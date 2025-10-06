@@ -1,40 +1,37 @@
 import React, { useRef, useState } from 'react';
+import {FileUploaderProps} from "@/components/appComponentFileType"
 
-interface FileUploaderProps {
-  onUpload: (file: File) => void;
-  allowedTypes?: string;
-}
 
 export const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, allowedTypes = 'image/*' }) => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   
-  const handleFileChange = (event:any) => {
+  const handleFileChange = (event:React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       processFiles(files);
     }
   };
   
-  const handleDragEnter = (e:any) => {
+  const handleDragEnter = (e:React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(true);
   };
   
-  const handleDragLeave = (e:any) => {
+  const handleDragLeave = (e:React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
   };
   
-  const handleDragOver = (e:any) => {
+  const handleDragOver = (e:React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
   };
   
-  const handleDrop = (e:any) => {
+  const handleDrop = (e:React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
@@ -45,7 +42,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({ onUpload, allowedTyp
     }
   };
   
-  const processFiles = (files:any) => {
+  const processFiles = (files:FileList) => {
     Array.from(files).forEach((file:any) => {
       // Check if the file is of allowed type
       if (file.type.match(allowedTypes.replace('*', '.*'))) {

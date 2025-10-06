@@ -1,3 +1,5 @@
+import { ColumnDef } from "@tanstack/react-table"
+
 export type StudentData = {
     email: string
     id:number
@@ -29,3 +31,12 @@ export interface Student {
 }
 
 export type StudentDataState = Student[]
+
+
+
+export interface DataTableProps<TData, TValue> {
+    columns: ColumnDef<TData, TValue>[]
+    data: TData[]
+    setSelectedRows?: any
+    mcqSide?: boolean
+}

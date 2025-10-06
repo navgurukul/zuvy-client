@@ -28,6 +28,8 @@ function formatSubmissionDate(dateString: string) {
   return `${day} ${month} ${year} at ${hours}:${minutes} ${ampm}`;
 }
 
+
+
 // Simplified interfaces for clarity
 
 const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDetails, submissionResults }) => {
@@ -38,6 +40,7 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
   const handleViewSolution = (questionId: number) => {
     router.push(`/student/course/${params.courseId}/codingChallengeResult?questionId=${questionId}&moduleId=${params.moduleId}&chapterId=${chapterId}`);
   };
+
 
   return (
     <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
@@ -131,5 +134,4 @@ const CodingChallengeResult: React.FC<CodingChallengeResultProps> = ({ chapterDe
     </div>
   );
 };
-
 export default CodingChallengeResult;

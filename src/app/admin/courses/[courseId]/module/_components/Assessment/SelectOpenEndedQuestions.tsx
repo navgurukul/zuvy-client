@@ -9,7 +9,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import PreviewOpenEnded from '@/app/admin/resource/_components/PreviewOpenEnded'
-import {selectedOpenEndedQuestionsProps,SelectTag} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {selectedOpenEndedQuestionsProps,Tag,CodingQuestiones} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 
 const SelectOpenEndedQuestions = ({
     setSelectedQuestions,
@@ -19,13 +19,13 @@ const SelectOpenEndedQuestions = ({
 }:selectedOpenEndedQuestionsProps) => {
     return (
         <div className="w-full">
-            {selectedQuestions.map((question: any) => {
-                const tag = tags?.find((tag: SelectTag ) => tag.id === question.tagId)
+            {selectedQuestions.map((question:CodingQuestiones) => {
+                const tag = tags?.find((tag:Tag ) => tag.id === question.tagId)
 
                 return (
                     <div
                         key={question.id}
-                        className="p-5 rounded-sm border-b border-gray-200 mb-4"
+                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
@@ -59,7 +59,7 @@ const SelectOpenEndedQuestions = ({
                                 </p>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
+                                        <p className="font-bold text-sm mt-2 text-primary cursor-pointer text-left">
                                             View Full Description
                                         </p>
                                     </DialogTrigger>
@@ -75,7 +75,7 @@ const SelectOpenEndedQuestions = ({
                                 onClick={() =>
                                     setSelectedQuestions(
                                         selectedQuestions.filter(
-                                            (q: any) => q.id !== question.id
+                                            (q: CodingQuestiones) => q.id !== question.id
                                         )
                                     )
                                 }

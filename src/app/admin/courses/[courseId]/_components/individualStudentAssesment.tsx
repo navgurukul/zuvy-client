@@ -1,7 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
+import { Eye, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'; 
 import {
     cn,
     difficultyColor,
@@ -85,18 +86,16 @@ const IndividualStudentAssesment = ({
     }
 
     return (
-        <div
-            className={`flex flex-col h-[160px] lg:h-[150px] p-6 shadow-lg  transition-transform transform hover:shadow-xl rounded-md overflow-hidden mt-3 w-5/6 relative`}
-        >
-            <div className="flex flex-col w-full h-full justify-between">
-                <div>
-                    <h1 className="capitalize text-start text-[14px] font-semibold mb-2 text-gray-600 dark:text-white truncate w-full">
-                        {type === 'codingSubmission'
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+              <CardContent className="p-4">
+                <div className='mb-4'>
+                    <h4 className="text-left text-base font-bold mb-1">
+                        {type === "codingSubmission"
                             ? data.questionDetail.title
                             : questionInfo.title}
-                    </h1>
+                    </h4>
 
-                  <div className="flex items-center gap-x-2 my-4">
+                    <div className="flex items-center gap-x-2 my-1">
                         <span
                             className={`h-2 w-2 rounded-full ${
                                 type === 'codingSubmission'
@@ -108,7 +107,7 @@ const IndividualStudentAssesment = ({
                                         : scoreHandler().className
                                 }`}
                         />
-                        <span className="text-[15px] text-gray-600">
+                        <span className="text-sm text-gray-600">
                             {type === 'codingSubmission' ? (
                                 <>Status: {data.status}</>
                             ) : type === 'openEndedSubmission' ? (
@@ -120,20 +119,21 @@ const IndividualStudentAssesment = ({
                     </div>
                 </div>
 
-                {/* Button positioned at the bottom-right */}
-                <div className="absolute bottom-3 right-3">
-                    <Button variant={'ghost'} className="w-full lg:w-auto">
-                        <Link
-                            className="text-[rgb(81,134,114)] font-semibold text-md flex items-center w-full truncate"
-                            href={questionInfo.link}
-                        >
-                            View Answers
-                            <ChevronRight size={20} className="ml-1" />
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-        </div>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mt-1 text-black hover:text-white font-semibold text-sm"
+                >
+                    <Link
+                        className=" flex items-center justify-center"
+                        href={questionInfo.link}
+                    >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Answer
+                    </Link>
+                </Button>
+            </CardContent>
+        </Card>
     )
 }
 

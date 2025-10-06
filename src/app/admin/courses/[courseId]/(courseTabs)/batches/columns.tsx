@@ -1,66 +1,116 @@
 'use client'
 
 import Image from 'next/image'
-
 import { ColumnDef } from '@tanstack/react-table'
-
 import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
-
-import DeleteConfirmationModal from '@/app/admin/courses/[courseId]/_components/deleteModal'
-import { fetchStudentData } from '@/utils/students'
 import { Task } from '@/utils/data/schema'
-import {
-    getBatchData,
-    getDeleteStudentStore,
-    getStoreStudentData,
-} from '@/store/store'
-import { getAttendanceColorClass } from '@/utils/students'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useFormContext } from 'react-hook-form'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
-export const columns: ColumnDef<Task>[] = [
+export const createColumns = (capEnrollment: number): ColumnDef<Task>[] => [
     {
         id: 'select',
         header: ({ table }) => {
+            const selectedCount = table.getSelectedRowModel().rows.length
+            const disableAll = selectedCount >= capEnrollment
+
             return (
-                <div>
-                    <Checkbox
-                        checked={
-                            table.getIsAllPageRowsSelected() ||
-                            (table.getIsSomePageRowsSelected() &&
-                                'indeterminate')
-                        }
-                        onCheckedChange={(value) =>
-                            table.toggleAllPageRowsSelected(!!value)
-                        }
-                        aria-label="Select all"
-                        className="translate-y-[2px]"
-                    />
-                </div>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div>
+                                <Checkbox
+                                    checked={
+                                        table.getIsAllPageRowsSelected() ||
+                                        (table.getIsSomePageRowsSelected() &&
+                                            'indeterminate')
+                                    }
+                                    onCheckedChange={(value) => {
+                                        if (!disableAll || !value) {
+                                            table.toggleAllPageRowsSelected(
+                                                !!value
+                                            )
+                                        }
+                                    }}
+                                    disabled={disableAll}
+                                    aria-label="Select all"
+                                    className="translate-y-[2px]"
+                                />
+                            </div>
+                        </TooltipTrigger>
+                        {disableAll && (
+                            <TooltipContent>
+                                <p>
+                                    You can’t select more than {capEnrollment}{' '}
+                                    students.
+                                </p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </TooltipProvider>
             )
         },
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-                className="translate-y-[2px]"
-            />
-        ),
+        cell: ({ row, table }) => {
+            const selectedCount = table.getSelectedRowModel().rows.length
+            const disable =
+                !row.getIsSelected() && selectedCount >= capEnrollment
+
+            return (
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div>
+                                <Checkbox
+                                    checked={row.getIsSelected()}
+                                    onCheckedChange={(value) => {
+                                        if (!disable || !value) {
+                                            row.toggleSelected(!!value)
+                                        }
+                                    }}
+                                    disabled={disable}
+                                    aria-label="Select row"
+                                    className="translate-y-[2px]"
+                                />
+                            </div>
+                        </TooltipTrigger>
+                        {disable && (
+                            <TooltipContent
+                                side="top"
+                                align="start"
+                                sideOffset={8}
+                            >
+                                <p className="max-w-xs whitespace-normal break-words text-center">
+                                    You’ve reached the cap enrollment limit. <br />
+                                    Deselect a student to add someone else, or
+                                    increase the cap enrollment.
+                                </p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </TooltipProvider>
+            )
+        },
         enableSorting: false,
         enableHiding: false,
     },
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => {
             const student = row.original
-            const profilePitcure = student.profilePicture
-            const ImageContainer = () => {
-                return profilePitcure ? (
+            const profilePicture = student.profilePicture
+            const ImageContainer = () =>
+                profilePicture ? (
                     <Image
-                        src={profilePitcure}
+                        src={profilePicture}
                         alt="profilePic"
                         height={10}
                         width={30}
@@ -77,7 +127,7 @@ export const columns: ColumnDef<Task>[] = [
                         className="rounded-[50%] ml-2"
                     />
                 )
-            }
+
             return <div className="flex items-center">{ImageContainer()}</div>
         },
         enableSorting: false,
@@ -86,7 +136,7 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'name',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
+            <DataTableColumnHeader column={column} title="Student's Name" />
         ),
         cell: ({ row }) => (
             <div className="w-[150px]">{row.getValue('name')}</div>
@@ -99,181 +149,12 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Email" />
         ),
-        cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
-
-            return (
-                <div className="flex space-x-2">
-                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue('email')}
-                    </span>
-                </div>
-            )
-        },
+        cell: ({ row }) => (
+            <div className="flex space-x-2">
+                <span className="max-w-[500px] truncate font-medium">
+                    {row.getValue('email')}
+                </span>
+            </div>
+        ),
     },
 ]
-
-// export const columns: ColumnDef<Task>[] = [
-//     {
-//         id: 'select',
-//         header: ({ table }) => (
-//             <div>
-//                 <Checkbox
-//                     checked={
-//                         table.getIsAllPageRowsSelected() ||
-//                         (table.getIsSomePageRowsSelected() && 'indeterminate')
-//                     }
-//                     onCheckedChange={(value) =>
-//                         table.toggleAllPageRowsSelected(!!value)
-//                     }
-//                     aria-label="Select all"
-//                     className="translate-y-[2px]"
-//                 />
-//             </div>
-//         ),
-//         cell: ({ row }) => (
-//             <Checkbox
-//                 checked={row.getIsSelected()}
-//                 onCheckedChange={(value) => row.toggleSelected(!!value)}
-//                 aria-label="Select row"
-//                 className="translate-y-[2px]"
-//             />
-//         ),
-//         enableSorting: false,
-//         enableHiding: false,
-//         meta: { className: 'w-[50px]' }, // Adjust column width
-//     },
-//     {
-//         accessorKey: 'profilePicture',
-//         header: ({ column }) => (
-//             <DataTableColumnHeader column={column} title="Profile Picture" />
-//         ),
-//         cell: ({ row }) => {
-//             const student = row.original
-//             const profilePicture = student.profilePicture
-//             const ImageContainer = () => {
-//                 return profilePicture ? (
-//                     <Image
-//                         src={profilePicture}
-//                         alt="profilePic"
-//                         height={10}
-//                         width={30}
-//                         className="rounded-[100%] ml-2"
-//                     />
-//                 ) : (
-//                     <Image
-//                         src={
-//                             'https://avatar.iran.liara.run/public/boy?username=Ash'
-//                         }
-//                         alt="profilePic"
-//                         height={35}
-//                         width={35}
-//                         className="rounded-[50%] ml-2"
-//                     />
-//                 )
-//             }
-//             return <div className="flex items-center">{ImageContainer()}</div>
-//         },
-//         enableSorting: false,
-//         enableHiding: false,
-//         meta: { className: 'w-[70px]' }, // Adjust column width
-//     },
-//     {
-//         accessorKey: 'name',
-//         header: ({ column }) => (
-//             <DataTableColumnHeader column={column} title="Student's Name" />
-//         ),
-//         cell: ({ row }) => (
-//             <div className="w-[150px] truncate">{row.getValue('name')}</div>
-//         ),
-//         enableSorting: true,
-//         enableHiding: true,
-//         meta: { className: 'w-[150px]' }, // Adjust column width
-//     },
-//     {
-//         accessorKey: 'email',
-//         header: ({ column }) => (
-//             <DataTableColumnHeader column={column} title="Email" />
-//         ),
-//         cell: ({ row }) => {
-//             return (
-//                 <div className="flex space-x-2">
-//                     <span className="max-w-[500px] truncate font-medium">
-//                         {row.getValue('email')}
-//                     </span>
-//                 </div>
-//             )
-//         },
-//         meta: { className: 'w-[300px]' }, // Wider column for Email
-//     },
-// ]
-
-// export const columns: ColumnDef<Task>[] = [
-//     {
-//         id: 'select',
-//         cell: ({ row }) => (
-//             <Checkbox
-//                 checked={row.getIsSelected()}
-//                 onCheckedChange={(value) => row.toggleSelected(!!value)}
-//                 aria-label="Select row"
-//                 className="translate-y-[2px]"
-//             />
-//         ),
-//         enableSorting: false,
-//         enableHiding: false,
-//         meta: { className: 'w-[50px]' },
-//     },
-//     {
-//         accessorKey: 'profilePicture',
-//         cell: ({ row }) => {
-//             const student = row.original
-//             const profilePicture = student.profilePicture
-//             const ImageContainer = () => {
-//                 return profilePicture ? (
-//                     <Image
-//                         src={profilePicture}
-//                         alt="profilePic"
-//                         height={10}
-//                         width={30}
-//                         className="rounded-[100%] ml-2"
-//                     />
-//                 ) : (
-//                     <Image
-//                         src={
-//                             'https://avatar.iran.liara.run/public/boy?username=Ash'
-//                         }
-//                         alt="profilePic"
-//                         height={35}
-//                         width={35}
-//                         className="rounded-[50%] ml-2"
-//                     />
-//                 )
-//             }
-//             return <div className="flex items-center">{ImageContainer()}</div>
-//         },
-//         enableSorting: false,
-//         enableHiding: false,
-//         meta: { className: 'w-[70px]' },
-//     },
-//     {
-//         accessorKey: 'name',
-//         cell: ({ row }) => (
-//             <div className="w-[150px] truncate">{row.getValue('name')}</div>
-//         ),
-//         enableSorting: true,
-//         enableHiding: true,
-//         meta: { className: 'w-[150px]' },
-//     },
-//     {
-//         accessorKey: 'email',
-//         cell: ({ row }) => (
-//             <div className="flex space-x-2">
-//                 <span className="max-w-[500px] truncate font-medium">
-//                     {row.getValue('email')}
-//                 </span>
-//             </div>
-//         ),
-//         meta: { className: 'w-[300px]' },
-//     },
-// ]

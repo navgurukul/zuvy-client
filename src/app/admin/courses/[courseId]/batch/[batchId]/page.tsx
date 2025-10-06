@@ -7,9 +7,9 @@ import {
     useSearchParams,
 } from 'next/navigation'
 import ErrorPage from 'next/error'
-
 import { Input } from '@/components/ui/input'
-import { Plus, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { Plus, Trash2, ArrowLeft } from 'lucide-react'
 import { Pencil } from 'lucide-react'
 
 import { toast } from '@/components/ui/use-toast'
@@ -50,15 +50,14 @@ import useDebounce from '@/hooks/useDebounce'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import BreadcrumbCmponent from '@/app/_components/breadcrumbCmponent'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { ComboboxStudent } from '../../(courseTabs)/students/components/comboboxStudentDataTable'
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
 import { POSITION } from '@/utils/constant'
-import {StudentDataState} from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
+import { StudentDataState, Batch, BatchOption, SelecteItem } from "@/app/admin/courses/[courseId]/batch/[batchId]/CourseBatchesType"
 import axios from 'axios'
-
+import { SearchBox } from '@/utils/searchBox'
 
 const BatchesInfo = ({
     params,
@@ -95,26 +94,6 @@ const BatchesInfo = ({
         StudentDataState | any
     >({})
 
-    const crumbs = [
-        {
-            crumb: 'My Courses',
-            href: `/admin/courses`,
-            isLast: false,
-        },
-        {
-            crumb: `${bootcamp?.name}`,
-            href: `/admin/courses/${params.courseId}/batches`,
-            isLast: false,
-        },
-        {
-            crumb: `${
-                studentData?.length > 0
-                    ? studentData[0].batchName
-                    : instructorsInfo.name
-            }`,
-            isLast: true,
-        },
-    ]
     const formSchema = z.object({
         name: z.string().min(2, {
             message: 'Batch name must be at least 2 characters.',
@@ -137,16 +116,16 @@ const BatchesInfo = ({
             // }
 
             (val) => {
-            const capEnrollmentValue = parseInt(val)
-            if (capEnrollmentValue > 100000) {
+                const capEnrollmentValue = parseInt(val)
+                if (capEnrollmentValue > 100000) {
+                    return {
+                        message: 'Cap Enrollment cannot exceed 100000.',
+                    }
+                }
                 return {
-                    message: 'Cap Enrollment cannot exceed 100000.',
+                    message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
                 }
             }
-            return {
-                message: `Cap Enrollment must be at least 1 and not less than the number of current students (${studentsData?.length}).`,
-            }
-        }
         ),
     })
 
@@ -159,6 +138,7 @@ const BatchesInfo = ({
         },
         mode: 'onChange',
     })
+
     useEffect(() => {
         form.setValue('name', instructorsInfo?.name || '')
         form.setValue(
@@ -179,10 +159,10 @@ const BatchesInfo = ({
     const isValid = formState.isValid
 
     const fetchBatches = useCallback(
-        async (courseId: any) => {
+        async (courseId: string) => {
             try {
-                const response = await api.get(`/bootcamp/batches/${courseId}`)
-                const batchData = response.data.data?.map((data: any) => {
+                const response = await api.get<{ data: Batch[] }>(`/bootcamp/batches/${courseId}`)
+                const batchData: BatchOption[] = response.data.data?.map((data: any) => {
                     return {
                         value: data.id,
                         label: data.name,
@@ -209,7 +189,7 @@ const BatchesInfo = ({
     )
 
     useEffect(() => {
-        fetchBatches(params.courseId)
+        fetchBatches(params?.courseId)
     }, [params.courseId])
 
     const fetchInstructorInfo = useCallback(
@@ -230,14 +210,17 @@ const BatchesInfo = ({
         },
         [setInstructorInfo, router]
     )
+
     useEffect(() => {
         fetchInstructorInfo(params.batchId)
     }, [isFormOpen, fetchInstructorInfo, params.batchId])
+
     useEffect(() => {
         if (params.batchId) {
             fetchInstructorInfo(params.batchId)
         }
     }, [params.batchId, router, fetchInstructorInfo])
+
     const batchDeleteHandler = async () => {
         try {
             await api.delete(`/batch/${params.batchId}`)
@@ -262,7 +245,7 @@ const BatchesInfo = ({
         }
         try {
             await api
-                .patch(`/batch/${params.batchId}`, convertedData)
+                .patch<Batch>(`/batch/${params.batchId}`, convertedData)
                 .then((res) => {
                     toast.success({
                         title: res.data.status,
@@ -270,13 +253,13 @@ const BatchesInfo = ({
                     })
                     const fetchBatchesInfo = async () => {
                         try {
-                            const response = await api.get(
+                            const response = await api.get<Batch>(
                                 `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`
                             )
                             setStudentData(response.data.modifiedStudentInfo)
 
                             //   }
-                        } catch (error) {}
+                        } catch (error) { }
                     }
                     fetchBatchesInfo()
                     fetchInstructorInfo(params.batchId)
@@ -288,6 +271,7 @@ const BatchesInfo = ({
             })
         }
     }
+
     useEffect(() => {
         const getBootCamp = async () => {
             await api
@@ -303,7 +287,7 @@ const BatchesInfo = ({
             if (debouncedValue) {
                 endpoint += `&searchTerm=${debouncedValue}`
             }
-            await api.get(endpoint).then((response) => {
+            await api.get<Batch>(endpoint).then((response) => {
                 setStudentData(response.data.modifiedStudentInfo)
                 setStoreStudentData(response.data.modifiedStudentInfo)
                 setStudents(response.data.modifiedStudentInfo)
@@ -322,7 +306,7 @@ const BatchesInfo = ({
             setLastPage,
             setPages,
             setTotalStudents,
-            debouncedValue, // Ensure searchTerm is included as a dependency
+            debouncedValue,
         ]
     )
 
@@ -330,18 +314,61 @@ const BatchesInfo = ({
         fetchStudentData(offset)
     }, [offset, position, fetchStudentData])
 
-    const handleSetSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearch(e.target.value)
-    }
+    // API functions for SearchBox
+    const fetchStudentSuggestions = useCallback(
+        async (query: string)=> {
+            try {
+                const endpoint = `/bootcamp/students/${params.courseId}?batch_id=${params.batchId}&searchTerm=${query}`
+                const response = await api.get<Batch>(endpoint)
 
-    const userIds = selectedRows.map((item: any) => item.userId)
+                // Transform student data to suggestions
+                return response.data.modifiedStudentInfo?.map((student: StudentDataPage) => ({
+                    ...student,
+                    id: student.userId,
+                    // Add any other fields you want to include in suggestions
+                })) || []
+            } catch (error) {
+                console.error('Error fetching student suggestions:', error)
+                return []
+            }
+        },
+        [params.courseId, params.batchId]
+    )
+
+    const performStudentSearch = useCallback(
+        async (query: string) => {
+            setSearch(query)
+            // The useEffect with debouncedValue will handle the actual search
+            return []
+        },
+        []
+    )
+
+    const loadDefaultStudents = useCallback(
+        async () => {
+            setSearch('')
+            fetchStudentData(0)
+            return []
+        },
+        [fetchStudentData]
+    )
+
+    const userIds = selectedRows.map((item: SelecteItem) => item.userId)
 
     return (
         <>
-            <BreadcrumbCmponent crumbs={crumbs} />
+            <Link
+                href={`/admin/courses/${params.courseId}/batches`}
+                className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
+            >
+                <ArrowLeft size={20} />
+                <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
+                    Back to Batches
+                </p>
+            </Link>
             <MaxWidthWrapper className="p-4 text-gray-600">
                 <div className="flex justify-between">
-                    <div className="w-1/2 flex flex-col items-start ">
+                    <div className="w-full flex flex-col items-start ">
                         <div className=" flex flex-col ">
                             <h1 className="capitalize text-start text-[30px] font-semibold">
                                 {studentData?.length > 0
@@ -539,191 +566,201 @@ const BatchesInfo = ({
                                 </div>
                             </div>
                         </div>
-                        <Input
-                            type="search"
-                            placeholder="Student Name, Email"
-                            className="w-1/2 my-12"
-                            onChange={handleSetSearch}
-                        />
-                    </div>
-                    <div className="flex m-4">
-                        <div className="flex items-center mx-4 text-sm">
-                            {selectedRows.length > 0 && (
-                                <>
-                                    <AlertDialogDemo
-                                        userId={userIds}
-                                        bootcampId={parseInt(params.courseId)}
-                                        title="Are you absolutely sure?"
-                                        description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
-                                        fetchStudentData={fetchStudentData}
-                                    />
-                                    <ComboboxStudent
-                                        batchData={allBatches}
-                                        bootcampId={params.courseId}
-                                        selectedRows={selectedRows}
-                                        fetchStudentData={fetchStudentData}
-                                    />
-                                </>
-                            )}
-                        </div>
-                        <div className="flex items-center mx-4 text-sm">
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <button
-                                        className="flex"
-                                        onClick={toggleForm}
-                                    >
-                                        <Pencil size={18} className="mx-1" />
-                                        Edit Batch
-                                    </button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Update Batch</DialogTitle>
-                                        <Form {...form}>
-                                            <form
-                                                onSubmit={form.handleSubmit(
-                                                    onSubmit
-                                                )}
-                                                className="space-y-8"
-                                            >
-                                                <FormField
-                                                    control={form.control}
-                                                    name="name"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>
-                                                                Batch Name
-                                                            </FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Batch Name"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="instructorEmail"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>
-                                                                Instructor Email
-                                                            </FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Instructor Email"
-                                                                    type="name"
-                                                                    {...field}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormField
-                                                    control={form.control}
-                                                    name="capEnrollment"
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormLabel>
-                                                                Cap Enrollment
-                                                            </FormLabel>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder="Cap Enrollment"
-                                                                    type="name"
-                                                                    {...field}
-                                                                    onChange={(
-                                                                        e
-                                                                    ) => {
-                                                                        // Prevent entering more than 6 digits
-                                                                        const value =
-                                                                            e
-                                                                                .target
-                                                                                .value
-                                                                        if (
-                                                                            value.length <=
-                                                                            6
-                                                                        ) {
-                                                                            field.onChange(
-                                                                                e
-                                                                            )
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                                <FormDescription>
-                                                    This form will Update the
-                                                    batch info
-                                                </FormDescription>
-                                                <div className="w-full flex flex-col items-end gap-y-5 ">
-                                                    <DialogClose asChild>
-                                                        <Button
-                                                            className="w-1/2"
-                                                            type="submit"
-                                                            disabled={
-                                                                !form.formState
-                                                                    .isValid
-                                                            }
-                                                        >
-                                                            Update batch
-                                                        </Button>
-                                                    </DialogClose>
-                                                </div>
-                                            </form>
-                                        </Form>
-                                    </DialogHeader>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-                        <div className="flex items-center gap-x-1 text-sm">
-                            <Trash2
-                                onClick={() => setDeleteModalOpen(true)}
-                                className="text-destructive cursor-pointer"
-                                size={20}
-                            ></Trash2>
-                            <span
-                                onClick={() => setDeleteModalOpen(true)}
-                                className=" cursor-pointer mr-2"
-                            >
-                                Delete
-                            </span>
-
-                            <DeleteConfirmationModal
-                                isOpen={isDeleteModalOpen}
-                                onClose={() => setDeleteModalOpen(false)}
-                                onConfirm={batchDeleteHandler}
-                                modalText="Type the batch name to confirm deletion"
-                                modalText2="Batch Name"
-                                input={true}
-                                buttonText="Delete Batch"
-                                instructorInfo={instructorsInfo}
-                            />
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button className=" gap-x-2 bg-success-dark opacity-75">
-                                        <Plus /> Add Students
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <AddStudentsModal
-                                    message={false}
-                                    id={+params.courseId || 0}
-                                    batch={true}
-                                    batchId={params.batchId}
-                                    fetchBatchesData={fetchStudentData}
-                                    setStudentData={setStudentDataTable}
-                                    studentData={studentDataTable}
+                        <div className='flex w-full justify-between items-center mt-4'>
+                            <div className="w-1/2">
+                                <SearchBox
+                                    placeholder="Search by name or email..."
+                                    fetchSuggestionsApi={fetchStudentSuggestions}
+                                    fetchSearchResultsApi={performStudentSearch}
+                                    defaultFetchApi={loadDefaultStudents}
+                                    getSuggestionLabel={(suggestion) => (
+                                        <div className="flex flex-col">
+                                            <span className="font-medium">{suggestion.name}</span>
+                                            <span className="text-xs text-muted-foreground">{suggestion.email}</span>
+                                        </div>
+                                    )}
+                                    inputWidth="w-full"
                                 />
-                            </Dialog>
+                            </div>
+                            <div className="flex items-center gap-x-4 text-sm">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <button
+                                            className="flex"
+                                            onClick={toggleForm}
+                                        >
+                                            <Pencil size={18} className="mx-1" />
+                                            Edit Batch
+                                        </button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Update Batch</DialogTitle>
+                                            <Form {...form}>
+                                                <form
+                                                    onSubmit={form.handleSubmit(
+                                                        onSubmit
+                                                    )}
+                                                    className="space-y-8"
+                                                >
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="name"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Batch Name
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="Batch Name"
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="instructorEmail"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Instructor Email
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="Instructor Email"
+                                                                        type="name"
+                                                                        {...field}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="capEnrollment"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>
+                                                                    Cap Enrollment
+                                                                </FormLabel>
+                                                                <FormControl>
+                                                                    <Input
+                                                                        placeholder="Cap Enrollment"
+                                                                        type="name"
+                                                                        {...field}
+                                                                        onChange={(
+                                                                            e
+                                                                        ) => {
+                                                                            // Prevent entering more than 6 digits
+                                                                            const value =
+                                                                                e
+                                                                                    .target
+                                                                                    .value
+                                                                            if (
+                                                                                value.length <=
+                                                                                6
+                                                                            ) {
+                                                                                field.onChange(
+                                                                                    e
+                                                                                )
+                                                                            }
+                                                                        }}
+                                                                    />
+                                                                </FormControl>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormDescription>
+                                                        This form will Update the
+                                                        batch info
+                                                    </FormDescription>
+                                                    <div className="w-full flex flex-col items-end gap-y-5 ">
+                                                        <DialogClose asChild>
+                                                            <Button
+                                                                className="w-1/2"
+                                                                type="submit"
+                                                                disabled={
+                                                                    !form.formState
+                                                                        .isValid
+                                                                }
+                                                            >
+                                                                Update batch
+                                                            </Button>
+                                                        </DialogClose>
+                                                    </div>
+                                                </form>
+                                            </Form>
+                                        </DialogHeader>
+                                    </DialogContent>
+                                </Dialog>
+                                <Trash2
+                                    onClick={() => setDeleteModalOpen(true)}
+                                    className="text-destructive cursor-pointer"
+                                    size={20}
+                                ></Trash2>
+                                <span
+                                    onClick={() => setDeleteModalOpen(true)}
+                                    className=" cursor-pointer mr-2"
+                                >
+                                    Delete
+                                </span>
+
+                                <DeleteConfirmationModal
+                                    isOpen={isDeleteModalOpen}
+                                    onClose={() => setDeleteModalOpen(false)}
+                                    onConfirm={batchDeleteHandler}
+                                    modalText="Type the batch name to confirm deletion"
+                                    modalText2="Batch Name"
+                                    input={true}
+                                    buttonText="Delete Batch"
+                                    instructorInfo={instructorsInfo}
+                                />
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button className=" gap-x-2">
+                                            <Plus /> Add Students
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogOverlay />
+                                    <AddStudentsModal
+                                        message={false}
+                                        id={+params.courseId || 0}
+                                        batch={true}
+                                        batchId={params.batchId}
+                                        fetchBatchesData={fetchStudentData}
+                                        setStudentData={setStudentDataTable}
+                                        studentData={studentDataTable}
+                                        modalType="both"
+                                    />
+                                </Dialog>
+                            </div>
+                        </div>
+                        <div className="flex">
+                            <div className="flex items-center mx-4 text-sm">
+                                {selectedRows.length > 0 && (
+                                    <>
+                                        <AlertDialogDemo
+                                            userId={userIds}
+                                            bootcampId={parseInt(params.courseId)}
+                                            title="Are you absolutely sure?"
+                                            description={`This action cannot be undone. This will permanently remove the ${selectedRows.length > 1 ? 'students' : 'student'} from the bootcamp`}
+                                            fetchStudentData={fetchStudentData}
+                                        />
+                                        <ComboboxStudent
+                                            batchData={allBatches}
+                                            bootcampId={params.courseId}
+                                            selectedRows={selectedRows}
+                                            fetchStudentData={fetchStudentData}
+                                        />
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -4,7 +4,7 @@
 import { toast } from '@/components/ui/use-toast'
 import { cn, difficultyColor } from '@/lib/utils'
 import { useLazyLoadedStudentData, useThemeStore } from '@/store/store'
-import { ChevronLeft, ChevronRight, Moon, Sun } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, Moon, Sun } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 import Image from 'next/image'
@@ -13,6 +13,7 @@ import useAssessmentResult from '@/hooks/useAssessmentResult'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import {AssessmentParams} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"
+import { SubmissionIdPage } from "@/app/student/_components/Skeletons"
 
 const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
     // State Variables
@@ -75,116 +76,7 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
     }
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-background">
-                <div className="text-left">
-                    <div className="mb-4 p-6">
-                        <Skeleton className="h-10 w-32" />
-                    </div>
-                </div>
-                <div className="max-w-4xl mx-auto p-6">
-                    {/* Header Skeleton */}
-                    <div className="mb-6 text-left">
-                        <Skeleton className="h-9 w-64 mb-2" />
-                        <Skeleton className="h-5 w-96" />
-                    </div>
-
-                    {/* Score Card Skeleton */}
-                    <div className="mb-8">
-                        <div className="p-6 rounded-lg border shadow-8dp bg-card">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <Skeleton className="h-8 w-48 mb-2" />
-                                    <Skeleton className="h-6 w-72" />
-                                </div>
-                                <div className="text-right">
-                                    <Skeleton className="w-20 h-20 rounded-full" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Coding Challenges Skeleton */}
-                    <div className="mb-8">
-                        <div className="mb-6">
-                            <Skeleton className="h-8 w-48 mb-2" />
-                            <div className="h-px bg-border"></div>
-                        </div>
-                        <div className="bg-card border border-border rounded-lg p-6 shadow-4dp">
-                            <div className="flex justify-between items-start mb-4">
-                                <Skeleton className="h-6 w-64" />
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-6 w-16 rounded-full" />
-                                    <Skeleton className="h-6 w-20 rounded-full" />
-                                </div>
-                            </div>
-                            <div className="space-y-2 mb-4">
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-4 w-12" />
-                                    <Skeleton className="h-4 w-20" />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-4 w-12" />
-                                    <Skeleton className="h-4 w-16" />
-                                </div>
-                            </div>
-                            <div className="flex justify-end">
-                                <Skeleton className="h-10 w-32" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* MCQ Skeleton */}
-                    <div className="mb-8">
-                        <div className="mb-6">
-                            <Skeleton className="h-8 w-56 mb-2" />
-                            <div className="h-px bg-border"></div>
-                        </div>
-                        <div className="bg-card border border-border rounded-lg p-6 shadow-4dp">
-                            <div className="flex justify-between items-start mb-4">
-                                <Skeleton className="h-6 w-32" />
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-6 w-20 rounded-full" />
-                                    <Skeleton className="h-6 w-16 rounded-full" />
-                                </div>
-                            </div>
-                            <div className="mb-4">
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-4 w-12" />
-                                    <Skeleton className="h-6 w-20" />
-                                </div>
-                            </div>
-                            <div className="flex justify-end">
-                                <Skeleton className="h-10 w-32" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Open-Ended Skeleton */}
-                    <div className="mb-8">
-                        <div className="mb-6">
-                            <Skeleton className="h-8 w-52 mb-2" />
-                            <div className="h-px bg-border"></div>
-                        </div>
-                        <div className="bg-card border border-border rounded-lg p-6 shadow-4dp">
-                            <div className="flex justify-between items-start mb-4">
-                                <Skeleton className="h-6 w-48" />
-                                <Skeleton className="h-6 w-24 rounded-full" />
-                            </div>
-                            <div className="mb-4">
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-4 w-16" />
-                                    <Skeleton className="h-4 w-12" />
-                                </div>
-                            </div>
-                            <div className="flex justify-end">
-                                <Skeleton className="h-10 w-32" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        )
+        return <SubmissionIdPage />
     }
 
     if (error) {
@@ -214,8 +106,9 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                     onClick={() => router.back()}
                     className="mb-6 text-primary hover:text-primary-dark"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-2" />
-                    Back
+                    {/* <ChevronLeft className="w-4 h-4 mr-2" />
+                    Back */}
+                     <X className="w-5 h-5" />
                 </Button>
                 <div className="bg-muted-light border border-border rounded-lg p-6 max-w-md mx-auto text-center">
                     <p className="text-muted-foreground">No assessment results found.</p>
@@ -525,8 +418,7 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                     onClick={() => router.back()}
                     className="inline-flex text-left w-full m-3 items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
                 >
-                    <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                    <span className="font-medium">Back to Assessment</span>
+                        <X className="w-5 h-5 mt-5 ml-4" />
                 </div>
                 <Button
           variant="ghost"

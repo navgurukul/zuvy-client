@@ -1,23 +1,25 @@
 'use client'
 
 // External imports
-import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
-import { Search, X } from 'lucide-react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { ArrowLeft, RefreshCw } from 'lucide-react'
 
 // Internal imports
-import { Input } from '@/components/ui/input'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
+import { Button } from '@/components/ui/button'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
-import useDebounce from '@/hooks/useDebounce'
 import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { fetchStudentAssessments } from '@/utils/admin'
 import { POSITION } from '@/utils/constant'
+import { SearchBox } from '@/utils/searchBox'
 
 type Props = {}
 
@@ -38,13 +40,20 @@ const Page = ({ params }: any) => {
     const searchParams = useSearchParams()
 
     const [assesmentData, setAssessmentData] = useState<any>()
-    const [searchInputValue, setSearchInputValue] = useState<string>('')
-    const [suggestions, setSuggestions] = useState<Suggestion[]>([])
-    const [showSuggestions, setShowSuggestions] = useState(false)
-    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+    const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
+    const [bootcampData, setBootcampData] = useState<any>()
+    const [passPercentage, setPassPercentage] = useState<number>(0)
+    const [selectedBatch, setSelectedBatch] = useState('All Batches')
 
-    const suggestionsRef = useRef<HTMLDivElement>(null)
-    const inputRef = useRef<HTMLInputElement>(null)
+    // Dummy batch data
+    const batchOptions = [
+        'All Batches',
+        'Full Stack Batch 2024-A',
+        'Full Stack Batch 2024-B',
+        'Data Science Batch 2024-A',
+        'UI/UX Design Batch 2024-A',
+        'Mobile Development Batch 2024-A'
+    ]
 
     const { isReattemptApproved } = getIsReattemptApproved()
     const position = useMemo(
@@ -57,106 +66,63 @@ const Page = ({ params }: any) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
 
-    // Get search query from URL
-    const searchQuery = searchParams.get('search') || ''
+    // API functions for the hook
+    const fetchSuggestionsApi = useCallback(async (query: string): Promise<Suggestion[]> => {
+        // if (!query.trim() || query.length < 2) {
+        //     return []
+        // }
+        const { assessments } = await fetchStudentAssessments(
+            params?.assessment_Id,
+            params?.courseId,
+            0, // Start from first page for suggestions
+            5, // Limit to 5 results for suggestions
+            query, // Use the search query
+            () => { }, // Empty function for setTotalPages
+            () => { }  // Empty function for setLastPage
+        )
 
-    // Debounced value for suggestions only
-    const debouncedInputValue = useDebounce(searchInputValue, 300)
+        return assessments
+            .map((student: any) => ({
+                id: student.id || student.studentId || student.student?.id || Math.random().toString(),
+                name: student.name || student.studentName || student.student?.name || '',
+                email: student.email || student.studentEmail || student.student?.email || ''
+            }))
+            .filter((suggestion: Suggestion) => suggestion.name && suggestion.email)
+    }, [params.assessment_Id, params.courseId])
 
-    const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
-    const [bootcampData, setBootcampData] = useState<any>()
-    const [passPercentage, setPassPercentage] = useState<number>(0)
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
+            params?.assessment_Id,
+            params?.courseId,
+            offset,
+            position,
+            query,
+            setTotalPages,
+            setLastPage
+        )
+        setDataTableAssessments(assessments)
+        setAssessmentData(moduleAssessment)
+        setPassPercentage(passPercentage)
+        setTotalStudents(moduleAssessment?.totalStudents)
+        return assessments
+    }, [params.assessment_Id, params.courseId, offset, position])
 
-    const crumbs = [
-        {
-            crumb: 'My Courses',
-            href: `/admin/courses`,
-            isLast: false,
-        },
-        {
-            crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: 'Submission - Assesments',
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: assesmentData?.title,
-            // href: '',
-            isLast: false,
-        },
-    ]
-
-    // Initialize search input with URL parameter
-    useEffect(() => {
-        setSearchInputValue(searchQuery)
-    }, [searchQuery])
-
-    // Fetch suggestions from API based on search query
-    const fetchSuggestionsFromAPI = useCallback(async (query: string) => {
-        if (!query.trim() || query.length < 2) {
-            setSuggestions([])
-            setShowSuggestions(false)
-            return
-        }
-
-        // Don't show suggestions if query is same as current search
-        if (query.trim() === searchQuery.trim()) {
-            setShowSuggestions(false)
-            return
-        }
-
-        setIsLoadingSuggestions(true)
-
-        try {
-            // Call the same API that fetches student assessments but with search query
-            const { assessments } = await fetchStudentAssessments(
-                params?.assessment_Id,
-                params?.courseId,
-                0, // Start from first page for suggestions
-                5, // Limit to 5 results for suggestions
-                query, // Use the search query
-                () => {}, // Empty function for setTotalPages
-                () => {}  // Empty function for setLastPage
-            )
-
-            const fetchedSuggestions = assessments
-                .map((student: any) => ({
-                    id: student.id || student.studentId || student.student?.id || Math.random().toString(),
-                    name: student.name || student.studentName || student.student?.name || '',
-                    email: student.email || student.studentEmail || student.student?.email || ''
-                }))
-                .filter((suggestion: Suggestion) => suggestion.name && suggestion.email) // Only show if both name and email exist
-
-            setSuggestions(fetchedSuggestions)
-
-            // Show suggestions if we have results and input is focused
-            if (fetchedSuggestions.length > 0 && document.activeElement === inputRef.current) {
-                setShowSuggestions(true)
-            } else {
-                setShowSuggestions(false)
-            }
-        } catch (error) {
-            console.error('Error fetching suggestions:', error)
-            setSuggestions([])
-            setShowSuggestions(false)
-        } finally {
-            setIsLoadingSuggestions(false)
-        }
-    }, [params.assessment_Id, params.courseId, searchQuery])
-
-    // Fetch suggestions when debounced input changes
-    useEffect(() => {
-        if (debouncedInputValue && debouncedInputValue.length >= 2) {
-            fetchSuggestionsFromAPI(debouncedInputValue)
-        } else {
-            setSuggestions([])
-            setShowSuggestions(false)
-        }
-    }, [debouncedInputValue, fetchSuggestionsFromAPI])
+    const defaultFetchApi = useCallback(async () => {
+        const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
+            params?.assessment_Id,
+            params?.courseId,
+            offset,
+            position,
+            '', // Empty search query
+            setTotalPages,
+            setLastPage
+        )
+        setDataTableAssessments(assessments)
+        setAssessmentData(moduleAssessment)
+        setPassPercentage(passPercentage)
+        setTotalStudents(moduleAssessment?.totalStudents)
+        return assessments
+    }, [params.assessment_Id, params.courseId, offset, position])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -170,12 +136,13 @@ const Page = ({ params }: any) => {
     const getStudentAssesmentDataHandler = useCallback(
         async (offset: number) => {
             if (offset >= 0) {
+                const currentSearchQuery = searchParams.get('search') || ''
                 const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
                     params?.assessment_Id,
                     params?.courseId,
                     offset,
                     position,
-                    searchQuery,
+                    currentSearchQuery,
                     setTotalPages,
                     setLastPage
                 )
@@ -185,14 +152,13 @@ const Page = ({ params }: any) => {
                 setTotalStudents(moduleAssessment?.totalStudents)
             }
         },
-        [params.assessment_Id, params.courseId, position, searchQuery]
+        [params.assessment_Id, params.courseId, position, searchParams]
     )
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 await Promise.all([
-                    // getStudentAssesmentDataHandler(offset),
                     getBootcampHandler(),
                 ])
             } catch (error) {
@@ -211,266 +177,105 @@ const Page = ({ params }: any) => {
         position,
         setLastPage,
         setTotalPages,
-        searchQuery])
-
-    // Handle input change
-    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        setSearchInputValue(value)
-
-        // If user manually clears the input (empty value)
-        if (value === '' && searchQuery !== '') {
-            // Clear the search immediately
-            const params = new URLSearchParams(searchParams.toString())
-            params.delete('search')
-            router.push(`${pathname}?${params.toString()}`)
-            setShowSuggestions(false)
-            setSuggestions([])
-            return
-        }
-
-        // Show suggestions if we have them and input has content
-        if (value.length >= 2 && suggestions.length > 0) {
-            setShowSuggestions(true)
-        } else if (value.length < 2) {
-            setShowSuggestions(false)
-            setSuggestions([])
-        }
-    }
-
-    // Handle search submission (Enter key)
-    const handleSearchSubmit = (query: string) => {
-        const searchTerm = query.trim()
-
-        // Update URL with search parameter
-        const params = new URLSearchParams(searchParams.toString())
-        if (searchTerm) {
-            params.set('search', searchTerm)
-        } else {
-            params.delete('search')
-        }
-
-        // Navigate and hide suggestions
-        router.push(`${pathname}?${params.toString()}`)
-        setShowSuggestions(false)
-        setSuggestions([])
-        inputRef.current?.blur()
-    }
-
-    // Handle Enter key press
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault()
-            handleSearchSubmit(searchInputValue)
-        } else if (e.key === 'Escape') {
-            setShowSuggestions(false)
-            inputRef.current?.blur()
-        }
-    }
-
-    // Handle suggestion click - always use name for search
-    const handleSuggestionClick = (suggestion: Suggestion) => {
-        const searchTerm = suggestion.name // Always use name for search
-        setSearchInputValue(searchTerm || '')
-        setShowSuggestions(false)
-        setSuggestions([])
-
-        // Update URL and trigger search
-        const params = new URLSearchParams(searchParams.toString())
-        if (searchTerm?.trim()) {
-            params.set('search', searchTerm.trim())
-        } else {
-            params.delete('search')
-        }
-
-        // Navigate to update URL
-        router.push(`${pathname}?${params.toString()}`)
-
-        // Blur input
-        inputRef.current?.blur()
-    }
-
-    // Handle clear search
-    const handleClearSearch = () => {
-        setSearchInputValue('')
-        setShowSuggestions(false)
-        setSuggestions([])
-
-        // Clear URL search parameter
-        const params = new URLSearchParams(searchParams.toString())
-        params.delete('search')
-
-        router.push(`${pathname}?${params.toString()}`)
-        inputRef.current?.focus()
-    }
-
-    // Handle input focus
-    const handleInputFocus = () => {
-        // Show suggestions if we have them and input has content
-        if (searchInputValue.length >= 2 && suggestions.length > 0) {
-            setShowSuggestions(true)
-        } else if (searchInputValue.length >= 2) {
-            // Fetch suggestions from API if input has content but no suggestions
-            fetchSuggestionsFromAPI(searchInputValue)
-        }
-    }
-
-    // Handle input blur - but with a small delay to allow suggestion clicks
-    const handleInputBlur = () => {
-        // Delay hiding suggestions to allow for suggestion clicks
-        setTimeout(() => {
-            setShowSuggestions(false)
-        }, 150)
-    }
-
-    // Handle click outside to close suggestions
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                suggestionsRef.current &&
-                !suggestionsRef.current.contains(event.target as Node) &&
-                inputRef.current &&
-                !inputRef.current.contains(event.target as Node)
-            ) {
-                setShowSuggestions(false)
-            }
-        }
-
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
-
+        searchParams.get('search')])
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
-            <MaxWidthWrapper className="p-4 ">
-                <div className="flex flex-col gap-y-4">
-                    <h1 className="text-start text-xl font-bold capitalize text-gray-700">
-                        {assesmentData?.title}
-                    </h1>
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
+                <Button
+                    variant="ghost"
+                    onClick={() => router.back()}
+                    className="hover:bg-transparent hover:text-primary transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Course Submissions
+                </Button>
+            </div>
 
-                    {
-                        <div className="text-start flex gap-x-3">
-                            <div className="p-4 rounded-lg shadow-md ">
-                                <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalStudents}
-                                </h1>
-                                <p className="text-gray-500 ">Total Students</p>
+            {/* Assessment Info Card */}
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                <CardHeader className="bg-muted">
+                    <CardTitle className="text-2xl text-gray-800 text-left">
+                        {assesmentData?.title || 'Loading...'}
+                    </CardTitle>
+
+                </CardHeader>
+                <CardContent className="bg-muted">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                            <div className="text-left">
+                                <div className="font-medium text-muted-foreground">Total Submissions:</div>
+                                <div className="text-lg font-semibold">{assesmentData?.totalSubmitedStudents || 0}</div>
                             </div>
-                            <div className="p-4 rounded-lg shadow-md ">
-                                <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalSubmitedStudents}
-                                </h1>
-                                <p className="text-gray-500 ">
-                                    Submissions Received
-                                </p>
+
+                            
+
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
+                                <div className="text-xl font-semibold text-gray-900">Assessments</div>
                             </div>
-                            <div className="p-4 rounded-lg shadow-md">
-                                <h1 className="text-gray-600 font-semibold text-xl">
-                                    {(
-                                        assesmentData?.totalStudents -
-                                        assesmentData?.totalSubmitedStudents
-                                    ).toString()}
-                                </h1>
-                                <p className="text-gray-500 ">
-                                    Not Yet Submitted
-                                </p>
+
+                            <div className="text-left">
+                                <div className="text-sm text-gray-600 mb-1">Course ID:</div>
+                                <div className="text-xl font-semibold text-gray-900">{params.courseId}</div>
                             </div>
-                            <div className="p-4 rounded-lg shadow-md ">
-                                <h1 className="text-gray-600 font-semibold text-xl">
-                                    {passPercentage}%
-                                </h1>
-                                <p className="text-gray-500 ">
-                                    Pass Percentage
-                                </p>
-                            </div>
-                            <div className="p-4 rounded-lg shadow-md ">
-                                <h1 className="text-gray-600 font-semibold text-xl">
-                                    {assesmentData?.totalQualifiedStudents}
-                                </h1>
-                                <p className="text-gray-500 ">
-                                    Total Qualified Students
-                                </p>
-                            </div>
-                        </div>
-                    }
-                    <div className="relative w-1/3 my-6">
-                        <div className="relative">
-                            <Input
-                                ref={inputRef}
-                                placeholder="Search by name or email"
-                                className="input-with-icon pl-8 pr-8"
-                                value={searchInputValue}
-                                onChange={handleSearchInputChange}
-                                onKeyDown={handleKeyDown}
-                                onFocus={handleInputFocus}
-                                onBlur={handleInputBlur}
-                            />
-                            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                                <Search className="text-gray-400" size={20} />
-                            </div>
-                            {(searchInputValue || searchQuery) && (
-                                <button
-                                    onClick={handleClearSearch}
-                                    className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
+                            <div className="text-left">
+                                <label className="font-medium text-muted-foreground">Batch Filter</label>
+                                <Select
+                                    value={selectedBatch}
+                                    onValueChange={setSelectedBatch}
                                 >
-                                    <X size={16} />
-                                </button>
-                            )}
-                        </div>
+                                    <SelectTrigger className="w-full mt-1">
+                                        <SelectValue placeholder="All Batches" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Batches</SelectItem>
+                                        {batchOptions.map((batch, index) => (
+                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
+                                        ))}
+                                    </SelectContent>
 
-                        {/* Suggestions Dropdown */}
-                        {showSuggestions && (
-                            <div
-                                ref={suggestionsRef}
-                                className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto mt-1"
-                            >
-                                {isLoadingSuggestions ? (
-                                    <div className="p-3 text-center text-gray-500">
-                                        <div className="flex items-center justify-center space-x-2">
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
-                                            <span>Loading suggestions...</span>
-                                        </div>
-                                    </div>
-                                ) :
-                                    suggestions.length > 0 ? (
-                                        suggestions.map((suggestion) => (
-                                            <button
-                                                key={suggestion.id}
-                                                onMouseDown={(e) => {
-                                                    // Prevent input blur
-                                                    e.preventDefault()
-                                                    handleSuggestionClick(suggestion)
-                                                }}
-                                                className="w-full text-left px-4 py-2 hover:bg-gray-100 border-b border-gray-100 last:border-b-0 focus:outline-none focus:bg-gray-100 transition-colors"
-                                            >
-                                                <div className="font-medium text-sm">
-                                                    {suggestion.name}
-                                                </div>
-                                                <div className="text-xs text-gray-500 mt-1">
-                                                    {suggestion.email}
-                                                </div>
-                                            </button>
-                                        ))
-                                    ) : searchInputValue.length >= 2 && !isLoadingSuggestions ? (
-                                        <div className="p-3 text-center text-gray-500">
-                                            No matches found for {searchInputValue}
-                                        </div>
-                                    ) : null}
+                                </Select>
+                            </div>
+                        </div>
+                </CardContent>
+            </Card>
+            <Card className="bg-muted">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl text-gray-800">
+                            Student Submissions
+                        </CardTitle>
+                    </div>
+                </CardHeader>
+                <div className="relative w-1/3 p-4">
+                    <SearchBox
+                        placeholder="Search by name or email"
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(s) => (
+                            <div>
+                                <div className="font-medium">{s.name}</div>
+                                <div className="text-sm text-gray-500">{s.email}</div>
                             </div>
                         )}
-                    </div>
-                    <DataTable data={dataTableAssesment} columns={columns} />
-                    <DataTablePagination
-                        totalStudents={totalStudents}
-                        pages={totalPages}
-                        lastPage={lastPage}
-                        fetchStudentData={getStudentAssesmentDataHandler}
+                        inputWidth=""
                     />
                 </div>
-            </MaxWidthWrapper>
+                <CardContent className="p-0">
+                    <DataTable data={dataTableAssesment} columns={columns} />
+                </CardContent>
+            </Card>
+            <div className="p-6 border-t">
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    pages={totalPages}
+                    lastPage={lastPage}
+                    fetchStudentData={getStudentAssesmentDataHandler}
+                />
+            </div>
         </>
     )
 }
 
-export default Page 
+export default Page

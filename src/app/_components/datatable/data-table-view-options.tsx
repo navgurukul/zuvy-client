@@ -22,7 +22,7 @@ export function DataTableViewOptions<TData>({
       <DropdownMenuTrigger asChild>
         <Button
           size="sm"
-          className="ml-auto hidden h-8 lg:flex text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]"
+          className="ml-auto hidden h-8 lg:flex text-gray-600 border border-input bg-background hover:bg-muted"
         >
           <View className="mr-2 h-4 w-4" />
           View

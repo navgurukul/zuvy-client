@@ -71,27 +71,31 @@ const DropzoneforMcq = ({
         onDrop,
     })
     return (
-        <div {...getRootProps({ className: className })}>
+        <div 
+            {...getRootProps({ 
+                className: `${className} w-full border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary transition-colors` 
+            })}
+        >
             <input {...getInputProps()} />
             {isDragActive ? (
-                <div className="">
-                    <p>Drop the files here ...</p>
+                <div className="min-h-[300px] flex items-center justify-center">
+                    <p className="text-primary font-medium">Drop the files here ...</p>
                 </div>
             ) : (
-                <div className="p-2 gap-y-4 flex flex-col justify-center items-center w-full h-full text-[rgb(81,134,114)] ">
-                    <Upload className="mb-[20px]" />
-                    <p className="mx-3 font-semibold">Upload Or Drag File</p>
-                    <p className="text-gray-400">.csv files are supported</p>
+                <div className="min-h-[300px] gap-y-4 flex flex-col justify-center items-center  w-full h-full text-primary">
+                    <Upload className="mb-[20px]" size={38} />
+                    <p className="mx-3 font-semibold text-lg">Upload Or Drag File</p>
+                    <p className="text-muted-foreground">.csv files are supported</p>
                 </div>
             )}
 
             {fileName && (
-                <div className="flex flex-col items-start mt-5 w-full gap-y-5 border border-gray-300 p-3 rounded-lg">
+                <div className="flex flex-col items-start mt-5 w-full gap-y-5 border border-border p-3 rounded-lg bg-background">
                     <div className="w-full flex items-center justify-between">
                         <h2 className="font-bold">{fileName}</h2>
                         <X
                             size={20}
-                            className="text-gray-400 cursor-pointer"
+                            className="text-gray-400 cursor-pointer hover:text-destructive"
                             onClick={removeFile}
                         />
                     </div>
@@ -101,10 +105,9 @@ const DropzoneforMcq = ({
                                 Upload Status
                             </h3>
                             <div className="flex items-center justify-start space-x-2">
-                                <div className="w-2 h-2 rounded-full bg-secondary" />
-                                <span className="text-black">
-                                    {mcqData?.quizzes?.length || 0} records
-                                    uploaded
+                                <div className="w-2 h-2 rounded-full bg-success" />
+                                <span className="text-foreground">
+                                    {mcqData?.quizzes?.length || 0} records uploaded
                                 </span>
                             </div>
                         </div>

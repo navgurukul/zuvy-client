@@ -28,14 +28,8 @@ import { Toolbar } from './Toolbar'
 import './remirror-editor.css'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useThemeStore } from '@/store/store'
+import {RemirrorTextEditorProps} from "@/components/remirror-editor/componentRemirrorType"
 
-interface RemirrorTextEditorProps {
-    initialContent: any
-    setInitialContent: (content: any) => void
-    preview?: boolean
-    hideBorder?: boolean
-    assignmentSide?: boolean
-}
 
 // Create empty content structure
 const createEmptyContent = () => {

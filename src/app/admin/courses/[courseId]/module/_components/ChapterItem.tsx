@@ -19,7 +19,8 @@ import { toast } from '@/components/ui/use-toast'
 import { useParams, useRouter } from 'next/navigation'
 import { getTopicId } from '@/store/store'
 import { Reorder, useDragControls } from 'framer-motion'
-import {ChapterItems} from "@/app/admin/courses/[courseId]/module/_components/ModuleComponentType"
+import { ChapterItems } from '@/app/admin/courses/[courseId]/module/_components/ModuleComponentType'
+import { Button } from '@/components/ui/button'
 
 function ChapterItem({
     title,
@@ -38,7 +39,7 @@ function ChapterItem({
     onDragStart,
     onDragEnd,
     showBorderFlash,
-}:ChapterItems) {
+}: ChapterItems) {
     // states and variables
     const { courseId } = useParams()
     const router = useRouter()
@@ -51,28 +52,28 @@ function ChapterItem({
     const setTopicIcon = () => {
         switch (topicId) {
             case 1:
-                return <Video />
+                return <Video size={20} />
             case 2:
-                return <BookOpenText />
+                return <BookOpenText size={20} />
             case 3:
-                return <SquareCode />
+                return <SquareCode size={20} />
             case 4:
-                return <FileQuestion />
+                return <FileQuestion size={20} />
             case 5:
-                return <PencilLine />
+                return <PencilLine size={20} />
             case 6:
-                return <BookOpenCheck />
+                return <BookOpenCheck size={20} />
             case 8:
-                return <Play />
+                return <Play size={20} />
             default:
-                return <StickyNote />
+                return <StickyNote size={20} />
         }
     }
 
     const setActiveChapterItem = () => {
         return activeChapter === chapterId
-            ? 'bg-[rgb(81,134,114)]/50 text-gray-700'
-            : 'text-black hover:bg-[rgb(81,134,114)]/20'
+            ? 'bg-blue-50 border border-blue-600 text-blue-700'
+            : 'bg-white hover:bg-gray-50 border border-gray-200'
     }
 
     const handleClick = () => {
@@ -131,22 +132,6 @@ function ChapterItem({
         setDeleteModalOpen(true)
     }
 
-    // const handleDragStart = () => {
-    //     setIsBeingDragged(true)
-    //     onDragStart()
-    //     // Don't show any toast during drag
-    // }
-
-    // const handleDragEnd = () => {
-    //     // Add small delay to prevent click after drag
-    //     // setTimeout(() => {
-    //     //     setIsBeingDragged(false)
-    //     // }, 300)
-
-    //     setIsBeingDragged(false)
-    //     onDragEnd()
-    // }
-
     return (
         <Reorder.Item
             value={chapterData.find((c: any) => c.chapterId === chapterId)}
@@ -162,8 +147,8 @@ function ChapterItem({
             }}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
-            transition={{ 
-                type: "spring",
+            transition={{
+                type: 'spring',
                 stiffness: 150,
                 damping: 28,
                 mass: 0.4,
@@ -177,15 +162,15 @@ function ChapterItem({
             }}
         >
             <div ref={chapterId === activeChapter ? activeChapterRef : null}>
-                <div
+                <div                  
                     className={cn(
-                        'flex rounded-md p-3  my-1 cursor-pointer justify-between items-center select-none transition-all duration-200',
+                        'p-3 rounded-lg cursor-pointer transition-colors',
                         setActiveChapterItem(),
                         isBeingDragged
                             ? 'opacity-90 cursor-grabbing'
                             : 'opacity-100 cursor-pointer',
-                        showBorderFlash 
-                            ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash' 
+                        showBorderFlash
+                            ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash'
                             : ''
                     )}
                     onClick={handleClick}
@@ -195,36 +180,44 @@ function ChapterItem({
                         WebkitUserSelect: 'none',
                     }}
                 >
-                    <div className="flex gap-2 capitalize">
-                        <p>{setTopicIcon()} </p>
-                        <p>{title}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Trash2
-                            onClick={(e) => {
-                                if (!isBeingDragged && !isDragging) {
-                                    handleDeleteModal()
-                                }
-                            }}
-                            className="hover:text-destructive cursor-pointer transition-colors"
-                            size={15}
-                            style={{
-                                pointerEvents: isBeingDragged ? 'none' : 'auto',
-                            }}
-                        />
-                        <GripVertical
-                            style={{
-                                cursor: isBeingDragged ? 'grabbing' : 'grab',
-                                pointerEvents: 'auto',
-                            }}
-                            className="text-gray-600 hover:text-gray-600 transition-colors"
-                            onPointerDown={(e) => {
-                                e.preventDefault()
-                                e.stopPropagation()
-                                dragControls.start(e)
-                            }}
-                            size={15}
-                        />
+                    <div className="flex justify-between items-center">
+                        <div className="flex gap-2">
+                            <p className="text-sm">{setTopicIcon()} </p>
+                            <h5 className="font-medium text-start text-sm mb-1">
+                                {title}
+                            </h5>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Trash2
+                                onClick={(e) => {
+                                    if (!isBeingDragged && !isDragging) {
+                                        handleDeleteModal()
+                                    }
+                                }}
+                                className="hover:text-destructive cursor-pointer transition-colors"
+                                size={15}
+                                style={{
+                                    pointerEvents: isBeingDragged
+                                        ? 'none'
+                                        : 'auto',
+                                }}
+                            />
+                            <GripVertical
+                                style={{
+                                    cursor: isBeingDragged
+                                        ? 'grabbing'
+                                        : 'grab',
+                                    pointerEvents: 'auto',
+                                }}
+                                className="text-gray-600 hover:text-gray-600 transition-colors"
+                                onPointerDown={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    dragControls.start(e)
+                                }}
+                                size={15}
+                            />
+                        </div>
                     </div>
                 </div>
                 <DeleteConfirmationModal

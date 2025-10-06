@@ -50,7 +50,7 @@ export interface DataTableViewOptionsProps<TData> {
 
 export interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+    data: any
     setSelectedRows?: any
     mcqSide?: boolean
     assignStudents?: string

@@ -230,6 +230,7 @@ const EditMcqForm = ({
                             title: 'Success',
                             description: res.data.message,
                         })
+                        closeModal() // Close modal after success
                     })
 
                 setIsVariantAdded(false)
@@ -269,6 +270,7 @@ const EditMcqForm = ({
                             className:
                                 'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                         })
+                        closeModal() // Close modal after success
                     })
                 await refetch()
             } catch (error: any) {
@@ -313,7 +315,7 @@ const EditMcqForm = ({
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmitHandler)}
-                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center text-gray-600"
+                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center text-foreground"
             >
                 <FormField
                     control={form.control}
@@ -340,7 +342,7 @@ const EditMcqForm = ({
                                                     <FormControl className="">
                                                         <RadioGroupItem
                                                             value={difficulty}
-                                                            className="text-[rgb(81,134,114)] border-black"
+                                                            className="text-primary border-primary"
                                                         />
                                                     </FormControl>
                                                     <FormLabel className="font-normal text-md ">
@@ -423,7 +425,7 @@ const EditMcqForm = ({
                                     key={field.id}
                                     className={`${
                                         activeVariantIndex === index
-                                            ? 'border-b-4 border-[rgb(81,134,114)] text-[rgb(81,134,114)] text-md'
+                                            ? 'border-b-4 border-primary text-primary text-md'
                                             : ''
                                     } rounded-none`}
                                     variant="ghost"
@@ -505,7 +507,7 @@ const EditMcqForm = ({
                                                         >
                                                             <FormControl>
                                                                 <RadioGroupItem
-                                                                    className="text-black border-black"
+                                                                    className="text-primary border-primary"
                                                                     value={optionIndex.toString()}
                                                                 />
                                                             </FormControl>
@@ -564,7 +566,7 @@ const EditMcqForm = ({
                                             onClick={() =>
                                                 appendOption({ optionText: '' })
                                             }
-                                            className="text-left text-[rgb(81,134,114)] font-semibold text-md"
+                                            className="text-left text-primary font-semibold text-md"
                                         >
                                             + Add Option
                                         </Button>
@@ -611,7 +613,7 @@ const EditMcqForm = ({
                         </>
                     )}
                     <Button 
-                        className="bg-success-dark opacity-75" 
+                        className="bg-primary hover:bg-primary-dark" 
                         type="submit"
                         disabled={!isContentValid} // Disable button if content is invalid
                     >

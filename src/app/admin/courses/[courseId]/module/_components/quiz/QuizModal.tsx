@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { isCodeQuestion, renderQuestionPreview } from '@/utils/quizHelpers'
-
+import {Tag} from "@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType"
 type Props = {}
 
 const QuizModal = ({
@@ -36,22 +36,27 @@ const QuizModal = ({
         }
     }
     
-    const filteredTag = tags?.filter((tag: any) => tag.id == data.tagId)
+    const filteredTag = tags?.filter((tag:Tag) => tag.id == data.tagId)
     const question = data?.quizVariants[0]?.question
     const hasCodeBlock = isCodeQuestion(question)
 
     return (
-        <div className="flex w-full justify-between py-3 items-center border-b h-30 border-gray-200">
+        <div className="flex w-full justify-between py-4 px-8 items-center h-30 rounded-lg border border-gray-200 bg-white mb-4">
             <div className="flex flex-col gap-2 w-full">
                 <div className="flex flex-col gap-2 w-full">
                     <div className="font-semibold flex justify-between w-full">
                         <div className="flex items-center gap-2 flex-wrap">
                             {/* Question Text */}
-                            <span className={`text-gray-600 text-[16px] ${hasCodeBlock ? 'font-mono text-sm' : ''}`}>
+                            {/* <span className={`text-gray-600 text-[16px] ${hasCodeBlock ? 'font-mono text-sm' : ''}`}>
                                 {renderQuestionPreview(question, {
                                     textLength: 40,
                                 })}
-                            </span>
+                            </span> */}
+                            <h2 className="font-bold text-[15px] text-gray-600">
+                                {renderQuestionPreview(question, {
+                                    textLength: 40,
+                                })}
+                            </h2>
                         </div>
                         {/* {ellipsis(data?.quizVariants[0]?.question, 40)} */}
                         <div className="mr-4 space-x-2 ">
@@ -71,8 +76,8 @@ const QuizModal = ({
                     </div>            
                     <Dialog>
                         <DialogTrigger asChild>
-                            <p className=" text-left font-bold text-sm  text-[#518672] cursor-pointer">
-                                View Description
+                            <p className=" text-left font-bold text-sm text-primary cursor-pointer">
+                                View Full Description
                             </p>
                         </DialogTrigger>
                         <DialogOverlay />

@@ -43,7 +43,7 @@ export type ChapterItems={
 
 
 // ChapterModal
-export interface ChapterModalPropa{
+export interface ChapterModalProps{
  fetchChapters: () => void
     newChapterOrder: number
     courseId: any
@@ -51,8 +51,6 @@ export interface ChapterModalPropa{
     scrollToBottom: () => void
     onClose: () => void
 }
-
-
 
 
 // CodingQuestionCard
@@ -68,17 +66,6 @@ export interface QuestionCardProps {
     onSolveChallenge: (id: number) => void
 }
 
-export interface questionDetails{
-    id: any
-    title: string
-    description: string
-    difficulty: string
-    constraints?: string
-    testCases?: string
-    examples: { input: number[]; output: number }
-}
-
-
 // CreateLiveClass
 export type CreateSessionDialogProps = {
     fetchingChapters: () => void
@@ -92,14 +79,6 @@ export type ExistingLiveClassProps = {
     onClose: () => void;
 };
 
-
-
-export interface questionDetails{
-    title: string
-    description: string
-    constraints?: string
-    examples: { input: number[]; output: number }
-}
 
 export interface IDEInput{
     parameterName: string
@@ -125,6 +104,21 @@ export interface IDEProps {
     getAssessmentData?: any
     runCodeLanguageId?: number
     runSourceCode?: string
+}
+
+
+export interface IDEInput{
+    parameterName: string
+    parameterType: string
+    parameterValue: [] | {}
+}
+export interface questionDetails{
+    title: string
+    id?: number;
+    difficulty?: string;
+    description: string
+    constraints?: string
+    examples: { input: number[]; output: number }
 }
 
 

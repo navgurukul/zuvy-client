@@ -29,8 +29,10 @@ import {
 import { getBatchData, getIsRowSelected } from '@/store/store'
 import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
 import AddLiveClasstoChapter from '@/app/admin/courses/[courseId]/module/_components/AddLiveClasstoChapter'
-import {DataTableProps,StudentData} from "@/app/_components/datatable/componentDatatable"
-
+import {
+    DataTableProps,
+    StudentData,
+} from '@/app/_components/datatable/componentDatatable'
 
 export function DataTable<TData, TValue>({
     columns,
@@ -95,7 +97,7 @@ export function DataTable<TData, TValue>({
                     )}
                 </div>
             )}
-        
+
             {!assignStudents && (
                 <div className="flex items-center justify-between mb-2">
                     <div>{customTopBar}</div>
@@ -104,7 +106,7 @@ export function DataTable<TData, TValue>({
                     </div>
                 </div>
             )}
-            <div className="rounded-md border text-gray-600">
+            <div className="rounded-md border">
                 <Table>
                     <TableHeader className={assignStudents && 'hidden'}>
                         {table.getHeaderGroups().map((headerGroup) => (

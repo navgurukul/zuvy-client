@@ -40,6 +40,7 @@ import{PublishData,PublishAssessmentDialogs} from '@/app/admin/courses/[courseId
 import { Badge } from '@/components/ui/badge'
 import {SettingsAssessmentProps} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 import PublishAssessmentDialog from '../PublishDialog'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     selectedCodingQuesIds,
@@ -60,7 +61,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     setIsNewQuestionAdded,
     setChapterTitle,
 }) => {
-    const { chapterID } = useParams()
+    const { courseId, moduleId, chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
     const mcqMax = selectedQuizQuesIds.length
     const [codingWeightageDisabled, setCodingWeightageDisabled] =
@@ -68,7 +69,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const [mcqsWeightageDisabled, setMcqsWeightageDisabled] = useState(false)
     const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false); // Added state for dialog
     const [currentAssessmentStatus, setCurrentAssessmentStatus] = useState(content?.currentState);
-
+    const router = useRouter()
+    
     useEffect(() => {
         setCurrentAssessmentStatus(content?.currentState);
     }, [content?.currentState]);
@@ -561,12 +563,17 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
         }
     }, [selectCodingDifficultyCount, selectQuizDifficultyCount])
 
+    const backToAssessment = () => {
+        setQuestionType('coding')
+        router.push(`/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterID}`)
+    }    
+
     return (
         <ScrollArea className="h-screen pb-24 pr-10">
             <ScrollBar orientation="vertical" className="" />
-            <main className="pb-6 w-full  bg-white text-left">
+            <main className="pb-6 w-full bg-card text-left">
                 <div
-                    onClick={() => setQuestionType('coding')}
+                    onClick={backToAssessment}
                     className="flex items-center mb-6 cursor-pointer box-border"
                 >
                     <ChevronLeft className="w-4 h-4 mr-2 box-border text-gray-600" />

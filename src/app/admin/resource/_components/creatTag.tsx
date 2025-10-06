@@ -21,7 +21,7 @@ const CreatTag: React.FC<newTopicDialogProps> = ({
     handleCreateTopic,
 }) => {
     return (
-        <DialogContent className="text-gray-600">
+        <DialogContent className="text-foreground">
             <DialogHeader>
                 <DialogTitle>New Topic</DialogTitle>
                 <div className="py-4">
@@ -38,7 +38,7 @@ const CreatTag: React.FC<newTopicDialogProps> = ({
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
                     <Button
-                        className="bg-success-dark opacity-75"
+                        className="bg-primary hover:bg-primary-dark shadow-4dp"
                         onClick={() => handleCreateTopic()}
                         // className={styles.createCourseBtnDialog}
                     >

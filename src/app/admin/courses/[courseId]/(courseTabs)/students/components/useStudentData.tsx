@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { getBatchData } from '@/store/store'
-import useDebounce from '@/hooks/useDebounce'
 import { getStoreStudentDataNew } from '@/store/store'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { api } from '@/utils/axios.config'
 import { POSITION, OFFSET } from '@/utils/constant'
 
 export const useStudentData = (courseId: any) => {
@@ -36,57 +34,41 @@ export const useStudentData = (courseId: any) => {
         const page = searchParams.get('page');
         return page ? parseInt(page) : OFFSET;
     }, [searchParams]);
-    const [internalSearch, setInternalSearch] = useState('') // for suggestions
-    const [suggestions, setSuggestions] = useState<any[]>([]) // separate state for suggestions
-    const [isInitialized, setIsInitialized] = useState(false) // Track if we've initialized from URL
-    const debouncedInternalSearch = useDebounce(internalSearch, 300)
 
-    // Clear search immediately when courseId changes
+    // Clear data immediately when courseId changes
     useEffect(() => {
         if (prevCourseId.current !== null && prevCourseId.current !== courseId) {
             // Course changed - force clear everything
             setSearch('')
-            setInternalSearch('')
-            setSuggestions([])
             setOffset(0)
             setCurrentPage(1)
             setStudents([]) // Clear students data immediately
             setTotalPages(0)
             setTotalStudents(0)
-            setIsInitialized(false) // Reset initialization flag
-            
-            // Clear URL immediately
-            const currentUrl = new URL(window.location.href)
-            currentUrl.searchParams.delete('search')
-            window.history.replaceState({}, '', currentUrl.toString())
         }
         prevCourseId.current = courseId
-    }, [courseId, setStudents, setTotalPages, setTotalStudents, setSearch, setInternalSearch, setOffset, setCurrentPage])
+    }, [courseId, setStudents, setTotalPages, setTotalStudents, setSearch, setOffset, setCurrentPage])
 
-    // Initialize search from URL params first
+    // Fetch data when courseId is ready
     useEffect(() => {
-        if (courseId !== undefined && !isInitialized) {
-            const searchQuery = searchParams.get('search') || ''
-            setSearch(searchQuery)
-            setInternalSearch(searchQuery)
-            setIsInitialized(true)
-        }
-    }, [courseId, searchParams, isInitialized, setSearch])
-
-    // Fetch data when courseId and search are ready
-    useEffect(() => {
-        if (courseId !== undefined && isInitialized) {
+        if (courseId !== undefined) {
+            // Get search from URL params
+            const urlSearchQuery = searchParams.get('search') || ''
+            
             // Clear existing data first
             setStudents([])
             setTotalPages(0)
             setTotalStudents(0)
             
-            // Then fetch new data with the correct search term
+            // Set the search state from URL
+            setSearch(urlSearchQuery)
+            
+            // Then fetch new data with search if present
             fetchStudentsHandler({
                 courseId,
                 limit,
                 offset: 0, // Always start from 0 when initializing
-                searchTerm: search, // Use the search term from URL
+                searchTerm: urlSearchQuery, // Use search from URL
                 setLoading,
                 setStudents,
                 setTotalPages,
@@ -95,28 +77,7 @@ export const useStudentData = (courseId: any) => {
                 showError: false,
             })
         }
-    }, [courseId, isInitialized, search, limit, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
-
-    // Fetch suggestions separately from main data
-    useEffect(() => {
-        if (debouncedInternalSearch.trim() && courseId) {
-            fetchSuggestions(debouncedInternalSearch.trim())
-        } else {
-            setSuggestions([])
-        }
-    }, [debouncedInternalSearch, courseId])
-
-    const fetchSuggestions = useCallback(async (searchTerm: string) => {
-        try {
-            const response = await api.get(
-                `/bootcamp/students/${courseId}?&searchTerm=${searchTerm}`
-            )
-            setSuggestions(response.data.modifiedStudentInfo || [])
-        } catch (error) {
-            console.error('Error fetching suggestions:', error)
-            setSuggestions([])
-        }
-    }, [courseId])
+    }, [courseId, limit, searchParams, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage, setSearch])
 
     const fetchData = useCallback(() => {
         fetchStudentsHandler({
@@ -162,28 +123,6 @@ export const useStudentData = (courseId: any) => {
         setOffset(0)
     }, [])
 
-    const handleSetSearch = useCallback((e: React.ChangeEvent<HTMLInputElement> | string) => {
-        const value = typeof e === 'string' ? e : e.target.value
-        setInternalSearch(value)
-    }, [])
-
-    const commitSearch = useCallback((value: string) => {
-        setSearch(value)
-        // Only reset to page 1 if we're actually searching, not clearing
-        if (value.trim()) {
-            setOffset(0)
-            setCurrentPage(1)
-        }
-
-        const params = new URLSearchParams(window.location.search)
-        if (value) {
-            params.set('search', value)
-        } else {
-            params.delete('search')
-        }
-        router.replace(`?${params.toString()}`)
-    }, [setSearch, setOffset, setCurrentPage, router])
-
     // Function for DataTablePagination component
     const fetchStudentData = useCallback((offsetValue: number) => {
         fetchStudentsHandler({
@@ -209,7 +148,6 @@ export const useStudentData = (courseId: any) => {
         limit,
         search,
         batchData,
-        suggestions, // return suggestions instead of students for autocomplete
         setLoading,
         setTotalPages,
         setCurrentPage,
@@ -222,10 +160,6 @@ export const useStudentData = (courseId: any) => {
         firstPageHandler,
         lastPageHandler,
         onLimitChange,
-        handleSetSearch,
-        commitSearch,
-        internalSearch,
-        debouncedInternalSearch,
-        fetchStudentData, // Added this for DataTablePagination
+        fetchStudentData,
     }
 }

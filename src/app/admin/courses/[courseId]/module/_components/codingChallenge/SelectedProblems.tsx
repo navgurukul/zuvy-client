@@ -10,7 +10,7 @@ import { getChapterUpdateStatus } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
-import {CodingTopicsProps,CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
+import {CodingTopicsProps,CodingTopicsTag,CodingChallangesQuestion} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 
 const SelectedProblems = ({
     selectedQuestions,
@@ -44,12 +44,12 @@ const SelectedProblems = ({
                 <h2 className="font-bold mb-5 text-[15px] text-gray-600">Selected Coding Problems</h2>
                 {selectedQuestions?.length > 0 ? (
                     <div className="w-full">
-                        {selectedQuestions?.map((selectedQuestion: any, index: any) => {
+                        {selectedQuestions?.map((selectedQuestion: CodingChallangesQuestion, index: number) => {
                             const selectedTagName = tags?.filter(
-                                (tag: any) => tag.id == selectedQuestion?.tagId
+                                (tag: CodingTopicsTag) => tag.id == selectedQuestion?.tagId
                             )
                             return (
-                                <div key={selectedQuestion?.id}>
+                                <div key={selectedQuestion?.id} className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4">
                                     <div className="flex items-center gap-2 justify-between w-full">
                                         <h3 className="font-bold text-[16px] text-gray-600">
                                             {selectedQuestion.title}
@@ -84,7 +84,7 @@ const SelectedProblems = ({
                                     </p>
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                            <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer">
+                                            <p className="font-bold text-sm mt-2 text-primary cursor-pointer">
                                                 View Full Description
                                             </p>
                                         </DialogTrigger>

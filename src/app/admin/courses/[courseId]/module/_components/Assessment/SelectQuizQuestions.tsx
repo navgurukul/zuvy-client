@@ -10,8 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import PreviewMCQ from '@/app/admin/resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
-import { MCQQuestion } from '@/app/admin/courses/[courseId]/module/_components/quiz/ModuleQuizType'
-
+import {MCQQuestion,CodingQuestiones} from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 const SelectQuizQuestions = ({
     setSelectedQuestions,
     selectedQuestions,
@@ -39,7 +38,7 @@ const SelectQuizQuestions = ({
     return (
         <>
             <div className="w-full">
-                {selectedQuestions.map((question: any) => {
+                {selectedQuestions.map((question: CodingQuestiones) => {
                     // Find the tag name corresponding to the question's tagId
                     const tag = tags?.find((tag: any) => tag.id === question.tagId)
                     const questionText =
@@ -49,7 +48,7 @@ const SelectQuizQuestions = ({
                     return (
                         <React.Fragment key={question.id}>
 
-                            <div className="p-5 rounded-sm border-b border-gray-200 mb-4">
+                            <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4">
                                 <div className="flex justify-between items-start w-full">
                                     <div className="w-full">
                                         <div className="flex items-center gap-2">
@@ -59,12 +58,11 @@ const SelectQuizQuestions = ({
                                                     { textLength: 40 }
                                                 )}
                                             </h2>
-
                                         </div>
 
                                         <Dialog>
                                             <DialogTrigger asChild>
-                                                <p className="font-bold text-sm mt-2 text-[#518672] cursor-pointer text-left">
+                                                <p className="font-bold text-sm mt-2 text-primary cursor-pointer text-left">
                                                     View Full Description
                                                 </p>
                                             </DialogTrigger>

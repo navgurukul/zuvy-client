@@ -122,6 +122,7 @@ export const useFeedbackForm = ({
             })
             return false
         } finally {
+            //   setTimeout(() => setLoading(false), 15000);
             setLoading(false)
         }
     }

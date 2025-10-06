@@ -1,9 +1,18 @@
+//// course layout 
+
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React from "react";
+import { LucideIcon } from "lucide-react";
 
-function TabItem({ href, title }: { href: string; title: string }) {
+interface TabItemProps {
+  href: string;
+  title: string;
+  icon?: LucideIcon;
+}
+
+function TabItem({ href, title, icon: Icon }: TabItemProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -15,11 +24,14 @@ function TabItem({ href, title }: { href: string; title: string }) {
     <Link
       href={href}
       className={cn(
-        "mx-1 px-3 py-1.5 text-sm font-medium rounded-sm",
-        isActive && "bg-white text-gray-700"
+        "mx-1 text-sm px-9 py-2 font-medium rounded-sm flex items-center justify-center gap-1 transition-colors text-center",
+        isActive 
+          ? "bg-primary text-white" 
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
       )}
     >
-      {title}
+      {Icon && <Icon className="h-4 w-4" />}
+      <span className="text-sm leading-tight">{title}</span>
     </Link>
   );
 }

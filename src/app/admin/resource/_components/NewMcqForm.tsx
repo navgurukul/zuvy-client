@@ -165,7 +165,7 @@ export default function NewMcqForm({
                     control={form.control}
                     name="difficulty"
                     render={({ field }) => (
-                        <div className="w-full ml-[140px]">
+                        <div className="w-full ml-[140px] text-foreground">
                             <FormItem className="space-y-3 text-start ">
                                 <FormControl>
                                     <RadioGroup
@@ -173,7 +173,7 @@ export default function NewMcqForm({
                                         defaultValue={field.value}
                                     >
                                         <div className="flex gap-x-5 ">
-                                            <FormLabel className="mt-5 font-semibold text-md ">
+                                            <FormLabel className="mt-5 font-semibold text-sm">
                                                 Difficulty
                                             </FormLabel>
                                             {difficulties.map((difficulty) => (
@@ -184,10 +184,10 @@ export default function NewMcqForm({
                                                     <FormControl className="">
                                                         <RadioGroupItem
                                                             value={difficulty}
-                                                            className="text-[rgb(81,134,114)] border-black"
+                                                            className="text-primary border-primary"
                                                         />
                                                     </FormControl>
-                                                    <FormLabel className="font-normal text-md ">
+                                                    <FormLabel className="font-normal text-sm">
                                                         {difficulty}
                                                     </FormLabel>
                                                 </FormItem>
@@ -206,11 +206,11 @@ export default function NewMcqForm({
                     name="topics"
                     render={({ field }) => (
                         <div className="w-full ml-[140px]">
-                            <FormItem className="text-start flex flex-col flex-start  ">
-                                <FormLabel className="font-semibold text-md">
+                            <FormItem className="text-start flex flex-col flex-start">
+                                <FormLabel className="font-semibold text-sm text-foreground">
                                     Topics
                                 </FormLabel>
-                                <div className="flex gap-x-4">
+                                <div className="flex gap-x-4 text-muted-foreground">
                                     <Select
                                         onValueChange={(value) => {
                                             const selectedTag = tags.find(
@@ -271,7 +271,7 @@ export default function NewMcqForm({
                             <Button
                                 key={field.id}
                                 className={`${activeVariantIndex === index
-                                        ? 'border-b-4 border-[rgb(81,134,114)] text-[rgb(81,134,114)] text-md'
+                                        ? 'border-b-4 border-primary text-primary text-md'
                                         : ''
                                     } rounded-none`}
                                 variant="ghost"
@@ -287,7 +287,7 @@ export default function NewMcqForm({
                                 onClick={() =>
                                     handleRemoveVariant(activeVariantIndex)
                                 }
-                                className="mt-3 ml-5 text-red-500 bg-white cursor-pointer"
+                                className="mt-3 ml-5 text-destructive bg-background cursor-pointer"
                             />
                             // <Button type="button">
                             // </Button>
@@ -349,7 +349,7 @@ export default function NewMcqForm({
                                                     >
                                                         <FormControl>
                                                             <RadioGroupItem
-                                                                className="text-black border-black"
+                                                                className="text-primary border-primary"
                                                                 value={optionIndex.toString()}
                                                             />
                                                         </FormControl>
@@ -390,7 +390,7 @@ export default function NewMcqForm({
                                                                 <Button
                                                                     type="button"
                                                                     variant="outline"
-                                                                    className="text-red-500"
+                                                                    className="text-destructive"
                                                                     onClick={() =>
                                                                         removeOption(
                                                                             optionIndex
@@ -414,7 +414,7 @@ export default function NewMcqForm({
                                         onClick={() =>
                                             appendOption({ optionText: '' })
                                         }
-                                        className="text-left text-[rgb(81,134,114)] font-semibold text-md"
+                                        className="text-left text-primary font-semibold text-md"
                                     >
                                         + Add Option
                                     </Button>
@@ -423,35 +423,36 @@ export default function NewMcqForm({
                         </>
                     )}
                 </div>
-                {!isContentValid ? (
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <div className="flex flex-col justify-end items-end w-[550px] cursor-not-allowed opacity-50">
-                                    <Button
-                                        className="bg-success-dark opacity-75"
-                                        type="submit"
-                                        disabled
-                                    >
-                                        Add Question
-                                    </Button>
-                                </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                         Question content is required. Also image-only questions are not allowed — please include text as well.
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                ) : (
-                    <div className="flex flex-col justify-end items-end w-[550px]">
+                {/* Add Question Button - Right Aligned */}
+                <div className="right-0 flex justify-end w-full">
+                    {!isContentValid ? (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="cursor-not-allowed opacity-50">
+                                        <Button
+                                            className="bg-primary hover:bg-primary-dark"
+                                            type="submit"
+                                            disabled
+                                        >
+                                            Add Question
+                                        </Button>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    Question content is required. Also image-only questions are not allowed — please include text as well.
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    ) : (
                         <Button
-                            className="bg-success-dark opacity-75"
+                            className="bg-primary hover:bg-primary-dark"
                             type="submit"
                         >
                             Add Question
                         </Button>
-                    </div>
-                )}
+                    )}
+                </div>
 
             </form>
         </Form>

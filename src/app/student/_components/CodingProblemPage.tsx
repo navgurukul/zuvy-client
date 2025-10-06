@@ -46,7 +46,7 @@ function findPairs(nums, target) {
     <div className="min-h-screen bg-background">
       <header className="flex items-center justify-between p-4 border-b">
         <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5"/>
         </Button>
       </header>
 
