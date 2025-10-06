@@ -21,9 +21,7 @@ const SettingsPage: React.FC = () => {
     const searchParams = useSearchParams()
     const initialTab = searchParams.get('tab') || 'users'
     const [activeTab, setActiveTab] = useState(initialTab)
-    const [selectedRole, setSelectedRole] = useState<
-        'Admin' | 'Ops' | 'Instructor'
-    >('Admin')
+    const [selectedRole, setSelectedRole] = useState('Admin')
 
     // Pagination state - get from URL params
     const [offset, setOffset] = useState<number>(OFFSET)
