@@ -36,6 +36,14 @@ interface CourseData {
     startTime: string
     unassigned_students: number
 }
+interface Permissions {
+    editCourse: boolean
+    viewBatch: boolean
+    viewModule: boolean
+    viewSetting: boolean
+    viewStudent: boolean
+    viewSubmission: boolean
+}
 
 interface BatchData {
     id: number
@@ -43,18 +51,20 @@ interface BatchData {
     bootcampId: number
     instructorId: number
     capEnrollment: number
-    createdAt: string,
-    updatedAt: string,
-    status: string,
-    startDate: string | null  
-    endDate: string | null  
+    createdAt: string
+    updatedAt: string
+    status: string
+    startDate: string | null
+    endDate: string | null
     students_enrolled: number
-    instructorEmail: string 
+    instructorEmail: string
 }
 
 interface StoreCourseData {
     courseData: CourseData | null
+    Permissions: Permissions
     setCourseData: (newValue: CourseData) => void
+    setPermissions: (newValue: Permissions) => void
     fetchCourseDetails: (courseId: number) => Promise<boolean>
 }
 
@@ -62,8 +72,8 @@ interface StoreBatchData {
     batchData: BatchData[] | null
     setBatchData: (newValue: BatchData[]) => void
     fetchBatches: (courseId: number) => void
-    totalBatches?: number 
-    totalPages?: number 
+    totalBatches?: number
+    totalPages?: number
 }
 
 export interface quiz {
@@ -95,14 +105,26 @@ export const getCourseData = create<StoreCourseData>((set) => ({
         startTime: '',
         unassigned_students: 0,
     },
+    Permissions: {
+        editCourse: false,
+        viewBatch: false,
+        viewModule: false,
+        viewSetting: false,
+        viewStudent: false,
+        viewSubmission: false,
+    },
     setCourseData: (newValue: CourseData) => {
         set({ courseData: newValue })
+    },
+    setPermissions: (newValue: Permissions) => {
+        set({ Permissions: newValue })
     },
     fetchCourseDetails: async (courseId: number): Promise<boolean> => {
         try {
             const response = await api.get(`/bootcamp/${courseId}`)
             const data = response.data
             set({ courseData: data.bootcamp })
+            set({ Permissions: data.permissions })
             return true
         } catch (error: unknown) {
             console.error('Error fetching course details:', error)
@@ -126,13 +148,14 @@ export const getBatchData = create<StoreBatchData>((set) => ({
         try {
             const response = await api.get(`/bootcamp/batches/${courseId}`)
             const data = response.data
-            set({ batchData: data.data,
+            set({
+                batchData: data.data,
                 totalBatches: data.totalBatches,
-                totalPages: data.totalPages
-             })
+                totalPages: data.totalPages,
+            })
         } catch (error) {
             console.error('Error fetching batches', error)
-            set({ batchData: [] }) 
+            set({ batchData: [] })
         }
     },
 }))
@@ -1132,47 +1155,50 @@ export const useThemeStore = create<ThemeStore>()(
 )
 
 interface CodingSubmissionStore {
-    codingSubmissionAction: any;
-    setCodingSubmissionAction: (action: any) => void;
-  }
-  
-  export const useCodingSubmissionStore = create<CodingSubmissionStore>((set) => ({
-    codingSubmissionAction: null,
-    setCodingSubmissionAction: (action) => set({ codingSubmissionAction: action }),
-  }));
+    codingSubmissionAction: any
+    setCodingSubmissionAction: (action: any) => void
+}
 
+export const useCodingSubmissionStore = create<CodingSubmissionStore>(
+    (set) => ({
+        codingSubmissionAction: null,
+        setCodingSubmissionAction: (action) =>
+            set({ codingSubmissionAction: action }),
+    })
+)
 
 interface isStudentEnrolledInOneCourseStore {
-    isStudentEnrolledInOneCourse : boolean;
-    setIsStudentEnrolledInOneCourse : (newValue: boolean) => void;
-}  
+    isStudentEnrolledInOneCourse: boolean
+    setIsStudentEnrolledInOneCourse: (newValue: boolean) => void
+}
 
-export const useIsStudentEnrolledInOneCourseStore = create<isStudentEnrolledInOneCourseStore>((set) => ({
-    isStudentEnrolledInOneCourse : true,
-    setIsStudentEnrolledInOneCourse : (newValue: boolean) => {
-        set({ isStudentEnrolledInOneCourse : newValue })
-    }
-}))
+export const useIsStudentEnrolledInOneCourseStore =
+    create<isStudentEnrolledInOneCourseStore>((set) => ({
+        isStudentEnrolledInOneCourse: true,
+        setIsStudentEnrolledInOneCourse: (newValue: boolean) => {
+            set({ isStudentEnrolledInOneCourse: newValue })
+        },
+    }))
 
 interface VideoProgressState {
-    progress: Record<string, number>;
-    setProgress: (videoId: string, time: number) => void;
-  }
-  
-  export const useVideoStore = create<VideoProgressState>()(
+    progress: Record<string, number>
+    setProgress: (videoId: string, time: number) => void
+}
+
+export const useVideoStore = create<VideoProgressState>()(
     persist(
-      (set) => ({
-        progress: {},
-        setProgress: (videoId, time) =>
-          set((state) => ({
-            progress: {
-              ...state.progress,
-              [videoId]: time,
-            },
-          })),
-      }),
-      {
-        name: 'video-progress', // key in localStorage
-      }
+        (set) => ({
+            progress: {},
+            setProgress: (videoId, time) =>
+                set((state) => ({
+                    progress: {
+                        ...state.progress,
+                        [videoId]: time,
+                    },
+                })),
+        }),
+        {
+            name: 'video-progress', // key in localStorage
+        }
     )
-  );
+)
