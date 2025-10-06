@@ -70,7 +70,7 @@ const CodingResultContent = () => {
             setLoading(false);
         }
     }, [questionId]);
-    
+
     
   if (loading) return <CodingSubmissionSkeleton />
 
@@ -103,7 +103,7 @@ const CodingResultContent = () => {
                 </div>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-destructive-dark mb-2">Error Loading Submission</h3>
+                <h3 className="text-lg font-semibold text-destructive-dark mb-2">Error Loading Submission</h3> 
                 <p className="text-sm text-destructive-dark">{submissionData?.message}</p>
               </div>
             </div>
@@ -219,7 +219,7 @@ const CodingResultContent = () => {
               </div> */}
               <div>
                 <h1 className="text-2xl text-left font-bold text-foreground mb-2">Coding Submission Result</h1>
-                <p className="text-muted-foreground text-left">Detailed analysis of your solution</p>
+                <p className="text-muted-foreground text-left">Detailed analysis of your solution</p> 
               </div>
             </div>
             <div className={`flex items-center space-x-2 px-2 py-1 rounded-full ${overallSuccess ? 'bg-success/10 border border-success/20' : 'bg-destructive/10 border border-destructive/20'}`}>
@@ -234,7 +234,7 @@ const CodingResultContent = () => {
               </div> */}
               <div>
                 <h3 className={`text-xl font-bold text-left ${overallSuccess ? 'text-success' : 'text-destructive'}`}>{overallSuccess ? 'All Tests Passed!' : 'Some Tests Failed'}</h3>
-                <p className="text-muted-foreground mt-1 text-left">{overallSuccess ? 'Congratulations! Your solution works perfectly.' : 'You can review your test case results below.'}</p>
+                <p className="text-muted-foreground mt-1 text-left">{overallSuccess ? 'Congratulations! Your solution works perfectly.' : 'You can review your test case results below.'}</p> 
               </div>
             </div>
           </div>

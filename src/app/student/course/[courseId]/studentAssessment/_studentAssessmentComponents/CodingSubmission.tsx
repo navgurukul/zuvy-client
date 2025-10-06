@@ -33,7 +33,13 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
- if (loading) return <CodingSubmissionSkeleton/>
+//  if (loading) return <CodingSubmissionSkeleton/>
+
+
+
+if (loading || !codingSubmissionsData) {
+  return <CodingSubmissionSkeleton />
+}
 
 
   if (codingSubmissionsData?.status === 'error') {
