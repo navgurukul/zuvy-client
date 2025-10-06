@@ -110,7 +110,6 @@ export function useBootcamps({
 
     const doFetch = useCallback(
         async (off: number) => {
-            console.log('BBBBBB')
 
             const key = buildKey(off)
 
