@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Video, Users, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, Video, Users, ExternalLink, Edit, Trash2} from 'lucide-react';
 import {LiveClassProps} from "@/app/admin/courses/[courseId]/module/_components/liveClass/ModuleLiveClassType"
 import { getEmbedLink } from '@/utils/admin';
 
@@ -95,6 +95,10 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
                                 </Badge>
                             </div>
                         </div>
+                        <div className="flex gap-3">
+                                <Edit className="w-5 h-5" />
+                                <Trash2 className="w-5 h-5 text-red-600" />
+                        </div>
                     </div>
                 </CardHeader>
 
@@ -175,3 +179,9 @@ const LiveClass = ({ chapterData, content, moduleId, courseId }: LiveClassProps)
 }
 
 export default LiveClass;
+
+
+
+
+
+
