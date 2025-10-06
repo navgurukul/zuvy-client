@@ -14,10 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
-import Heading from '../_components/header'
 import NewCourseDialog from './_components/newCourseDialog'
-import { api, apiMeraki } from '@/utils/axios.config'
-import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, POSITION } from '@/utils/constant'
 import styles from './_components/cources.module.css'
@@ -30,27 +27,16 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStudentData } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
 import { Spinner } from '@/components/ui/spinner'
+import { getPermissions } from '@/lib/GetPermissions'
 import {
     Course,
     CourseData,
-    CoursesResponse,
 } from '@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Users, Clock, BookOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from '@/components/ui/select'
 import CourseCard from './_components/CourseCard'
 import { useAllCourses } from '@/hooks/useAllCourses'
 import { useBootcamps } from '@/hooks/useBootcamps'
 import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
-import {PermissionsComponent} from './[courseId]/permissions/coursePermission'
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -66,9 +52,7 @@ const Courses: React.FC = () => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { studentData } = useStudentData()
-     const queryObject: Record<string, string> = {};
-
-
+    const [permissions, setPermissions] = useState<Record<string, boolean>>({})
 
     // search state
     const searchInputRef = useRef<HTMLInputElement>(null)
@@ -105,7 +89,7 @@ const Courses: React.FC = () => {
         useState<number>(-1)
 
     // === Hooks ===
-    const { allCourses, refetchAllCourses, permissions } = useAllCourses(true)
+    const { allCourses, refetchAllCourses } = useAllCourses(true)
     const { courses, loading, totalBootcamps, totalPages, refetchBootcamps } =
         useBootcamps({
             limit: position,
@@ -418,10 +402,13 @@ const Courses: React.FC = () => {
         return ''
     }
 
-    PermissionsComponent({ permissions })
-    permissions &&  searchParams.forEach((value, key) => {
-    queryObject[key] = value;
-  });
+        useEffect(() => {
+            (async () => {
+                const perms = await getPermissions();
+                setPermissions(perms);
+            })()
+        }, [permissions]);
+
 
     return (
         <>
@@ -449,7 +436,7 @@ const Courses: React.FC = () => {
                                 <Dialog>
 
                                     <DialogTrigger asChild>
-                                        <Button className={`text-white bg-primary font-semibold px-5 py-2 flex gap-2 ${queryObject.createCourse === 'false' && 'invisible'} `}>
+                                        <Button className={`text-white bg-primary font-semibold px-5 py-2 flex gap-2 ${!permissions.createCourse && 'invisible'}`}>
                                             <Plus className="w-5" />
                                             Create New Course 
                                         </Button>

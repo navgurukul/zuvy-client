@@ -1,77 +1,33 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import Sidebar from './sidebar'
-import { Bell, Menu, Search } from 'lucide-react'
-import { getUser } from '@/store/store'
+import {
+    Layers,
+    Settings,
+    Database,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { MobileNavbarRoutes } from './navbar-routes'
 import { useLazyLoadedStudentData } from '@/store/store'
-import NavbarNotifications from './navbar-notifications'
-import { Layers, Database, Settings, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import {
-    commonRoutes,
-    guestRoutes,
-    adminRoutes,
-    teacherRoutes,
-} from '@/lib/sidebar-routes'
 import { Logout } from '@/utils/logout'
-import { getUserInitials } from '@/utils/common'
 import { useThemeStore } from '@/store/store'
 import { Moon, Sun } from 'lucide-react'
 import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
+import { getPermissions } from '@/lib/GetPermissions'
+import { Spinner } from '@/components/ui/spinner'
 
 //Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
-    const { user, setUser } = getUser()
     const pathname = usePathname()
-    const searchParams = useSearchParams()
-
-    // Get all query params as an object
-    const queryObject: Record<string, string> = {}
-
-    searchParams.forEach((value, key) => {
-        queryObject[key] = value
-    })
-
-    const { viewRolesAndPermission, viewContent } = queryObject
-
-    const isAdmin = pathname?.includes('/admin')
-    const isTeacher = pathname?.includes('/instructor')
-    const routes = isAdmin
-        ? adminRoutes
-        : isTeacher
-        ? teacherRoutes
-        : guestRoutes
-
+    const role = pathname.split('/')[1]
+    const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+    const [loading, setLoading] = useState(true);
 
     const handleLogoutClick = () => {
         setShowLogoutDialog(true)
@@ -82,12 +38,41 @@ const Navbar = () => {
         await Logout()
     }
 
+    const routes = [
+        {
+            name: 'Course Studio',
+            href: `/${role}/courses`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/courses` || pathname.startsWith(`/${role}/courses/`),
+        },
+        {
+            name: 'Question Bank',
+            href: `/${role}/content-bank`,
+            icon: Database,
+            active: `/${role}/content-bank`,
+        },
+        {
+            name: 'Roles and Permissions',
+            href: `/${role}/settings`,
+            icon: Settings,
+            active: `/${role}/settings`,
+        },
+    ]
+
+    useEffect(() => {
+        (async () => {
+            const perms = await getPermissions();
+            setPermissions(perms);
+        })().then(() => setLoading(false));
+    }, [permissions]);
+
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
             <div className="flex h-16 items-center justify-between px-6">
                 <div className="flex items-center gap-8">
                     {/* Logo and Brand */}
-                    <Link href="/admin" className="flex items-center space-x-3">
+                    <Link href={`/${role}/courses`} className="flex items-center space-x-3">
                         <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
                             <span className="text-white font-bold text-lg">
                                 Z
@@ -102,21 +87,19 @@ const Navbar = () => {
                     <nav className="flex items-center space-x-1">
                         {routes.map((item) => {
                             const Icon = item.icon
-                            const canViewContent = viewContent === 'true'
-                            const canViewRoles =
-                                viewRolesAndPermission === 'true'
 
-                            if (item.name === 'Content Bank' && !canViewContent)
-                                return null
-                            if (
-                                item.name === 'Roles and Permissions' &&
-                                !canViewRoles
-                            )
-                                return null
                             const isActive =
                                 typeof item.active === 'function'
                                     ? item.active(pathname)
                                     : item.active === pathname
+
+                            // Check permissions for Question Bank and Roles and Permissions
+                            if (item.name === 'Question Bank' && !permissions.viewQuestion) {
+                                return null;
+                            }
+                            if (item.name === 'Roles and Permissions' && !permissions.viewRolesAndPermission) {
+                                return null;
+                            }
 
                             return (
                                 <>
@@ -132,11 +115,11 @@ const Navbar = () => {
                                             )}
                                         >
                                             <Icon className="h-4 w-4" />
-                                            <span>{item.name}</span>
+                                            {loading? <Spinner />: <span>{item.name}</span>}
                                         </Link>
                                     )}
-                                    {item.name === 'Question Bank' && (
-                                        <QuestionBankDropdown />
+                                    {item.name === 'Question Bank' && permissions.viewQuestion && (
+                                        loading ? <Spinner /> : <QuestionBankDropdown />
                                     )}
                                 </>
                             )
@@ -159,7 +142,7 @@ const Navbar = () => {
                         )}
                     </Button>
 
-                    {/* Admin Avatar with Dropdown */}
+                    {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown
                         studentData={studentData}
                         handleLogoutClick={handleLogoutClick}

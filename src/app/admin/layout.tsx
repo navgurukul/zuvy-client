@@ -9,13 +9,16 @@ import { Spinner } from '@/components/ui/spinner'
 
 import '../globals.css'
 import { useEffect } from 'react'
+import { db } from '@/lib/indexDb'
 import StudentNavbar from '../_components/navbar'
+import { useAllCourses } from '@/hooks/useAllCourses'
 
 export default function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const { refetchAllCourses } = useAllCourses(true);
     const pathname = usePathname()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     const isFullWidthRoute = pathname.includes('/module') || pathname.includes('/project') || adminAssessmentPreviewRoute;
@@ -31,6 +34,8 @@ export default function RootLayout({
         return ''
     }
 
+
+
     return (
         <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
             {user.email.length == 0 ? (
@@ -38,18 +43,17 @@ export default function RootLayout({
                     <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : user &&
-              (user.rolesList.length === 0 ||
-                  (user.rolesList.length > 0 &&
-                      user.rolesList[0] !== 'admin')) ? (
+                (user.rolesList.length === 0 ||
+                    (user.rolesList.length > 0 &&
+                        user.rolesList[0] !== 'admin')) ? (
                 <UnauthorizedUser rolesList={rolesList} path={'Admin'} />
-            ) : (                
+            ) : (
                 <div className={`${isAssessmentRouteClasses(pathname)}`}>
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
                     <div
-                        className={`${
-                            adminAssessmentPreviewRoute ? '' : 'pt-16'
-                        } h-screen`}
+                        className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'
+                            } h-screen`}
                     >
                         <MaxWidthWrapper>{children}</MaxWidthWrapper>
                     </div>
