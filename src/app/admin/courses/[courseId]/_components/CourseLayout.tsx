@@ -8,7 +8,7 @@ import styles from '../../_components/cources.module.css'
 import TabItem from './TabItem'
 import { getCourseData } from '@/store/store'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, usePathname } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {
     ArrowLeft,
@@ -26,49 +26,52 @@ import {
 function CourseLayout() {
     const router = useRouter()
     const { courseId } = useParams()
-    const { courseData } = getCourseData()
+    const { courseData, Permissions } = getCourseData()
+    // get the role from current path like if the url is this - admin/courses/721/details  then get admin from it
+    const pathname = usePathname()
+    const role = pathname.split('/')[1]
 
     const courseMenu = [
         {
             title: 'General Details',
             value: 'generalDetails',
-            href: `/admin/courses/${courseData?.id}/details`,
+            href: `/${role}/courses/${courseData?.id}/details`,
             icon: Info,
         },
         {
             title: 'Curriculum',
             value: 'curriculum',
-            href: `/admin/courses/${courseData?.id}/curriculum`,
+            href: `/${role}/courses/${courseData?.id}/curriculum`,
             icon: BookOpen,
         },
         {
             title: 'Students',
             value: 'students',
-            href: `/admin/courses/${courseData?.id}/students`,
+            href: `/${role}/courses/${courseData?.id}/students`,
             icon: GraduationCap,
         },
         {
             title: 'Batches',
             value: 'batches',
-            href: `/admin/courses/${courseData?.id}/batches`,
+            href: `/${role}/courses/${courseData?.id}/batches`,
             icon: Users,
         },
         {
             title: 'Sessions',
             value: 'sessions',
-            href: `/admin/courses/${courseData?.id}/sessions`,
+            href: `/${role}/courses/${courseData?.id}/sessions`,
             icon: Calendar,
         },
         {
             title: 'Submissions',
             value: 'submissions',
-            href: `/admin/courses/${courseData?.id}/submissions`,
+            href: `/${role}/courses/${courseData?.id}/submissions`,
             icon: FileText,
         },
         {
             title: 'Settings',
             value: 'settings',
-            href: `/admin/courses/${courseData?.id}/settings`,
+            href: `/${role}/courses/${courseData?.id}/settings`,
             icon: Settings,
         },
     ]
@@ -82,7 +85,6 @@ function CourseLayout() {
                 const success = await getCourseData
                     .getState()
                     .fetchCourseDetails(parseInt(courseID))
-                console.log('success', success)
                 if (!success) {
                     console.log('Not true')
                     router.push(`/admin/courses`)
@@ -99,18 +101,6 @@ function CourseLayout() {
     }
 
     useEffect(() => {
-        const storedCourseId = localStorage.getItem('courseId')
-        // if (courseId && storedCourseId) {
-        //     // setCourseId(storedCourseId)
-        //     getCourseData
-        //         .getState()
-        //         .fetchCourseDetails(parseInt(storedCourseId))
-        // }
-        // if (courseId) {
-        //     const courseID = Array.isArray(courseId) ? courseId[0] : courseId
-        //     getCourseData.getState().fetchCourseDetails(parseInt(courseID))
-        //     console.log('yha se aa rha hai')
-        // }
         handleFetch()
     }, [])
 
@@ -118,7 +108,7 @@ function CourseLayout() {
         <>
             {/* <Breadcrumb crumbs={crumbs} /> */}
             <Link
-                href={'/admin/courses'}
+                href={`/${role}/courses`}
                 className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ArrowLeft size={20} />
@@ -146,14 +136,37 @@ function CourseLayout() {
                             }}
                         >
                             <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
-                                {courseMenu.map(({ title, href, icon }) => (
-                                <TabItem
-                                    key={href}
-                                    title={title}
-                                    href={href}
-                                    icon={icon}
-                                />
-                            ))}
+                                {courseMenu.map(({ title, href, icon }) => {
+                                    // Check permissions based on tab title
+                                    const shouldRender = (() => {
+                                        switch(title) {
+                                            case 'General Details':
+                                                return Permissions.editCourse;
+                                            case 'Curriculum':
+                                                return Permissions.viewModule;
+                                            case 'Students':
+                                                return Permissions.viewStudent;
+                                            case 'Batches':
+                                                return Permissions.viewBatch;
+                                            case 'Submissions':
+                                                return Permissions.viewSubmission;
+                                            case 'Settings':
+                                                return Permissions.viewSetting;
+                                            default:
+                                                return false;
+                                        }
+                                    })();
+
+                                    // Only render the tab if user has permission
+                                    return shouldRender ? (
+                                        <TabItem
+                                            key={href}
+                                            title={title}
+                                            href={href}
+                                            icon={icon}
+                                        />
+                                    ) : null;
+                                })}
                             </TabsList>
                         </div>
                         <div
