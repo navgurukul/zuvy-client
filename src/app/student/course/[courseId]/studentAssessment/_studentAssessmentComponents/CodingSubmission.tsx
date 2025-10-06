@@ -33,7 +33,10 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
- if (loading) return <CodingSubmissionSkeleton/>
+
+if (loading || !codingSubmissionsData) {
+  return <CodingSubmissionSkeleton />
+}
 
 
   if (codingSubmissionsData?.status === 'error') {
@@ -154,8 +157,6 @@ const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmission
         className="inline-flex text-left w-full  items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
       >
         
-        {/* <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-        <span className="font-medium">Back to Results</span> */}
         <X className="w-5 h-5" />
       </div>
         <Button

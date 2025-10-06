@@ -1086,35 +1086,91 @@ export const ProjectPageSkeleton= () => {
 export const CodingResultPageSkeleton=()=>{
  return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/20">
-      <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-lg">
+      {/* <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-lg">
         <div className="animate-pulse mb-6">
             <div className="w-12 h-12 bg-primary rounded-full mx-auto"></div>
           </div>
           <h2 className="text-xl font-semibold text-foreground mb-2">Loading Submission</h2>
           <p className="text-muted-foreground">Fetching your coding submission details...</p>
-      </div>
+      </div> */}
     </div>
   )
 }
 
+
+
 // quizResult/page.tsx
+export const QuizResultsSkeleton = () => {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 p-6 max-w-screen-lg mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-3">
+          <Skeleton className="w-6 h-6 rounded-full" />
+          <Skeleton className="h-6 w-40" />
+        </div>
+      </div>
 
-
-export const QuizResultPageSkeleton=()=>{
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
-                <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-16dp max-w-md w-full">
-                    <div className="relative mb-6">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto flex items-center justify-center">
-                            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
-                    <p className="text-muted-foreground">Fetching your performance data...</p>
-                </div>
+      {/* Performance Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="bg-card border border-border rounded-xl p-6 shadow-8dp"
+          >
+            <div className="flex items-center space-x-3">
+              <Skeleton className="w-10 h-10 rounded-lg" />
+              <div>
+                <Skeleton className="h-3 w-16 mb-2" />
+                <Skeleton className="h-5 w-20" />
+              </div>
             </div>
-        )
-    }
+          </div>
+        ))}
+      </div>
+
+      {/* Questions Skeleton */}
+      <div className="space-y-6">
+        {[1, 2].map((q) => (
+          <div
+            key={q}
+            className="bg-card border border-border rounded-2xl shadow-8dp overflow-hidden"
+          >
+            {/* Question Header */}
+            <div className="bg-card-elevated border-b border-border p-6 flex justify-between items-center">
+              <div className="flex items-center space-x-3">
+                <Skeleton className="w-8 h-8 rounded-lg" />
+                <Skeleton className="h-5 w-32" />
+              </div>
+              <div className="flex space-x-3">
+                <Skeleton className="h-5 w-16 rounded-full" />
+                <Skeleton className="h-5 w-20 rounded-full" />
+              </div>
+            </div>
+
+            {/* Question Body */}
+            <div className="p-6 space-y-4">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-2/3" />
+
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((opt) => (
+                  <div
+                    key={opt}
+                    className="p-4 rounded-xl border border-border flex items-center space-x-3"
+                  >
+                    <Skeleton className="w-5 h-5 rounded-full" />
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
 
 
 
