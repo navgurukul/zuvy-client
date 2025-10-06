@@ -7,13 +7,16 @@ import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { UserRole } from '@/utils/types/type'
 import UserInviteSection from './_components/UserInviteSection'
 import { UserManagementTable } from './_components/UserManagementTable'
-import { columns, User } from './columns'
+// import { columns, User } from './columns'
 import RoleManagementPanel from './_components/RoleManagementPanel'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useAllUsers } from '@/hooks/useAllUsers'
 import AddUserModal from './_components/AddUserModal'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, POSITION } from '@/utils/constant'
+import { createColumns } from './columns'
+import { useRoles } from '@/hooks/useRoles'
+import { useUser } from '@/hooks/useSingleUser'
 
 const SettingsPage: React.FC = () => {
     const pathname = usePathname()
@@ -22,6 +25,10 @@ const SettingsPage: React.FC = () => {
     const initialTab = searchParams.get('tab') || 'users'
     const [activeTab, setActiveTab] = useState(initialTab)
     const [selectedRole, setSelectedRole] = useState('Admin')
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    const [isEditMode, setIsEditMode] = useState(false)
+    const { roles, loading: rolesLoading } = useRoles()
+    const [editingUserId, setEditingUserId] = useState<number | null>(null)
 
     // Pagination state - get from URL params
     const [offset, setOffset] = useState<number>(OFFSET)
@@ -37,6 +44,13 @@ const SettingsPage: React.FC = () => {
         totalPages,
         refetchUsers,
     } = useAllUsers({ initialFetch: true, limit: position, searchTerm: '', offset })
+    const {
+      user,
+        loading: userLoading,
+        error,
+    } = useUser(editingUserId)
+
+    console.log('user in page', user)
 
     const handleInviteGenerated = (role: UserRole, inviteLink: string) => {
         console.log(`${role} invite link generated:`, inviteLink)
@@ -64,7 +78,42 @@ const SettingsPage: React.FC = () => {
         updateURL(tab)
     }
 
-    // Users are now fetched from API via useAllUsers hook
+    const handleRoleChange = async (userId: number, roleId: number, roleName: string) => {
+        console.log('Update role:', { userId, roleId, roleName })
+        // Call your API to update the user's role
+        // await updateUserRole(userId, roleId)
+        // refetchUsers()
+    }
+
+    const handleEdit = (userId: number) => {
+        console.log('Edit user:', userId)
+        // Open edit modal or navigate to edit page
+        setEditingUserId(userId) 
+        setIsEditMode(true)
+        setIsAddModalOpen(true)
+    }
+
+    useEffect(() => {
+        if (editingUserId && user && !userLoading && isEditMode) {
+            setIsAddModalOpen(true)
+        }
+    }, [editingUserId, user, userLoading, isEditMode])
+
+    const handleDelete = async (userId: number) => {
+        console.log('Delete user:', userId)
+        // Call your API to delete the user
+        // await deleteUser(userId)
+        // refetchUsers()
+    }
+
+    // Create columns with the fetched roles and callbacks
+    const columns = createColumns(
+        roles,
+        rolesLoading,
+        handleRoleChange,
+        handleEdit,
+        handleDelete
+    )
 
     return (
         <div className="py-2 bg-white min-h-screen">
@@ -115,14 +164,23 @@ const SettingsPage: React.FC = () => {
                                     organization
                                 </p>
                             </div>
-                            <Dialog>
+                            <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                                 <DialogTrigger asChild>
                                     <Button className="bg-primary hover:bg-blue-700 text-white">
                                         <Plus className="w-4 h-4 mr-2" />
                                         Add User
                                     </Button>
                                 </DialogTrigger>
-                                <AddUserModal refetchUsers={() => refetchUsers(offset)} />
+                                 {isAddModalOpen && (
+                                    <AddUserModal 
+                                        isEditMode={isEditMode}
+                                        user={user}
+                                        refetchUsers={() => {
+                                            refetchUsers(offset)
+                                            setIsAddModalOpen(false)
+                                        }} 
+                                    />
+                                )}
                             </Dialog>
                         </div>
 

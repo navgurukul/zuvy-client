@@ -9,6 +9,8 @@ import { useRbacPermissions } from '@/hooks/useRbacPermissions'
 import { useRoles } from '@/hooks/useRoles'
 import { useAssignPermissions } from '@/hooks/useAssignPermissions'
 import { COLOR_PALETTE } from '@/lib/utils'
+import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import AddRoleModal from './AddRoleModal'
 
 interface RoleAction {
     id: number
@@ -31,6 +33,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     const [selectedPermissions, setSelectedPermissions] = useState<Set<number>>(
         new Set()
     )
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
     // Fetch RBAC resources from API
     const { resources, loading, error } = useRbacResources(true)
@@ -144,10 +147,17 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         Configure role permissions and manage system actions
                     </p>
                 </div>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Role
-                </Button>
+                <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                    <DialogTrigger asChild>
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add New Role
+                        </Button>
+                    </DialogTrigger>
+                        {isAddModalOpen && (
+                            <AddRoleModal />
+                        )}
+                </Dialog>
             </div>
 
             {/* Role Selection Tabs */}

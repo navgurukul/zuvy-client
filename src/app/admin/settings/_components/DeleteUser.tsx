@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useCallback, useEffect, useState } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -14,57 +16,35 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { fetchStudentsHandler } from '@/utils/admin'
-import {
-    getStoreStudentDataNew,
-    getStoreStudentData,
-    getIsRowSelected,
-} from '@/store/store'
-import { DeleteAlertDialogProps } from '@/app/admin/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType'
 
-export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
+interface DeleteUserProps {
+    title: string
+    description: string
+    userId: any
+}
+
+export const DeleteUser: React.FC<DeleteUserProps> = ({
     title,
     description,
     userId,
-    bootcampId,
-    fetchStudentData,
-    setSelectedRows,
 }) => {
-    const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
-    const {
-        setStudents,
-        setTotalPages,
-        setLoading,
-        offset,
-        setTotalStudents,
-        setCurrentPage,
-        limit,
-        search,
-    } = getStoreStudentDataNew()
+    // const searchParams = useSearchParams()
+    // const offsetParam = searchParams.get('offset')
+    // const [offset, setOffset] = useState<number>(Number(offsetParam) || OFFSET)
+    // const limitParam = searchParams.get('limit')
+    // const position: number = Number(limitParam ?? POSITION) || Number(POSITION)
+    // const {
+    //     refetchUsers,
+    // } = useAllUsers({ initialFetch: true, limit: position, searchTerm: '', offset })
 
-    async function deleteStudentHandler(userId: any, bootcampId: any) {
+    async function deleteUserHandler(userId: any) {
         try {
-            let url = `/student/{userId}/${bootcampId}?`
-            url += 'userId=' + userId.join('&userId=')
-            await api.delete(url).then((res) => {
+            await api.delete(`/rbac/deleteUser/${userId}`).then((res) => {
                 toast.success({
                     title: 'User Deleted Successfully!',
                     description: res.data.message,
                 })
-                fetchStudentData && fetchStudentData()
-                fetchStudentsHandler({
-                    courseId: bootcampId,
-                    limit,
-                    offset,
-                    searchTerm: search,
-                    setLoading,
-                    setStudents,
-                    setTotalPages,
-                    setTotalStudents,
-                    setCurrentPage,
-                })
-                // setSelectedRows([])
-                setIsRowUnSelected(!isRowUnSelected)
+                // refetchUsers(offset)
             })
         } catch (error: any) {
             toast.error({
@@ -95,7 +75,7 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     </AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-red-500"
-                        onClick={() => deleteStudentHandler(userId, bootcampId)}
+                        onClick={() => deleteUserHandler(userId)}
                     >
                         Continue
                     </AlertDialogAction>
@@ -105,4 +85,4 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     )
 }
 
-export default AlertDialogDemo
+export default DeleteUser

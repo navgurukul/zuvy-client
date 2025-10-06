@@ -71,6 +71,7 @@
 
 
 'use client'
+
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/utils/axios.config'
 
@@ -98,14 +99,18 @@ export interface UsersResponse {
     }
 }
 
-export function useUser(userId: number | undefined) {
+export function useUser(userId: number | null) {
     const [user, setUser] = useState<User | null>(null) // Changed to single User, not array
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<unknown>(null)
 
+    console.log('userId', userId)
+
     const getUser = useCallback(async (userId: number) => {
         try {
-            setLoading(true) // ✅ Changed from false to true
+            if (!userId) return
+
+            setLoading(true)
             setError(null)
             const res = await api.get<UsersResponse>(`/rbac/getUser/${userId}`)
             console.log('User fetch response:', res.data)
@@ -121,13 +126,12 @@ export function useUser(userId: number | undefined) {
         } finally {
             setLoading(false)
         }
-    }, []) // ✅ Removed userId from dependencies since it's a parameter
+    }, []) 
 
     useEffect(() => {
         if (userId) {
             getUser(userId)
         } else {
-            // Reset state when no userId
             setUser(null)
             setLoading(false)
         }

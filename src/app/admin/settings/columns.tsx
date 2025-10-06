@@ -18,10 +18,16 @@ import { OFFSET, POSITION } from '@/utils/constant'
 import { useSearchParams } from 'next/navigation'
 import { useAllUsers } from '@/hooks/useAllUsers'
 import { useUser } from '@/hooks/useSingleUser'
+import DeleteUser from './_components/DeleteUser'
+
+type roleCellProps = {
+  role: string;
+  roles: any; 
+  rolesLoading: boolean;
+};
 
 // Role Cell Component
-const RoleCell = ({ role }: { role: string }) => {
-    const { roles, loading: rolesLoading } = useRoles()
+const RoleCell = ({ role, roles, rolesLoading }: roleCellProps) => {
 
     return (
         <Select defaultValue={role?.toLowerCase()}>
@@ -34,7 +40,7 @@ const RoleCell = ({ role }: { role: string }) => {
                         Loading...
                     </SelectItem>
                 ) : (
-                    roles.map((roleOption) => (
+                    roles.map((roleOption: any) => (
                         <SelectItem
                             key={roleOption.id}
                             value={roleOption.name}
@@ -56,9 +62,17 @@ export interface User {
     name: string
     email: string
     roleName: string
+    dateAdded?: string
 }
 
-export const columns: ColumnDef<User>[] = [
+// Export a function that creates columns
+export const createColumns = (
+    roles: any[],
+    rolesLoading: boolean,
+    onRoleChange: (userId: number, roleId: number, roleName: string) => void,
+    onEdit: (userId: number) => void,
+    onDelete: (userId: number) => void
+): ColumnDef<User>[] => [
     {
         accessorKey: 'name',
         header: 'Name',
@@ -80,7 +94,7 @@ export const columns: ColumnDef<User>[] = [
         header: 'Role',
         cell: ({ row }) => {
             const role = row.getValue('roleName') as string
-            return <RoleCell role={role} />
+            return <RoleCell role={role} roles={roles} rolesLoading={rolesLoading}/>
         },
     },
     {
@@ -94,63 +108,32 @@ export const columns: ColumnDef<User>[] = [
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
-            console.log('Here one')
             const selectedUser = row.original
-            // const searchParams = useSearchParams()
-            // const offset = Number(searchParams.get('offset') || OFFSET)
-            // const limitParam = searchParams.get('limit')
-            // const position: number =
-            //     Number(limitParam ?? POSITION) || Number(POSITION)
-            // const { refetchUsers } = useAllUsers({
-            //     initialFetch: false,
-            //     limit: position,
-            //     searchTerm: '',
-            //     offset,
-            // })
-            // console.log('selectedUser details:', selectedUser)
-            // console.log('fetched user details:', user)
-
+            // console.log('selectedUser', selectedUser)
             return (
                 <div className="flex gap-1">
-                    {/* <Dialog>
-                        <DialogTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="p-1 h-7 w-7 hover:bg-gray-100"
-                                onClick={() => {
-                                    console.log('Edit user:', selectedUser.id)
-                                }}
-                            >
-                                <Edit className="w-4 h-4 text-gray-700" />
-                            </Button>
-                        </DialogTrigger>
-                        <AddUserModal
-                            refetchUsers={() => refetchUsers(offset)}
-                            selectedId={selectedUser.id}
-                        />
-                    </Dialog> */}
                     <Button
                         variant="ghost"
                         size="sm"
                         className="p-1 h-7 w-7 hover:bg-gray-100"
-                        onClick={() => {
-                            console.log('Edit user:', selectedUser.id)
-                        }}
+                        onClick={() => onEdit(selectedUser.userId)}
                     >
                         <Edit className="w-4 h-4 text-gray-700" />
                     </Button>
 
-                    <Button
+                    {/* <Button
                         variant="ghost"
                         size="sm"
                         className="p-1 h-7 w-7 hover:bg-red-50"
-                        onClick={() => {
-                            console.log('Delete user:', selectedUser.id)
-                        }}
+                        onClick={() => onDelete(selectedUser.userId)}
                     >
                         <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button>
+                    </Button> */}
+                    <DeleteUser 
+                        userId={selectedUser.userId}
+                        title="Are you absolutely sure?"
+                        description="This action cannot be undone. This will permanently remove the student from the bootcamp"
+                    />
                 </div>
             )
         },

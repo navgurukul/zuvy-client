@@ -16,7 +16,11 @@ import { useRoles } from '@/hooks/useRoles'
 import { api } from '@/utils/axios.config'
 
 type AddUserModalProps = {
-  refetchUsers: () => void;
+  isEditMode: boolean;
+  user?: any | null;
+  refetchUsers?: () => void;
+  selectedId?: number; 
+  onClose?: () => void;
 };
 
 type RoleCardProps = {
@@ -68,7 +72,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
 }
 
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
+const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUsers, onClose }) => {
     const { roles, loading: rolesLoading } = useRoles()
     const [pendingUserRole, setPendingUserRole] = useState(null)
     const [newUser, setNewUser] = useState<{ name: string; email: string }>({
@@ -116,14 +120,36 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
             email: '',
         })
         setPendingUserRole(null)
-        refetchUsers()
+        refetchUsers && refetchUsers()
+        onClose && onClose()
+    }
+
+    const handleEditUser = async () => {
+        if (!canSubmit) return
+
+        const payload = {
+            name: newUser.name.trim(),
+            email: newUser.email.trim(),
+            roleId: pendingUserRole,
+        }
+
+        console.log('payload', payload)
+
+        await api.post(`/rbac/updateUser/${user.userId}`, payload)
+
+        refetchUsers && refetchUsers()
+        onClose && onClose()
+    }
+
+    const handleSubmit = () => {
+        isEditMode ? handleEditUser() : handleAddUser()
     }
 
     return (
         <DialogContent className="max-w-3xl">
             <DialogHeader className="text-left">
                 <DialogTitle className="text-[18px] font-semibold">
-                    Add New User
+                    {isEditMode ? 'Edit User' : 'Add New User'}
                 </DialogTitle>
             </DialogHeader>
 
@@ -198,9 +224,9 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ refetchUsers }) => {
                     <Button
                         className="bg-primary hover:bg-blue-700"
                         disabled={!canSubmit}
-                        onClick={handleAddUser}
+                        onClick={handleSubmit}
                     >
-                        Add User
+                        {isEditMode ? 'Save Change' : 'Add User'}
                     </Button>
                 </DialogClose>
             </DialogFooter>
