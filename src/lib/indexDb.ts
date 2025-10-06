@@ -18,3 +18,7 @@ class AppDB extends Dexie {
 }
 
 export const db = new AppDB();
+
+
+
+

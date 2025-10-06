@@ -43,9 +43,9 @@ const QuizResults = ({
     ) || 0
     const percentage = maxMarks > 0 ? Math.ceil((totalMarks / maxMarks) * 100) : 0
 
-    // Show loading state
-    if (loading) {
-     return<QuizResultsSkeleton/>
+
+    if (loading || !quizResults) {
+       return <QuizResultsSkeleton />;
     }
     // Show error state
     if (error) {
