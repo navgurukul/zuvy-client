@@ -44,7 +44,7 @@ const ProfileDropDown = ({
                             alt="Student"
                         />
                         <AvatarFallback className="bg-gray-200 text-muted-foreground text-md font-medium">
-                            {getUserInitials('Poonam Singh Bagh')}
+                            {getUserInitials(studentData?.name)}
                         </AvatarFallback>
                     </Avatar>
                 </DropdownMenuTrigger>

@@ -29,7 +29,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
-import { NewCodingProblemFormProps } from "@/app/admin/resource/_components/adminResourceComponentType"
+import { NewCodingProblemFormProps } from "@/app/[admin]/resource/_components/adminResourceComponentType"
 import { useCreateCodingQuestion } from '@/hooks/useCreateCodingQuestion'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/

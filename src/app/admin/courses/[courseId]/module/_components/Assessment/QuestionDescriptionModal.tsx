@@ -1,7 +1,7 @@
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn, difficultyBgColor, difficultyColor } from '@/lib/utils';
-import {QuestionDescriptionModalProps } from "@/app/admin/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
+import {QuestionDescriptionModalProps } from "@/app/[admin]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType"
 import { ReactElement, JSXElementConstructor, ReactNode, ReactPortal, PromiseLikeOfReactNode, Key } from 'react';
 
 // Define the types for different question types
