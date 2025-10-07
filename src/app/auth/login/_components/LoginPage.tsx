@@ -18,7 +18,7 @@ import { api } from '@/utils/axios.config'
 import { Button } from '@/components/ui/button'
 import './styles/login.css'
 import { toast } from '@/components/ui/use-toast'
-import { getUser } from '@/store/store'
+import { getUser, useThemeStore } from '@/store/store'
 import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 
@@ -26,6 +26,7 @@ type Props = {}
 
 function LoginPage({}: Props) {
     const [loading, setLoading] = useState(false)
+    const { isDark } = useThemeStore();
     const { user, setUser } = getUser()
     const router = useRouter()
     const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
@@ -269,11 +270,11 @@ const handleGoogleSuccess = async (
                             {/* Logo */}
                             <div className="mb-6">
                                 <Image
-                                    src={'/logo.PNG'}
+                                    src={isDark ? '/zuvy-logo-horizontal-dark (1).png' : '/zuvy-logo-horizontal (1).png'}
                                     alt="Zuvy Logo"
                                     className="mx-auto"
-                                    width={64}
-                                    height={64}
+                                    width={100}
+                                    height={100}
                                 />
                             </div>
 

@@ -51,7 +51,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip'
 import useWindowSize from '@/hooks/useHeightWidth'
-import { useIsStudentEnrolledInOneCourseStore } from '@/store/store'
+import { useIsStudentEnrolledInOneCourseStore, useThemeStore } from '@/store/store'
 import {
     Module,
     ModuleContentCounts,
@@ -59,6 +59,8 @@ import {
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
     const [showAllModules, setShowAllModules] = useState(false)
+    const { isDark } = useThemeStore()
+    
     const { setIsStudentEnrolledInOneCourse } =
         useIsStudentEnrolledInOneCourseStore()
     const {
@@ -149,7 +151,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
         progressData?.data?.bootcampTracking?.coverImage || ''
     const validCourseCoverImage = isValidImageUrl(courseCoverImage)
         ? courseCoverImage
-        : '/logo.PNG'
+        : (isDark
+                                ? '/zuvy-logo-horizontal-dark (1).png'
+                                : '/zuvy-logo-horizontal (1).png')
     const collaborator =
         progressData?.data?.bootcampTracking?.collaborator || ''
     const validCollaborator = isValidImageUrl(collaborator) ? collaborator : ''

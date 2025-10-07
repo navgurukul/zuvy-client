@@ -20,10 +20,12 @@ import useCourseSyllabus from '@/hooks/useCourseSyllabus'
 import TruncatedDescription from '@/app/student/_components/TruncatedDescription'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useThemeStore } from '@/store/store'
 
 const CourseSyllabusPage = () => {
     const { courseId } = useParams()
     const router = useRouter()
+    const { isDark } = useThemeStore()
     const { syllabusData, loading, error, refetch } =
         useCourseSyllabus(courseId)
 
@@ -249,7 +251,9 @@ const CourseSyllabusPage = () => {
                                 <Image
                                     width={128}
                                     height={128}
-                                    src={syllabusData.coverImage || '/logo.PNG'}
+                                    src={syllabusData.coverImage || (isDark
+                                ? '/zuvy-logo-horizontal-dark (1).png'
+                                : '/zuvy-logo-horizontal (1).png')}
                                     alt={syllabusData.bootcampName}
                                 />
                             </div>
