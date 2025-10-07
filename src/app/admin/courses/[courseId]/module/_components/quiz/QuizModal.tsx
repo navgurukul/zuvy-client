@@ -41,7 +41,7 @@ const QuizModal = ({
     const hasCodeBlock = isCodeQuestion(question)
 
     return (
-        <div className="flex w-full justify-between py-4 px-8 items-center h-30 rounded-lg border border-gray-200 bg-white mb-4">
+        <div className="flex w-full justify-between py-4 px-8 items-center h-30 rounded-lg border border-gray-200 bg-white mt-4">
             <div className="flex flex-col gap-2 w-full">
                 <div className="flex flex-col gap-2 w-full">
                     <div className="font-semibold flex justify-between w-full">
