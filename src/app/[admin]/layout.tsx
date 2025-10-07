@@ -9,14 +9,17 @@ import { Spinner } from '@/components/ui/spinner'
 
 import '../globals.css'
 import { useEffect } from 'react'
+import { db } from '@/lib/indexDb'
 import StudentNavbar from '../_components/navbar'
 import { useRoles } from '@/hooks/useRoles'
+import { useAllCourses } from '@/hooks/useAllCourses'
 
 export default function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const { refetchAllCourses } = useAllCourses(true);
     const pathname = usePathname()
     const { roles } = useRoles()
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
@@ -32,6 +35,8 @@ export default function RootLayout({
         }
         return ''
     }
+
+
 
     return (
         <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
@@ -49,9 +54,8 @@ export default function RootLayout({
                     {!adminAssessmentPreviewRoute && <StudentNavbar />}
 
                     <div
-                        className={`${
-                            adminAssessmentPreviewRoute ? '' : 'pt-16'
-                        } h-screen`}
+                        className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'
+                            } h-screen`}
                     >
                         <MaxWidthWrapper>{children}</MaxWidthWrapper>
                     </div>
