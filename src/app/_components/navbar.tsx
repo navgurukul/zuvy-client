@@ -45,9 +45,11 @@ import { useThemeStore } from '@/store/store'
 import { Moon, Sun } from 'lucide-react'
 import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
+import { useRoles } from '@/hooks/useRoles'
 
 //Test
 const Navbar = () => {
+    const { roles } = useRoles()
     const { studentData } = useLazyLoadedStudentData()
     const { user, setUser } = getUser()
     const pathname = usePathname()
@@ -60,15 +62,23 @@ const Navbar = () => {
         queryObject[key] = value
     })
 
+    const role = user.rolesList[0]
+    console.log('user in navbar', user.rolesList[0])
+    console.log('roles in navbar', roles)
+
     const { viewRolesAndPermission, viewContent } = queryObject
 
-    const isAdmin = pathname?.includes('/admin')
-    const isTeacher = pathname?.includes('/instructor')
+    const isAdmin = pathname?.includes(role)
+    // const isAdmin = pathname?.includes('/admin')
+    // const isTeacher = pathname?.includes('/instructor')
     const routes = isAdmin
-        ? adminRoutes
-        : isTeacher
-        ? teacherRoutes
+        ? adminRoutes(role)
         : guestRoutes
+    // const routes = isAdmin
+    //     ? adminRoutes
+    //     : isTeacher
+    //     ? teacherRoutes
+    //     : guestRoutes
 
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -146,7 +156,7 @@ const Navbar = () => {
 
                 {/* Right - Theme Switch and Avatar with Dropdown */}
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
-                    <Button
+                    {/* <Button
                         variant="ghost"
                         size="sm"
                         onClick={toggleTheme}
@@ -157,7 +167,7 @@ const Navbar = () => {
                         ) : (
                             <Moon className="h-4 w-4" />
                         )}
-                    </Button>
+                    </Button> */}
 
                     {/* Admin Avatar with Dropdown */}
                     <ProfileDropDown

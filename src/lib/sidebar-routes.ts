@@ -165,25 +165,25 @@ const teacherRoutes = [
 //     // { label: "Help", icon: HelpCircle, href: "/admin/help" },
 // ]
 
-const adminRoutes = [
+const adminRoutes = (role: string) =>[
     {
         name: 'Course Studio',
-        href: '/admin/courses',
+        href: `/${role}/courses`,
         icon: Layers,
         active: (pathname: string) => 
-        pathname === '/admin/courses' || pathname.startsWith('/admin/courses/'),
+        pathname === `/${role}/courses` || pathname.startsWith(`/${role}/courses`),
     },
     {
         name: 'Question Bank',
-        href: '/admin/content-bank',
+        href: `/${role}/content-bank`,
         icon: Database,
-        active: '/admin/content-bank',
+        active: `/${role}/content-bank`,
     },
     {
         name: 'Roles and Permissions',
-        href: '/admin/settings',
+        href: `/${role}/settings`,
         icon: Settings,
-        active: '/admin/settings',
+        active: `/${role}/settings`,
     },
 ]
 
