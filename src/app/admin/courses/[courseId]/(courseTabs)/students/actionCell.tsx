@@ -21,11 +21,13 @@ interface ActionCellProps {
         bootcampId: string
         name: string
         email: string
+        status?: string
+        batchId?: string
     }
 }
 
 const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
-    const { userId, bootcampId, name, email } = student
+    const { userId, bootcampId, name, email, status, batchId } = student
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -44,7 +46,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
                     <DropdownMenuItem 
                         onClick={() => {
                             setDropdownOpen(false)
-                            router.push(`/admin/courses/${bootcampId}/students?view=details&studentId=${userId}`)
+                            router.push(`/admin/courses/${bootcampId}/${userId}`)
                         }}
                         className="focus:text-blue-600"
                     >
@@ -66,7 +68,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
                             setDropdownOpen(false)
                             setDeleteModalOpen(true)
                         }}
-                        className="text-red-600 focus:text-blue-600"
+                        className="text-destructive focus:text-primary"
                     >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete Student
@@ -74,12 +76,14 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
                 </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Edit Modal - Outside dropdown */}
+            {/* Edit Modal - Updated with batchId */}
             <EditModal
                 userId={Number(userId)}
                 bootcampId={Number(bootcampId)}
                 name={name}
                 email={email}
+                status={status}
+                batchId={Number(batchId)} // Pass batchId
                 isOpen={editModalOpen}
                 onClose={() => setEditModalOpen(false)}
             />

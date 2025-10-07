@@ -13,7 +13,8 @@ export const taskSchema = z.object({
     batchName: z.string(),
     attendance: z.number(),
     status: z.string(),
-    lastActive: z.string().nullable().optional(), // Add this for last active date
+    lastActive: z.string().nullable().optional(), 
+    lastActiveDate: z.string().nullable().optional(),
     studentStatus: z.enum(['active', 'dropout', 'graduate']).optional(), // Add this for student status
     enrolledDate: z.string().nullable().optional(), // Add this for enrolled date
     reattemptCount: z.number().optional(),

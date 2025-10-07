@@ -92,7 +92,7 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                 />
             </div>
 
-            {showBatchSelection && (
+            {/* {showBatchSelection && (
                 <div className="text-left">
                     <Label htmlFor="batch">Batch (Optional)</Label>
                     <Select
@@ -120,7 +120,7 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
                         </SelectContent>
                     </Select>
                 </div>
-            )}
+            )} */}
         </div>
     )
 }
