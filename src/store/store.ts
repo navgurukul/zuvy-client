@@ -1000,6 +1000,7 @@ export const getEditStudent = create<editStudent>((set) => ({
 }))
 
 type StudentInfo = {
+    status: any
     email: string
     name: string
 }
@@ -1011,6 +1012,7 @@ type studentData = {
 
 export const getStudentData = create<studentData>((set) => ({
     studentData: {
+        status: '',
         email: '',
         name: '',
     },

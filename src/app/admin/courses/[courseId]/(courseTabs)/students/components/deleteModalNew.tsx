@@ -78,7 +78,7 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button className="bg-white text-red-400">
+                <Button className="bg-background text-destructive hover:bg-background">
                     <Trash2 />
                 </Button>
             </AlertDialogTrigger>

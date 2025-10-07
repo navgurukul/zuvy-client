@@ -105,9 +105,9 @@ export const getAttendanceColorClass = (attendance: number) => {
     if (attendance < 50) {
         return 'text-destructive' // Red color for attendance < 50%
     } else if (attendance >= 50 && attendance < 75) {
-        return 'text-yellow-dark' // Yellow color for attendance between 50% and 75%
+        return 'text-primary' // blue color for attendance between 50% and 75%
     } else {
-        return 'text-secondary' // Green color for attendance >= 75%
+        return 'text-success' // Green color for attendance >= 75%
     }
 }
 
