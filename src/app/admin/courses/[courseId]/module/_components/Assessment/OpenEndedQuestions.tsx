@@ -18,7 +18,7 @@ const OpenEndedQuestions = ({
     tags,
 }:OpenEndedQuestionesProps) => {
     return (
-        <ScrollArea className="h-[calc(100vh-200px)] pb-44  pr-4">
+        <ScrollArea className="h-[25.5rem] w-full pr-3">
             {/* <ScrollBar orientation="vertical" className="h-dvh" /> */}
             {questions.map((question: OpenEndedQuestiones) => {
                 const tag = tags?.find(
@@ -27,7 +27,7 @@ const OpenEndedQuestions = ({
                 return (
                     <div
                         key={question.id}
-                        className="py-4 px-8 pr-5 rounded-lg border border-gray-200 bg-white mb-4"
+                        className="py-4 px-8 pr-5 rounded-lg border border-gray-200 bg-white mt-4"
                     >
                         <div className="flex justify-between text-start items-center">
                             <div className="w-full">

@@ -48,7 +48,7 @@ const SelectQuizQuestions = ({
                     return (
                         <React.Fragment key={question.id}>
 
-                            <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4">
+                            <div className="py-4 px-8 rounded-lg border border-gray-200 bg-white mt-4">
                                 <div className="flex justify-between items-start w-full">
                                     <div className="w-full">
                                         <div className="flex items-center gap-2">

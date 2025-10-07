@@ -23,6 +23,8 @@ import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {CodingChallangesQuestion,ChallangesProps, CodingTopicsTag} from "@/app/admin/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType"
 import { AnyARecord } from 'dns'
+import { SquareCode } from 'lucide-react'
+
 function CodingChallenge({
     content,
     activeChapterTitle,
@@ -264,13 +266,13 @@ function CodingChallenge({
                 <div className='px-5 pb-4 border-b border-gray-200'>
                     <div className="flex flex-col items-start mb-15">
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-2/6 flex justify-center align-middle items-center relative">
+                            <div className="w-2/4 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={handleTitleChange}
                                     value={chapterTitle}
                                     placeholder="Untitled Coding Problem"
-                                    className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
+                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                 />
                                 {!chapterTitle && (
                                     <Pencil
@@ -300,6 +302,10 @@ function CodingChallenge({
                                 )}
                             </div>
                         </div>
+                        <div className="flex items-center gap-2 pb-4">
+                            <SquareCode size={20} className="transition-colors" />
+                            <p className="text-muted-foreground">Coding Problems</p>
+                        </div>
                     </div>
                 </div>
 
@@ -327,7 +333,7 @@ function CodingChallenge({
                     <div className="grid grid-cols-2">
                         <div className="">
                             <div className="">
-                                <ScrollArea className="h-screen pb-80">
+                                <ScrollArea className="h-[25.5rem] w-full pr-3">
                                     {filteredQuestions?.map((question: any) => {
                                         const selectedTagName = tags?.filter(
                                             (tag: any) => tag.id == question.tagId
@@ -335,7 +341,7 @@ function CodingChallenge({
                                         return (
                                             <div
                                                 key={question.id}
-                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white mt-4"
                                             >
                                                 <div className="flex justify-between text-start items-center w-full">
                                                     <div className="w-full">

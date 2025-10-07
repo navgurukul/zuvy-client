@@ -14,7 +14,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import '@/app/_components/editor/Tiptap.css'
+// import '@/app/_components/editor/Tiptap.css'
 import { Pencil } from 'lucide-react'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import UploadArticle from './UploadPdf'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     Tooltip,
     TooltipContent,
@@ -437,7 +438,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
     }
 
     return (
-        <div className="px-5 flex-1 overflow-y-auto space-y-2 pr-2">
+     <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
+        <div className="px-5 space-y-2 pr-2 pb-6">
             <div className="w-full ">
                 {/* <div className="flex justify-between items-center"> */}
                 {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
@@ -446,7 +448,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     <form
                         id="myForm"
                         onSubmit={form.handleSubmit(editArticleContent)}
-                        className=""
+                        className="mr-4 mb-1"
                     >
                         <FormField
                             control={form.control}
@@ -474,8 +476,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                         : 'Untitled PDF'
                                                 }
                                                 className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                // className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                // className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
                                             />
                                         </>
                                     </FormControl>
@@ -526,12 +526,12 @@ const AddArticle: React.FC<AddArticleProps> = ({
                         </div>
                     </div> */}
                 {/* </div> */}
-                <div className="flex items-center gap-2 ml-4 pb-4">
+                <div className="flex items-center gap-2 ml-1 pb-4">
                     <BookOpenText size={20} className="transition-colors" />
                     <p className="text-muted-foreground">Article</p>
                 </div>
 
-                <div className="ml-4">
+                <div className="ml-1 mr-4">
                     <RadioGroup
                         className="flex items-center gap-x-6"
                         onValueChange={(value) => setDefaultValue(value)}
@@ -685,7 +685,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     </div>
                 </div>
 
-                <div className="flex justify-end mt-5">
+                <div className="flex justify-end mt-5 mr-3">
                     {defaultValue === 'editor' ? (
                         <Button
                             className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -710,6 +710,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 </div>
             </div>
         </div>
+    </ScrollArea>
     )
 }
 

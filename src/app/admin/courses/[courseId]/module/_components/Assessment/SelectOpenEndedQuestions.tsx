@@ -25,7 +25,7 @@ const SelectOpenEndedQuestions = ({
                 return (
                     <div
                         key={question.id}
-                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mt-4"
                     >
                         <div className="flex justify-between items-start">
                             <div className="flex-1">

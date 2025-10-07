@@ -90,7 +90,8 @@ function Page() {
         if (moduleId && courseData?.id) {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
-                    const data = res.data.find(
+                    const modulesData = res.data.modules || res.data
+                    const data = modulesData.find(
                         (item:  ModuleData ) => moduleId === item.id
                     )
                     setSelectedModuleData(data)
@@ -177,7 +178,8 @@ function Page() {
         if (isEditOpen && moduleId && courseData?.id) {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
-                    const data = res.data.find(
+                    const modulesData = res.data.modules || res.data
+                    const data = modulesData.find(
                         (module: any) => module.id === moduleId
                     )
                     setSelectedModuleData(data) // Set the selected module's data
@@ -340,7 +342,10 @@ function Page() {
             const response = await api.get(
                 `/content/allModules/${courseData.id}`
             )
-            const modulesWithStartedFlag = response.data.map((module: ModuleData) => ({
+
+            const modulesData = response.data.modules || response.data
+
+            const modulesWithStartedFlag = modulesData.map((module: ModuleData) => ({
                 ...module,
                 isStarted: false,
             }))
@@ -630,7 +635,7 @@ function Page() {
                 <div className="flex flex-col items-center justify-center overflow-hidden">
                     {curriculum.length > 0 ? (
                         <Reorder.Group
-                            className="w-full px-2 md:px-0 max-w-4xl flex flex-col gap-y-4 my-4"
+                            className="w-full px-2 md:px-0 max-w-4xl flex flex-col my-4"
                             values={curriculum}
                             onReorder={handleReorderModules}
                             axis="y"

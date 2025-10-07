@@ -25,7 +25,7 @@ function QuizList({
     tags: any
 }) {
     return (
-        <ScrollArea className="h-[580px] w-full pb-10 pr-3">
+        <ScrollArea className="h-[25.5rem] w-full pr-3">
             {questionData.map((question:QuizListQuestion) => {
                 const isSelected = addQuestion?.some(
                     (quest: QuizListQuestion) => quest?.id === question.id
@@ -42,7 +42,7 @@ function QuizList({
 
                 return (
                     <div
-                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                        className="py-4 px-8 rounded-lg border border-gray-200 bg-white mt-4"
                         key={question.id}
                     >
                         <div className="flex items-center justify-between w-full">

@@ -10,7 +10,6 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
-import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import {SubmissionData,BootcampData,QuizDetails} from "@/app/admin/courses/[courseId]/submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionQuizQuestion/viewQuizQuestionPageType"
 
@@ -24,38 +23,6 @@ const Page = ({ params }: { params: paramsType }) => {
   const codeBlockClass =
     'text-gray-800 font-light bg-gray-300 p-4 rounded-lg text-left whitespace-pre-wrap w-full'
 
-  const crumbs = [
-    {
-      crumb: 'My Courses',
-      href: `/admin/courses`,
-      isLast: false,
-    },
-    {
-      crumb: bootcampData?.name,
-
-      href: `/admin/courses/${params.courseId}/submissions`,
-      isLast: false,
-    },
-    {
-      crumb: 'Submission - Assesments',
-      href: `/admin/courses/${params.courseId}/submissions`,
-      isLast: false,
-    },
-    {
-      crumb: assesmentData?.title,
-      href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
-      isLast: false,
-    },
-    {
-      crumb: proctoringData?.user?.name,
-      href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
-      isLast: false,
-    },
-    {
-      crumb: `Quiz Report`,
-      isLast: true,
-    },
-  ]
   const getBootcampHandler = useCallback(async () => {
     try {
       const res = await api.get<{ bootcamp: BootcampData }>(`/bootcamp/${params.courseId}`)
@@ -118,12 +85,11 @@ const Page = ({ params }: { params: paramsType }) => {
 
   return (
     <>
-      <BreadcrumbComponent crumbs={crumbs} />
       <div className="flex items-center gap-4 mb-8">
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="hover:bg-blue-600 hover:text-white transition-colors"
+          className="hover:bg-transparent hover:text-primary transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Course Submissions

@@ -131,10 +131,13 @@ export default function NewMcqForm({
             isRandomOptions: false,
             variantMCQs: values.variants.map((variant, index) => ({
                 question: variant.questionText,
-                options: variant.options.reduce((acc: Record<number, string>, option, idx) => {
-                    acc[idx + 1] = option.optionText
-                    return acc
-                }, {}),
+                options: variant.options.reduce(
+                    (acc: Record<number, string>, option, idx) => {
+                        acc[idx + 1] = option.optionText
+                        return acc
+                    },
+                    {}
+                ),
                 correctOption: variant.selectedOption + 1,
             })),
         }
@@ -145,7 +148,11 @@ export default function NewMcqForm({
                 title: 'Success',
                 description: 'Question Created Successfully',
             })
-            setIsMcqModalOpen(false)
+
+            // Refresh data, reset form and then close modal
+            await getAllQuizQuesiton() // This will fetch and update the data
+            form.reset()
+            closeModal()
         } catch (error: any) {
             toast.error({
                 title: 'Error',
