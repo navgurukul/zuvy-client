@@ -273,8 +273,8 @@ const handleGoogleSuccess = async (
                                     src={isDark ? '/zuvy-logo-horizontal-dark (1).png' : '/zuvy-logo-horizontal (1).png'}
                                     alt="Zuvy Logo"
                                     className="mx-auto"
-                                    width={64}
-                                    height={64}
+                                    width={100}
+                                    height={100}
                                 />
                             </div>
 

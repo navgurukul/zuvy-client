@@ -234,8 +234,8 @@ const Header = () => {
                         }
                         alt="Zuvy Logo"
                         className="mx-auto"
-                        width={64}
-                        height={64}
+                        width={72}
+                        height={72}
                     />
                 </div>
 
