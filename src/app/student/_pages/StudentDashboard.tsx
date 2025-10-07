@@ -14,7 +14,7 @@ import {
 import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '@/store/store';
+import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store';
 import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
@@ -25,6 +25,8 @@ import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const { studentData, loading, error, refetch } = useStudentData();
+  const { isDark } = useThemeStore()
+  
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
 
   const { studentData: studentProfile } = useLazyLoadedStudentData();
@@ -291,7 +293,9 @@ const formatUpcomingItem = (item: any) => {
                   {/* Course Image */}
                   <div className="mt-2">
                     <Image
-                      src={bootcamp.coverImage || '/logo.PNG'}
+                      src={bootcamp.coverImage ||  (isDark
+                                ? '/zuvy-logo-horizontal-dark (1).png'
+                                : '/zuvy-logo-horizontal (1).png')}
                       alt={bootcamp.name}
                       width={128}
                      height={128}
