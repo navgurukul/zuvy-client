@@ -25,7 +25,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import '@/app/_components/editor/Tiptap.css'
+// import '@/app/_components/editor/Tiptap.css'
 import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
 import {
     Popover,
@@ -43,6 +43,7 @@ import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import UploadArticle from '../Article/UploadPdf'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     Tooltip,
     TooltipContent,
@@ -524,6 +525,7 @@ const AddAssignent = ({
         )
     }
     return (
+        <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
         <div className="px-5">
             <>
                 <div className="w-full ">
@@ -898,6 +900,7 @@ const AddAssignent = ({
                 </div>
             </>
         </div>
+    </ScrollArea>
     )
 }
 
