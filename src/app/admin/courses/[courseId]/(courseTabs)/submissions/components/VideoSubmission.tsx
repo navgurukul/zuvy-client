@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, Play } from 'lucide-react'
+import { Play,Eye } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +63,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                         if (filteredVideos.length === 0) return null
                         return (
                             <div key={key}>
-                                <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
+                                <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white mb-4">
                                     Module - {key}
                                 </h2>
                                 <div className="grid md:grid-cols-3 gap-3">
@@ -75,18 +75,58 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                 : 0
                                         return (
                                             <div
-                                                className="bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                                                className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow w-full"
                                                 key={video.id}
                                             >
                                                 {/* Content */}
-                                                <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p- bg-gray-100 rounded-md">
-                                                            <Play className="w-4 h-4 text-gray-600" />
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="p-2 rounded-md">
+                                                            <Play className="w-4 h-4" />
                                                         </div>
-                                                        <h3 className="font-medium text-base text-gray-900">{video.title}</h3>
+                                                        <h3 className="font-medium text-base">{video.title}</h3>
                                                     </div>
-                                                    
+                                                </div>
+                                                <div className="absolute top-3 right-3">
+                                                    {video.completedStudents >
+                                                        0 ? (
+                                                            
+                                                        <Link
+                                                            href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
+                                                        >
+                                                            <Button
+                                                            variant="ghost"
+                                                            className="flex items-center text-gray-500  hover:text-gray-700 hover:bg-transparent"
+                                                           
+                                                        >
+                                                             <Eye
+                                                                    size={
+                                                                        20
+                                                                    }
+                                                                    className="ml-1"
+                                                                />
+                                                        </Button>
+                                                               
+                                                           
+
+                                                        </Link>
+
+                                                    ) : (
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="hover:text-gray-400 transition-colors"
+                                                            disabled={
+                                                                true
+                                                            }
+                                                        >
+                                                            <Eye
+                                                                size={
+                                                                    20
+                                                                }
+                                                                className="ml-1"
+                                                            />
+                                                        </Button>
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center justify-between mt-4 text-sm">
                                                     <div className="flex items-center gap-1">
@@ -103,52 +143,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                     >
                                                         {videoData.totalStudents - video.completedStudents} pending
                                                     </Badge>
-                                                </div>
-                                               
-
-                                                {/* Fix View Submissions button to right bottom corner */}
-                                                <div className="w-full flex justify-end">
-                                                    {video.completedStudents >
-                                                        0 ? (
-                                                       
-                                                            <Link
-                                                                href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
-                                                            >
-                                                                 <Button
-                                                            variant="ghost"
-                                                           className="hover:bg-blue-600 hover:text-white transition-colors mt-2"
-                                                        >
-                                                             View
-                                                             Submissions
-                                                             <ChevronRight
-                                                                size={
-                                                                    16
-                                                                }
-                                                                className="ml-1"
-                                                            />
-                                                        </Button>
-                                                        
-                                                            </Link>
-                                                            
-                                                    ) : (
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="flex items-center text-green-700 hover:bg-transparent"
-                                                            disabled={
-                                                                true
-                                                            }
-                                                        >
-                                                            View
-                                                            Submissions
-                                                            <ChevronRight
-                                                                size={
-                                                                    16
-                                                                }
-                                                                className="ml-1"
-                                                            />
-                                                        </Button>
-                                                    )}
-                                                </div>
+                                                </div>                                               
                                             </div>
                                         )
                                     })}

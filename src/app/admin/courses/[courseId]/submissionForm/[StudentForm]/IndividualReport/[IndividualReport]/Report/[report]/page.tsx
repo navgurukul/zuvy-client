@@ -106,9 +106,9 @@ const Page = ({ params }: { params: Params }) => {
 
     return (
         <div className="min-h-screen font-semibold bg-background">
-            {/* Back Button */}
-            <MaxWidthWrapper>
-                <div className="flex items-center gap-4 mb-8">
+              {/* Back Button */}
+             <MaxWidthWrapper>
+                 <div className="flex items-center gap-4 mb-8">
                     <Button
                         variant="ghost"
                         onClick={() => router.back()}
