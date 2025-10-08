@@ -39,7 +39,7 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
 
     async function deleteUserHandler(userId: any) {
         try {
-            await api.delete(`/rbac/deleteUser/${userId}`).then((res) => {
+            await api.delete(`/users/deleteUser/${userId}`).then((res) => {
                 toast.success({
                     title: 'User Deleted Successfully!',
                     description: res.data.message,

@@ -44,7 +44,7 @@ const AddRoleModal = () => {
                 description: newRole.description.trim(),
             }
 
-            const response = await api.post('/rbac/users', payload)
+            const response = await api.post('/users/create/user/role', payload)
 
             // Reset form
             setNewRole({

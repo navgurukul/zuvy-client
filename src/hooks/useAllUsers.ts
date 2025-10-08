@@ -61,7 +61,7 @@ export function useAllUsers({
                 // setLoading(true)
                 setLoading(false)
                 setError(null)
-                const res = await api.get<UsersResponse>(`/rbac/get/all/users?limit=${stableLimit}&offset=${offset}`)
+                const res = await api.get<UsersResponse>(`/users/get/all/users?limit=${stableLimit}&offset=${offset}`)
                 const allUsers = res.data || []
 
                 setUsers(allUsers.data)

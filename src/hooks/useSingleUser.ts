@@ -112,7 +112,7 @@ export function useUser(userId: number | null) {
 
             setLoading(true)
             setError(null)
-            const res = await api.get<UsersResponse>(`/rbac/getUser/${userId}`)
+            const res = await api.get<UsersResponse>(`/users/getUser/${userId}`)
             console.log('User fetch response:', res.data)
             
             // Assuming the API returns a single user in data array

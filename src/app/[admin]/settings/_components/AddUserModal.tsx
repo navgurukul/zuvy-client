@@ -112,7 +112,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
             roleId: pendingUserRole,
         }
 
-        await api.post('/rbac/addUsers', payload)
+        await api.post('/users/addUsers', payload)
 
         // Reset form
         setNewUser({
@@ -135,7 +135,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
 
         console.log('payload', payload)
 
-        await api.post(`/rbac/updateUser/${user.userId}`, payload)
+        await api.post(`/users/updateUser/${user.userId}`, payload)
 
         refetchUsers && refetchUsers()
         onClose && onClose()
