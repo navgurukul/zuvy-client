@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowDownToLine, ChevronRight, Play } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, Play, Eye } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import Link from 'next/link'
@@ -149,34 +149,54 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                         key={liveClass.id}
                         className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
                     >
-
-                        <button
-                            onClick={() => {
-                                if (submissions > 0) {
-                                    handleDownloadPdf(liveClass.id, liveClass.title)
-                                }
-                            }}
-                            className={`absolute top-2 right-2 z-10 transform ${submissions > 0
+                        <div className="absolute top-2 right-2 z-10 flex items-center">
+                            <button
+                                onClick={() => {
+                                    if (submissions > 0) {
+                                        handleDownloadPdf(liveClass.id, liveClass.title)
+                                    }
+                                }}
+                                className={`transform ${submissions > 0
                                     ? 'hover:text-gray-700 cursor-pointer'
                                     : 'text-gray-400 cursor-not-allowed'
-                                }`}
-                            title={submissions > 0 ? 'Download Report' : 'No submissions yet'}
-                            disabled={submissions === 0}
-                        >
-                            <ArrowDownToLine
-                                size={20}
-                                className={submissions > 0 ? 'text-gray-500' : 'text-gray-300'}
-                            />
-                        </button>
+                                    }`}
+                                title={submissions > 0 ? 'Download Report' : 'No submissions yet'}
+                                disabled={submissions === 0}
+                            >
+                                <ArrowDownToLine
+                                    size={20}
+                                    className={submissions > 0 ? 'text-gray-500' : 'text-gray-300'}
+                                />
+                            </button>
+                            {submissions > 0 ? (
+                                <Link
+                                    href={`/admin/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
+                                >
+                                    <Button
+                                        variant={'ghost'}
+                                        className="hover:bg-white-600 hover:text-gray-700 text-gray-500 transition-colors"
+                                    >
+                                        <Eye size={20} />
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <Button
+                                    variant={'ghost'}
+                                    className="text-gray-400 text-sm"
+                                    disabled
+                                >
+                                    <Eye size={20} />
+                                </Button>
+                            )}
 
-
+                        </div>
                         <div className="flex flex-col w-full">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-100 rounded-md">
-                                    <Play className="w-4 h-4 text-gray-600" />
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 rounded-md">
+                                    <Play className="w-4 h-4" />
                                 </div>
-                                <h3 className="font-medium text-base text-gray-900">
-                                    {liveClass.title || 'Untitled Live Class'}
+                                <h3 className="font-medium text-base">
+                                    {liveClass.title}
                                 </h3>
                             </div>
                             <div className="flex items-center justify-between mt-4 text-sm">
@@ -195,31 +215,6 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                     {totalStudents - submissions} pending
                                 </Badge>
                             </div>
-                        </div>
-
-                        <div className="w-full flex justify-end mt-2">
-                            {submissions > 0 ? (
-                                <Link
-                                    href={`/admin/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
-                                >
-                                    <Button
-                                        variant={'ghost'}
-                                        className="hover:bg-blue-600 hover:text-white transition-colors"
-                                    >
-                                        View Submission
-                                        <ChevronRight className="text-green-700" size={17} />
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <Button
-                                    variant={'ghost'}
-                                    className="text-green-700 text-sm"
-                                    disabled
-                                >
-                                    View Submission
-                                    <ChevronRight className="text-green-700" size={17} />
-                                </Button>
-                            )}
                         </div>
                     </div>
                 )

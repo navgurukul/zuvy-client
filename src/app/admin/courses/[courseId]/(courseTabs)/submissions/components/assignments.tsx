@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, ArrowDownToLine, FileText } from 'lucide-react'
+import { ChevronRight, ArrowDownToLine, FileText,Eye } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import jsPDF from 'jspdf'
@@ -152,47 +152,61 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         key={moduleData.id}
                                                     >
                                                         {/* Icon at the top-right */}
-                                                        <div className="absolute top-5 pr-3 right-2 group">
-                                                            <button
-                                                                className={`ml-2 cursor-pointer ${isDisabled
-                                                                    ? 'text-gray-400'
-                                                                    : 'text-gray-500 hover:text-gray-700'
-                                                                    }`}
-                                                                onClick={
-                                                                    isDisabled
-                                                                        ? undefined
-                                                                        : () =>
-                                                                            handleDownloadPdf(
-                                                                                Number(
-                                                                                    chapterId
-                                                                                )
-                                                                            )
-                                                                }
-                                                                aria-label="Download full report"
-                                                                disabled={
-                                                                    isDisabled
-                                                                } // Disable button
-                                                            >
-                                                                <ArrowDownToLine
-                                                                    size={20}
-                                                                />
-                                                            </button>
-                                                            {/* Tooltip visible on hover */}
-                                                            {!isDisabled && (
-                                                                <div className="absolute right-0 mt-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                                    Download
-                                                                    full report
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                                        <div className="flex items-center gap-3">
 
+                                                            <div className="absolute top-5 pr-3 right-10 group">
+                                                                <button
+                                                                    className={`ml-2 cursor-pointer ${isDisabled
+                                                                        ? 'text-gray-400'
+                                                                        : 'text-gray-500 hover:text-gray-700'
+                                                                        }`}
+                                                                    onClick={
+                                                                        isDisabled
+                                                                            ? undefined
+                                                                            : () =>
+                                                                                handleDownloadPdf(
+                                                                                    Number(
+                                                                                        chapterId
+                                                                                    )
+                                                                                )
+                                                                    }
+                                                                    aria-label="Download full report"
+                                                                    disabled={
+                                                                        isDisabled
+                                                                    } // Disable button
+                                                                >
+                                                                    <ArrowDownToLine
+                                                                        size={20}
+                                                                    />
+                                                                </button>
+                                                                {/* Tooltip visible on hover */}
+                                                                {!isDisabled && (
+                                                                    <div className="absolute right-0 mt-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
+                                                                        Download
+                                                                        full report
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="absolute top-5 pr-3 right-2 group">
+                                                                <Link
+                                                                    href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                                >
+                                                                    <div>
+                                                                        <Eye
+                                                                            size={20} className="text-gray-500 mb-1"
+                                                                        />
+                                                                    </div>
+
+                                                                </Link>
+                                                            </div>
+                                                        </div>
                                                         {/* Content */}
                                                         <div className="font-semibold pl-3 flex w-full flex-col justify-between">
-                                                            <div className="flex items-center gap-3">
+                                                            <div className="flex items-center gap-2">
                                                                 <div className="p-2 bg-gray-100 rounded-md">
-                                                                    <FileText className="w-4 h-4 text-gray-600" />
+                                                                    <FileText className="w-4 h-4" />
                                                                 </div>
-                                                                <h3 className="font-medium text-base text-gray-900">{moduleData.title}</h3>
+                                                                <h3 className="font-medium text-base">{moduleData.title}</h3>
                                                             </div>
                                                             <div className="flex items-center justify-between mt-4 text-sm">
                                                                 <div className="flex items-center gap-1">
@@ -209,26 +223,6 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                                 >
                                                                     {totalStudents - moduleData.submitStudents} pending
                                                                 </Badge>
-                                                            </div>
-                                                            {/* Fix View Submissions button to right bottom corner */}
-                                                            <div className="w-full flex justify-end">
-
-                                                                <Link
-                                                                    href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
-                                                                >
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        className="hover:bg-blue-600 hover:text-white transition-colors mt-2"
-                                                                    >
-                                                                        View
-                                                                        Submissions
-                                                                        <ChevronRight
-                                                                            size={16} className="ml-1"
-                                                                        />
-                                                                    </Button>
-
-                                                                </Link>
-
                                                             </div>
                                                         </div>
                                                     </div>
