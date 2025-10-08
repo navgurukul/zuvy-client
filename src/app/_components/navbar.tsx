@@ -1,4 +1,5 @@
 'use client'
+
 import Link from 'next/link'
 import {
     Layers,
@@ -23,6 +24,7 @@ const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -128,7 +130,7 @@ const Navbar = () => {
 
                 {/* Right - Theme Switch and Avatar with Dropdown */}
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
-                    <Button
+                    {/* <Button
                         variant="ghost"
                         size="sm"
                         onClick={toggleTheme}
@@ -139,7 +141,7 @@ const Navbar = () => {
                         ) : (
                             <Moon className="h-4 w-4" />
                         )}
-                    </Button>
+                    </Button> */}
 
                     {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown

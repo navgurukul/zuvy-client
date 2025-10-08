@@ -27,8 +27,8 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { getBatchData, getIsRowSelected } from '@/store/store'
-import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
-import AddLiveClasstoChapter from '@/app/admin/courses/[courseId]/module/_components/AddLiveClasstoChapter'
+import McqDeleteVaiarntComp from '@/app/[admin]/resource/_components/McqDeleteComponent'
+import AddLiveClasstoChapter from '@/app/[admin]/courses/[courseId]/module/_components/AddLiveClasstoChapter'
 import {
     DataTableProps,
     StudentData,
