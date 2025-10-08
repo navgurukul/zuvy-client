@@ -24,12 +24,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { getBatchData } from '@/store/store'
-import McqDeleteVaiarntComp from '@/app/[admin]/resource/_components/McqDeleteComponent'
-import {
-    StudentData,
-    DataTableProps,
-} from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+import{StudentData,DataTableProps} from "./courseBatchesType"
+
 export function DataTable<TData, TValue>({
     columns,
     data,

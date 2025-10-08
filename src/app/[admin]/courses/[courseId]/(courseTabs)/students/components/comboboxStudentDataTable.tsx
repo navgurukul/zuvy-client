@@ -19,10 +19,7 @@ import {
 } from '@/components/ui/popover'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import {
-    ComboboxStudentProps,
-    CourseStudentBatchItem,
-} from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType'
+import{ComboboxStudentProps,CourseStudentBatchItem} from "@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 export function ComboboxStudent({
     batchData,
     batchName,
@@ -31,7 +28,7 @@ export function ComboboxStudent({
     batchId,
     selectedRows,
     fetchStudentData,
-}: ComboboxStudentProps) {
+}:ComboboxStudentProps) {
     const [open, setOpen] = React.useState(false)
     const [value, setValue] = React.useState('')
     const [displaybatchName, setDisplayBatchName] = React.useState(
@@ -45,19 +42,19 @@ export function ComboboxStudent({
     }, [batchName, batchId])
 
     const handleSelectBatchChange = async (
-        currentValue: string,
-        value: string,
-        setValue: (val: string) => void,
-        setOpen: (open: boolean) => void
-    ) => {
-        setValue(value)
-        setOpen(false)
+     currentValue: string,
+    value: string,
+    setValue: (val: string) => void,
+    setOpen: (open: boolean) => void
+) => {
+    setValue(value);
+    setOpen(false)
         const [selectedValue] = currentValue.split('-')
         const selectedBatch = batchData.find(
             (batch: CourseStudentBatchItem) => batch.value == selectedValue
         )
         const label = selectedBatch ? selectedBatch.label : ''
-
+        
         if (selectedValue !== value) {
             setValue(selectedValue)
         }
@@ -85,7 +82,7 @@ export function ComboboxStudent({
         }
     }
 
-    const selected = selectedRows?.map((item) => {
+    const selected = selectedRows?.map((item:any) => {
         return {
             name: item.name,
             email: item.email,
@@ -138,52 +135,38 @@ export function ComboboxStudent({
                     <CommandGroup>
                         {batchData.map((batch: CourseStudentBatchItem) => {
                             return (
-                                <CommandItem
-                                    key={batch.value}
-                                    disabled={
-                                        value == batch.value && !batchisFull
-                                    }
-                                    value={`${batch.value}-${batch.label}`}
-                                    onSelect={(currentValue) => {
-                                        selectedRows
-                                            ? handleAssignBatch(currentValue)
-                                            : handleSelectBatchChange(
-                                                  currentValue,
-                                                  value,
-                                                  setValue,
-                                                  setOpen
-                                              )
-                                    }}
+                            <CommandItem
+                                key={batch.value}
+                                disabled={value == batch.value && !batchisFull}
+                                value={`${batch.value}-${batch.label}`}
+                                onSelect={(currentValue) => {
+                                    selectedRows
+                                        ? handleAssignBatch(currentValue)
+                                        : handleSelectBatchChange(
+                                              currentValue,
+                                              value,
+                                              setValue,
+                                              setOpen
+                                          )
+                                }}
+                                className={cn('cursor-pointer',
+                                    value == (batch.value) && 'bg-orange-500 text-accent-foreground',
+                                    `data-[selected]:${value == (batch.value) ? 'bg-orange-500' : 'bg-gray-100'} data-[selected]:${value == (batch.value) ? 'text-accent-foreground' : 'text-black'}`,
+                                )}
+                            >
+                                <div className="flex items-center text-start gap-2">
+                                <Check
                                     className={cn(
-                                        'cursor-pointer',
-                                        value == batch.value &&
-                                            'bg-orange-500 text-accent-foreground',
-                                        `data-[selected]:${
-                                            value == batch.value
-                                                ? 'bg-orange-500'
-                                                : 'bg-gray-100'
-                                        } data-[selected]:${
-                                            value == batch.value
-                                                ? 'text-accent-foreground'
-                                                : 'text-black'
-                                        }`
+                                        'mr-2 h-4 w-4',
+                                        value == batch.value && !batchisFull
+                                            ? 'opacity-100'
+                                            : 'opacity-0'
                                     )}
-                                >
-                                    <div className="flex items-center text-start gap-2">
-                                        <Check
-                                            className={cn(
-                                                'mr-2 h-4 w-4',
-                                                value == batch.value &&
-                                                    !batchisFull
-                                                    ? 'opacity-100'
-                                                    : 'opacity-0'
-                                            )}
-                                        />
-                                        {batch.label}
-                                    </div>
-                                </CommandItem>
-                            )
-                        })}
+                                />
+                                {batch.label}
+                                </div>
+                            </CommandItem>
+                        )})}
                     </CommandGroup>
                 </Command>
             </PopoverContent>

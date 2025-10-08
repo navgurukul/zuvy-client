@@ -20,7 +20,7 @@ import {
     getStoreStudentData,
     getIsRowSelected,
 } from '@/store/store'
-import { DeleteAlertDialogProps } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType'
+import{DeleteAlertDialogProps} from "@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
 
 export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     title,
@@ -78,7 +78,7 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button className="bg-white text-red-400">
+                <Button className="bg-background text-destructive hover:bg-background">
                     <Trash2 />
                 </Button>
             </AlertDialogTrigger>
@@ -90,9 +90,7 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel className="!text-gray-600 hover:border-[rgb(81,134,114)]">
-                        Cancel
-                    </AlertDialogCancel>
+                    <AlertDialogCancel className="!text-gray-600 hover:border-[rgb(81,134,114)]">Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-red-500"
                         onClick={() => deleteStudentHandler(userId, bootcampId)}
