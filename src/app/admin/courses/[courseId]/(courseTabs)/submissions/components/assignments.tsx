@@ -201,10 +201,10 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             </div>
                                                         </div>
                                                         {/* Content */}
-                                                        <div className="font-semibold pl-3 flex w-full flex-col justify-between">
+                                                        <div className="font-semibold  flex w-full flex-col justify-between">
                                                             <div className="flex items-center gap-2">
-                                                                <div className="p-2 bg-gray-100 rounded-md">
-                                                                    <FileText className="w-4 h-4" />
+                                                                <div className="p-2 rounded-md">
+                                                                    <FileText className="w-4 h-4"/>
                                                                 </div>
                                                                 <h3 className="font-medium text-base">{moduleData.title}</h3>
                                                             </div>

@@ -183,8 +183,7 @@ const Page = ({ params }: any) => {
                     <Button
                         variant="ghost"
                         onClick={() => router.back()}
-                        className="hover:bg-blue-600 hover:text-white transition-colors"
-                    >
+                        className="hover:bg-transparent hover:text-primary transition-colors">
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Course Submissions
                     </Button>
