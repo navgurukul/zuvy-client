@@ -66,6 +66,7 @@ export default function Page({
                 if (currentModule) {
                     setActiveChapterTitle(currentModule?.chapterTitle)
                     setCurrentChapter(currentModule)
+                    
                 }
 
                 setChapterContent(response.data)

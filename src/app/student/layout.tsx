@@ -47,7 +47,6 @@ function StudentLayoutContent({
     )
 }
 
-dd
 export default function StudentLayout({
     children,
 }: {
