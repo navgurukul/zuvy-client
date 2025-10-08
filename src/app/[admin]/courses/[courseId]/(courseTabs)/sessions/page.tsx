@@ -226,8 +226,10 @@ function Page({ params }: ParamsType) {
         if (!params.courseId) return
 
         try {
-            const response = await api.get(`/content/allModules/${params.courseId}`)
-            setModulesData(response.data.modules || response.data)
+            const response = await api.get(
+                `/content/allModules/${params.courseId}`
+            )
+            setModulesData(response.data)
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
