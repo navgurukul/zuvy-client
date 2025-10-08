@@ -35,8 +35,8 @@ function QuizList({
     tags: any
 }) {
     return (
-        <ScrollArea className="h-[25.5rem] w-full  pr-3">
-            {questionData.map((question: QuizListQuestion) => {
+        <ScrollArea className="h-[25.5rem] w-full pr-3">
+            {questionData.map((question:QuizListQuestion) => {
                 const isSelected = addQuestion?.some(
                     (quest: QuizListQuestion) => quest?.id === question.id
                 )

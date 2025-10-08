@@ -157,6 +157,10 @@ export const columns: ColumnDef<CodingQuestion>[] = [
         ),
         cell: ({ row }) => {
             const codingQuestion = row.original
+            const { tags } = getCodingQuestionTags() // Get tags from store
+        
+        // Define topicName here as well
+        const topicName = tags.find(tag => tag.id === codingQuestion.tagId)?.tagName || 'Unknown Topic'
 
             return (
                 <div className="mr-5 flex justify-end">
@@ -169,6 +173,7 @@ export const columns: ColumnDef<CodingQuestion>[] = [
                         <QuestionDescriptionModal
                             question={codingQuestion}
                             type="coding"
+                            tagName={topicName}
                         />
                     </Dialog>
                 </div>

@@ -350,7 +350,7 @@ function CodingChallenge({
                     <div className="grid grid-cols-2">
                         <div className="">
                             <div className="">
-                                <ScrollArea className="h-screen pb-80">
+                                <ScrollArea className="h-[25.5rem] w-full pr-3">
                                     {filteredQuestions?.map((question: any) => {
                                         const selectedTagName = tags?.filter(
                                             (tag: any) =>
@@ -359,7 +359,7 @@ function CodingChallenge({
                                         return (
                                             <div
                                                 key={question.id}
-                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4"
+                                                className="py-4 px-8 rounded-lg border border-gray-200 bg-white mt-4"
                                             >
                                                 <div className="flex justify-between text-start items-center w-full">
                                                     <div className="w-full">

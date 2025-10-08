@@ -133,8 +133,10 @@ function QuizLibrary({
     }, [quizData, addQuestion, handleAddQuestion])
 
     return (
-        <div className="w-full flex flex-col gap-3">
-            <div className="w-full h-max-content mt-4">{renderQuizList}</div>
+        <div className="w-full flex flex-col gap-3">            
+            <div className="w-full h-screen mt-4">
+                {renderQuizList}
+            </div>
         </div>
     )
 }

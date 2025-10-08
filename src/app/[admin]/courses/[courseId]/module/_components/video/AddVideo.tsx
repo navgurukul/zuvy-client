@@ -1112,7 +1112,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                 </Button>
                                 <Button
                                     type="submit"
-                                    className="w-3/3 bg-primary opacity-75"
+                                    className="w-3/3 bg-blue-700"
                                 >
                                     Save Changes
                                 </Button>

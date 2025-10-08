@@ -182,7 +182,8 @@ function Page() {
         if (isEditOpen && moduleId && courseData?.id) {
             api.get(`/content/allModules/${courseData.id}`)
                 .then((res) => {
-                    const data = res?.data?.modules?.find(
+                    const modulesData = res.data.modules || res.data
+                    const data = modulesData.find(
                         (module: any) => module.id === moduleId
                     )
                     setSelectedModuleData(data) // Set the selected module's data

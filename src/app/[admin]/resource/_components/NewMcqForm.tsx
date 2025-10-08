@@ -151,7 +151,11 @@ export default function NewMcqForm({
                 title: 'Success',
                 description: 'Question Created Successfully',
             })
-            setIsMcqModalOpen(false)
+
+            // Refresh data, reset form and then close modal
+            await getAllQuizQuesiton() // This will fetch and update the data
+            form.reset()
+            closeModal()
         } catch (error: any) {
             toast.error({
                 title: 'Error',

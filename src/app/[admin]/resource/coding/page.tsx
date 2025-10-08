@@ -508,13 +508,9 @@ const CodingProblems = () => {
                             <div className="flex items-center gap-4 mb-6">
                                 <div>
                                     <SearchBox
-                                        placeholder="Search..."
-                                        fetchSuggestionsApi={
-                                            fetchSuggestionsApi
-                                        }
-                                        fetchSearchResultsApi={
-                                            fetchSearchResultsApi
-                                        }
+                                        placeholder="Search question"
+                                        fetchSuggestionsApi={fetchSuggestionsApi}
+                                        fetchSearchResultsApi={fetchSearchResultsApi}
                                         defaultFetchApi={defaultFetchApi}
                                         getSuggestionLabel={(suggestion) => (
                                             <div>

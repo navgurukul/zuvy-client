@@ -107,12 +107,18 @@ const OpenEndedQuestions = (props: Props) => {
         useState(false)
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
-        const response = await api.get(
-            `/content/openEndedQuestions?searchTerm=${encodeURIComponent(
-                query
-            )}&limit=5&offset=0`
-        )
-        return response.data.data || []
+        const response = await api.get(`/content/openEndedQuestions?searchTerm=${encodeURIComponent(query)}&limit=5&offset=0`)
+        
+        // If there's truncation in suggestions, increase it
+        const suggestions = (response.data.data || []).map((item: any) => ({
+            ...item,
+            // Increase question truncation size - बड़ा करें
+            question: item.question.length > 40
+                ? item.question.substring(0, 40) + '...'
+                : item.question
+        }))
+        
+        return suggestions
     }, [])
 
     const fetchSearchResultsApi = useCallback(

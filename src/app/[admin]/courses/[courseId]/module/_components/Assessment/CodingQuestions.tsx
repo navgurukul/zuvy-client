@@ -32,8 +32,7 @@ const CodingQuestions = ({
     }
 
     return (
-        <ScrollArea className="h-3/5  w-full pr-5 pb-32">
-            {/* <ScrollBar orientation="vertical" className="h-3/4" /> */}
+        <ScrollArea className="h-[25.5rem] w-full pr-3">
             <div className="h-screen">
                 {questions.map((question: CodingQuestiones) => {
                     const tag = tags?.find(
