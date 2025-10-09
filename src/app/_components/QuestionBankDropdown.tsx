@@ -12,13 +12,13 @@ import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
-const QuestionBankDropdown = () => {
+const QuestionBankDropdown = ({role}: {role: string}) => {
     const pathname = usePathname()
     const [open, setOpen] = useState(false)
 
     const isActive =
-        pathname === '/admin/resource/' ||
-        pathname.startsWith('/admin/resource/')
+        pathname === `/${role}/resource/` ||
+        pathname.startsWith(`/${role}/resource/`)
 
     return (
         <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -45,10 +45,10 @@ const QuestionBankDropdown = () => {
 
                 <DropdownMenuContent className="w-40">
                     <Link
-                        href="/admin/resource/coding"
+                        href={`/${role}/resource/coding`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === '/admin/resource/coding'
+                            pathname === `/${role}/resource/coding`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}
@@ -56,10 +56,10 @@ const QuestionBankDropdown = () => {
                         Coding Problems
                     </Link>
                     <Link
-                        href="/admin/resource/mcq"
+                        href={`/${role}/resource/mcq`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === '/admin/resource/mcq'
+                            pathname === `/${role}/resource/mcq`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}
@@ -67,10 +67,10 @@ const QuestionBankDropdown = () => {
                         MCQ
                     </Link>
                     <Link
-                        href="/admin/resource/open-ended"
+                        href={`/${role}/resource/open-ended`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === '/admin/resource/open-ended'
+                            pathname === `/${role}/resource/open-ended`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}
