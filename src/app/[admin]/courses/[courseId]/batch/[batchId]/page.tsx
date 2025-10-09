@@ -51,6 +51,7 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { Spinner } from '@/components/ui/spinner'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import AddStudentsModal from '../../_components/addStudentsmodal'
+import AddStudentOptions from '../../_components/AddStudentOptions'
 import { ComboboxStudent } from '../../(courseTabs)/students/components/comboboxStudentDataTable'
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 import { useStudentData } from '../../(courseTabs)/students/components/useStudentData'
@@ -80,6 +81,7 @@ const BatchesInfo = ({
     const [bootcamp, setBootcamp] = useState<any>([])
     const [search, setSearch] = useState('')
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
+    const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false)
     const [instructorsInfo, setInstructorInfo] = useState<any>([])
     const [pages, setPages] = useState<number>()
     const position = useMemo(
@@ -742,23 +744,29 @@ const BatchesInfo = ({
                                     buttonText="Delete Batch"
                                     instructorInfo={instructorsInfo}
                                 />
-                                <Dialog>
+                                <Dialog
+                                    open={isAddStudentModalOpen} onOpenChange={setIsAddStudentModalOpen}>
                                     <DialogTrigger asChild>
                                         <Button className=" gap-x-2">
                                             <Plus /> Add Students
                                         </Button>
-                                    </DialogTrigger>
+                                    </DialogTrigger> 
                                     <DialogOverlay />
-                                    <AddStudentsModal
-                                        message={false}
-                                        id={+params.courseId || 0}
-                                        batch={true}
+                               <DialogContent className="max-w-[800px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Add Students</DialogTitle>
+                                        </DialogHeader>
+                                        <AddStudentOptions
+                                            context="batch"
+                                            courseId={+params.courseId || 0}
                                         batchId={params.batchId}
-                                        fetchBatchesData={fetchStudentData}
-                                        setStudentData={setStudentDataTable}
-                                        studentData={studentDataTable}
-                                        modalType="both"
-                                    />
+                                            capEnrollment={instructorsInfo?.capEnrollment}
+                                            onSuccess={() => {
+                                                fetchStudentData(offset)
+                                                setIsAddStudentModalOpen(false)
+                                            }}
+                                        />
+                                    </DialogContent>
                                 </Dialog>
                             </div>
                         </div>

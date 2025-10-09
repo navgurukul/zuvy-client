@@ -22,7 +22,7 @@ export interface CourseDetailsFormData {
     name: string
     bootcampTopic?: string
     description: string
-    duration: string
+    duration: number
     language: string
     startTime: Date
     coverImage?: string
