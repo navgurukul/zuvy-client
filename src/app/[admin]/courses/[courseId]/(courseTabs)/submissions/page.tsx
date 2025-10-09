@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowDownToLine, ChevronRight, FileText, CheckSquare, Code, MessageSquare, ClipboardCheck, BookOpen, Play, Video, Eye } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, FileText, CheckSquare, Code, MessageSquare, ClipboardCheck, BookOpen, Play, Video } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import Link from 'next/link'
@@ -228,7 +228,7 @@ const Page = ({ params }: { params: any }) => {
                     console.error('Error fetching videos for suggestions:', error)
                 }
                 break
-
+            
             case 'live':
                 try {
                     const liveRes = await api.get(
@@ -435,8 +435,8 @@ const Page = ({ params }: { params: any }) => {
                                 <div className="relative w-full lg:w-1/3">
                                     <SearchBox
                                         placeholder={`${activeTab === 'practice'
-                                            ? 'Search for practice problems by name'
-                                            : `Search for ${activeTab} by name`
+                                                ? 'Search for practice problems by name'
+                                                : `Search for ${activeTab} by name`
                                             }`}
                                         fetchSuggestionsApi={fetchSuggestionsApi}
                                         fetchSearchResultsApi={fetchSearchResultsApi}
@@ -561,42 +561,22 @@ const Page = ({ params }: { params: any }) => {
                                                             key={item.id}
                                                             className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
                                                         >
-                                                            <div className="absolute top-2 right-1 z-10 flex items-center gap-0">
-
-                                                                <button
-                                                                    onClick={submissions > 0 ? handleDownloadPdf : undefined}
-                                                                    className={`cursor-pointer ${submissions > 0 ? 'text-gray-500 hover:text-gray-700' : 'text-gray-400'
-                                                                        }`}
-                                                                    title="Download Report"
-                                                                    disabled={submissions === 0}
-                                                                >
-                                                                    <ArrowDownToLine size={20} className="" />
-                                                                </button>
-                                                                {submissions > 0 ? (
-                                                                    <Link
-                                                                        href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData?.[0]?.id}`}
-                                                                    >
-                                                                        <Button variant={'ghost'} className="hover:bg-white-600 hover:text-gray-700 transition-colors">
-                                                                            <Eye className="text-gray-500" size={20} />
-                                                                        </Button>
-                                                                    </Link>
-                                                                ) : (
-                                                                    <Button
-                                                                        variant={'ghost'}
-                                                                        className="text-gray-400 text-sm"
-                                                                        disabled
-                                                                    >
-                                                                        <Eye className="text-gray-400" size={20} />
-                                                                    </Button>
-                                                                )}
-                                                            </div>
+                                                            <button
+                                                                onClick={submissions > 0 ? handleDownloadPdf : undefined}
+                                                                className={`absolute top-2 right-2 z-10 transform cursor-pointer ${submissions > 0 ? 'hover:text-gray-700' : 'text-gray-400'
+                                                                    }`}
+                                                                title="Download Report"
+                                                                disabled={submissions === 0}
+                                                            >
+                                                                <ArrowDownToLine size={20} className="text-gray-500" />
+                                                            </button>
 
                                                             <div className="flex flex-col w-full">
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className="p-2 rounded-md">
-                                                                        <BookOpen className="w-4 h-4" />
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="p-2 bg-gray-100 rounded-md">
+                                                                        <BookOpen className="w-4 h-4 text-gray-600" />
                                                                     </div>
-                                                                    <h3 className="font-medium text-base">{item.projectData[0].title || 'Untitled Project'}</h3>
+                                                                    <h3 className="font-medium text-base text-gray-900">{item.projectData[0].title || 'Untitled Project'}</h3>
                                                                 </div>
                                                                 <div className="flex items-center justify-between mt-4 text-sm">
                                                                     <div className="flex items-center gap-1">
@@ -614,6 +594,28 @@ const Page = ({ params }: { params: any }) => {
                                                                         {totalStudents - submissions} pending
                                                                     </Badge>
                                                                 </div>
+                                                            </div>
+
+                                                            <div className="w-full flex justify-end mt-2">
+                                                                {submissions > 0 ? (
+                                                                    <Link
+                                                                        href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData?.[0]?.id}`}
+                                                                    >
+                                                                        <Button variant={'ghost'} className="hover:bg-blue-600 hover:text-white transition-colors">
+                                                                            View Submission{' '}
+                                                                            <ChevronRight className="text-green-700" size={17} />
+                                                                        </Button>
+                                                                    </Link>
+                                                                ) : (
+                                                                    <Button
+                                                                        variant={'ghost'}
+                                                                        className="text-green-700 text-sm"
+                                                                        disabled
+                                                                    >
+                                                                        View Submission
+                                                                        <ChevronRight className="text-green-700" size={17} />
+                                                                    </Button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     )
@@ -638,22 +640,22 @@ const Page = ({ params }: { params: any }) => {
                                     {activeTab === 'form' && (
                                         <div className="grid relative gap-8 mt-4 md:mt-8">
                                             {formData.length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
-                                                    {formData.map((item: any) =>
-                                                        (item.moduleChapterData || []).map((data: any, index: any) => (
-                                                            <FormComponent
-                                                                key={`${item.id}-${index}`}
-                                                                moduleName={item.name}
-                                                                moduleId={item.id}
-                                                                bootcampId={item.bootcampId}
-                                                                data={data}
-                                                                debouncedSearch={appliedSearchQuery}
-                                                            />
-                                                        ))
-                                                    )}
+                                               <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3"> 
+                                                {formData.map((item: any) =>
+                                                    (item.moduleChapterData || []).map((data: any, index: any) => (
+                                                        <FormComponent
+                                                            key={`${item.id}-${index}`}
+                                                            moduleName={item.name}
+                                                            moduleId={item.id}
+                                                            bootcampId={item.bootcampId}
+                                                            data={data}
+                                                            debouncedSearch={appliedSearchQuery}
+                                                        />
+                                                    ))
+                                                )}
                                                 </div>
                                             ) : (
-
+                                                
                                                 <div className="flex flex-col justify-center items-center">
                                                     <p className="text-center text-muted-foreground max-w-md">
                                                         {appliedSearchQuery ? `No Forms Found for "${appliedSearchQuery}"` : 'No Forms submissions available from the students yet. Please wait until the first submission'}
@@ -682,10 +684,10 @@ const Page = ({ params }: { params: any }) => {
                                         />
                                     )}
                                     {activeTab === 'live' && (
-                                        <LiveClassSubmission
-                                            debouncedSearch={appliedSearchQuery}
-                                            courseId={params.courseId}
-                                        />
+                                      <LiveClassSubmission
+                                         debouncedSearch={appliedSearchQuery}
+                                         courseId={params.courseId}
+                                       />
                                     )}
                                 </div>
                             </TabsContent>

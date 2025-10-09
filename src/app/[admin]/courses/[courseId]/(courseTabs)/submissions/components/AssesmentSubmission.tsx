@@ -236,10 +236,10 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                         (key) =>
                             key !== 'totalStudents' && (
                                 <div key={key}>
-                                    <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white mb-4">
+                                    <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
                                         Module - {key}
                                     </h2>
-                                    <div className="grid md:grid-cols-3 gap-4">
+                                    <div className="grid md:grid-cols-3 gap-3">
                                         {assesments[key].map(
                                             (
                                                 assessment: AssessmentSubmissions

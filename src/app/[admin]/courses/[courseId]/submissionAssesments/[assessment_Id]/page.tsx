@@ -17,6 +17,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
+import { fetchStudentAssessments } from '@/utils/admin'
 import { POSITION } from '@/utils/constant'
 import { SearchBox } from '@/utils/searchBox'
 
@@ -33,21 +34,6 @@ interface Suggestion {
     email: string;
 }
 
-interface Batch {
-    id: number;
-    name: string;
-    bootcampId: number;
-    instructorId: number;
-    capEnrollment: number;
-    createdAt: string;
-    updatedAt: string;
-    status: string;
-    startDate: string | null;
-    endDate: string | null;
-    students_enrolled: number;
-    instructorEmail: string;
-}
-
 const Page = ({ params }: any) => {
     const router = useRouter()
     const pathname = usePathname()
@@ -57,11 +43,17 @@ const Page = ({ params }: any) => {
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
     const [passPercentage, setPassPercentage] = useState<number>(0)
-    const [selectedBatch, setSelectedBatch] = useState<string>('all')
-    const [batches, setBatches] = useState<Batch[]>([])
-    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const [sortField, setSortField] = useState<string>('submittedDate')
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+    const [selectedBatch, setSelectedBatch] = useState('All Batches')
+
+    // Dummy batch data
+    const batchOptions = [
+        'All Batches',
+        'Full Stack Batch 2024-A',
+        'Full Stack Batch 2024-B',
+        'Data Science Batch 2024-A',
+        'UI/UX Design Batch 2024-A',
+        'Mobile Development Batch 2024-A'
+    ]
 
     const { isReattemptApproved } = getIsReattemptApproved()
     const position = useMemo(
@@ -74,94 +66,19 @@ const Page = ({ params }: any) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
 
-    // Fetch batches from API
-    const fetchBatches = useCallback(async () => {
-        setIsLoadingBatches(true)
-        try {
-            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
-            setBatches(res.data.data || [])
-        } catch (error) {
-            console.error('Error fetching batches:', error)
-        } finally {
-            setIsLoadingBatches(false)
-        }
-    }, [params.courseId])
-
-    // Fetch student assessments with sorting, batch filter and search
-    const fetchStudentAssessmentsWithBatch = useCallback(async (
-        assessmentId: string,
-        courseId: string,
-        offset: number,
-        limit: number | string,
-        searchQuery: string,
-        batchId?: string,
-        orderBy?: string,
-        orderDirection?: 'asc' | 'desc'
-    ) => {
-        try {
-            // Build query parameters
-            const queryParams = new URLSearchParams()
-            
-            if (batchId && batchId !== 'all') {
-                queryParams.append('batchId', batchId)
-            }
-            
-            if (searchQuery) {
-                queryParams.append('searchStudent', searchQuery)
-            }
-            
-            if (orderBy) {
-                queryParams.append('orderBy', orderBy)
-            }
-            
-            if (orderDirection) {
-                queryParams.append('orderDirection', orderDirection)
-            }
-            
-            queryParams.append('offset', offset.toString())
-            queryParams.append('limit', limit.toString())
-
-            const res = await api.get(
-                `/admin/assessment/students/assessment_id${assessmentId}?${queryParams.toString()}`
-            )
-
-            const data = res.data
-            const assessments = data.submitedOutsourseAssessments || []
-            const moduleAssessment = data.ModuleAssessment || {}
-            
-            // Calculate total pages
-            const totalStudents = moduleAssessment.totalSubmitedStudents || 0
-            const calculatedTotalPages = Math.ceil(totalStudents / Number(limit))
-            
-            setTotalPages(calculatedTotalPages)
-            setLastPage(calculatedTotalPages)
-            
-            return {
-                assessments,
-                moduleAssessment,
-                passPercentage: moduleAssessment.passPercentage || 0
-            }
-        } catch (error) {
-            console.error('Error fetching student assessments:', error)
-            return {
-                assessments: [],
-                moduleAssessment: {},
-                passPercentage: 0
-            }
-        }
-    }, [])
-
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string): Promise<Suggestion[]> => {
-        const { assessments } = await fetchStudentAssessmentsWithBatch(
+        // if (!query.trim() || query.length < 2) {
+        //     return []
+        // }
+        const { assessments } = await fetchStudentAssessments(
             params?.assessment_Id,
             params?.courseId,
-            0,
-            5,
-            query,
-            selectedBatch !== 'all' ? selectedBatch : undefined,
-            sortField,
-            sortDirection
+            0, // Start from first page for suggestions
+            5, // Limit to 5 results for suggestions
+            query, // Use the search query
+            () => { }, // Empty function for setTotalPages
+            () => { }  // Empty function for setLastPage
         )
 
         return assessments
@@ -171,65 +88,41 @@ const Page = ({ params }: any) => {
                 email: student.email || student.studentEmail || student.student?.email || ''
             }))
             .filter((suggestion: Suggestion) => suggestion.name && suggestion.email)
-    }, [params.assessment_Id, params.courseId, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch])
+    }, [params.assessment_Id, params.courseId])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessmentsWithBatch(
+        const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
             params?.assessment_Id,
             params?.courseId,
             offset,
             position,
             query,
-            selectedBatch !== 'all' ? selectedBatch : undefined,
-            sortField,
-            sortDirection
+            setTotalPages,
+            setLastPage
         )
         setDataTableAssessments(assessments)
         setAssessmentData(moduleAssessment)
         setPassPercentage(passPercentage)
-        setTotalStudents(moduleAssessment?.totalSubmitedStudents || 0)
+        setTotalStudents(moduleAssessment?.totalStudents)
         return assessments
-    }, [params.assessment_Id, params.courseId, offset, position, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch])
+    }, [params.assessment_Id, params.courseId, offset, position])
 
     const defaultFetchApi = useCallback(async () => {
-        const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessmentsWithBatch(
+        const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
             params?.assessment_Id,
             params?.courseId,
             offset,
             position,
-            '',
-            selectedBatch !== 'all' ? selectedBatch : undefined,
-            sortField,
-            sortDirection
+            '', // Empty search query
+            setTotalPages,
+            setLastPage
         )
         setDataTableAssessments(assessments)
         setAssessmentData(moduleAssessment)
         setPassPercentage(passPercentage)
-        setTotalStudents(moduleAssessment?.totalSubmitedStudents || 0)
+        setTotalStudents(moduleAssessment?.totalStudents)
         return assessments
-    }, [params.assessment_Id, params.courseId, offset, position, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch])
-
-    const crumbs = [
-        {
-            crumb: 'My Courses',
-            href: `/admin/courses`,
-            isLast: false,
-        },
-        {
-            crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: 'Submission - Assesments',
-            href: `/admin/courses/${params.courseId}/submissions`,
-            isLast: false,
-        },
-        {
-            crumb: assesmentData?.title,
-            isLast: false,
-        },
-    ]
+    }, [params.assessment_Id, params.courseId, offset, position])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -244,44 +137,29 @@ const Page = ({ params }: any) => {
         async (offset: number) => {
             if (offset >= 0) {
                 const currentSearchQuery = searchParams.get('search') || ''
-                const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessmentsWithBatch(
+                const { assessments, moduleAssessment, passPercentage } = await fetchStudentAssessments(
                     params?.assessment_Id,
                     params?.courseId,
                     offset,
                     position,
                     currentSearchQuery,
-                    selectedBatch !== 'all' ? selectedBatch : undefined,
-                    sortField,
-                    sortDirection
+                    setTotalPages,
+                    setLastPage
                 )
                 setDataTableAssessments(assessments)
                 setAssessmentData(moduleAssessment)
                 setPassPercentage(passPercentage)
-                setTotalStudents(moduleAssessment?.totalSubmitedStudents || 0)
+                setTotalStudents(moduleAssessment?.totalStudents)
             }
         },
-        [params.assessment_Id, params.courseId, position, searchParams, selectedBatch, sortField, sortDirection, fetchStudentAssessmentsWithBatch]
+        [params.assessment_Id, params.courseId, position, searchParams]
     )
-
-    // Handle batch change
-    const handleBatchChange = useCallback((value: string) => {
-        setSelectedBatch(value)
-        setOffset(0)
-    }, [setOffset])
-
-    // Handle sorting change
-    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
-        setSortField(field)
-        setSortDirection(direction)
-        setOffset(0)
-    }, [setOffset])
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 await Promise.all([
                     getBootcampHandler(),
-                    fetchBatches()
                 ])
             } catch (error) {
                 console.error('Error in fetching data:', error)
@@ -289,7 +167,7 @@ const Page = ({ params }: any) => {
         }
 
         fetchData()
-    }, [isReattemptApproved, getBootcampHandler, fetchBatches])
+    }, [isReattemptApproved, getBootcampHandler])
 
     useEffect(() => {
         getStudentAssesmentDataHandler(offset)
@@ -299,41 +177,37 @@ const Page = ({ params }: any) => {
         position,
         setLastPage,
         setTotalPages,
-        searchParams.get('search'),
-        selectedBatch,
-        sortField,
-        sortDirection
-    ])
-
+        searchParams.get('search')])
     return (
         <>
-        <div className="min-h-screen flex justify-center">
-            <MaxWidthWrapper className="p-6 max-w-7xl">
-                {/* Header */}
-                <div className="flex items-center gap-4 mb-8">
-                    <Button
-                        variant="ghost"
-                        onClick={() => router.back()}
-                        className="hover:bg-transparent hover:text-primary transition-colors"
-                    >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Course Submissions
-                    </Button>
-                </div>
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-8">
+                <Button
+                    variant="ghost"
+                    onClick={() => router.back()}
+                    className="hover:bg-transparent hover:text-primary transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back to Course Submissions
+                </Button>
+            </div>
 
-                {/* Assessment Info Card */}
-                <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
-                    <CardHeader className="bg-muted">
-                        <CardTitle className="text-2xl text-gray-800 text-left">
-                            {assesmentData?.title || 'Loading...'}
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="bg-muted">
+            {/* Assessment Info Card */}
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                <CardHeader className="bg-muted">
+                    <CardTitle className="text-2xl text-gray-800 text-left">
+                        {assesmentData?.title || 'Loading...'}
+                    </CardTitle>
+
+                </CardHeader>
+                <CardContent className="bg-muted">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                             <div className="text-left">
                                 <div className="font-medium text-muted-foreground">Total Submissions:</div>
                                 <div className="text-lg font-semibold">{assesmentData?.totalSubmitedStudents || 0}</div>
                             </div>
+
+                            
 
                             <div className="text-left">
                                 <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
@@ -348,67 +222,57 @@ const Page = ({ params }: any) => {
                                 <label className="font-medium text-muted-foreground">Batch Filter</label>
                                 <Select
                                     value={selectedBatch}
-                                    onValueChange={handleBatchChange}
-                                    disabled={isLoadingBatches}
+                                    onValueChange={setSelectedBatch}
                                 >
                                     <SelectTrigger className="w-full mt-1">
                                         <SelectValue placeholder="All Batches" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">All Batches</SelectItem>
-                                        {batches.map((batch) => (
-                                            <SelectItem key={batch.id} value={batch.id.toString()}>
-                                                {batch.name}
-                                            </SelectItem>
+                                        {batchOptions.map((batch, index) => (
+                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
                                         ))}
                                     </SelectContent>
 
                                 </Select>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
-                
-                <Card className="bg-muted">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-xl text-gray-800">
-                                Student Submissions
-                            </CardTitle>
-                        </div>
-                    </CardHeader>
-                    <div className="relative w-1/3 p-4">
-                        <SearchBox
-                            placeholder="Search by name or email"
-                            fetchSuggestionsApi={fetchSuggestionsApi}
-                            fetchSearchResultsApi={fetchSearchResultsApi}
-                            defaultFetchApi={defaultFetchApi}
-                            getSuggestionLabel={(s) => (
-                                <div>
-                                    <div className="font-medium">{s.name}</div>
-                                    <div className="text-sm text-gray-500">{s.email}</div>
-                                </div>
-                            )}
-                            inputWidth=""
-                        />
+                </CardContent>
+            </Card>
+            <Card className="bg-muted">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-xl text-gray-800">
+                            Student Submissions
+                        </CardTitle>
                     </div>
-                    <CardContent className="p-0">
-                        <DataTable 
-                            data={dataTableAssesment} 
-                            columns={columns}
-                            onSortingChange={handleSortingChange}
-                        />
-                    </CardContent>
-                </Card>
-                <div className="p-6 border-t">
-                    <DataTablePagination
-                        totalStudents={totalStudents}
-                        pages={totalPages}
-                        lastPage={lastPage}
-                        fetchStudentData={getStudentAssesmentDataHandler}
+                </CardHeader>
+                <div className="relative w-1/3 p-4">
+                    <SearchBox
+                        placeholder="Search by name or email"
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(s) => (
+                            <div>
+                                <div className="font-medium">{s.name}</div>
+                                <div className="text-sm text-gray-500">{s.email}</div>
+                            </div>
+                        )}
+                        inputWidth=""
                     />
                 </div>
-            </MaxWidthWrapper>
+                <CardContent className="p-0">
+                    <DataTable data={dataTableAssesment} columns={columns} />
+                </CardContent>
+            </Card>
+            <div className="p-6 border-t">
+                <DataTablePagination
+                    totalStudents={totalStudents}
+                    pages={totalPages}
+                    lastPage={lastPage}
+                    fetchStudentData={getStudentAssesmentDataHandler}
+                />
             </div>
         </>
     )
