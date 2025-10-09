@@ -57,13 +57,6 @@ const SettingsPage: React.FC = () => {
         error,
     } = useUser(editingUserId)
 
-    console.log('user in page', user)
-
-    const handleInviteGenerated = (role: UserRole, inviteLink: string) => {
-        console.log(`${role} invite link generated:`, inviteLink)
-        // You can add additional logic here, such as updating state or making API calls
-    }
-
     useEffect(() => {
         if (initialTab) setActiveTab(initialTab)
     }, [initialTab])
@@ -86,14 +79,12 @@ const SettingsPage: React.FC = () => {
     }
 
     const handleRoleChange = async (userId: number, roleId: number, roleName: string) => {
-        console.log('Update role:', { userId, roleId, roleName })
         // Call your API to update the user's role
         // await updateUserRole(userId, roleId)
         // refetchUsers()
     }
 
     const handleEdit = (userId: number) => {
-        console.log('Edit user:', userId)
         // Open edit modal or navigate to edit page
         setEditingUserId(userId) 
         setIsEditMode(true)
@@ -107,7 +98,7 @@ const SettingsPage: React.FC = () => {
     }, [editingUserId, user, userLoading, isEditMode])
 
     const handleDelete = async (userId: number) => {
-        console.log('Delete user:', userId)
+
         // Call your API to delete the user
         // await deleteUser(userId)
         // refetchUsers()

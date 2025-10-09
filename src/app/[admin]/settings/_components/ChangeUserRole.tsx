@@ -50,8 +50,8 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId }: ro
     }
 
     return (
-        <Select 
-            defaultValue={role?.toLowerCase()} 
+          <Select 
+            defaultValue={role} 
             onValueChange={handleRoleChange} 
             disabled={isUpdating}
         >
