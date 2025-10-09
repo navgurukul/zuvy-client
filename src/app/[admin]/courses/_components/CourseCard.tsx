@@ -5,21 +5,10 @@ import {
     Course,
     CourseData,
     CoursesResponse,
+    CourseCardProps,
 } from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
-
-interface CourseCardProps {
-    //   id: string;
-    //   title: string;
-    //   learnerCount: number;
-    //   duration: string;
-    //   status: 'draft' | 'published' | 'ongoing' | 'archived' | 'completed';
-    course: Course
-    validImageUrl: string
-    onClick: () => void
-    statusOptions: { label: string; value: string }[]
-}
 
 const CourseCard = ({
     course,
