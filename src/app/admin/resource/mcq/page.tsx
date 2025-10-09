@@ -139,7 +139,8 @@ const Mcqs = (props: Props) => {
         window.history.replaceState({}, '', newURL)
     }, [])
     const fetchSuggestionsApi = useCallback(async (query: string): Promise<any[]> => {
-        if (!query.trim()) {
+        // Don't return empty if query has spaces - only check if completely empty
+        if (!query || query.trim().length === 0) {
             return []
         }
     
@@ -147,7 +148,7 @@ const Mcqs = (props: Props) => {
             // API call to fetch quiz questions based on the query
             const response = await api.get('Content/allQuizQuestions', {
                 params: {
-                    searchTerm: encodeURIComponent(query),
+                    searchTerm: query.trim(), // Remove encodeURIComponent here as axios handles it
                     // Add additional filters if needed (tags, difficulty, etc.)
                 }
             })
