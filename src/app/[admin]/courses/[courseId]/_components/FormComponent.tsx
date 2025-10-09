@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getAssesmentBackgroundColorClass } from '@/lib/utils'
-import { ChevronRight, MessageSquare } from 'lucide-react'
+import { ChevronRight, MessageSquare, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { FormComponentProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
@@ -27,15 +27,41 @@ const FormComponent = ({
     }, [bootcampId])
 
     return (
-        <div className="bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
-            <div className="flex flex-col w-full justify-between py-2 lg:mx-2">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gray-100 rounded-md">
-                        <MessageSquare className="w-4 h-4 text-gray-600" />
+        <div className="relative bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
+            <div className="flex flex-col w-full justify-between">
+                <div className="flex items-center gap-2">
+                    <div className="p-2rounded-md">
+                        <MessageSquare className="w-4 h-4"/>
                     </div>
-                    <h3 className="font-medium text-base text-gray-900">
-                        {data.title}
-                    </h3>
+                    <h3 className="font-medium text-base">{data.title}</h3>
+                </div>
+                <div className="absolute top-2 right-1">
+                {data.submitStudents > 0 ? (
+                        <Link
+                            href={{
+                                pathname: `/admin/courses/${bootcampId}/submissionForm/${data.id}`,
+                                query: {
+                                    moduleId: moduleId,
+                                },
+                            }}
+                        >
+                                <Button
+                                    variant="ghost"
+                                    className="hover:bg-white-600 hover:text-gray-700 transition-colors"                               
+                                >
+                                    
+                                    <Eye size={20}  className="text-gray-500" />
+                                </Button>
+                        </Link>
+                    ) : (
+                            <Button
+                                className="text-gray-400"
+                                variant="ghost"
+                                disabled={data.submitStudents === 0}
+                            >
+                                <Eye size={20}  className="ml-1" />
+                            </Button>
+                    )}
                 </div>
                 <div className="flex items-center justify-between mt-4 text-sm">
                     <div className="flex items-center gap-1">
@@ -52,40 +78,6 @@ const FormComponent = ({
                     >
                         {totalStudents - data.submitStudents} pending
                     </Badge>
-                </div>
-                <div className="mt-4 flex justify-end">
-                    {data.submitStudents > 0 ? (
-                        <Link
-                            href={{
-                                pathname: `/admin/courses/${bootcampId}/submissionForm/${data.id}`,
-                                query: {
-                                    moduleId: moduleId,
-                                },
-                            }}
-                        >
-                            <h1 className="w-full text-center text-sm flex lg:text-right text-green-700">
-                                {' '}
-                                <Button
-                                    variant="ghost"
-                                    className="hover:bg-blue-600 hover:text-white transition-colors"
-                                >
-                                    View Submissions
-                                    <ChevronRight size={16} className="ml-1" />
-                                </Button>
-                            </h1>
-                        </Link>
-                    ) : (
-                        <h1 className="w-full text-center text-sm flex lg:text-right text-green-700">
-                            <Button
-                                className="text-green-700"
-                                variant="ghost"
-                                disabled={data.submitStudents === 0}
-                            >
-                                View Submissions
-                                <ChevronRight size={16} className="ml-1" />
-                            </Button>
-                        </h1>
-                    )}
                 </div>
             </div>
         </div>

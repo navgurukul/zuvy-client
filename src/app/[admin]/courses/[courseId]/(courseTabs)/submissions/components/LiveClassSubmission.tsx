@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowDownToLine, ChevronRight, Play } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, Play,Eye } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import Link from 'next/link'
@@ -56,47 +56,53 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
     const handleDownloadPdf = async (liveClassId: string, liveClassTitle: string) => {
         try {
-            const apiUrl = `/submission/livesession/students?liveClassId=${liveClassId}&bootcampId=${courseId}`
+            const apiUrl = `/submission/livesession/zuvy_livechapter_student_submission/${liveClassId}`
             const response = await api.get(apiUrl)
-            const students = response.data?.liveClassSubmissionData?.liveClassTrackingData || []
+
+            const sessionData = response.data?.data?.[0] // First session object
+            const students = sessionData?.studentAttendanceRecords || []
 
             const doc = new jsPDF()
 
             doc.setFontSize(18)
             doc.text('Live Class Submission Report', 14, 15)
-            doc.setFontSize(15)
-            doc.text('List of Students:', 14, 23)
+            doc.setFontSize(14)
+            doc.text(`Title: ${liveClassTitle}`, 14, 22)
+            doc.text('Student Attendance:', 14, 30)
 
-            const columns = [
-                { header: 'Name', dataKey: 'userName' },
-                { header: 'Email', dataKey: 'userEmail' },
-            ]
+            const columns = ['Name', 'Email', 'Status', 'Duration (min)']
 
-            const rows = students.map((student: any) => ({
-                name: student.userName || 'N/A',
-                email: student.userEmail || 'N/A',
-            }))
+            const rows = students.map((record: any) => {
+                return [
+                    record.user?.name || 'N/A',
+                    record.user?.email || 'N/A',
+                    record.status || 'N/A',
+                    (record.duration / 60).toFixed(2), // converting seconds to minutes (optional)
+                ]
+            })
 
+            // Draw table
             autoTable(doc, {
-                head: [columns.map((col) => col.header)],
-                body: rows.map((row: any) => [row.name, row.email]),
-                startY: 25,
+                head: [columns],
+                body: rows,
+                startY: 35,
                 margin: { horizontal: 10 },
                 styles: { overflow: 'linebreak', halign: 'center' },
                 headStyles: { fillColor: [22, 160, 133] },
                 theme: 'grid',
             })
 
-            doc.save(`${liveClassTitle || 'live-class'}.pdf`)
-        } catch (error) {
+            // Save PDF
+            doc.save(`${liveClassTitle || 'live-class-report'}.pdf`)
+        } catch (error: any) {
             console.error('Error generating PDF:', error)
-            toast({
+            toast.error({
                 title: 'Error',
-                description: 'Failed to generate PDF',
-                variant: 'destructive',
+                description: error?.response?.data?.message || 'Failed to generate PDF',
             })
         }
     }
+
 
     if (loading) {
         return (
@@ -143,27 +149,55 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                         key={liveClass.id}
                         className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
                     >
-                        <button
-                            onClick={
-                                submissions > 0
-                                    ? () => handleDownloadPdf(liveClass.id, liveClass.title)
-                                    : undefined
-                            }
-                            className={`absolute top-2 right-2 z-10 transform cursor-pointer ${
-                                submissions > 0 ? 'hover:text-gray-700' : 'text-gray-400'
-                            }`}
-                            title="Download Report"
-                            disabled={submissions === 0}
-                        >
-                            <ArrowDownToLine size={20} className="text-gray-500" />
-                        </button>
+
+<div className="absolute top-2 right-2 z-10 flex items-center">
+                            <button
+                                onClick={() => {
+                                    if (submissions > 0) {
+                                        handleDownloadPdf(liveClass.id, liveClass.title)
+                                    }
+                                }}
+                                className={`transform ${submissions > 0
+                                    ? 'hover:text-gray-700 cursor-pointer'
+                                    : 'text-gray-400 cursor-not-allowed'
+                                    }`}
+                                title={submissions > 0 ? 'Download Report' : 'No submissions yet'}
+                                disabled={submissions === 0}
+                            >
+                                <ArrowDownToLine
+                                    size={20}
+                                    className={submissions > 0 ? 'text-gray-500' : 'text-gray-300'}
+                                />
+                            </button>
+                            {submissions > 0 ? (
+                                <Link
+                                    href={`/admin/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
+                                >
+                                    <Button
+                                        variant={'ghost'}
+                                        className="hover:bg-white-600 hover:text-gray-700 text-gray-500 transition-colors"
+                                    >
+                                        <Eye size={20} />
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <Button
+                                    variant={'ghost'}
+                                    className="text-gray-400 text-sm"
+                                    disabled
+                                >
+                                    <Eye size={20} />
+                                </Button>
+                            )}
+
+                        </div>
 
                         <div className="flex flex-col w-full">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-gray-100 rounded-md">
-                                    <Play className="w-4 h-4 text-gray-600" />
+                            <div className="flex items-center gap-2">
+                                <div className="p-2 rounded-md">
+                                    <Play className="w-4 h-4" />
                                 </div>
-                                <h3 className="font-medium text-base text-gray-900">
+                                <h3 className="font-medium text-base">
                                     {liveClass.title || 'Untitled Live Class'}
                                 </h3>
                             </div>
@@ -183,31 +217,6 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                     {totalStudents - submissions} pending
                                 </Badge>
                             </div>
-                        </div>
-
-                        <div className="w-full flex justify-end mt-2">
-                            {submissions > 0 ? (
-                                <Link
-                                    href={`/admin/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
-                                >
-                                    <Button
-                                        variant={'ghost'}
-                                        className="hover:bg-blue-600 hover:text-white transition-colors"
-                                    >
-                                        View Submission
-                                        <ChevronRight className="text-green-700" size={17} />
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <Button
-                                    variant={'ghost'}
-                                    className="text-green-700 text-sm"
-                                    disabled
-                                >
-                                    View Submission
-                                    <ChevronRight className="text-green-700" size={17} />
-                                </Button>
-                            )}
                         </div>
                     </div>
                 )

@@ -47,7 +47,7 @@ const PraticeProblemsComponent = ({
 
     if (allEmpty) {
         return (
-            <div className="w-screen flex flex-col justify-center items-center h-4/5">
+            <div className="flex flex-col justify-center items-center">
                 <p className="text-center text-muted-foreground max-w-md">
                     No practice problems found.
                 </p>
@@ -56,7 +56,6 @@ const PraticeProblemsComponent = ({
                     alt="No Practice Problem Found"
                     width={120}
                     height={120}
-                    className="mb-6"
                 />
             </div>
         )
@@ -88,7 +87,6 @@ const PraticeProblemsComponent = ({
                         alt="No Practice Problem Found"
                         width={120}
                         height={120}
-                        className="mb-6"
                     />
                 </div>
             )}
