@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import { useAllUsers } from '@/hooks/useAllUsers'
 
 interface DeleteUserProps {
     title: string
@@ -28,24 +29,23 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
     description,
     userId,
 }) => {
-    // const searchParams = useSearchParams()
-    // const offsetParam = searchParams.get('offset')
-    // const [offset, setOffset] = useState<number>(Number(offsetParam) || OFFSET)
-    // const limitParam = searchParams.get('limit')
-    // const position: number = Number(limitParam ?? POSITION) || Number(POSITION)
-    // const {
-    //     refetchUsers,
-    // } = useAllUsers({ initialFetch: true, limit: position, searchTerm: '', offset })
 
+    const { refetchUsers } = useAllUsers({
+        limit: 10,
+        searchTerm: '',
+        offset: 0,
+    })
     async function deleteUserHandler(userId: any) {
+
         try {
             await api.delete(`/users/deleteUser/${userId}`).then((res) => {
                 toast.success({
                     title: 'User Deleted Successfully!',
                     description: res.data.message,
                 })
-                // refetchUsers(offset)
-            })
+            }
+        )
+        await refetchUsers(0)
         } catch (error: any) {
             toast.error({
                 title: 'Failed',
