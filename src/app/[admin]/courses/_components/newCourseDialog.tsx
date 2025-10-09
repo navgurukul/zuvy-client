@@ -207,7 +207,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     }
 
     return (
-        <DialogContent className="max-w-2xl text-gray-600">
+        <DialogContent className="max-w-2xl text-foreground">
             <DialogHeader className="text-left">
                 <DialogTitle className="text-left">
                     Create New Course
@@ -216,15 +216,15 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             <ScrollArea className="max-h-[60vh] px-1">
                 <div className="space-y-5 py-4 pr-4">
-                    <div className="text-left">
-                        <Label htmlFor="name" className="font-bold text-[1rem]">
+                    <div className="text-left ml-1">
+                        <Label htmlFor="name" className="text-[1rem]">
                             Course Name *
                         </Label>
                         <Input
                             type="text"
                             id="name"
                             placeholder="Enter course name"
-                            className="text-[0.95rem] border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            className="text-[0.95rem]"
                             value={newCourseName}
                             onChange={handleNewCourseNameChange}
                             required
@@ -234,7 +234,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                     <div className="text-left ml-1">
                         <Label
                             htmlFor="description"
-                            className="font-bold text-[1rem]"
+                            className="text-[1rem]"
                         >
                             Course Description *
                         </Label>
@@ -248,10 +248,10 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         />
                     </div>
 
-                    <div className="text-left">
+                    <div className="text-left ml-1">
                         <Label
                             htmlFor="duration"
-                            className="font-bold text-[1rem]"
+                            className="text-[1rem]"
                         >
                             Duration (weeks) *
                         </Label>
@@ -515,7 +515,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button className="text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)]">
+                    <Button variant="outline">
                         Cancel
                     </Button>
                 </DialogClose>

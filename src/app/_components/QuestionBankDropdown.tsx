@@ -33,10 +33,10 @@ const QuestionBankDropdown = () => {
                         className={cn(
                             'flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium focus:outline-none',
                             isActive
-                                ? 'bg-blue-600 text-white shadow-sm cursor-default hover:bg-blue-600 hover:text-white'
+                                ? 'bg-primary text-primary-foreground shadow-sm cursor-default hover:bg-primary hover:text-primary-foreground'
                                 : open
-                                ? 'bg-gray-100 text-black hover:bg-gray-100 hover:text-black'
-                                : 'text-black hover:text-black hover:bg-gray-100'
+                                ? 'bg-gray-100 text-foreground hover:bg-gray-100 hover:text-foreground'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
                         )}
                     >
                         <Database className="h-4 w-4" />

@@ -110,7 +110,9 @@ const CourseCard = ({
                     </div>
                     <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        <span>{course.duration}</span>
+                        <span>
+                            {course.duration} {Number(course.duration) <= 1 ? 'week' : 'weeks'}
+                        </span>
                     </div>
                 </div>
             </CardFooter>
