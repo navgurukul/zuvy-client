@@ -11,8 +11,6 @@ import DownloadReport from '@/app/[admin]/courses/[courseId]/submissionAssesment
 import ApproveReattempt from '@/app/[admin]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
 
-const mockBatches = ['Batch A', 'Batch B', 'Batch C']
-
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'student',
@@ -34,31 +32,24 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'batch',
+        accessorKey: 'batchName',
         header: 'Batch',
         cell: ({ row }) => {
-            const index = row.index
+            const batchName = row.original.batchName || 'N/A'
             return (
-                <Badge
-                    variant="outline"
-                    className="text-black border-black-200"
-                >
-                    {mockBatches[index % mockBatches.length]}
+                <Badge variant="outline" className="text-black border-black-200">
+                    {batchName}
                 </Badge>
             )
         },
     },
     {
         accessorKey: 'startedAt',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Started At" />
-        ),
         cell: ({ row }) => {
             const startedAt = row.original.startedAt
             return (
                 <div className="flex">
                     <span className="max-w-[500px] truncate font-medium text-black">
-                        {/* {startedAt ? new Date(startedAt).toLocaleString() : 'N/A'} */}
                         {startedAt
                             ? (() => {
                                   const date = new Date(startedAt)
@@ -92,16 +83,21 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'submitedAt',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Submitted At" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Submitted At" 
+                onSort={onSort}
+                sortField="submittedDate"
+            />
         ),
+        id: 'submittedDate',
         cell: ({ row }) => {
             const submitedAt = row.original.submitedAt
             return (
                 <div className="flex">
                     <span className="max-w-[500px] truncate font-medium text-black">
                         {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
-
                         {submitedAt
                             ? (() => {
                                   const date = new Date(submitedAt)
@@ -135,9 +131,6 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'time taken',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Time Taken" />
-        ),
         cell: ({ row }) => {
             const startedAt = row.original.startedAt
             const submitedAt = row.original.submitedAt
@@ -160,7 +153,14 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'percentage',
-        header: 'Score',
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Score" 
+                onSort={onSort}
+                sortField="percentage"
+            />
+        ),
         cell: ({ row }) => {
             const score = row.original.percentage?.toFixed(2) || '0.00'
             const isPassed = row.original.isPassed
@@ -213,8 +213,7 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
-            const { bootcampId, assessment_Id, userId, id, title, submitedAt } =
-                row.original
+            const { bootcampId, assessment_Id, userId, id, title, submitedAt } = row.original;
 
             const handleDownload = () => {
                 DownloadReport({
@@ -224,8 +223,8 @@ export const columns: ColumnDef<Task>[] = [
                         title: title ?? '',
                     },
                     submitedAt,
-                })
-            }
+                });
+            };
 
             return (
                 <div className="flex items-center gap-3">
@@ -250,10 +249,11 @@ export const columns: ColumnDef<Task>[] = [
                         userInfo={{
                             userId: String(row.original.userId),
                             id: String(row.original.id),
-                            title: row.original.title ?? '',
+                            title: row.original.title ?? ''
                         }}
                         submitedAt={submitedAt}
                     />
+                    
                     {/* Re-attempt Icon */}
                     <Button
                         variant="ghost"
@@ -269,7 +269,7 @@ export const columns: ColumnDef<Task>[] = [
                     {/* Approve Re-Attempt Button */}
                     <ApproveReattempt data={row.original} />
                 </div>
-            )
+            );
         },
     },
 ]

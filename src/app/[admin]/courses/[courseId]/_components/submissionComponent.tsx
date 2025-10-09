@@ -1,4 +1,4 @@
-import { ArrowDownToLine, Code, ChevronRight } from 'lucide-react'
+import { ArrowDownToLine, Code, ChevronRight,Eye } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { jsPDF } from 'jspdf'
@@ -83,17 +83,16 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
         props.totalSubmissions > 0 && props.studentsSubmitted > 0
 
     return (
-        <div className="bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
-            <div className="flex flex-col justify-between flex-grow py-2 lg:mx-2">
+        <div className="bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
+            <div className="flex flex-col justify-between">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-gray-100 rounded-md">
-                            <Code className="w-4 h-4 text-gray-600" />
+                    <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-md">
+                            <Code className="w-4 h-4" />
                         </div>
-                        <h3 className="font-medium text-base text-gray-900">
-                            {props.title}
-                        </h3>
+                        <h3 className="font-medium text-base">{props.title}</h3>
                     </div>
+                    <div className="flex items-center gap-3">
                     <div className="relative group">
                         <button
                             className={`ml-2 ${
@@ -119,49 +118,41 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                 : 'Download full report'}
                         </div>
                     </div>
+                    <div className="relative group">
+                            {hasSubmissions ? (
+                                <Link
+                                    href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
+                                >
+                                    <div>
+                                        <Eye className="text-gray-500 mb-2 hover:text-gray-700" size={20} />
+                                    </div>
+                                </Link>
+                            ) : (
+                                <div className="flex items-center text-sm font-medium text-gray-400 cursor-not-allowed">
+                                    <Eye className="text-gray-400 mb-2" size={20} />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* <div className="flex justify-between items-center"> */}
-                <div className="flex items-center justify-between mt-4 text-sm">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-between mt-4 text-sm">
+                        <div className="flex items-center gap-1">
+                            <Badge
+                                variant="outline"
+                                className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
+                            >
+                                {props.studentsSubmitted} submissions
+                            </Badge>
+                        </div>
                         <Badge
-                            variant="outline"
-                            className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
+                            variant="secondary"
+                            className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
                         >
-                            {props.studentsSubmitted} submissions
+                            {props.totalSubmissions - props.studentsSubmitted} pending
                         </Badge>
                     </div>
-                    <Badge
-                        variant="secondary"
-                        className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                    >
-                        {props.totalSubmissions - props.studentsSubmitted}{' '}
-                        pending
-                    </Badge>
-                </div>
-                {/* Conditionally rendering Link for Submissions */}
-                <div className="mt-4 flex justify-end">
-                    <div>
-                        {hasSubmissions ? (
-                            <Link
-                                href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
-                            >
-                                <Button
-                                    variant="ghost"
-                                    className="hover:bg-blue-600 hover:text-white transition-colors"
-                                >
-                                    View Submissions
-                                    <ChevronRight size={16} className="ml-1" />
-                                </Button>
-                            </Link>
-                        ) : (
-                            <div className="flex items-center text-sm font-medium text-gray-400 cursor-not-allowed">
-                                View Submissions
-                                <ChevronRight size={16} className="ml-1" />
-                            </div>
-                        )}
-                    </div>
-                </div>
             </div>
         </div>
     )
