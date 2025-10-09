@@ -28,7 +28,7 @@ export function useRbacPermissions(resourceId?: number) {
                 setLoading(true)
                 setError(null)
                 const response = await api.get<[null, PermissionsResponse]>(
-                    `/rbac/get/all/permissions?resourceId=${id}`
+                    `permissions/1/permissions/${id}`
                 )
                 const [, apiResponse] = response.data
                 const list = apiResponse.data ?? []
