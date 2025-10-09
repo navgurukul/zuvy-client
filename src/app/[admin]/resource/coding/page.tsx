@@ -582,11 +582,11 @@ const CodingProblems = () => {
                                                     height={500}
                                                 />
                                             </div>
-                                            <h2>
+                                            <h6>
                                                 No coding problems have been
                                                 created yet. Start by adding the
                                                 first one
-                                            </h2>
+                                            </h6>
 
                                             <Dialog>
                                                 <DialogTrigger asChild>

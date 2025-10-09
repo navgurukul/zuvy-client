@@ -12,8 +12,9 @@ import { cn } from '@/lib/utils'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
-const QuestionBankDropdown = ({role}: {role: string}) => {
+const QuestionBankDropdown = () => {
     const pathname = usePathname()
+        const role = pathname.split('/')[1]
     const [open, setOpen] = useState(false)
 
     const isActive =
