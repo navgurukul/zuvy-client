@@ -2,58 +2,10 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select'
+
 import { Edit, Trash2 } from 'lucide-react'
-import { UserRole } from '@/utils/types/type'
-import { useRoles } from '@/hooks/useRoles'
-import AddUserModal from './_components/AddUserModal'
-import { Dialog, DialogTrigger } from '@/components/ui/dialog'
-import { OFFSET, POSITION } from '@/utils/constant'
-import { useSearchParams } from 'next/navigation'
-import { useAllUsers } from '@/hooks/useAllUsers'
-import { useUser } from '@/hooks/useSingleUser'
 import DeleteUser from './_components/DeleteUser'
-
-type roleCellProps = {
-  role: string;
-  roles: any; 
-  rolesLoading: boolean;
-};
-
-// Role Cell Component
-const RoleCell = ({ role, roles, rolesLoading }: roleCellProps) => {
-
-    return (
-        <Select defaultValue={role?.toLowerCase()}>
-            <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm">
-                <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-                {rolesLoading ? (
-                    <SelectItem value="loading" disabled>
-                        Loading...
-                    </SelectItem>
-                ) : (
-                    roles.map((roleOption: any) => (
-                        <SelectItem
-                            key={roleOption.id}
-                            value={roleOption.name}
-                            className="capitalize"
-                        >
-                            {roleOption.name}
-                        </SelectItem>
-                    ))
-                )}
-            </SelectContent>
-        </Select>
-    )
-}
+import { ChangeUserRole } from './_components/ChangeUserRole'
 
 export interface User {
     id: number
@@ -94,16 +46,18 @@ export const createColumns = (
         header: 'Role',
         cell: ({ row }) => {
             const role = row.getValue('roleName') as string
-            return <RoleCell role={role} roles={roles} rolesLoading={rolesLoading}/>
+            const userId = row.original.userId
+            const roleId = row.original.roleId
+            return <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} roleId={roleId} />
         },
     },
-    {
-        accessorKey: 'dateAdded',
-        header: 'Date Added',
-        cell: ({ row }) => (
-            <div className="text-gray-600">{row.getValue('dateAdded')}</div>
-        ),
-    },
+    // {
+    //     accessorKey: 'dateAdded',
+    //     header: 'Date Added',
+    //     cell: ({ row }) => (
+    //         <div className="text-gray-600">{row.getValue('dateAdded')}</div>
+    //     ),
+    // },
     {
         id: 'actions',
         header: 'Actions',

@@ -173,7 +173,7 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className="bg-primary hover:bg-blue-700 text-white">
+                                    <Button onClick={() => { setIsEditMode(false)}} className="bg-primary hover:bg-blue-700 text-white">
                                         <Plus className="w-4 h-4 mr-2" />
                                         Add User
                                     </Button>

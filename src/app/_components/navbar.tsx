@@ -122,7 +122,7 @@ const Navbar = () => {
                                         </Link>
                                     )}
                                     {item.name === 'Question Bank' && permissions.viewQuestion && (
-                                        loading ? <Spinner /> : <QuestionBankDropdown role={role}/>
+                                        loading ? <Spinner /> : <QuestionBankDropdown/>
                                     )}
                                 </>
                             )
