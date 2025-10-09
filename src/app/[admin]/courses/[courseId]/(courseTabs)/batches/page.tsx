@@ -66,6 +66,7 @@ import { StudentData, BatchSuggestion, StudentDataState, ParamsType } from "./co
 import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
+import AddStudentOptions from '../../_components/AddStudentOptions'
 
 // Enhanced Batch interface to match new design
 interface EnhancedBatch {
@@ -97,6 +98,7 @@ const Page = ({ params }: { params: ParamsType }) => {
     const [searchStudent, setSearchStudent] = useState('')
     const debouncedSearchStudent = useDebounce(searchStudent, 1000)
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
+    const [isManualValid, setIsManualValid] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
     const [csvFile, setCsvFile] = useState<File | null>(null)
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -115,13 +117,14 @@ const Page = ({ params }: { params: ParamsType }) => {
 
     // Helper function to get status color
     const getStatusColor = (status: string) => {
-        switch (status) {
+        const normalizedStatus = status?.toLowerCase()
+        switch (normalizedStatus) {
             case 'ongoing':
-                return 'bg-green-100 text-green-800 border-green-200'
-            case 'not_started':
                 return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+            case 'not_started':
+                return 'bg-blue-100 text-blue-800 border-blue-200'
             case 'completed':
-                return 'bg-gray-100 text-gray-800 border-gray-200'
+                return 'bg-green-100 text-green-800 border-green-200'
             default:
                 return 'bg-gray-100 text-gray-800 border-gray-200'
         }
@@ -739,8 +742,8 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const renderModal = (emptyState: boolean) => {
 
      const shouldShowAddStudentModal = (
-        courseData?.unassigned_students === 0 ||  
-        (!batchData || batchData.length === 0)
+        courseData?.unassigned_students === 0
+        //  ||  (!batchData || batchData.length === 0)
     )
    
     if (shouldShowAddStudentModal) {
@@ -811,13 +814,17 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                                 {assignStudents === 'manually' ? (
                                     <div className="space-y-6">
-                                        {/* Assignment Method Selection */}
-                                        {renderManualAssignmentMethod()}
-                                        
-                                        {/* Assignment Method Content */}
-                                        <div className="border-t pt-6">
-                                            {renderAssignmentMethodContent()}
-                                        </div>
+                                        {/* Assignment reusable component */}
+                                        <AddStudentOptions
+                                            context="create"
+                                            courseId={params.courseId}
+                                            capEnrollment={capEnrollmentValue}
+                                            initialMethod={manualAssignmentMethod as any}
+                                            onUnassignedChange={(rows: StudentData[]) => setSelectedRows(rows)}
+                                            onSingleChange={(data: { name: string; email: string }) => setSingleStudentData(data)}
+                                            onCsvChange={(data: any[]) => setStudentData(data)}
+                                            onValidityChange={(v: boolean) => setIsManualValid(v)}
+                                        />
                                         
                                         {/* Action Buttons */}
                                         <div className="flex justify-between w-full pt-4 border-t">
@@ -831,7 +838,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                                             {/* <DialogClose asChild> */}
                                                 <Button
                                                     type="button"
-                                                    disabled={!form.formState.isValid || !isManualAssignmentValid()}
+                                                    disabled={!form.formState.isValid ||!isManualValid}
                                                    onClick={async (e) => {
                                                    e.preventDefault() // Prevent any default form submission
                                                     const formData = form.getValues()

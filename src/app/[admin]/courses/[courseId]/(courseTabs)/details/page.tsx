@@ -42,7 +42,7 @@ const FormSchema = z.object({
     description: z
         .string()
         .min(10, 'Please add a course description (minimum 10 characters).'),
-    duration: z.string().min(1, 'Please enter the course duration.'),
+    duration: z.coerce.number().min(1, 'Please enter the course duration.'),
     language: z.string().min(1, 'Please select the language.'),
     startTime: z.date({
         required_error: 'Please choose a start date for the course.',
@@ -91,7 +91,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
             description: '',
             coverImage: '',
             collaborator: '',
-            duration: '',
+            duration: 0,
             language: '',
             startTime: undefined,
         },
@@ -164,7 +164,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                 description: courseData.description || '',
                 coverImage: courseData.coverImage || '',
                 collaborator: courseData.collaborator || '',
-                duration: courseData.duration?.toString() || '',
+                duration: Number(courseData.duration)  || 0,
                 language: courseData.language || '',
                 startTime: courseData.startTime
                     ? new Date(courseData.startTime)
@@ -291,24 +291,29 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         if (value === '') {
-            return value
+            return ''
         }
-        const isValidInteger = /^\d+$/.test(value)
-        if (!isValidInteger) {
-            toast.error({
-                title: 'Invalid Integer',
-                description: 'Please enter a valid integer value',
-            })
-            return
-        }
-        if (parseInt(value, 10) <= 0) {
-            toast.error({
-                title: 'Invalid Value',
-                description: 'Duration must be greater than 0',
-            })
-            return
-        }
-        return value
+
+        const numValue = parseInt(value, 10)
+        if (isNaN(numValue)) {
+        toast({
+            title: 'Invalid Input',
+            description: 'Please enter a valid numeric duration.',
+            variant: 'destructive',
+        })
+        return '' // Previous value return karo
+    }
+    
+    if (numValue <= 0) {
+        toast({
+            title: 'Invalid Value',
+            description: 'Duration must be greater than 0',
+            variant: 'destructive',
+        })
+        return '' // Previous value return karo
+    }
+    
+    return numValue
     }
 
     return (
@@ -701,7 +706,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                             <FormControl>
                                                 <Input
                                                     id="duration"
-                                                    type="number"
+                                                    type="text"
                                                     min="1"
                                                     placeholder="Duration in weeks"
                                                     value={field.value}

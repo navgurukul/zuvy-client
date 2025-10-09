@@ -31,7 +31,7 @@ interface CourseData {
     description: string
     coverImage: string
     collaborator: string
-    duration: string
+    duration: number | string
     language: string
     startTime: string
     unassigned_students: number
@@ -100,7 +100,7 @@ export const getCourseData = create<StoreCourseData>((set) => ({
         description: '',
         coverImage: '',
         collaborator: '',
-        duration: '',
+        duration: 0,
         language: 'string',
         startTime: '',
         unassigned_students: 0,
