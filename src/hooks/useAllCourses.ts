@@ -17,7 +17,7 @@ export function useAllCourses(initialFetch = true) {
         try {
             setLoading(true)
             const res = await api.get<CoursesResponse>(
-                '/bootcamp?limit=10&offset=0'
+                '/bootcamp?limit=1000&offset=0'
             )
             setAllCourses(res.data.data)
             

@@ -102,6 +102,7 @@ const Courses: React.FC = () => {
             auto: true,
         })
     const { createBootcamp, creating } = useCreateBootcamp()
+    console.log(allCourses)
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const searchContainerRef = useRef<HTMLDivElement>(null)
@@ -195,6 +196,9 @@ const Courses: React.FC = () => {
             setFilteredSuggestions([])
         }
     }
+
+
+
 
     // Handle suggestion click - this triggers course fetching
     const handleSuggestionClick = (course: Course) => {
@@ -298,11 +302,13 @@ const Courses: React.FC = () => {
             const filtered = filterCoursesByRelevance(
                 allCourses,
                 debouncedSearchForSuggestions
+                
             )
             setFilteredSuggestions(filtered)
         } else {
             setFilteredSuggestions([])
         }
+        console.log('Filtered Suggestions:', filteredSuggestions);
     }, [debouncedSearchForSuggestions, allCourses])
 
     useEffect(() => {
@@ -758,5 +764,4 @@ const Courses: React.FC = () => {
         </>
     )
 }
-
 export default Courses
