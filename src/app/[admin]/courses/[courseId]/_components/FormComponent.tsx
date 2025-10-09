@@ -35,7 +35,7 @@ const FormComponent = ({
                     </div>
                     <h3 className="font-medium text-base">{data.title}</h3>
                 </div>
-                <div className="absolute top-2 right-3">
+                <div className="absolute top-2 right-1">
                 {data.submitStudents > 0 ? (
                         <Link
                             href={{
