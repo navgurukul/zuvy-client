@@ -24,10 +24,17 @@ const SettingsPage: React.FC = () => {
     const searchParams = useSearchParams()
     const initialTab = searchParams.get('tab') || 'users'
     const [activeTab, setActiveTab] = useState(initialTab)
-    const [selectedRole, setSelectedRole] = useState('Admin')
+    const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined)
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
+    
+    // Set the first role as selected once roles are loaded
+    useEffect(() => {
+        if (roles.length > 0 && !selectedRole) {
+            setSelectedRole(roles[0].name);
+        }
+    }, [roles, selectedRole]);
     const [editingUserId, setEditingUserId] = useState<number | null>(null)
 
     // Pagination state - get from URL params
