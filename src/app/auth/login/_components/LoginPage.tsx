@@ -175,12 +175,8 @@ const handleGoogleSuccess = async (
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     router.push('/student')
-                } else if (userRole === 'admin') {
-                    router.push('/admin/courses')
-                } else if (userRole === 'instructor') {
-                    router.push('/instructor')
                 } else {
-                    router.push(`/${userRole}`)
+                    router.push(`/${userRole}/courses`)
                 }
             }
         } catch (err: any) {
