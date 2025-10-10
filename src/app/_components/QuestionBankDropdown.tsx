@@ -22,7 +22,7 @@ const QuestionBankDropdown = () => {
         pathname.startsWith(`/${role}/resource/`)
 
     return (
-        <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
             <div
                 onMouseEnter={() => setOpen(true)}
                 onMouseLeave={() => setOpen(false)}
