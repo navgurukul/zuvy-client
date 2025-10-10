@@ -139,17 +139,9 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                         </div>
 
                         <div className="flex-1 flex items-center justify-between hover:bg-muted/50 p-2 rounded-md transition-colors">
-                            {/* <div
+                            <div
                                 className="text-left flex items-center gap-3"
                                 onClick={handleModuleRoute}
-                            > */}
-
-                            <div 
-                              className="text-left flex items-center gap-3"
-                              onClick={(e) => {
-                               if (isDragging) return;
-                                handleModuleRoute();
-                               }}
                             >
                                 <div
                                     className={`p-2 rounded-md ${
