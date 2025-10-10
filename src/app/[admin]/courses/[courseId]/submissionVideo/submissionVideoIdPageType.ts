@@ -98,3 +98,15 @@ export interface CoursesResponse {
   totalPages: number;
   permissions: coursePermissions
 }
+
+export interface CourseCardProps {
+    //   id: string;
+    //   title: string;
+    //   learnerCount: number;
+    //   duration: string;
+    //   status: 'draft' | 'published' | 'ongoing' | 'archived' | 'completed';
+    course: Course
+    validImageUrl: string
+    onClick: () => void
+    statusOptions: { label: string; value: string }[]
+}
