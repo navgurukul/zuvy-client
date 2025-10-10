@@ -25,7 +25,7 @@ const UnauthorizedUser = ({ role }: any) => {
                         {`The page is meant to be viewed by Zuvy ${role}. You do
                         not have ${role} access to access this page`}
                     </p>
-                    <Button onClick={() => router.push(`/${role}`)}>
+                    <Button onClick={() => router.push(`/${role}/courses`)}>
                         Return to Dashboard
                     </Button>
                 </div>
