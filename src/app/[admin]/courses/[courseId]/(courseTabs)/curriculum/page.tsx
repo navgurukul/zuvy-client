@@ -74,6 +74,7 @@ function Page() {
 
     const containerRef = useRef<HTMLDivElement>(null)
 
+    
     const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
         setTypeId(value === 'learning-material' ? 1 : 2)
