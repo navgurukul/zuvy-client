@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRoles } from '@/hooks/useRoles'
 import { api } from '@/utils/axios.config'
+import { toast } from '@/components/ui/use-toast'
 
 type AddUserModalProps = {
   isEditMode: boolean;
@@ -74,11 +75,22 @@ const RoleCard: React.FC<RoleCardProps> = ({
 
 const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUsers, onClose }) => {
     const { roles, loading: rolesLoading } = useRoles()
-    const [pendingUserRole, setPendingUserRole] = useState(null)
+    const [pendingUserRole, setPendingUserRole] = useState<number | null>(null)
     const [newUser, setNewUser] = useState<{ name: string; email: string }>({
         name: '',
         email: '',
     })
+
+    // Initialize form with user data when in edit mode
+    useEffect(() => {
+        if (isEditMode && user) {
+            setNewUser({
+                name: user.name || '',
+                email: user.email || '',
+            });
+            setPendingUserRole(user.roleId || null);
+        }
+    }, [isEditMode, user])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -112,7 +124,22 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
             roleId: pendingUserRole,
         }
 
-        await api.post('/users/addUsers', payload)
+        try {
+            const response = await api.post('/users/addUsers', payload)
+            if(response.status === 201) {
+                toast.success({
+                    title: 'User added successfully',
+                    description: 'The new user has been added.',
+                })
+            }
+        } catch (error) {
+            toast.error({
+                title: 'Error adding user',
+                description: 'There was an issue adding the new user.',
+            })
+            console.error('Error adding user:', error)
+            return
+        }
 
         // Reset form
         setNewUser({
@@ -133,10 +160,22 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
             roleId: pendingUserRole,
         }
 
-        console.log('payload', payload)
-
-        await api.post(`/users/updateUser/${user.userId}`, payload)
-
+        try {
+            const response = await api.put(`/users/updateUser/${user.id}`, payload)
+            if(response.status === 200) {
+                toast.success({
+                    title: 'User updated successfully',
+                    description: 'The user details have been updated.',
+                })
+            }
+        } catch (error) {
+            toast.error({
+                title: 'Error updating user',
+                description: 'There was an issue updating the user details.',
+            })
+            console.error('Error updating user:', error)
+            return
+        }
         refetchUsers && refetchUsers()
         onClose && onClose()
     }

@@ -24,10 +24,17 @@ const SettingsPage: React.FC = () => {
     const searchParams = useSearchParams()
     const initialTab = searchParams.get('tab') || 'users'
     const [activeTab, setActiveTab] = useState(initialTab)
-    const [selectedRole, setSelectedRole] = useState('Admin')
+    const [selectedRole, setSelectedRole] = useState<string | undefined>(undefined)
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
+    
+    // Set the first role as selected once roles are loaded
+    useEffect(() => {
+        if (roles.length > 0 && !selectedRole) {
+            setSelectedRole(roles[0].name);
+        }
+    }, [roles, selectedRole]);
     const [editingUserId, setEditingUserId] = useState<number | null>(null)
 
     // Pagination state - get from URL params
@@ -49,13 +56,6 @@ const SettingsPage: React.FC = () => {
         loading: userLoading,
         error,
     } = useUser(editingUserId)
-
-    console.log('user in page', user)
-
-    const handleInviteGenerated = (role: UserRole, inviteLink: string) => {
-        console.log(`${role} invite link generated:`, inviteLink)
-        // You can add additional logic here, such as updating state or making API calls
-    }
 
     useEffect(() => {
         if (initialTab) setActiveTab(initialTab)
@@ -79,14 +79,12 @@ const SettingsPage: React.FC = () => {
     }
 
     const handleRoleChange = async (userId: number, roleId: number, roleName: string) => {
-        console.log('Update role:', { userId, roleId, roleName })
         // Call your API to update the user's role
         // await updateUserRole(userId, roleId)
         // refetchUsers()
     }
 
     const handleEdit = (userId: number) => {
-        console.log('Edit user:', userId)
         // Open edit modal or navigate to edit page
         setEditingUserId(userId) 
         setIsEditMode(true)
@@ -100,7 +98,7 @@ const SettingsPage: React.FC = () => {
     }, [editingUserId, user, userLoading, isEditMode])
 
     const handleDelete = async (userId: number) => {
-        console.log('Delete user:', userId)
+
         // Call your API to delete the user
         // await deleteUser(userId)
         // refetchUsers()
@@ -166,7 +164,7 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                                 <DialogTrigger asChild>
-                                    <Button className="bg-primary hover:bg-blue-700 text-white">
+                                    <Button onClick={() => { setIsEditMode(false)}} className="bg-primary hover:bg-blue-700 text-white">
                                         <Plus className="w-4 h-4 mr-2" />
                                         Add User
                                     </Button>

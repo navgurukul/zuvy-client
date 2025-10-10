@@ -239,13 +239,11 @@ const OpenEndedQuestions = (props: Props) => {
 
             const selectedTopicIds = selectedOptions
                 .filter((option) => option.value !== '-1')
-                .map((option) => option.value)
-                .join(',')
+                .map((option) => Number(option.value)) // Convert to numbers
 
             const selectedDifficultyLevels = difficulty
                 .filter((option) => option.value !== 'None')
                 .map((option) => option.value)
-                .join(',')
 
             try {
                 const response = await api.get(`/content/openEndedQuestions`, {
@@ -253,7 +251,7 @@ const OpenEndedQuestions = (props: Props) => {
                         searchTerm: searchParam,
                         limit: position,
                         offset: offset,
-                        topics: selectedTopicIds,
+                        tagId: selectedTopicIds, // ✅ Change 'topics' to 'tagId'
                         difficulty: selectedDifficultyLevels,
                     },
                 })

@@ -125,7 +125,7 @@ const handleGoogleSuccess = async (
         credentialResponse: CredentialResponse
     ) => {
         if (!credentialResponse.credential) {
-            toast({
+            toast.error({
                 title: 'Login Failed',
                 description: 'No credential received from Google.',
                 className:
@@ -185,7 +185,7 @@ const handleGoogleSuccess = async (
             }
         } catch (err: any) {
             console.error('Google login error:', err)
-            toast({
+            toast.error({
                 title: 'Login Error',
                 description: `${err.response?.data?.message}. Please contact zuvy support team` || 'Please try again later.',
                 className: `fixed bottom-4 left-1/2 transform -translate-x-1/2 text-start capitalize border border-destructive max-w-lg box-border`,
@@ -198,7 +198,7 @@ const handleGoogleSuccess = async (
     // Handle Google Sign-In failure
     const handleGoogleError = () => {
         console.error('Google login failed')
-        toast({
+        toast.error({
             title: 'Login Failed',
             description: 'Google authentication failed. Please try again.',
             className:
@@ -242,7 +242,7 @@ const handleGoogleSuccess = async (
         if (googleLoginButton) {
             googleLoginButton.click()
         } else {
-            toast({
+            toast.error({
                 title: 'Login Error',
                 description: 'Could not start Google login. Please try again.',
                 className:

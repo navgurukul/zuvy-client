@@ -21,7 +21,7 @@ interface RoleAction {
 }
 
 interface RoleManagementPanelProps {
-    selectedRole: string
+    selectedRole: string | undefined
     onRoleChange: (role: string) => void
 }
 
@@ -29,10 +29,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     selectedRole,
     onRoleChange,
 }) => {
-    const [selectedAction, setSelectedAction] = useState<number>(1)
-    const [selectedPermissions, setSelectedPermissions] = useState<Set<number>>(
-        new Set()
-    )
+    const [selectedAction, setSelectedAction] = useState<number>(12)
+    const [roleId, setRoleId] = useState<number>(1)
+    const [selectedPermissions, setSelectedPermissions] = useState<Record<number, boolean>>({})
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
 
     // Fetch RBAC resources from API
@@ -41,7 +40,18 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         permissions: fetchedPermissions,
         loading: permissionsLoading,
         error: permissionsError,
-    } = useRbacPermissions(selectedAction)
+    } = useRbacPermissions(selectedAction, roleId)
+
+    // Initialize selected permissions when permissions are fetched
+    useEffect(() => {
+        if (fetchedPermissions) {
+            const initialPermissions: Record<number, boolean> = {}
+            fetchedPermissions.forEach((permission: any) => {
+                initialPermissions[permission.id] = permission.granted || false
+            })
+            setSelectedPermissions(initialPermissions)
+        }
+    }, [fetchedPermissions])
 
     const roleActions: RoleAction[] = useMemo(
         () =>
@@ -69,15 +79,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     const handlePermissionToggle = (permission: { id: number } | number) => {
         const permissionId =
             typeof permission === 'number' ? permission : permission.id
-        setSelectedPermissions((prev) => {
-            const newSet = new Set(prev)
-            if (newSet.has(permissionId)) {
-                newSet.delete(permissionId)
-            } else {
-                newSet.add(permissionId)
-            }
-            return newSet
-        })
+        setSelectedPermissions((prev) => ({
+            ...prev,
+            [permissionId]: !prev[permissionId]
+        }))
     }
 
     const formatPermissionName = (permission: string) => {
@@ -88,9 +93,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     }
 
     const handleActionSelect = (actionId: number) => {
+        // actionId is the resourceId
         setSelectedAction(actionId)
         // Reset selected permissions when switching actions
-        setSelectedPermissions(new Set())
+        setSelectedPermissions({})
     }
 
     const handleSelectAll = () => {
@@ -98,22 +104,40 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             Array.isArray(fetchedPermissions) &&
             fetchedPermissions.length > 0
         ) {
-            setSelectedPermissions(
-                new Set(fetchedPermissions.map((p: any) => p.id))
-            )
+            const allSelected: Record<number, boolean> = {}
+            fetchedPermissions.forEach((permission: any) => {
+                allSelected[permission.id] = true
+            })
+            setSelectedPermissions(allSelected)
         }
     }
 
     const handleDeselectAll = () => {
-        setSelectedPermissions(new Set())
+        if (
+            Array.isArray(fetchedPermissions) &&
+            fetchedPermissions.length > 0
+        ) {
+            const allDeselected: Record<number, boolean> = {}
+            fetchedPermissions.forEach((permission: any) => {
+                allDeselected[permission.id] = false
+            })
+            setSelectedPermissions(allDeselected)
+        }
     }
 
     const { roles } = useRoles()
     const { assignPermissions, loading: assigning } = useAssignPermissions()
 
+    // Select first role by default when roles are loaded
+    useEffect(() => {
+        if (roles.length > 0 && !selectedRole) {
+            onRoleChange(roles[0].name);
+        }
+    }, [roles, selectedRole, onRoleChange]);
+
     const resolveRoleId = (): number | undefined => {
         const match = roles.find(
-            (r) => r.name?.toLowerCase() === selectedRole.toLowerCase()
+            (r) => r.name?.toLowerCase() === selectedRole?.toLowerCase()
         )
         return match?.id
     }
@@ -123,15 +147,11 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         const resourceId = selectedAction
         if (!roleId || !resourceId) return
 
-        const permissionsPayload: Record<number, boolean> = {}
-        Array.from(selectedPermissions).forEach((pid) => {
-            permissionsPayload[pid] = true
-        })
-
+        // Use selectedPermissions directly as it's already in the correct format
         await assignPermissions({
             resourceId,
             roleId,
-            permissions: permissionsPayload,
+            permissions: selectedPermissions,
         })
     }
 
@@ -154,9 +174,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                             Add New Role
                         </Button>
                     </DialogTrigger>
-                        {isAddModalOpen && (
-                            <AddRoleModal />
-                        )}
+                    {isAddModalOpen && (
+                        <AddRoleModal />
+                    )}
                 </Dialog>
             </div>
 
@@ -164,21 +184,23 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             <div className="flex gap-6 border-b border-gray-200">
                 {
                     roles.map((role, index) => {
-                        console.log('COLOR_PALETTE[index].bg', COLOR_PALETTE[index].bg);
                         return (
-                        <Button
-                            key={role.id}
-                            onClick={() => onRoleChange(role.name)}
-                            className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${
-                                selectedRole === 'Admin'
+                            <Button
+                                key={role.id}
+                                onClick={() => {
+                                    onRoleChange(role.name)
+                                    setRoleId(role.id)
+                                }}
+                                className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
                                     ? 'border-blue-500 text-gray-900 hover:bg-transparent'
                                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                            }`}
-                        >
-                            <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
-                            <span className="font-medium text-[1rem] capitalize">{role.name}</span>
-                        </Button>
-                    )})
+                                    }`}
+                            >
+                                <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
+                                <span className="font-medium text-[1rem] capitalize">{role.name}</span>
+                            </Button>
+                        )
+                    })
                 }
             </div>
 
@@ -187,39 +209,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 {/* Left Column - Role Actions */}
                 <div className="col-span-1">
                     <div className="bg-white rounded-lg border border-gray-200 p-4 h-[600px] flex flex-col">
-                        {/* Header with Edit/Delete */}
-                        {/* <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-semibold text-[1rem] text-muted-foreground">
-                                {selectedRole}
-                            </h3>
-                            <div className="flex">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="p-1 h-8 w-8"
-                                >
-                                    <Edit className="w-4 h-4 text-gray-600" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="p-1 h-8 w-8"
-                                >
-                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                </Button>
-                            </div>
-                        </div> */}
-
-                        {/* Add Role Action Button */}
-                        {/* <div className="mb-4 pb-4 border-b border-gray-200">
-                            <Button variant="outline" className="w-full">
-                                <Plus className="w-4 h-4 mr-2" />
-                                Add Role Action
-                            </Button>
-                        </div> */}
 
                         {/* Role Actions Title */}
-                        <h4 className="font-semibold text-[1rem] text-start text-gray-900 mb-4">
+                        <h4 className="font-semibold text-[1rem] text-start text-gray-900 mb-4 capitalize">
                             {selectedRole} Role Actions
                         </h4>
 
@@ -240,23 +232,22 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                     <div
                                         key={action.id}
                                         onClick={() =>
+                                            // action.id is the resourceId
                                             handleActionSelect(action.id)
                                         }
-                                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                                            selectedAction === action.id
-                                                ? 'bg-blue-600 text-white'
-                                                : 'bg-white hover:bg-gray-50 border border-gray-200'
-                                        }`}
+                                        className={`p-3 rounded-lg cursor-pointer transition-colors ${selectedAction === action.id
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white hover:bg-gray-50 border border-gray-200'
+                                            }`}
                                     >
                                         <h5 className="font-medium text-start text-[1rem] mb-1">
                                             {action.title}
                                         </h5>
                                         <p
-                                            className={`text-sm text-start ${
-                                                selectedAction === action.id
-                                                    ? 'text-blue-100'
-                                                    : 'text-gray-600'
-                                            }`}
+                                            className={`text-sm text-start ${selectedAction === action.id
+                                                ? 'text-blue-100'
+                                                : 'text-gray-600'
+                                                }`}
                                         >
                                             {action.description}
                                         </p>
@@ -319,8 +310,8 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 </div>
                             )}
                             {!permissionsLoading &&
-                            fetchedPermissions &&
-                            fetchedPermissions.length > 0 ? (
+                                fetchedPermissions &&
+                                fetchedPermissions.length > 0 ? (
                                 <div className="space-y-3">
                                     {fetchedPermissions?.map(
                                         (permission: any) => (
@@ -336,9 +327,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                 </label>
                                                 <Checkbox
                                                     id={permission.id}
-                                                    checked={selectedPermissions.has(
-                                                        permission.id
-                                                    ) || permission.granted}
+                                                    checked={selectedPermissions[permission.id] || false}
                                                     onCheckedChange={() =>
                                                         handlePermissionToggle(
                                                             permission.id
@@ -366,12 +355,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         </div>
 
                         {/* Selected Permissions Summary */}
-                        {selectedPermissions.size > 0 && (
+                        {Object.keys(selectedPermissions).length > 0 && (
                             <div className="mt-4 pt-4 border-t border-gray-200">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-gray-600">
-                                        {selectedPermissions.size} permission
-                                        {selectedPermissions.size !== 1
+                                        {Object.values(selectedPermissions).filter(Boolean).length} permission
+                                        {Object.values(selectedPermissions).filter(Boolean).length !== 1
                                             ? 's'
                                             : ''}{' '}
                                         selected
@@ -381,12 +370,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         size="sm"
                                         onClick={handleAssignPermissions}
                                         className="text-xs"
-                                        // disabled={assigning}
+                                    // disabled={assigning}
                                     >
                                         {/* {assigning
                                             ? 'Saving...'
                                             : 'Save Changes'} */}
-                                            Save Changes
+                                        Save Changes
                                     </Button>
                                 </div>
                             </div>

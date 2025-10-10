@@ -39,6 +39,37 @@ const Page = ({ params }: PageParams) => {
 
     const parsedCrumbData = crumbData ? JSON.parse(crumbData) : []
 
+    const crumbs = useMemo(
+        () => [
+            {
+                crumb: 'My Courses',
+                href: `/admin/courses`,
+                isLast: false,
+            },
+            {
+                crumb: parsedCrumbData[0],
+                href: `/admin/courses/${params.courseId}/submissions`,
+                isLast: false,
+            },
+            // {
+            //     crumb: 'Submission - Practice Problems',
+            //     href: `/admin/courses/${params.courseId}/submissions`,
+            //     isLast: false,
+            // },
+            {
+                crumb: parsedCrumbData[1],
+                href: `/admin/courses/${params.courseId}/submissionProblems/${moduleId}`,
+                isLast: false,
+            },
+            {
+                crumb: 'Individual Coding Submission',
+                href: ``,
+                isLast: true,
+            },
+        ],
+        [params, parsedCrumbData]
+    )
+
     const fetchCodingSubbmissionDataHandler = useCallback(async () => {
         try {
             await api
@@ -93,7 +124,7 @@ const Page = ({ params }: PageParams) => {
                                                     />
                                                 </svg>
                                             </div>
-                                            <div className="flex-1">
+                                            <div className="flex-1 text-left">
                                                 <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 uppercase tracking-wide">
                                                     Title
                                                 </h3>
@@ -125,7 +156,7 @@ const Page = ({ params }: PageParams) => {
                                                     />
                                                 </svg>
                                             </div>
-                                            <div className="flex-1">
+                                            <div className="flex-1 text-left">
                                                 <h3 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2 uppercase tracking-wide">
                                                     Description
                                                 </h3>
@@ -143,7 +174,7 @@ const Page = ({ params }: PageParams) => {
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-800/50">
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-start gap-4">
                                             <div className="p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl">
                                                 <svg
                                                     className="w-6 h-6 text-purple-600 dark:text-purple-400"
@@ -159,20 +190,14 @@ const Page = ({ params }: PageParams) => {
                                                     />
                                                 </svg>
                                             </div>
-                                            <div className="flex-1">
-                                                <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 uppercase tracking-wide">
-                                                    Difficulty Level
-                                                </h3>
-                                                <span
-                                                    className={cn(
-                                                        `inline-flex items-center px-4 py-2 rounded-full text-sm font-bold`,
-                                                        difficultyColor(
-                                                            codingSubmissiondata
-                                                                ?.questionDetail
-                                                                ?.difficulty
-                                                        )
-                                                    )}
-                                                >
+                                            <div className="flex-1 text-left">
+                                                <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 uppercase tracking-wide">Difficulty Level</h3>
+                                                <span className={cn(
+                                                    `inline-flex items-center px-4 py-2 rounded-full text-sm font-bold`,
+                                                    difficultyColor(
+                                                        codingSubmissiondata?.questionDetail
+                                                            ?.difficulty
+                                                    ))}>
                                                     <div className="w-2 h-2 rounded-full mr-2 bg-current"></div>
                                                     {
                                                         codingSubmissiondata
@@ -201,10 +226,8 @@ const Page = ({ params }: PageParams) => {
                                                     />
                                                 </svg>
                                             </div>
-                                            <div className="flex-1">
-                                                <h3 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 uppercase tracking-wide">
-                                                    Constraints
-                                                </h3>
+                                            <div className="flex-1 text-left">
+                                                <h3 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 uppercase tracking-wide">Constraints</h3>
                                                 <p className="text-orange-900 dark:text-orange-100 text-sm leading-relaxed break-words">
                                                     {
                                                         codingSubmissiondata
@@ -218,6 +241,7 @@ const Page = ({ params }: PageParams) => {
                                 </div>
                             </CardContent>
                         </Card>
+
                         <div className="flex flex-col md:flex-row gap-4 mb-8">
                             <div className="w-full md:w-1/2">
                                 <TestCaseResults

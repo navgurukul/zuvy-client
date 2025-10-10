@@ -9,7 +9,7 @@ export interface PermissionsResponse {
     data?: Array<{ id: number; name: string }>
 }
 
-export function useRbacPermissions(resourceId?: number) {
+export function useRbacPermissions(resourceId?: number, roleId?: number) {
     const [permissions, setPermissions] = useState<
         Array<{ id: number; name: string }>
     >([])
@@ -17,7 +17,7 @@ export function useRbacPermissions(resourceId?: number) {
     const [error, setError] = useState<unknown>(null)
 
     const getPermissions = useCallback(
-        async (rid?: number) => {
+        async (rid?: number, roleId?: number) => {
             const id = typeof rid === 'number' ? rid : resourceId
             if (typeof id !== 'number') {
                 setPermissions([])
@@ -27,15 +27,12 @@ export function useRbacPermissions(resourceId?: number) {
             try {
                 setLoading(true)
                 setError(null)
-                const response = await api.get<[null, PermissionsResponse]>(
-                    `/rbac/get/all/permissions?resourceId=${id}`
+                const response = await api.get(
+                    `permissions/${roleId}/permissions/${id}`
                 )
-                const [, apiResponse] = response.data
-                const list = apiResponse.data ?? []
-                setPermissions(Array.isArray(list) ? list : [])
+                setPermissions(response.data)
             } catch (err) {
                 setError(err)
-                setPermissions([])
                 console.error(
                     'Error fetching permissions for resource:',
                     id,
@@ -47,10 +44,10 @@ export function useRbacPermissions(resourceId?: number) {
         },
         [resourceId]
     )
-
     useEffect(() => {
-        if (typeof resourceId === 'number') getPermissions(resourceId)
-    }, [resourceId, getPermissions])
+        if (typeof resourceId === 'number') getPermissions(resourceId, roleId)
+    }, [resourceId, getPermissions, roleId])
+
 
     return {
         permissions,
