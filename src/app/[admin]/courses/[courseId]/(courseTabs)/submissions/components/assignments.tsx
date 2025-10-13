@@ -135,7 +135,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                         </h1>
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-8 mt-2 md:mt-4 md:grid-cols-2 lg:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-8 mt-2 md:mt-4 md:grid-cols-2 lg:grid-cols-4">
                                         {data.moduleChapterData.map(
                                             (
                                                 moduleData: AssignmentModuleData

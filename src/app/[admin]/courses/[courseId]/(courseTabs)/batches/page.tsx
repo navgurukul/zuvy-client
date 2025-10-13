@@ -1102,7 +1102,7 @@ const renderEditModal = () => (
                     </div>
                 ) : (
                     /* Batch Cards Grid - Updated Design */
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {(enhancedBatchData?.length ?? 0) > 0 ? (
                             enhancedBatchData?.map((batch: EnhancedBatch) => (
                                 <Card key={batch.id} className="hover:shadow-lg transition-all duration-200 flex flex-col w-[380px]">

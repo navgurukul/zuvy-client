@@ -472,7 +472,7 @@ const Page = ({ params }: { params: any }) => {
                                     )}
                                     {activeTab === 'projects' &&
                                         (bootcampModules.length > 0 ? (
-                                            <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
+                                            <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-4">
                                                 {bootcampModules.map((item: any) => {
                                                     const submissions = item.projectData?.[0]?.submitStudents || 0
 
@@ -638,7 +638,7 @@ const Page = ({ params }: { params: any }) => {
                                     {activeTab === 'form' && (
                                         <div className="grid relative gap-8 mt-4 md:mt-8">
                                             {formData.length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-3">
+                                                <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-4">
                                                     {formData.map((item: any) =>
                                                         (item.moduleChapterData || []).map((data: any, index: any) => (
                                                             <FormComponent

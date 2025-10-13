@@ -37,7 +37,8 @@ export default function RootLayout({
     if(roleFromPath === userRole) {
             // ✅ Authorized user
     return (
-        <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
+        // <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
+        <div>
             <div className={isAssessmentRouteClasses(pathname)}>
                 {!adminAssessmentPreviewRoute && <StudentNavbar />}
                 <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen`}>
