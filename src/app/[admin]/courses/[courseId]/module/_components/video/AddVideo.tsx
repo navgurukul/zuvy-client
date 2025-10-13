@@ -763,7 +763,7 @@ const formSchema = z.object({
     videoTitle: z.string()
         .min(2, {
         message: 'Video Title must be at least 2 characters.'})
-        .max(60, { message: 'Video Title cannot exceed 60 characters.' }),
+        .max(50, { message: 'Video Title cannot exceed 50 characters.' }),
     
     description: z.string().min(4, {
         message: 'Description must be at least 4 characters.',
@@ -968,13 +968,13 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                     {...field} // Spread the field props (e.g., value, name, etc.)
                                                     onChange={(e) => {
                                                         const newValue = e.target.value
-                                                         if (newValue.length <= 60) {
+                                                         if (newValue.length <= 50) {
                                                            setVideoTitle( newValue) 
                                                            field.onChange(newValue)
                                                         } else {
                                                         toast.error({
                                                          title: "Character Limit Reached",
-                                                         description: "Video title cannot exceed 60 characters.",
+                                                         description: "You can enter up to 50 characters only.",
                                                            })
                                                         }
                                                         // setVideoTitle(

@@ -205,14 +205,14 @@ const AddForm: React.FC<AddFormProps> = ({
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { title, description, questions } = values
 
-
         if (!questions || questions.length === 0) {
-           toast({
+            toast({
                 variant: 'destructive',
                 title: 'Cannot create form',
-                description: 'Please add at least one question before creating the form.',
-            });
-            return;
+                description:
+                    'Please add at least one question before creating the form.',
+            })
+            return
         }
 
         const formQuestionDto = questions
@@ -373,8 +373,20 @@ const AddForm: React.FC<AddFormProps> = ({
                                                 required
                                                 {...field}
                                                 onChange={(e) => {
-                                                    setTitles(e.target.value)
-                                                    field.onChange(e)
+                                                    const newValue =
+                                                        e.target.value
+                                                    if (newValue.length <= 50) {
+                                                        setTitles(newValue)
+                                                        field.onChange(newValue)
+                                                    } else {
+                                                        toast.error({
+                                                            title: 'Character Limit Reached',
+                                                            description:
+                                                                'You can enter up to 50 characters only.',
+                                                        })
+                                                    }
+                                                    // setTitles(e.target.value)
+                                                    // field.onChange(e)
                                                 }}
                                                 placeholder="Untitled Form"
                                                 className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"

@@ -312,7 +312,16 @@ function Quiz(props: QuizProps) {
                                 <Input
                                     required
                                     onChange={(e) => {
-                                        setInputValue(e.target.value)
+
+                                         const newValue = e.target.value
+                                        if (newValue.length <= 50) {
+                                           setInputValue(newValue)
+                                        } else {
+                                          toast.error({
+                                          title: "Character Limit Reached",
+                                           description: "You can enter up to 50 characters only.",
+                                        })
+                                    }
                                     }}
                                     value={inputValue}
                                     placeholder="Untitled Quiz"
