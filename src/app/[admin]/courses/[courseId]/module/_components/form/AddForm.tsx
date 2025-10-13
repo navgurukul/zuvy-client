@@ -205,6 +205,16 @@ const AddForm: React.FC<AddFormProps> = ({
     async function onSubmit(values: z.infer<typeof formSchema>) {
         const { title, description, questions } = values
 
+
+        if (!questions || questions.length === 0) {
+           toast({
+                variant: 'destructive',
+                title: 'Cannot create form',
+                description: 'Please add at least one question before creating the form.',
+            });
+            return;
+        }
+
         const formQuestionDto = questions
             .filter((item) => item.id && item.id.startsWith('new-'))
             .map((item) => ({
