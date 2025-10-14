@@ -22,6 +22,7 @@ type AddUserModalProps = {
   refetchUsers?: () => void;
   selectedId?: number; 
   onClose?: () => void;
+  isOpen?: boolean;
 };
 
 type RoleCardProps = {
@@ -73,24 +74,59 @@ const RoleCard: React.FC<RoleCardProps> = ({
 }
 
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUsers, onClose }) => {
+const AddUserModal: React.FC<AddUserModalProps> = ({ 
+    isEditMode, 
+    user, 
+    refetchUsers, 
+    onClose,
+    isOpen = false,
+}) => {
     const { roles, loading: rolesLoading } = useRoles()
     const [pendingUserRole, setPendingUserRole] = useState<number | null>(null)
+    const [freshUserData, setFreshUserData] = useState<any>(null)
+    const [isFetchingFreshData, setIsFetchingFreshData] = useState(false)
     const [newUser, setNewUser] = useState<{ name: string; email: string }>({
         name: '',
         email: '',
     })
 
-    // Initialize form with user data when in edit mode
+    // Fetch fresh user data when entering edit mode
     useEffect(() => {
-        if (isEditMode && user) {
+        if (isEditMode && user?.id && isOpen) {
+            const fetchFreshUserData = async () => {
+                setIsFetchingFreshData(true)
+                try {
+                    const response = await api.get(`/users/${user.id}`)
+                    setFreshUserData(response.data)
+                    setNewUser({
+                        name: response.data.name || '',
+                        email: response.data.email || '',
+                    })
+                    setPendingUserRole(response.data.roleId || null)
+                } catch (error) {
+                    // Fallback to passed user data if fetch fails
+                    console.error('Error fetching fresh user data:', error)
+                    setNewUser({
+                        name: user.name || '',
+                        email: user.email || '',
+                    })
+                    setPendingUserRole(user.roleId || null)
+                } finally {
+                    setIsFetchingFreshData(false)
+                }
+            }
+
+            fetchFreshUserData()
+        } else if (!isEditMode && isOpen) {
+            // Reset form for add mode
             setNewUser({
-                name: user.name || '',
-                email: user.email || '',
-            });
-            setPendingUserRole(user.roleId || null);
+                name: '',
+                email: '',
+            })
+            setPendingUserRole(null)
+            setFreshUserData(null)
         }
-    }, [isEditMode, user])
+    }, [isEditMode, user?.id, isOpen])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -147,6 +183,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
             email: '',
         })
         setPendingUserRole(null)
+        setFreshUserData(null)
         refetchUsers && refetchUsers()
         onClose && onClose()
     }
@@ -163,6 +200,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
         try {
             const response = await api.put(`/users/updateUser/${user.id}`, payload)
             if(response.status === 200) {
+                // Update the cached fresh data immediately
+                setFreshUserData({
+                    ...freshUserData,
+                    ...payload,
+                })
                 toast.success({
                     title: 'User updated successfully',
                     description: 'The user details have been updated.',
@@ -192,63 +234,74 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
                 </DialogTitle>
             </DialogHeader>
 
-            {/* Form Body */}
-            <div className="space-y-6">
-                {/* Name & Email */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="text-left">
-                        <Label className="text-[14px] font-medium">
-                            Name *
-                        </Label>
-                        <Input
-                            id="name"
-                            name="name"
-                            value={newUser.name}
-                            onChange={handleInputChange}
-                            placeholder="Enter full name"
-                            className="mt-2"
-                        />
-                    </div>
-                    <div className="text-left">
-                        <Label className="text-[14px] font-medium">
-                            Email *
-                        </Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            value={newUser.email}
-                            onChange={handleInputChange}
-                            placeholder="Enter email address"
-                            className="mt-2"
-                        />
+            {/* Loading state for fresh data */}
+            {isEditMode && isFetchingFreshData && (
+                <div className="flex justify-center items-center py-8">
+                    <div className="animate-pulse">
+                        Loading user data...
                     </div>
                 </div>
+            )}
 
-                {/* Role Selection */}
-                <div className="text-left">
-                    <Label className="text-[14px] font-medium">
-                        Select Role *
-                    </Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                        {roles.map((role) => (
-                            <RoleCard
-                                key={role.id}
-                                id={role.id}
-                                icon={getRoleIcon(role.name)}
-                                title={role.name}
-                                description={role.description}
-                                selected={
-                                    pendingUserRole ===
-                                    role.id
-                                }
-                                onSelect={
-                                    setPendingUserRole
-                                }
+            {/* Form Body */}
+            {!isFetchingFreshData && (
+                <div className="space-y-6">
+                    {/* Name & Email */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="text-left">
+                            <Label className="text-[14px] font-medium">
+                                Name *
+                            </Label>
+                            <Input
+                                id="name"
+                                name="name"
+                                value={newUser.name}
+                                onChange={handleInputChange}
+                                placeholder="Enter full name"
+                                className="mt-2"
                             />
-                        ))}
+                        </div>
+                        <div className="text-left">
+                            <Label className="text-[14px] font-medium">
+                                Email *
+                            </Label>
+                            <Input
+                                id="email"
+                                name="email"
+                                value={newUser.email}
+                                onChange={handleInputChange}
+                                placeholder="Enter email address"
+                                className="mt-2"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Role Selection */}
+                    <div className="text-left">
+                        <Label className="text-[14px] font-medium">
+                            Select Role *
+                        </Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                            {roles.map((role) => (
+                                <RoleCard
+                                    key={role.id}
+                                    id={role.id}
+                                    icon={getRoleIcon(role.name)}
+                                    title={role.name}
+                                    description={role.description}
+                                    selected={
+                                        pendingUserRole ===
+                                        role.id
+                                    }
+                                    onSelect={
+                                        setPendingUserRole
+                                    }
+                                />
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
@@ -262,7 +315,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ isEditMode, user, refetchUs
                 <DialogClose asChild>
                     <Button
                         className="bg-primary hover:bg-blue-700"
-                        disabled={!canSubmit}
+                        disabled={!canSubmit || isFetchingFreshData}
                         onClick={handleSubmit}
                     >
                         {isEditMode ? 'Save Change' : 'Add User'}
