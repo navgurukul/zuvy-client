@@ -74,8 +74,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
     // misc
     const formSchema = z.object({
         title: z.string()
-        .max(50, { message: "Title must be 50 characters or fewer" })
-        .nonempty("Title is required"),
     })
 
     const form = useForm({
@@ -462,17 +460,15 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                 value={title} // Explicitly set value
                                                 onChange={(e) => {
                                                     // FIXED: Always update the same title state
-                                                    if (e.target.value.length <= 50) {
-                                                    setTitle(e.target.value)
-                                                    field.onChange(e)
+                                                    if (e.target.value.length>50) {
+                                                        toast.error({
+                                                        title: "Character Limit Reached",
+                                                        description: "You can enter up to 50 characters only.",
+                                                    })
                                                     }else {
-                                                   // Optional toast error (nice UX feedback)
-                                                    toast.error({
-                                                    title: "Character Limit Reached",
-                                                    description: "You can enter up to 50 characters only.",
-                                                 })
-                                                }
-
+                                                     setTitle(e.target.value)
+                                                     field.onChange(e)
+                                                    }
                                                 }}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {

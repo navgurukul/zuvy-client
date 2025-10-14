@@ -375,15 +375,16 @@ const AddForm: React.FC<AddFormProps> = ({
                                                 onChange={(e) => {
                                                     const newValue =
                                                         e.target.value
-                                                    if (newValue.length <= 50) {
-                                                        setTitles(newValue)
-                                                        field.onChange(newValue)
-                                                    } else {
-                                                        toast.error({
+                                                    if (newValue.length>50) {
+                                                           toast.error({
                                                             title: 'Character Limit Reached',
                                                             description:
                                                                 'You can enter up to 50 characters only.',
                                                         })
+                                                    } else {
+                                                        setTitles(newValue)
+                                                        field.onChange(newValue)
+                                                     
                                                     }
                                                     // setTitles(e.target.value)
                                                     // field.onChange(e)

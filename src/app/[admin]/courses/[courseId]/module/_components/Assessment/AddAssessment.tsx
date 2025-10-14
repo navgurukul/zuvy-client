@@ -372,13 +372,14 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 required
                                 onChange={(e) => {
                                     const newValue = e.target.value
-                                     if (newValue.length <= 50) {
-                                        setChapterTitle(newValue)
+                                     if (newValue.length>50) {
+                                          toast.error({
+                                            title: "Character Limit Reached",
+                                            description: "You can enter up to 50 characters only",
+                                        })
+                                        
                                      } else {
-                                    toast.error({
-                                      title: "Character Limit Reached",
-                                     description: "You can enter up to 50 characters only",
-                                     })
+                                        setChapterTitle(newValue)
                                  }
                                     
                                 }}

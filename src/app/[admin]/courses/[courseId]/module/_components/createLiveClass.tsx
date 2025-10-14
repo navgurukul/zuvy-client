@@ -315,14 +315,16 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         {...field}
                                         onChange={(e) => {
                                             const newValue = e.target.value
-                                            if (newValue.length <= 50) {
-                                                field.onChange(newValue)
-                                            } else {
-                                                toast.error({
+                                            if (newValue.length>50) {
+                                                  toast.error({
                                                     title: 'Character Limit Reached',
                                                     description:
                                                         'You can enter up to 50 characters only',
                                                 })
+                                               
+                                            } else {
+                                                field.onChange(newValue)
+                                              
                                             }
                                         }}
                                     />

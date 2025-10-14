@@ -109,14 +109,16 @@ function CodingChallenge({
     }
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value
-          if (newTitle.length <= 50) {
-        setChapterTitle(newTitle)
-        setHasTitleChanged(newTitle !== savedTitle)
+          if (newTitle.length>50) {
+            toast.error({
+              title: 'Character Limit Reached',
+              description: 'You can enter up to 50 characters only.',
+           })
+       
     } else {
-        toast.error({
-            title: 'Character Limit Reached',
-            description: 'You can enter up to 50 characters only.',
-        })
+         setChapterTitle(newTitle)
+        setHasTitleChanged(newTitle !== savedTitle)
+       
     }
         // setChapterTitle(newTitle)
         // setHasTitleChanged(newTitle !== savedTitle)
