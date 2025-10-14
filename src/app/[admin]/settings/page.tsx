@@ -85,17 +85,11 @@ const SettingsPage: React.FC = () => {
     }
 
     const handleEdit = (userId: number) => {
-        // Open edit modal or navigate to edit page
-        setEditingUserId(userId) 
-        setIsEditMode(true)
+        // Pehle modal ko open karo, fir editingUserId set karo
         setIsAddModalOpen(true)
+        setIsEditMode(true)
+        setEditingUserId(userId) 
     }
-
-    useEffect(() => {
-        if (editingUserId && user && !userLoading && isEditMode) {
-            setIsAddModalOpen(true)
-        }
-    }, [editingUserId, user, userLoading, isEditMode])
 
     const handleDelete = async (userId: number) => {
 
@@ -112,6 +106,12 @@ const SettingsPage: React.FC = () => {
         handleEdit,
         handleDelete
     )
+
+    const handleCloseModal = () => {
+        setIsAddModalOpen(false)
+        setEditingUserId(null)
+        setIsEditMode(false)
+    }
 
     return (
         <div className="py-2 bg-white min-h-screen">
@@ -169,14 +169,16 @@ const SettingsPage: React.FC = () => {
                                         Add User
                                     </Button>
                                 </DialogTrigger>
-                                 {isAddModalOpen && (
+                                {isAddModalOpen && (
                                     <AddUserModal 
                                         isEditMode={isEditMode}
                                         user={user}
+                                        isOpen={isAddModalOpen}
                                         refetchUsers={() => {
                                             refetchUsers(offset)
-                                            setIsAddModalOpen(false)
+                                            handleCloseModal()
                                         }} 
+                                        onClose={handleCloseModal}
                                     />
                                 )}
                             </Dialog>
@@ -206,7 +208,6 @@ const SettingsPage: React.FC = () => {
                                     columns={columns}
                                     data={users}
                                 />
-
                                 {/* Pagination */}
                                 <DataTablePagination
                                     totalStudents={totalRows}
