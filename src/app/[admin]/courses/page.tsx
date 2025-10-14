@@ -299,13 +299,12 @@ const Courses: React.FC = () => {
             const filtered = filterCoursesByRelevance(
                 allCourses,
                 debouncedSearchForSuggestions
-                
             )
             setFilteredSuggestions(filtered)
         } else {
             setFilteredSuggestions([])
         }
-        console.log('Filtered Suggestions:', filteredSuggestions);
+        console.log('Filtered Suggestions:', filteredSuggestions)
     }, [debouncedSearchForSuggestions, allCourses])
 
     useEffect(() => {
@@ -410,11 +409,11 @@ const Courses: React.FC = () => {
     }
 
     useEffect(() => {
-        (async () => {
-            const perms = await getPermissions();
-            setPermissions(perms);
+        ;(async () => {
+            const perms = await getPermissions()
+            setPermissions(perms)
         })()
-    }, [permissions]);
+    }, [permissions])
 
     console.log('permission', permissions)
 
@@ -444,7 +443,12 @@ const Courses: React.FC = () => {
                             <div className="flex-1 flex justify-end min-w-[220px]">
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button className={`text-white bg-primary font-semibold px-5 py-2 flex gap-2 ${!permissions.createCourse && 'invisible'}`}>
+                                        <Button
+                                            className={`text-white bg-primary font-semibold px-5 py-2 flex gap-2 ${
+                                                !permissions.createCourse &&
+                                                'invisible'
+                                            }`}
+                                        >
                                             <Plus className="w-5" />
                                             Create New Course
                                         </Button>
@@ -573,7 +577,15 @@ const Courses: React.FC = () => {
                     </div>
                     <div className="">
                         <div className="mb-5 flex justify-center items-center">
-                            {courses.length === 0 ? (
+                            {!permissions.viewCourse ? (
+                                <div className="flex justify-center items-center h-[60vh]">
+                                    <p className="text-lg font-medium text-gray-600">
+                                        You do not have permission to view
+                                        courses, Please contact the admin.
+                                    </p>
+                                </div>
+                            ) : courses.length === 0 ? (
+                                // {courses.length === 0 ? (
                                 <>
                                     {activeSearchTerm.length > 0 ? (
                                         <div className="absolute h-screen">
@@ -711,7 +723,6 @@ const Courses: React.FC = () => {
                                 </>
                             ) : (
                                 <div>
-                                    {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start"> */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2 md:px-0 mt-5 mb-8 items-start w-full">
                                         {courses.map((course, index) => {
                                             const validImageUrl =
