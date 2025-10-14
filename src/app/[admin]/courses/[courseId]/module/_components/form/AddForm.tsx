@@ -36,9 +36,15 @@ const formSchema = z.object({
         message: 'Video Title must be at least 2 characters.',
     }),
 
-    description: z.string().min(4, {
-        message: 'Description must be at least 4 characters.',
-    }),
+    description: z
+        .string()
+        .refine((val) => val.trim().length > 0, {
+            message: 'Please add a description.',
+        })
+        .refine((val) => val.trim().length >= 4, {
+            message: 'Description must be at least 4 characters.',
+        }),
+        
     questions: z.array(
         z.object({
             id: z.string().optional() || z.number().optional(),
@@ -64,6 +70,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const { setFormPreviewContent } = getFormPreviewStore()
     const [titles, setTitles] = useState(content?.title || '')
     const [isSaved, setIsSaved] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -202,7 +209,59 @@ const AddForm: React.FC<AddFormProps> = ({
         form.setValue('questions', updatedQuestions)
     }
 
+     // ✅ CUSTOM VALIDATION FUNCTION 
+    const validateQuestionsWithOptions = (questions: any[]) => {
+        const errors: { index: number; message: string }[] = []
+        
+        questions.forEach((question, index) => {
+            // Multiple Choice (typeId: 1) or Checkbox (typeId: 2) 
+            const requiresOptions = question.typeId === 1 || question.typeId === 2
+            
+            if (requiresOptions) {
+                const hasValidOptions = 
+                    question.options && 
+                    question.options.length > 0 && 
+                    question.options.some((opt: string) => opt.trim().length > 0)
+                
+                if (!hasValidOptions) {
+                    errors.push({
+                        index,
+                        message: `Question ${index + 1}: Please add at least one option for Multiple Choice or Checkbox questions.`
+                    })
+                    
+                    // Set error directly in form
+                    form.setError(`questions.${index}.options`, {
+                        type: 'manual',
+                        message: 'Please add at least one option for this question.'
+                    })
+                }
+            }
+        })
+        
+        return errors
+    }
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        // ✅ VALIDATION CHECK 
+        const validationErrors = validateQuestionsWithOptions(values.questions)
+        
+        if (validationErrors.length > 0) {
+            // toast notification 
+            toast({
+                variant: 'destructive',
+                title: 'Validation Error',
+                description: validationErrors[0].message,
+            })
+            
+            // Scroll to first error (optional)
+            const firstErrorIndex = validationErrors[0].index
+            const errorElement = document.querySelector(`[data-question-index="${firstErrorIndex}"]`)
+            errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            
+            return 
+        }
+
+        setIsSubmitting(true)
         const { title, description, questions } = values
 
         if (!questions || questions.length === 0) {
@@ -291,7 +350,9 @@ const AddForm: React.FC<AddFormProps> = ({
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
-        }
+        } finally {
+        setIsSubmitting(false) // Reset loading state
+    }
     }
 
     function previewForm() {
@@ -447,19 +508,31 @@ const AddForm: React.FC<AddFormProps> = ({
                         </div>
 
                         {questions.map((item, index) => (
-                            <FormSection
-                                key={item.id || `form-section-${index}`}
-                                item={item}
-                                index={index}
-                                form={form}
-                                deleteQuestion={deleteQuestion}
-                                formData={questions}
-                            />
+                            <div key={item.id || `form-section-${index}`} data-question-index={index}>
+                                <FormSection
+                                    item={item}
+                                    index={index}
+                                    form={form}
+                                    deleteQuestion={deleteQuestion}
+                                    formData={questions}
+                                />
+                                {/* ✅ ERROR MESSAGE DISPLAY */}
+                                {form.formState.errors.questions?.[index]?.options && (
+                                    <p className="text-sm text-red-500 mt-2">
+                                        {form.formState.errors.questions[index]?.options?.message}
+                                    </p>
+                                )}
+                            </div>
                         ))}
 
                         <div className="flex justify-start">
-                            <Button type="submit" className="w-3/3 bg-primary">
-                                Create
+                            <Button 
+                              type="submit" 
+                              disabled={isSubmitting}
+                              aria-label="Save form changes"
+                              aria-busy={isSubmitting}
+                              className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90">
+                                {isSubmitting ? 'Saving...' : 'Save'}
                             </Button>
                         </div>
                     </form>

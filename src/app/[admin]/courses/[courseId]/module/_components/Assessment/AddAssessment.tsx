@@ -396,6 +396,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                                 />
                             )} */}
+                            
                         </div>
 
                         {/* preview & settings buttons */}
