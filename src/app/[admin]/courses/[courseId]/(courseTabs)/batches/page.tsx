@@ -525,14 +525,9 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
     // Rest of the existing useEffect and other functions remain the same
     useEffect(() => {
         if (params.courseId) {
-            console.log('Fetching course details for:', params.courseId)
             fetchCourseDetails(params.courseId)
         }
     }, [params.courseId, fetchCourseDetails])
-
-    useEffect(() => {
-    console.log('CourseData updated:', courseData)
-}, [courseData])
 
     useEffect(() => {
         const timer = setTimeout(() => {

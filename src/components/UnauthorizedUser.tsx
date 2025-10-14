@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 
-const UnauthorizedUser = ({ role }: any) => {
+const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleFromPath?: string }) => {
     const router = useRouter()
     return (
         <div className="flex flex-col items-center pt-24">
@@ -22,10 +22,10 @@ const UnauthorizedUser = ({ role }: any) => {
                         Unauthorized Access
                     </h1>
                     <p className="text-md mt-3 mb-5 capitalize">
-                        {`The page is meant to be viewed by Zuvy ${role}. You do
-                        not have ${role} access to access this page`}
+                        {`The page is meant to be viewed by Zuvy ${roleFromPath}. You do
+                        not have ${roleFromPath} access to access this page`}
                     </p>
-                    <Button onClick={() => router.push(`/${role}/courses`)}>
+                    <Button onClick={() => router.push(`/${userRole}/courses`)}>
                         Return to Dashboard
                     </Button>
                 </div>
