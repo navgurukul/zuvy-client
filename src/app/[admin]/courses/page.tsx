@@ -712,7 +712,7 @@ const Courses: React.FC = () => {
                             ) : (
                                 <div>
                                     {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start"> */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2 md:px-0 mt-5 mb-8 items-start w-full">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2 md:px-0 mt-5 mb-8 items-start w-full">
                                         {courses.map((course, index) => {
                                             const validImageUrl =
                                                 getValidImageUrl(
