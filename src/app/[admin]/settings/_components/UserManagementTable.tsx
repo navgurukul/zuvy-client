@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -30,16 +30,7 @@ import {
 import { useRoles } from '@/hooks/useRoles'
 import { SearchBox } from '@/utils/searchBox'
 import { api } from '@/utils/axios.config'
-
-interface User {
-    id: number
-    roleId: number
-    userId: number
-    name: string
-    email: string
-    roleName: string
-    createdAt: string
-}
+import type { User } from '../columns'
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -54,7 +45,6 @@ export function UserManagementTable<TData extends User, TValue>({
     const [rowSelection, setRowSelection] = useState({})
     const [data, setData] = useState<TData[]>([])
     const [loading, setLoading] = useState(false)
-
     // Fetch roles from API
     const { roles, loading: rolesLoading } = useRoles()
 
@@ -64,13 +54,12 @@ export function UserManagementTable<TData extends User, TValue>({
             const response = await api.get(
                 `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
             )
-            
             // Map the data to include id field for SearchBox
             const suggestions = (response.data.data || []).map((user: User) => ({
                 ...user,
                 id: user.userId, // Use userId as id for SearchBox
             }))
-            
+
             return suggestions
         } catch (error) {
             console.error('Error fetching suggestions:', error)
@@ -85,7 +74,7 @@ export function UserManagementTable<TData extends User, TValue>({
             const response = await api.get(
                 `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
             )
-            
+
             setData(response.data.data || [])
             return response.data
         } catch (error) {
@@ -115,7 +104,7 @@ export function UserManagementTable<TData extends User, TValue>({
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search)
         const searchQuery = urlParams.get('search')
-        
+
         if (searchQuery && searchQuery.trim()) {
             // If search query exists in URL, fetch search results
             fetchSearchResultsApi(searchQuery.trim())
@@ -152,14 +141,10 @@ export function UserManagementTable<TData extends User, TValue>({
                     fetchSuggestionsApi={fetchSuggestionsApi}
                     fetchSearchResultsApi={fetchSearchResultsApi}
                     defaultFetchApi={defaultFetchApi}
-                    getSuggestionLabel={(student) => (
+                    getSuggestionLabel={(user) => (
                         <div>
-                            <div className="font-medium">
-                                {student.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                                {student.email}
-                            </div>
+                            <div className="font-medium">{user.name}</div>
+                            <div className="text-sm text-gray-500">{user.email}</div>
                         </div>
                     )}
                     inputWidth="w-80"
