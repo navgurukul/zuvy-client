@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -16,50 +16,61 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { useAllUsers } from '@/hooks/useAllUsers'
 
 interface DeleteUserProps {
     title: string
     description: string
     userId: any
+    onDeleteSuccess?: (userId: any) => void  
 }
 
 export const DeleteUser: React.FC<DeleteUserProps> = ({
     title,
     description,
     userId,
+    onDeleteSuccess,
 }) => {
+    const [open, setOpen] = useState(false)  // ✅ Modal control
+    const [isDeleting, setIsDeleting] = useState(false)  // ✅ Loading state
 
-    const { refetchUsers } = useAllUsers({
-        limit: 10,
-        searchTerm: '',
-        offset: 0,
-    })
     async function deleteUserHandler(userId: any) {
-
+        setIsDeleting(true)
+        
         try {
-            await api.delete(`/users/deleteUser/${userId}`).then((res) => {
-                toast.success({
-                    title: 'User Deleted Successfully!',
-                    description: res.data.message,
-                })
+            
+            const res = await api.delete(`/users/deleteUser/${userId}`)
+            
+            toast.success({
+                title: 'User Deleted Successfully!',
+                description: res.data.message,
+            })
+
+            setOpen(false)
+
+            if (onDeleteSuccess) {
+                onDeleteSuccess(userId)
             }
-        )
-        await refetchUsers(0)
+
         } catch (error: any) {
             toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'An error occurred.',
+                title: 'Failed to Delete User',
+                description: error.response?.data?.message || 'An error occurred.',
             })
+            
+        } finally {
+            setIsDeleting(false)
         }
     }
 
     return (
-        <AlertDialog>
+        <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button className="bg-white text-red-400">
-                    <Trash2 />
+                <Button 
+                    className="bg-white text-red-400 hover:bg-red-50"
+                    variant="ghost"
+                    size="sm"
+                >
+                    <Trash2 className="w-4 h-4" />
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -70,14 +81,18 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel className="!text-gray-600 hover:border-[rgb(81,134,114)]">
+                    <AlertDialogCancel 
+                        className="!text-gray-600 hover:border-[rgb(81,134,114)]"
+                        disabled={isDeleting}  // ✅ Disable during delete
+                    >
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
-                        className="bg-red-500"
+                        className="bg-red-500 hover:bg-red-600"
                         onClick={() => deleteUserHandler(userId)}
+                        disabled={isDeleting}  // ✅ Disable during delete
                     >
-                        Continue
+                        {isDeleting ? 'Deleting...' : 'Delete'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

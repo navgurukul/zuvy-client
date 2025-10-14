@@ -28,6 +28,7 @@ const SettingsPage: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
+    const [allUsers, setAllUsers] = useState<any[]>([])
     
     // Set the first role as selected once roles are loaded
     useEffect(() => {
@@ -56,6 +57,11 @@ const SettingsPage: React.FC = () => {
         loading: userLoading,
         error,
     } = useUser(editingUserId)
+
+    // ✅ SYNC hook data to local state
+    useEffect(() => {
+        setAllUsers(users)
+    }, [users])
 
     useEffect(() => {
         if (initialTab) setActiveTab(initialTab)
@@ -102,6 +108,13 @@ const SettingsPage: React.FC = () => {
         // Call your API to delete the user
         // await deleteUser(userId)
         // refetchUsers()
+
+         // Remove user from UI immediately (Optimistic Update)
+        setAllUsers((prevUsers) => 
+            prevUsers.filter((user) => user.userId !== userId)
+        )
+
+        await refetchUsers(offset)
     }
 
     // Create columns with the fetched roles and callbacks
@@ -155,7 +168,7 @@ const SettingsPage: React.FC = () => {
                         <div className="flex justify-between items-center mb-4">
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 text-start">
-                                    Users ({users.length})
+                                    Users ({allUsers.length})
                                 </h2>
                                 <p className="text-muted-foreground text-[1.1rem] text-start">
                                     Manage all users and their roles in your
@@ -204,7 +217,7 @@ const SettingsPage: React.FC = () => {
                             <>
                                 <UserManagementTable
                                     columns={columns}
-                                    data={users}
+                                    data={allUsers}
                                 />
 
                                 {/* Pagination */}

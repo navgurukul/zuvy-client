@@ -85,8 +85,9 @@ export const createColumns = (
                     </Button> */}
                     <DeleteUser 
                         userId={selectedUser.userId}
-                        title="Are you absolutely sure?"
-                        description="This action cannot be undone. This will permanently remove the student from the bootcamp"
+                        title="Delete user?"
+                        description="This action cannot be undone. This will permanently delete this user."
+                        onDeleteSuccess={(userId) => onDelete(userId)}
                     />
                 </div>
             )
