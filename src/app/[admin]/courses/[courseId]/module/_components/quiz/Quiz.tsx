@@ -354,7 +354,7 @@ function Quiz(props: QuizProps) {
                                 className="transition-colors"
                             />
                             <p className="text-muted-foreground">
-                                Coding Problems
+                                Quiz
                             </p>
                         </div>
                     </div>

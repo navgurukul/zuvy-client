@@ -673,7 +673,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     <Button
                                         type="button"
                                         variant="default"
-                                        className="w-auto px-6 bg-success-dark opacity-75"
+                                        className="w-auto px-6 bg-primary text-primary-foreground hover:bg-primary/90"
                                     >
                                         Publish Options
                                     </Button>
@@ -1094,7 +1094,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 }
                                                                 className={
                                                                     field.value
-                                                                        ? 'bg-[#609082]'
+                                                                        ? 'bg-[#274edd]'
                                                                         : 'bg-gray-300'
                                                                 }
                                                             />
