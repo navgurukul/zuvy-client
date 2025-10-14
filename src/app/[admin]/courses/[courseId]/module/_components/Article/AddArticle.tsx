@@ -14,7 +14,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import '@/app/_components/editor/Tiptap.css'
+// import '@\app\_components\editor\Tiptap.css'
 import { Pencil } from 'lucide-react'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import UploadArticle from './UploadPdf'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
     Tooltip,
     TooltipContent,
@@ -437,6 +438,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     }
 
     return (
+        <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
         <div className="px-5 flex-1 overflow-y-auto space-y-2 pr-2">
             <div className="w-full ">
                 {/* <div className="flex justify-between items-center"> */}
@@ -683,7 +685,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     </div>
                 </div>
 
-                <div className="flex justify-end mt-5">
+                <div className="flex justify-end mt-5 mr-3">
                     {defaultValue === 'editor' ? (
                         <Button
                             className="bg-primary text-primary-foreground hover:bg-primary/90"
@@ -696,7 +698,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     ) : (
                         <div>
                             <Button
-                                className="bg-success-dark opacity-75"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90"
                                 type="button"
                                 onClick={onFileUpload}
                                 disabled={!disabledUploadButton}
@@ -708,6 +710,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 </div>
             </div>
         </div>
+    </ScrollArea>
     )
 }
 
