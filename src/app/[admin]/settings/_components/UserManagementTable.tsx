@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -20,7 +20,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
 import {
     Select,
     SelectContent,
@@ -28,27 +27,103 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Search } from 'lucide-react'
 import { useRoles } from '@/hooks/useRoles'
+import { SearchBox } from '@/utils/searchBox'
+import { api } from '@/utils/axios.config'
+
+interface User {
+    id: number
+    roleId: number
+    userId: number
+    name: string
+    email: string
+    roleName: string
+    createdAt: string
+}
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
-    data: TData[]
 }
 
-export function UserManagementTable<TData, TValue>({
+export function UserManagementTable<TData extends User, TValue>({
     columns,
-    data,
 }: UserManagementTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-        {}
-    )
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
+    const [data, setData] = useState<TData[]>([])
+    const [loading, setLoading] = useState(false)
 
     // Fetch roles from API
     const { roles, loading: rolesLoading } = useRoles()
+
+    // Fetch suggestions for search (without limit/offset for suggestions)
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        try {
+            const response = await api.get(
+                `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
+            )
+            
+            // Map the data to include id field for SearchBox
+            const suggestions = (response.data.data || []).map((user: User) => ({
+                ...user,
+                id: user.userId, // Use userId as id for SearchBox
+            }))
+            
+            return suggestions
+        } catch (error) {
+            console.error('Error fetching suggestions:', error)
+            return []
+        }
+    }, [])
+
+    // Fetch search results with filters applied
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        setLoading(true)
+        try {
+            const response = await api.get(
+                `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
+            )
+            
+            setData(response.data.data || [])
+            return response.data
+        } catch (error) {
+            console.error('Error fetching search results:', error)
+            setData([])
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    // Default fetch - load all users when search is cleared
+    const defaultFetchApi = useCallback(async () => {
+        setLoading(true)
+        try {
+            const response = await api.get('/users/get/all/users')
+            setData(response.data.data || [])
+            return { data: response.data.data }
+        } catch (error) {
+            console.error('Error loading all users:', error)
+            setData([])
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
+    // Load data on component mount - check if search exists in URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const searchQuery = urlParams.get('search')
+        
+        if (searchQuery && searchQuery.trim()) {
+            // If search query exists in URL, fetch search results
+            fetchSearchResultsApi(searchQuery.trim())
+        } else {
+            // Otherwise load all users
+            defaultFetchApi()
+        }
+    }, []) // Empty dependency array - run only once on mount
 
     const table = useReactTable({
         data,
@@ -72,23 +147,23 @@ export function UserManagementTable<TData, TValue>({
         <div className="space-y-4">
             {/* Search and Filter Bar */}
             <div className="flex gap-4 mb-6">
-                <div className="relative w-64">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 mt-1 text-muted-foreground" />
-                    <Input
-                        placeholder="Search users..."
-                        className="pl-10 bg-white"
-                        value={
-                            (table
-                                .getColumn('name')
-                                ?.getFilterValue() as string) ?? ''
-                        }
-                        onChange={(event) =>
-                            table
-                                .getColumn('name')
-                                ?.setFilterValue(event.target.value)
-                        }
-                    />
-                </div>
+                <SearchBox
+                    placeholder="Search by name or email..."
+                    fetchSuggestionsApi={fetchSuggestionsApi}
+                    fetchSearchResultsApi={fetchSearchResultsApi}
+                    defaultFetchApi={defaultFetchApi}
+                    getSuggestionLabel={(student) => (
+                        <div>
+                            <div className="font-medium">
+                                {student.name}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                                {student.email}
+                            </div>
+                        </div>
+                    )}
+                    inputWidth="w-80"
+                />
 
                 <div className="mt-2">
                     <Select
@@ -151,7 +226,16 @@ export function UserManagementTable<TData, TValue>({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {loading ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
@@ -176,7 +260,7 @@ export function UserManagementTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    No results found.
                                 </TableCell>
                             </TableRow>
                         )}
