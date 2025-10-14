@@ -11,7 +11,7 @@ import {
 export const useCourseDetails = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [isImageUploading, setIsImageUploading] = useState(false)
-    const { courseData, setCourseData } = getCourseData()
+    const { Permissions, courseData, setCourseData } = getCourseData()
 
     const uploadImage = async (
         croppedImage: string
@@ -162,6 +162,7 @@ export const useCourseDetails = () => {
         isLoading,
         isImageUploading,
         courseData,
+        Permissions,
         updateCourseDetails,
         uploadImage,
         validateImageFile,

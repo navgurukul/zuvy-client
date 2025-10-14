@@ -419,7 +419,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                         <DialogClose asChild>
                             <Button
                                 onClick={form.handleSubmit(onSubmit)}
-                                className="bg-[rgb(81,134,114)]"
+                                className="bg-primary"
                                 disabled={isLoading}
                             >
                                 Create Module

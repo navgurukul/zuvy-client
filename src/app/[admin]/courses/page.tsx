@@ -197,9 +197,6 @@ const Courses: React.FC = () => {
         }
     }
 
-
-
-
     // Handle suggestion click - this triggers course fetching
     const handleSuggestionClick = (course: Course) => {
         setSearchQuery(course.name)
@@ -412,13 +409,14 @@ const Courses: React.FC = () => {
         return ''
     }
 
-        useEffect(() => {
-            (async () => {
-                const perms = await getPermissions();
-                setPermissions(perms);
-            })()
-        }, [permissions]);
+    useEffect(() => {
+        (async () => {
+            const perms = await getPermissions();
+            setPermissions(perms);
+        })()
+    }, [permissions]);
 
+    console.log('permission', permissions)
 
     return (
         <>
@@ -720,7 +718,6 @@ const Courses: React.FC = () => {
                                                 getValidImageUrl(
                                                     course.coverImage
                                                 )
-
                                             return (
                                                 <CourseCard
                                                     key={course.id}

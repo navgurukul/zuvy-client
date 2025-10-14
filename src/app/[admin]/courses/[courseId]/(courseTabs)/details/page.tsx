@@ -79,9 +79,12 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         isLoading,
         isImageUploading,
         courseData,
+        Permissions,
         updateCourseDetails,
         validateImageFile,
     } = useCourseDetails()
+
+    console.log('Permissions in details', Permissions)
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -371,7 +374,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                 onClick={() =>
                                                     fileInputRef.current?.click()
                                                 }
-                                                disabled={isImageUploading}
+                                                disabled={!Permissions.editCourse || isImageUploading}
                                             >
                                                 <Upload className="h-4 w-4 mr-2" />
                                                 {isImageUploading
@@ -391,7 +394,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                     size="sm"
                                                     onClick={handleRemoveImage}
                                                     type="button"
-                                                    disabled={isImageUploading}
+                                                    disabled={!Permissions.editCourse || isImageUploading}
                                                 >
                                                     <Trash2 className="h-4 w-4 mr-2" />
                                                     Remove Image
@@ -443,6 +446,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                         value
                                                     )
                                                 }
+                                                disabled={!Permissions.editCourse}
                                                 className="flex gap-4"
                                             >
                                                 <div className="flex flex-row items-center space-x-2 space-y-0">
@@ -538,6 +542,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                                     handleCollaboratorButtonClick
                                                                 }
                                                                 disabled={
+                                                                    !Permissions.editCourse ||
                                                                     isImageUploading
                                                                 }
                                                             >
@@ -584,6 +589,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                     onChange={
                                                         handleCollaboratorFileChange
                                                     }
+                                                    disabled={!Permissions.editCourse}
                                                     className="hidden"
                                                     ref={
                                                         collaboratorFileInputRef
@@ -626,6 +632,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                         placeholder="Enter collaborator text"
                                                         maxLength={80}
                                                         {...field}
+                                                        disabled={!Permissions.editCourse}
                                                         value={
                                                             field.value || ''
                                                         }
@@ -658,6 +665,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                 id="name"
                                                 placeholder="Enter course title"
                                                 {...field}
+                                                disabled={!Permissions.editCourse}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -683,6 +691,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                 placeholder="Enter course description"
                                                 className="min-h-[120px]"
                                                 {...field}
+                                                disabled={!Permissions.editCourse}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -711,6 +720,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                     min="1"
                                                     placeholder="Duration in weeks"
                                                     value={field.value}
+                                                    disabled={!Permissions.editCourse}
                                                     onChange={(e) => {
                                                         const validatedValue =
                                                             handleDurationChange(
@@ -761,6 +771,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                                           )
                                                                         : ''
                                                                 }
+                                                                disabled={!Permissions.editCourse}
                                                                 placeholder="Select start date"
                                                                 className="cursor-pointer"
                                                                 readOnly
@@ -830,6 +841,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                                         language
                                                                     }
                                                                     id={language.toLowerCase()}
+                                                                    disabled={!Permissions.editCourse}
                                                                 />
                                                             </FormControl>
                                                             <Label
@@ -854,7 +866,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                         <Button
                             type="submit"
                             className="bg-primary hover:bg-primary-dark mb-5"
-                            disabled={isLoading || isImageUploading}
+                            disabled={!Permissions.editCourse || isLoading || isImageUploading}
                         >
                             {isLoading ? 'Saving...' : 'Save Changes'}
                         </Button>

@@ -34,6 +34,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
         onDragStart,
         onDragEnd,
         showBorderFlash,
+        permissions,
     } = props
 
     const router = useRouter()
@@ -169,29 +170,32 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                             </div>
 
                             <div className="flex items-center gap-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        editHandle(moduleId)
-                                    }}
-                                    className="hover:text-muted-foreground hover:bg-gray-200"
-                                >
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleDeleteModal()
-                                    }}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
+                                {permissions.editModule && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            editHandle(moduleId)
+                                        }}
+                                        className="hover:text-muted-foreground hover:bg-gray-200"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                )}
+                                {permissions.deleteModule && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDeleteModal()
+                                        }}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>

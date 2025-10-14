@@ -1,3 +1,5 @@
+import { PermissionsType } from '@/app/[admin]/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType'
+
 // AddStudentsModal
 export type AddStudentsModalProps = {
   id: number;
@@ -101,6 +103,7 @@ export type CurricullamCardProps = {
     onDragStart?: () => void
     onDragEnd?: () => void
     showBorderFlash?: boolean
+    permissions: PermissionsType
 }
 
 
