@@ -74,7 +74,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
     // misc
     const formSchema = z.object({
-        title: z.string(),
+        title: z.string()
     })
 
     const form = useForm({
@@ -462,8 +462,15 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                 value={title} // Explicitly set value
                                                 onChange={(e) => {
                                                     // FIXED: Always update the same title state
-                                                    setTitle(e.target.value)
-                                                    field.onChange(e)
+                                                    if (e.target.value.length>50) {
+                                                        toast.error({
+                                                        title: "Character Limit Reached",
+                                                        description: "You can enter up to 50 characters only.",
+                                                    })
+                                                    }else {
+                                                     setTitle(e.target.value)
+                                                     field.onChange(e)
+                                                    }
                                                 }}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {

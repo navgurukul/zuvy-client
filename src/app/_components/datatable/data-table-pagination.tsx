@@ -66,9 +66,16 @@ export function DataTablePagination<TData>({
                     <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup
                         value={position}
+                        // onValueChange={(newLimit) => {
+                        //     updateURLParams(1, newLimit) 
+                        // }}
+
+
                         onValueChange={(newLimit) => {
-                            updateURLParams(1, newLimit) 
-                        }}
+    const newPage = Math.ceil(((currentPage - 1) * +position + 1) / +newLimit);
+    updateURLParams(newPage, newLimit);
+}}
+
                     >
                         {ROWS_PER_PAGE.map((rows) => (
                             <DropdownMenuRadioItem key={rows} value={rows}>

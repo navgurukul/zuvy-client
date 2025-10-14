@@ -762,6 +762,7 @@ const Courses: React.FC = () => {
                 </div>
             )}
         </>
+        
     )
 }
 export default Courses
