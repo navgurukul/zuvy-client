@@ -66,7 +66,7 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
                 <Button 
-                    className="bg-white text-red-400 hover:bg-red-50"
+                    className=" text-red-600 hover:bg-red-200 hover:text-red-600"
                     variant="ghost"
                     size="sm"
                 >

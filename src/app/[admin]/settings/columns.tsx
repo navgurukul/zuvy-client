@@ -69,10 +69,10 @@ export const createColumns = (
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="p-1 h-7 w-7 hover:bg-gray-100"
+                        className="p-1 h-7 w-7 hover:bg-primary hover:text-white"
                         onClick={() => onEdit(selectedUser.userId)}
                     >
-                        <Edit className="w-4 h-4 text-gray-700" />
+                        <Edit className="w-4 h-4" />
                     </Button>
 
                     {/* <Button
