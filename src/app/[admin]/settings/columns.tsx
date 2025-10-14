@@ -63,7 +63,6 @@ export const createColumns = (
         header: 'Actions',
         cell: ({ row }) => {
             const selectedUser = row.original
-            // console.log('selectedUser', selectedUser)
             return (
                 <div className="flex gap-1">
                     <Button

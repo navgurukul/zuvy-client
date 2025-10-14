@@ -102,7 +102,6 @@ const Courses: React.FC = () => {
             auto: true,
         })
     const { createBootcamp, creating } = useCreateBootcamp()
-    console.log(allCourses)
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const searchContainerRef = useRef<HTMLDivElement>(null)
@@ -308,7 +307,6 @@ const Courses: React.FC = () => {
         } else {
             setFilteredSuggestions([])
         }
-        console.log('Filtered Suggestions:', filteredSuggestions);
     }, [debouncedSearchForSuggestions, allCourses])
 
     useEffect(() => {

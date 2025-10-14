@@ -30,7 +30,6 @@ export function useUser(userId: number | null) {
             
             // Get the user data from the response
             const userData = res?.data
-            console.log('fetched user data', userData)
             setUser(userData)
         } catch (err) {
             setError(err)

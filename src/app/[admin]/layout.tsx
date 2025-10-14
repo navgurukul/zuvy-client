@@ -69,6 +69,6 @@ export default function RootLayout({
 
     // ❌ Unauthorized for this route
     if (userRole !== roleFromPath) {
-        return <UnauthorizedUser role={userRole} />
+        return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
     }
 }

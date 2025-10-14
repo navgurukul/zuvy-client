@@ -189,7 +189,6 @@ const ProjectPage = () => {
       // Refetch project details to get updated status
       try {
         await refetchProjectDetails();
-        console.log('Project details refetched successfully');
       } catch (error) {
         console.error('Error refetching project details:', error);
       }

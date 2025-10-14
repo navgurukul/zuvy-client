@@ -266,7 +266,6 @@
 //             totalClasses: values.totalClasses,
 //             moduleId: values.modulesIds,
 //         }
-//         // console.log(transformedData)
 
 //         try {
 //             await api.post(`/classes`, transformedData).then((res) => {

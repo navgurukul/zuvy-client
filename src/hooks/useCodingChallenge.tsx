@@ -127,7 +127,7 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
             }
         } catch (error) {
             // No previous submission found, this is fine
-            console.log('No previous submission found');
+            console.error('No previous submission found');
         }
     }, [questionId]);
 
