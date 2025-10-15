@@ -96,7 +96,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             const fetchFreshUserData = async () => {
                 setIsFetchingFreshData(true)
                 try {
-                    const response = await api.get(`/users/${user.id}`)
+                    const response = await api.get(`/users/getUser/${user.id}`)
                     setFreshUserData(response.data)
                     setNewUser({
                         name: response.data.name || '',
