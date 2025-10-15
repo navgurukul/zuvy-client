@@ -428,6 +428,7 @@ const Courses: React.FC = () => {
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}
                     <div className="px-1 pt-2 pb-2">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
+                        {/* <div className="flex flex-col lg:flex-row justify-between items-center gap-6 w-full"> */}
                             {/* Left: Title and Subtitle */}
                             <div className="flex-1 min-w-[220px] text-start">
                                 <h1 className="text-3xl font-bold text-foreground mb-1">
