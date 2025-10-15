@@ -206,7 +206,7 @@ const SettingsPage: React.FC = () => {
                             <>
                                 <UserManagementTable
                                     columns={columns}
-                                    data={users}
+                                    // data={users}
                                 />
                                 {/* Pagination */}
                                 <DataTablePagination
