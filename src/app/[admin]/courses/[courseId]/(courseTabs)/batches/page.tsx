@@ -601,7 +601,6 @@ const Page = ({ params }: { params: ParamsType }) => {
     // Rest of the existing useEffect and other functions remain the same
     useEffect(() => {
         if (params.courseId) {
-            console.log('Fetching course details for:', params.courseId)
             fetchCourseDetails(params.courseId)
         }
     }, [params.courseId, fetchCourseDetails])

@@ -102,7 +102,6 @@ const Courses: React.FC = () => {
             auto: true,
         })
     const { createBootcamp, creating } = useCreateBootcamp()
-    console.log(allCourses)
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const searchContainerRef = useRef<HTMLDivElement>(null)
@@ -305,7 +304,6 @@ const Courses: React.FC = () => {
         } else {
             setFilteredSuggestions([])
         }
-        console.log('Filtered Suggestions:', filteredSuggestions);
     }, [debouncedSearchForSuggestions, allCourses])
 
     useEffect(() => {
@@ -416,8 +414,6 @@ const Courses: React.FC = () => {
         })()
     }, [permissions]);
 
-    console.log('permission', permissions)
-
     return (
         <>
             {loading ? (
@@ -425,7 +421,7 @@ const Courses: React.FC = () => {
                     <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
-                <div className="w-full">
+                <div className="w-full font-manrope">
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}
                     <div className="px-1 pt-2 pb-2">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
@@ -761,6 +757,7 @@ const Courses: React.FC = () => {
                 </div>
             )}
         </>
+        
     )
 }
 export default Courses

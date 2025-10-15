@@ -79,7 +79,6 @@ function ChapterItem({
     const handleClick = () => {
         // Prevent click during drag
         if (isBeingDragged || isDragging) {
-            console.log('Click prevented during drag')
             return
         }
 
@@ -104,14 +103,11 @@ function ChapterItem({
                         description: res.data.message,
                     })
                     fetchChapters()
-                    console.log('chapterData', chapterData)
                     if (chapterData[0].chapterId === chapterId) {
-                        console.log('Comes on if')
                         router.push(
                             `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[1].chapterId}`
                         )
                     } else if (chapterId === activeChapter) {
-                        console.log('Comes on else')
                         router.push(
                             `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[0].chapterId}`
                         )

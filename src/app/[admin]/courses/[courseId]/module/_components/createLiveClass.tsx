@@ -70,7 +70,9 @@ const formSchema = z
             .refine(
                 (val) => {
                     // allow empty / undefined
-                    return val === undefined || val === '' || !isNaN(Number(val))
+                    return (
+                        val === undefined || val === '' || !isNaN(Number(val))
+                    )
                 },
                 { message: 'Invalid second batch' }
             ),
@@ -132,8 +134,9 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     const [isCalendarOpen, setCalendarOpen] = useState(false)
     const [bootcampData, setBootcampData] = useState<any>([])
     // Reusable select styling helper
-    const baseSelectClass = 'w-full border border-input rounded-md px-3 py-2 bg-background text-gray-600 focus:outline-none focus:ring-2 focus:ring-[rgb(81,134,114)] focus:border-[rgb(81,134,114)] disabled:opacity-50 disabled:cursor-not-allowed';
-    
+    const baseSelectClass =
+        'w-full border border-input rounded-md px-3 py-2 bg-background text-gray-600 focus:outline-none focus:ring-2 focus:ring-[rgb(81,134,114)] focus:border-[rgb(81,134,114)] disabled:opacity-50 disabled:cursor-not-allowed'
+
     // Platform options
     const platformOptions = [
         { value: 'zoom', label: 'Zoom' },
@@ -194,8 +197,8 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
         startDate,
         startTime,
         endTime,
-    batch,
-    secondBatch,
+        batch,
+        secondBatch,
         platform,
     } = form.watch()
 
@@ -204,7 +207,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
         startDate &&
         startTime &&
         endTime &&
-    batch &&
+        batch &&
         platform
     )
 
@@ -233,7 +236,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
             startDateTime: startDateTime,
             endDateTime: endDateTime,
             timeZone: 'Asia/Kolkata',
-            isZoomMeet: values.platform === 'zoom'
+            isZoomMeet: values.platform === 'zoom',
         }
 
         try {
@@ -305,12 +308,26 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                     <span className="text-red-500">*</span>
                                 </FormLabel>
                                 <FormControl>
-                                        <Input
-                                            className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
-                                            placeholder="Session Title"
-                                            disabled={isLoading}
-                                            {...field}
-                                        />
+                                    <Input
+                                        className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                                        placeholder="Session Title"
+                                        disabled={isLoading}
+                                        {...field}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value
+                                            if (newValue.length>50) {
+                                                  toast.error({
+                                                    title: 'Character Limit Reached',
+                                                    description:
+                                                        'You can enter up to 50 characters only',
+                                                })
+                                               
+                                            } else {
+                                                field.onChange(newValue)
+                                              
+                                            }
+                                        }}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -402,9 +419,22 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                                         : undefined
                                                 }
                                                 onChange={(e) => {
-                                                    field.onChange(
+                                                    // field.onChange(
+                                                    //     e.target.value
+                                                    // )
+
+                                                    const newValue =
                                                         e.target.value
-                                                    )
+                                                    if (newValue.length <= 50) {
+                                                        field.onChange(newValue)
+                                                    } else {
+                                                        toast.error({
+                                                            title: 'Character Limit Reached',
+                                                            description:
+                                                                'Assignment title cannot exceed 50 characters.',
+                                                        })
+                                                    }
+
                                                     if (
                                                         form.getValues(
                                                             'endTime'
@@ -458,25 +488,44 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             render={({ field }) => (
                                 <FormItem className="text-left text-gray-600">
                                     <FormLabel>
-                                        Batches <span className="text-red-500">*</span>
+                                        Batches{' '}
+                                        <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
                                         <select
-                                            className={cn(baseSelectClass, !field.value && 'text-muted-foreground')}
+                                            className={cn(
+                                                baseSelectClass,
+                                                !field.value &&
+                                                    'text-muted-foreground'
+                                            )}
                                             value={field.value}
                                             disabled={isLoading}
                                             onChange={(e) => {
                                                 field.onChange(e.target.value)
-                                                if (form.getValues('secondBatch') === e.target.value) {
-                                                    form.setValue('secondBatch', undefined)
+                                                if (
+                                                    form.getValues(
+                                                        'secondBatch'
+                                                    ) === e.target.value
+                                                ) {
+                                                    form.setValue(
+                                                        'secondBatch',
+                                                        undefined
+                                                    )
                                                 }
                                                 form.clearErrors('batch')
                                             }}
                                             aria-busy={isLoading}
                                         >
-                                            <option value="">Select batch...</option>
+                                            <option value="">
+                                                Select batch...
+                                            </option>
                                             {bootcampData.map((b: any) => (
-                                                <option key={b.value} value={b.value}>{b.label}</option>
+                                                <option
+                                                    key={b.value}
+                                                    value={b.value}
+                                                >
+                                                    {b.label}
+                                                </option>
                                             ))}
                                         </select>
                                     </FormControl>
@@ -489,7 +538,9 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             name="secondBatch"
                             render={({ field }) => (
                                 <FormItem className="text-left text-gray-600">
-                                    <FormLabel>Second Batch (optional)</FormLabel>
+                                    <FormLabel>
+                                        Second Batch (optional)
+                                    </FormLabel>
                                     <FormControl>
                                         <select
                                             className={baseSelectClass}
@@ -504,15 +555,30 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         >
                                             {batch ? (
                                                 <>
-                                                    <option value="">None</option>
+                                                    <option value="">
+                                                        None
+                                                    </option>
                                                     {bootcampData
-                                                        .filter((b: any) => b.value !== form.getValues('batch'))
+                                                        .filter(
+                                                            (b: any) =>
+                                                                b.value !==
+                                                                form.getValues(
+                                                                    'batch'
+                                                                )
+                                                        )
                                                         .map((b: any) => (
-                                                            <option key={b.value} value={b.value}>{b.label}</option>
+                                                            <option
+                                                                key={b.value}
+                                                                value={b.value}
+                                                            >
+                                                                {b.label}
+                                                            </option>
                                                         ))}
                                                 </>
                                             ) : (
-                                                <option value="">Select primary batch first</option>
+                                                <option value="">
+                                                    Select primary batch first
+                                                </option>
                                             )}
                                         </select>
                                     </FormControl>
@@ -526,11 +592,16 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             render={({ field }) => (
                                 <FormItem className="text-left text-gray-600">
                                     <FormLabel>
-                                        Platform <span className="text-red-500">*</span>
+                                        Platform{' '}
+                                        <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
                                         <select
-                                            className={cn(baseSelectClass, !field.value && 'text-muted-foreground')}
+                                            className={cn(
+                                                baseSelectClass,
+                                                !field.value &&
+                                                    'text-muted-foreground'
+                                            )}
                                             value={field.value}
                                             disabled={isLoading}
                                             onChange={(e) => {
@@ -539,9 +610,16 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                             }}
                                             aria-busy={isLoading}
                                         >
-                                            <option value="">Select platform...</option>
+                                            <option value="">
+                                                Select platform...
+                                            </option>
                                             {platformOptions.map((p) => (
-                                                <option key={p.value} value={p.value}>{p.label}</option>
+                                                <option
+                                                    key={p.value}
+                                                    value={p.value}
+                                                >
+                                                    {p.label}
+                                                </option>
                                             ))}
                                         </select>
                                     </FormControl>
@@ -578,7 +656,10 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
 
                     <div className="flex justify-end">
                         {isLoading ? (
-                            <Button disabled className="w-1/3 mt-3 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border">
+                            <Button
+                                disabled
+                                className="w-1/3 mt-3 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border"
+                            >
                                 <Spinner className="mr-2 text-black h-4 w-4 animate-spin" />
                                 Creating Session
                             </Button>

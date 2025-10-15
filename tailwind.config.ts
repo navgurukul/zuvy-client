@@ -10,6 +10,7 @@ export default {
 		"./components/**/*.{ts,tsx}",
 		"./app/**/*.{ts,tsx}",
 		"./src/**/*.{ts,tsx}",
+		"./src/app/**/*.{ts,tsx}",
 	],
 	prefix: "",
 	theme: {
@@ -22,9 +23,9 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'heading': ['Outfit', 'sans-serif'],
+				'heading': ['Manrope', 'sans-serif'],
 				'body': ['Manrope', 'sans-serif'],
-				'code': ['Fira Code', 'monospace'],
+				'code': ['Manrope', 'monospace'],
 				'manrope': ['Manrope', 'sans-serif'],
 			},
 			colors: {

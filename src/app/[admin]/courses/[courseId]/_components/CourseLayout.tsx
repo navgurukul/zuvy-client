@@ -86,7 +86,6 @@ function CourseLayout() {
                     .getState()
                     .fetchCourseDetails(parseInt(courseID))
                 if (!success) {
-                    console.log('Not true')
                     router.push(`/admin/courses`)
                     toast.info({
                         title: 'Caution',
@@ -95,7 +94,7 @@ function CourseLayout() {
                     })
                 }
             } catch (error) {
-                console.log('Caught in handleFetch', error)
+                console.error('Caught in handleFetch', error)
             }
         }
     }

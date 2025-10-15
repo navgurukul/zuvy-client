@@ -545,10 +545,26 @@ const AddAssignent = ({
                                                 <Input
                                                     {...field}
                                                     onChange={(e) => {
-                                                        setTitles(
+                                                        const newValue =
                                                             e.target.value
-                                                        )
-                                                        field.onChange(e)
+                                                        if (newValue.length>50)
+                                                        { 
+                                                             toast.error({
+                                                                title: 'Character Limit Reached',
+                                                                description:
+                                                                    'You can enter up to 50 characters only.',
+                                                            })  
+                                                        } else {
+                                                             setTitles(newValue)
+                                                            field.onChange(
+                                                                newValue
+                                                            )
+                                                           
+                                                        }
+                                                        // setTitles(
+                                                        //     e.target.value
+                                                        // )
+                                                        // field.onChange(e)
                                                     }}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter') {
