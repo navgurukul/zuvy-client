@@ -109,8 +109,19 @@ function CodingChallenge({
     }
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value
-        setChapterTitle(newTitle)
+          if (newTitle.length>50) {
+            toast.error({
+              title: 'Character Limit Reached',
+              description: 'You can enter up to 50 characters only.',
+           })
+       
+    } else {
+         setChapterTitle(newTitle)
         setHasTitleChanged(newTitle !== savedTitle)
+       
+    }
+        // setChapterTitle(newTitle)
+        // setHasTitleChanged(newTitle !== savedTitle)
     }
     useEffect(() => {
         const newQuestions = content?.codingQuestionDetails || []
@@ -258,6 +269,8 @@ function CodingChallenge({
         )
     }
 
+
+
     if (isDataLoading) {
         return (
             <div className="px-5">
@@ -346,6 +359,8 @@ function CodingChallenge({
                     <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
                         Coding Library
                     </h1>
+
+                
 
                     <div className="grid grid-cols-2">
                         <div className="">
@@ -515,5 +530,4 @@ function CodingChallenge({
         </>
     )
 }
-
 export default CodingChallenge

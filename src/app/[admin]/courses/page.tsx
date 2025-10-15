@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
@@ -102,7 +103,6 @@ const Courses: React.FC = () => {
             auto: true,
         })
     const { createBootcamp, creating } = useCreateBootcamp()
-    console.log(allCourses)
 
     const dropdownRef = useRef<HTMLDivElement>(null)
     const searchContainerRef = useRef<HTMLDivElement>(null)
@@ -304,7 +304,6 @@ const Courses: React.FC = () => {
         } else {
             setFilteredSuggestions([])
         }
-        console.log('Filtered Suggestions:', filteredSuggestions)
     }, [debouncedSearchForSuggestions, allCourses])
 
     useEffect(() => {
@@ -415,8 +414,6 @@ const Courses: React.FC = () => {
         })()
     }, [permissions])
 
-    console.log('permission', permissions)
-
     return (
         <>
             {loading ? (
@@ -424,7 +421,7 @@ const Courses: React.FC = () => {
                     <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
-                <div className="w-full">
+                <div className="w-full font-manrope">
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}
                     <div className="px-1 pt-2 pb-2">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
@@ -724,7 +721,8 @@ const Courses: React.FC = () => {
                                 </>
                             ) : (
                                 <div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 px-2 md:px-0 mt-5 mb-8 items-start w-full">
+                                    {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start"> */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2 md:px-0 mt-5 mb-8 items-start w-full">
                                         {courses.map((course, index) => {
                                             const validImageUrl =
                                                 getValidImageUrl(
@@ -773,6 +771,7 @@ const Courses: React.FC = () => {
                 </div>
             )}
         </>
+        
     )
 }
 export default Courses

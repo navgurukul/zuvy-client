@@ -9,7 +9,6 @@ export const Logout = async () => {
     const access_token = localStorage.getItem('access_token')
 
     try {
-        // console.log('access_token', access_token)
         // const response = await axios.post(
         //     `${mainUrl}/auth/logout`,
         //     {}, // empty body

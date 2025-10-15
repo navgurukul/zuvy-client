@@ -38,7 +38,7 @@ export default function RootLayout({
             // ✅ Authorized user
     return (
         // <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
-        <div>
+        <div className='font-manrope'>
             <div className={isAssessmentRouteClasses(pathname)}>
                 {!adminAssessmentPreviewRoute && <StudentNavbar />}
                 <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen`}>
@@ -52,7 +52,7 @@ export default function RootLayout({
     // 🧠 Guard loading states properly
     if (user.email.length === 0 || loading) {
         return (
-            <div className="flex items-center justify-center h-[680px]">
+            <div className="flex items-center justify-center h-[680px] font-manrope">
                 <Spinner className="text-[rgb(81,134,114)]" />
             </div>
         )
@@ -70,6 +70,6 @@ export default function RootLayout({
 
     // ❌ Unauthorized for this route
     if (userRole !== roleFromPath) {
-        return <UnauthorizedUser role={userRole} />
+        return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
     }
 }

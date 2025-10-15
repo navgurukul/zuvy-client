@@ -28,7 +28,6 @@
 
 //     const getBootcamp = useCallback(
 //         async (newOffset?: number) => {
-//             console.log('Loop')
 //             try {
 //                 setLoading(true)
 //                 const resolvedOffset =
