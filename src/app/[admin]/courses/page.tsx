@@ -76,7 +76,6 @@ const Courses: React.FC = () => {
         })
     const { createBootcamp, creating } = useCreateBootcamp()
 
-    // === API Functions for SearchBox ===
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         const response = await api.get(
           `/bootcamp?limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
