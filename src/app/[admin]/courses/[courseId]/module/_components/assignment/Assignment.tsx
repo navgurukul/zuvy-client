@@ -69,12 +69,15 @@ const AddAssignent = ({
     // misc
 
     const formSchema = z.object({
-        title: z.string(),
+        title: z.string()
+        .max(50, { message: 'You can enter up to 50 characters only.' }),
         startDate: z.date({
-            required_error: 'A start date is required.',
+            required_error: 'A start date is required.'
         }),
+        
     })
 
+    
     const router = useRouter()
     const [title, setTitle] = useState('')
     const [deadline, setDeadline] = useState<any>()
@@ -545,26 +548,26 @@ const AddAssignent = ({
                                                 <Input
                                                     {...field}
                                                     onChange={(e) => {
-                                                        const newValue =
-                                                            e.target.value
-                                                        if (newValue.length>50)
-                                                        { 
-                                                             toast.error({
-                                                                title: 'Character Limit Reached',
-                                                                description:
-                                                                    'You can enter up to 50 characters only.',
-                                                            })  
-                                                        } else {
-                                                             setTitles(newValue)
-                                                            field.onChange(
-                                                                newValue
-                                                            )
-                                                           
-                                                        }
-                                                        // setTitles(
+                                                        // const newValue =
                                                         //     e.target.value
-                                                        // )
-                                                        // field.onChange(e)
+                                                        // if (newValue.length>50)
+                                                        // { 
+                                                        //      toast.error({
+                                                        //         title: 'Character Limit Reached',
+                                                        //         description:
+                                                        //             'You can enter up to 50 characters only.',
+                                                        //     })  
+                                                        // } else {
+                                                        //      setTitles(newValue)
+                                                        //     field.onChange(
+                                                        //         newValue
+                                                        //     )
+                                                           
+                                                        // }
+                                                        setTitles(
+                                                            e.target.value
+                                                        )
+                                                        field.onChange(e)
                                                     }}
                                                     onKeyDown={(e) => {
                                                         if (e.key === 'Enter') {

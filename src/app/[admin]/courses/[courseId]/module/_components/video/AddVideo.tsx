@@ -723,12 +723,6 @@
 
 // export default AddVideo
 
-
-
-
-
-
-
 'use client'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -766,11 +760,13 @@ import { Video } from 'lucide-react'
 // Helper function to convert links to embed-friendly format
 
 const formSchema = z.object({
-    videoTitle: z.string()
+    videoTitle: z
+        .string()
         .min(2, {
-        message: 'Video Title must be at least 2 characters.'})
-        .max(50, { message: "You can enter up to 50 characters only." }),
-    
+            message: 'Video Title must be at least 2 characters.',
+        })
+        .max(50, { message: 'You can enter up to 50 characters only.' }),
+
     description: z.string().min(4, {
         message: 'Description must be at least 4 characters.',
     }),
@@ -817,7 +813,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
     })
 
     const {
-        formState: { isDirty, isValid, isSubmitting},
+        formState: { isDirty, isValid, isSubmitting },
     } = form
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -971,24 +967,12 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                             <div className="flex items-center gap-4">
                                                 <Input
                                                     required
-                                                    {...field} 
+                                                    {...field}
                                                     onChange={(e) => {
-                                                        // const newValue = e.target.value
-                                                        //  if (newValue.length>50) {
-                                                        //      toast.error({
-                                                        //  title: "Character Limit Reached",
-                                                        //  description: "You can enter up to 50 characters only.",
-                                                        //    })
-                                                           
-                                                        // } else {
-                                                        //     setVideoTitle( newValue) 
-                                                        //    field.onChange(newValue)
-                                                       
-                                                        // }
                                                         setVideoTitle(
                                                             e.target.value
                                                         ) // Update the local state
-                                                        field.onChange(e) 
+                                                        field.onChange(e)
                                                     }}
                                                     placeholder={
                                                         'Untitled Video'
@@ -1137,17 +1121,20 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                 </Button> */}
 
                                 <Button
-    type="submit"
-    disabled={!isDirty || !isValid || isSubmitting}
-    className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
-        !isDirty || !isValid || isSubmitting
-            ? 'bg-gray-300 cursor-not-allowed opacity-70'
-            : 'bg-primary'
-    }`}
->
-    {isSubmitting ? 'Saving...' : 'Save Changes'}
-</Button>
-
+                                    type="submit"
+                                    disabled={
+                                        !isDirty || !isValid || isSubmitting
+                                    }
+                                    className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
+                                        !isDirty || !isValid || isSubmitting
+                                            ? 'bg-gray-300 cursor-not-allowed opacity-70'
+                                            : 'bg-primary'
+                                    }`}
+                                >
+                                    {isSubmitting
+                                        ? 'Saving...'
+                                        : 'Save Changes'}
+                                </Button>
                             </div>
                         </form>
                     </Form>
