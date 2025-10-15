@@ -73,7 +73,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                             <h2 className="text-lg text-start font-bold text-gray-900 dark:text-white">
                                 Module - {key}
                             </h2>
-                            <div className="grid md:grid-cols-3 gap-3">
+                            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3">
                                 {filteredVideos.map(
                                     (video: VideoSubmissions) => {
                                         const isDisabled =

@@ -34,6 +34,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
         onDragStart,
         onDragEnd,
         showBorderFlash,
+        permissions,
     } = props
 
     const router = useRouter()
@@ -107,7 +108,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
             transition={{ duration: 0.2 }}
         >
             <Card
-                className={`shadow-sm my-2 w-full cursor-pointer transition-all duration-300 ${
+                className={`shadow-sm my-2 w-full transition-all duration-300 ${
                     showBorderFlash
                         ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash'
                         : ''
@@ -140,7 +141,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
 
                         <div className="flex-1 flex items-center justify-between hover:bg-muted/50 p-2 rounded-md transition-colors">
                             <div
-                                className="text-left flex items-center gap-3"
+                                className="text-left flex items-center gap-3 cursor-pointer w-full"
                                 onClick={handleModuleRoute}
                             >
                                 <div
@@ -169,29 +170,32 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                             </div>
 
                             <div className="flex items-center gap-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        editHandle(moduleId)
-                                    }}
-                                    className="hover:text-muted-foreground hover:bg-gray-200"
-                                >
-                                    <Edit className="h-4 w-4" />
-                                </Button>
-
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleDeleteModal()
-                                    }}
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
+                                {permissions.editModule && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            editHandle(moduleId)
+                                        }}
+                                        className="hover:text-muted-foreground hover:bg-gray-200"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                )}
+                                {permissions.deleteModule && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            handleDeleteModal()
+                                        }}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -68,8 +68,6 @@ const Navbar = () => {
         })().then(() => setLoading(false));
     }, [permissions]);
 
-
-
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
             <div className="flex h-16 items-center justify-between px-6">

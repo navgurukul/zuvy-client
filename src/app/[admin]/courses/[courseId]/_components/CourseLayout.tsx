@@ -122,52 +122,46 @@ function CourseLayout() {
             <div className="w-full">
                 <Tabs defaultValue="generalDetails" className="w-full">
                     <div
-                        className="relative border-b-2 border-muted flex justify-start overflow-x-auto overflow-y-hidden"
+                        className="relative border-b-2 border-muted pr-3 flex justify-start overflow-x-auto overflow-y-hidden"
                         style={{
                             scrollbarWidth: 'none', // Firefox
                             msOverflowStyle: 'none', // IE and Edge
+                            flex: '0 0 auto'
                         }}
                     >
-                        <div
-                            className="flex w-max"
-                            style={{
-                                flex: '0 0 auto', // Prevent flex from shrinking or expanding
-                            }}
-                        >
-                            <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
-                                {courseMenu.map(({ title, href, icon }) => {
-                                    // Check permissions based on tab title
-                                    const shouldRender = (() => {
-                                        switch(title) {
-                                            case 'General Details':
-                                                return Permissions.editCourse;
-                                            case 'Curriculum':
-                                                return Permissions.viewModule;
-                                            case 'Students':
-                                                return Permissions.viewStudent;
-                                            case 'Batches':
-                                                return Permissions.viewBatch;
-                                            case 'Submissions':
-                                                return Permissions.viewSubmission;
-                                            case 'Settings':
-                                                return Permissions.viewSetting;
-                                            default:
-                                                return false;
-                                        }
-                                    })();
+                        <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
+                            {courseMenu.map(({ title, href, icon }) => {
+                                // Check permissions based on tab title
+                                const shouldRender = (() => {
+                                    switch(title) {
+                                        case 'General Details':
+                                            return Permissions.editCourse;
+                                        case 'Curriculum':
+                                            return Permissions.viewModule;
+                                        case 'Students':
+                                            return Permissions.viewStudent;
+                                        case 'Batches':
+                                            return Permissions.viewBatch;
+                                        case 'Submissions':
+                                            return Permissions.viewSubmission;
+                                        case 'Settings':
+                                            return Permissions.viewSetting;
+                                        default:
+                                            return false;
+                                    }
+                                })();
 
-                                    // Only render the tab if user has permission
-                                    return shouldRender ? (
-                                        <TabItem
-                                            key={href}
-                                            title={title}
-                                            href={href}
-                                            icon={icon}
-                                        />
-                                    ) : null;
-                                })}
-                            </TabsList>
-                        </div>
+                                // Only render the tab if user has permission
+                                return shouldRender ? (
+                                    <TabItem
+                                        key={href}
+                                        title={title}
+                                        href={href}
+                                        icon={icon}
+                                    />
+                                ) : null;
+                            })}
+                        </TabsList>
                         <div
                             className="absolute top-0 right-0 h-full"
                             style={{
