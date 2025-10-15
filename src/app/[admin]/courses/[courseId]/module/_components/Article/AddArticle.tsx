@@ -75,6 +75,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
     // misc
     const formSchema = z.object({
         title: z.string()
+        .min(2, { message: 'Title must be at least 2 characters long.' })
+        .max(50, { message: 'Title can be at most 50 characters long.' }),
     })
 
     const form = useForm({
@@ -84,6 +86,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
         },
         mode: 'onChange',
     })
+
+    const { handleSubmit, formState: { isValid, isSubmitting, errors} } = form
+
 
     // NEW: Function to check if editor content is empty
     const isEditorContentEmpty = (content: any) => {
@@ -461,16 +466,18 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                 {...field}
                                                 value={title} // Explicitly set value
                                                 onChange={(e) => {
+                                                      setTitle(e.target.value)
+                                                       field.onChange(e)
                                                     // FIXED: Always update the same title state
-                                                    if (e.target.value.length>50) {
-                                                        toast.error({
-                                                        title: "Character Limit Reached",
-                                                        description: "You can enter up to 50 characters only.",
-                                                    })
-                                                    }else {
-                                                     setTitle(e.target.value)
-                                                     field.onChange(e)
-                                                    }
+                                                    // if (e.target.value.length>50) {
+                                                    //     toast.error({
+                                                    //     title: "Character Limit Reached",
+                                                    //     description: "You can enter up to 50 characters only.",
+                                                    // })
+                                                    // }else {
+                                                    //  setTitle(e.target.value)
+                                                    //  field.onChange(e)
+                                                    // }
                                                 }}
                                                 onKeyDown={(e) => {
                                                     if (e.key === 'Enter') {
@@ -704,14 +711,59 @@ const AddArticle: React.FC<AddArticleProps> = ({
                         </Button>
                     ) : (
                         <div>
-                            <Button
+                            {/* <Button
                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                 type="button"
                                 onClick={onFileUpload}
                                 disabled={!disabledUploadButton}
                             >
                                 {isSaving ? 'Saving...' : 'Save'}
-                            </Button>
+                            </Button> */}
+
+{/* 
+                    <Button
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    type="button"
+                    onClick={onFileUpload}
+                    disabled={!isValid || isSubmitting || errors.title || !disabledUploadButton}
+                >
+                    {isSaving ? 'Saving...' : 'Save'}
+                </Button> */}
+
+
+
+
+                 {/* <Button
+                type="submit"
+                disabled={!isValid || isSubmitting || !!errors.title || !disabledUploadButton}  
+                className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
+                     !isValid || isSubmitting || errors.title 
+                        ? 'bg-gray-300 cursor-not-allowed opacity-70'
+                        : 'bg-primary'
+                }`}
+            >
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button> */}
+
+
+
+            <Button
+                type="submit"
+                disabled={
+                    !isValid || // Disable if form is invalid
+                    isSubmitting || // Disable if form is submitting
+                    !!errors.title || // Disable if title has an error
+                     // Disable if article content has an error
+                    !disabledUploadButton // Disable based on other state
+                }
+                className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
+                    !isValid || isSubmitting || errors.title || !disabledUploadButton
+                        ? 'bg-gray-300 cursor-not-allowed opacity-70'
+                        : 'bg-primary'
+                }`}
+            >
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </Button>
                         </div>
                     )}
                 </div>
