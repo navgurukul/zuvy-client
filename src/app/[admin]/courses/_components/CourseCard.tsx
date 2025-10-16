@@ -37,7 +37,7 @@ const CourseCard = ({
 
     return (
         <Card
-            className="group w-[21.8rem] cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-1 bg-white border border-gray-200 flex flex-col h-full font-manrope"
+      className="group cursor-pointer transition-all duration-200 hover:shadow-hover hover:-translate-y-1 bg-card border-border flex flex-col h-full"
             onClick={onClick}
         >
             <CardHeader className="p-0">
@@ -47,7 +47,7 @@ const CourseCard = ({
                             src={validImageUrl}
                             alt={course.name}
                             fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-200"
+              className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                     </div>
@@ -72,7 +72,7 @@ const CourseCard = ({
 
             <CardContent className="bg-muted p-6 flex-1">
                 <div className="flex items-start justify-between gap-4">
-                    <h3 className="font-semibold text-start text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors flex-1">
+                    <h3 className="font-bold text-start text-lg leading-tight line-clamp-2 group-hover:text-blue-600 transition-colors flex-1">
                         {course.name}
                     </h3>
                     {/* <Badge 
