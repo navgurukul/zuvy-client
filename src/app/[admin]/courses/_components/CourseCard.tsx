@@ -85,7 +85,7 @@ const CourseCard = ({
                 </div>
             </CardContent>
 
-            <CardFooter className="bg-muted px-6 pb-6 pt-0 mt-auto">
+           <CardFooter className="bg-muted px-6 pb-6 pt-0 mt-auto">
                 <div className="flex items-center justify-between w-full text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
@@ -97,14 +97,15 @@ const CourseCard = ({
                             Learners
                         </span>
                     </div>
-                    {
-                        course?.duration &&  <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        <span>
-                            {course.duration} {Number(course.duration) <= 1 ? 'week' : 'weeks'}
-                        </span>
+                        {course.duration != null && course.duration !== '' && (
+                            <span>
+                                {course.duration}{' '}
+                                {Number(course.duration) <= 1 ? 'week' : 'weeks'}
+                            </span>
+                        )}
                     </div>
-                    }
                 </div>
             </CardFooter>
         </Card>
