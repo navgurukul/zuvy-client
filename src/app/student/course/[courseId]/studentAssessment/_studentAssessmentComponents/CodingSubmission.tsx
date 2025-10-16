@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ChevronLeft,
@@ -14,7 +14,8 @@ import {
   TestTube2,
   Terminal,
   Sun,
-  Moon
+  Moon,
+  X
 } from 'lucide-react'
 import { decodeBase64 } from '@/utils/students'
 import Editor from '@monaco-editor/react'
@@ -23,27 +24,17 @@ import { CodingSubmissionData, TestCase } from '@/app/student/course/[courseId]/
 import { Button } from '@/components/ui/button'
 import { useThemeStore } from '@/store/store'
 import useWindowSize from '@/hooks/useHeightWidth'
+import {CodingSubmissionSkeleton} from "@/app/student/_components/Skeletons"
 
-const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: CodingSubmissionData | null }) => {
+const CodingSubmission = ({ codingSubmissionsData, loading }: { codingSubmissionsData: CodingSubmissionData | null, loading: boolean }) => {
   const router = useRouter()
   const { isDark, toggleTheme } = useThemeStore();
+
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
+ if (loading) return <CodingSubmissionSkeleton/>
 
-  if (!codingSubmissionsData) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center">
-          <div className="animate-pulse">
-            <div className="w-8 h-8 bg-primary rounded-full mx-auto mb-4"></div>
-          </div>
-          <p className="text-lg font-medium text-foreground">Loading submission details...</p>
-          <p className="text-sm text-muted-foreground">Please wait while we fetch your coding submission</p>
-        </div>
-      </div>
-    )
-  }
 
   if (codingSubmissionsData?.status === 'error') {
     return (
@@ -163,9 +154,9 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
         className="inline-flex text-left w-full  items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
       >
         
-        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-        <span className="font-medium">Back to Results</span>
-
+        {/* <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
+        <span className="font-medium">Back to Results</span> */}
+        <X className="w-5 h-5" />
       </div>
         <Button
           variant="ghost"
@@ -195,6 +186,7 @@ const CodingSubmission = ({ codingSubmissionsData }: { codingSubmissionsData: Co
                 <p className="text-muted-foreground text-left">Detailed analysis of your solution</p>
               </div>
             </div>
+
 
             {/* Score Badge */}
             <div className={`flex items-center space-x-2 px-1 py-1 rounded-full ${overallSuccess

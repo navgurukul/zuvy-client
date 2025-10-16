@@ -10,6 +10,7 @@ import { useQuizResults } from '@/hooks/useQuizResults'
 import { useThemeStore } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import {MCQResult} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/quizResult/modulesAssessmentQuixResultType"
+import{QuizResultPageSkeleton} from "@/app/student/_components/Skeletons"
 const QuizResults = ({
     params,
 }: {
@@ -37,28 +38,15 @@ const QuizResults = ({
         0
     ) || 0
     const maxMarks = quizResults?.mcqs?.reduce(
-        (sum: number, result: any) => sum + Math.trunc(Number(result.mark)), 
+        (sum: number, result: any) => sum + (Number(result.mark)), 
         0
     ) || 0
-    const percentage = maxMarks > 0 ? Math.round((totalMarks / maxMarks) * 100) : 0
+    const percentage = maxMarks > 0 ? Math.ceil((totalMarks / maxMarks) * 100) : 0
 
     // Show loading state
     if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
-                <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-16dp max-w-md w-full">
-                    <div className="relative mb-6">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto flex items-center justify-center">
-                            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
-                    <p className="text-muted-foreground">Fetching your performance data...</p>
-                </div>
-            </div>
-        )
+     return<QuizResultPageSkeleton/>
     }
-
     // Show error state
     if (error) {
         return (
@@ -186,7 +174,7 @@ const QuizResults = ({
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground font-medium">Points</p>
-                                <p className="text-2xl font-bold text-foreground">{totalMarks}/{maxMarks}</p>
+                                <p className="text-2xl font-bold text-foreground">{totalMarks.toFixed(2)}/{Math.ceil(maxMarks)}</p>
                             </div>
                         </div>
                     </div>
@@ -234,7 +222,7 @@ const QuizResults = ({
                                                 ? 'bg-success/10 text-success border border-success/20'
                                                 : 'bg-muted text-muted-foreground border border-border'
                                         )}>
-                                            {result.submissionsData?.status === 'passed' ? Number(result.mark) : 0}/{Math.trunc(Number(result.mark))} Marks
+                                            {result.submissionsData?.status === 'passed' ? Number(result.mark) : 0}/{(Number(result.mark))} Marks
                                         </div>
                                     </div>
                                 </div>

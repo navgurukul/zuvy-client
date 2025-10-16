@@ -87,3 +87,16 @@ export interface Bootcamp {
   };
   upcomingEvents: UpcomingEvent[];
 }
+
+
+export interface Module{
+    id: number | undefined;
+    order: any;
+    name: any;
+    ChapterId: any;
+    projectId: any;
+    typeId: number;
+    isLock: boolean;
+    progress: number;
+    description: string;
+}

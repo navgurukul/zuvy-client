@@ -9,7 +9,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
-import ModuleContentSkeleton from "@/app/student/_components/ModuleContentSkeleton";
+import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
 import Header from "../_components/Header";
 import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
@@ -24,8 +24,25 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
+  
+
+
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const hasScrolledRef = useRef(false);
+
+
+
+
+
+useEffect(() => {
+  if (enhancedModule) {
+    setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
+  }
+}, [trackingData, moduleDetails, loading, error]);
+
+
+
+
 
   useEffect(() => {
     if (chapterId && !hasScrolledRef.current) {

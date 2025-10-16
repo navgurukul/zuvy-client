@@ -202,3 +202,47 @@ export interface TimerDisplayProps {
   remainingTime: number;
 }
 
+export type QType = "quiz" | "open-ended" | "coding";
+
+export type PageParams = {
+  params: {
+    assessmentOutSourceId: string;
+    moduleID: string;
+    viewcourses: string;
+    chapterId: string;
+  };
+};
+
+export type CodingQuestion = {
+  codingQuestionId: number;
+  codingOutsourseId: number;
+  title: string;
+  difficulty: string;
+};
+
+export type AssessmentData = {
+  ModuleAssessment: { title: string };
+  submission: { startedAt: string; id: number };
+  chapterId: number;
+  moduleId: string | number;
+  bootcampId: string | number;
+  // MCQ
+  IsQuizzSubmission: boolean;
+  hardMcqQuestions: number;
+  easyMcqQuestions: number;
+  mediumMcqQuestions: number;
+  totalMcqQuestions: number;
+  weightageMcqQuestions?: number;
+  // Coding
+  codingQuestions: CodingQuestion[];
+  easyCodingMark?: number;
+  mediumCodingMark?: number;
+  hardCodingMark?: number;
+  // Proctoring config
+  canTabChange?: boolean;
+  canScreenExit?: boolean;
+  canCopyPaste?: boolean;
+  canEyeTrack?: boolean;
+  // time
+  timeLimit?: number; // seconds
+};
