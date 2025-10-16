@@ -1,4 +1,7 @@
 // types.ts
+
+export type UserRole = 'Admin' | 'Ops' | 'Instructor'
+
 export interface QuizOption {
     [key: string]: string
 }

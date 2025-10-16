@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
 import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
+import {AssignmentSkeleton} from "@/app/student/_components/Skeletons";
 
 const FormSchema = z.object({
   link: z
@@ -33,7 +34,6 @@ const FormSchema = z.object({
       }
     ),
 });
-
 
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -171,23 +171,28 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   };
 
   if (loading) {
-    return (
-      <div className={`mx-auto space-y-6 ${isMobile ? 'p-4' : isSmallScreen ? 'p-6 max-w-3xl' : 'p-8 max-w-4xl'}`}>
-        <div className="flex justify-between items-center">
-          <Skeleton className={`${isMobile ? 'h-6 w-1/2' : 'h-8 w-1/2'}`} />
-          <Skeleton className={`${isMobile ? 'h-5 w-20' : 'h-6 w-24'}`} />
-        </div>
-        <Skeleton className={`${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`} />
-        <Skeleton className={`${isMobile ? 'h-16' : 'h-24'} w-full`} />
-        <Skeleton className={`${isMobile ? 'h-6 w-1/3' : 'h-8 w-1/4'}`} />
-        <Skeleton className={`${isMobile ? 'h-8' : 'h-10'} w-full`} />
-        <div className="flex justify-end">
-          <Skeleton className={`${isMobile ? 'h-8 w-24' : 'h-10 w-32'}`} />
-        </div>
-      </div>
-    );
+    // return (
+    //   <div className={`mx-auto space-y-6 ${isMobile ? 'p-4' : isSmallScreen ? 'p-6 max-w-3xl' : 'p-8 max-w-4xl'}`}>
+    //     <div className="flex justify-between items-center">
+    //       <Skeleton className={`${isMobile ? 'h-6 w-1/2' : 'h-8 w-1/2'}`} />
+    //       <Skeleton className={`${isMobile ? 'h-5 w-20' : 'h-6 w-24'}`} />
+    //     </div>
+    //     <Skeleton className={`${isMobile ? 'h-3 w-1/2' : 'h-4 w-1/3'}`} />
+    //     <Skeleton className={`${isMobile ? 'h-16' : 'h-24'} w-full`} />
+    //     <Skeleton className={`${isMobile ? 'h-6 w-1/3' : 'h-8 w-1/4'}`} />
+    //     <Skeleton className={`${isMobile ? 'h-8' : 'h-10'} w-full`} />
+    //     <div className="flex justify-end">
+    //       <Skeleton className={`${isMobile ? 'h-8 w-24' : 'h-10 w-32'}`} />
+    //     </div>
+    //   </div>
+    // );
   }
 
+     if (loading) {
+        return <AssignmentSkeleton/>;
+      }
+
+      
   return (
     <div className="min-h-screen bg-background">
        <ScrollArea className={`${isMobile ? 'h-[75vh]' : 'h-[80vh]'}`}  >

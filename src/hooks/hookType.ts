@@ -603,6 +603,7 @@ export interface InstructorDetails {
 
 export interface UpcomingEvent {
   chapterId: any;
+  hangoutLink?:string;
   moduleId: any;
   id: number;
   title: string;
@@ -666,6 +667,111 @@ export interface UpcomingEventsData {
 }
 export interface UseUpcomingEventsReturn {
   upcomingEventsData: UpcomingEventsData | null;
+  loading: boolean;
+  error: string | null;
+}
+
+// useBootcampSettings.tsx
+export interface BootcampSettingsData {
+  type: string;
+  isModuleLocked: boolean;
+}
+
+export interface UseBootcampSettingsReturn {
+  bootcampSettings: BootcampSettingsData | null;
+  loading: boolean;
+  error: string | null;
+  updateError: string | null; // Add this
+  updateSettings: (settings: BootcampSettingsData) => Promise<void>;
+  refetch: () => Promise<void>;
+}
+
+// useBootcampDelete.tsx
+export interface UseBootcampDeleteReturn {
+    deleteBootcamp: (bootcampId: string) => Promise<void>
+    isDeleting: boolean
+    error: string | null
+}
+
+export interface coursePermissions {
+  createCourse: boolean;
+  viewCourse: boolean;
+  editCourse: boolean;
+  deleteCourse: boolean;
+  viewContent: boolean;
+  viewRolesAndPermissions: boolean;
+};
+
+
+// useCreateCodingQuestion
+export interface CreateCodingQuestionData {
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  tagId: number;
+  constraints: string;
+  testCases: Array<{
+    inputs: Array<{
+      parameterType: string;
+      parameterValue: any;
+      parameterName: string;
+    }>;
+    expectedOutput: {
+      parameterType: string;
+      parameterValue: any;
+    };
+  } | null>;
+  createdAt: string;
+  updatedAt: string;
+  content: any;
+}
+
+export interface UseCreateCodingQuestionReturn {
+  createQuestion: (data: CreateCodingQuestionData) => Promise<boolean>;
+  loading: boolean;
+  error: string | null;
+}
+
+
+
+// useEditCodingQuestion
+export interface EditCodingQuestionData {
+  title: string;
+  description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  tagId: number;
+  constraints: string;
+  testCases: Array<{
+    inputs: Array<{
+      parameterType: string;
+      parameterValue: any;
+      parameterName: string;
+    }>;
+    expectedOutput: {
+      parameterType: string;
+      parameterValue: any;
+    };
+  } | null>;
+  updatedAt: string;
+  content: any;
+}
+
+export interface UseEditCodingQuestionReturn {
+  editQuestion: (questionId: number | null, data: EditCodingQuestionData) => Promise<boolean>;
+  loading: boolean;
+  error: string | null;
+}
+
+
+// useCreateOpenEndedQuestion
+export interface CreateOpenEndedQuestionData {
+  question: string;
+  tagId: number;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+}
+
+export interface UseCreateOpenEndedQuestionReturn {
+  createOpenEndedQuestion: (data: CreateOpenEndedQuestionData) => Promise<boolean>;
   loading: boolean;
   error: string | null;
 }
