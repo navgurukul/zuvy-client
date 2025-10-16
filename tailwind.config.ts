@@ -23,7 +23,7 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'heading': ['Manrope', 'sans-serif'],
+				'heading': ['Outfit', 'sans-serif'],
 				'body': ['Manrope', 'sans-serif'],
 				'code': ['Manrope', 'monospace'],
 				'manrope': ['Manrope', 'sans-serif'],

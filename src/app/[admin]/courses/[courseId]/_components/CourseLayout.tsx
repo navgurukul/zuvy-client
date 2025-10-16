@@ -130,22 +130,22 @@ function CourseLayout() {
                         }}
                     >
                         <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
-                            {courseMenu.map(({ title, href, icon }) => {
+                            {courseMenu?.map(({ title, href, icon }) => {
                                 // Check permissions based on tab title
                                 const shouldRender = (() => {
                                     switch(title) {
                                         case 'General Details':
-                                            return Permissions.editCourse;
+                                            return Permissions?.editCourse;
                                         case 'Curriculum':
-                                            return Permissions.viewModule;
+                                            return Permissions?.viewModule;
                                         case 'Students':
-                                            return Permissions.viewStudent;
+                                            return Permissions?.viewStudent;
                                         case 'Batches':
-                                            return Permissions.viewBatch;
+                                            return Permissions?.viewBatch;
                                         case 'Submissions':
-                                            return Permissions.viewSubmission;
+                                            return Permissions?.viewSubmission;
                                         case 'Settings':
-                                            return Permissions.viewSetting;
+                                            return Permissions?.viewSetting;
                                         default:
                                             return false;
                                     }
