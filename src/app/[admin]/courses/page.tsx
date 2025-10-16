@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
@@ -298,7 +299,6 @@ const Courses: React.FC = () => {
             const filtered = filterCoursesByRelevance(
                 allCourses,
                 debouncedSearchForSuggestions
-                
             )
             setFilteredSuggestions(filtered)
         } else {
@@ -408,11 +408,11 @@ const Courses: React.FC = () => {
     }
 
     useEffect(() => {
-        (async () => {
-            const perms = await getPermissions();
-            setPermissions(perms);
+        ;(async () => {
+            const perms = await getPermissions()
+            setPermissions(perms)
         })()
-    }, [permissions]);
+    }, [permissions])
 
     return (
         <>
@@ -425,6 +425,7 @@ const Courses: React.FC = () => {
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}
                     <div className="px-1 pt-2 pb-2">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
+                        {/* <div className="flex flex-col lg:flex-row justify-between items-center gap-6 w-full"> */}
                             {/* Left: Title and Subtitle */}
                             <div className="flex-1 min-w-[220px] text-start">
                                  <h1 className="font-heading  font-extrabold text-3xl text-foreground mb-2">
@@ -440,7 +441,12 @@ const Courses: React.FC = () => {
                             <div className="flex-1 flex justify-end min-w-[220px]">
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button className={`text-white bg-primary font-semibold px-5 py-2 flex gap-2 ${!permissions.createCourse && 'invisible'}`}>
+                                        <Button
+                                            className={`text-white bg-primary font-semibold px-5 py-2 flex gap-2 ${
+                                                !permissions.createCourse &&
+                                                'invisible'
+                                            }`}
+                                        >
                                             <Plus className="w-5" />
                                             Create New Course
                                         </Button>
