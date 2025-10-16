@@ -421,16 +421,16 @@ const Courses: React.FC = () => {
                     <Spinner className="text-[rgb(81,134,114)]" />
                 </div>
             ) : (
-                <div className="w-full font-manrope">
+                <div className="w-full px-6 py-8 font-manrope">
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}
                     <div className="px-1 pt-2 pb-2">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
                         {/* <div className="flex flex-col lg:flex-row justify-between items-center gap-6 w-full"> */}
                             {/* Left: Title and Subtitle */}
                             <div className="flex-1 min-w-[220px] text-start">
-                                <h1 className="text-3xl font-bold text-foreground mb-1">
-                                    Course Studio
-                                </h1>
+                                 <h1 className="font-heading  font-extrabold text-3xl text-foreground mb-2">
+              Course Studio
+            </h1>
                                 <p className="text-muted-foreground text-lg font-normal">
                                     Create, manage, and monitor your educational
                                     courses
@@ -474,16 +474,16 @@ const Courses: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
+                        <div className="flex mb-8 flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
                             {/* Search Bar */}
-                            <div className="relative w-full sm:w-[500px] lg:w-[450px]">
+                            <div className="relative max-w-md flex-1">
                                 {/* Search Icon */}
-                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 mt-1 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                     ref={searchInputRef}
                                     type="text"
                                     placeholder="Search courses..."
-                                    className="lg:max-w-[800px] bg-card w-full pl-10 pr-10" // pl-10 for left padding (space for icon)
+                                    className="pl-10 bg-card border-border focus:ring-primary focus:border-primary" // pl-10 for left padding (space for icon)
                                     value={searchQuery}
                                     onChange={handleSearchChange}
                                     onKeyDown={handleKeyDown}
@@ -574,16 +574,8 @@ const Courses: React.FC = () => {
                         </div>
                     </div>
                     <div className="">
-                        <div className="mb-5 flex justify-center items-center">
-                            {!permissions.viewCourse ? (
-                                <div className="flex justify-center items-center h-[60vh]">
-                                    <p className="text-lg font-medium text-gray-600">
-                                        You do not have permission to view
-                                        courses, Please contact the admin.
-                                    </p>
-                                </div>
-                            ) : courses.length === 0 ? (
-                                // {courses.length === 0 ? (
+                        <div className="">
+                            {courses.length === 0 ? (
                                 <>
                                     {activeSearchTerm.length > 0 ? (
                                         <div className="absolute h-screen">
@@ -722,7 +714,7 @@ const Courses: React.FC = () => {
                             ) : (
                                 <div>
                                     {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 md:px-0 mt-5 mb-8 items-start"> */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2 md:px-0 mt-5 mb-8 items-start w-full">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                                         {courses.map((course, index) => {
                                             const validImageUrl =
                                                 getValidImageUrl(

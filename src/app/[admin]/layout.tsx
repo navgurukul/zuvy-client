@@ -41,8 +41,8 @@ export default function RootLayout({
         <div className='font-manrope'>
             <div className={isAssessmentRouteClasses(pathname)}>
                 {!adminAssessmentPreviewRoute && <StudentNavbar />}
-                <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen`}>
-                    <MaxWidthWrapper>{children}</MaxWidthWrapper>
+                <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen flex-1`}>
+                    {children}
                 </div>
             </div>
         </div>
