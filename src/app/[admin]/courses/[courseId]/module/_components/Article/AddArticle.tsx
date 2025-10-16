@@ -387,6 +387,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 }, 1000) //
             } catch (err: any) {
                 console.error(err)
+               
                 toast.error({
                     title: 'Upload failed',
                     description:
@@ -687,24 +688,67 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
                 <div className="flex justify-end mt-5 mr-3">
                     {defaultValue === 'editor' ? (
+                        // <Button
+                        //     className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        //     type="submit"
+                        //     form="myForm"
+                        //     disabled={!hasEditorContent || isSaving}
+                        // >
+                        //     {isSaving ? 'Saving...' : 'Save'}
+                        // </Button>
+
+
                         <Button
-                            className="bg-primary text-primary-foreground hover:bg-primary/90"
-                            type="submit"
-                            form="myForm"
-                            disabled={!hasEditorContent || isSaving}
-                        >
-                            {isSaving ? 'Saving...' : 'Save'}
-                        </Button>
+  type="submit"
+  form="myForm"
+  className="bg-primary text-primary-foreground hover:bg-primary/90"
+  disabled={
+    isSaving ||                   // disable while saving
+    !form.formState.isValid ||     // disable if title invalid
+    !hasEditorContent             // disable if editor empty
+  }
+>
+  {isSaving ? 'Saving...' : 'Save'}
+</Button>
+
+
+
+
+
                     ) : (
                         <div>
-                            <Button
+                            {/* <Button
                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                 type="button"
                                 onClick={onFileUpload}
-                                disabled={!disabledUploadButton}
+                                // disabled={!disabledUploadButton}
+                                disabled={!disabledUploadButton || isSaving} 
                             >
                                 {isSaving ? 'Saving...' : 'Save'}
-                            </Button>
+                            </Button> */}
+{/* <Button
+  type="button"
+  onClick={onFileUpload}
+  className="bg-primary text-primary-foreground hover:bg-primary/90"
+  disabled={!form.formState.isValid || disabledUploadButton}
+>
+  {isSaving ? 'Uploading...' : 'Save'}
+</Button> */}
+
+
+<Button
+  type="button"
+  onClick={onFileUpload}
+  className="bg-primary text-primary-foreground hover:bg-primary/90"
+  disabled={
+    loading ||                 
+    !form.formState.isValid ||  
+    (!file && !ispdfUploaded) ||    
+    disabledUploadButton           
+  }
+>
+  {loading ? 'Saving...' : 'Save'}
+</Button>
                         </div>
                     )}
                 </div>
