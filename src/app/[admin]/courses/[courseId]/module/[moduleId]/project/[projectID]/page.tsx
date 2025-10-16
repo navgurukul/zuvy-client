@@ -424,7 +424,7 @@ import {
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
-import { ArrowUpRightSquare, CalendarIcon } from 'lucide-react'
+import { ArrowUpRightSquare, CalendarIcon, Eye, ArrowLeft } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -432,7 +432,7 @@ import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams } from 'next/navigation'
 // import ProjectPreview from '../_components/ProjectPreview'
-import { Eye } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
 import { RemirrorJSON } from 'remirror'
@@ -682,8 +682,17 @@ export default function Project() {
 
     return (
         <>
-            <BreadcrumbComponent crumbs={crumbs} />
-            <div className="flex flex-col mt-5">
+            {/* <BreadcrumbComponent crumbs={crumbs} /> */}
+            <div className="flex flex-col mt-10 lg:mx-44 mx-10">
+                <Link
+                    href={`/admin/courses/${courseId}/curriculum`}
+                    className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
+                >
+                    <ArrowLeft size={20} />
+                    <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
+                        Back to Curriculum
+                    </p>
+                </Link>
                 <div className="w-full ">
                     {/* {showPreview ? (
                         <ProjectPreview
@@ -705,10 +714,10 @@ export default function Project() {
                                     <FormItem>
                                         {/* <FormLabel></FormLabel> */}
                                         <FormControl>
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex justify-between items-center text-foreground">
                                                 <Input
                                                     placeholder="Untitled Article"
-                                                    className="p-0 text-3xl w-2/5 text-left font-semibold outline-none border-none focus:ring-0 capitalize"
+                                                    className="p-0 text-2xl w-2/5 text-left font-semibold outline-none border-none focus-visible:ring-0 capitalize"
                                                     {...field}
                                                     {...form.register('title')}
                                                     onChange={(e) =>
@@ -718,7 +727,7 @@ export default function Project() {
                                                 <div
                                                     id="previewProject"
                                                     onClick={previewProject}
-                                                    className="flex w-[80px] hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                                    className="flex w-[90px] hover:bg-primary hover:text-primary-foreground rounded-md p-1 cursor-pointer mr-4"
                                                 >
                                                     <Eye size={18} />
                                                     <h6 className="ml-1 text-sm">
@@ -731,80 +740,81 @@ export default function Project() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
-                                control={form.control}
-                                name="startDate"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col justify-start gap-x-2 text-left">
-                                        <FormLabel className="m-0">
-                                            <span className="text-xl">
-                                                Choose Deadline Date
-                                            </span>
-                                            <span className="text-red-500">
-                                                *
-                                            </span>{' '}
-                                        </FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={'outline'}
-                                                        className={`w-[230px]  text-left font-normal ${
-                                                            !field.value &&
-                                                            'text-muted-foreground'
-                                                        }`}
-                                                    >
-                                                        {field.value
-                                                            ? format(
-                                                                  field.value,
-                                                                  'EEEE, MMMM d, yyyy'
-                                                              )
-                                                            : 'Pick a date'}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date: any) =>
-                                                        date <=
-                                                        addDays(new Date(), -1)
-                                                    } // Disable past dates
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
                         </form>
                     </Form>
                     {/* </>
                     )} */}
                 </div>
-                <div className="text-left">
-                    <RemirrorTextEditor
-                        initialContent={initialContent}
-                        setInitialContent={setInitialContent}
-                    />
+
+                <div className="bg-card border rounded-lg p-6 space-y-6">
+                    {/* Deadline Date */}
+                    <Form {...form}>
+                        <FormField
+                            control={form.control}
+                            name="startDate"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col justify-start gap-x-2 text-left">
+                                    <FormLabel className="m-0">
+                                        <span className="text-lg">
+                                            Choose Deadline Date
+                                        </span>
+                                        <span className="text-foreground">
+                                            *
+                                        </span>{' '}
+                                    </FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={'outline'}
+                                                    className={`w-[230px] text-left font-normal ${!field.value &&
+                                                        'text-muted-foreground'
+                                                        }`}
+                                                >
+                                                    {field.value
+                                                        ? format(
+                                                            field.value,
+                                                            'EEEE, MMMM d, yyyy'
+                                                        )
+                                                        : 'Pick a date'}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                            className="w-auto p-0"
+                                            align="start"
+                                        >
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                disabled={(date: any) =>
+                                                    date <=
+                                                    addDays(new Date(), -1)
+                                                }
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </Form>
+
+                    {/* Remirror Editor */}
+                    <div className="text-left">
+                        <RemirrorTextEditor
+                            initialContent={initialContent}
+                            setInitialContent={setInitialContent}
+                        />
+                    </div>
                 </div>
-                <div className="flex justify-end mt-5">
-                    <Button
-                        type="submit"
-                        form="myForm"
+                <div className="flex justify-end my-5">
+                    <Button type="submit" form="myForm"
                         disabled={isContentEmpty()}
-                        className={
-                            isContentEmpty()
-                                ? 'opacity-50 cursor-not-allowed'
-                                : ''
-                        }
+                        className={isContentEmpty() ? 'opacity-50 cursor-not-allowed' : ''}
                     >
                         Save
                     </Button>
