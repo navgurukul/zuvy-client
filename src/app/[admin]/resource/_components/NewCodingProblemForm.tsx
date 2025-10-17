@@ -74,20 +74,6 @@ const formSchema = z.object({
         required_error: 'You need to select a Difficulty type.',
     }),
     topics: z.number().min(1, 'You need to select a Topic'),
-    testCases: z.array(
-        z.object({
-            inputs: z.array(
-                z.object({
-                    type: z.enum(inputTypes),
-                    value: z.string(),
-                })
-            ),
-            output: z.object({
-                type: z.enum(outputTypes),
-                value: z.string(),
-            }),
-        })
-    ),
 })
 
 export default function NewCodingProblemForm({
@@ -109,6 +95,11 @@ export default function NewCodingProblemForm({
             inputs: [{ id: Date.now(), type: 'int', value: '' }],
             output: { type: 'int', value: '' },
         },
+        {
+            id: 2,
+            inputs: [{ id: Date.now() + 1, type: 'int', value: '' }],
+            output: { type: 'int', value: '' },
+        }
     ])
 
     const [hasSyntaxErrors, setHasSyntaxErrors] = useState(false)
@@ -318,6 +309,14 @@ export default function NewCodingProblemForm({
     }
 
     const handleRemoveTestCase = (id: number) => {
+        if (testCases.length <= 2) {
+            toast.error({
+                title: "Cannot Remove Test Case",
+                description: "At least 2 test cases are required.",
+            });
+            return;
+        }
+
         setTestCases((prevTestCases) =>
             prevTestCases.filter((testCase) => testCase.id !== id)
         )
@@ -331,7 +330,7 @@ export default function NewCodingProblemForm({
             constraints: '',
             difficulty: 'Easy',
             topics: 0,
-            testCases: [],
+            // testCases: [],
         },
     })
 
@@ -459,10 +458,37 @@ export default function NewCodingProblemForm({
     }
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        // Manual test cases validation
+        if (testCases.length < 2) {
+            toast.error({
+                title: 'Insufficient Test Cases',
+                description: 'At least 2 test cases are required.',
+            });
+            setActiveTab("testcases"); // Switch to test cases tab
+            return;
+        }
+
+        // Check if all test cases have valid inputs and outputs
+        const hasEmptyValues = testCases.some(testCase => {
+            const hasEmptyInputs = testCase.inputs.some(input => !input.value.trim());
+            const hasEmptyOutput = !testCase.output.value.trim();
+            return hasEmptyInputs || hasEmptyOutput;
+        });
+
+        if (hasEmptyValues) {
+            toast.error({
+                title: 'Incomplete Test Cases',
+                description: 'Please fill all input and output values for all test cases.',
+            });
+            setActiveTab("testcases"); // Switch to test cases tab
+            return;
+        }
+
         let hasErrors = showSyntaxErrors(testCases)
 
         // If there are validation errors, return early and don't submit
         if (hasErrors) {
+            setActiveTab("testcases"); // Switch to test cases tab
             return
         }
 
@@ -637,6 +663,7 @@ export default function NewCodingProblemForm({
                 description:
                     'Some test cases contain invalid data. Please correct them before submitting.',
             })
+            setActiveTab("testcases");
             return
         }
 
@@ -651,7 +678,7 @@ export default function NewCodingProblemForm({
                 constraints: '',
                 difficulty: 'Easy',
                 topics: 0,
-                testCases: [],
+                // testCases: [],
             })
 
             setTestCases([
@@ -660,8 +687,14 @@ export default function NewCodingProblemForm({
                     inputs: [{ id: Date.now(), type: 'int', value: '' }],
                     output: { type: 'int', value: '' },
                 },
+                {                    
+                    id: 2,
+                    inputs: [{ id: Date.now() + 1, type: 'int', value: '' }],
+                    output: { type: 'int', value: '' },
+                },
             ])
 
+            setActiveTab("details")
             setIsDialogOpen(false)
 
             // Refresh data
@@ -810,6 +843,11 @@ export default function NewCodingProblemForm({
                                     <FormItem className="text-left w-full !mb-12">
                                         <FormLabel>Topics</FormLabel>
                                         <Select
+                                            value={
+                                                field.value && field.value !== 0
+                                                    ? tags.find((tag: any) => tag.id === field.value)?.tagName || ""
+                                                    : ""
+                                            }
                                             onValueChange={(value) => {
                                                 const selectedTag = tags.find(
                                                     (tag: any) =>
@@ -1140,7 +1178,7 @@ export default function NewCodingProblemForm({
                                             </div>
                                         </div>
 
-                                        {testCases.length > 1 && (
+                                        {testCases.length > 2 && (
                                             <Button
                                                 variant="ghost"
                                                 className="mt-4 text-destructive hover:text-destructive"

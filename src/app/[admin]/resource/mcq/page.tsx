@@ -139,7 +139,8 @@ const Mcqs = (props: Props) => {
         window.history.replaceState({}, '', newURL)
     }, [])
     const fetchSuggestionsApi = useCallback(async (query: string): Promise<any[]> => {
-        if (!query.trim()) {
+        // Don't return empty if query has spaces - only check if completely empty
+        if (!query || query.trim().length === 0) {
             return []
         }
     
@@ -147,7 +148,7 @@ const Mcqs = (props: Props) => {
             // API call to fetch quiz questions based on the query
             const response = await api.get('Content/allQuizQuestions', {
                 params: {
-                    searchTerm: encodeURIComponent(query),
+                    searchTerm: query.trim(), // Remove encodeURIComponent here as axios handles it
                     // Add additional filters if needed (tags, difficulty, etc.)
                 }
             })
@@ -163,8 +164,8 @@ const Mcqs = (props: Props) => {
     
                         // Truncate the question for display purposes
                         // const truncatedText = plainText.length > 100 ? plainText.substring(0, 15) + '...' : plainText
-                        const truncatedText = plainText.length > 15
-                        ? plainText.split(' ').slice(0, 2).join(' ') + '...'
+                        const truncatedText = plainText.length > 45
+                        ? plainText.split(' ').slice(0, 6).join(' ') + '...'
                         : plainText                        // Get topic name from tags (backend should ideally return topic name too)
 
                         const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
@@ -443,7 +444,13 @@ const Mcqs = (props: Props) => {
     const renderTabContent = (tabValue: string) => {
         switch (tabValue) {
             case 'bulk':
-                return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
+                return (
+                    <BulkUploadMcq
+                        closeModal={() => setIsCreateMcqDialogOpen(false)}
+                        setStoreQuizData={setStoreQuizData}
+                        getAllQuizQuesiton={() => filteredQuizQuestions(setStoreQuizData)}
+                    />
+                )
             case 'oneatatime':
                 return (
                     <div className="flex items-start justify-center w-full">

@@ -336,8 +336,8 @@ const StudentsPage = ({ params }: { params: any }) => {
 
     // Normal table view (no conditional rendering needed)
     return (
-        <div className="text-gray-800">
-            <div className="text-start">
+        <div className="text-foreground">
+            <div className="text-start mt-6">
                 <h2 className="font-heading text-xl font-semibold">Students</h2>
                 <p className="text-muted-foreground">
                     Manage student enrollments and track their progress

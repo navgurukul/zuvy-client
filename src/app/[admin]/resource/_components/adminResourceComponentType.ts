@@ -18,7 +18,9 @@ export interface QuestionCardProps {
 
 // BulkMcqForm
 export type BulkMcqProps = {
-    setIsMcqModalOpen: React.Dispatch<React.SetStateAction<boolean>>
+    closeModal: () => void
+    setStoreQuizData: (data: any) => void
+    getAllQuizQuesiton: () => Promise<void>
 }
 
 // CheckboxAndDeleteCombo

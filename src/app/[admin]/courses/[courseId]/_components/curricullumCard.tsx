@@ -40,11 +40,15 @@ const CurricullumCard = (props: CurricullamCardProps) => {
     const router = useRouter()
     const dragControls = useDragControls()
     const [isDragging, setIsDragging] = useState(false)
+    const [originalOrder, setOriginalOrder] = useState(order)
 
     // Calculate time in weeks and days
     const timeAllotedInWeeks = Math.ceil(timeAlloted / 604800)
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+
+    // Use original order during dragging, current order when not dragging
+    const displayOrder = isDragging ? originalOrder : order
 
     const handleDeleteModal = () => {
         setDeleteModalOpen(true)
@@ -97,6 +101,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
             }}
             onDragStart={() => {
                 setIsDragging(true)
+                setOriginalOrder(order)
                 props.setDraggedModuleId(props.moduleId)
                 onDragStart?.()
             }}
@@ -104,6 +109,10 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                 setIsDragging(false)
                 props.setDraggedModuleId(null)
                 onDragEnd?.()
+                // Update original order after drag completes
+                setTimeout(() => {
+                    setOriginalOrder(order)
+                }, 100)
             }}
             transition={{ duration: 0.2 }}
         >
@@ -139,11 +148,11 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                             <GripVertical className="h-5 w-5" />
                         </div>
 
-                        <div className="flex-1 flex items-center justify-between hover:bg-muted/50 p-2 rounded-md transition-colors">
-                            <div
-                                className="text-left flex items-center gap-3 cursor-pointer w-full"
-                                onClick={handleModuleRoute}
-                            >
+                        <div 
+                            className="flex-1 flex items-center justify-between hover:bg-muted/50 p-2 rounded-md transition-colors"
+                            onClick={handleModuleRoute}
+                        >
+                            <div className="text-left flex items-center gap-3 cursor-pointer w-full">
                                 <div
                                     className={`p-2 rounded-md ${
                                         props.typeId === 2
@@ -155,7 +164,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-lg">
-                                        Module {order}: {name}
+                                        Module {displayOrder}: {name} {/* Use displayOrder instead of order */}
                                     </h3>
                                     <p className="text-muted-foreground text-[1rem]">
                                         {description}

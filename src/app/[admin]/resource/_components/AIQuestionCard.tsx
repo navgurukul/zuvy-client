@@ -117,12 +117,20 @@ export const AIQuestionCard = ({
                     {Object.values(options).map((option, index) => (
                         <div
                             key={option}
-                            className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer"
+                            className={`flex items-center px-4 py-3 rounded-md cursor-pointer ${
+                                correctOption === index + 1
+                                    ? 'bg-green-100 border border-green-300 hover:bg-green-200'
+                                    : 'hover:bg-gray-100'
+                            }`}
                         >
-                            <span className="font-medium mr-2">
+                            <span className={`font-medium mr-2 ${
+                                correctOption === index + 1 ? 'text-green-700' : ''
+                            }`}>
                                 {String.fromCharCode(65 + index)}.
                             </span>
-                            <span>{option}</span>
+                            <span className={correctOption === index + 1 ? 'text-green-700 font-medium' : ''}>
+                                {option}
+                            </span>
                         </div>
                     ))}
                 </div>
