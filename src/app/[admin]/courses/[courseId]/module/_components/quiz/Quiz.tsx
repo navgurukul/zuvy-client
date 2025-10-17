@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/[admin]/courses/[courseId]/module/_components/quiz/QuizLibrary'
+import { getUser } from '@/store/store'
 import {
     QuizDataLibrary,
     LibraryOption,
@@ -31,6 +32,8 @@ import { FileQuestion } from 'lucide-react'
 
 function Quiz(props: QuizProps) {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [tags, setTags] = useState<PageTag[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [addQuestion, setAddQuestion] = useState<QuizDataLibrary[]>([])
@@ -287,7 +290,7 @@ function Quiz(props: QuizProps) {
             quizQuestionDetails: addQuestion,
         })
         router.push(
-            `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+            `/${userRole}/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
         )
     }
 

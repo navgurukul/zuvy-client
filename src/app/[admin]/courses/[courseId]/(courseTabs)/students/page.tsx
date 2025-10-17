@@ -11,7 +11,7 @@ import {
     FileSpreadsheet,
     UserPlus,
 } from 'lucide-react'
-
+import { getUser } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -70,7 +70,8 @@ const StudentsPage = ({ params }: { params: any }) => {
         setStudents,
         fetchStudentData,
     } = useStudentData(params.courseId)
-
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
   const { batchData } = getBatchData()
   const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
   const [studentData, setStudentData] = useState<StudentDataState | any>({})
@@ -261,7 +262,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         if (error?.response?.data.message === 'Bootcamp not found!') {
-          router.push(`/admin/courses`)
+          router.push(`/${userRole}/courses`)
           toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
         }
       }

@@ -8,6 +8,7 @@ import {
     getAllTags,
     getAllTagsWithoutFilter,
 } from '@/utils/admin'
+import { getUser } from '@/store/store'
 import OpenEndedQuestions from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/OpenEndedQuestions'
 import QuizQuestions from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/QuizQuestions'
 import CodingTopics from '@/app/[admin]/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
@@ -36,6 +37,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     activeChapterTitle,
 }) => {
     const searchParams = useSearchParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const initialTab = searchParams.get('tab') || ''
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
@@ -155,7 +158,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
         router.push(
-            `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
+            `/${userRole}/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
         )
     }
 
@@ -167,7 +170,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         ) {
             setAssessmentPreviewContent(content)
             router.push(
-                `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
+                `/${userRole}/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
         } else {
             toast.error({

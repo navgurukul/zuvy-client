@@ -7,6 +7,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { getUser } from '@/store/store'
 import { getAssessmentPreviewStore } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
@@ -20,6 +21,8 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/PreviewPageType'
 
 const PreviewAssessment = ({ params }: { params: Params }) => {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { assessmentPreviewContent, setAssessmentPreviewContent } =
         getAssessmentPreviewStore()
 
@@ -37,7 +40,7 @@ const PreviewAssessment = ({ params }: { params: Params }) => {
 
     function startPreviewAssessment() {
         router.push(
-            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions`
+            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions`
         )
     }
 

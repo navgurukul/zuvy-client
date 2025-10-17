@@ -44,6 +44,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import UploadArticle from '../Article/UploadPdf'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { getUser } from '@/store/store'
 import {
     Tooltip,
     TooltipContent,
@@ -76,6 +77,8 @@ const AddAssignent = ({
     })
 
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [title, setTitle] = useState('')
     const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
@@ -400,7 +403,7 @@ const AddAssignent = ({
             }
             setAssignmentPreviewContent(content)
             router.push(
-                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
+                `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
             )
         }
     }
@@ -469,7 +472,7 @@ const AddAssignent = ({
         if (ispdfUploaded) {
             setAssignmentPreviewContent(content)
             router.push(
-                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
+                `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
             )
         } else {
             toast.error({

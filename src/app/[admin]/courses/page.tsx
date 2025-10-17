@@ -49,6 +49,7 @@ const Courses: React.FC = () => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { studentData } = useStudentData()
+    const userRole = studentData?.rolesList?.[0]?.toLowerCase() || ''
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
 
     // pagination & layout
@@ -156,7 +157,7 @@ const Courses: React.FC = () => {
                 setNewCourseDescription('')
                 await refetchBootcamps(offset) // same page refresh
                 await refetchAllCourses() // refresh suggestions
-                router.push(`/admin/courses/${data.bootcamp.id}/details`)
+                router.push(`/${userRole}/courses/${data.bootcamp.id}/details`)
             } catch (error: any) {
                 toast.error({
                     title: error?.data?.status || 'Error',

@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { getUser } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -46,6 +47,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
 }) => {
     const heightClass = useResponsiveHeight()
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
     // state - FIXED: Use single title state for both modes
     const [title, setTitle] = useState('')
@@ -323,7 +326,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             }
             setArticlePreviewContent(content)
             router.push(
-                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
+                `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
             )
         }
     }
@@ -332,7 +335,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
         if (ispdfUploaded) {
             setArticlePreviewContent(content)
             router.push(
-                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
+                `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
             )
         } else {
             return toast.error({

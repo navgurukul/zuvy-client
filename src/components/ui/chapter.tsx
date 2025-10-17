@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, useRef } from 'react'
 import { api } from '@/utils/axios.config'
 import { useParams } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { getUser } from '@/store/store'
 import { Reorder } from 'framer-motion'
 import ChapterItem from '@/app/[admin]/courses/[courseId]/module/_components/ChapterItem'
 import { toast } from '@/components/ui/use-toast'
@@ -56,6 +57,8 @@ interface QuizQuestionDetails {
 
 function Chapter() {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseId, moduleId, chapterID } = useParams()
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
@@ -150,7 +153,7 @@ function Chapter() {
                 (item: any) => item.chapterId
             )
         } catch (error) {
-            router.replace(`/admin/courses/${courseId}/curriculum`)
+            router.replace(`/${userRole}/courses/${courseId}/curriculum`)
             toast.info({
                 title: 'Caution',
                 description: 'The Module has been deleted by another Admin',

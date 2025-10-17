@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { Tabs, TabsList } from '@/components/ui/tabs'
-
+import { getUser } from '@/store/store'
 import styles from '../../_components/cources.module.css'
 import TabItem from './TabItem'
 import { getCourseData } from '@/store/store'
@@ -26,6 +26,8 @@ import {
 function CourseLayout() {
     const router = useRouter()
     const { courseId } = useParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseData, Permissions } = getCourseData()
     // get the role from current path like if the url is this - admin/courses/721/details  then get admin from it
     const pathname = usePathname()
@@ -86,7 +88,7 @@ function CourseLayout() {
                     .getState()
                     .fetchCourseDetails(parseInt(courseID))
                 if (!success) {
-                    router.push(`/admin/courses`)
+                    router.push(`/${userRole}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:
