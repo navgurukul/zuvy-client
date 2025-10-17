@@ -3,14 +3,16 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Edit, Trash2, Plus, Users } from 'lucide-react'
+import { Edit, Trash2, Plus, Users, AlertTriangle } from 'lucide-react'
 import { useRbacResources } from '@/hooks/useRbacResources'
 import { useRbacPermissions } from '@/hooks/useRbacPermissions'
 import { useRoles } from '@/hooks/useRoles'
 import { useAssignPermissions } from '@/hooks/useAssignPermissions'
 import { COLOR_PALETTE } from '@/lib/utils'
-import { Dialog, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import AddRoleModal from './AddRoleModal'
+import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 
 interface RoleAction {
     id: number
@@ -32,7 +34,18 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     const [selectedAction, setSelectedAction] = useState<number>(12)
     const [roleId, setRoleId] = useState<number>(1)
     const [selectedPermissions, setSelectedPermissions] = useState<Record<number, boolean>>({})
+    const [originalPermissions, setOriginalPermissions] = useState<Record<number, boolean>>({})
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+    
+    // Unsaved changes warning modal state
+    const [showWarningModal, setShowWarningModal] = useState(false)
+    const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
+    
+    // Route change detection
+    const router = useRouter()
+    const pathname = usePathname()
+    const [currentPath, setCurrentPath] = useState<string>(pathname)
+    const [pendingRoute, setPendingRoute] = useState<string | null>(null)
 
     // Fetch RBAC resources from API
     const { resources, loading, error } = useRbacResources(true)
@@ -50,8 +63,94 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 initialPermissions[permission.id] = permission.granted || false
             })
             setSelectedPermissions(initialPermissions)
+            setOriginalPermissions(initialPermissions) // Store original state
         }
     }, [fetchedPermissions])
+
+    // Check if there are unsaved changes
+    const hasUnsavedChanges = useMemo(() => {
+        return JSON.stringify(selectedPermissions) !== JSON.stringify(originalPermissions)
+    }, [selectedPermissions, originalPermissions])
+
+    // Route change detection and prevention
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (hasUnsavedChanges) {
+                e.preventDefault()
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?'
+                return e.returnValue
+            }
+        }
+
+        const handleRouteChange = (url: string) => {
+            if (hasUnsavedChanges && url !== currentPath) {
+                setPendingRoute(url)
+                setShowWarningModal(true)
+                throw 'Route change cancelled'
+            }
+        }
+
+        // Add beforeunload listener
+        window.addEventListener('beforeunload', handleBeforeUnload)
+
+        // Override router methods
+        const originalPush = router.push
+        const originalReplace = router.replace
+        const originalBack = router.back
+        const originalForward = router.forward
+
+        router.push = (href: any, options?: any) => {
+            const targetUrl = typeof href === 'string' ? href : href.pathname
+            try {
+                handleRouteChange(targetUrl)
+                return originalPush.call(router, href, options)
+            } catch {
+                return Promise.resolve(false)
+            }
+        }
+
+        router.replace = (href: any, options?: any) => {
+            const targetUrl = typeof href === 'string' ? href : href.pathname
+            try {
+                handleRouteChange(targetUrl)
+                return originalReplace.call(router, href, options)
+            } catch {
+                return Promise.resolve(false)
+            }
+        }
+
+        router.back = () => {
+            if (hasUnsavedChanges) {
+                setPendingRoute('back')
+                setShowWarningModal(true)
+                return
+            }
+            return originalBack.call(router)
+        }
+
+        router.forward = () => {
+            if (hasUnsavedChanges) {
+                setPendingRoute('forward')
+                setShowWarningModal(true)
+                return
+            }
+            return originalForward.call(router)
+        }
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload)
+            // Restore original router methods
+            router.push = originalPush
+            router.replace = originalReplace
+            router.back = originalBack
+            router.forward = originalForward
+        }
+    }, [hasUnsavedChanges, currentPath, router])
+
+    // Update current path when pathname changes
+    useEffect(() => {
+        setCurrentPath(pathname)
+    }, [pathname])
 
     const roleActions: RoleAction[] = useMemo(
         () =>
@@ -92,11 +191,37 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             .join(' ')
     }
 
+    // Handle navigation with unsaved changes check
+    const handleNavigationWithCheck = (action: () => void) => {
+        if (hasUnsavedChanges) {
+            setPendingAction(() => action)
+            setShowWarningModal(true)
+        } else {
+            action()
+        }
+    }
+
     const handleActionSelect = (actionId: number) => {
-        // actionId is the resourceId
-        setSelectedAction(actionId)
-        // Reset selected permissions when switching actions
-        setSelectedPermissions({})
+        const navigateToAction = () => {
+            setSelectedAction(actionId)
+            // Reset selected permissions when switching actions
+            setSelectedPermissions({})
+            setOriginalPermissions({})
+        }
+
+        handleNavigationWithCheck(navigateToAction)
+    }
+
+    const handleRoleChange = (roleName: string, newRoleId: number) => {
+        const changeRole = () => {
+            onRoleChange(roleName)
+            setRoleId(newRoleId)
+            // Reset permissions when changing roles
+            setSelectedPermissions({})
+            setOriginalPermissions({})
+        }
+
+        handleNavigationWithCheck(changeRole)
     }
 
     const handleSelectAll = () => {
@@ -147,16 +272,88 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         const resourceId = selectedAction
         if (!roleId || !resourceId) return
 
-        // Use selectedPermissions directly as it's already in the correct format
-        await assignPermissions({
-            resourceId,
-            roleId,
-            permissions: selectedPermissions,
-        })
+        try {
+            await assignPermissions({
+                resourceId,
+                roleId,
+                permissions: selectedPermissions,
+            })
+            // Update original permissions after successful save
+            setOriginalPermissions({ ...selectedPermissions })
+        } catch (error) {
+            console.error('Error saving permissions:', error)
+        }
+    }
+
+    // Handle warning modal actions
+    const handleDiscardChanges = () => {
+        // First revert to original permissions
+        setSelectedPermissions({ ...originalPermissions })
+        
+        // Close the modal first
+        setShowWarningModal(false)
+        
+        // Use setTimeout to ensure modal closes before navigation
+        setTimeout(() => {
+            if (pendingAction) {
+                pendingAction()
+                setPendingAction(null)
+            } else if (pendingRoute) {
+                // Handle route navigation
+                if (pendingRoute === 'back') {
+                    window.history.back()
+                } else if (pendingRoute === 'forward') {
+                    window.history.forward()
+                } else {
+                    // Use window.location for external routes or router.push for internal routes
+                    if (pendingRoute.startsWith('http')) {
+                        window.location.href = pendingRoute
+                    } else {
+                        router.push(pendingRoute)
+                    }
+                }
+                setPendingRoute(null)
+            }
+        }, 100) // Small delay to ensure modal closes
+    }
+
+    const handleCancelNavigation = () => {
+        setShowWarningModal(false)
+        setPendingAction(null)
+        setPendingRoute(null)
     }
 
     return (
         <div className="space-y-6">
+            {/* Unsaved Changes Warning Modal */}
+            <Dialog open={showWarningModal} onOpenChange={setShowWarningModal}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-warning" />
+                            Unsaved Changes
+                        </DialogTitle>
+                        <DialogDescription>
+                            You have unsaved changes to the permissions. Would you like to Discard the changes?
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-3 mt-6">
+                        <Button
+                            variant="outline"
+                            onClick={handleCancelNavigation}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleDiscardChanges}
+                        >
+                            Discard Changes
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
@@ -187,10 +384,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         return (
                             <Button
                                 key={role.id}
-                                onClick={() => {
-                                    onRoleChange(role.name)
-                                    setRoleId(role.id)
-                                }}
+                                onClick={() => handleRoleChange(role.name, role.id)}
                                 className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
                                     ? 'border-blue-500 text-gray-900 hover:bg-transparent'
                                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -198,6 +392,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                             >
                                 <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
                                 <span className="font-medium text-[1rem] capitalize">{role.name}</span>
+                                {/* Show unsaved indicator */}
+                                {selectedRole === role.name && hasUnsavedChanges && (
+                                    <div className="w-2 h-2 bg-warning rounded-full"></div>
+                                )}
                             </Button>
                         )
                     })
@@ -205,10 +403,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             </div>
 
             {/* Main Content - Two Column Layout */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-3 gap-6">
                 {/* Left Column - Role Actions */}
                 <div className="col-span-1">
-                    <div className="bg-white rounded-lg border border-gray-200 p-4 h-[600px] flex flex-col">
+                    <div className="bg-white rounded-lg border border-gray-200 p-4 h-[calc(100vh-20rem)]  flex flex-col">
 
                         {/* Role Actions Title */}
                         <h4 className="font-semibold text-[1rem] text-start text-gray-900 mb-4 capitalize">
@@ -231,7 +429,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 roleActions.map((action) => (
                                     <div
                                         key={action.id}
-                                        onClick={() =>
+                                        onClick={() => 
                                             // action.id is the resourceId
                                             handleActionSelect(action.id)
                                         }
@@ -259,12 +457,17 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
 
                 {/* Right Column - Permissions */}
                 <div className="col-span-2">
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 h-[600px] flex flex-col">
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 h-[calc(100vh-20rem)]  flex flex-col">
                         {/* Permissions Header */}
                         <div className="flex justify-between items-center mb-4">
                             <div>
                                 <h3 className="font-bold text-start text-[1rem] text-gray-900">
                                     Permissions for {getSelectedAction()?.title}
+                                    {hasUnsavedChanges && (
+                                        <span className="ml-2 text-xs bg-amber-100 text-warning px-2 py-1 rounded">
+                                            Unsaved changes
+                                        </span>
+                                    )}
                                 </h3>
                                 <p className="text-gray-600 text-start text-sm mt-1">
                                     {getSelectedAction()?.description}
@@ -369,7 +572,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         variant="outline"
                                         size="sm"
                                         onClick={handleAssignPermissions}
-                                        className="text-xs"
+                                        className="text-xs bg-accent text-white hover:bg-accent/90"
                                     // disabled={assigning}
                                     >
                                         {/* {assigning

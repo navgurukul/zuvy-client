@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -20,7 +20,6 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
 import {
     Select,
     SelectContent,
@@ -28,30 +27,98 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Search } from 'lucide-react'
 import { useRoles } from '@/hooks/useRoles'
+import { SearchBox } from '@/utils/searchBox'
+import { api } from '@/utils/axios.config'
+import type { User } from '../columns'
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
+    onSearchChange?: (isSearching: boolean) => void
 }
 
-export function UserManagementTable<TData, TValue>({
+export function UserManagementTable<TData extends User, TValue>({
     columns,
-    data,
+    data: propData, // Rename to propData
+    onSearchChange,
 }: UserManagementTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-        {}
-    )
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = useState({})
-
+    const [searchData, setSearchData] = useState<TData[]>([])
+    const [isSearching, setIsSearching] = useState(false)
+    const [loading, setLoading] = useState(false)
+    
     // Fetch roles from API
     const { roles, loading: rolesLoading } = useRoles()
 
+    // Use search data if searching, otherwise use prop data
+    const displayData = isSearching ? searchData : propData
+
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        try {
+            const response = await api.get(
+                `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
+            )
+            const suggestions = (response.data.data || []).map((user: User) => ({
+                ...user,
+                id: user.userId, // Use userId as id for SearchBox
+            }))
+
+            return suggestions
+        } catch (error) {
+            console.error('Error fetching suggestions:', error)
+            return []
+        }
+    }, [])
+
+    // Fetch search results with filters applied
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        setLoading(true)
+        setIsSearching(true)
+        onSearchChange?.(true)
+        
+        try {
+            const response = await api.get(
+                `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
+            )
+
+            setSearchData(response.data.data || [])
+            return response.data
+        } catch (error) {
+            console.error('Error fetching search results:', error)
+            setSearchData([])
+        } finally {
+            setLoading(false)
+        }
+    }, [onSearchChange])
+
+    // Default fetch - clear search and show parent data
+    const defaultFetchApi = useCallback(async () => {
+        setIsSearching(false)
+        setSearchData([])
+        onSearchChange?.(false)
+        return { data: propData }
+    }, [propData, onSearchChange])
+
+    // Load data on component mount - check if search exists in URL
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search)
+        const searchQuery = urlParams.get('search')
+
+        if (searchQuery && searchQuery.trim()) {
+            fetchSearchResultsApi(searchQuery.trim())
+        } else {
+            // Clear search state to show parent data
+            setIsSearching(false)
+            setSearchData([])
+        }
+    }, []) // Run only once on mount
+
     const table = useReactTable({
-        data,
+        data: displayData,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -72,23 +139,19 @@ export function UserManagementTable<TData, TValue>({
         <div className="space-y-4">
             {/* Search and Filter Bar */}
             <div className="flex gap-4 mb-6">
-                <div className="relative w-64">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 mt-1 text-muted-foreground" />
-                    <Input
-                        placeholder="Search users..."
-                        className="pl-10 bg-white"
-                        value={
-                            (table
-                                .getColumn('name')
-                                ?.getFilterValue() as string) ?? ''
-                        }
-                        onChange={(event) =>
-                            table
-                                .getColumn('name')
-                                ?.setFilterValue(event.target.value)
-                        }
-                    />
-                </div>
+                <SearchBox
+                    placeholder="Search by name or email..."
+                    fetchSuggestionsApi={fetchSuggestionsApi}
+                    fetchSearchResultsApi={fetchSearchResultsApi}
+                    defaultFetchApi={defaultFetchApi}
+                    getSuggestionLabel={(user) => (
+                        <div>
+                            <div className="font-medium">{user.name}</div>
+                            <div className="text-sm text-gray-500">{user.email}</div>
+                        </div>
+                    )}
+                    inputWidth="w-80"
+                />
 
                 <div className="mt-2">
                     <Select
@@ -151,7 +214,16 @@ export function UserManagementTable<TData, TValue>({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {loading ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
@@ -176,7 +248,7 @@ export function UserManagementTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    No results found.
                                 </TableCell>
                             </TableRow>
                         )}

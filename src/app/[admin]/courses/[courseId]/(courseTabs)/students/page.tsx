@@ -71,340 +71,268 @@ const StudentsPage = ({ params }: { params: any }) => {
         fetchStudentData,
     } = useStudentData(params.courseId)
 
-    const { batchData } = getBatchData()
-    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
-    const [studentData, setStudentData] = useState<StudentDataState | any>({})
-    const [isOpen, setIsOpen] = useState(false)
-    const [isSingleStudentOpen, setIsSingleStudentOpen] = useState(false)
-    const [lastActiveFilter, setLastActiveFilter] = useState<string>('all')
-    const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
-    const [statusFilter, setStatusFilter] = useState<string>('all')
-    const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
+  const { batchData } = getBatchData()
+  const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
+  const [studentData, setStudentData] = useState<StudentDataState | any>({})
+  const [isOpen, setIsOpen] = useState(false)
+  const [isSingleStudentOpen, setIsSingleStudentOpen] = useState(false)
+  const [lastActiveFilter, setLastActiveFilter] = useState<string>('all')
+  const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [batchFilter, setBatchFilter] = useState<string>('all')
+  const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
 
-    // Fetch data with filters
-    const fetchFilteredData = useCallback(async () => {
-        try {
-            let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
-            
-            // Add enrolled date filter if not 'all'
-            if (enrolledDateFilter && enrolledDateFilter !== 'all') {
-                const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
-                if (enrolledDate) {
-                    url += `&enrolledDate=${enrolledDate}`
-                }
-            }
-            
-            // Add status filter if not 'all'
-            if (statusFilter && statusFilter !== 'all') {
-                url += `&status=${statusFilter}`
-            }
-            
-            // Add last active filter if not 'all'
-            // if (lastActiveFilter && lastActiveFilter !== 'all') {
-            //     const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-            //     if (lastActiveDate) {
-            //         url += `&lastActiveDate=${lastActiveDate}`
-            //     }
-            // }
-            
-            // Add attendance filter if not empty
-            if (attendanceFilter && attendanceFilter.trim() !== '') {
-                url += `&attendance=${attendanceFilter.trim()}`
-            }
-            
-            // Add search if exists
-            const urlSearchParams = new URLSearchParams(window.location.search)
-            const searchQuery = urlSearchParams.get("search")
-            if (searchQuery) {
-                url += `&searchTerm=${searchQuery}`
-            }
-            
-            const response = await api.get(url)
-            setStudents(response.data.modifiedStudentInfo || [])
-            setSelectedRows([])
-            
-        } catch (error) {
-            console.error('Error fetching filtered data:', error)
-            toast.error({
-                title: 'Error',
-                description: 'Failed to fetch student data',
-            })
-        }
-    }, [params.courseId, limit, offset, enrolledDateFilter, statusFilter, lastActiveFilter, attendanceFilter, setStudents])
-
-    // Update this helper function to handle new options
-    // const convertLastActiveFilterToDate = (filter: string): string | null => {
-    //     const today = new Date()
-    //     const formatDate = (date: Date) => date.toISOString().split('T')[0] // YYYY-MM-DD format
-        
-    //     switch (filter) {
-    //         case 'today':
-    //             return formatDate(today)
-            
-    //         case 'yesterday':
-    //             const yesterday = new Date(today)
-    //             yesterday.setDate(today.getDate() - 1)
-    //             return formatDate(yesterday)
-            
-    //         case 'thisWeek':
-    //             const startOfWeek = new Date(today)
-    //             startOfWeek.setDate(today.getDate() - today.getDay()) // Start of current week (Sunday)
-    //             return formatDate(startOfWeek)
-            
-    //         case 'thisMonth':
-    //             const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    //             return formatDate(startOfMonth)
-            
-    //         case 'last3months':
-    //             const last3Months = new Date(today)
-    //             last3Months.setMonth(today.getMonth() - 3)
-    //             return formatDate(last3Months)
-            
-    //         case 'last6months':
-    //             const last6Months = new Date(today)
-    //             last6Months.setMonth(today.getMonth() - 6)
-    //             return formatDate(last6Months)
-            
-    //         case 'lastyear':
-    //             const lastYear = new Date(today)
-    //             lastYear.setFullYear(today.getFullYear() - 1)
-    //             return formatDate(lastYear)
-            
-    //         case 'older':
-    //             const twoYearsAgo = new Date(today)
-    //             twoYearsAgo.setFullYear(today.getFullYear() - 2)
-    //             return formatDate(twoYearsAgo)
-            
-    //         default:
-    //             return null
-    //     }
-    // }
-
-    // Add this helper function alongside convertLastActiveFilterToDate
-    const convertEnrolledDateFilterToDate = (filter: string): string | null => {
-        const today = new Date()
-        const formatDate = (date: Date) => date.toISOString().split('T')[0] // YYYY-MM-DD format
-        
-        switch (filter) {
-            case 'today':
-                return formatDate(today)
-            
-            case 'yesterday':
-                const yesterday = new Date(today)
-                yesterday.setDate(today.getDate() - 1)
-                return formatDate(yesterday)
-            
-            case 'thisWeek':
-                const startOfWeek = new Date(today)
-                startOfWeek.setDate(today.getDate() - today.getDay()) // Start of current week (Sunday)
-                return formatDate(startOfWeek)
-            
-            case 'thisMonth':
-                const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-                return formatDate(startOfMonth)
-            
-            case 'last3months':
-                const last3Months = new Date(today)
-                last3Months.setMonth(today.getMonth() - 3)
-                return formatDate(last3Months)
-            
-            case 'last6months':
-                const last6Months = new Date(today)
-                last6Months.setMonth(today.getMonth() - 6)
-                return formatDate(last6Months)
-            
-            case 'lastyear':
-                const lastYear = new Date(today)
-                lastYear.setFullYear(today.getFullYear() - 1)
-                return formatDate(lastYear)
-            
-            case 'older':
-                const twoYearsAgo = new Date(today)
-                twoYearsAgo.setFullYear(today.getFullYear() - 2)
-                return formatDate(twoYearsAgo)
-            
-            default:
-                return null
-        }
-    }
-
-    // Apply filters when they change
-    useEffect(() => {
-        fetchFilteredData()
-    }, [enrolledDateFilter, statusFilter, lastActiveFilter, attendanceFilter, fetchFilteredData])
-
-    // Update fetchSuggestionsApi to include attendance filter
-    const fetchSuggestionsApi = useCallback(async (query: string) => {
-        let url = `/bootcamp/students/${params.courseId}?searchTerm=${query}`
-        
-        // Add current filters to suggestions
-        if (enrolledDateFilter && enrolledDateFilter !== 'all') {
-            const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
-            if (enrolledDate) {
-                url += `&enrolledDate=${enrolledDate}`
-            }
-        }
-        if (statusFilter && statusFilter !== 'all') {
-            url += `&status=${statusFilter}`
-        }
-        // if (lastActiveFilter && lastActiveFilter !== 'all') {
-        //     const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-        //     if (lastActiveDate) {
-        //         url += `&lastActiveDate=${lastActiveDate}`
-        //     }
-        // }
-        if (attendanceFilter && attendanceFilter.trim() !== '') {
-            url += `&attendance=${attendanceFilter.trim()}`
-        }
-        
-        const response = await api.get(url)
-        const suggestions = (response.data.modifiedStudentInfo || []).map(
-          (student: StudentData) => ({
-            ...student,
-            id: student.userId,
-          })
-        );
-        return suggestions;
-    }, [params.courseId, enrolledDateFilter, statusFilter, lastActiveFilter, attendanceFilter]);
-
-    // Keep fetchSearchResultsApi with current offset for proper search functionality
-    const fetchSearchResultsApi = useCallback(
-        async (query: string) => {
-            let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}&searchTerm=${query}`
-            
-            // Add current filters to search
-            if (enrolledDateFilter && enrolledDateFilter !== 'all') {
-                const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
-                if (enrolledDate) {
-                    url += `&enrolledDate=${enrolledDate}`
-                }
-            }
-            if (statusFilter && statusFilter !== 'all') {
-                url += `&status=${statusFilter}`
-            }
-            // if (lastActiveFilter && lastActiveFilter !== 'all') {
-            //     const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-            //     if (lastActiveDate) {
-            //         url += `&lastActiveDate=${lastActiveDate}`
-            //     }
-            // }
-            if (attendanceFilter && attendanceFilter.trim() !== '') {
-                url += `&attendance=${attendanceFilter.trim()}`
-            }
-            
-            const response = await api.get(url)
-            setStudents(response.data.modifiedStudentInfo || [])
-            setSelectedRows([])
-            return response.data
-        },
-        [params.courseId, limit, offset, setStudents, enrolledDateFilter, statusFilter, lastActiveFilter, attendanceFilter]
-    );
+  // Fetch data with filters
+  const fetchFilteredData = useCallback(async () => {
+    try {
+      let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
       
-    const defaultFetchApi = useCallback(
-        async () => {
-            await fetchFilteredData()
-            return { modifiedStudentInfo: students }
-        },
-        [fetchFilteredData, students]
-    );
+      // Add enrolled date filter if not 'all'
+      if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+        const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
+        if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
+      }
+      
+      // Add status filter if not 'all'
+      if (statusFilter && statusFilter !== 'all') url += `&status=${statusFilter}`
 
-    // Reset selectedRows when course changes
-    useEffect(() => {
-        setSelectedRows([])
-    }, [params.courseId])
+      // Add batch filter if not 'all'
+      if (batchFilter && batchFilter !== 'all') url += `&batch_id=${batchFilter}`
 
-    const newBatchData = batchData?.map((data) => {
-        return {
-            value: data.id,
-            label: data.name,
-        }
-    })
-
-    const fetchStudentDataForBatch = useCallback(
-        async (offsetValue: number) => {
-            try {
-                const res = await api.get(
-                    `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
-                )
-                setSelectedRows([])
-                setStudents(res.data.modifiedStudentInfo)
-            } catch (error: any) {
-                if (axios.isAxiosError(error)) {
-                    if (
-                        error?.response?.data.message === 'Bootcamp not found!'
-                    ) {
-                        router.push(`/admin/courses`)
-                        toast.info({
-                            title: 'Caution',
-                            description:
-                                'The Course has been deleted by another Admin',
-                        })
-                    }
-                }
-                console.error(error)
-            }
-        },
-        [params.courseId, limit, setStudents]
-    )
-
-    const userIds = selectedRows.map((item: any) => item.userId)
-
-    // Handle enrolled date filter change
-    const handleEnrolledDateFilterChange = (value: string) => {
-        setEnrolledDateFilter(value)
-        // Reset to first page when filter changes
-        const urlParams = new URLSearchParams(window.location.search)
-        urlParams.delete('page')
-        const newUrl = `${window.location.pathname}?${urlParams.toString()}`
-        window.history.replaceState({}, '', newUrl)
+      // Add last active filter if not 'all'
+      // if (lastActiveFilter && lastActiveFilter !== 'all') {
+      // const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
+      // if (lastActiveDate) {
+      // url += `&lastActiveDate=${lastActiveDate}`
+      // }
+      // }
+      
+      // Add attendance filter if not empty
+      if (attendanceFilter && attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+      
+      // Add search if exists
+      const urlSearchParams = new URLSearchParams(window.location.search)
+      const searchQuery = urlSearchParams.get("search")
+      if (searchQuery) url += `&searchTerm=${searchQuery}`
+      
+      const response = await api.get(url)
+      setStudents(response.data.modifiedStudentInfo || [])
+      setSelectedRows([])
+      
+    } catch (error) {
+      console.error('Error fetching filtered data:', error)
+      toast.error({ title: 'Error', description: 'Failed to fetch student data' })
     }
+  }, [params.courseId, limit, offset, enrolledDateFilter, statusFilter, batchFilter, lastActiveFilter, attendanceFilter, setStudents])
 
-    // Handle status filter change
-    const handleStatusFilterChange = (value: string) => {
-        setStatusFilter(value)
-        // Reset to first page when filter changes
-        const urlParams = new URLSearchParams(window.location.search)
-        urlParams.delete('page')
-        const newUrl = `${window.location.pathname}?${urlParams.toString()}`
-        window.history.replaceState({}, '', newUrl)
+  // Update this helper function to handle new options
+  // const convertLastActiveFilterToDate = (filter: string): string | null => {
+  // const today = new Date()
+  // const formatDate = (date: Date) => date.toISOString().split('T')[0] // YYYY-MM-DD format
+  
+  // switch (filter) {
+  // case 'today':
+  // return formatDate(today)
+  
+  // case 'yesterday':
+  // const yesterday = new Date(today)
+  // yesterday.setDate(today.getDate() - 1)
+  // return formatDate(yesterday)
+  
+  // case 'thisWeek':
+  // const startOfWeek = new Date(today)
+  // startOfWeek.setDate(today.getDate() - today.getDay()) // Start of current week (Sunday)
+  // return formatDate(startOfWeek)
+  
+  // case 'thisMonth':
+  // const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+  // return formatDate(startOfMonth)
+  
+  // case 'last3months':
+  // const last3Months = new Date(today)
+  // last3Months.setMonth(today.getMonth() - 3)
+  // return formatDate(last3Months)
+  
+  // case 'last6months':
+  // const last6Months = new Date(today)
+  // last6Months.setMonth(today.getMonth() - 6)
+  // return formatDate(last6Months)
+  
+  // case 'lastyear':
+  // const lastYear = new Date(today)
+  // lastYear.setFullYear(today.getFullYear() - 1)
+  // return formatDate(lastYear)
+  
+  // case 'older':
+  // const twoYearsAgo = new Date(today)
+  // twoYearsAgo.setFullYear(today.getFullYear() - 2)
+  // return formatDate(twoYearsAgo)
+  
+  // default:
+  // return null
+  // }
+  // }
+
+  // Add this helper function alongside convertLastActiveFilterToDate
+  const convertEnrolledDateFilterToDate = (filter: string): string | null => {
+    const today = new Date()
+    const formatDate = (date: Date) => date.toISOString().split('T')[0] // YYYY-MM-DD format
+    
+    switch (filter) {
+      case 'today': return formatDate(today)
+      case 'yesterday': const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1); return formatDate(yesterday)
+      case 'thisWeek': const startOfWeek = new Date(today); startOfWeek.setDate(today.getDate() - today.getDay()); return formatDate(startOfWeek)
+      case 'thisMonth': const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1); return formatDate(startOfMonth)
+      case 'last3months': const last3Months = new Date(today); last3Months.setMonth(today.getMonth() - 3); return formatDate(last3Months)
+      case 'last6months': const last6Months = new Date(today); last6Months.setMonth(today.getMonth() - 6); return formatDate(last6Months)
+      case 'lastyear': const lastYear = new Date(today); lastYear.setFullYear(today.getFullYear() - 1); return formatDate(lastYear)
+      case 'older': const twoYearsAgo = new Date(today); twoYearsAgo.setFullYear(today.getFullYear() - 2); return formatDate(twoYearsAgo)
+      default: return null
     }
+  }
 
-    // Handle last active filter change
-    // const handleLastActiveFilterChange = (value: string) => {
-    //     setLastActiveFilter(value)
-    //     // Reset to first page when filter changes
-    //     const urlParams = new URLSearchParams(window.location.search)
-    //     urlParams.delete('page')
-    //     const newUrl = `${window.location.pathname}?${urlParams.toString()}`
-    //     window.history.replaceState({}, '', newUrl)
+  // Apply filters when they change
+  useEffect(() => { fetchFilteredData() }, [enrolledDateFilter, statusFilter, batchFilter, lastActiveFilter, attendanceFilter, fetchFilteredData])
+
+  // Update fetchSuggestionsApi to include attendance filter
+  const fetchSuggestionsApi = useCallback(async (query: string) => {
+    let url = `/bootcamp/students/${params.courseId}?searchTerm=${query}`
+    
+    // Add current filters to suggestions
+    if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+      const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
+      if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
+    }
+    if (statusFilter && statusFilter !== 'all') url += `&status=${statusFilter}`
+    if (batchFilter && batchFilter !== 'all') url += `&batch_id=${batchFilter}`
+    // if (lastActiveFilter && lastActiveFilter !== 'all') {
+    // const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
+    // if (lastActiveDate) {
+    // url += `&lastActiveDate=${lastActiveDate}`
     // }
+    // }
+    if (attendanceFilter && attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+    
+    const response = await api.get(url)
+    const suggestions = (response.data.modifiedStudentInfo || []).map((student: StudentData) => ({ ...student, id: student.userId }));
+    return suggestions;
+  }, [params.courseId, enrolledDateFilter, statusFilter, batchFilter, lastActiveFilter, attendanceFilter]);
 
-    // Add handler for attendance filter change
-    const handleAttendanceFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value
-        // Only allow numbers
-        if (value === '' || /^\d+$/.test(value)) {
-            setAttendanceFilter(value)
-            // Reset to first page when filter changes
-            const urlParams = new URLSearchParams(window.location.search)
-            urlParams.delete('page')
-            const newUrl = `${window.location.pathname}?${urlParams.toString()}`
-            window.history.replaceState({}, '', newUrl)
-        }
+  // Keep fetchSearchResultsApi with current offset for proper search functionality
+  const fetchSearchResultsApi = useCallback(async (query: string) => {
+    let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}&searchTerm=${query}`
+    
+    // Add current filters to search
+    if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+      const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
+      if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
     }
+    if (statusFilter && statusFilter !== 'all') url += `&status=${statusFilter}`
+    if (batchFilter && batchFilter !== 'all') url += `&batch_id=${batchFilter}`
+    // if (lastActiveFilter && lastActiveFilter !== 'all') {
+    // const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
+    // if (lastActiveDate) {
+    // url += `&lastActiveDate=${lastActiveDate}`
+    // }
+    // }
+    if (attendanceFilter && attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+    
+    const response = await api.get(url)
+    setStudents(response.data.modifiedStudentInfo || [])
+    setSelectedRows([])
+    return response.data
+  }, [params.courseId, limit, offset, setStudents, enrolledDateFilter, statusFilter, batchFilter, lastActiveFilter, attendanceFilter]);
+  
+  const defaultFetchApi = useCallback(async () => {
+    await fetchFilteredData()
+    return { modifiedStudentInfo: students }
+  }, [fetchFilteredData, students]);
 
-    // Add this useEffect to listen for refresh events
-    useEffect(() => {
-        const handleRefresh = () => {
-            fetchFilteredData()
+  // Reset selectedRows when course changes
+  useEffect(() => { setSelectedRows([]) }, [params.courseId])
+
+  const newBatchData = batchData?.map((data) => ({ value: data.id, label: data.name }))
+
+  const fetchStudentDataForBatch = useCallback(async (offsetValue: number) => {
+    try {
+      const res = await api.get(`/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`)
+      setSelectedRows([])
+      setStudents(res.data.modifiedStudentInfo)
+    } catch (error: any) {
+      if (axios.isAxiosError(error)) {
+        if (error?.response?.data.message === 'Bootcamp not found!') {
+          router.push(`/admin/courses`)
+          toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
         }
-        
-        window.addEventListener('refreshStudentData', handleRefresh)
-        
-        return () => {
-            window.removeEventListener('refreshStudentData', handleRefresh)
-        }
-    }, [fetchFilteredData])
+      }
+      console.error(error)
+    }
+  }, [params.courseId, limit, setStudents])
+
+  const userIds = selectedRows.map((item: any) => item.userId)
+
+  // Handle enrolled date filter change
+  const handleEnrolledDateFilterChange = (value: string) => {
+    setEnrolledDateFilter(value)
+    // Reset to first page when filter changes
+    const urlParams = new URLSearchParams(window.location.search)
+    urlParams.delete('page')
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+    window.history.replaceState({}, '', newUrl)
+  }
+
+  // Handle status filter change
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value)
+    // Reset to first page when filter changes
+    const urlParams = new URLSearchParams(window.location.search)
+    urlParams.delete('page')
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+    window.history.replaceState({}, '', newUrl)
+  }
+
+  // add handler for batch filter change
+  const handleBatchFilterChange = (value: string) => {
+    setBatchFilter(value)
+    const urlParams = new URLSearchParams(window.location.search)
+    // persist selected batch in URL under batch_id so share/bookmark works
+    if (value && value !== 'all') urlParams.set('batch_id', value)
+    else urlParams.delete('batch_id')
+    urlParams.delete('page')
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+    window.history.replaceState({}, '', newUrl)
+  }
+
+  // Handle last active filter change
+  // const handleLastActiveFilterChange = (value: string) => {
+  // setLastActiveFilter(value)
+  // // Reset to first page when filter changes
+  // const urlParams = new URLSearchParams(window.location.search)
+  // urlParams.delete('page')
+  // const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+  // window.history.replaceState({}, '', newUrl)
+  // }
+
+  // Add handler for attendance filter change
+  const handleAttendanceFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    // Only allow numbers
+    if (value === '' || /^\d+$/.test(value)) {
+      setAttendanceFilter(value)
+      // Reset to first page when filter changes
+      const urlParams = new URLSearchParams(window.location.search)
+      urlParams.delete('page')
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`
+      window.history.replaceState({}, '', newUrl)
+    }
+  }
+
+  // Add this useEffect to listen for refresh events
+  useEffect(() => {
+    const handleRefresh = () => { fetchFilteredData() }
+    window.addEventListener('refreshStudentData', handleRefresh)
+    return () => { window.removeEventListener('refreshStudentData', handleRefresh) }
+  }, [fetchFilteredData])
 
     // Normal table view (no conditional rendering needed)
     return (
@@ -517,22 +445,23 @@ const StudentsPage = ({ params }: { params: any }) => {
                     )}
                 </div>
 
-                {/* Filters Row (on mobile both in one row) */}
-                <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 md:gap-y-0 mt-10">
-                    {/* Status Filter */}
-                    <div className="w-full sm:w-[160px] mt-2">
-                        <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                            <SelectTrigger className="text-sm w-full">
-                                <SelectValue placeholder="All Status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">All Status</SelectItem>
-                                <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="dropout">Dropout</SelectItem>
-                                <SelectItem value="graduate">Graduate</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+        {/* Filters Row (on mobile both in one row) */}
+        <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 md:gap-y-0 mt-10">
+          {/* Status Filter */}
+          <div className="w-full sm:w-[160px] mt-2">
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+              <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Status" /></SelectTrigger>
+              <SelectContent><SelectItem value="all">All Status</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="dropout">Dropout</SelectItem><SelectItem value="graduate">Graduate</SelectItem></SelectContent>
+            </Select>
+          </div>
+
+          {/* Batch Filter (placed after Status) */}
+          <div className="w-full sm:w-[160px] mt-2">
+            <Select value={batchFilter} onValueChange={handleBatchFilterChange}>
+              <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Batches" /></SelectTrigger>
+              <SelectContent><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
+            </Select>
+          </div>
 
                     {/* Enrolled Date filter */}
                     <div className="w-full sm:w-[160px] mt-2">

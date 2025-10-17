@@ -19,6 +19,7 @@ import axios from 'axios'
 import {
     CurriculumItem,
     ModuleData,
+    PermissionsType,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType'
 import { Plus } from 'lucide-react'
 
@@ -32,6 +33,12 @@ function Page() {
         CurriculumItem[]
     >([])
     const { courseData } = getCourseData()
+    const [permissions, setPermissions] = useState<PermissionsType>({
+        createModule: false,
+        deleteModule: false,
+        editModule: false,
+        viewModule: false,
+    })
     const [isLoading, setIsLoading] = useState(false)
     const [typeId, setTypeId] = useState(1)
     const [loading, setLoading] = useState(true)
@@ -74,7 +81,6 @@ function Page() {
 
     const containerRef = useRef<HTMLDivElement>(null)
 
-    
     const handleTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { value } = event.target
         setTypeId(value === 'learning-material' ? 1 : 2)
@@ -352,6 +358,7 @@ function Page() {
                     isStarted: false,
                 })
             )
+            setPermissions(response?.data?.permissions)
             setCurriculum(modulesWithStartedFlag)
             setOriginalCurriculum([...modulesWithStartedFlag])
             setLoading(false)
@@ -587,29 +594,31 @@ function Page() {
                             Course Curriculum
                         </h2>
                         <div>
-                            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                                <DialogTrigger asChild>
-                                    <Button className="text-white bg-primary">
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Module / Project
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <NewModuleDialog
-                                    moduleData={moduleData}
-                                    timeData={timeData}
-                                    createModule={createModule}
-                                    handleModuleChange={handleModuleChange}
-                                    handleTimeAllotedChange={
-                                        handleTimeAllotedChange
-                                    }
-                                    handleTypeChange={handleTypeChange}
-                                    typeId={typeId}
-                                    isOpen={isOpen}
-                                    setIsLoading={setIsLoading}
-                                    isLoading={isLoading}
-                                />
-                            </Dialog>
+                            {permissions.createModule && (
+                                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button className="text-white bg-primary">
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Module / Project
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogOverlay />
+                                    <NewModuleDialog
+                                        moduleData={moduleData}
+                                        timeData={timeData}
+                                        createModule={createModule}
+                                        handleModuleChange={handleModuleChange}
+                                        handleTimeAllotedChange={
+                                            handleTimeAllotedChange
+                                        }
+                                        handleTypeChange={handleTypeChange}
+                                        typeId={typeId}
+                                        isOpen={isOpen}
+                                        setIsLoading={setIsLoading}
+                                        isLoading={isLoading}
+                                    />
+                                </Dialog>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -677,6 +686,7 @@ function Page() {
                                     showBorderFlash={
                                         flashingModuleId === item.id
                                     }
+                                    permissions={permissions}
                                 />
                             ))}
                         </Reorder.Group>
@@ -692,28 +702,31 @@ function Page() {
                                 Create new modules for the curriculum on Strapi
                                 CMS
                             </p>
-                            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                                <DialogTrigger asChild>
-                                    <Button className="text-white bg-success-dark opacity-75">
-                                        Add Module
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <NewModuleDialog
-                                    moduleData={moduleData}
-                                    createModule={createModule}
-                                    handleModuleChange={handleModuleChange}
-                                    handleTimeAllotedChange={
-                                        handleTimeAllotedChange
-                                    }
-                                    timeData={timeData}
-                                    handleTypeChange={handleTypeChange}
-                                    typeId={typeId}
-                                    isOpen={isOpen}
-                                    setIsLoading={setIsLoading}
-                                    isLoading={isLoading}
-                                />
-                            </Dialog>
+                            {permissions.createModule && (
+                                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button className="text-white bg-primary">
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add Module / Project
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogOverlay />
+                                    <NewModuleDialog
+                                        moduleData={moduleData}
+                                        createModule={createModule}
+                                        handleModuleChange={handleModuleChange}
+                                        handleTimeAllotedChange={
+                                            handleTimeAllotedChange
+                                        }
+                                        timeData={timeData}
+                                        handleTypeChange={handleTypeChange}
+                                        typeId={typeId}
+                                        isOpen={isOpen}
+                                        setIsLoading={setIsLoading}
+                                        isLoading={isLoading}
+                                    />
+                                </Dialog>
+                            )}
                         </div>
                     )}
                 </div>

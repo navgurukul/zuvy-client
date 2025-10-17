@@ -28,6 +28,7 @@ const SettingsPage: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
+    const [isSearching, setIsSearching] = useState(false) 
     
     // Set the first role as selected once roles are loaded
     useEffect(() => {
@@ -85,17 +86,11 @@ const SettingsPage: React.FC = () => {
     }
 
     const handleEdit = (userId: number) => {
-        // Open edit modal or navigate to edit page
-        setEditingUserId(userId) 
-        setIsEditMode(true)
+        // Pehle modal ko open karo, fir editingUserId set karo
         setIsAddModalOpen(true)
+        setIsEditMode(true)
+        setEditingUserId(userId) 
     }
-
-    useEffect(() => {
-        if (editingUserId && user && !userLoading && isEditMode) {
-            setIsAddModalOpen(true)
-        }
-    }, [editingUserId, user, userLoading, isEditMode])
 
     const handleDelete = async (userId: number) => {
 
@@ -113,8 +108,14 @@ const SettingsPage: React.FC = () => {
         handleDelete
     )
 
+    const handleCloseModal = () => {
+        setIsAddModalOpen(false)
+        setEditingUserId(null)
+        setIsEditMode(false)
+    }
+
     return (
-        <div className="py-2 bg-white min-h-screen">
+        <div className=" bg-white min-h-screen p-6">
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-2">
                 <Button
@@ -169,14 +170,16 @@ const SettingsPage: React.FC = () => {
                                         Add User
                                     </Button>
                                 </DialogTrigger>
-                                 {isAddModalOpen && (
+                                {isAddModalOpen && (
                                     <AddUserModal 
                                         isEditMode={isEditMode}
                                         user={user}
+                                        isOpen={isAddModalOpen}
                                         refetchUsers={() => {
                                             refetchUsers(offset)
-                                            setIsAddModalOpen(false)
+                                            handleCloseModal()
                                         }} 
+                                        onClose={handleCloseModal}
                                     />
                                 )}
                             </Dialog>
@@ -205,21 +208,20 @@ const SettingsPage: React.FC = () => {
                                 <UserManagementTable
                                     columns={columns}
                                     data={users}
+                                    onSearchChange={setIsSearching}
                                 />
-
-                                {/* Pagination */}
-                                <DataTablePagination
-                                    totalStudents={totalRows}
-                                    lastPage={totalPages}
-                                    pages={totalPages}
-                                    // fetchStudentData={handlePaginationChange}
-                                    fetchStudentData={(
-                                            newOffset: number
-                                        ) => {
+                                {!isSearching && (
+                                    <DataTablePagination
+                                        totalStudents={totalRows}
+                                        lastPage={totalPages}
+                                        pages={totalPages}
+                                        // fetchStudentData={handlePaginationChange}
+                                        fetchStudentData={(newOffset: number) => {
                                             setOffset(newOffset)
-                                            refetchUsers(newOffset) // instead of getBootcamp(newOffset)
+                                            refetchUsers(newOffset)
                                         }}
-                                />
+                                    />
+                                )}
                             </>
                         )}
                     </div>

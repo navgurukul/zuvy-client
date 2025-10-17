@@ -255,7 +255,6 @@ const StudentDashboard = () => {
                             .map((item) => {
                             const eventType = mapEventType(item.type);
                             const liveClassStatus = item.status;
-                            console.log(item)
                             return (
                               <CarouselItem key={item.id} className="pl-2 md:basis-1/3  ">
                                 <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>

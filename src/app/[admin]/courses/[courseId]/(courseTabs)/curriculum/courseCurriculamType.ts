@@ -22,3 +22,10 @@ export interface ModuleData {
     timeAlloted: number
     typeId: number
 }
+
+export interface PermissionsType {
+    createModule: boolean
+    deleteModule: boolean
+    editModule: boolean
+    viewModule: boolean
+}

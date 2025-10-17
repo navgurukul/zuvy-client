@@ -42,7 +42,6 @@ const SingleStudentForm: React.FC<SingleStudentFormProps> = ({
             if (showBatchSelection) {
                 try {
                     const response = await api.get(`/bootcamp/batches/${courseId}`)
-                    console.log('Fetched batches:', response.data)
                     setLocalBatchData(response.data.data || [])
                 } catch (error) {
                     console.error('Error fetching batches:', error)

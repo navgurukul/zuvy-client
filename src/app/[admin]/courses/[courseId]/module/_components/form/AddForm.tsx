@@ -318,7 +318,6 @@ const AddForm: React.FC<AddFormProps> = ({
                     {}
                 ),
             }))
-        console.log('editFormQuestionDto', editFormQuestionDto)
 
         let payload = {}
         if (formQuestionDto.length > 0 && editFormQuestionDto.length > 0) {

@@ -69,10 +69,10 @@ export const createColumns = (
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="p-1 h-7 w-7 hover:bg-gray-100"
+                        className="p-1 h-7 w-7 hover:bg-primary hover:text-white"
                         onClick={() => onEdit(selectedUser.userId)}
                     >
-                        <Edit className="w-4 h-4 text-gray-700" />
+                        <Edit className="w-4 h-4" />
                     </Button>
 
                     {/* <Button
@@ -85,8 +85,9 @@ export const createColumns = (
                     </Button> */}
                     <DeleteUser 
                         userId={selectedUser.userId}
-                        title="Are you absolutely sure?"
-                        description="This action cannot be undone. This will permanently remove the student from the bootcamp"
+                        title="Delete user?"
+                        description="This action cannot be undone. This will permanently delete this user."
+                        onDeleteSuccess={(userId) => onDelete(userId)}
                     />
                 </div>
             )

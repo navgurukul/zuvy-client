@@ -132,7 +132,7 @@ export const getCourseData = create<StoreCourseData>((set) => ({
                 if (error?.response?.data.message === 'Bootcamp not found!')
                     return false
             } else {
-                console.log('Unknown error', error)
+                console.error('Unknown error', error)
             }
             return true
         }
