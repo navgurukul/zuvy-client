@@ -72,12 +72,11 @@ const CurricullumCard = (props: CurricullamCardProps) => {
     const handleModuleRoute = () => {
         if (typeId === 1) {
             router.push(
-                `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+                // `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+                `module/${moduleId}/chapters/${chapterId}`
             )
         } else if (typeId === 2) {
-            router.push(
-                `/admin/courses/${courseId}/module/${moduleId}/project/${projectId}`
-            )
+            router.push(`module/${moduleId}/project/${projectId}`)
         }
     }
 

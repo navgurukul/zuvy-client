@@ -127,7 +127,7 @@ const SettingsPage: React.FC = () => {
     )
 
     return (
-        <div className="py-2 bg-white min-h-screen">
+        <div className="py-8 px-8 bg-white min-h-screen">
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-2">
                 <Button
@@ -164,7 +164,7 @@ const SettingsPage: React.FC = () => {
                     /> */}
 
                     {/* Users Management Section */}
-                    <div className="py-8">
+                    <div className="py-4">
                         <div className="flex justify-between items-center mb-4">
                             <div>
                                 <h2 className="text-lg font-semibold text-gray-900 text-start">

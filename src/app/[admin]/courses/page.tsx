@@ -358,7 +358,7 @@ const Courses: React.FC = () => {
             setNewCourseDescription('')
             await refetchBootcamps(offset) // same page refresh
             await refetchAllCourses() // refresh suggestions
-            router.push(`/admin/courses/${data.bootcamp.id}/details`)
+            router.push(`courses/${data.bootcamp.id}/details`)
         } catch (error: any) {
             toast.error({
                 title: error?.data?.status || 'Error',

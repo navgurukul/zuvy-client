@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Edit, Trash2 } from 'lucide-react'
 import DeleteUser from './_components/DeleteUser'
 import { ChangeUserRole } from './_components/ChangeUserRole'
+import { formatDate } from '@/lib/utils'
 
 export interface User {
+    createdAt: any
     id: number
     roleId: number
     userId: number
@@ -51,19 +53,22 @@ export const createColumns = (
             return <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} roleId={roleId} />
         },
     },
-    // {
-    //     accessorKey: 'dateAdded',
-    //     header: 'Date Added',
-    //     cell: ({ row }) => (
-    //         <div className="text-gray-600">{row.getValue('dateAdded')}</div>
-    //     ),
-    // },
+    {
+        accessorKey: 'dateAdded',
+        header: 'Date Added',
+        cell: ({ row }) => {
+             const createdAt = row.original.createdAt
+            return (
+                <div className="text-gray-600">{formatDate(createdAt)}</div>
+            )
+        },
+    },
     {
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
             const selectedUser = row.original
-            // console.log('selectedUser', selectedUser)
+            console.log('row', row)
             return (
                 <div className="flex gap-1">
                     <Button
@@ -74,15 +79,6 @@ export const createColumns = (
                     >
                         <Edit className="w-4 h-4" />
                     </Button>
-
-                    {/* <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-1 h-7 w-7 hover:bg-red-50"
-                        onClick={() => onDelete(selectedUser.userId)}
-                    >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                    </Button> */}
                     <DeleteUser 
                         userId={selectedUser.userId}
                         title="Delete user?"
