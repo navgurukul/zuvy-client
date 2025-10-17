@@ -32,9 +32,12 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/_components/form/ModuleFormType'
 
 const formSchema = z.object({
-    title: z.string().min(2, {
-        message: 'Video Title must be at least 2 characters.',
-    }),
+    title: z
+        .string()
+        .min(2, {
+            message: 'Form Title must be at least 2 characters.',
+        })
+        .max(50, { message: 'You can enter up to 50 characters only.' }),
 
     description: z
         .string()
@@ -44,7 +47,7 @@ const formSchema = z.object({
         .refine((val) => val.trim().length >= 4, {
             message: 'Description must be at least 4 characters.',
         }),
-        
+
     questions: z.array(
         z.object({
             id: z.string().optional() || z.number().optional(),
@@ -74,6 +77,7 @@ const AddForm: React.FC<AddFormProps> = ({
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        mode: 'onChange',
         defaultValues: {
             title: content?.title ?? '',
             description: content?.description ?? '',
@@ -209,59 +213,69 @@ const AddForm: React.FC<AddFormProps> = ({
         form.setValue('questions', updatedQuestions)
     }
 
-     // ✅ CUSTOM VALIDATION FUNCTION 
+    // ✅ CUSTOM VALIDATION FUNCTION
     const validateQuestionsWithOptions = (questions: any[]) => {
         const errors: { index: number; message: string }[] = []
-        
+
         questions.forEach((question, index) => {
-            // Multiple Choice (typeId: 1) or Checkbox (typeId: 2) 
-            const requiresOptions = question.typeId === 1 || question.typeId === 2
-            
+            // Multiple Choice (typeId: 1) or Checkbox (typeId: 2)
+            const requiresOptions =
+                question.typeId === 1 || question.typeId === 2
+
             if (requiresOptions) {
-                const hasValidOptions = 
-                    question.options && 
-                    question.options.length > 0 && 
-                    question.options.some((opt: string) => opt.trim().length > 0)
-                
+                const hasValidOptions =
+                    question.options &&
+                    question.options.length > 0 &&
+                    question.options.some(
+                        (opt: string) => opt.trim().length > 0
+                    )
+
                 if (!hasValidOptions) {
                     errors.push({
                         index,
-                        message: `Question ${index + 1}: Please add at least one option for Multiple Choice or Checkbox questions.`
+                        message: `Question ${
+                            index + 1
+                        }: Please add at least one option for Multiple Choice or Checkbox questions.`,
                     })
-                    
+
                     // Set error directly in form
                     form.setError(`questions.${index}.options`, {
                         type: 'manual',
-                        message: 'Please add at least one option for this question.'
+                        message:
+                            'Please add at least one option for this question.',
                     })
                 }
             }
         })
-        
+
         return errors
     }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        // ✅ VALIDATION CHECK 
+        // ✅ VALIDATION CHECK
         const validationErrors = validateQuestionsWithOptions(values.questions)
-        
+
         if (validationErrors.length > 0) {
-            // toast notification 
+            // toast notification
             toast({
                 variant: 'destructive',
                 title: 'Validation Error',
                 description: validationErrors[0].message,
             })
-            
+
             // Scroll to first error (optional)
             const firstErrorIndex = validationErrors[0].index
-            const errorElement = document.querySelector(`[data-question-index="${firstErrorIndex}"]`)
-            errorElement?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-            
-            return 
+            const errorElement = document.querySelector(
+                `[data-question-index="${firstErrorIndex}"]`
+            )
+            errorElement?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+            })
+
+            return
         }
 
-        setIsSubmitting(true)
         const { title, description, questions } = values
 
         if (!questions || questions.length === 0) {
@@ -271,8 +285,10 @@ const AddForm: React.FC<AddFormProps> = ({
                 description:
                     'Please add at least one question before creating the form.',
             })
+            setIsSubmitting(false)
             return
         }
+        setIsSubmitting(true)
 
         const formQuestionDto = questions
             .filter((item) => item.id && item.id.startsWith('new-'))
@@ -350,8 +366,8 @@ const AddForm: React.FC<AddFormProps> = ({
                     error.response?.data?.message || 'An error occurred.',
             })
         } finally {
-        setIsSubmitting(false) // Reset loading state
-    }
+            setIsSubmitting(false) // Reset loading state
+        }
     }
 
     function previewForm() {
@@ -433,21 +449,8 @@ const AddForm: React.FC<AddFormProps> = ({
                                                 required
                                                 {...field}
                                                 onChange={(e) => {
-                                                    const newValue =
-                                                        e.target.value
-                                                    if (newValue.length>50) {
-                                                           toast.error({
-                                                            title: 'Character Limit Reached',
-                                                            description:
-                                                                'You can enter up to 50 characters only.',
-                                                        })
-                                                    } else {
-                                                        setTitles(newValue)
-                                                        field.onChange(newValue)
-                                                     
-                                                    }
-                                                    // setTitles(e.target.value)
-                                                    // field.onChange(e)
+                                                    setTitles(e.target.value)
+                                                    field.onChange(e)
                                                 }}
                                                 placeholder="Untitled Form"
                                                 className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
@@ -507,7 +510,10 @@ const AddForm: React.FC<AddFormProps> = ({
                         </div>
 
                         {questions.map((item, index) => (
-                            <div key={item.id || `form-section-${index}`} data-question-index={index}>
+                            <div
+                                key={item.id || `form-section-${index}`}
+                                data-question-index={index}
+                            >
                                 <FormSection
                                     item={item}
                                     index={index}
@@ -516,21 +522,29 @@ const AddForm: React.FC<AddFormProps> = ({
                                     formData={questions}
                                 />
                                 {/* ✅ ERROR MESSAGE DISPLAY */}
-                                {form.formState.errors.questions?.[index]?.options && (
+                                {form.formState.errors.questions?.[index]
+                                    ?.options && (
                                     <p className="text-sm text-red-500 mt-2">
-                                        {form.formState.errors.questions[index]?.options?.message}
+                                        {
+                                            form.formState.errors.questions[
+                                                index
+                                            ]?.options?.message
+                                        }
                                     </p>
                                 )}
                             </div>
                         ))}
 
                         <div className="flex justify-start">
-                            <Button 
-                              type="submit" 
-                              disabled={isSubmitting}
-                              aria-label="Save form changes"
-                              aria-busy={isSubmitting}
-                              className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90">
+                            <Button
+                                type="submit"
+                                disabled={
+                                    !form.formState.isValid || isSubmitting
+                                }
+                                aria-label="Save form changes"
+                                aria-busy={isSubmitting}
+                                className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90"
+                            >
                                 {isSubmitting ? 'Saving...' : 'Save'}
                             </Button>
                         </div>
