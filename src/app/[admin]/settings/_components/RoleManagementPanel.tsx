@@ -406,7 +406,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             <div className="grid lg:grid-cols-3 gap-6">
                 {/* Left Column - Role Actions */}
                 <div className="col-span-1">
-                    <div className="bg-white rounded-lg border border-gray-200 p-4 h-[calc(100vh-320px)]  flex flex-col">
+                    <div className="bg-white rounded-lg border border-gray-200 p-4 h-[calc(100vh-20rem)]  flex flex-col">
 
                         {/* Role Actions Title */}
                         <h4 className="font-semibold text-[1rem] text-start text-gray-900 mb-4 capitalize">
@@ -457,7 +457,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
 
                 {/* Right Column - Permissions */}
                 <div className="col-span-2">
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 h-[calc(100vh-320px)]  flex flex-col">
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 h-[calc(100vh-20rem)]  flex flex-col">
                         {/* Permissions Header */}
                         <div className="flex justify-between items-center mb-4">
                             <div>
