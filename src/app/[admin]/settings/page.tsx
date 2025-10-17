@@ -28,6 +28,7 @@ const SettingsPage: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
+    const [isSearching, setIsSearching] = useState(false) 
     
     // Set the first role as selected once roles are loaded
     useEffect(() => {
@@ -207,21 +208,20 @@ const SettingsPage: React.FC = () => {
                                 <UserManagementTable
                                     columns={columns}
                                     data={users}
+                                    onSearchChange={setIsSearching}
                                 />
-
-                                {/* Pagination */}
-                                <DataTablePagination
-                                    totalStudents={totalRows}
-                                    lastPage={totalPages}
-                                    pages={totalPages}
-                                    // fetchStudentData={handlePaginationChange}
-                                    fetchStudentData={(
-                                            newOffset: number
-                                        ) => {
+                                {!isSearching && (
+                                    <DataTablePagination
+                                        totalStudents={totalRows}
+                                        lastPage={totalPages}
+                                        pages={totalPages}
+                                        // fetchStudentData={handlePaginationChange}
+                                        fetchStudentData={(newOffset: number) => {
                                             setOffset(newOffset)
-                                            refetchUsers(newOffset) // instead of getBootcamp(newOffset)
+                                            refetchUsers(newOffset)
                                         }}
-                                />
+                                    />
+                                )}
                             </>
                         )}
                     </div>
