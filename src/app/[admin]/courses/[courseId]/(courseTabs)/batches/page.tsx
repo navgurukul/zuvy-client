@@ -1296,7 +1296,7 @@ const Page = ({ params }: { params: ParamsType }) => {
 
     if (courseData?.id) {
         return (
-            <div className="w-full max-w-none space-y-6 pb-8">
+            <div className="w-full max-w-none pb-8">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -1309,7 +1309,24 @@ const Page = ({ params }: { params: ParamsType }) => {
                     </div>
                     {renderModal(false)}
                 </div>
-
+                <div className="flex flex-col lg:flex-row justify-between items-center mb-8">
+                <div className="relative w-full lg:max-w-[500px]">
+                            <SearchBox
+                                placeholder="Search Classes"
+                                fetchSuggestionsApi={fetchSuggestionsApi}
+                                fetchSearchResultsApi={fetchSearchResultsApi}
+                                defaultFetchApi={defaultFetchApi}
+                                getSuggestionLabel={(s) => (
+                                    <div>
+                                        <div className="font-medium">
+                                            {s.name}
+                                        </div>
+                                    </div>
+                                )}
+                                inputWidth="relative lg:w-[400px] w-full"
+                            />
+                        </div>
+                    </div>
                 {loading ? (
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
