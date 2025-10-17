@@ -331,6 +331,7 @@ const Page = ({ params }: { params: PageProps }) => {
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleDelete}
                 loading={isDeleting}
+                courseName={courseData?.name || ''}
             />
         </div>
     )
