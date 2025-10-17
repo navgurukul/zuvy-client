@@ -39,8 +39,9 @@ const Dropzone = ({
             setFile(pdfFile)
             const tempUrl = URL.createObjectURL(pdfFile)
             setPreviewPdfLink(tempUrl)
+             setDisableButton(false)
             setIsPdfUploaded(false)
-            setDisableButton(true)
+           
         } else {
             return toast.error({
                 title: 'Error',
@@ -63,6 +64,7 @@ const Dropzone = ({
     function onConfirm() {
         onDeletePdfhandler()
         removeFile()
+        setDisableButton(true)
     }
 
     function getCleanFileNameFromUrl(url: string) {

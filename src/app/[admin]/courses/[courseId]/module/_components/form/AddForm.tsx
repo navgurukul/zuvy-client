@@ -276,7 +276,6 @@ const AddForm: React.FC<AddFormProps> = ({
             return
         }
 
-        setIsSubmitting(true)
         const { title, description, questions } = values
 
         if (!questions || questions.length === 0) {
@@ -286,8 +285,10 @@ const AddForm: React.FC<AddFormProps> = ({
                 description:
                     'Please add at least one question before creating the form.',
             })
+            setIsSubmitting(false)
             return
         }
+        setIsSubmitting(true)
 
         const formQuestionDto = questions
             .filter((item) => item.id && item.id.startsWith('new-'))
@@ -536,14 +537,6 @@ const AddForm: React.FC<AddFormProps> = ({
                         ))}
 
                         <div className="flex justify-start">
-                            {/* <Button 
-                              type="submit" 
-                              disabled={isSubmitting}
-                              aria-label="Save form changes"
-                              aria-busy={isSubmitting}
-                              className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90">
-                                {isSubmitting ? 'Saving...' : 'Save'}
-                            </Button> */}
                             <Button
                                 type="submit"
                                 disabled={
