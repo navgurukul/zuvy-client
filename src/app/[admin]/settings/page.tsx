@@ -115,7 +115,7 @@ const SettingsPage: React.FC = () => {
     }
 
     return (
-        <div className="py-2 bg-white min-h-screen">
+        <div className=" bg-white min-h-screen p-6">
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-2">
                 <Button
