@@ -245,7 +245,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
             {/* Form Body */}
             {!isFetchingFreshData && (
-                <div className="space-y-6">
+                <div className="space-y-6 h-[400px] overflow-y-auto pr-2 pl-2">
                     {/* Name & Email */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="text-left">
