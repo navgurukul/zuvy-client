@@ -11,6 +11,7 @@ import { useAssignPermissions } from '@/hooks/useAssignPermissions'
 import { COLOR_PALETTE } from '@/lib/utils'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import AddRoleModal from './AddRoleModal'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface RoleAction {
     id: number
@@ -29,6 +30,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     selectedRole,
     onRoleChange,
 }) => {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const { roles, refetchRoles } = useRoles()
+    const { assignPermissions, loading: assigning } = useAssignPermissions()
     const [selectedAction, setSelectedAction] = useState<number>(12)
     const [roleId, setRoleId] = useState<number>(1)
     const [selectedPermissions, setSelectedPermissions] = useState<Record<number, boolean>>({})
@@ -125,13 +130,27 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         }
     }
 
-    const { roles, refetchRoles } = useRoles()
-    const { assignPermissions, loading: assigning } = useAssignPermissions()
+    // Initialize role from URL on mount
+    useEffect(() => {
+        const roleFromUrl = searchParams.get('role');
+        if (roleFromUrl && roles.length > 0) {
+            const matchingRole = roles.find(role => role.name === roleFromUrl);
+            if (matchingRole) {
+                onRoleChange(matchingRole.name);
+                setRoleId(matchingRole.id);
+            }
+        }
+    }, [roles]);
 
     // Select first role by default when roles are loaded
     useEffect(() => {
         if (roles.length > 0 && !selectedRole) {
-            onRoleChange(roles[0].name);
+            // onRoleChange(roles[0].name);
+            const roleFromUrl = searchParams.get('role');
+            if (!roleFromUrl) {
+                onRoleChange(roles[0].name);
+                setRoleId(roles[0].id);
+            }
         }
     }, [roles, selectedRole, onRoleChange]);
 
@@ -191,6 +210,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 onClick={() => {
                                     onRoleChange(role.name)
                                     setRoleId(role.id)
+                                    // router.push(`?role=${role.name}`, { scroll: false });
+                                    const newParams = new URLSearchParams(searchParams);
+                                    newParams.set('role', role.name);
+                                    router.push(`?${newParams.toString()}`, { scroll: false });
                                 }}
                                 className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
                                     ? 'border-blue-500 text-gray-900 hover:bg-transparent'
