@@ -50,7 +50,9 @@ const formSchema = z
     .object({
         sessionTitle: z.string().min(2, {
             message: 'Session Title must be at least 2 characters.',
-        }),
+        })
+        .max(50, { message: 'You can enter up to 50 characters only.' }),
+
         description: z.string().optional(),
         startDate: z.date({
             required_error: 'A start date is required.',
@@ -317,18 +319,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         disabled={isLoading}
                                         {...field}
                                         onChange={(e) => {
-                                            const newValue = e.target.value
-                                            if (newValue.length>50) {
-                                                  toast.error({
-                                                    title: 'Character Limit Reached',
-                                                    description:
-                                                        'You can enter up to 50 characters only',
-                                                })
-                                               
-                                            } else {
-                                                field.onChange(newValue)
-                                              
-                                            }
+                                             field.onChange(e.target.value)
                                         }}
                                     />
                                 </FormControl>

@@ -70,7 +70,9 @@ const AddAssignent = ({
     // misc
 
     const formSchema = z.object({
-        title: z.string(),
+        title: z
+            .string()
+            .max(50, { message: 'You can enter up to 50 characters only.' }),
         startDate: z.date({
             required_error: 'A start date is required.',
         }),
@@ -121,6 +123,9 @@ const AddAssignent = ({
         },
         mode: 'onChange',
     })
+
+    const { handleSubmit, control, formState } = form
+    const { isValid } = formState
 
     const isEditorContentEmpty = (content?: EditorContent) => {
         if (!content || !content.doc || !content.doc.content) return true
@@ -529,62 +534,51 @@ const AddAssignent = ({
     }
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">
-        <div className="px-5">
-            <>
-                <div className="w-full ">
-                    <Form {...form}>
-                        <form
-                            id="myForm"
-                            onSubmit={form.handleSubmit(editAssignmentContent)}
-                            className=" "
-                        >
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col gap-0">
-                                        <FormControl>
-                                            <>
-                                                <Input
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        const newValue =
-                                                            e.target.value
-                                                        if (newValue.length>50)
-                                                        { 
-                                                             toast.error({
-                                                                title: 'Character Limit Reached',
-                                                                description:
-                                                                    'You can enter up to 50 characters only.',
-                                                            })  
-                                                        } else {
-                                                             setTitles(newValue)
-                                                            field.onChange(
-                                                                newValue
-                                                            )
-                                                           
-                                                        }
-                                                        // setTitles(
-                                                        //     e.target.value
-                                                        // )
-                                                        // field.onChange(e)
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.preventDefault()
-                                                        }
-                                                    }}
-                                                    placeholder="Untitled Assignment"
-                                                    className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                    // autoFocus
-                                                />
-                                            </>
-                                        </FormControl>
-                                        <FormMessage className="h-5" />
-                                    </FormItem>
+            <div className="px-5">
+                <>
+                    <div className="w-full ">
+                        <Form {...form}>
+                            <form
+                                id="myForm"
+                                onSubmit={form.handleSubmit(
+                                    editAssignmentContent
                                 )}
-                            />
-                            {/* {!titles && ( // Show pencil icon only when the title is empty
+                                className=" "
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col gap-0">
+                                            <FormControl>
+                                                <>
+                                                    <Input
+                                                        {...field}
+                                                        onChange={(e) => {
+                                                            setTitles(
+                                                                e.target.value
+                                                            )
+                                                            field.onChange(e)
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            if (
+                                                                e.key ===
+                                                                'Enter'
+                                                            ) {
+                                                                e.preventDefault()
+                                                            }
+                                                        }}
+                                                        placeholder="Untitled Assignment"
+                                                        className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                        // autoFocus
+                                                    />
+                                                </>
+                                            </FormControl>
+                                            <FormMessage className="h-5" />
+                                        </FormItem>
+                                    )}
+                                />
+                                {/* {!titles && ( // Show pencil icon only when the title is empty
                                 <Pencil
                                     fill="true"
                                     fillOpacity={0.4}
@@ -592,7 +586,7 @@ const AddAssignent = ({
                                     className="absolute text-gray-100 pointer-events-none mt-1 right-5"
                                 />
                             )} */}
-                            {/* <div className="flex items-center justify-between mr-2">
+                                {/* <div className="flex items-center justify-between mr-2">
                                     {defaultValue === 'editor' ? (
                                         <div
                                             id="previewAssignment"
@@ -620,91 +614,95 @@ const AddAssignent = ({
                                         </div>
                                     )}
                             </div> */}
-                            <div className="flex items-center gap-2">
-                                <PencilLine
-                                    size={15}
-                                    className="transition-colors"
-                                />
-                                <p className="text-muted-foreground">
-                                    Assignment
-                                </p>
-                            </div>
-                            {/* <Form {...form}>
+                                <div className="flex items-center gap-2">
+                                    <PencilLine
+                                        size={15}
+                                        className="transition-colors"
+                                    />
+                                    <p className="text-muted-foreground">
+                                        Assignment
+                                    </p>
+                                </div>
+                                {/* <Form {...form}>
                                 <form
                                     id="myForm"
                                     onSubmit={form.handleSubmit(editAssignmentContent)}
                                     className=" "
                                 > */}
-                            <div className="">
-                                <RadioGroup
-                                    className="flex items-center gap-x-6 mt-4"
-                                    onValueChange={(value) =>
-                                        setDefaultValue(value)
-                                    }
-                                    value={defaultValue}
-                                >
-                                    <TooltipProvider>
-                                        <div className="flex gap-x-2">
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <RadioGroupItem
-                                                        value="editor"
-                                                        disabled={!!pdfLink}
-                                                        id="r1"
-                                                        className="mt-1 text-black border-black"
-                                                    />
-                                                </TooltipTrigger>
-                                                {pdfLink && (
-                                                    <TooltipContent side="top">
-                                                        You have uploaded a PDF,
-                                                        so the editor is now
-                                                        disabled
-                                                    </TooltipContent>
-                                                )}
-                                            </Tooltip>
-                                            <Label
-                                                htmlFor="r1"
-                                                className="font-light text-md text-black"
-                                            >
-                                                Editor
-                                            </Label>
-                                        </div>
+                                <div className="">
+                                    <RadioGroup
+                                        className="flex items-center gap-x-6 mt-4"
+                                        onValueChange={(value) =>
+                                            setDefaultValue(value)
+                                        }
+                                        value={defaultValue}
+                                    >
+                                        <TooltipProvider>
+                                            <div className="flex gap-x-2">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <RadioGroupItem
+                                                            value="editor"
+                                                            disabled={!!pdfLink}
+                                                            id="r1"
+                                                            className="mt-1 text-black border-black"
+                                                        />
+                                                    </TooltipTrigger>
+                                                    {pdfLink && (
+                                                        <TooltipContent side="top">
+                                                            You have uploaded a
+                                                            PDF, so the editor
+                                                            is now disabled
+                                                        </TooltipContent>
+                                                    )}
+                                                </Tooltip>
+                                                <Label
+                                                    htmlFor="r1"
+                                                    className="font-light text-md text-black"
+                                                >
+                                                    Editor
+                                                </Label>
+                                            </div>
 
-                                        <div className="flex gap-x-2">
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <RadioGroupItem
-                                                        value="pdf"
-                                                        id="r2"
-                                                        className="mt-1 text-black border-black"
-                                                        disabled={isEditorSaved}
-                                                    />
-                                                </TooltipTrigger>
-                                                {isEditorSaved && (
-                                                    <TooltipContent side="top">
-                                                        You have already saved
-                                                        the assignment, so PDF
-                                                        upload is now disabled
-                                                    </TooltipContent>
-                                                )}
-                                            </Tooltip>
-                                            <Label
-                                                htmlFor="r2"
-                                                className="font-light text-md text-black"
-                                            >
-                                                Upload PDF
-                                            </Label>
-                                        </div>
-                                    </TooltipProvider>
-                                </RadioGroup>
+                                            <div className="flex gap-x-2">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <RadioGroupItem
+                                                            value="pdf"
+                                                            id="r2"
+                                                            className="mt-1 text-black border-black"
+                                                            disabled={
+                                                                isEditorSaved
+                                                            }
+                                                        />
+                                                    </TooltipTrigger>
+                                                    {isEditorSaved && (
+                                                        <TooltipContent side="top">
+                                                            You have already
+                                                            saved the
+                                                            assignment, so PDF
+                                                            upload is now
+                                                            disabled
+                                                        </TooltipContent>
+                                                    )}
+                                                </Tooltip>
+                                                <Label
+                                                    htmlFor="r2"
+                                                    className="font-light text-md text-black"
+                                                >
+                                                    Upload PDF
+                                                </Label>
+                                            </div>
+                                        </TooltipProvider>
+                                    </RadioGroup>
 
-                                <div className="bg-card rounded-lg shadow-sm border">
-                                    <div className="p-6">
-                                        <p className="text-xl text-start font-semibold">
-                                            Assignment Details
-                                        </p>
-                                        <div className="flex gap-4">
-                                            {/* <div className="w-[70%]">
+                                    <div className="bg-card rounded-lg shadow-sm border">
+                                        <div className="p-6">
+                                            <p className="text-xl text-start font-semibold">
+                                                Assignment Details
+                                            </p>
+                                            <div className="flex gap-4">
+                                                {/* <div className="w-[70%]">
                                                 <FormField
                                                     control={form.control}
                                                     name="title"
@@ -749,192 +747,205 @@ const AddAssignent = ({
                                                     )}
                                                 />
                                             </div> */}
-                                            <div className="w-[30%]">
-                                                <FormField
-                                                    control={form.control}
-                                                    name="startDate"
-                                                    render={({ field }) => {
-                                                        const d = field.value
-                                                            ? typeof field.value ===
-                                                              'string'
-                                                                ? field.value.split(
-                                                                      ' '
-                                                                  )[0]
-                                                                : field.value
-                                                            : null
-                                                        let dateValue =
-                                                            typeof field.value ===
-                                                                'string' && d
-                                                                ? parseISO(d)
-                                                                : field.value
-                                                        return (
-                                                            <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
-                                                                <Popover>
-                                                                    <PopoverTrigger
-                                                                        asChild
-                                                                    >
-                                                                        <div className="w-full">
-                                                                            <p className="flex text-left text-lg mt-4 mb-2">
-                                                                                Choose
-                                                                                Deadline
-                                                                                Date*
-                                                                            </p>
-                                                                            <div
-                                                                                className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-2 text-sm text-gray-700 hover:border-[rgb(81,134,114)] ${
-                                                                                    !field.value &&
-                                                                                    'text-muted-foreground'
-                                                                                }`}
-                                                                                onClick={(
-                                                                                    e
-                                                                                ) => {
-                                                                                    const target =
-                                                                                        e.target as HTMLElement
-                                                                                    const isText =
-                                                                                        target.closest(
-                                                                                            '.date-text'
+                                                <div className="w-[30%]">
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="startDate"
+                                                        render={({ field }) => {
+                                                            const d =
+                                                                field.value
+                                                                    ? typeof field.value ===
+                                                                      'string'
+                                                                        ? field.value.split(
+                                                                              ' '
+                                                                          )[0]
+                                                                        : field.value
+                                                                    : null
+                                                            let dateValue =
+                                                                typeof field.value ===
+                                                                    'string' &&
+                                                                d
+                                                                    ? parseISO(
+                                                                          d
+                                                                      )
+                                                                    : field.value
+                                                            return (
+                                                                <FormItem className="flex flex-col justify-start gap-x-2 gap-y-4 text-left">
+                                                                    <Popover>
+                                                                        <PopoverTrigger
+                                                                            asChild
+                                                                        >
+                                                                            <div className="w-full">
+                                                                                <p className="flex text-left text-lg mt-4 mb-2">
+                                                                                    Choose
+                                                                                    Deadline
+                                                                                    Date*
+                                                                                </p>
+                                                                                <div
+                                                                                    className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-2 text-sm text-gray-700 hover:border-[rgb(81,134,114)] ${
+                                                                                        !field.value &&
+                                                                                        'text-muted-foreground'
+                                                                                    }`}
+                                                                                    onClick={(
+                                                                                        e
+                                                                                    ) => {
+                                                                                        const target =
+                                                                                            e.target as HTMLElement
+                                                                                        const isText =
+                                                                                            target.closest(
+                                                                                                '.date-text'
+                                                                                            )
+                                                                                        const isIcon =
+                                                                                            target.closest(
+                                                                                                '.calendar-icon'
+                                                                                            )
+                                                                                        if (
+                                                                                            !isText &&
+                                                                                            !isIcon
                                                                                         )
-                                                                                    const isIcon =
-                                                                                        target.closest(
-                                                                                            '.calendar-icon'
-                                                                                        )
-                                                                                    if (
-                                                                                        !isText &&
-                                                                                        !isIcon
-                                                                                    )
-                                                                                        e.stopPropagation()
-                                                                                }}
-                                                                            >
-                                                                                <span className="date-text cursor-pointer truncate">
-                                                                                    {dateValue
-                                                                                        ? format(
-                                                                                              dateValue,
-                                                                                              'EEE, MMM d, yyyy'
-                                                                                          )
-                                                                                        : 'Pick a date'}
-                                                                                </span>
+                                                                                            e.stopPropagation()
+                                                                                    }}
+                                                                                >
+                                                                                    <span className="date-text cursor-pointer truncate">
+                                                                                        {dateValue
+                                                                                            ? format(
+                                                                                                  dateValue,
+                                                                                                  'EEE, MMM d, yyyy'
+                                                                                              )
+                                                                                            : 'Pick a date'}
+                                                                                    </span>
 
-                                                                                <CalendarIcon className="calendar-icon h-5 w-5 opacity-60 ml-2 cursor-pointer" />
+                                                                                    <CalendarIcon className="calendar-icon h-5 w-5 opacity-60 ml-2 cursor-pointer" />
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </PopoverTrigger>
+                                                                        </PopoverTrigger>
 
-                                                                    <PopoverContent
-                                                                        className="w-auto p-0"
-                                                                        align="start"
-                                                                    >
-                                                                        <Calendar
-                                                                            mode="single"
-                                                                            selected={
-                                                                                field.value
-                                                                            }
-                                                                            onSelect={(
-                                                                                date
-                                                                            ) => {
-                                                                                if (
-                                                                                    date
-                                                                                ) {
-                                                                                    field.onChange(
-                                                                                        date
-                                                                                    )
-                                                                                    setDeadline(
-                                                                                        date
-                                                                                    ) // Keep both states in sync
+                                                                        <PopoverContent
+                                                                            className="w-auto p-0"
+                                                                            align="start"
+                                                                        >
+                                                                            <Calendar
+                                                                                mode="single"
+                                                                                selected={
+                                                                                    field.value
                                                                                 }
-                                                                            }}
-                                                                            disabled={(
-                                                                                date: any
-                                                                            ) =>
-                                                                                date <=
-                                                                                addDays(
-                                                                                    new Date(),
-                                                                                    -1
-                                                                                )
-                                                                            }
-                                                                            initialFocus
-                                                                        />
-                                                                    </PopoverContent>
-                                                                </Popover>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )
-                                                    }}
-                                                />
+                                                                                onSelect={(
+                                                                                    date
+                                                                                ) => {
+                                                                                    if (
+                                                                                        date
+                                                                                    ) {
+                                                                                        field.onChange(
+                                                                                            date
+                                                                                        )
+                                                                                        setDeadline(
+                                                                                            date
+                                                                                        ) 
+                                                                                    }
+                                                                                }}
+                                                                                disabled={(
+                                                                                    date: any
+                                                                                ) =>
+                                                                                    date <=
+                                                                                    addDays(
+                                                                                        new Date(),
+                                                                                        -1
+                                                                                    )
+                                                                                }
+                                                                                initialFocus
+                                                                            />
+                                                                        </PopoverContent>
+                                                                    </Popover>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
-                                        </div>
-                                        {defaultValue === 'editor' &&
-                                            !pdfLink && ( // <-- PDF link nahi hai tabhi editor dikhao
-                                                <div className="mt-2 text-start">
-                                                    <p className="flex text-left text-lg mt-6 mb-2">
-                                                        Description
-                                                    </p>
-                                                    <RemirrorTextEditor
-                                                        initialContent={
-                                                            initialContent
+                                            {defaultValue === 'editor' &&
+                                                !pdfLink && ( // <-- PDF link nahi hai tabhi editor dikhao
+                                                    <div className="mt-2 text-start">
+                                                        <p className="flex text-left text-lg mt-6 mb-2">
+                                                            Description
+                                                        </p>
+                                                        <RemirrorTextEditor
+                                                            initialContent={
+                                                                initialContent
+                                                            }
+                                                            setInitialContent={
+                                                                setInitialContent
+                                                            }
+                                                        />
+                                                    </div>
+                                                )}
+                                            {defaultValue === 'pdf' && (
+                                                <div className="mt-4">
+                                                    <UploadArticle
+                                                        loading={loading}
+                                                        file={file}
+                                                        setFile={setFile}
+                                                        className=""
+                                                        isPdfUploaded={
+                                                            ispdfUploaded
                                                         }
-                                                        setInitialContent={
-                                                            setInitialContent
+                                                        pdfLink={pdfLink}
+                                                        setIsPdfUploaded={
+                                                            setIsPdfUploaded
+                                                        }
+                                                        onDeletePdfhandler={
+                                                            onDeletePdfhandler
+                                                        }
+                                                        setDisableButton={
+                                                            setIsdisabledUploadButton
                                                         }
                                                     />
                                                 </div>
                                             )}
-                                        {defaultValue === 'pdf' && (
-                                            <div className="mt-4">
-                                                <UploadArticle
-                                                    loading={loading}
-                                                    file={file}
-                                                    setFile={setFile}
-                                                    className=""
-                                                    isPdfUploaded={
-                                                        ispdfUploaded
-                                                    }
-                                                    pdfLink={pdfLink}
-                                                    setIsPdfUploaded={
-                                                        setIsPdfUploaded
-                                                    }
-                                                    onDeletePdfhandler={
-                                                        onDeletePdfhandler
-                                                    }
-                                                    setDisableButton={
-                                                        setIsdisabledUploadButton
-                                                    }
-                                                />
-                                            </div>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            {/* </form>
+                                {/* </form>
                             </Form> */}
-                            <div className="flex justify-end mt-5">
-                                {defaultValue === 'editor' ? (
-                                    <Button
-                                        className="bg-primary text-primary-foreground hover:bg-primary/90"
-                                        type="submit"
-                                        form="myForm"
-                                        disabled={!hasEditorContent || isSaving}
-                                    >
-                                        {isSaving ? 'Saving...' : 'Save'}
-                                    </Button>
-                                ) : (
-                                    <div>
+                                <div className="flex justify-end mt-5">
+                                    {defaultValue === 'editor' ? (
+
                                         <Button
-                                            className="bg-primary text-primary-foreground hover:bg-primary/90"
-                                            type="button"
-                                            onClick={onFileUpload}
-                                            disabled={!disabledUploadButton}
+                                            type="submit"
+                                            form="myForm"
+                                            disabled={
+                                                !hasEditorContent ||
+                                                isSaving ||
+                                                !isValid
+                                            }
                                         >
-                                            {/* Upload PDF */}
                                             {isSaving ? 'Saving...' : 'Save'}
                                         </Button>
-                                    </div>
-                                )}
-                            </div>
-                        </form>
-                    </Form>
-                </div>
-            </>
-        </div>
-    </ScrollArea>
+                                    ) : (
+                                        <div>                                          
+
+                                            <Button
+                                                type="button"
+                                                onClick={onFileUpload}
+                                                className="bg-primary text-primary-foreground hover:bg-primary/90"
+                                                disabled={
+                                                    loading ||
+                                                    !form.formState.isValid ||
+                                                    (!file && !ispdfUploaded) ||
+                                                    disabledUploadButton
+                                                }
+                                            >
+                                                {loading ? 'Saving...' : 'Save'}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </form>
+                        </Form>
+                    </div>
+                </>
+            </div>
+        </ScrollArea>
     )
 }
 

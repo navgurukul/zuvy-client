@@ -30,6 +30,17 @@ import useDebounce from '@/hooks/useDebounce'
 import CodingTopics from '../codingChallenge/CodingTopics'
 import { FileQuestion } from 'lucide-react'
 
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const quizSchema = z.object({
+    title: z
+        .string()
+        .min(1, 'Quiz title is required')
+        .max(50, 'You can enter up to 50 characters only.'),
+})
+
 function Quiz(props: QuizProps) {
     const router = useRouter()
     const { user } = getUser()
@@ -66,6 +77,14 @@ function Quiz(props: QuizProps) {
         easyQuestions: [],
         mediumQuestions: [],
         hardQuestions: [],
+    })
+
+    const form = useForm<z.infer<typeof quizSchema>>({
+        resolver: zodResolver(quizSchema),
+        defaultValues: {
+            title: inputValue || '',
+        },
+        mode: 'onChange',
     })
 
     const fetchQuizQuestions = useCallback(
@@ -176,6 +195,7 @@ function Quiz(props: QuizProps) {
     // Update isSaved state when addQuestion changes
     useEffect(() => {
         setIsSaved(checkIfSaved())
+        form.trigger("title") 
     }, [addQuestion, savedQuestions])
 
     const openModal = () => setIsOpen(true)
@@ -311,7 +331,7 @@ function Quiz(props: QuizProps) {
                     <div className="w-full flex flex-col items-start">
                         {/* Input Field */}
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-2/4 flex justify-center align-middle items-center relative">
+                            {/* <div className="w-2/4 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -348,7 +368,7 @@ function Quiz(props: QuizProps) {
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
                                 </div> */}
-                                {addQuestion?.length > 0 && (
+                            {/* {addQuestion?.length > 0 && (
                                     <div className="mt-5">
                                         <Button
                                             onClick={handleSaveQuiz}
@@ -358,16 +378,90 @@ function Quiz(props: QuizProps) {
                                         </Button>
                                     </div>
                                 )}
-                            </div>
+                            </div>  */}
+
+                            <form
+                                onSubmit={form.handleSubmit((data) => {
+                                    setInputValue(data.title)
+                                    handleSaveQuiz()
+                                })}
+                                className="flex justify-between items-center w-full"
+                            >
+                                <div className="w-2/4 flex flex-col justify-center relative">
+                                    <Input
+                                        {...form.register('title')}
+                                        placeholder="Untitled Quiz"
+                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                    />
+                                    {!form.watch('title') && (
+                                        <Pencil
+                                            fill="true"
+                                            fillOpacity={0.4}
+                                            size={20}
+                                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                        />
+                                    )}
+                                    {form.formState.errors.title && (
+                                        <p className="text-red-500 text-sm mt-1">
+                                            {
+                                                form.formState.errors.title
+                                                    .message
+                                            }
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    {addQuestion?.length > 0 && (
+                                        <div className="mt-5">
+                                            {/* <Button
+                                                type="submit"
+                                                disabled={
+                                                    !form.formState.isValid ||
+                                                    form.formState.isSubmitting
+                                                }
+                                                className={`bg-primary opacity-75 ${
+                                                    !form.formState.isValid
+                                                        ? 'cursor-not-allowed opacity-50'
+                                                        : ''
+                                                }`}
+                                            >
+                                                Save
+                                            </Button> */}
+
+
+                                            <Button
+  type="submit"
+  disabled={
+    form.formState.isSubmitting ||
+    !form.formState.isValid ||
+    isSaved
+  }
+  className={`bg-primary ${
+    form.formState.isSubmitting || !form.formState.isValid || isSaved
+      ? 'opacity-50 cursor-not-allowed'
+      : 'opacity-75'
+  }`}
+>
+  {form.formState.isSubmitting
+    ? 'Saving...'
+    : isSaved
+    ? 'Saved'
+    : 'Save'}
+</Button>
+
+
+                                        </div>
+                                    )}
+                                </div>
+                            </form>
                         </div>
                         <div className="flex items-center gap-2">
                             <FileQuestion
                                 size={20}
                                 className="transition-colors"
                             />
-                            <p className="text-muted-foreground">
-                                Quiz
-                            </p>
+                            <p className="text-muted-foreground">Quiz</p>
                         </div>
                     </div>
                 </div>

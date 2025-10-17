@@ -1,5 +1,4 @@
 'use client'
-
 import { EditIcon, Eye, Pencil, Settings, ArrowRight } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
@@ -28,6 +27,16 @@ import {
     CodingQuestiones,
 } from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType'
 
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const chapterSchema = z.object({
+    title: z
+        .string()
+        .min(1, 'Assessment title is required')
+        .max(50, 'You can enter up to 50 characters only.'),
+})
 const AddAssessment: React.FC<AddAssessmentProps> = ({
     chapterData,
     content,
@@ -36,6 +45,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     topicId,
     activeChapterTitle,
 }) => {
+    const form = useForm<z.infer<typeof chapterSchema>>({
+        resolver: zodResolver(chapterSchema),
+        defaultValues: { title: activeChapterTitle || '' },
+        mode: 'onChange',
+    })
+
     const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -369,61 +384,102 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         <div className="w-full pb-2">
             <div className="px-5 border-b border-gray-200">
                 {questionType !== 'settings' && (
+                    // <div className="flex items-center mb-5 w-full justify-between">
+                    //     <div className="w-2/6 flex justify-center align-middle items-center relative">
+                    //         <Input
+                    //             required
+                    //             onChange={(e) => {
+                    //                 const newValue = e.target.value
+                    //                  if (newValue.length>50) {
+                    //                       toast.error({
+                    //                         title: "Character Limit Reached",
+                    //                         description: "You can enter up to 50 characters only",
+                    //                     })
+
+                    //                  } else {
+                    //                     setChapterTitle(newValue)
+                    //              }
+
+                    //             }}
+                    //             value={chapterTitle}
+                    //             // placeholder={content?.ModuleAssessment?.title}
+                    //             placeholder="Untitled Assessment"
+                    //             className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
+                    //         />
+                    //         {/* {chapterTitle.length == 0 && (
+                    //             <Pencil
+                    //                 fill="true"
+                    //                 fillOpacity={0.4}
+                    //                 size={20}
+                    //                 className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                    //             />
+                    //         )} */}
+
+                    //     </div>
+
+                    //     {/* preview & settings buttons */}
+                    //     <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
+                    //         {/* <div
+                    //             id="previewAssessment"
+                    //             onClick={previewAssessment}
+                    //             className="flex hover:bg-gray-300 rounded-md p-1"
+                    //         >
+                    //             <Eye size={18} />
+                    //             <h6 className="ml-1 text-sm">Preview</h6>
+                    //         </div> */}
+
+                    //         <div
+                    //             onClick={handleSettingsButtonClick}
+                    //             id="settingsAssessment"
+                    //             className="flex hover:bg-gray-300 rounded-md p-1"
+                    //         >
+                    //             {/* <Settings size={18} />
+                    //             <h6 className="mx-1 text-sm">Settings</h6> */}
+                    //             <h6 className="mx-1 text-sm">Next</h6>
+                    //             <ArrowRight size={20} />
+                    //         </div>
+                    //     </div>
+                    // </div>
+
                     <div className="flex items-center mb-5 w-full justify-between">
-                        <div className="w-2/6 flex justify-center align-middle items-center relative">
+                        <div className="w-2/6 relative">
                             <Input
-                                required
-                                onChange={(e) => {
-                                    const newValue = e.target.value
-                                     if (newValue.length>50) {
-                                          toast.error({
-                                            title: "Character Limit Reached",
-                                            description: "You can enter up to 50 characters only",
-                                        })
-                                        
-                                     } else {
-                                        setChapterTitle(newValue)
-                                 }
-                                    
-                                }}
-                                value={chapterTitle}
-                                // placeholder={content?.ModuleAssessment?.title}
+                                {...form.register('title')}
                                 placeholder="Untitled Assessment"
-                                className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
+                                className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
                             />
-                            {/* {chapterTitle.length == 0 && (
-                                <Pencil
-                                    fill="true"
-                                    fillOpacity={0.4}
-                                    size={20}
-                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                />
-                            )} */}
-                            
+                            {form.formState.errors.title && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {form.formState.errors.title.message}
+                                </p>
+                            )}
                         </div>
 
-                        {/* preview & settings buttons */}
-                        <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
-                            {/* <div
-                                id="previewAssessment"
-                                onClick={previewAssessment}
-                                className="flex hover:bg-gray-300 rounded-md p-1"
+                        <form
+                            onSubmit={form.handleSubmit((data) => {
+                                // Save the validated title
+                                setChapterTitle(data.title)
+                                handleSettingsButtonClick()
+                            })}
+                            className="flex items-center gap-2"
+                        >
+                            <Button
+                                type="submit"
+                                disabled={
+                                    !form.formState.isValid ||
+                                    form.formState.isSubmitting
+                                }
+                                className={`flex items-center gap-1 ${
+                                    !form.formState.isValid ||
+                                    form.formState.isSubmitting
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : ''
+                                }`}
                             >
-                                <Eye size={18} />
-                                <h6 className="ml-1 text-sm">Preview</h6>
-                            </div> */}
-
-                            <div
-                                onClick={handleSettingsButtonClick}
-                                id="settingsAssessment"
-                                className="flex hover:bg-gray-300 rounded-md p-1"
-                            >
-                                {/* <Settings size={18} />
-                                <h6 className="mx-1 text-sm">Settings</h6> */}
                                 <h6 className="mx-1 text-sm">Next</h6>
                                 <ArrowRight size={20} />
-                            </div>
-                        </div>
+                            </Button>
+                        </form>
                     </div>
                 )}
                 {/* select type of questions */}
