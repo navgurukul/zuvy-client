@@ -324,7 +324,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 py-4">
             {/* Unsaved Changes Warning Modal */}
             <Dialog open={showWarningModal} onOpenChange={setShowWarningModal}>
                 <DialogContent className="sm:max-w-[425px]">
@@ -357,10 +357,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h2 className="text-xl text-start font-bold text-gray-900 mb-2">
+                    <h2 className="text-lg text-start font-semibold text-gray-900">
                         Manage Role Functions
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-muted-foreground text-[1.1rem]">
                         Configure role permissions and manage system actions
                     </p>
                 </div>

@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { GraduationCap, Shield, Cog } from 'lucide-react'
 import {
     DialogContent,
     DialogHeader,
@@ -15,6 +14,27 @@ import { Label } from '@/components/ui/label'
 import { useRoles } from '@/hooks/useRoles'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {
+    GraduationCap,
+    Shield,
+    Cog,
+    User,
+    Briefcase,
+    Users,
+    Code,
+    Palette,
+    Headphones,
+    CheckCircle,
+    Edit,
+    Eye,
+    UserCircle,
+    BarChart,
+    Award,
+    CalendarCheck,
+    DollarSign,
+    TrendingUp,
+    Megaphone,
+} from 'lucide-react'
 
 type AddUserModalProps = {
   isEditMode: boolean;
@@ -138,8 +158,27 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         newUser.email.trim().length > 0 &&
         !!pendingUserRole
 
+     const iconList = [
+        User,
+        Briefcase,
+        Users,
+        Code,
+        Palette,
+        Headphones,
+        CheckCircle,
+        Edit,
+        Eye,
+        UserCircle,
+        BarChart,
+        Award,
+        CalendarCheck,
+        DollarSign,
+        TrendingUp,
+        Megaphone,
+    ]
+
     const getRoleIcon = useCallback((role: string) => {
-        switch (role) {
+        switch (role.toLowerCase()) {
             case 'admin':
                 return <Shield className="w-5 h-5" />
             case 'ops':
@@ -147,7 +186,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             case 'instructor':
                 return <GraduationCap className="w-5 h-5" />
             default:
-                return  <Cog className="w-5 h-5" />
+                 // Get icon sequentially from the list based on role name
+                const roleIndex = role
+                    .split('')
+                    .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+                const IconComponent = iconList[roleIndex % iconList.length]
+                return <IconComponent className="w-5 h-5" />
         }
     }, [])
 
@@ -289,13 +333,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                                     icon={getRoleIcon(role.name)}
                                     title={role.name}
                                     description={role.description}
-                                    selected={
-                                        pendingUserRole ===
-                                        role.id
-                                    }
-                                    onSelect={
-                                        setPendingUserRole
-                                    }
+                                    selected={pendingUserRole === role.id}
+                                    onSelect={setPendingUserRole}
                                 />
                             ))}
                         </div>
@@ -305,10 +344,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button
-                        variant="outline"
-                        className="bg-white"
-                    >
+                    <Button variant="outline" className="bg-white">
                         Cancel
                     </Button>
                 </DialogClose>
