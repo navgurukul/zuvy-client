@@ -126,9 +126,8 @@ function Page({ params }: ParamsType) {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
         localStorage.setItem('sessionTab', tab)
-        setClasses([]) // Clear existing classes immediately
+        setClasses([]) 
 
-        // Fetch new data for the selected tab without loading state
         fetchClassesData(0, currentSearchQuery)
         setOffset(0)
         setCurrentPage(1)
