@@ -5,6 +5,7 @@ import { getAssignmentPreviewStore } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { getUser } from '@/store/store'
 import { Link } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -17,6 +18,8 @@ import {
 const PreviewAssignment = ({ params }: { params: Params }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isPdfPreview = searchParams.get('pdf') === 'true'
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()
@@ -122,7 +125,7 @@ const PreviewAssignment = ({ params }: { params: Params }) => {
 
     const goBack = () => {
         router.push(
-            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`
+            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`
         )
     }
 

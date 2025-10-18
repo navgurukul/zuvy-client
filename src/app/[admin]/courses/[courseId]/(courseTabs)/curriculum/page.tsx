@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
 import { api } from '@/utils/axios.config'
+import { getUser } from '@/store/store'
 import { getCourseData } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import CurricullumCard from '@/app/[admin]/courses/[courseId]/_components/curricullumCard'
@@ -27,6 +28,8 @@ function Page() {
     const router = useRouter()
     const params = useParams()
     const courseId = params.courseId
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
     const [originalCurriculum, setOriginalCurriculum] = useState<
@@ -365,7 +368,7 @@ function Page() {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/admin/courses`)
+                    router.push(`/${userRole}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:
@@ -568,7 +571,7 @@ function Page() {
                     This course has been deleted.
                 </p>
                 <Button
-                    onClick={() => router.push('/admin/courses')}
+                    onClick={() => router.push(`/${userRole}/courses`)}
                     className="mt-6 bg-secondary"
                 >
                     Back to Courses
@@ -577,6 +580,7 @@ function Page() {
         )
     }
 
+    
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">

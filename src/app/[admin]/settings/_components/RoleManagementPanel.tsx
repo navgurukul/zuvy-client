@@ -11,7 +11,7 @@ import { useAssignPermissions } from '@/hooks/useAssignPermissions'
 import { COLOR_PALETTE } from '@/lib/utils'
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import AddRoleModal from './AddRoleModal'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 
 interface RoleAction {
@@ -31,6 +31,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     selectedRole,
     onRoleChange,
 }) => {
+    const searchParams = useSearchParams()
+    const { roles } = useRoles()
+    const { assignPermissions, loading: assigning } = useAssignPermissions()
     const [selectedAction, setSelectedAction] = useState<number>(12)
     const [roleId, setRoleId] = useState<number>(1)
     const [selectedPermissions, setSelectedPermissions] = useState<Record<number, boolean>>({})
@@ -216,6 +219,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         const changeRole = () => {
             onRoleChange(roleName)
             setRoleId(newRoleId)
+            const newParams = new URLSearchParams(searchParams);
+            newParams.set('role', roleName);
+            router.push(`?${newParams.toString()}`, { scroll: false });
             // Reset permissions when changing roles
             setSelectedPermissions({})
             setOriginalPermissions({})
@@ -250,13 +256,27 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         }
     }
 
-    const { roles } = useRoles()
-    const { assignPermissions, loading: assigning } = useAssignPermissions()
+    // Initialize role from URL on mount
+    useEffect(() => {
+        const roleFromUrl = searchParams.get('role');
+        if (roleFromUrl && roles.length > 0) {
+            const matchingRole = roles.find(role => role.name === roleFromUrl);
+            if (matchingRole) {
+                onRoleChange(matchingRole.name);
+                setRoleId(matchingRole.id);
+            }
+        }
+    }, [roles]);
 
     // Select first role by default when roles are loaded
     useEffect(() => {
         if (roles.length > 0 && !selectedRole) {
-            onRoleChange(roles[0].name);
+            // onRoleChange(roles[0].name);
+            const roleFromUrl = searchParams.get('role');
+            if (!roleFromUrl) {
+                onRoleChange(roles[0].name);
+                setRoleId(roles[0].id);
+            }
         }
     }, [roles, selectedRole, onRoleChange]);
 
@@ -324,7 +344,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 py-4">
             {/* Unsaved Changes Warning Modal */}
             <Dialog open={showWarningModal} onOpenChange={setShowWarningModal}>
                 <DialogContent className="sm:max-w-[425px]">
@@ -357,10 +377,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h2 className="text-xl text-start font-bold text-gray-900 mb-2">
+                    <h2 className="text-lg text-start font-semibold text-gray-900">
                         Manage Role Functions
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-muted-foreground text-[1.1rem]">
                         Configure role permissions and manage system actions
                     </p>
                 </div>

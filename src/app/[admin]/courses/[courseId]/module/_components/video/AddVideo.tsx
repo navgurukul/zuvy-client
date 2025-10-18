@@ -731,6 +731,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { getUser } from '@/store/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
     Form,
@@ -792,6 +793,8 @@ const AddVideo: React.FC<AddVideoProps> = ({
 }) => {
     // const heightClass = useResponsiveHeight()
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [showPreview, setShowPreview] = useState<boolean>(false)
     const [showVideoBox, setShowVideoBox] = useState<boolean>(true)
@@ -926,7 +929,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
         if (content?.contentDetails[0]?.links) {
             setVideoPreviewContent(content)
             router.push(
-                `/admin/courses/${courseId}/module/${moduleId}/chapter/${content.id}/video/${content.topicId}/preview`
+                `/${userRole}/courses/${courseId}/module/${moduleId}/chapter/${content.id}/video/${content.topicId}/preview`
             )
         } else {
             toast.info({

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { getUser } from '@/store/store'
 import * as z from 'zod'
 import { ChevronLeft, AlertCircle, Info } from 'lucide-react'
 import {
@@ -64,6 +65,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     setIsNewQuestionAdded,
     setChapterTitle,
 }) => {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseId, moduleId, chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
     const mcqMax = selectedQuizQuesIds.length
@@ -607,7 +610,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const backToAssessment = () => {
         setQuestionType('coding')
         router.push(
-            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterID}`
+            `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${chapterID}`
         )
     }
 

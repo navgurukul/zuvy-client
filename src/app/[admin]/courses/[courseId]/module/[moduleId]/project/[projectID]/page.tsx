@@ -432,6 +432,7 @@ import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams } from 'next/navigation'
 // import ProjectPreview from '../_components/ProjectPreview'
+import { getUser } from '@/store/store'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { getProjectPreviewStore } from '@/store/store'
@@ -444,6 +445,8 @@ import {
 
 export default function Project() {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { setProjectPreviewContent } = getProjectPreviewStore()
     // const [showPreview, setShowPreview] = useState<boolean>(false)
     const { courseId, moduleId, projectID } = useParams()
@@ -637,7 +640,7 @@ export default function Project() {
         if (projectData) {
             setProjectPreviewContent(projectData)
             router.push(
-                `/admin/courses/${courseId}/module/${moduleId}/project/${projectID}/preview`
+                `/${userRole}/courses/${courseId}/module/${moduleId}/project/${projectID}/preview`
             )
         }
     }

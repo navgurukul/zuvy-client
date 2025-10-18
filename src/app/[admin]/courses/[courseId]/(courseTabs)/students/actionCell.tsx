@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
+import { getUser } from '@/store/store'
 
 import {
     DropdownMenu,
@@ -27,6 +28,8 @@ interface ActionCellProps {
 }
 
 const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { userId, bootcampId, name, email, status, batchId } = student
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const [editModalOpen, setEditModalOpen] = useState(false)
@@ -46,7 +49,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
                     <DropdownMenuItem 
                         onClick={() => {
                             setDropdownOpen(false)
-                            router.push(`/admin/courses/${bootcampId}/${userId}`)
+                            router.push(`/${userRole}/courses/${bootcampId}/${userId}`)
                         }}
                         className="focus:text-blue-600"
                     >

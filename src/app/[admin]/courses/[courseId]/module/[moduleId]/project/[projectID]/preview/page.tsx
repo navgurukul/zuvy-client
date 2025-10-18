@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { getProjectPreviewStore } from '@/store/store'
 import { fetchProjectDetails } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
+import { getUser } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
@@ -11,6 +12,8 @@ import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 const ProjectPreview = () => {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseId, moduleId, projectID } = useParams()
     const { projectPreviewContent, setProjectPreviewContent } =
         getProjectPreviewStore()
@@ -18,7 +21,7 @@ const ProjectPreview = () => {
 
     const goBack = () => {
         router.push(
-            `/admin/courses/${courseId}/module/${moduleId}/project/${projectID}`
+            `/${userRole}/courses/${courseId}/module/${moduleId}/project/${projectID}`
         )
     }
 

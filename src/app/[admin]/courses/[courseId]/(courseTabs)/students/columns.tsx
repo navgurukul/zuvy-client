@@ -6,7 +6,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 
 import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
-
+import { getUser } from '@/store/store'
 import { fetchStudentData } from '@/utils/students'
 import { Task } from '@/utils/data/schema'
 import { getBatchData, getEditStudent, getStudentData } from '@/store/store'
@@ -21,6 +21,8 @@ import ActionCell from './actionCell'
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
     const { userId } = row.original
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { isStudent, setIsStudent } = getEditStudent()
     const { studentData, setStudentData } = getStudentData()
     const router = useRouter()
@@ -34,7 +36,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     }
     
     const handleStudentClick = () => {
-        router.push(`/admin/courses/${params.courseId}/${userId}`)
+        router.push(`/${userRole}/courses/${params.courseId}/${userId}`)
     }
     
     return (
