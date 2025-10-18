@@ -10,6 +10,7 @@ import { Reorder, useDragControls } from 'framer-motion'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { getUser } from '@/store/store'
 import { CurricullamCardProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
 const CurricullumCard = (props: CurricullamCardProps) => {
@@ -39,6 +40,8 @@ const CurricullumCard = (props: CurricullamCardProps) => {
 
     const router = useRouter()
     const dragControls = useDragControls()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [isDragging, setIsDragging] = useState(false)
     const [originalOrder, setOriginalOrder] = useState(order)
 
@@ -76,11 +79,11 @@ const CurricullumCard = (props: CurricullamCardProps) => {
     const handleModuleRoute = () => {
         if (typeId === 1) {
             router.push(
-                `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+                `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
             )
         } else if (typeId === 2) {
             router.push(
-                `/admin/courses/${courseId}/module/${moduleId}/project/${projectId}`
+                `/${userRole}/courses/${courseId}/module/${moduleId}/project/${projectId}`
             )
         }
     }

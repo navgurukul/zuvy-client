@@ -56,6 +56,7 @@ import {
     getStoreStudentData,
     getDeleteStudentStore,
 } from '@/store/store'
+import { getUser } from '@/store/store'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -113,12 +114,13 @@ interface PermissionsType {
 const Page = ({ params }: { params: ParamsType }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { students } = useStudentData(params.courseId)
     const { courseData, fetchCourseDetails } = getCourseData()
     const { batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
     const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
-
     // Other states
     const [loading, setLoading] = useState(true)
     const [assignStudents, setAssignStudents] = useState('')
@@ -381,7 +383,7 @@ const Page = ({ params }: { params: ParamsType }) => {
         batchId: string | number,
         batchName: string
     ) => {
-        router.push(`/admin/courses/${params.courseId}/batch/${batchId}`)
+        router.push(`/${userRole}/courses/${params.courseId}/batch/${batchId}`)
     }
 
     // Handle CSV file upload

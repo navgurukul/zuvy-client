@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Pencil, PlusCircle } from 'lucide-react'
-
+import { getUser } from '@/store/store'
 // Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -69,6 +69,8 @@ const AddForm: React.FC<AddFormProps> = ({
     courseId,
 }) => {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setFormPreviewContent } = getFormPreviewStore()
     const [titles, setTitles] = useState(content?.title || '')
@@ -382,7 +384,7 @@ const AddForm: React.FC<AddFormProps> = ({
         if (content) {
             setFormPreviewContent(content)
             router.push(
-                `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/form/${content.topicId}/preview`
+                `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/form/${content.topicId}/preview`
             )
         }
     }

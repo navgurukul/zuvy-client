@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Calendar as CalendarIcon } from 'lucide-react'
+import { getUser } from '@/store/store'
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -130,6 +131,8 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     fetchingChapters,
     onClose,
 }) => {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
@@ -252,7 +255,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
             const latestChapter = chapters[chapters.length - 1]
             if (latestChapter) {
                 router.push(
-                    `/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
+                    `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
                 )
             }
             toast.success({

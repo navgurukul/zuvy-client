@@ -556,6 +556,7 @@ import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import CodingTopics from '@/app/[admin]/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
 import SelectedProblems from '@/app/[admin]/courses/[courseId]/module/_components/codingChallenge/SelectedProblems'
+import { getUser } from '@/store/store'
 import { Input } from '@/components/ui/input'
 import { api } from '@/utils/axios.config'
 import useDebounce from '@/hooks/useDebounce'
@@ -589,6 +590,8 @@ function CodingChallenge({
     courseId,
 }: ChallangesProps) {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { setCodingPreviewContent } = getCodingPreviewStore()
 
     const chapterSchema = z.object({
@@ -826,7 +829,7 @@ function CodingChallenge({
         }
         setCodingPreviewContent(updatedContent)
         router.push(
-            `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
+            `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
         )
     }
 

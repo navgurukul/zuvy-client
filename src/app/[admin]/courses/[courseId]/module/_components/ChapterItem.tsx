@@ -12,6 +12,7 @@ import {
     BookOpenCheck,
     Play,
 } from 'lucide-react'
+import { getUser } from '@/store/store'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useEffect, useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
@@ -43,6 +44,8 @@ function ChapterItem({
     // states and variables
     const { courseId } = useParams()
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const { setTopicId } = getTopicId()
     const dragControls = useDragControls()
@@ -87,7 +90,7 @@ function ChapterItem({
             setTopicId(topicId)
         }
         router.push(
-            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+            `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
         )
     }
 
@@ -105,11 +108,11 @@ function ChapterItem({
                     fetchChapters()
                     if (chapterData[0].chapterId === chapterId) {
                         router.push(
-                            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[1].chapterId}`
+                            `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${chapterData[1].chapterId}`
                         )
                     } else if (chapterId === activeChapter) {
                         router.push(
-                            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterData[0].chapterId}`
+                            `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${chapterData[0].chapterId}`
                         )
                     }
                 })

@@ -7,6 +7,7 @@ import {
     useSearchParams,
 } from 'next/navigation'
 import ErrorPage from 'next/error'
+import { getUser } from '@/store/store'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { Plus, Trash2, ArrowLeft } from 'lucide-react'
@@ -72,6 +73,8 @@ const BatchesInfo = ({
 }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const param = useParams()
     const location = usePathname()
     const { students, setStudents } = useStudentData(params.courseId)
@@ -185,7 +188,7 @@ const BatchesInfo = ({
                     if (
                         error?.response?.data.message === 'Bootcamp not found!'
                     ) {
-                        router.push(`/admin/courses`)
+                        router.push(`/${userRole}/courses`)
                         toast.info({
                             title: 'Caution',
                             description:
@@ -239,7 +242,7 @@ const BatchesInfo = ({
                 title: 'Batch Deleted Successfully',
             })
             setDeleteModalOpen(false)
-            router.push(`/admin/courses/${params.courseId}/batches`)
+            router.push(`/${userRole}/courses/${params.courseId}/batches`)
         } catch (error) {
             toast.error({
                 title: 'Batch not Deleted',

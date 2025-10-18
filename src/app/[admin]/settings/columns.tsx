@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Edit, Trash2 } from 'lucide-react'
 import DeleteUser from './_components/DeleteUser'
 import { ChangeUserRole } from './_components/ChangeUserRole'
+import { formatDate } from '@/lib/utils'
 
 export interface User {
+    createdAt: any
     id: number
     roleId: number
     userId: number
@@ -51,13 +53,16 @@ export const createColumns = (
             return <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} roleId={roleId} />
         },
     },
-    // {
-    //     accessorKey: 'dateAdded',
-    //     header: 'Date Added',
-    //     cell: ({ row }) => (
-    //         <div className="text-gray-600">{row.getValue('dateAdded')}</div>
-    //     ),
-    // },
+   {
+        accessorKey: 'dateAdded',
+        header: 'Date Added',
+        cell: ({ row }) => {
+             const createdAt = row.original.createdAt
+            return (
+                <div className="text-gray-600">{formatDate(createdAt)}</div>
+            )
+        },
+    },
     {
         id: 'actions',
         header: 'Actions',

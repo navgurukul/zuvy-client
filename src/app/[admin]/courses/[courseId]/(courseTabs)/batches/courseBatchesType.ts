@@ -11,14 +11,10 @@ export type StudentData = {
     progress: number
     profilePicture: string
 }
-
-
-
 // page.tsx
 export interface ParamsType{
   courseId: number;
 }
-
 export interface BatchSuggestion {
     id: number
     name: string
@@ -31,8 +27,6 @@ export interface Student {
 }
 
 export type StudentDataState = Student[]
-
-
 
 export interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
