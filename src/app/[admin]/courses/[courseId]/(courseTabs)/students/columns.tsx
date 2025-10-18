@@ -381,6 +381,9 @@ export const columns: ColumnDef<Task>[] = [
 
     {
         id: 'actions',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Actions" />
+        ),
         cell: ({ row }) => {
             const student = row.original
             return (

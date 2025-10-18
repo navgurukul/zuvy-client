@@ -129,6 +129,7 @@ const EditAIQuestion = ({
                                             <Textarea
                                                 placeholder="Write your Question here"
                                                 {...field}
+                                                className="min-h-[80px] max-h-[200px] resize-none overflow-y-auto"
                                             />
                                         </FormControl>
                                         <FormMessage />
