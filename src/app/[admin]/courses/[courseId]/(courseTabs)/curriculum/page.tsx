@@ -23,6 +23,7 @@ import {
     PermissionsType,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType'
 import { Plus } from 'lucide-react'
+import {CurriculumSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 function Page() {
     const router = useRouter()
@@ -583,9 +584,10 @@ function Page() {
     
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <Spinner className="text-secondary" />
-            </div>
+            // <div className="flex justify-center items-center h-screen">
+            //     <Spinner className="text-secondary" />
+            // </div>
+            <CurriculumSkeleton/>
         )
     }
 

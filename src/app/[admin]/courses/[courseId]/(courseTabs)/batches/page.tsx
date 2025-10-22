@@ -1333,7 +1333,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
                             <div className="relative top-[70%]">
-                                <Spinner className="text-secondary" />
+                                {/* <Spinner className="text-secondary" /> */}
                             </div>
                         </div>
                     </div>

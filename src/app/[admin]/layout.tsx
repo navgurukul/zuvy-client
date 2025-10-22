@@ -53,7 +53,7 @@ export default function RootLayout({
     if (user.email.length === 0 || loading) {
         return (
             <div className="flex items-center justify-center h-[680px] font-manrope">
-                <Spinner className="text-[rgb(81,134,114)]" />
+                {/* <Spinner className="text-[rgb(81,134,114)]" /> */}
             </div>
         )
     }

@@ -10,6 +10,7 @@ import { getCourseData } from '@/store/store'
 import Link from 'next/link'
 import { useParams, useRouter, usePathname } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
+import {CourseLayoutSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import {
     ArrowLeft,
     GraduationCap,
@@ -32,6 +33,7 @@ function CourseLayout() {
     // get the role from current path like if the url is this - admin/courses/721/details  then get admin from it
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+     const [loading, setLoading] = useState(true)
 
     const courseMenu = [
         {
@@ -105,6 +107,10 @@ function CourseLayout() {
         handleFetch()
     }, [])
 
+
+if (!courseData || !courseData?.id) {
+  return <CourseLayoutSkeleton/>
+}
     return (
         <>
             {/* <Breadcrumb crumbs={crumbs} /> */}
@@ -182,3 +188,93 @@ function CourseLayout() {
 }
 
 export default CourseLayout
+
+
+
+
+
+
+// return (
+//   <>
+//     {loading ? (
+//       <CourseLayoutSkeleton />
+//     ) : (
+//       // 🔹 Jab data mil gaya
+//       <div className="px-8 py-10">
+//         {/* Back Button */}
+//         <Link
+//           href={`/${role}/courses`}
+//           className="flex items-center gap-2 text-foreground hover:text-primary mb-6"
+//         >
+//           <ArrowLeft size={20} />
+//           <p className="text-sm font-medium">Back to Course Library</p>
+//         </Link>
+
+//         {/* Course Title */}
+//         <h1 className="font-heading text-3xl font-bold text-foreground mb-8">
+//           {courseData?.name}
+//         </h1>
+
+//         {/* Tabs Section */}
+//         <div className="w-full">
+//           <Tabs defaultValue="generalDetails" className="w-full">
+//             <div
+//               className="relative border-b-2 border-muted pr-3 flex justify-start overflow-x-auto overflow-y-hidden"
+//               style={{
+//                 scrollbarWidth: 'none',
+//                 msOverflowStyle: 'none',
+//                 flex: '0 0 auto',
+//               }}
+//             >
+//               <TabsList className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
+//                 {courseMenu?.map(({ title, href, icon }) => {
+//                   const shouldRender = (() => {
+//                     switch (title) {
+//                       case 'General Details':
+//                         return Permissions?.editCourse
+//                       case 'Curriculum':
+//                         return Permissions?.viewModule
+//                       case 'Students':
+//                         return Permissions?.viewStudent
+//                       case 'Batches':
+//                         return Permissions?.viewBatch
+//                       case 'Submissions':
+//                         return Permissions?.viewSubmission
+//                       case 'Settings':
+//                         return Permissions?.viewSetting
+//                       default:
+//                         return false
+//                     }
+//                   })()
+
+//                   return shouldRender ? (
+//                     <TabItem key={href} title={title} href={href} icon={icon} />
+//                   ) : null
+//                 })}
+//               </TabsList>
+//               <div
+//                 className="absolute top-0 right-0 h-full"
+//                 style={{
+//                   width: '20px',
+//                   background:
+//                     'linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 100%)',
+//                   pointerEvents: 'none',
+//                 }}
+//               />
+//             </div>
+//           </Tabs>
+//         </div>
+//       </div>
+//     )}
+//   </>
+// )
+// }
+// export default CourseLayout
+
+
+
+
+
+
+
+

@@ -32,6 +32,9 @@ import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { LANGUAGES } from '@/utils/constant'
 import { useCourseDetails } from '@/hooks/useCourseDetails'
 import { PageParams } from '@/app/[admin]/courses/[courseId]/(courseTabs)/details/courseDetailType'
+import {GeneralDetailsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+// import {CourseLayoutSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 const FormSchema = z.object({
     name: z
@@ -320,6 +323,11 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     }
 
     return (
+         <>
+            {isLoading ?(
+            <GeneralDetailsSkeleton/>
+                      
+        ) : (
         // <div className="w-full max-w-none space-y-6">
         <div className='container mx-auto px-2 pt-2 pb-2 max-w-5xl'>
             <h2 className="font-heading text-xl font-semibold text-left ml-1">
@@ -874,6 +882,8 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                 </form>
             </Form>
         </div>
+    )}
+    </>
     )
 }
 
