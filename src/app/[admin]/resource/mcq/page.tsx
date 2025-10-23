@@ -405,7 +405,7 @@ const Mcqs = (props: Props) => {
             const searchFilter = searchParams.get('search') || ''
             fetchCodingQuestions(offset, searchFilter)
         }
-    }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions])
+    }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions, isCreateMcqDialogOpen]) // 🔥 isCreateMcqDialogOpen dependency add karo
 
     const handleNewTopicChange = (
         event: React.ChangeEvent<HTMLInputElement>

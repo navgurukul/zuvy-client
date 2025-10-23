@@ -11,11 +11,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import { getDeleteQuizQuestion } from '@/store/store'
 import { DELETE_AI_QUESTION_CONFIRMATION } from '@/utils/constant'
 import { handleDeleteQuizModal } from '@/utils/admin'
 import EditAIQuestion from './EditAIQuestion'
+import AIQuestionDeleteModal from './AIQuestionDeleteModal'
 import {
     QuestionCardProps,
     Tag,
@@ -36,6 +36,10 @@ export const AIQuestionCard = ({
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [isEditModalOpen, setEditModalOpen] = useState(false)
+
+    const handleDeleteConfirm = () => {
+        handleQuestionConfirm(questionId, setDeleteModalOpen)
+    }
 
     return (
         <>
@@ -93,20 +97,7 @@ export const AIQuestionCard = ({
                             className="text-destructive cursor-pointer"
                             size={20}
                         />
-                        <DeleteConfirmationModal
-                            isOpen={isDeleteModalOpen}
-                            onClose={() => setDeleteModalOpen(false)}
-                            onConfirm={() => {
-                                handleQuestionConfirm(
-                                    questionId,
-                                    setDeleteModalOpen
-                                )
-                            }}
-                            modalTitle={'Delete Question'}
-                            modalText={DELETE_AI_QUESTION_CONFIRMATION}
-                            buttonText="Delete Question"
-                            input={false}
-                        />
+                        
                     </div>
                 </div>
 
@@ -135,6 +126,14 @@ export const AIQuestionCard = ({
                     ))}
                 </div>
             </Card>
+
+            {/* Delete Confirmation Modal */}
+            <AIQuestionDeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                questionText={question}
+            />
         </>
     )
 }

@@ -135,39 +135,49 @@ const NewMcqProblemForm = ({
         new Promise((resolve) => setTimeout(resolve, ms))
 
     const handleCreateQuizQuestion = async (
-        requestBody: NewMcqRequestBodyType
-    ) => {
-        if (!requestBody.quizzes || requestBody.quizzes.length === 0) {
-            toast.error({
-                title: 'No questions to save',
-                description: 'Please generate or add questions before saving.',
-            })
-            return
-        }
+    requestBody: NewMcqRequestBodyType
+) => {
+    if (!requestBody.quizzes || requestBody.quizzes.length === 0) {
+        toast.error({
+            title: 'No questions to save',
+            description: 'Please generate or add questions before saving.',
+        })
+        return
+    }
+    
+    setSaving(true) // Add loading state
+    
+    try {
+        const res = await api.post(`/Content/quiz`, requestBody)
+
+        // 🔥 Fetch fresh quiz questions and update store
         try {
-            const res = await api.post(`/Content/quiz`, requestBody)
-
-            // Close modal and refresh data after successful save
-            closeModal() // Use closeModal to close the dialog
-            setMcqType('')
-            handleClear()
-
-            // Refresh quiz data
             const quizData = await getAllQuizQuesiton()
             setStoreQuizData(quizData)
-
-            toast.success({
-                title: res.data.status || 'Success',
-                description: res.data.message || 'Quiz Question Created',
-            })
-        } catch (error) {
-            toast.error({
-                title: 'Error',
-                description:
-                    'There was an error creating the quiz question. Please try again.',
-            })
+        } catch (err) {
+            console.error('Error fetching quiz questions after save:', err)
         }
+
+        // Close modal and reset form after successful save
+        closeModal()
+        setMcqType('')
+        handleClear()
+
+        toast.success({
+            title: res.data.status || 'Success',
+            description: res.data.message || 'Quiz Questions Created Successfully',
+        })
+    } catch (error) {
+        console.error('Error creating quiz questions:', error)
+        toast.error({
+            title: 'Error',
+            description:
+                'There was an error creating the quiz questions. Please try again.',
+        })
+    } finally {
+        setSaving(false) // Remove loading state
     }
+}
 
     const { control, handleSubmit, setValue } = form
 
@@ -814,16 +824,39 @@ const NewMcqProblemForm = ({
     }
 
     const handleQuestionConfirm = (
-        questionId: any,
-        setDeleteModalOpen: any
-    ) => {
-        const updateQuestions = generatedQuestions.filter(
-            (item: any) => item.questionId !== questionId
-        )
-        setGeneratedQuestions(updateQuestions)
-        setDeleteModalOpen(false)
+    questionId: any,
+    setDeleteModalOpen: any
+) => {
+    const updateQuestions = generatedQuestions.filter(
+        (item: any) => item.questionId !== questionId
+    )
+    setGeneratedQuestions(updateQuestions)
+    
+    // 🔥 Update requestBody
+    if (updateQuestions.length > 0) {
+        const bulkQuestions = updateQuestions.map((question) => {
+            return {
+                tagId: question.tagId,
+                difficulty: question.difficulty,
+                variantMCQs: [
+                    {
+                        question: question.question,
+                        options: question.options,
+                        correctOption: question.correctOption,
+                    },
+                ],
+            }
+        })
+        const updatedRequestBody = {
+            quizzes: bulkQuestions,
+        }
+        setRequestBody(updatedRequestBody)
+    } else {
+        setRequestBody({ quizzes: [] })
     }
-
+    
+    setDeleteModalOpen(false)
+}
     useEffect(() => {
         if (loadingAI) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -1112,34 +1145,24 @@ const NewMcqProblemForm = ({
                                 type="button"
                                 onClick={handleClear}
                                 className="flex items-center bg-gray-300 text-black"
+                                disabled={saving}
                             >
                                 Clear Questions
                             </Button>
-                            {/* <Button
-                                type="submit"
-                                disabled={saving}
+                            <Button
+                                type="button"
+                                onClick={() => handleCreateQuizQuestion(requestBody)}
                                 className="w-1/3 flex items-center justify-center"
+                                disabled={saving}
                             >
                                 {saving ? (
                                     <>
-                                        <Spinner
-                                            size="small"
-                                            className="mr-2"
-                                        />
+                                        <Spinner size="small" className="mr-2" />
                                         Saving...
                                     </>
                                 ) : (
-                                    'Add Questions'
+                                    'Save Questions'
                                 )}
-                            </Button> */}
-                            <Button
-                                type="button"
-                                onClick={() =>
-                                    handleCreateQuizQuestion(requestBody)
-                                }
-                                className="w-1/3 flex items-center justify-center"
-                            >
-                                Save Questions
                             </Button>
                         </div>
                     )}
