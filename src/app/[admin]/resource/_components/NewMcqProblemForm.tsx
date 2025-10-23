@@ -145,28 +145,42 @@ const NewMcqProblemForm = ({
         return
     }
     
-    setSaving(true) // Add loading state
+    setSaving(true)
     
     try {
         const res = await api.post(`/Content/quiz`, requestBody)
-
-        // 🔥 Fetch fresh quiz questions and update store
-        try {
-            const quizData = await getAllQuizQuesiton()
-            setStoreQuizData(quizData)
-        } catch (err) {
-            console.error('Error fetching quiz questions after save:', err)
-        }
-
-        // Close modal and reset form after successful save
-        closeModal()
-        setMcqType('')
-        handleClear()
 
         toast.success({
             title: res.data.status || 'Success',
             description: res.data.message || 'Quiz Questions Created Successfully',
         })
+
+        // Clear form and close modal first
+        handleClear()
+        setMcqType('')
+        closeModal()
+
+        // Then refresh data after a small delay to prevent table errors
+        setTimeout(async () => {
+            try {
+                if (typeof getAllQuizQuesiton === 'function') {
+                    await getAllQuizQuesiton(
+                        setStoreQuizData,
+                        0, // Reset offset
+                        10, // Limit
+                        [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
+                        [{ value: '-1', label: 'All Topics' }], // Reset topic filter
+                        () => {}, // setTotalMCQQuestion placeholder
+                        () => {}, // setLastPage placeholder
+                        () => {}, // setTotalPages placeholder
+                        '' // No search term
+                    )
+                }
+            } catch (err) {
+                console.error('Error refreshing data:', err)
+            }
+        }, 100) // Small delay to let UI settle
+
     } catch (error) {
         console.error('Error creating quiz questions:', error)
         toast.error({
@@ -175,7 +189,7 @@ const NewMcqProblemForm = ({
                 'There was an error creating the quiz questions. Please try again.',
         })
     } finally {
-        setSaving(false) // Remove loading state
+        setSaving(false)
     }
 }
 
