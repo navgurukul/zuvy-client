@@ -282,3 +282,93 @@ export const CurriculumSkeleton = () => {
 
 
 
+
+
+
+
+export const StudentPageSkeleton = () => {
+  return (
+    <div className="text-foreground">
+      {/* Title and description */}
+      <div className="text-start mt-6">
+        <Skeleton className="h-7 w-[150px] mb-2" />
+        <Skeleton className="h-5 w-[300px]" />
+      </div>
+
+      {/* Search box and action buttons */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-y-4 mt-6">
+        {/* Search Box */}
+        <div className="w-full md:w-1/2 lg:w-1/4">
+          <Skeleton className="h-10" />
+        </div>
+
+        {/* Buttons */}
+        <div className="flex w-full flex-row mt-2 gap-x-4 md:w-auto">
+          <Skeleton className="h-10 w-[180px]" />
+          <Skeleton className="h-10 w-[160px]" />
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 mt-10">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="w-full sm:w-[160px] mt-2">
+            <Skeleton className="h-10" />
+          </div>
+        ))}
+        {/* Attendance input */}
+        <div className="w-full sm:w-[160px]">
+          <Skeleton className="h-10" />
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="mt-6">
+        <Skeleton className="h-[400px] rounded-md" />
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-end mt-6">
+        <Skeleton className="h-10 w-[200px] rounded-md" />
+      </div>
+    </div>
+  )
+}
+
+
+
+
+export const BatchCardSkeleton = () => {
+    return (
+        <div className="w-[380px] p-4 bg-gray-100 rounded-md shadow animate-pulse space-y-4">
+            {/* Title */}
+            <Skeleton className="h-5 w-3/4 rounded" />
+
+            {/* Status badge */}
+            <Skeleton className="h-6 w-20 rounded-full bg-yellow-300" />
+
+            {/* Instructor */}
+            <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-2/3 rounded" />
+            </div>
+
+            {/* Students */}
+            <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-1/2 rounded" />
+            </div>
+
+            {/* Duration */}
+            <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-3/5 rounded" />
+            </div>
+
+            {/* Button */}
+            <Skeleton className="h-10 w-32 rounded-md bg-blue-300" />
+        </div>
+    )
+}
+
+

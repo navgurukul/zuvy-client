@@ -91,6 +91,8 @@ import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
 import AddStudentOptions from '../../_components/AddStudentOptions'
+import {BatchCardSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 // Enhanced Batch interface to match new design
 interface EnhancedBatch {
@@ -1333,10 +1335,11 @@ const Page = ({ params }: { params: ParamsType }) => {
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
                             <div className="relative top-[70%]">
-                                {/* <Spinner className="text-secondary" /> */}
+                                <Spinner className="text-secondary" />
                             </div>
                         </div>
                     </div>
+
                 ) : (
                     /* Batch Cards Grid - Updated Design */
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

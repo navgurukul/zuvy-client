@@ -33,7 +33,7 @@ import { LANGUAGES } from '@/utils/constant'
 import { useCourseDetails } from '@/hooks/useCourseDetails'
 import { PageParams } from '@/app/[admin]/courses/[courseId]/(courseTabs)/details/courseDetailType'
 import {GeneralDetailsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
-// import {CourseLayoutSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 
 const FormSchema = z.object({
