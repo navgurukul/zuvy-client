@@ -13,6 +13,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import AddRoleModal from './AddRoleModal'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 interface RoleAction {
     id: number
@@ -398,28 +399,29 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             </div>
 
             {/* Role Selection Tabs */}
-            <div className="flex gap-6 border-b border-gray-200">
-                {
-                    roles.map((role, index) => {
-                        return (
+            <div className="border-b border-gray-200">
+                <ScrollArea className="w-full">
+                    <div className="flex gap-6 pb-2 min-w-max">
+                        {roles.map((role, index) => (
                             <Button
                                 key={role.id}
                                 onClick={() => handleRoleChange(role.name, role.id)}
-                                className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
+                                className={`flex items-center gap-3 border-b-2 transition-colors bg-transparent 
+                                            whitespace-nowrap flex-shrink-0 ${selectedRole === role.name
                                     ? 'border-blue-500 text-gray-900 hover:bg-transparent'
                                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                     }`}
                             >
                                 <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
                                 <span className="font-medium text-[1rem] capitalize">{role.name}</span>
-                                {/* Show unsaved indicator */}
                                 {selectedRole === role.name && hasUnsavedChanges && (
                                     <div className="w-2 h-2 bg-warning rounded-full"></div>
                                 )}
                             </Button>
-                        )
-                    })
-                }
+                        ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
             </div>
 
             {/* Main Content - Two Column Layout */}
