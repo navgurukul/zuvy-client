@@ -649,12 +649,14 @@ const CodingProblems = () => {
                     </Dialog>
 
                     {!isCodingDialogOpen && !isCodingEditDialogOpen && (
-                        <DataTablePagination
-                            totalStudents={totalCodingQuestion}
-                            lastPage={lastPage}
-                            pages={totalPages}
-                            fetchStudentData={fetchCodingQuestions}
-                        />
+                        <div className='pb-4 flex justify-end'>
+                            <DataTablePagination
+                                totalStudents={totalCodingQuestion}
+                                lastPage={lastPage}
+                                pages={totalPages}
+                                fetchStudentData={fetchCodingQuestions}
+                            />
+                        </div>
                     )}
                 </div>
             )}
