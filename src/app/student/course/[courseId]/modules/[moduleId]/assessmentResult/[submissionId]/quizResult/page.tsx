@@ -10,7 +10,7 @@ import { useQuizResults } from '@/hooks/useQuizResults'
 import { useThemeStore } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import {MCQResult} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/quizResult/modulesAssessmentQuixResultType"
-import{QuizResultPageSkeleton} from "@/app/student/_components/Skeletons"
+import{QuizResultsSkeleton} from "@/app/student/_components/Skeletons"
 const QuizResults = ({
     params,
 }: {
@@ -43,9 +43,9 @@ const QuizResults = ({
     ) || 0
     const percentage = maxMarks > 0 ? Math.ceil((totalMarks / maxMarks) * 100) : 0
 
-    // Show loading state
-    if (loading) {
-     return<QuizResultPageSkeleton/>
+
+    if (loading || !quizResults) {
+       return <QuizResultsSkeleton />;
     }
     // Show error state
     if (error) {
@@ -93,8 +93,7 @@ const QuizResults = ({
                         onClick={() => router.back()}
                         className="inline-flex items-center space-x-2 text-primary hover:text-primary-dark mb-8 transition-colors duration-200 cursor-pointer group"
                     >
-                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                        <span className="font-medium">Back to Results</span>
+                         <X className="w-5 h-5 mt-5 ml-4" />
                     </div>
                     
                     <div className="text-center bg-card border border-border rounded-2xl p-12 shadow-8dp">
@@ -114,8 +113,7 @@ const QuizResults = ({
                         onClick={() => router.back()}
                         className="inline-flex text-left w-full m-3 items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
                     >
-                        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-200" />
-                        <span className="font-medium">Back to Results</span>
+                         <X className="w-5 h-5 mt-5 ml-4" />
                     </div>
                     <Button
           variant="ghost"
@@ -137,9 +135,10 @@ const QuizResults = ({
                     
                     <div className="flex items-center space-x-3">
                         <Award className="w-6 h-6 text-primary" />
-                        <h1 className="text-2xl font-bold text-foreground">Quiz Results</h1>
+                        <h1 className="text-2xl font-bold text-foreground">Quiz Results</h1> 
                     </div>
                 </div>
+
 
                 {/* Performance Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
