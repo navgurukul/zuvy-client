@@ -411,8 +411,6 @@ function Page() {
     async function handleReorder(newOrderModules: CurriculumItem[]) {
         if (!courseData?.id || !draggedModuleId) return
 
-        // setIsReordering(true)
-
         const newPosition =
             newOrderModules.findIndex((item) => item.id === draggedModuleId) + 1
 
@@ -427,15 +425,11 @@ function Page() {
         // If position hasn't changed, don't make API call
         if (!hasActuallyChanged) {
             setIsReordering(false)
-            return // Early return - no API call, no toast
+            return
         }
 
         setIsReordering(true)
 
-        const updatedModules = newOrderModules.map((item, index) => ({
-            ...item,
-            order: index + 1,
-        }))
         try {
             const response = await api.put(
                 `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${draggedModuleId}`,
@@ -443,7 +437,7 @@ function Page() {
                     reOrderDto: { newOrder: newPosition },
                 }
             )
-            // setOriginalCurriculum([...updatedModules])
+            
             const warningMsg = response.data?.[0]?.message ?? ''
 
             if (warningMsg.includes('started by')) {
@@ -460,7 +454,9 @@ function Page() {
                 setOriginalCurriculum(updatedOriginal)
                 setCurriculum(updatedOriginal)
             } else {
-                setOriginalCurriculum([...updatedModules])
+                // Update both curriculum and original with the new order
+                setOriginalCurriculum([...newOrderModules])
+                setCurriculum([...newOrderModules])
                 toast.success({
                     title: 'Success',
                     description: 'Module order updated successfully',
@@ -482,15 +478,11 @@ function Page() {
     }
 
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
-        // Update curriculum immediately for smooth UI
-        const updatedModules = newOrderModules.map((item, index) => ({
-            ...item,
-            order: index + 1,
-        }))
-        setCurriculum(updatedModules)
+        // Only update the visual order during drag, don't update the actual order values
+        setCurriculum(newOrderModules)
 
         const oldOrder = originalCurriculum.map((item) => item.id)
-        const newOrder = updatedModules.map((item) => item.id)
+        const newOrder = newOrderModules.map((item) => item.id)
 
         const orderChanged =
             JSON.stringify(oldOrder) !== JSON.stringify(newOrder)
@@ -505,33 +497,36 @@ function Page() {
             setReorderTimeout(null)
         }
 
+        // Don't set timeout during dragging - only when drag ends
         if (!isDragging) {
-            // Only set timeout if drag is not active (this means it's the final drop)
             const timeout = setTimeout(() => {
                 if (hasOrderChanged) {
-                    handleReorder(updatedModules)
+                    // Update order values only when drag is complete
+                    const updatedModulesWithOrder = newOrderModules.map((item, index) => ({
+                        ...item,
+                        order: index + 1,
+                    }))
+                    handleReorder(updatedModulesWithOrder)
                     setHasOrderChanged(false)
                 }
-            }, 200) // Reduced timeout since it's only for final drop
+            }, 200)
 
             setReorderTimeout(timeout)
         }
     }
 
-    const handleDragStart = () => {
+    // Handle the start of a drag: mark dragging and remember which module is being dragged
+    const handleDragStart = (moduleId: number) => {
         setIsDragging(true)
-        setHasOrderChanged(false)
+        setDraggedModuleId(moduleId)
     }
 
     const handleDragEnd = () => {
         setIsDragging(false)
 
-        // After drag ends, check if we need to save
+        // After drag ends, update the order values
         setTimeout(() => {
             if (hasOrderChanged) {
-                // handleReorder(curriculum)
-                // setHasOrderChanged(false)
-
                 const currentOrder = curriculum.map((item) => item.id)
                 const originalOrder = originalCurriculum.map((item) => item.id)
 
@@ -539,7 +534,12 @@ function Page() {
                     JSON.stringify(currentOrder) !==
                     JSON.stringify(originalOrder)
                 ) {
-                    handleReorder(curriculum)
+                    // Update the order values when drag is complete
+                    const updatedModulesWithOrder = curriculum.map((item, index) => ({
+                        ...item,
+                        order: index + 1,
+                    }))
+                    handleReorder(updatedModulesWithOrder)
                 }
                 setHasOrderChanged(false)
             }
@@ -685,7 +685,7 @@ function Page() {
                                     projectId={item.projectId}
                                     chapterId={item.ChapterId}
                                     setDraggedModuleId={setDraggedModuleId}
-                                    onDragStart={handleDragStart}
+                                    onDragStart={() => handleDragStart(item.id)}
                                     onDragEnd={handleDragEnd}
                                     showBorderFlash={
                                         flashingModuleId === item.id
