@@ -1152,7 +1152,6 @@ export const SubmissionIdPage=()=>{
                               </div>
                           </div>
                       </div>
-  
                       {/* Coding Challenges Skeleton */}
                       <div className="mb-8">
                           <div className="mb-6">
@@ -1182,7 +1181,6 @@ export const SubmissionIdPage=()=>{
                               </div>
                           </div>
                       </div>
-  
                       {/* MCQ Skeleton */}
                       <div className="mb-8">
                           <div className="mb-6">
