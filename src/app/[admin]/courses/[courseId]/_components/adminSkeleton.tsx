@@ -4,7 +4,8 @@
 import React from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft } from 'lucide-react'; // Icon import
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 export const CoursesSkeleton: React.FC = () => {
   return (
@@ -134,80 +135,7 @@ export const GeneralDetailsSkeleton: React.FC = () => {
 }
 
 
-
-
 // // CourseLayoutSkeleton
-// export const CourseLayoutSkeleton=()=> {
-//     return (
-//         <div className="px-6 py-8 space-y-6">
-//             {/* Back button + title */}
-//             <div className="flex items-center gap-3">
-//                 <Skeleton className="h-5 w-5 rounded-full" />
-//                 <Skeleton className="h-5 w-[180px]" />
-//             </div>
-
-//             {/* Course title */}
-//             <Skeleton className="h-8 w-[250px] mt-4" />
-
-//             {/* Tabs */}
-//             <div className="flex gap-3 mt-6 overflow-x-auto">
-//                 {[...Array(6)].map((_, i) => (
-//                     <Skeleton key={i} className="h-10 w-[120px] rounded-md" />
-//                 ))}
-//             </div>
-
-//             {/* Main content placeholder */}
-//             <div className="space-y-4 mt-10">
-//                 <Skeleton className="h-6 w-[200px]" />
-//                 <Skeleton className="h-4 w-[80%]" />
-//                 <Skeleton className="h-4 w-[70%]" />
-//                 <Skeleton className="h-4 w-[60%]" />
-//             </div>
-//         </div>
-//     )
-// }
-
-
-
-
-
-
-
-// export const CourseLayoutSkeleton = () => {
-//   return (
-//     <div className="px-8 py-10 space-y-6">
-//       {/* Back to Course Library */}
-//       <div className="flex items-center gap-2">
-//         <Skeleton className="h-4 w-4 rounded-full" /> {/* back icon */}
-//         <Skeleton className="h-4 w-[150px]" /> {/* "Back to Course Library" */}
-//       </div>
-
-//       {/* Course title */}
-//       <Skeleton className="h-9 w-[120px] mt-4" /> {/* e.g. React */}
-
-//       {/* Tabs (General Details, Curriculum, etc.) */}
-//       <div className="flex items-center justify-start gap-6 mt-8 border-b border-gray-200 pb-2 overflow-x-auto">
-//         {["General Details", "Curriculum", "Students", "Batches", "Submissions", "Settings"].map(
-//           (tab, i) => (
-//             <div key={i} className="flex items-center gap-2">
-//               <Skeleton className="h-4 w-4 rounded-full" /> {/* icon placeholder */}
-//               <Skeleton className="h-5 w-[120px] rounded-md" /> {/* tab name */}
-//             </div>
-//           )
-//         )}
-//       </div>
-
-//     </div>
-//   );
-// };
-
-
-
-
-
-
-
-
 
 export const CourseLayoutSkeleton = () => {
   return (
@@ -372,3 +300,70 @@ export const BatchCardSkeleton = () => {
 }
 
 
+
+
+
+
+export default function BatchesSkeleton() {
+    return (
+        <div className="w-full max-w-none pb-8">
+            {/* Header Skeleton */}
+            <div className="flex items-center justify-between mb-6">
+                <div className="space-y-2">
+                    <Skeleton className="h-6 w-40" />
+                    <Skeleton className="h-4 w-72" />
+                </div>
+                <Skeleton className="h-10 w-[200px] rounded-md" />
+            </div>
+
+            {/* Search Bar Skeleton */}
+            <div className="flex flex-col lg:flex-row justify-between items-center mb-8">
+                <div className="relative w-full lg:max-w-[500px]">
+                    <Skeleton className="h-10 w-full rounded-md" />
+                </div>
+            </div>
+
+            {/* Grid of Batch Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                    <Card
+                        key={i}
+                        className="flex flex-col w-[380px] hover:shadow-lg transition-all duration-200"
+                    >
+                        <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1 space-y-2">
+                                    <Skeleton className="h-5 w-32" />
+                                    <Skeleton className="h-4 w-16 rounded-md" />
+                                </div>
+                                <div className="flex gap-1">
+                                    <Skeleton className="h-6 w-6 rounded-md" />
+                                    <Skeleton className="h-6 w-6 rounded-md" />
+                                </div>
+                            </div>
+                        </CardHeader>
+
+                        <CardContent className="space-y-3">
+                            <div className="flex items-center gap-2 text-sm">
+                                <Skeleton className="h-4 w-4 rounded-full" />
+                                <Skeleton className="h-4 w-40" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <Skeleton className="h-4 w-4 rounded-full" />
+                                <Skeleton className="h-4 w-32" />
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <Skeleton className="h-4 w-4 rounded-full" />
+                                <Skeleton className="h-4 w-44" />
+                            </div>
+                        </CardContent>
+
+                        <CardFooter className="pt-3">
+                            <Skeleton className="h-8 w-full rounded-md" />
+                        </CardFooter>
+                    </Card>
+                ))}
+            </div>
+        </div>
+    )
+}
