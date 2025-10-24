@@ -84,8 +84,6 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         validateImageFile,
     } = useCourseDetails()
 
-    console.log('Permissions in details', Permissions)
-
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {

@@ -33,7 +33,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     onRoleChange,
 }) => {
     const searchParams = useSearchParams()
-    const { roles } = useRoles()
+    const { roles,refetchRoles } = useRoles()
     const { assignPermissions, loading: assigning } = useAssignPermissions()
     const [selectedAction, setSelectedAction] = useState<number>(12)
     const [roleId, setRoleId] = useState<number>(1)
@@ -393,7 +393,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         </Button>
                     </DialogTrigger>
                     {isAddModalOpen && (
-                        <AddRoleModal />
+                        <AddRoleModal
+                            onClose={() => setIsAddModalOpen(false)}
+                            onRoleAdded={refetchRoles}
+                         />
                     )}
                 </Dialog>
             </div>
