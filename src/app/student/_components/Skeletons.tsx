@@ -1126,7 +1126,6 @@ export const QuizResultsSkeleton = () => {
           </div>
         ))}
       </div>
-
       {/* Questions Skeleton */}
       <div className="space-y-6">
         {[1, 2].map((q) => (
@@ -1145,7 +1144,6 @@ export const QuizResultsSkeleton = () => {
                 <Skeleton className="h-5 w-20 rounded-full" />
               </div>
             </div>
-
             {/* Question Body */}
             <div className="p-6 space-y-4">
               <Skeleton className="h-4 w-3/4" />
@@ -1170,9 +1168,6 @@ export const QuizResultsSkeleton = () => {
   )
 }
 
-
-
-  
 
 // submissionIdPage.tsx
 export const SubmissionIdPage=()=>{
@@ -1204,7 +1199,6 @@ export const SubmissionIdPage=()=>{
                               </div>
                           </div>
                       </div>
-  
                       {/* Coding Challenges Skeleton */}
                       <div className="mb-8">
                           <div className="mb-6">
@@ -1260,7 +1254,6 @@ export const SubmissionIdPage=()=>{
                               </div>
                           </div>
                       </div>
-  
                       {/* Open-Ended Skeleton */}
                       <div className="mb-8">
                           <div className="mb-6">
