@@ -156,9 +156,6 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     // Populate form when courseData changes
     useEffect(() => {
         if (courseData) {
-            // Reset image states first to ensure clean slate
-            resetImageStates()
-
             form.reset({
                 name: courseData.name || '',
                 bootcampTopic: courseData.bootcampTopic || '',
@@ -213,14 +210,24 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     }
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        const success = await updateCourseDetails(data, croppedImage)
+        // If collaborator type is image, set the collaborator field to the cropped image URL
+        const formDataToSubmit = {
+            ...data,
+            collaborator: collaboratorType === 'image' ? croppedCollaboratorImage || '' : data.collaborator || ''
+        }
+
+        const success = await updateCourseDetails(
+            formDataToSubmit, 
+            croppedImage,
+            collaboratorType === 'image' ? croppedCollaboratorImage : null
+        )
+        
         if (!success) {
             return
         }
 
-        // Handle collaborator image upload (only if type is image and there's a cropped image)
-        // Note: Ye logic aapko apne updateCourseDetails function mein add karna padega
-        // ya separately handle karna padega based on your API structure
+        // Don't reset image states after successful submission
+        // The useEffect will handle updating the form with new data from courseData
     }
 
     // Image upload handler - validation hook se kar rahe hain
