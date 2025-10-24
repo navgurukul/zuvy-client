@@ -41,8 +41,6 @@ const CodingResultContent = () => {
     const chapterId = searchParams.get('chapterId');
     const { isDark, toggleTheme } = useThemeStore();
 
-
-    console.log(moduleId , chapterId)
     useEffect(() => {
         if (questionId) {
             const fetchSubmission = async () => {

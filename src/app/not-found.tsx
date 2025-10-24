@@ -1,12 +1,13 @@
 'use client'
 
 import { buttonVariants } from '@/components/ui/button'
+import { getUser } from '@/store/store';
 import Link from 'next/link'
 import { usePathname } from 'next/navigation';
 
 const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
-      const pathname = usePathname()
-        const role = pathname.split('/')[1]
+        const { user } = getUser()
+        const role = user.rolesList[0]
 
     return (
         <main className="grid min-h-screen place-items-center px-6 py-20 sm:py-32 lg:px-6 ">

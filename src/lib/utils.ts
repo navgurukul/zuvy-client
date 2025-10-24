@@ -81,6 +81,24 @@ export function statusColor(status: string): string {
     }
 }
 
+export const COLOR_PALETTE = [
+  { bg: 'bg-orange-500', text: 'text-orange-500', border: 'border-orange-500', hex: '#f97316' },
+  { bg: 'bg-blue-500', text: 'text-blue-500', border: 'border-blue-500', hex: '#3b82f6' },
+  { bg: 'bg-green-500', text: 'text-green-500', border: 'border-green-500', hex: '#22c55e' },
+  { bg: 'bg-purple-500', text: 'text-purple-500', border: 'border-purple-500', hex: '#a855f7' },
+  { bg: 'bg-pink-500', text: 'text-pink-500', border: 'border-pink-500', hex: '#ec4899' },
+  { bg: 'bg-indigo-500', text: 'text-indigo-500', border: 'border-indigo-500', hex: '#6366f1' },
+  { bg: 'bg-red-500', text: 'text-red-500', border: 'border-red-500', hex: '#ef4444' },
+  { bg: 'bg-teal-500', text: 'text-teal-500', border: 'border-teal-500', hex: '#14b8a6' },
+  { bg: 'bg-yellow-500', text: 'text-yellow-500', border: 'border-yellow-500', hex: '#eab308' },
+  { bg: 'bg-cyan-500', text: 'text-cyan-500', border: 'border-cyan-500', hex: '#06b6d4' },
+  { bg: 'bg-emerald-500', text: 'text-emerald-500', border: 'border-emerald-500', hex: '#10b981' },
+  { bg: 'bg-violet-500', text: 'text-violet-500', border: 'border-violet-500', hex: '#8b5cf6' },
+  { bg: 'bg-fuchsia-500', text: 'text-fuchsia-500', border: 'border-fuchsia-500', hex: '#d946ef' },
+  { bg: 'bg-rose-500', text: 'text-rose-500', border: 'border-rose-500', hex: '#f43f5e' },
+  { bg: 'bg-lime-500', text: 'text-lime-500', border: 'border-lime-500', hex: '#84cc16' },
+];
+
 export const getAttendanceColorClass = (attendance: any) => {
     if (attendance === 100) {
         return 'bg-green-500 text-white'
@@ -109,7 +127,7 @@ export function getAssesmentBackgroundColorClass(totalNo: number, no: number) {
 export const formatDate = (dateString: string): string => {
     const options: Intl.DateTimeFormatOptions = {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric',
         // hour: '2-digit',
         // minute: '2-digit',

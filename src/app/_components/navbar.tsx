@@ -1,4 +1,5 @@
 'use client'
+
 import Link from 'next/link'
 import {
     Layers,
@@ -23,6 +24,7 @@ const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -72,12 +74,12 @@ const Navbar = () => {
                 <div className="flex items-center gap-8">
                     {/* Logo and Brand */}
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
-                        <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-                            <span className="text-white font-bold text-lg">
+                        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+                            <span className="text-primary-foreground font-bold text-lg">
                                 Z
                             </span>
                         </div>
-                        <h3 className="font-bold text-gray-900 text-xl">
+                        <h3 className="font-heading font-semibold text-foreground text-xl">
                             Zuvy Admin
                         </h3>
                     </Link>
@@ -109,8 +111,8 @@ const Navbar = () => {
                                             className={cn(
                                                 'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
                                                 isActive
-                                                    ? 'bg-blue-600 text-white shadow-sm'
-                                                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
                                             )}
                                         >
                                             <Icon className="h-4 w-4" />
@@ -118,7 +120,7 @@ const Navbar = () => {
                                         </Link>
                                     )}
                                     {item.name === 'Question Bank' && permissions.viewQuestion && (
-                                        loading ? <Spinner /> : <QuestionBankDropdown />
+                                        loading ? <Spinner /> : <QuestionBankDropdown/>
                                     )}
                                 </>
                             )
@@ -128,7 +130,7 @@ const Navbar = () => {
 
                 {/* Right - Theme Switch and Avatar with Dropdown */}
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
-                    <Button
+                    {/* <Button
                         variant="ghost"
                         size="sm"
                         onClick={toggleTheme}
@@ -139,7 +141,7 @@ const Navbar = () => {
                         ) : (
                             <Moon className="h-4 w-4" />
                         )}
-                    </Button>
+                    </Button> */}
 
                     {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown

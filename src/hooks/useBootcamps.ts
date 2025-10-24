@@ -5,7 +5,7 @@
 // import type {
 //     Course,
 //     CoursesResponse,
-// } from '@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+// } from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 
 // type UseBootcampsArgs = {
 //     limit: number | string
@@ -28,7 +28,6 @@
 
 //     const getBootcamp = useCallback(
 //         async (newOffset?: number) => {
-//             console.log('Loop')
 //             try {
 //                 setLoading(true)
 //                 const resolvedOffset =
@@ -74,7 +73,7 @@ import { api } from '@/utils/axios.config'
 import type {
     Course,
     CoursesResponse,
-} from '@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+} from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 
 type UseBootcampsArgs = {
     limit: number | string
@@ -110,7 +109,6 @@ export function useBootcamps({
 
     const doFetch = useCallback(
         async (off: number) => {
-
             const key = buildKey(off)
 
             // If we are already fetching this exact key, or it already finished, skip

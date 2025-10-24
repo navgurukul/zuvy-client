@@ -116,6 +116,12 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 224 71% 56%;
+
+    /* Global scrollbar colors */
+   --scrollbar-track: 0 0% 95%;
+   --scrollbar-thumb: 0 0% 70%;
+   --scrollbar-thumb-hover: 0 0% 45%;
+   --scrollbar-corner: 0 0% 100%;
   }
 
   /* Dark Mode Configuration - Warm, comfortable dark theme */
@@ -270,6 +276,23 @@
     @apply bg-background text-foreground font-body;
     font-size: 1.125rem; /* 18px */
     line-height: 1.7;
+  }
+
+  /* Global native scrollbar color only (no size/shape changes) */
+  * {
+    scrollbar-color: hsl(var(--scrollbar-thumb)) hsl(var(--scrollbar-track));
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--scrollbar-track));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--scrollbar-thumb));
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--scrollbar-thumb-hover));
   }
 
   h1, h2, h3, h4, h5, h6 {

@@ -14,14 +14,15 @@ import { useState } from 'react'
 
 const QuestionBankDropdown = () => {
     const pathname = usePathname()
+        const role = pathname.split('/')[1]
     const [open, setOpen] = useState(false)
 
     const isActive =
-        pathname === '/admin/resource/' ||
-        pathname.startsWith('/admin/resource/')
+        pathname === `/${role}/resource/` ||
+        pathname.startsWith(`/${role}/resource/`)
 
     return (
-        <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
             <div
                 onMouseEnter={() => setOpen(true)}
                 onMouseLeave={() => setOpen(false)}
@@ -32,10 +33,10 @@ const QuestionBankDropdown = () => {
                         className={cn(
                             'flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium focus:outline-none',
                             isActive
-                                ? 'bg-blue-600 text-white shadow-sm cursor-default hover:bg-blue-600 hover:text-white'
+                                ? 'bg-primary text-primary-foreground shadow-sm cursor-default hover:bg-primary hover:text-primary-foreground'
                                 : open
-                                ? 'bg-gray-100 text-black hover:bg-gray-100 hover:text-black'
-                                : 'text-black hover:text-black hover:bg-gray-100'
+                                ? 'bg-gray-100 text-foreground hover:bg-gray-100 hover:text-foreground'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
                         )}
                     >
                         <Database className="h-4 w-4" />
@@ -45,10 +46,10 @@ const QuestionBankDropdown = () => {
 
                 <DropdownMenuContent className="w-40">
                     <Link
-                        href="/admin/resource/coding"
+                        href={`/${role}/resource/coding`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === '/admin/resource/coding'
+                            pathname === `/${role}/resource/coding`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}
@@ -56,10 +57,10 @@ const QuestionBankDropdown = () => {
                         Coding Problems
                     </Link>
                     <Link
-                        href="/admin/resource/mcq"
+                        href={`/${role}/resource/mcq`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === '/admin/resource/mcq'
+                            pathname === `/${role}/resource/mcq`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}
@@ -67,10 +68,10 @@ const QuestionBankDropdown = () => {
                         MCQ
                     </Link>
                     <Link
-                        href="/admin/resource/open-ended"
+                        href={`/${role}/resource/open-ended`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === '/admin/resource/open-ended'
+                            pathname === `/${role}/resource/open-ended`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}

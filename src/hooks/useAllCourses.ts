@@ -4,7 +4,7 @@ import { api } from '@/utils/axios.config'
 import type {
     Course,
     CoursesResponse,
-} from '@/app/admin/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+} from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import { coursePermissions } from './hookType'
 import { db } from '@/lib/indexDb'
 
@@ -17,7 +17,8 @@ export function useAllCourses(initialFetch = true) {
         try {
             setLoading(true)
             const res = await api.get<CoursesResponse>(
-                '/bootcamp?limit=10&offset=0'
+                // '/bootcamp?limit=10&offset=0'
+                 '/bootcamp'
             )
             setAllCourses(res.data.data)
             
