@@ -50,8 +50,8 @@ const CurricullumCard = (props: CurricullamCardProps) => {
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
 
-    // Use original order during dragging, current order when not dragging
-    const displayOrder = isDragging ? originalOrder : order
+    // Always use the current order from props, don't override during drag
+    const displayOrder = order
 
     const handleDeleteModal = () => {
         setDeleteModalOpen(true)
@@ -112,10 +112,6 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                 setIsDragging(false)
                 props.setDraggedModuleId(null)
                 onDragEnd?.()
-                // Update original order after drag completes
-                setTimeout(() => {
-                    setOriginalOrder(order)
-                }, 100)
             }}
             transition={{ duration: 0.2 }}
         >
@@ -167,7 +163,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                                 </div>
                                 <div>
                                     <h3 className="font-semibold text-lg">
-                                        Module {displayOrder}: {name} {/* Use displayOrder instead of order */}
+                                        Module {displayOrder}: {name}
                                     </h3>
                                     <p className="text-muted-foreground text-[1rem]">
                                         {description}
