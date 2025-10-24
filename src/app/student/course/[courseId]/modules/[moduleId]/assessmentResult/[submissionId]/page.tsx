@@ -12,20 +12,30 @@ import { getAssesmentBackgroundColorClass } from '@/lib/utils'
 import useAssessmentResult from '@/hooks/useAssessmentResult'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import {AssessmentParams} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"
-import { SubmissionIdPage } from "@/app/student/_components/Skeletons"
+import { AssessmentParams } from '@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType'
+import { SubmissionIdPage } from '@/app/student/_components/Skeletons'
+import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
+import AssessmentFeedbackModal from './AssessmentFeedbackModal'
 
 const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
     // State Variables
-    const [assessmentOutsourseId, setAssessmentOutsourseId] = useState<number | null>(null)
+    const [assessmentOutsourseId, setAssessmentOutsourseId] = useState<
+        number | null
+    >(null)
     const { studentData } = useLazyLoadedStudentData()
-    const { isDark, toggleTheme } = useThemeStore();
+    const { isDark, toggleTheme } = useThemeStore()
+    // const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
 
     const router = useRouter()
 
     // Use the custom hook
-    const { data: viewResultsData, loading, error, refetch } = useAssessmentResult(params.submissionId)
-   
+    const {
+        data: viewResultsData,
+        loading,
+        error,
+        refetch,
+    } = useAssessmentResult(params.submissionId)
 
     React.useEffect(() => {
         if (viewResultsData && viewResultsData.assessmentOutsourseId) {
@@ -35,7 +45,8 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
 
     const isPassed = viewResultsData?.isPassed
     const percentage = viewResultsData?.percentage
-    const passPercentage = viewResultsData?.submitedOutsourseAssessment?.passPercentage
+    const passPercentage =
+        viewResultsData?.submitedOutsourseAssessment?.passPercentage
 
     const formatTime = (milliseconds: number): string => {
         const seconds = Math.floor((milliseconds / 1000) % 60)
@@ -91,7 +102,9 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                     Back
                 </Button>
                 <div className="bg-destructive-light border border-destructive rounded-lg p-6 max-w-md mx-auto">
-                    <h2 className="text-destructive font-semibold mb-2">Error Loading Results</h2>
+                    <h2 className="text-destructive font-semibold mb-2">
+                        Error Loading Results
+                    </h2>
                     <p className="text-destructive-dark">{error}</p>
                 </div>
             </div>
@@ -108,10 +121,12 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                 >
                     {/* <ChevronLeft className="w-4 h-4 mr-2" />
                     Back */}
-                     <X className="w-5 h-5" />
+                    <X className="w-5 h-5" />
                 </Button>
                 <div className="bg-muted-light border border-border rounded-lg p-6 max-w-md mx-auto text-center">
-                    <p className="text-muted-foreground">No assessment results found.</p>
+                    <p className="text-muted-foreground">
+                        No assessment results found.
+                    </p>
                 </div>
             </div>
         )
@@ -119,13 +134,13 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
 
     // Render Helpers
     const renderCodingChallenges = () => {
-        const totalCodingQuestions = viewResultsData.submitedOutsourseAssessment.totalCodingQuestions;
-        const attemptedCodingQuestions = viewResultsData.PracticeCode.length ;
-        
+        const totalCodingQuestions =
+            viewResultsData.submitedOutsourseAssessment.totalCodingQuestions
+        const attemptedCodingQuestions = viewResultsData.PracticeCode.length
 
         // Don't show section if no coding questions exist
         if (!totalCodingQuestions || totalCodingQuestions === 0) {
-            return null;
+            return null
         }
 
         const getCodingQuestionWeightage = (difficulty: string) => {
@@ -171,82 +186,119 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                                     No Coding Questions Attempted
                                 </h3>
                                 <p className="text-sm text-muted-foreground text-left">
-                                    You did not attempt any of the {totalCodingQuestions} coding challenge{totalCodingQuestions > 1 ? 's' : ''} in this assessment.
+                                    You did not attempt any of the{' '}
+                                    {totalCodingQuestions} coding challenge
+                                    {totalCodingQuestions > 1 ? 's' : ''} in
+                                    this assessment.
                                 </p>
                             </div>
                         </div>
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {viewResultsData.PracticeCode.map((codingQuestion: any) => {
-                            const weightageCodingQuestions = getCodingQuestionWeightage(
-                                codingQuestion.questionDetail.difficulty
-                            )
-                            const isAccepted = codingQuestion.status === 'Accepted'
+                        {viewResultsData.PracticeCode.map(
+                            (codingQuestion: any) => {
+                                const weightageCodingQuestions =
+                                    getCodingQuestionWeightage(
+                                        codingQuestion.questionDetail.difficulty
+                                    )
+                                const isAccepted =
+                                    codingQuestion.status === 'Accepted'
 
-                            return (
-                                <div
-                                    key={codingQuestion.id}
-                                    className="bg-card border border-border rounded-lg p-6 shadow-4dp hover:shadow-8dp transition-shadow"
-                                >
-                                    <div className="flex justify-between items-start mb-4">
-                                        <h3 className="font-semibold text-lg text-foreground text-left">
-                                            {codingQuestion.questionDetail.title}
-                                        </h3>
-                                        <div className="flex items-center gap-2">
-                                            <span
-                                                className={cn(
-                                                    'px-2 py-1 rounded-full text-xs font-medium',
-                                                    difficultyColor(codingQuestion.questionDetail.difficulty)
-                                                )}
+                                return (
+                                    <div
+                                        key={codingQuestion.id}
+                                        className="bg-card border border-border rounded-lg p-6 shadow-4dp hover:shadow-8dp transition-shadow"
+                                    >
+                                        <div className="flex justify-between items-start mb-4">
+                                            <h3 className="font-semibold text-lg text-foreground text-left">
+                                                {
+                                                    codingQuestion
+                                                        .questionDetail.title
+                                                }
+                                            </h3>
+                                            <div className="flex items-center gap-2">
+                                                <span
+                                                    className={cn(
+                                                        'px-2 py-1 rounded-full text-xs font-medium',
+                                                        difficultyColor(
+                                                            codingQuestion
+                                                                .questionDetail
+                                                                .difficulty
+                                                        )
+                                                    )}
+                                                >
+                                                    {
+                                                        codingQuestion
+                                                            .questionDetail
+                                                            .difficulty
+                                                    }
+                                                </span>
+                                                <span className="bg-muted px-2 py-1 text-xs rounded-full font-medium">
+                                                    {Math.trunc(
+                                                        Number(
+                                                            weightageCodingQuestions
+                                                        )
+                                                    )}{' '}
+                                                    Marks
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2 mb-4 text-left">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-muted-foreground">
+                                                    Status:
+                                                </span>
+                                                <span
+                                                    className={cn(
+                                                        'font-medium',
+                                                        isAccepted
+                                                            ? 'text-success'
+                                                            : 'text-destructive'
+                                                    )}
+                                                >
+                                                    {codingQuestion.status}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-muted-foreground">
+                                                    Score:
+                                                </span>
+                                                <span className="font-medium">
+                                                    {isAccepted
+                                                        ? `${Number(
+                                                              weightageCodingQuestions
+                                                          ).toFixed(
+                                                              2
+                                                          )} / ${Number(
+                                                              weightageCodingQuestions
+                                                          ).toFixed(2)}`
+                                                        : `0 / ${Number(
+                                                              weightageCodingQuestions
+                                                          ).toFixed(2)}`}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-end">
+                                            <Button
+                                                onClick={() =>
+                                                    viewCodingSubmission(
+                                                        codingQuestion.codingOutsourseId,
+                                                        codingQuestion.questionId
+                                                    )
+                                                }
+                                                className="bg-primary hover:bg-primary-dark text-primary-foreground"
                                             >
-                                                {codingQuestion.questionDetail.difficulty}
-                                            </span>
-                                            <span className="bg-muted px-2 py-1 text-xs rounded-full font-medium">
-                                                {Math.trunc(Number(weightageCodingQuestions))} Marks
-                                            </span>
+                                                View Submission
+                                                <ChevronRight className="w-4 h-4 ml-2" />
+                                            </Button>
                                         </div>
                                     </div>
-
-                                    <div className="space-y-2 mb-4 text-left">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-muted-foreground">Status:</span>
-                                            <span
-                                                className={cn(
-                                                    'font-medium',
-                                                    isAccepted ? 'text-success' : 'text-destructive'
-                                                )}
-                                            >
-                                                {codingQuestion.status}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-medium text-muted-foreground">Score:</span>
-                                            <span className="font-medium">
-                                                {isAccepted
-                                                    ? `${Number(weightageCodingQuestions).toFixed(2)} / ${Number(weightageCodingQuestions).toFixed(2)}`
-                                                    : `0 / ${Number(weightageCodingQuestions).toFixed(2)}`}
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-end">
-                                        <Button
-                                            onClick={() =>
-                                                viewCodingSubmission(
-                                                    codingQuestion.codingOutsourseId,
-                                                    codingQuestion.questionId
-                                                )
-                                            }
-                                            className="bg-primary hover:bg-primary-dark text-primary-foreground"
-                                        >
-                                            View Submission
-                                            <ChevronRight className="w-4 h-4 ml-2" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )
-                        })}
+                                )
+                            }
+                        )}
                     </div>
                 )}
             </div>
@@ -262,17 +314,18 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
             totalMcqQuestions,
         } = viewResultsData.submitedOutsourseAssessment
 
-        const attemptedMCQQuestions = viewResultsData.attemptedMCQQuestions;
+        const attemptedMCQQuestions = viewResultsData.attemptedMCQQuestions
 
         // Don't show section if no MCQ questions exist
         if (!totalMcqQuestions || totalMcqQuestions === 0) {
-            return null;
+            return null
         }
 
         return (
             <div className="mb-8">
                 <SectionHeading title="Multiple Choice Questions" />
-                {attemptedMCQQuestions === 0 || attemptedMCQQuestions === null ? (
+                {attemptedMCQQuestions === 0 ||
+                attemptedMCQQuestions === null ? (
                     <div className="bg-card border border-border rounded-lg p-8 shadow-4dp">
                         <div className="flex flex-col items-start text-left">
                             <Image
@@ -287,7 +340,10 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                                     No MCQ Questions Attempted
                                 </h3>
                                 <p className="text-sm text-muted-foreground text-left">
-                                    You did not attempt any of the {totalMcqQuestions} multiple choice question{totalMcqQuestions > 1 ? 's' : ''} in this assessment.
+                                    You did not attempt any of the{' '}
+                                    {totalMcqQuestions} multiple choice question
+                                    {totalMcqQuestions > 1 ? 's' : ''} in this
+                                    assessment.
                                 </p>
                             </div>
                         </div>
@@ -310,12 +366,16 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
 
                         <div className="mb-4 text-left">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-muted-foreground">Score:</span>
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    Score:
+                                </span>
                                 <span className="font-medium text-lg">
                                     {Number(viewResultsData.mcqScore) % 1 === 0
                                         ? Number(viewResultsData.mcqScore)
-                                        : Number(viewResultsData.mcqScore).toFixed(2)
-                                    } / {weightageMcqQuestions}
+                                        : Number(
+                                              viewResultsData.mcqScore
+                                          ).toFixed(2)}{' '}
+                                    / {weightageMcqQuestions}
                                 </span>
                             </div>
                         </div>
@@ -341,17 +401,19 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
 
     const renderOpenEndedQuestions = () => {
         const openEndedCount = viewResultsData.openEndedQuestionCount
-        const attemptedOpenEndedQuestions = viewResultsData.attemptedOpenEndedQuestions
+        const attemptedOpenEndedQuestions =
+            viewResultsData.attemptedOpenEndedQuestions
 
         // Don't show section if no open-ended questions exist
         if (!openEndedCount || openEndedCount === 0) {
-            return null;
+            return null
         }
 
         return (
             <div className="mb-8">
                 <SectionHeading title="Open-Ended Questions" />
-                {attemptedOpenEndedQuestions === 0 || attemptedOpenEndedQuestions === null ? (
+                {attemptedOpenEndedQuestions === 0 ||
+                attemptedOpenEndedQuestions === null ? (
                     <div className="bg-card border border-border rounded-lg p-8 shadow-4dp">
                         <div className="flex flex-col items-start text-left">
                             <Image
@@ -366,7 +428,10 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                                     No Open-Ended Questions Attempted
                                 </h3>
                                 <p className="text-sm text-muted-foreground text-left">
-                                    You did not attempt any of the {openEndedCount} open-ended question{openEndedCount > 1 ? 's' : ''} in this assessment.
+                                    You did not attempt any of the{' '}
+                                    {openEndedCount} open-ended question
+                                    {openEndedCount > 1 ? 's' : ''} in this
+                                    assessment.
                                 </p>
                             </div>
                         </div>
@@ -384,9 +449,12 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
 
                         <div className="mb-4 text-left">
                             <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-muted-foreground">Attempted:</span>
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    Attempted:
+                                </span>
                                 <span className="font-medium">
-                                    {attemptedOpenEndedQuestions} / {openEndedCount}
+                                    {attemptedOpenEndedQuestions} /{' '}
+                                    {openEndedCount}
                                 </span>
                             </div>
                         </div>
@@ -413,34 +481,57 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
     return (
         <div className="min-h-screen bg-background">
             <div className="text-left flex justify-between mr-4">
-
                 <div
                     onClick={() => router.back()}
                     className="inline-flex text-left w-full m-3 items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200 cursor-pointer group"
                 >
-                        <X className="w-5 h-5 mt-5 ml-4" />
+                    <X className="w-5 h-5 mt-5 ml-4" />
                 </div>
                 <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleTheme}
-          className="w-8 h-8 sm:w-9 sm:h-9 p-0 mt-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-        >
-          {isDark ? (
-            <Sun className="h-4 w-4" />
-          ) : (
-            <Moon className="h-4 w-4" />
-          )}
-        </Button>
-
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleTheme}
+                    className="w-8 h-8 sm:w-9 sm:h-9 p-0 mt-3 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                    {isDark ? (
+                        <Sun className="h-4 w-4" />
+                    ) : (
+                        <Moon className="h-4 w-4" />
+                    )}
+                </Button>
             </div>
             <div className="max-w-4xl mx-auto p-6">
                 {/* Header */}
                 <div className="mb-6 text-left">
-
-                    <h1 className="text-3xl font-bold text-left text-foreground mb-2">Assessment Results</h1>
+                    <div className="flex justify-between">
+                        <h1 className="text-3xl font-bold text-left text-foreground mb-2">
+                            Assessment Results
+                        </h1>
+                        {/* <h1 className="text-lg font-bold text-left text-foreground mb-2">View Assessment Feedback</h1> */}
+                        {/* <Button onClick={() => setShowFeedbackModal(true)}>View Assessment Feedback</Button> */}
+                        {/* <Dialog>
+                            <DialogTrigger asChild>
+                                <Button className="text-white bg-secondary" onClick={() => setIsOpen(true)}>
+                                    View Assessment Feedback
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <AssessmentFeedbackModal setIsOpen={setIsOpen} isOpen={isOpen} />
+                        </Dialog> */}
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button className="text-white bg-primary hover:bg-primary-dark">
+                                    View Assessment Feedback
+                                </Button>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <AssessmentFeedbackModal />
+                        </Dialog>
+                    </div>
                     {timeTaken && (
-                        <p className=" text-left text-muted-foreground">{timeTaken}</p>
+                        <p className=" text-left text-muted-foreground">
+                            {timeTaken}
+                        </p>
                     )}
                 </div>
 
@@ -457,26 +548,36 @@ const ViewAssessmentResults = ({ params }: { params: AssessmentParams }) => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-2xl text-left font-bold mb-2">
-                                    Your Score: {percentage
+                                    Your Score:{' '}
+                                    {percentage
                                         ? percentage % 1 === 0
                                             ? percentage
                                             : percentage.toFixed(2)
-                                        : 0}/100
+                                        : 0}
+                                    /100
                                 </h2>
-                                <p className={cn(
-                                    'text-lg',
-                                    isPassed ? 'text-success-dark' : 'text-destructive-dark'
-                                )}>
+                                <p
+                                    className={cn(
+                                        'text-lg',
+                                        isPassed
+                                            ? 'text-success-dark'
+                                            : 'text-destructive-dark'
+                                    )}
+                                >
                                     {isPassed
                                         ? '🎉 Congratulations, you passed!'
                                         : `You needed at least ${passPercentage}% to pass`}
                                 </p>
                             </div>
                             <div className="text-right">
-                                <div className={cn(
-                                    'w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold',
-                                    isPassed ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'
-                                )}>
+                                <div
+                                    className={cn(
+                                        'w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold',
+                                        isPassed
+                                            ? 'bg-success text-success-foreground'
+                                            : 'bg-destructive text-destructive-foreground'
+                                    )}
+                                >
                                     {isPassed ? '✓' : '✗'}
                                 </div>
                             </div>
