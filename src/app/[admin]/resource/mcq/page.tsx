@@ -644,12 +644,14 @@ const Mcqs = (props: Props) => {
                         mcqSide={true}
                     />
                     {totalMCQQuestion > 0 && (
-                        <DataTablePagination
-                            totalStudents={totalMCQQuestion}
-                            lastPage={lastPage}
-                            pages={totalPages}
-                            fetchStudentData={fetchCodingQuestions}
-                        />
+                        <div className='py-4 flex justify-end'>
+                            <DataTablePagination
+                                totalStudents={totalMCQQuestion}
+                                lastPage={lastPage}
+                                pages={totalPages}
+                                fetchStudentData={fetchCodingQuestions}
+                            />
+                        </div>
                     )}
                 </MaxWidthWrapper>
             )}

@@ -614,12 +614,14 @@ const OpenEndedQuestions = (props: Props) => {
                             </MaxWidthWrapper>
                         </>
                     )}
-                    <DataTablePagination
-                        totalStudents={totalOpenEndedQuestion}
-                        lastPage={lastPage}
-                        pages={totalPages}
-                        fetchStudentData={fetchCodingQuestions}
-                    />
+                    <div className='pb-4 flex justify-end'>
+                        <DataTablePagination
+                            totalStudents={totalOpenEndedQuestion}
+                            lastPage={lastPage}
+                            pages={totalPages}
+                            fetchStudentData={fetchCodingQuestions}
+                        />
+                    </div>
                 </div>
             )}
         </>
