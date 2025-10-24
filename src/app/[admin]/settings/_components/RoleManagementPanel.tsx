@@ -13,6 +13,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import AddRoleModal from './AddRoleModal'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
     Tooltip,
     TooltipContent,

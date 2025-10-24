@@ -76,9 +76,9 @@ function Page() {
         description: '',
     })
     const [timeData, setTimeData] = useState({
-        months: -1,
-        weeks: -1,
-        days: -1,
+        months: 0,  // Changed from -1 to 0
+        weeks: 0,   // Changed from -1 to 0
+        days: 0,    // Changed from -1 to 0
     })
     const dragControls = useDragControls()
 
@@ -126,17 +126,24 @@ function Page() {
     }
     // Convert seconds to months, weeks and days:-
     const convertSeconds = (seconds: number) => {
-        const SECONDS_IN_A_MINUTE = 60
-        const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
-        const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
+        // Handle negative or zero seconds
+        if (seconds <= 0) {
+            return {
+                months: 0,
+                weeks: 0,
+                days: 0,
+            }
+        }
+
+        const SECONDS_IN_A_DAY = 24 * 60 * 60 // 86400
         const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
         const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
         const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
-        seconds %= SECONDS_IN_A_MONTH
-        const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
-        seconds %= SECONDS_IN_A_WEEK
-        const days = Math.floor(seconds / SECONDS_IN_A_DAY)
-        seconds %= SECONDS_IN_A_DAY
+        const remainingAfterMonths = seconds % SECONDS_IN_A_MONTH
+        const weeks = Math.floor(remainingAfterMonths / SECONDS_IN_A_WEEK)
+        const remainingAfterWeeks = remainingAfterMonths % SECONDS_IN_A_WEEK
+        const days = Math.floor(remainingAfterWeeks / SECONDS_IN_A_DAY)
+
         return {
             months: months,
             weeks: weeks,
@@ -151,9 +158,9 @@ function Page() {
                 description: '',
             })
             setTimeData({
-                months: -1,
-                weeks: -1,
-                days: -1,
+                months: 0,  // Changed from -1 to 0
+                weeks: 0,   // Changed from -1 to 0
+                days: 0,    // Changed from -1 to 0
             })
 
             setTypeId(1)
@@ -181,9 +188,9 @@ function Page() {
                 description: '',
             })
             setTimeData({
-                months: -1,
-                weeks: -1,
-                days: -1,
+                months: 0,  // Changed from -1 to 0
+                weeks: 0,   // Changed from -1 to 0
+                days: 0,    // Changed from -1 to 0
             })
         }
     }, [selectedModuleData])
@@ -229,7 +236,13 @@ function Page() {
         }
 
         const { days, weeks, months } = timeData
-        const totalDays = days + weeks * 7 + months * 28
+        
+        // Ensure no negative values
+        const safeDays = Math.max(0, days || 0)
+        const safeWeeks = Math.max(0, weeks || 0)
+        const safeMonths = Math.max(0, months || 0)
+        
+        const totalDays = safeDays + safeWeeks * 7 + safeMonths * 28
         const totalSeconds = totalDays * 86400
         const moduleDto = {
             ...moduleData,
@@ -308,7 +321,13 @@ function Page() {
         }
 
         const { days, weeks, months } = timeData
-        const totalDays = days + weeks * 7 + months * 28
+        
+        // Ensure no negative values
+        const safeDays = Math.max(0, days || 0)
+        const safeWeeks = Math.max(0, weeks || 0)
+        const safeMonths = Math.max(0, months || 0)
+        
+        const totalDays = safeDays + safeWeeks * 7 + safeMonths * 28
         const totalSeconds = totalDays * 86400
 
         if (totalSeconds === 0) {
