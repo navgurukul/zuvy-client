@@ -139,7 +139,7 @@ const SettingsPage: React.FC = () => {
                         }
                     `}
                 >
-                    <Settings className="w-4 h-4" />
+                    <Shield className="w-4 h-4" />
                     Manage Role Functions
                 </Button>
             </div>

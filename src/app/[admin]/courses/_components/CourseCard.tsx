@@ -9,6 +9,8 @@ import {
 } from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
+import OptimizedImageWithFallback from '@/components/ImageWithFallback'
+
 
 const CourseCard = ({
     course,
@@ -52,21 +54,21 @@ const CourseCard = ({
                         />
                     </div>
                 ) : (
-                    <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gradient-to-br from-blue-100 to-blue-500 flex items-center justify-center">
-                        <BookOpen className="h-12 w-12 text-blue-600 opacity-60" />
-                    </div>
-                    // <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                    //     <OptimizedImageWithFallback
-                    //         src={
-                    //             ''
-                    //         }
-                    //         alt={
-                    //             course.name ||
-                    //             'Course Image'
-                    //         }
-                    //         fallBackSrc="/logo_white.png"
-                    //     />
+                    // <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gradient-to-br from-blue-100 to-blue-500 flex items-center justify-center">
+                    //     <BookOpen className="h-12 w-12 text-blue-600 opacity-60" />
                     // </div>
+                    <div className="flex justify-center h-[200px] relative overflow-hidden rounded-sm">
+                        <OptimizedImageWithFallback
+                            src={
+                                ''
+                            }
+                            alt={
+                                course.name ||
+                                'Course Image'
+                            }
+                            fallBackSrc="/logo_white.png"
+                        />
+                    </div>
                 )}
             </CardHeader>
 
