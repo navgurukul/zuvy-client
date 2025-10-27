@@ -1082,45 +1082,109 @@ export const ProjectPageSkeleton= () => {
 
 
 
-// CodingResult/Page.tsx
-export const CodingResultPageSkeleton=()=>{
- return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted/20">
-      <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-lg">
-        <div className="animate-pulse mb-6">
-            <div className="w-12 h-12 bg-primary rounded-full mx-auto"></div>
+
+
+// quizResult/page.tsx
+// export const QuizResultPageSkeleton=()=>{
+//         return (
+//             <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
+//                 <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-16dp max-w-md w-full">
+//                     <div className="relative mb-6">
+//                         <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto flex items-center justify-center">
+//                             <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+//                         </div>
+//                     </div>
+//                     <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
+//                     <p className="text-muted-foreground">Fetching your performance data...</p>
+//                 </div>
+//             </div>
+//         )
+//     }
+
+
+
+
+
+export const QuizResultPageSkeleton = () => {
+  return (
+    <div className="min-h-screen w-full bg-background px-8 py-8">
+      {/* Back to Results */}
+      <div className="mb-6">
+        <Skeleton className="h-5 w-28" />
+      </div>
+
+      {/* Quiz Results Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-6 w-40" />
+      </div>
+
+      {/* Score Stats Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="bg-card border border-border rounded-2xl p-6 flex flex-col gap-3 shadow-sm"
+          >
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-6 w-20" />
           </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">Loading Submission</h2>
-          <p className="text-muted-foreground">Fetching your coding submission details...</p>
+        ))}
+      </div>
+
+      {/* Question Section */}
+      <div className="space-y-8">
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div
+            key={index}
+            className="bg-card border border-border rounded-2xl shadow-sm p-6 space-y-5"
+          >
+            {/* Question header row */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-6 w-6 rounded-md" />
+                <Skeleton className="h-5 w-28" />
+              </div>
+              <div className="flex gap-3">
+                <Skeleton className="h-5 w-12 rounded-md" />
+                <Skeleton className="h-5 w-24 rounded-md" />
+              </div>
+            </div>
+
+            {/* Question text */}
+            <Skeleton className="h-5 w-64" />
+
+            {/* Answer options */}
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 border rounded-xl p-4"
+                >
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
 }
 
-// quizResult/page.tsx
-
-
-export const QuizResultPageSkeleton=()=>{
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
-                <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-16dp max-w-md w-full">
-                    <div className="relative mb-6">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto flex items-center justify-center">
-                            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
-                    <p className="text-muted-foreground">Fetching your performance data...</p>
-                </div>
-            </div>
-        )
-    }
 
 
 
 
 
-  
+
+
+
+
+
+
+
 
 // submissionIdPage.tsx
 export const SubmissionIdPage=()=>{
