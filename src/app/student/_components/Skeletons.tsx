@@ -80,6 +80,7 @@ export const ArticleSkeleton = () => (
 )
 
 
+
 export const AssignmentSkeleton = () => {
     const isMobile =
         typeof window !== 'undefined' ? window.innerWidth < 768 : false

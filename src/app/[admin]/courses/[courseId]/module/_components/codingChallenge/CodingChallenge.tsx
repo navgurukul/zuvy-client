@@ -582,6 +582,8 @@ import { SquareCode } from 'lucide-react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import {CodingChallengeSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 function CodingChallenge({
     content,
@@ -834,15 +836,16 @@ function CodingChallenge({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Coding Problem details...
-                    </div>
-                </div>
-            </div>
-        )
+        // return (
+        //     <div className="px-5">
+        //         <div className="w-full flex justify-center items-center py-8">
+        //             <div className="animate-pulse">
+        //                 Loading Coding Problem details...
+        //             </div>
+        //         </div>
+        //     </div>
+        // )
+        return <CodingChallengeSkeleton />
     }
     return (
         <>

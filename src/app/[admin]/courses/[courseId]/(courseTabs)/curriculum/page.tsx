@@ -559,6 +559,7 @@ function Page() {
         }
     }, [reorderTimeout, borderFlashTimeout])
 
+
     if (isCourseDeleted) {
         return (
             <div className="flex flex-col justify-center items-center h-full mt-20">

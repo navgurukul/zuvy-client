@@ -18,6 +18,8 @@ import { Spinner } from '@/components/ui/spinner'
 import useBootcampSettings from '@/hooks/useBootcampSettings'
 import useBootcampDelete from '@/hooks/useBootcampDelete'
 import { PageProps } from '@/app/[admin]/courses/[courseId]/(courseTabs)/settings/courseSettingType'
+import {SettingsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 const Page = ({ params }: { params: PageProps }) => {
     const router = useRouter()
@@ -112,15 +114,16 @@ const Page = ({ params }: { params: PageProps }) => {
     // Loading state
     if (loading) {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="my-5 flex justify-center items-center">
-                    <div className="absolute h-screen">
-                        <div className="relative top-[25%]">
-                            <Spinner className="text-[rgb(81,134,114)]" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+            // <div className="flex justify-center items-center h-screen">
+            //     <div className="my-5 flex justify-center items-center">
+            //         <div className="absolute h-screen">
+            //             <div className="relative top-[25%]">
+            //                 <Spinner className="text-[rgb(81,134,114)]" />
+            //             </div>
+            //         </div>
+            //     </div>
+            // </div>
+            <SettingsSkeleton/>
         )
     }
 
@@ -337,5 +340,4 @@ const Page = ({ params }: { params: PageProps }) => {
         </div>
     )
 }
-
 export default Page

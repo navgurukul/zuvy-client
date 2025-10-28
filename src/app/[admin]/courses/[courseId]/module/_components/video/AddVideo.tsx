@@ -759,6 +759,8 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/_components/video/ModuleVideoType'
 import { getEmbedLink, isLinkValid } from '@/utils/admin'
 import { Video } from 'lucide-react'
+import {VideoSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
@@ -856,24 +858,56 @@ const AddVideo: React.FC<AddVideoProps> = ({
         }
     }
 
-    useEffect(() => {
-        if (hasLoaded.current) return
-        hasLoaded.current = true
-        setIsDataLoading(true)
+    // useEffect(() => {
+    //     if (hasLoaded.current) return
+    //     hasLoaded.current = true
+    //     setIsDataLoading(true)
 
-        if (content?.contentDetails?.[0]?.links?.[0]) {
-            form.reset({
-                videoTitle: content?.contentDetails?.[0]?.title ?? '',
-                description: content?.contentDetails?.[0]?.description ?? '',
-                links: content?.contentDetails?.[0]?.links?.[0] ?? '',
-            })
-        } else {
-            setShowVideoBox(false)
-        }
-        setVideoTitle(content?.contentDetails?.[0]?.title ?? '')
-        setIsDataLoading(false)
-    }, [content?.contentDetails, form])
+    //     if (content?.contentDetails?.[0]?.links?.[0]) {
+    //         form.reset({
+    //             videoTitle: content?.contentDetails?.[0]?.title ?? '',
+    //             description: content?.contentDetails?.[0]?.description ?? '',
+    //             links: content?.contentDetails?.[0]?.links?.[0] ?? '',
+    //         })
+    //     } else {
+    //         setShowVideoBox(false)
+    //     }
+    //     setVideoTitle(content?.contentDetails?.[0]?.title ?? '')
+    //     setIsDataLoading(false)
+    // }, [content?.contentDetails, form])
 
+
+
+useEffect(() => {
+  if (!content?.contentDetails) return;
+
+  setIsDataLoading(true);
+
+  const timer = setTimeout(() => {
+    const firstVideo = content.contentDetails[0];
+
+    if (firstVideo?.links?.[0]) {
+      form.reset({
+        videoTitle: firstVideo.title ?? '',
+        description: firstVideo.description ?? '',
+        links: firstVideo.links[0] ?? '',
+      });
+      setShowVideoBox(true);
+    } else {
+      setShowVideoBox(false);
+    }
+
+    setVideoTitle(firstVideo?.title ?? '');
+    setIsDataLoading(false);
+  }, 800); 
+
+  return () => clearTimeout(timer);
+}, [content, form]);
+
+
+
+
+    
     const handleClose = async () => {
         setShowVideoBox(false)
         form.setValue('links', '')
@@ -940,13 +974,14 @@ const AddVideo: React.FC<AddVideoProps> = ({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">Loading Quiz details...</div>
-                </div>
-            </div>
-        )
+        // return (
+        //     <div className="px-5">
+        //         <div className="w-full flex justify-center items-center py-8">
+        //             <div className="animate-pulse">Loading Video details...</div>
+        //         </div>
+        //     </div>
+        // )
+        return <VideoSkeletons/>
     }
 
     return (

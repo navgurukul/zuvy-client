@@ -340,7 +340,6 @@ const StudentsPage = ({ params }: { params: any }) => {
 
 
   useEffect(() => {
-    // fake delay
     const timer = setTimeout(() => setLoading(false), 600)
     return () => clearTimeout(timer)
   }, [])
