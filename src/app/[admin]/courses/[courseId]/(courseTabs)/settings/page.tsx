@@ -14,7 +14,6 @@ import { getUser } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import CourseDeleteModal from '../../_components/CourseDeleteModal'
 import { getCourseData } from '@/store/store'
-import { Spinner } from '@/components/ui/spinner'
 import useBootcampSettings from '@/hooks/useBootcampSettings'
 import useBootcampDelete from '@/hooks/useBootcampDelete'
 import { PageProps } from '@/app/[admin]/courses/[courseId]/(courseTabs)/settings/courseSettingType'
@@ -114,15 +113,6 @@ const Page = ({ params }: { params: PageProps }) => {
     // Loading state
     if (loading) {
         return (
-            // <div className="flex justify-center items-center h-screen">
-            //     <div className="my-5 flex justify-center items-center">
-            //         <div className="absolute h-screen">
-            //             <div className="relative top-[25%]">
-            //                 <Spinner className="text-[rgb(81,134,114)]" />
-            //             </div>
-            //         </div>
-            //     </div>
-            // </div>
             <SettingsSkeleton/>
         )
     }

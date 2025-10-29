@@ -46,7 +46,6 @@ import {
 import { CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/use-toast'
-import { Spinner } from '@/components/ui/spinner'
 import { Label } from '@/components/ui/label'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { api } from '@/utils/axios.config'
@@ -91,7 +90,7 @@ import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
 import AddStudentOptions from '../../_components/AddStudentOptions'
-import BatchesSkeleton from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import {BatchesSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 
 // Enhanced Batch interface to match new design
@@ -1336,17 +1335,6 @@ const Page = ({ params }: { params: ParamsType }) => {
                             />
                         </div>
                     </div>
-                {/* /* {true ? (
-                    // <div className="my-5 flex justify-center items-center">
-                    //     <div className="absolute h-screen">
-                    //         <div className="relative top-[70%]">
-                    //             <Spinner className="text-secondary" />
-                    //         </div>
-                    //     </div>
-                    // </div>
-                    <BatchesSkeleton/>
-
-                ) : (  */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {(enhancedBatchData?.length ?? 0) > 0 ? (
                             enhancedBatchData?.map((batch: EnhancedBatch) => (

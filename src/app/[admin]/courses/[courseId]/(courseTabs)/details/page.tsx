@@ -34,8 +34,6 @@ import { useCourseDetails } from '@/hooks/useCourseDetails'
 import { PageParams } from '@/app/[admin]/courses/[courseId]/(courseTabs)/details/courseDetailType'
 import {GeneralDetailsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
-
-
 const FormSchema = z.object({
     name: z
         .string()
@@ -321,6 +319,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     
     return numValue
     }
+
 
     return (
          <>

@@ -396,7 +396,7 @@ const Page = ({ params }: { params: any }) => {
 
     return (
         <div className="">
-            {loading ? (
+            {/* {loading ? (
                 <div className="my-5 flex justify-center items-center">
                     <div className="absolute h-screen">
                         <div className="relative top-[75%]">
@@ -404,7 +404,7 @@ const Page = ({ params }: { params: any }) => {
                         </div>
                     </div>
                 </div>
-            ) : (
+            ) : ( */}
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-semibold">Course Submissions</h2>
@@ -692,7 +692,7 @@ const Page = ({ params }: { params: any }) => {
                         ))}
                     </Tabs>
                 </div>
-            )}
+            {/* )} */}
         </div>
     )
 }

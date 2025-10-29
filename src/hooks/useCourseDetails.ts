@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { getCourseData } from '@/store/store'
@@ -7,11 +7,13 @@ import {
     UpdateCourseResponse,
     ImageUploadResponse,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/details/courseDetailType'
+import { fixTablesKey } from '@remirror/pm/tables'
 
 export const useCourseDetails = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [isImageUploading, setIsImageUploading] = useState(false)
     const { Permissions, courseData, setCourseData } = getCourseData()
+
 
     const uploadImage = async (
         croppedImage: string

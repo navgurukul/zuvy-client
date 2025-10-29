@@ -21,7 +21,6 @@ import { toast } from '@/components/ui/use-toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStudentData } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
 import { getPermissions } from '@/lib/GetPermissions'
 import {
     Course,
@@ -218,9 +217,6 @@ const Courses: React.FC = () => {
     return (
         <>
             {loading ? (
-                // <div className="flex justify-center items-center h-screen">
-                //     <Spinner className="text-[rgb(81,134,114)]" />
-                // </div>
                 <CoursesSkeleton/>
             ) : (
                 <div className="w-full px-6 py-8 font-manrope">
