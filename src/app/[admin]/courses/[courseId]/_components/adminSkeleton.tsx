@@ -256,7 +256,8 @@ export const StudentPageSkeleton = () => {
     )
 }
 
-export default function BatchesSkeleton() {
+
+export const BatchesSkeleton = () => {
     return (
         <div className="w-full max-w-none pb-8">
             {/* Header Skeleton */}
@@ -320,6 +321,9 @@ export default function BatchesSkeleton() {
     )
 }
 
+
+
+// SettingsSkeleton 
 export const SettingsSkeleton = () => {
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6 animate-pulse">
@@ -380,6 +384,11 @@ export const SettingsSkeleton = () => {
     )
 }
 
+
+
+
+
+//  VideoSkeletons
 export const VideoSkeletons = () => (
     <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
         <div className="max-w-4xl mx-auto">
@@ -403,16 +412,6 @@ export const VideoSkeletons = () => (
                     <div className="absolute top-4 left-4 h-6 w-20 bg-muted/70 rounded-full animate-pulse"></div>
                 </div>
 
-                {/* Extra Video Cards (if multiple links) */}
-                <div className="space-y-6">
-                    {[...Array(1)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="aspect-video w-full bg-muted rounded-xl animate-pulse"
-                        ></div>
-                    ))}
-                </div>
-
                 {/* Mark as Watched Button */}
                 <div className="flex justify-end">
                     <div className="h-10 w-40 bg-muted rounded-lg animate-pulse"></div>
@@ -424,114 +423,71 @@ export const VideoSkeletons = () => (
 
 
 
-export const ArticleSkeletons = () => (
-    <div className="bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
-        <div className="max-w-4xl mx-auto space-y-6">
-            {/* Header with title + badge */}
-            <div className="flex justify-between items-center mb-6">
-                <div className="space-y-4">
-                    <div className="h-7 w-48 bg-muted rounded animate-pulse"></div>
-                    <div className="h-4 w-64 bg-muted rounded animate-pulse"></div>
-                </div>
-                <div className="h-6 w-24 bg-muted rounded animate-pulse"></div>
-            </div>
 
-            {/* Main content area */}
-            <div className="space-y-6">
-                {/* PDF / Editor skeleton (big content box) */}
-                <div className="h-[28rem] w-full bg-muted rounded-lg animate-pulse"></div>
+// ArticleSkeletons
+export const ArticleSkeletons = () => {
+     return (
+    <div className="p-6 max-w-5xl mx-auto space-y-6">
+      {/* Title input */}
+      <Skeleton className="h-10 w-full rounded-md" />
 
-                {/* Action button */}
-                <div className="flex justify-end">
-                    <div className="h-10 w-40 bg-muted rounded-lg animate-pulse"></div>
-                </div>
-            </div>
+      {/* Assignment label */}
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-4 w-4 rounded-full" />
+        <Skeleton className="h-5 w-32" />
+      </div>
+
+      {/* Editor / Upload PDF radio buttons */}
+      <div className="flex items-center gap-6 mt-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4 rounded-full" />
+          <Skeleton className="h-4 w-16" />
         </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4 rounded-full" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      </div>
+
+      {/* Assignment Details Card */}
+      <div className="border rounded-lg bg-card shadow-sm p-6 space-y-6">
+        {/* Heading */}
+        <Skeleton className="h-6 w-40" />
+
+        {/* Deadline picker */}
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-52" />
+          <Skeleton className="h-10 w-[30%] rounded-md" />
+        </div>
+
+        {/* Description area */}
+        <div className="space-y-3 mt-2">
+          <Skeleton className="h-5 w-32" /> 
+          <div className="border rounded-lg p-4 space-y-2">
+            {/* Toolbar buttons */}
+            <div className="flex gap-2">
+              {[...Array(10)].map((_, i) => (
+                <Skeleton key={i} className="h-6 w-6 rounded-md" />
+              ))}
+            </div>
+            {/* Text editor box */}
+            <Skeleton className="h-32 w-full rounded-md mt-2" />
+          </div>
+        </div>
+      </div>
+      {/* Save button */}
+      <div className="flex justify-end">
+        <Skeleton className="h-10 w-24 rounded-md" />
+      </div>
     </div>
-)
+  )
+}
 
 
 
 
 
-// export const CodingChallengeSkeleton = () => {
-//     return (
-//         <div className="px-5 pb-8 animate-pulse">
-//             {/* --- Header Skeleton --- */}
-//             <div className="flex justify-between items-center mb-6">
-//                 <div className="flex flex-col space-y-2 w-2/4">
-//                     <Skeleton className="h-8 w-3/4 rounded-md" /> 
-//                     <Skeleton className="h-4 w-1/2 rounded-md" />{' '}
-//                     {/* sub text */}
-//                 </div>
-//                 <div className="flex items-center gap-3">
-//                     <Skeleton className="h-8 w-20 rounded-md" /> 
-//                     <Skeleton className="h-8 w-20 rounded-md" /> 
-//                 </div>
-//             </div>
-
-//             {/* --- Coding Problems text --- */}
-//             <div className="flex items-center gap-2 mb-4">
-//                 <Skeleton className="h-5 w-5 rounded-full" /> 
-//                 <Skeleton className="h-4 w-40 rounded-md" />{' '}
-//                 {/* Coding Problems */}
-//             </div>
-
-//             {/* --- Filters / Search --- */}
-//             <div className="flex flex-wrap gap-3 mb-6">
-//                 <Skeleton className="h-10 w-1/3 rounded-md" />{' '}
-//                 {/* Search bar */}
-//                 <Skeleton className="h-10 w-1/4 rounded-md" />{' '}
-//                 {/* Topics dropdown */}
-//                 <Skeleton className="h-10 w-1/4 rounded-md" />{' '}
-//                 {/* Difficulty dropdown */}
-//             </div>
-
-//             {/* --- Coding Library & Selected Problems Layout --- */}
-//             <div className="grid grid-cols-2 gap-6">
-//                 {/* Left side - coding problems list */}
-//                 <ScrollArea className="h-[70vh]">
-//                     {[...Array(5)].map((_, i) => (
-//                         <div
-//                             key={i}
-//                             className="py-4 px-8 rounded-lg border border-gray-200 bg-white mb-4 space-y-3"
-//                         >
-//                             <div className="flex justify-between items-start">
-//                                 <Skeleton className="h-5 w-3/4 rounded-md" />
-//                                 <div className="flex gap-2">
-//                                     <Skeleton className="h-5 w-16 rounded-md" />{' '}
-//                                     {/* Tag */}
-//                                     <Skeleton className="h-5 w-12 rounded-md" />{' '}
-//                                     {/* Difficulty */}
-//                                     <Skeleton className="h-5 w-5 rounded-full" />{' '}
-//                                     {/* + icon */}
-//                                 </div>
-//                             </div>
-//                             <Skeleton className="h-4 w-full rounded-md" />
-//                             <Skeleton className="h-4 w-5/6 rounded-md" />
-//                             <Skeleton className="h-4 w-1/3 rounded-md" />{' '}
-//                             {/* View full description */}
-//                         </div>
-//                     ))}
-//                 </ScrollArea>
-
-//                 {/* Right side - selected coding problems */}
-//                 <div className="border border-gray-200 rounded-lg p-6 bg-white">
-//                     <Skeleton className="h-6 w-3/4 mb-4" /> {/* Header */}
-//                     {[...Array(3)].map((_, i) => (
-//                         <div key={i} className="mb-4">
-//                             <Skeleton className="h-5 w-full rounded-md mb-2" />
-//                             <Skeleton className="h-4 w-2/3 rounded-md" />
-//                         </div>
-//                     ))}
-//                 </div>
-//             </div>
-//         </div>
-//     )
-// }
-
-
-
+// CodingChallengeSkeleton 
 export const CodingChallengeSkeleton = () => {
     return (
       
@@ -601,7 +557,6 @@ export const CodingChallengeSkeleton = () => {
 
 
 // SkeletonQuiz 
-
 export const SkeletonQuiz = () => {
     return (
         <div className="p-5 space-y-5">
@@ -657,9 +612,248 @@ export const SkeletonQuiz = () => {
 
 
 
+export const AssignmentSkeletons = () => {
+  return (
+    <div className="p-6 max-w-5xl mx-auto space-y-6">
+      {/* Title input */}
+      <Skeleton className="h-10 w-full rounded-md" />
+
+      {/* Assignment label */}
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-4 w-4 rounded-full" />
+        <Skeleton className="h-5 w-32" />
+      </div>
+
+      {/* Editor / Upload PDF radio buttons */}
+      <div className="flex items-center gap-6 mt-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4 rounded-full" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4 rounded-full" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      </div>
+
+      {/* Assignment Details Card */}
+      <div className="border rounded-lg bg-card shadow-sm p-6 space-y-6">
+        {/* Heading */}
+        <Skeleton className="h-6 w-40" />
+
+        {/* Deadline picker */}
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-52" />
+          <Skeleton className="h-10 w-[30%] rounded-md" />
+        </div>
+
+        {/* Description area */}
+        <div className="space-y-3 mt-2">
+          <Skeleton className="h-5 w-32" /> {/* Label */}
+          <div className="border rounded-lg p-4 space-y-2">
+            {/* Toolbar buttons */}
+            <div className="flex gap-2">
+              {[...Array(10)].map((_, i) => (
+                <Skeleton key={i} className="h-6 w-6 rounded-md" />
+              ))}
+            </div>
+            {/* Text editor box */}
+            <Skeleton className="h-32 w-full rounded-md mt-2" />
+          </div>
+        </div>
+      </div>
+
+      {/* Save button */}
+      <div className="flex justify-end">
+        <Skeleton className="h-10 w-24 rounded-md" />
+      </div>
+    </div>
+  )
+}
 
 
 
 
 
+export const AssessmentSkeleton = () => {
+  return (
+    <div className="w-full pb-2">
+      {/* Header Section */}
+      <div className="px-5 border-b border-gray-200 space-y-5">
+        {/* Title & Next Button */}
+        <div className="flex items-center mb-5 w-full justify-between">
+          {/* Title Input */}
+          <div className="w-2/6">
+            <Skeleton className="h-8 w-full rounded-md" />
+          </div>
 
+          {/* Next Button */}
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-8 w-20 rounded-md" />
+          </div>
+        </div>
+
+        {/* Tabs (Coding / MCQ / Open-Ended) */}
+        <div className="flex gap-6 mb-5 border-b border-gray-200 w-1/2 pb-2">
+          <Skeleton className="h-8 w-40 rounded-md" />
+          <Skeleton className="h-8 w-40 rounded-md" />
+          <Skeleton className="h-8 w-56 rounded-md" />
+        </div>
+      </div>
+
+      {/* Filters + Main Content */}
+      <div className="px-5 pt-4 bg-card space-y-4">
+        {/* Search + Filters */}
+        <div className="flex items-center justify-between gap-4">
+          {/* Search Bar */}
+          <Skeleton className="h-10 w-[60%] rounded-md" />
+
+          {/* Filter Dropdowns */}
+          <div className="flex gap-4">
+            <Skeleton className="h-10 w-40 rounded-md" />
+            <Skeleton className="h-10 w-40 rounded-md" />
+          </div>
+        </div>
+
+        {/* Section Headings */}
+        <div className="flex justify-between w-2/3">
+          <Skeleton className="h-5 w-40 rounded-md" /> 
+          <Skeleton className="h-5 w-48 rounded-md" /> 
+        </div>
+
+        {/* Main Layout: Left (Questions) | Separator | Right (Selected) */}
+        <div className="flex gap-6">
+          {/* Left Section - Question Library */}
+          <div className="flex-1 space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="p-4 border rounded-lg space-y-3 bg-card shadow-sm"
+              >
+                <Skeleton className="h-5 w-3/4" /> 
+                <div className="flex gap-2">
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <Skeleton className="h-4 w-32" /> 
+              </div>
+            ))}
+          </div>
+
+          {/* Separator */}
+          <div className="w-[2px] bg-gray-200 rounded-lg" />
+
+          {/* Right Section - Selected Questions */}
+          <div className="w-[35%] border-l border-gray-200 pl-6 space-y-3">
+            <Skeleton className="h-5 w-48" /> 
+            <Skeleton className="h-4 w-52" /> 
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+export const FeedbackFormSkeleton = () => {
+  return (
+    <div className="flex flex-col gap-y-6 max-w-4xl mx-auto w-full">
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-8 w-64 rounded-md" /> 
+      </div>
+
+      {/* Form Title */}
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-24 rounded-md" /> 
+        <Skeleton className="h-10 w-full rounded-md" /> 
+      </div>
+
+      {/* Description */}
+      <div className="flex flex-col gap-2">
+        <Skeleton className="h-4 w-24 rounded-md" /> 
+        <Skeleton className="h-10 w-full rounded-md" /> 
+      </div>
+
+      {/* Questions Header */}
+      <div className="flex items-center justify-between mt-4">
+        <Skeleton className="h-5 w-32 rounded-md" /> 
+        <Skeleton className="h-9 w-36 rounded-md" /> 
+      </div>
+
+      {/* Question Box */}
+      <div className="border rounded-lg p-5 space-y-4 bg-muted/40">
+        {/* Question Header */}
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-5 w-28 rounded-md" /> 
+          <Skeleton className="h-5 w-5 rounded-full" />
+        </div>
+
+        {/* Question Type Dropdown */}
+        <Skeleton className="h-10 w-52 rounded-md" />
+
+        {/* Question Input */}
+        <Skeleton className="h-10 w-full rounded-md" />
+
+        {/* Options */}
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-9 w-3/4 rounded-md" />
+          <Skeleton className="h-9 w-3/4 rounded-md" />
+        </div>
+
+        {/* Add Option */}
+        <Skeleton className="h-9 w-32 rounded-md" />
+      </div>
+
+      {/* Save Button */}
+      <div className="flex justify-start mt-2">
+        <Skeleton className="h-9 w-24 rounded-md" />
+      </div>
+    </div>
+  )
+}
+
+
+
+export const RecordingSkeletons = () => {
+  return (
+    <div className="w-full p-6 border rounded-lg bg-card space-y-6">
+      {/* Header Section */}
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-3">
+          {/* Session Title */}
+          <Skeleton className="h-6 w-72 rounded-md" />
+
+          {/* Status Badge */}
+          <Skeleton className="h-6 w-24 rounded-full" />
+        </div>
+
+        {/* Download Button */}
+        <Skeleton className="h-9 w-44 rounded-md" />
+      </div>
+
+      {/* Session Info (Date, Time, Created By) */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-5 w-64 rounded-md" />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-5 w-44 rounded-md" />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-5 w-52 rounded-md" />
+        </div>
+      </div>
+
+      {/* Recording Section */}
+      <div className="flex justify-center mt-6">
+        <Skeleton className="h-10 w-full max-w-[1000px] rounded-md bg-muted/50" />
+      </div>
+    </div>
+  )
+}

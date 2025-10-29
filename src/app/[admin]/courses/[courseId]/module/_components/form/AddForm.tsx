@@ -30,6 +30,7 @@ import {
     AddFormProps,
     FormQuestionDetail,
 } from '@/app/[admin]/courses/[courseId]/module/_components/form/ModuleFormType'
+import {FeedbackFormSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const formSchema = z.object({
     title: z
@@ -76,6 +77,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const [titles, setTitles] = useState(content?.title || '')
     const [isSaved, setIsSaved] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isDataLoading, setIsDataLoading] = useState(true)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -139,6 +141,17 @@ const AddForm: React.FC<AddFormProps> = ({
                       ],
         },
     })
+
+
+
+useEffect(() => {
+  if (content) {
+    const timer = setTimeout(() => setIsDataLoading(false), 500) 
+    return () => clearTimeout(timer)
+  }
+}, [content])
+
+
 
     const questions = form.watch('questions')
 
@@ -388,6 +401,12 @@ const AddForm: React.FC<AddFormProps> = ({
             )
         }
     }
+
+
+    if (isDataLoading) {
+       return <FeedbackFormSkeleton/>
+    }
+
 
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">

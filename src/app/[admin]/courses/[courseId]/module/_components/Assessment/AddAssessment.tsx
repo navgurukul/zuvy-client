@@ -26,6 +26,8 @@ import {
     McqAccumulator,
     CodingQuestiones,
 } from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType'
+import {AssessmentSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -370,77 +372,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     }, [content?.ModuleAssessment?.title, activeChapterTitle])
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Assessment details...
-                    </div>
-                </div>
-            </div>
-        )
+        return <AssessmentSkeleton/>
     }
     return (
         <div className="w-full pb-2">
             <div className="px-5 border-b border-gray-200">
                 {questionType !== 'settings' && (
-                    // <div className="flex items-center mb-5 w-full justify-between">
-                    //     <div className="w-2/6 flex justify-center align-middle items-center relative">
-                    //         <Input
-                    //             required
-                    //             onChange={(e) => {
-                    //                 const newValue = e.target.value
-                    //                  if (newValue.length>50) {
-                    //                       toast.error({
-                    //                         title: "Character Limit Reached",
-                    //                         description: "You can enter up to 50 characters only",
-                    //                     })
-
-                    //                  } else {
-                    //                     setChapterTitle(newValue)
-                    //              }
-
-                    //             }}
-                    //             value={chapterTitle}
-                    //             // placeholder={content?.ModuleAssessment?.title}
-                    //             placeholder="Untitled Assessment"
-                    //             className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
-                    //         />
-                    //         {/* {chapterTitle.length == 0 && (
-                    //             <Pencil
-                    //                 fill="true"
-                    //                 fillOpacity={0.4}
-                    //                 size={20}
-                    //                 className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                    //             />
-                    //         )} */}
-
-                    //     </div>
-
-                    //     {/* preview & settings buttons */}
-                    //     <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
-                    //         {/* <div
-                    //             id="previewAssessment"
-                    //             onClick={previewAssessment}
-                    //             className="flex hover:bg-gray-300 rounded-md p-1"
-                    //         >
-                    //             <Eye size={18} />
-                    //             <h6 className="ml-1 text-sm">Preview</h6>
-                    //         </div> */}
-
-                    //         <div
-                    //             onClick={handleSettingsButtonClick}
-                    //             id="settingsAssessment"
-                    //             className="flex hover:bg-gray-300 rounded-md p-1"
-                    //         >
-                    //             {/* <Settings size={18} />
-                    //             <h6 className="mx-1 text-sm">Settings</h6> */}
-                    //             <h6 className="mx-1 text-sm">Next</h6>
-                    //             <ArrowRight size={20} />
-                    //         </div>
-                    //     </div>
-                    // </div>
-
                     <div className="flex items-center mb-5 w-full justify-between">
                         <div className="w-2/6 relative">
                             <Input

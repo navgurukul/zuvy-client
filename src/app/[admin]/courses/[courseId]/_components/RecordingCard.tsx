@@ -31,6 +31,7 @@ import {
     DisplayAttendance,
 } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
+
 function RecordingCard({
     classData,
     isAdmin,
@@ -165,7 +166,6 @@ function RecordingCard({
             })
         }
     }
-
     return (
         <Card className="w-full p-6">
             <div className="flex justify-start">
