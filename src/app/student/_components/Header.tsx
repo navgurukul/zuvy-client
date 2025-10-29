@@ -91,6 +91,7 @@ const Header = () => {
                         className="flex items-center cursor-pointer"
                         onClick={handleLogoClick}
                     >
+                        
                         <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
                     </div>
 
@@ -212,10 +213,15 @@ const Header = () => {
             {/* Left - Logo and Navigation */}
             <div className="flex items-center gap-2 sm:gap-4">
                 <div
-                    className="flex items-center cursor-pointer"
+                    className="flex items-center cursor-pointer mb-1"
                     onClick={handleLogoClick}
                 >
-                    <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
+                    {isDark ? 
+                  <img src={'/zuvy-logo-horizontal-dark.png'} alt="Zuvy" className="h-7" />
+
+                :     
+                    <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
+                }
                 </div>
 
                 {/* Course Navigation Buttons */}
@@ -274,7 +280,7 @@ const Header = () => {
                                     alt="Student"
                                 />
                             ) : (
-                                <AvatarFallback className="font-medium">
+                                <AvatarFallback className="font-medium text-white">
                                     {getUserInitials(studentData?.name)}
                                 </AvatarFallback>
                             )}

@@ -265,7 +265,7 @@ const handleGoogleSuccess = async (
                             {/* Logo */}
                             <div className="mb-6">
                                 <Image
-                                    src={'/logo.PNG'}
+                                    src={'/zuvy-logo-horizontal.png'}
                                     alt="Zuvy Logo"
                                     className="mx-auto"
                                     width={64}
