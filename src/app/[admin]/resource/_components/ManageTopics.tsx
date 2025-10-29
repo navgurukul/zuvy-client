@@ -407,7 +407,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                     <div className="space-y-4">
                         <p className="text-gray-700 font-medium">
                             Deleting topics will permanently remove them from the system.
-                            If a topic is linked to any question, it can't be deleted.
+                            If a topic is linked to any question, it can not be deleted.
                             Are you sure you want to continue?
                         </p>
                         {deleteConfirmTopic && (
