@@ -97,10 +97,10 @@
         --card-foreground: 210 20% 98%;
 
         /* Primary Brand Colors - Dark Mode */
-        --primary: 224 75% 65%;
-        --primary-light: 224 71% 20%;
-        --primary-dark: 224 71% 48%;
-        --primary-foreground: 210 20% 98%;
+        --primary: 122 35% 36%; /* #3A7A3D - Brighter Forest Green */
+        --primary-light: 122 36% 27%; /* #2C5F2D - Subtle Green */
+        --primary-dark: 122 35% 45%; /* #4A9A4D - Bright Green Emphasis */
+        --primary-foreground: 0 0% 100%; /* #FFFFFF - White Text */
 
         /* Secondary Brand Colors - Dark Mode */
         --secondary: 25 90% 63%;
