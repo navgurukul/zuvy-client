@@ -70,7 +70,7 @@ const CodingResultContent = () => {
     }, [questionId]);
     
     
-  if (loading) return <CodingSubmissionSkeleton />
+  if (loading) return <CodingSubmissionSkeleton/>
 
 
   if (!questionId) {

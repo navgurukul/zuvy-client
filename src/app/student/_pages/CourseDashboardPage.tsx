@@ -864,7 +864,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
                             <div className="flex-1 text-left">
                               {isCurrentModule && (
-                                <Badge className="mb-2 bg-primary-light text-primary border-primary/20 self-start hover:bg-primary-light/80">Current Module</Badge>
+                                <Badge className="mb-2 bg-primary-light dark:text-white text-primary border-primary/20 self-start hover:bg-primary-light/80">Current Module</Badge>
                               )}
                               {isCompleted && (
                                 <Badge className="mb-2 bg-success-light text-success border-success/20 self-start hover:bg-success-light/80">Completed</Badge>
@@ -900,7 +900,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     <div>
 
                                       <Button
-                                        className={`px-6 font-semibold bg-  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline hover:underline-offset-4 ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline' : ''} `}`}
+                                        className={`px-6 font-semibold bg- hover:text-white  ${(isLocked || (module.typeId !== 2 && !module.ChapterId)) ? 'text-muted-foreground cursor-not-allowed' : ` text-primary hover:underline hover:underline-offset-4 ${isCurrentModule ? 'border-2 border-primary bg-primary text-white hover:no-underline  ' : ''} `}`}
                                         disabled={isLocked || (module.typeId !== 2 && !module.ChapterId)}
                                         onClick={(e) => {
                                           if (isLocked || (module.typeId !== 2 && !module.ChapterId)) {
@@ -910,7 +910,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                       >
                                         {module.typeId !== 2 ? <Link key={module.id} className="" href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
                                           {getModuleCTA(module, moduleProgress)}
-                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={`${isCurrentModule ? 'text-white' : ''} text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
+                                        </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={`${isCurrentModule ? 'text-white' : ''} text-sm  hover:underline`} >View Project</Link>}
                                       </Button>
                                     </div>
                                   </TooltipTrigger>
@@ -964,7 +964,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                     >
                                       {module.typeId !== 2 ? <Link key={module.id} href={`${isCurrentModule ? `/student/course/${courseId}/modules/${module.id}?chapterId=${upcomingChapterId}` : `/student/course/${courseId}/modules/${module.id}?chapterId=${module.ChapterId}`}`}>
                                         {getModuleCTA(module, moduleProgress)}
-                                      </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={` text-sm text-muted-foreground text-primary hover:underline`} >View Project</Link>}
+                                      </Link> : <Link href={`/student/course/${courseId}/projects?moduleId=${module.id}&projectId=${module.projectId}`} className={` text-sm  text-primary hover:underline`} >View Project</Link>}
                                     </Button>
                                   </div>
                                 </TooltipTrigger>
@@ -983,7 +983,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                   }) : 
                 <div className="mb-6 text-left flex flex-col justify-end w-full items-center">
                     <Image
-                      src="/emptyStates/modulesNotFound.svg"
+                      src="/emptyStates/greendog.svg"
                       alt="No upcoming events"
                       width={50}
                       height={50}
@@ -1094,7 +1094,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       {/* Illustration */}
                       <div className="mb-6 max-w-[200px] w-full">
                         <Image
-                          src="/emptyStates/emptyStateforWhatsNext.svg"
+                          src="/emptyStates/whatsnext.svg"
                           alt="No upcoming events"
                           width={200}
                           height={120}

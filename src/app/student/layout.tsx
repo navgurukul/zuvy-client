@@ -7,6 +7,10 @@ import { useRoles } from '@/hooks/useRoles'
 import { Spinner } from '@/components/ui/spinner';
 import Notfound from '../not-found';
 import UnauthorizedUser from '@/components/UnauthorizedUser';
+import { Toaster } from "@/components/ui/toaster";
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 // Theme Initializer Component
 const ThemeInitializer = () => {
@@ -70,15 +74,15 @@ export default function StudentLayout({
     if (roleFromPath === userRole) {
         return (
             <Suspense fallback={
-                <div className="h-screen bg-background flex flex-col font-manrope">
-                    <main className="flex-1 overflow-y-auto">
+                <div className="h-screen bg-background flex flex-col">
+                    {/* <main className="flex-1 overflow-y-auto">
                         <div className="flex items-center justify-center h-full">
                             <div className="text-center">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
                                 <p className="text-muted-foreground">Loading...</p>
                             </div>
                         </div>
-                    </main>
+                    </main> */}
                 </div>
             }>
                 <StudentLayoutContent>
@@ -103,4 +107,12 @@ export default function StudentLayout({
             />
         )
     } 
+    return (
+        <html lang="en">
+            <body className={`${inter.className} font-body`}>
+                {children}
+                <Toaster />
+            </body>
+        </html>
+    );
 }

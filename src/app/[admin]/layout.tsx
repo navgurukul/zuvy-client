@@ -38,7 +38,7 @@ export default function RootLayout({
             // ✅ Authorized user
     return (
         // <div className={isFullWidthRoute ? '' : 'container mx-auto px-2 pt-2 pb-2 max-w-7xl'}>
-        <div className='font-manrope'>
+        <div className='font-body'>
             <div className={isAssessmentRouteClasses(pathname)}>
                 {!adminAssessmentPreviewRoute && <StudentNavbar />}
                 <div className={`${adminAssessmentPreviewRoute ? '' : 'pt-16'} h-screen flex-1`}>

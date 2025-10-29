@@ -75,21 +75,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-8">
                     {/* Logo and Brand */}
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
-                        {/* <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-                            <span className="text-primary-foreground font-bold text-lg">
-                                Z
-                            </span>
-                        </div>
-                        <h3 className="font-heading font-semibold text-foreground text-xl">
-                            Zuvy Admin
-                        </h3> */}
-                         <Image
-                            src={'/zuvy-logo-horizontal .png'}
-                            alt="logo"
-                            // className="py-2"
-                            width={'70'}
-                            height={'70'}
-                        />
+                          <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
 
                     {/* Navigation Items */}
@@ -124,7 +110,7 @@ const Navbar = () => {
                                             )}
                                         >
                                             <Icon className="h-4 w-4" />
-                                            {loading? <Spinner />: <span>{item.name}</span>}
+                                            {loading? <Spinner />: <span className='' >{item.name}</span>}
                                         </Link>
                                     )}
                                     {item.name === 'Question Bank' && permissions.viewQuestion && (
