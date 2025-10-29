@@ -55,7 +55,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
     {
         accessorKey: 'tagId',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Topic" />
+            <DataTableColumnHeader className="flex text-left" column={column} title="Topic" />
         ),
         cell: ({ row }) => {
             const openEndedQuestion = row.original
