@@ -6,7 +6,6 @@ import CodingSubmission from '@/app/student/course/[courseId]/studentAssessment/
 import { useSearchParams } from 'next/navigation'
 import { useCodingSubmissions } from '@/hooks/useCodingSubmissions'
 import {AssessmentParams} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/AssessmentSubmmisionPageType"
-import {CodingResultPageSkeleton} from "@/app/student/_components/Skeletons"
 const Page = ({ params }: { params: AssessmentParams }) => {
     const { studentData } = useLazyLoadedStudentData()
     const searchParams = useSearchParams()
@@ -23,9 +22,6 @@ const Page = ({ params }: { params: AssessmentParams }) => {
         enabled: !!studentData?.id // Only fetch when user data is available
     })    // Show loading state
 
-    if (loading) {
-        return<CodingResultPageSkeleton/>
-    }
 
     // Show error state
     if (error) {
