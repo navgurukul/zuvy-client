@@ -6,6 +6,7 @@ import {
     Settings,
     Database,
 } from 'lucide-react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -74,14 +75,21 @@ const Navbar = () => {
                 <div className="flex items-center gap-8">
                     {/* Logo and Brand */}
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
-                        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+                        {/* <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
                             <span className="text-primary-foreground font-bold text-lg">
                                 Z
                             </span>
                         </div>
                         <h3 className="font-heading font-semibold text-foreground text-xl">
                             Zuvy Admin
-                        </h3>
+                        </h3> */}
+                         <Image
+                            src={'/zuvy-logo-horizontal .png'}
+                            alt="logo"
+                            // className="py-2"
+                            width={'70'}
+                            height={'70'}
+                        />
                     </Link>
 
                     {/* Navigation Items */}
