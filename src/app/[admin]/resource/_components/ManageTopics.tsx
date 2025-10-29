@@ -196,15 +196,10 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                 setIsCreating(true)
                 
                 // Create all newly added topics
-                 const createPromises = newlyAddedTopics.map(topicName =>
-                    api.post('/Content/createTag', {
-                        tagName: topicName,
-                    })
-                )
-                
-                await Promise.all(createPromises)
-
-                toast({
+               await api.post('/Content/createTag', {
+                tagNames: newlyAddedTopics  // Send array with correct field name
+            })               
+             toast({
                     title: 'Success',
                     description: `${newlyAddedTopics.length} topic${newlyAddedTopics.length > 1 ? 's' : ''} created successfully`,
                 })
