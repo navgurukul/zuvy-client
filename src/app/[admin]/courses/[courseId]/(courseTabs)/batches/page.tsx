@@ -608,10 +608,6 @@ const Page = ({ params }: { params: ParamsType }) => {
     }, [params.courseId, fetchCourseDetails])
 
     useEffect(() => {
-        console.log('CourseData updated:', courseData)
-    }, [courseData])
-
-    useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
         }, 1000)

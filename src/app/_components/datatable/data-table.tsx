@@ -93,11 +93,19 @@ export function DataTable<TData, TValue>({
     }
 
     useEffect(() => {
-        const selectedRows = table
-            .getSelectedRowModel()
-            .rows.map((row) => row.original)
-        setSelectedRows && setSelectedRows(selectedRows)
-    }, [table.getSelectedRowModel().rows])
+        // Multiple safety checks
+        try {
+            const selectedRowModel = table?.getSelectedRowModel?.()
+            if (selectedRowModel?.rows?.length !== undefined) {
+                const selectedRows = selectedRowModel.rows.map((row) => row.original)
+                setSelectedRows && setSelectedRows(selectedRows)
+            }
+        } catch (error) {
+            console.warn('Error accessing selected row model:', error)
+            // Reset selected rows on error
+            setSelectedRows && setSelectedRows([])
+        }
+    }, [table?.getSelectedRowModel?.()?.rows?.length]) // More specific dependency
 
     useEffect(() => {
         table.toggleAllRowsSelected(false)
