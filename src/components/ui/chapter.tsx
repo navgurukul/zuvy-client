@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { api } from '@/utils/axios.config'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { getUser } from '@/store/store'
 import { Reorder } from 'framer-motion'
 import ChapterItem from '@/app/[admin]/courses/[courseId]/module/_components/ChapterItem'
 import { toast } from '@/components/ui/use-toast'
@@ -25,10 +24,11 @@ import {
     getCurrentModuleName,
     getChapterUpdateStatus,
     getCourseData,
+    getUser,
 } from '@/store/store'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
+import { QuizOptions, QuizQuestionDetails } from '@/components/appComponentFileType'
 
 type Chapter = {
     chapterId: number
@@ -36,23 +36,6 @@ type Chapter = {
     topicId: number
     topicName: string
     order: number
-}
-
-interface QuizOptions {
-    option1: string
-    option2: string
-    option3: string
-    option4: string
-}
-
-interface QuizQuestionDetails {
-    id: number
-    question: string
-    options: QuizOptions
-    correctOption: string
-    marks: null | number
-    difficulty: string
-    tagId: number
 }
 
 function Chapter() {

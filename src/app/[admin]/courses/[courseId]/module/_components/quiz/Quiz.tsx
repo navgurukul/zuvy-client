@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import QuizLibrary from '@/app/[admin]/courses/[courseId]/module/_components/quiz/QuizLibrary'
-import { getUser } from '@/store/store'
 import {
     QuizDataLibrary,
     LibraryOption,
@@ -18,9 +17,9 @@ import {
     getAllQuizData,
     getChapterUpdateStatus,
     getQuizPreviewStore,
+    getUser,
 } from '@/store/store'
-import { ArrowUpRightSquare, Pencil } from 'lucide-react'
-import { Eye } from 'lucide-react'
+import { ArrowUpRightSquare, Pencil, FileQuestion } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
     QuizProps,
@@ -28,11 +27,12 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import useDebounce from '@/hooks/useDebounce'
 import CodingTopics from '../codingChallenge/CodingTopics'
-import { FileQuestion } from 'lucide-react'
 
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import useEditChapter from '@/hooks/useEditChapter' 
+import useGetChapterDetails from '@/hooks/useGetChapterDetails'
 
 const quizSchema = z.object({
     title: z
@@ -78,6 +78,9 @@ function Quiz(props: QuizProps) {
         mediumQuestions: [],
         hardQuestions: [],
     })
+
+    const { editChapter } = useEditChapter()
+    const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
 
     const form = useForm<z.infer<typeof quizSchema>>({
         resolver: zodResolver(quizSchema),
@@ -228,8 +231,9 @@ function Quiz(props: QuizProps) {
         requestBody: Record<string, any>
     ) => {
         try {
-            const response = await api.put(
-                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+            const response = await editChapter(
+                props.moduleId,
+                props.chapterId,
                 requestBody
             )
             toast.success({
@@ -261,9 +265,12 @@ function Quiz(props: QuizProps) {
         if (!props.chapterId || props.chapterId === 0) return
 
         try {
-            const res = await api.get<ChapterDetailsResponse>(
-                `/Content/chapterDetailsById/${props.chapterId}?bootcampId=${props.courseId}&moduleId=${props.moduleId}&topicId=${props.content.topicId}`
-            )
+            const res = await getChapterDetails({
+                chapterId: props.chapterId,
+                bootcampId: props.courseId,
+                moduleId: props.moduleId,
+                topicId: props.content.topicId,
+            })
             setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
             setSavedQuestions(res.data.quizQuestionDetails)
@@ -431,25 +438,24 @@ function Quiz(props: QuizProps) {
 
 
                                             <Button
-  type="submit"
-  disabled={
-    form.formState.isSubmitting ||
-    !form.formState.isValid ||
-    isSaved
-  }
-  className={`bg-primary ${
-    form.formState.isSubmitting || !form.formState.isValid || isSaved
-      ? 'opacity-50 cursor-not-allowed'
-      : 'opacity-75'
-  }`}
->
-  {form.formState.isSubmitting
-    ? 'Saving...'
-    : isSaved
-    ? 'Saved'
-    : 'Save'}
-</Button>
-
+                                                type="submit"
+                                                disabled={
+                                                    form.formState.isSubmitting ||
+                                                    !form.formState.isValid ||
+                                                    isSaved
+                                                }
+                                                className={`bg-primary ${
+                                                    form.formState.isSubmitting || !form.formState.isValid || isSaved
+                                                    ? 'opacity-50 cursor-not-allowed'
+                                                    : 'opacity-75'
+                                                }`}
+                                                >
+                                                {form.formState.isSubmitting
+                                                    ? 'Saving...'
+                                                    : isSaved
+                                                    ? 'Saved'
+                                                    : 'Save'}
+                                            </Button>
 
                                         </div>
                                     )}

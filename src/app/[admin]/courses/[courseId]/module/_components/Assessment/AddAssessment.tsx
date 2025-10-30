@@ -7,7 +7,6 @@ import {
     getAllTags,
     getAllTagsWithoutFilter,
 } from '@/utils/admin'
-import { getUser } from '@/store/store'
 import OpenEndedQuestions from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/OpenEndedQuestions'
 import QuizQuestions from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/QuizQuestions'
 import CodingTopics from '@/app/[admin]/courses/[courseId]/module/_components/codingChallenge/CodingTopics'
@@ -17,7 +16,7 @@ import SettingsAssessment from '@/app/[admin]/courses/[courseId]/module/_compone
 import SelectedQuestions from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/SelectedQuestions'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
-import { getAssessmentPreviewStore } from '@/store/store'
+import { getAssessmentPreviewStore, getUser } from '@/store/store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'

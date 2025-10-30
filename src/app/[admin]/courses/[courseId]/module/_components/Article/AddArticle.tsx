@@ -4,7 +4,6 @@ import { z } from 'zod'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { getUser } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -16,10 +15,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 // import '@\app\_components\editor\Tiptap.css'
-import { Pencil } from 'lucide-react'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
-import { getChapterUpdateStatus, getArticlePreviewStore } from '@/store/store'
-import { Eye } from 'lucide-react'
+import { getChapterUpdateStatus, getArticlePreviewStore, getUser } from '@/store/store'
 import { useRouter } from 'next/navigation'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -38,6 +35,9 @@ import {
     ContentArticle,
 } from '@/app/[admin]/courses/[courseId]/module/_components/Article/courseModuleArticleType'
 import { BookOpenText } from 'lucide-react'
+import useEditChapter from '@/hooks/useEditChapter'
+import useUploadPdf from '@/hooks/useUploadPdf'
+import useGetChapterDetails from '@/hooks/useGetChapterDetails'
 
 const AddArticle: React.FC<AddArticleProps> = ({
     content,
@@ -74,6 +74,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const [wasContentNonEmptyWhenSaved, setWasContentNonEmptyWhenSaved] =
         useState(false)
     const [isInitialLoad, setIsInitialLoad] = useState(true)
+    const { editChapter } = useEditChapter()
+    const { uploadPdf, loading: uploadLoading } = useUploadPdf()
+    const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
 
     // misc
     const formSchema = z.object({
@@ -141,10 +144,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 articleContent: initialContentString,
             }
 
-            await api.put(
-                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                data
-            )
+            await editChapter(content.moduleId, content.id, data)
+
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(!isEditorContentEmpty(initialContent))
@@ -169,9 +170,12 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const getArticleContent = async () => {
         try {
             setIsDataLoading(true)
-            const response = await api.get(
-                `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
-            )
+            const response = await getChapterDetails({
+                chapterId: content.id,
+                bootcampId: courseId,
+                moduleId: content.moduleId,
+                topicId: content.topicId,
+            })
             const contentDetails = response?.data?.contentDetails?.[0]
 
             const link = contentDetails?.links?.[0]
@@ -233,10 +237,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 articleContent: initialContentString,
             }
 
-            await api.put(
-                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                data
-            )
+            await editChapter(content.moduleId, content.id, data)
+
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(!isEditorContentEmpty(initialContent))
@@ -364,20 +366,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
             try {
                 setIsLoading(true)
-                await api.post(
-                    `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
-                    formData, // ← pass FormData directly
-                    {
-                        // OPTIONAL: axios will set the correct Content-Type boundary for you
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                    }
-                )
+                await uploadPdf(content.moduleId, content.id, formData)
                 setIsChapterUpdated(!isChapterUpdated)
 
-                // toast.success({
-                //     title: 'Success',
-                //     description: 'PDF uploaded successfully!',
-                // })
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
@@ -405,30 +396,28 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
     async function onDeletePdfhandler() {
         setIsDeleteLoading(true)
-        await api
-            .put(
-                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                { title: title, links: null }
-            )
-            .then((res) => {
-                toast.success({
-                    title: 'Success',
-                    description: 'PDF Deleted Successfully',
-                })
-                setIsPdfUploaded(false)
-                setIsDeleteLoading(false)
-                setpdfLink(null)
+        try {
+            await editChapter(content.moduleId, content.id, {
+                title: title,
+                links: null,
             })
-            .catch((err: any) => {
-                toast.error({
-                    title: 'Delete PDF failed',
-                    description:
-                        err.response?.data?.message ||
-                        err.message ||
-                        'An error occurred.',
-                })
-                setIsDeleteLoading(false)
+            toast.success({
+                title: 'Success',
+                description: 'PDF Deleted Successfully',
             })
+            setIsPdfUploaded(false)
+            setIsDeleteLoading(false)
+            setpdfLink(null)
+        } catch (err: any) {
+            toast.error({
+                title: 'Delete PDF failed',
+                description:
+                    err.response?.data?.message ||
+                    err.message ||
+                    'An error occurred.',
+            })
+            setIsDeleteLoading(false)
+        }
     }
 
     if (isDataLoading) {

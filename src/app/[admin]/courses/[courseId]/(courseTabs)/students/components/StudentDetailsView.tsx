@@ -11,24 +11,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { DataTable } from '../../../../../../_components/datatable/data-table'
 import { createAttendanceColumns } from './attendanceColumns'
-
-interface StudentDetailsViewProps {
-    courseId: string
-    studentId: string
-    onBack: () => void
-}
-
-interface ClassData {
-    id: number
-    title: string
-    startTime: string
-    endTime: string
-    s3Link: string | null
-    moduleId: number | null
-    chapterId: number | null
-    attendanceStatus: string
-    duration: number
-}
+import { StudentDetailsViewProps, ClassData } from './courseStudentComponentType'
 
 const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     courseId,

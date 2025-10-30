@@ -16,3 +16,19 @@ export interface StudentPage {
 }
 
 export type StudentDataState = StudentPage[]
+
+export interface Student {
+    email: string
+    name: string
+}
+
+export interface ActionCellProps {
+    student: {
+        userId: string
+        bootcampId: string
+        name: string
+        email: string
+        status?: string
+        batchId?: string
+    }
+}
