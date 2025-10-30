@@ -608,10 +608,6 @@ const Page = ({ params }: { params: ParamsType }) => {
     }, [params.courseId, fetchCourseDetails])
 
     useEffect(() => {
-        console.log('CourseData updated:', courseData)
-    }, [courseData])
-
-    useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
         }, 1000)
@@ -1464,7 +1460,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                     batch.name
                                                 )
                                             }
-                                            className="w-ful bg-blue-600 text-white hover:bg-blue-700"
+                                            className="w-full h-10"
                                         >
                                             <Eye className="h-4 w-4 mr-2" />
                                             View Students

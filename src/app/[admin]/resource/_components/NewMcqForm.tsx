@@ -146,16 +146,34 @@ export default function NewMcqForm({
         }
 
         try {
-            await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
+            const res = await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
+
             toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
             })
 
-            // Refresh data, reset form and then close modal
-            await getAllQuizQuesiton() // This will fetch and update the data
+            try {
+                // Use the proper function signature for getAllQuizQuesiton
+                await getAllQuizQuesiton(
+                    setStoreQuizData,
+                    0, // Reset offset
+                    10, // Limit
+                    [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
+                    [{ value: '-1', label: 'All Topics' }], // Reset topic filter
+                    () => {}, // setTotalMCQQuestion placeholder
+                    () => {}, // setLastPage placeholder
+                    () => {}, // setTotalPages placeholder
+                    '' // No search term
+                )
+            } catch (fetchError) {
+                console.error('Error refreshing data after question creation:', fetchError)
+            }
+
+            // Reset form and close modal after successful save and refresh
             form.reset()
             closeModal()
+
         } catch (error: any) {
             toast.error({
                 title: 'Error',

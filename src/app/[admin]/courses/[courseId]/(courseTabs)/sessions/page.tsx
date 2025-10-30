@@ -29,7 +29,6 @@ function Page({ params }: ParamsType) {
     const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    console.log(userRole,'admin hdafdgdsa')
     const [classes, setClasses] = useState<CourseClassItem[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()

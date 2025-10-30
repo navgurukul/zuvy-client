@@ -61,12 +61,14 @@ export const useCourseDetails = () => {
 
     const updateCourseDetails = async (
         data: CourseDetailsFormData,
-        croppedImage?: string | null
+        croppedImage?: string | null,
+        croppedCollaboratorImage?: string | null
     ): Promise<boolean> => {
         try {
             setIsLoading(true)
 
             let coverImage = data.coverImage || ''
+            let collaborator = data.collaborator || ''
 
             // Handle cover image upload if there's a new cropped image
             if (croppedImage && croppedImage !== courseData?.coverImage) {
@@ -79,12 +81,23 @@ export const useCourseDetails = () => {
                 coverImage = croppedImage
             }
 
+            // Handle collaborator image upload if there's a new cropped collaborator image
+            if (croppedCollaboratorImage && croppedCollaboratorImage !== courseData?.collaborator) {
+                const uploadedCollaboratorImageUrl = await uploadImage(croppedCollaboratorImage)
+                if (!uploadedCollaboratorImageUrl) {
+                    return false
+                }
+                collaborator = uploadedCollaboratorImageUrl
+            } else if (croppedCollaboratorImage) {
+                collaborator = croppedCollaboratorImage
+            }
+
             const response = await api.patch<UpdateCourseResponse>(
                 `/bootcamp/${courseData?.id}`,
                 {
                     ...data,
                     coverImage,
-                    collaborator: data.collaborator || '',
+                    collaborator,
                 },
                 {
                     headers: { 'Content-Type': 'application/json' },
@@ -97,7 +110,7 @@ export const useCourseDetails = () => {
                 bootcampTopic,
                 description,
                 coverImage: updatedCoverImage,
-                collaborator,
+                collaborator: updatedCollaborator,
                 startTime,
                 duration,
                 language,
@@ -111,7 +124,7 @@ export const useCourseDetails = () => {
                 bootcampTopic,
                 description,
                 coverImage: updatedCoverImage,
-                collaborator,
+                collaborator: updatedCollaborator,
                 startTime,
                 duration,
                 language,

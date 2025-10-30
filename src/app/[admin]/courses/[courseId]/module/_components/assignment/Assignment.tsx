@@ -72,6 +72,7 @@ const AddAssignent = ({
     const formSchema = z.object({
         title: z
             .string()
+            .min(1, { message: 'Title is required.' })
             .max(50, { message: 'You can enter up to 50 characters only.' }),
         startDate: z.date({
             required_error: 'A start date is required.',
@@ -916,7 +917,8 @@ const AddAssignent = ({
                                             disabled={
                                                 !hasEditorContent ||
                                                 isSaving ||
-                                                !isValid
+                                                !isValid ||
+                                                !titles.trim()
                                             }
                                         >
                                             {isSaving ? 'Saving...' : 'Save'}
@@ -932,7 +934,8 @@ const AddAssignent = ({
                                                     loading ||
                                                     !form.formState.isValid ||
                                                     (!file && !ispdfUploaded) ||
-                                                    disabledUploadButton
+                                                    disabledUploadButton ||
+                                                    !titles.trim()
                                                 }
                                             >
                                                 {loading ? 'Saving...' : 'Save'}
