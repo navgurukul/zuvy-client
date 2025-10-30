@@ -54,6 +54,7 @@ import {
 } from '@/app/[admin]/resource/coding/adminResourceCodinType'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
+import {CodingProblemsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const CodingProblems = () => {
     const router = useRouter()
@@ -413,9 +414,7 @@ const CodingProblems = () => {
     return (
         <>
             {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-[rgb(81,134,114)]" />
-                </div>
+                <CodingProblemsSkeleton />
             ) : (
                 <div>
                     {allCodingQuestions.length > 0 && !isCodingDialogOpen ? (
@@ -661,5 +660,4 @@ const CodingProblems = () => {
         </>
     )
 }
-
 export default CodingProblems

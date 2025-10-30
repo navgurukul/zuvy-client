@@ -10,9 +10,23 @@ import {
 import { fixTablesKey } from '@remirror/pm/tables'
 
 export const useCourseDetails = () => {
-    const [isLoading, setIsLoading] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [isImageUploading, setIsImageUploading] = useState(false)
     const { Permissions, courseData, setCourseData } = getCourseData()
+
+
+
+useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!courseData || Object.keys(courseData).length === 0) {
+        setIsLoading(true)
+      } else {
+        setIsLoading(false)
+      }
+    }, 600) 
+    return () => clearTimeout(timer)
+  }, [courseData])
+
 
 
     const uploadImage = async (

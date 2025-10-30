@@ -1,6 +1,6 @@
 'use client'
 // External imports
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -29,6 +29,7 @@ import { POSITION, OFFSET } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {McqSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 import { 
     Dialog, 
@@ -78,6 +79,7 @@ interface Option {
 }
 
 const Mcqs = (props: Props) => {
+    const hasLoaded = useRef(false);
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -404,6 +406,12 @@ const Mcqs = (props: Props) => {
         if (options.length > 0) {
             const searchFilter = searchParams.get('search') || ''
             fetchCodingQuestions(offset, searchFilter)
+             .then(() => {
+                setTimeout(() => setLoading(false), 400);
+            })
+            .catch(() => {
+                setLoading(false);
+            });
         }
     }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions])
 
@@ -490,10 +498,15 @@ const Mcqs = (props: Props) => {
                 )
         }
     }
-
+   
     return (
         <>
+         {loading ? (
+                    <McqSkeleton/>
+                    ) : (
+                <>
             {/* Edit Modal */}
+
             <Dialog open={isEditQuizModalOpen} onOpenChange={setIsEditModalOpen}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
@@ -636,6 +649,8 @@ const Mcqs = (props: Props) => {
                         columns={columns}
                         mcqSide={true}
                     />
+
+
                     {totalMCQQuestion > 0 && (
                         <DataTablePagination
                             totalStudents={totalMCQQuestion}
@@ -646,8 +661,9 @@ const Mcqs = (props: Props) => {
                     )}
                 </MaxWidthWrapper>
             )}
-        </>
+      </>
+    )}
+    </>
     )
 }
-
 export default Mcqs

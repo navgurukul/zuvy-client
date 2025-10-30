@@ -56,6 +56,8 @@ import {
     OpenOption,
 } from '@/app/[admin]/resource/open-ended/adminResourceOpenType'
 import { SearchBox } from '@/utils/searchBox'
+import {OpenEndedQuestionsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 type Props = {}
 
@@ -421,9 +423,10 @@ const OpenEndedQuestions = (props: Props) => {
     return (
         <>
             {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-[rgb(81,134,114)]" />
-                </div>
+                 <OpenEndedQuestionsSkeleton />
+                // <div className="flex justify-center items-center h-screen">
+                //     <Spinner className="text-[rgb(81,134,114)]" />
+                // </div>
             ) : (
                 <div>
                     {allOpenEndedQuestions?.length > 0 ? (
@@ -625,5 +628,4 @@ const OpenEndedQuestions = (props: Props) => {
         </>
     )
 }
-
 export default OpenEndedQuestions

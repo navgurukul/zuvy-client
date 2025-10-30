@@ -385,11 +385,14 @@ function Page() {
         }
     }
 
+
     useEffect(() => {
         if (courseData?.id) {
             fetchCourseModules()
         }
     }, [courseData?.id])
+
+
 
     // New function to trigger border flash for specific module
     const triggerBorderFlash = (moduleId: number) => {
@@ -581,12 +584,10 @@ function Page() {
         )
     }
 
-    
+
     if (loading) {
-        return (
-            <CurriculumSkeleton/>
-        )
-    }
+    return <CurriculumSkeleton />
+}
 
     return (
         <div className="w-full">

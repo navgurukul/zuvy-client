@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import ChapterModal from '@/app/[admin]/courses/[courseId]/module/_components/ChapterModal'
+// import {SettingsSkelet} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import {
     getChapterContentState,
     getChapterDataState,

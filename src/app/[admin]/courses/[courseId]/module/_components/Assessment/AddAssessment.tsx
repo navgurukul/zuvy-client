@@ -57,7 +57,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const initialTab = searchParams.get('tab') || ''
-    const [isDataLoading, setIsDataLoading] = useState(true)
+    const [isDataLoading, setIsDataLoading] = useState(false)
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
 
@@ -350,13 +350,13 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         if (hasLoaded.current) return
         hasLoaded.current = true
         const loadTags = async () => {
-            setIsDataLoading(true) // Start loading
+            // setIsDataLoading(true) // Start loading
             try {
                 await getAllTagsWithoutFilter(setTags)
             } catch (error) {
                 console.error('Error loading tags:', error)
             } finally {
-                setIsDataLoading(false) // End loading
+                // setIsDataLoading(false) 
             }
         }
         loadTags()

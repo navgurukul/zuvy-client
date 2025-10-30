@@ -6,7 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 
 export const CoursesSkeleton: React.FC = () => {
     return (
@@ -815,17 +816,17 @@ export const FeedbackFormSkeleton = () => {
 
 
 
+
 export const RecordingSkeletons = () => {
   return (
-    <div className="w-full p-6 border rounded-lg bg-card space-y-6">
+    <div className="w-full max-w-5xl mx-auto p-6 border rounded-lg bg-card space-y-6 shadow-sm">
       {/* Header Section */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-3">
           {/* Session Title */}
           <Skeleton className="h-6 w-72 rounded-md" />
-
           {/* Status Badge */}
-          <Skeleton className="h-6 w-24 rounded-full" />
+          <Skeleton className="h-6 w-28 rounded-full" />
         </div>
 
         {/* Download Button */}
@@ -833,7 +834,7 @@ export const RecordingSkeletons = () => {
       </div>
 
       {/* Session Info (Date, Time, Created By) */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Skeleton className="h-5 w-5 rounded-full" />
           <Skeleton className="h-5 w-64 rounded-md" />
@@ -841,19 +842,278 @@ export const RecordingSkeletons = () => {
 
         <div className="flex items-center gap-2">
           <Skeleton className="h-5 w-5 rounded-full" />
-          <Skeleton className="h-5 w-44 rounded-md" />
+          <Skeleton className="h-5 w-52 rounded-md" />
         </div>
 
         <div className="flex items-center gap-2">
           <Skeleton className="h-5 w-5 rounded-full" />
-          <Skeleton className="h-5 w-52 rounded-md" />
+          <Skeleton className="h-5 w-60 rounded-md" />
         </div>
       </div>
 
       {/* Recording Section */}
-      <div className="flex justify-center mt-6">
-        <Skeleton className="h-10 w-full max-w-[1000px] rounded-md bg-muted/50" />
+      <div className="mt-6">
+        <Skeleton className="h-10 w-full rounded-md bg-muted/60" />
       </div>
     </div>
   )
+}
+
+
+
+
+export const ModuleContentSkeletons = () => {
+  return (
+    <div className="h-screen flex">
+      {/* Mobile Header Skeleton */}
+      <div className="lg:hidden px-4 py-4 border-b border-border flex items-center justify-between">
+        <div className="h-6 bg-muted rounded animate-pulse w-48"></div>
+        <div className="h-10 w-10 bg-muted rounded animate-pulse"></div>
+      </div>
+
+      {/* Desktop Sidebar Skeleton */}
+      <div className="hidden lg:block w-64 h-screen bg-background border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border flex-shrink-0">
+          <div className="h-4 bg-muted rounded animate-pulse mb-4 w-24"></div>
+          <div className="h-6 bg-muted rounded animate-pulse mb-2"></div>
+          <div className="h-4 bg-muted rounded animate-pulse w-32"></div>
+        </div>
+        
+        <div className="border-t border-border flex-shrink-0"></div>
+        
+        <ScrollArea className="flex-1">
+          <div className="p-3 space-y-3">
+            {/* Topic Skeleton */}
+            <div className="space-y-2">
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+              
+              {/* Items Skeleton */}
+              <div className="space-y-1 pl-0">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                  <div key={i} className="flex items-start gap-2 p-2">
+                    <div className="w-6 h-6 bg-muted rounded animate-pulse flex-shrink-0 mt-1"></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="h-4 bg-muted rounded animate-pulse mb-1"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-20"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Second Topic Skeleton */}
+            {/* <div className="space-y-2">
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+              
+              <div className="space-y-1 pl-0">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-start gap-2 p-2">
+                    <div className="w-6 h-6 bg-muted rounded animate-pulse flex-shrink-0 mt-1"></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="h-4 bg-muted rounded animate-pulse mb-1"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-16"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div> */}
+          </div>
+          <ScrollBar />
+        </ScrollArea>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+// question bank
+export const CodingProblemsSkeleton = () => {
+  return (
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-8 w-80" /> 
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-32 rounded-md" />
+          <Skeleton className="h-10 w-40 rounded-md" /> 
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="flex flex-wrap items-center gap-4">
+        <Skeleton className="h-10 w-[350px] rounded-md" /> 
+        <Skeleton className="h-10 w-[180px] rounded-md" /> 
+        <Skeleton className="h-10 w-[180px] rounded-md" />
+      </div>
+
+      {/* Table Header */}
+      <div className="grid grid-cols-6 gap-4 mt-6 border-b border-border pb-3">
+        <Skeleton className="h-6 w-24" /> 
+        <Skeleton className="h-6 w-20" /> 
+        <Skeleton className="h-6 w-20" /> 
+        <Skeleton className="h-6 w-16" /> 
+        <Skeleton className="h-6 w-20" /> 
+        <Skeleton className="h-6 w-20" /> 
+      </div>
+
+      {/* Table Rows */}
+      <div className="space-y-3">
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="grid grid-cols-6 items-center gap-4 border-b border-border py-3"
+          >
+            <Skeleton className="h-5 w-48" /> {/* Question */}
+            <Skeleton className="h-5 w-28" /> {/* Topic */}
+            <Skeleton className="h-6 w-20 rounded-full" /> {/* Difficulty */}
+            <Skeleton className="h-5 w-10" /> {/* Usage */}
+            <Skeleton className="h-5 w-24" /> {/* Created */}
+            <div className="flex gap-3">
+              <Skeleton className="h-5 w-5 rounded-md" /> {/* View icon */}
+              <Skeleton className="h-5 w-5 rounded-md" /> {/* Edit icon */}
+              <Skeleton className="h-5 w-5 rounded-md" /> {/* Delete icon */}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center mt-6 gap-2">
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+      </div>
+    </div>
+  )
+}
+
+
+
+
+export const McqSkeleton = () => {
+  return (
+    <div className="p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <Skeleton className="h-8 w-64" /> {/* Title */}
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-28" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+      </div>
+
+      {/* Filters (Search + Dropdowns) */}
+      <div className="flex items-center gap-4 mb-6">
+        <Skeleton className="h-10 w-[350px] rounded-lg" />
+        <Skeleton className="h-10 w-[180px] rounded-lg" />
+        <Skeleton className="h-10 w-[180px] rounded-lg" />
+      </div>
+
+      {/* Table */}
+      <Card className="w-full">
+        <CardContent className="p-0">
+          {/* Table Header */}
+          <div className="flex justify-between bg-muted p-3 border-b">
+            <Skeleton className="h-5 w-[200px]" />
+            <Skeleton className="h-5 w-[80px]" />
+            <Skeleton className="h-5 w-[100px]" />
+            <Skeleton className="h-5 w-[70px]" />
+            <Skeleton className="h-5 w-[90px]" />
+            <Skeleton className="h-5 w-[90px]" />
+          </div>
+
+          {/* Table Rows */}
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="flex justify-between items-center border-b px-3 py-3"
+            >
+              <Skeleton className="h-5 w-[300px]" /> {/* Question */}
+              <Skeleton className="h-5 w-[100px]" /> {/* Topic */}
+              <Skeleton className="h-6 w-[80px] rounded-full" /> {/* Difficulty */}
+              <Skeleton className="h-5 w-[50px]" /> {/* Usage */}
+              <Skeleton className="h-5 w-[80px]" /> {/* Created */}
+              <div className="flex gap-2">
+                <Skeleton className="h-6 w-6 rounded-full" /> {/* Eye */}
+                <Skeleton className="h-6 w-6 rounded-full" /> {/* Edit */}
+                <Skeleton className="h-6 w-6 rounded-full" /> {/* Delete */}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      {/* Pagination Skeleton */}
+      <div className="flex justify-end items-center gap-4 mt-6">
+        <Skeleton className="h-8 w-16" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+      </div>
+    </div>
+  )
+}
+
+
+
+
+export const OpenEndedQuestionsSkeleton = () => {
+    return (
+        <MaxWidthWrapper>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 mt-6">
+                <Skeleton className="h-8 w-[350px]" /> {/* Page title */}
+                <div className="flex gap-2">
+                    <Skeleton className="h-10 w-[120px]" /> {/* Create Topic */}
+                    <Skeleton className="h-10 w-[150px]" /> {/* Create Question */}
+                </div>
+            </div>
+
+            {/* Search and filters */}
+            <div className="flex items-center gap-4 mb-6">
+                <Skeleton className="h-10 w-[350px]" /> {/* Search input */}
+                <Skeleton className="h-10 w-[180px]" /> {/* Difficulty */}
+                <Skeleton className="h-10 w-[180px]" /> {/* Topic */}
+            </div>
+
+            {/* Table headers */}
+            <div className="w-full border border-border rounded-lg overflow-hidden">
+                <div className="grid grid-cols-5 bg-muted text-muted-foreground p-3 font-semibold">
+                    <Skeleton className="h-5 w-[120px]" /> {/* Question Name */}
+                    <Skeleton className="h-5 w-[80px]" /> {/* Topic */}
+                    <Skeleton className="h-5 w-[90px]" /> {/* Difficulty */}
+                    <Skeleton className="h-5 w-[60px]" /> {/* Usage */}
+                    <Skeleton className="h-5 w-[80px]" /> {/* Preview */}
+                </div>
+
+                {/* Table rows (6 rows for loading effect) */}
+                {[...Array(6)].map((_, index) => (
+                    <div
+                        key={index}
+                        className="grid grid-cols-5 items-center p-4 border-t border-border"
+                    >
+                        <Skeleton className="h-5 w-[200px]" /> {/* Question Name */}
+                        <Skeleton className="h-5 w-[100px]" /> {/* Topic */}
+                        <Skeleton className="h-5 w-[70px]" /> {/* Difficulty */}
+                        <Skeleton className="h-5 w-[50px]" /> {/* Usage */}
+                        <div className="flex justify-center gap-2">
+                            <Skeleton className="h-6 w-6 rounded-full" /> {/* Eye */}
+                            <Skeleton className="h-6 w-6 rounded-full" /> {/* Edit */}
+                            <Skeleton className="h-6 w-6 rounded-full" /> {/* Delete */}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Pagination section */}
+            <div className="flex justify-end items-center mt-6 gap-3">
+                <Skeleton className="h-8 w-[80px]" /> {/* Prev */}
+                <Skeleton className="h-8 w-[50px]" /> {/* Page number */}
+                <Skeleton className="h-8 w-[80px]" /> {/* Next */}
+            </div>
+        </MaxWidthWrapper>
+    )
 }
