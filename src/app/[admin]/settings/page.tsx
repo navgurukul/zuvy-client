@@ -115,7 +115,7 @@ const SettingsPage: React.FC = () => {
     }
 
     return (
-        <div className="bg-white min-h-screen p-8">
+        <div className="p-6 bg-white min-h-screen">
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-2">
                 <Button
@@ -139,7 +139,7 @@ const SettingsPage: React.FC = () => {
                         }
                     `}
                 >
-                    <Settings className="w-4 h-4" />
+                    <Shield className="w-4 h-4" />
                     Manage Role Functions
                 </Button>
             </div>

@@ -84,13 +84,14 @@ const Header = () => {
     // Don't render theme toggle until client-side
     if (!isClient) {
         return (
-            <header className="w-full h-16 px-4 sm:px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
+            <header className="w-full h-16 px-4 sm:px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50 ">
                 {/* Left - Logo and Navigation */}
                 <div className="flex items-center gap-2 sm:gap-4">
                     <div
                         className="flex items-center cursor-pointer"
                         onClick={handleLogoClick}
                     >
+                        
                         <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
                     </div>
 
@@ -212,10 +213,15 @@ const Header = () => {
             {/* Left - Logo and Navigation */}
             <div className="flex items-center gap-2 sm:gap-4">
                 <div
-                    className="flex items-center cursor-pointer"
+                    className="flex items-center cursor-pointer mb-1"
                     onClick={handleLogoClick}
                 >
-                    <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
+                    {isDark ? 
+                  <img src={'/zuvy-logo-horizontal-dark.png'} alt="Zuvy" className="h-7" />
+
+                :     
+                    <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
+                }
                 </div>
 
                 {/* Course Navigation Buttons */}
@@ -274,7 +280,7 @@ const Header = () => {
                                     alt="Student"
                                 />
                             ) : (
-                                <AvatarFallback className="font-medium">
+                                <AvatarFallback className="font-medium text-white">
                                     {getUserInitials(studentData?.name)}
                                 </AvatarFallback>
                             )}

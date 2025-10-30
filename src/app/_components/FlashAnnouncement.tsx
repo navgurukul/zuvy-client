@@ -185,7 +185,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
               >
                 {/* Left Section */}
                 <div className="space-y-3">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-[#3e69de] px-3 py-1 text-xs font-medium text-white">
+                  <div className="inline-flex items-center gap-2 rounded-full  px-3 py-1 text-xs font-medium ">
                     <Rocket className="h-4 w-4" aria-hidden="true" />
                     Now Live
                   </div>
@@ -232,7 +232,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
             </p>
 
                   <div className="pt-2">
-                    <Button onClick={handleClose}  className="px-6 bg-[#3e69de] cursor-pointer">
+                    <Button onClick={handleClose}  className="px-6  cursor-pointer">
                       Explore
                     </Button>
                   </div>
@@ -245,7 +245,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
                       <span className="text-sm font-medium text-muted-foreground">
                         Launch status
                       </span>
-                      <span className="rounded-full dark:text-black bg-success px-2 py-1 text-xs text-white">
+                      <span className="rounded-full dark:text-black bg-primary px-2 py-1 text-xs text-white">
                         Live Now
                       </span>
                     </div>
@@ -260,7 +260,7 @@ const FlashAnnouncementDialog: FC<FlashAnnouncementDialogProps> = ({
 
                     <Progress
                       value={100}
-                      className="mb-2 bg-[#3e69de]/50 border border-[#3e69de]"
+                      className="mb-2 bg-primary"
                       aria-label="Release progress"
                     />
                     <div className="text-sm text-muted-foreground">

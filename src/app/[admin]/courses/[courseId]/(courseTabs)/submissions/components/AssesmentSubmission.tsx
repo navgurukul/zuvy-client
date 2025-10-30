@@ -240,51 +240,52 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                                         Module - {key}
                                     </h2>
                                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        {assesments[key].map(
-                                            (
-                                                assessment: AssessmentSubmissions
-                                            ) => (
-                                                <AssesmentComponent
-                                                    key={assessment.id}
-                                                    id={Number(assessment.id)}
-                                                    title={assessment.title}
-                                                    codingChallenges={
-                                                        assessment.totalCodingQuestions
-                                                    }
-                                                    mcq={
-                                                        assessment.totalMcqQuestions
-                                                    }
-                                                    openEnded={
-                                                        assessment.totalOpenEndedQuestions
-                                                    }
-                                                    totalSubmissions={
-                                                        assesments?.totalStudents
-                                                    }
-                                                    studentsSubmitted={
-                                                        assessment.totalSubmitedAssessments
-                                                    }
-                                                    bootcampId={courseId}
-                                                    qualifiedStudents={
-                                                        assessment.qualifiedStudents
-                                                    }
-                                                    // onDownloadClick={() =>
-                                                    //     handleDownloadClick(
-                                                    //         assessment
-                                                    //     )
-                                                    // }
-                                                    onDownloadPdf={() =>
-                                                        handleDownloadPdf(
-                                                            assessment
-                                                        )
-                                                    }
-                                                    onDownloadCsv={() =>
-                                                        handleDownloadCsv(
-                                                            assessment
-                                                        )
-                                                    }
-                                                />
+                                        {Array.isArray(assesments[key]) &&
+                                            assesments[key].map(
+                                                (assessment: AssessmentSubmissions) => (
+                                                    <AssesmentComponent
+                                                        key={assessment.id}
+                                                        id={Number(assessment.id)}
+                                                        title={assessment.title}
+                                                        codingChallenges={
+                                                            assessment.totalCodingQuestions
+                                                        }
+                                                        mcq={
+                                                            assessment.totalMcqQuestions
+                                                        }
+                                                        openEnded={
+                                                            assessment.totalOpenEndedQuestions
+                                                        }
+                                                        totalSubmissions={
+                                                            assesments?.totalStudents
+                                                        }
+                                                        studentsSubmitted={
+                                                            assessment.totalSubmitedAssessments
+                                                        }
+                                                        bootcampId={courseId}
+                                                        qualifiedStudents={
+                                                            assessment.qualifiedStudents
+                                                        }
+                                                        // onDownloadClick={() =>
+                                                        //     handleDownloadClick(
+                                                        //         assessment
+                                                        //     )
+                                                        // }
+                                                        onDownloadPdf={() =>
+                                                            handleDownloadPdf(
+                                                                assessment
+                                                            )
+                                                        }
+                                                        onDownloadCsv={() =>
+                                                            handleDownloadCsv(
+                                                                assessment
+                                                            )
+                                                        }
+                                                    />
+                                                )
                                             )
-                                        )}
+                                        }
+
                                     </div>
                                 </div>
                             )

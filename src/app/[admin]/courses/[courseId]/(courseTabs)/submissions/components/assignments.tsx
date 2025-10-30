@@ -51,7 +51,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
 
                 const doc = new jsPDF()
 
-                // Title Styling
+
                 doc.setFontSize(18)
                 doc.setFont('Regular', 'normal')
 
