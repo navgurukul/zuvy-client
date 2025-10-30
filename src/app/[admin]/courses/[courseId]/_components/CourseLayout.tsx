@@ -112,7 +112,7 @@ if (!courseData || !courseData?.id) {
   return <CourseLayoutSkeleton/>
 }
     return (
-        <>
+        <div className="pl-6 pr-3">
             {/* <Breadcrumb crumbs={crumbs} /> */}
             <Link
                 href={`/${role}/courses`}
@@ -183,7 +183,7 @@ if (!courseData || !courseData?.id) {
                 </Tabs>
             </div>
 
-        </>
+        </div>
     )
 }
 

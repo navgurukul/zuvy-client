@@ -370,7 +370,7 @@ useEffect(() => {
             )
             toast.success({
                 title: 'Success',
-                description: 'Form Edited Successfully',
+                description: 'Form Saved Successfully',
             })
             setIsChapterUpdated(!isChapterUpdated)
             setIsSaved(true)

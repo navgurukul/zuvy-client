@@ -126,8 +126,8 @@ const Page = ({ params }: { params: paramsType }) => {
     const formattedDate = date.toLocaleDateString('en-US', options2)
 
     return (
-        <div className="pb-10">
-            <div className="flex items-center gap-4 mb-8">
+        <div className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
+            <div className="flex items-center gap-4 mb-8 mt-8">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}

@@ -371,22 +371,28 @@ const Mcqs = (props: Props) => {
         }
     }, []) // Empty dependency - runs only when component mounts
 
+    // Data fetching function को update करो
     const fetchCodingQuestions = useCallback(
         async (offset: number, searchTerm?: string) => {
-            if (offset >= 0) {
-                // Use the passed searchTerm if provided, otherwise use the current search from URL
-                const currentSearchTerm = searchTerm !== undefined ? searchTerm : (searchParams.get('search') || '')
-                filteredQuizQuestions(
-                    setStoreQuizData,
-                    offset,
-                    position,
-                    difficulty,
-                    selectedOptions,
-                    setTotalMCQQuestion,
-                    setLastPage,
-                    setTotalPages,
-                    currentSearchTerm
-                )
+            if (offset >= 0 && options.length > 0) { // Add options.length check
+                try {
+                    const currentSearchTerm = searchTerm !== undefined ? searchTerm : (searchParams.get('search') || '')
+                    await filteredQuizQuestions(
+                        setStoreQuizData,
+                        offset,
+                        position,
+                        difficulty,
+                        selectedOptions,
+                        setTotalMCQQuestion,
+                        setLastPage,
+                        setTotalPages,
+                        currentSearchTerm
+                    )
+                } catch (error) {
+                    console.error('Error fetching questions:', error)
+                    // Set empty data on error to prevent table crashes
+                    setStoreQuizData([])
+                }
             }
         },
         [
@@ -398,6 +404,7 @@ const Mcqs = (props: Props) => {
             setLastPage,
             setTotalPages,
             searchParams,
+            options.length, // Add this dependency
         ]
     )
 
@@ -645,19 +652,21 @@ const Mcqs = (props: Props) => {
                     
 
                     <DataTable
-                        data={quizData}
+                        data={quizData || []} // Ensure data is never undefined
                         columns={columns}
                         mcqSide={true}
                     />
 
 
                     {totalMCQQuestion > 0 && (
-                        <DataTablePagination
-                            totalStudents={totalMCQQuestion}
-                            lastPage={lastPage}
-                            pages={totalPages}
-                            fetchStudentData={fetchCodingQuestions}
-                        />
+                        <div className='py-4 flex justify-end'>
+                            <DataTablePagination
+                                totalStudents={totalMCQQuestion}
+                                lastPage={lastPage}
+                                pages={totalPages}
+                                fetchStudentData={fetchCodingQuestions}
+                            />
+                        </div>
                     )}
                 </MaxWidthWrapper>
             )}

@@ -86,14 +86,14 @@ const QuestionDescriptionModal = ({
                                 </div>
 
                                 {/* Function Name */}
-                                <div>
+                                {/* <div>
                                     <h4 className="font-semibold text-foreground text-lg mb-3">
                                         Function Name to Start With:{' '}
                                         <span className="font-light text-base">
                                             minJumps
                                         </span>
                                     </h4>
-                                </div>
+                                </div> */}
 
                                 {/* Input */}
                                 <div>

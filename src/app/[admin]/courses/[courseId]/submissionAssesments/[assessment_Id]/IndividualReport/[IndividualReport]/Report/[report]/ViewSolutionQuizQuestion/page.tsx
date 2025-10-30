@@ -93,6 +93,7 @@ const Page = ({ params }: { params: paramsType }) => {
 
     return (
         <>
+            <MaxWidthWrapper className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
             <div className="flex items-center gap-4 mb-8">
                 <Button
                     variant="ghost"
@@ -103,7 +104,6 @@ const Page = ({ params }: { params: paramsType }) => {
                     Back to Course Submissions
                 </Button>
             </div>
-            <MaxWidthWrapper className="flex flex-col gap-6 pb-10">
                 <Card className="bg-gradient-to-r from-card to-muted/30 border border-border rounded-2xl shadow-lg">
                     <CardHeader className="flex flex-row items-center gap-x-4 p-6">
                         <Avatar className="h-14 w-14 shadow-md ring-2 ring-muted-foreground/20">

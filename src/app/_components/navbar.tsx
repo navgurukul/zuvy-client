@@ -6,6 +6,7 @@ import {
     Settings,
     Database,
 } from 'lucide-react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -18,7 +19,6 @@ import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 import { getPermissions } from '@/lib/GetPermissions'
 import { Spinner } from '@/components/ui/spinner'
-import Image from 'next/image'
 
 //Test
 const Navbar = () => {

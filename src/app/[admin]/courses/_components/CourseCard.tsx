@@ -1,10 +1,12 @@
-import Image from 'next/image'
-
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Users, Clock, BookOpen } from 'lucide-react'
 import {
     CourseCardProps,
 } from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+import Image from 'next/image'
+import { cn } from '@/lib/utils'
+import OptimizedImageWithFallback from '@/components/ImageWithFallback'
+
 
 const CourseCard = ({
     course,
@@ -33,8 +35,8 @@ const CourseCard = ({
                     </div>
                 ) : (
                     <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gradient-to-br from-primary-light to-primary flex items-center justify-center">
-            <BookOpen className="h-12 w-12 text-primary opacity-60" />
-          </div>
+                        <BookOpen className="h-12 w-12 text-primary opacity-60" />
+                    </div>
                     // <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
                     //     <OptimizedImageWithFallback
                     //         src={
