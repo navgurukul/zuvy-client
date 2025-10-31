@@ -110,13 +110,11 @@ const Page = ({ params }: { params: PageProps }) => {
         }
     }
 
-    // Loading state
     if (loading) {
         return (
             <SettingsSkeleton/>
         )
     }
-
     // Error state
     if (error) {
         return (

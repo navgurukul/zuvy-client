@@ -11,12 +11,16 @@ import {
     VideoSubmissions,
     VideoData,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
+import {VideoSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const [videoData, setVideoData] = useState<VideoData | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
     const getVideoSubmission = useCallback(async () => {
         try {
+            setIsLoading(true)
             const url = debouncedSearch
                 ? `/admin/bootcampModuleCompletion/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
                 : `/admin/bootcampModuleCompletion/bootcamp_id${courseId}`
@@ -28,6 +32,8 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                 title: 'Error',
                 description: 'Error fetching assessments:',
             })
+        }finally {
+           setIsLoading(false)
         }
     }, [courseId, debouncedSearch])
 
@@ -35,6 +41,9 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
         getVideoSubmission()
     }, [getVideoSubmission])
 
+    if (isLoading) {
+        return<VideoSubmissionSkeleton/>
+    }
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (

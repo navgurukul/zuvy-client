@@ -1,5 +1,3 @@
-// Course Studio skeleton
-
 'use client'
 import React from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -9,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Play,Eye,ArrowDownToLine} from 'lucide-react'
 
 export const CoursesSkeleton: React.FC = () => {
     return (
@@ -17,8 +16,8 @@ export const CoursesSkeleton: React.FC = () => {
             <div className="px-1 pt-2 pb-2">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 w-full">
                     <div className="flex-1 min-w-[220px] text-start space-y-2">
-                        <Skeleton className="h-8 w-1/3" /> {/* title */}
-                        <Skeleton className="h-4 w-2/3" /> {/* subtitle */}
+                        <Skeleton className="h-8 w-1/3" /> 
+                        <Skeleton className="h-4 w-2/3" /> 
                     </div>
                     <div className="flex-1 flex justify-end min-w-[220px]">
                         <Skeleton className="h-10 w-40 rounded-lg" />{' '}
@@ -56,6 +55,8 @@ export const CoursesSkeleton: React.FC = () => {
         </div>
     )
 }
+
+
 
 // Course Detail page
 export const GeneralDetailsSkeleton: React.FC = () => {
@@ -137,14 +138,13 @@ export const GeneralDetailsSkeleton: React.FC = () => {
     )
 }
 
-// // CourseLayoutSkeleton
-
+// CourseLayoutSkeleton
 export const CourseLayoutSkeleton = () => {
     return (
         <div className="space-y-8 p-8">
             {/* Back to Course Library Button */}
             <div className="flex items-center gap-2">
-                <Skeleton className="h-4 w-4 rounded-full" /> {/* back icon */}
+                <Skeleton className="h-4 w-4 rounded-full" /> 
                 <Skeleton className="h-4 w-[150px]" />{' '}
                 {/* "Back to Course Library" */}
             </div>
@@ -178,6 +178,7 @@ export const CourseLayoutSkeleton = () => {
         </div>
     )
 }
+
 
 // CurriculumSkeleton
 export const CurriculumSkeleton = () => {
@@ -601,7 +602,6 @@ export const SkeletonQuiz = () => {
                         </div>
                     ))}
                 </div>
-
                 {/* Right side - Selected Question */}
                 <div className="w-[35%] border-l pl-6 space-y-3">
                     <Skeleton className="h-5 w-40" />
@@ -908,6 +908,340 @@ export const ModuleContentSkeletons = () => {
     </div>
   );
 };
+
+
+// Submission Page
+export const CourseSubmissionSkeleton=()=>{
+  return (
+    <div className="space-y-4">
+      {/* Tabs Skeleton */}
+      <div className="w-full bg-card border border-border items-center rounded-lg p-1 h-12 flex flex-nowrap justify-around overflow-x-auto">
+        {[...Array(6)].map((_, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <Skeleton className="w-12 h-6 rounded-md" />
+            <Skeleton className="w-20 h-4 rounded-md" />
+          </div>
+        ))}
+      </div>
+
+      {/* Search bar Skeleton */}
+      <div className="flex items-center justify-between">
+        <Skeleton className="w-64 h-9 rounded-md" /> 
+      </div>
+    </div>
+  )
+}
+
+
+
+// Assessment submisson page
+export const AssessmentSubmissionSkeleton=()=>{
+  return (
+    <div className="grid relative gap-8 mt-4 md:mt-8">
+      {/* Simulating 2 Modules */}
+      {[...Array(2)].map((_, moduleIndex) => (
+        <div key={moduleIndex}>
+          {/* Module Title */}
+          <Skeleton className="w-48 h-6 mb-4 rounded-md" />
+
+          {/* Chapter Cards Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, cardIndex) => (
+              <Card
+                key={cardIndex}
+                className="bg-muted/40 border border-border shadow-sm rounded-xl"
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="w-32 h-5 rounded-md" /> 
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="w-5 h-5 rounded-full" /> 
+                    <Skeleton className="w-5 h-5 rounded-full" /> 
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex justify-between items-center mt-2">
+                    <Skeleton className="w-24 h-6 rounded-full" /> 
+                    <Skeleton className="w-20 h-6 rounded-full" /> 
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+// Assignment Submission Skeleton
+export const AssignmentSubmissionSkeleton = () => {
+  return (
+    <div className="grid relative gap-8 mt-4 md:mt-8">
+      {[...Array(2)].map((_, moduleIndex) => (
+        <div key={moduleIndex}>
+          {/* Module Title */}
+          <Skeleton className="w-48 h-6 mb-4 rounded-md" />
+
+          {/* Chapter Cards Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, cardIndex) => (
+              <Card
+                key={cardIndex}
+                className="bg-muted/40 border border-border shadow-sm rounded-xl"
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="w-32 h-5 rounded-md" /> 
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="w-5 h-5 rounded-full" /> 
+                    <Skeleton className="w-5 h-5 rounded-full" /> 
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex justify-between items-center mt-2">
+                    <Skeleton className="w-24 h-6 rounded-full" /> 
+                    <Skeleton className="w-20 h-6 rounded-full" /> 
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+
+// Feedback Submission Form
+export const FeedbackSubmissionSkeleton = () => {
+  return (
+    <div className="relative bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
+      <div className="flex flex-col w-full justify-between">
+        {/* Title row */}
+        <div className="flex items-center gap-2">
+          <Skeleton className="w-5 h-5 rounded-md" /> 
+          <Skeleton className="w-32 h-5 rounded-md" /> 
+        </div>
+
+        {/* Eye icon on right */}
+        <div className="absolute top-2 right-1">
+          <Skeleton className="w-6 h-6 rounded-full" />
+        </div>
+
+        {/* Badges row */}
+        <div className="flex items-center justify-between mt-4 text-sm">
+          <Skeleton className="w-28 h-6 rounded-full" /> 
+          <Skeleton className="w-24 h-6 rounded-full" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+
+
+
+// Practice Problem Submission
+export const PracticeProblemSubmissionSkeleton = () => {
+  return (
+    <div className="grid relative gap-8 mt-4 md:mt-8">
+      {/* Simulating 2 Modules */}
+      {[...Array(2)].map((_, moduleIndex) => (
+        <div key={moduleIndex}>
+          {/* Module Title */}
+          <Skeleton className="w-48 h-6 mb-4 rounded-md" />
+
+          {/* Chapter Cards Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, cardIndex) => (
+              <Card
+                key={cardIndex}
+                className="bg-muted/40 border border-border shadow-sm rounded-xl"
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="w-32 h-5 rounded-md" /> 
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="w-5 h-5 rounded-full" /> 
+                    <Skeleton className="w-5 h-5 rounded-full" />
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex justify-between items-center mt-2">
+                    <Skeleton className="w-24 h-6 rounded-full" /> 
+                    <Skeleton className="w-20 h-6 rounded-full" /> 
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+
+
+// Video Submission
+export const VideoSubmissionSkeleton = () => {
+  return (
+    <div className="grid relative gap-8 mt-4 md:mt-8">
+      {/* Simulating 2 Modules */}
+      {[...Array(2)].map((_, moduleIndex) => (
+        <div key={moduleIndex}>
+          {/* Module Title */}
+          <Skeleton className="w-48 h-6 mb-4 rounded-md" />
+
+          {/* Chapter Cards Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, cardIndex) => (
+              <Card
+                key={cardIndex}
+                className="bg-muted/40 border border-border shadow-sm rounded-xl"
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <Skeleton className="w-32 h-5 rounded-md" /> 
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="w-5 h-5 rounded-full" /> 
+                    <Skeleton className="w-5 h-5 rounded-full" /> 
+                  </div>
+                </CardHeader>
+
+                <CardContent>
+                  <div className="flex justify-between items-center mt-2">
+                    <Skeleton className="w-24 h-6 rounded-full" /> 
+                    <Skeleton className="w-20 h-6 rounded-full" /> 
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+
+// LiveClassSubmissionSkeleton
+export const LiveClassSubmissionSkeleton = () => {
+  return (
+    <div className="grid relative gap-8 mt-4 md:mt-8">
+      {/* Simulating 2 Modules */}
+      {[...Array(2)].map((_, moduleIndex) => (
+        <div key={moduleIndex}>
+          {/* Chapter Cards Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, cardIndex) => (
+              <Card
+                key={cardIndex}
+                className="bg-muted/40 border border-border shadow-sm rounded-xl"
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <Skeleton className="w-5 h-5 rounded-full" />
+                    <Skeleton className="w-5 h-5 rounded-full" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center mt-2">
+                    <Skeleton className="w-24 h-6 rounded-full" /> 
+                    <Skeleton className="w-20 h-6 rounded-full" /> 
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+
+
+
+
+
+
+
+
+// Project submission page
+// export const ProjectSubmissionSkeleton = () => {
+//   return (
+//     <div className="space-y-8 mt-4">
+//       {/* Repeat for few modules */}
+//       {[...Array(2)].map((_, moduleIndex) => (
+//         <div key={moduleIndex} className="space-y-4">
+//           {/* Module title skeleton */}
+//           <Skeleton className="h-6 w-48 rounded-md" />
+
+//           {/* Cards grid */}
+//           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+//             {[...Array(4)].map((_, cardIndex) => (
+//               <div
+//                 key={cardIndex}
+//                 className="relative bg-muted border border-gray-200 rounded-md p-4 w-full"
+//               >
+//                 {/* Icon & buttons row */}
+//                 <div className="flex justify-between items-start mb-4">
+//                   <Skeleton className="h-5 w-5 rounded-md" />
+//                   <div className="flex gap-2">
+//                     <Skeleton className="h-5 w-5 rounded-md" />
+//                     <Skeleton className="h-5 w-5 rounded-md" />
+//                   </div>
+//                 </div>
+
+//                 {/* Title row */}
+//                 <div className="flex items-center gap-3 mb-4">
+//                   <Skeleton className="h-8 w-8 rounded-md" />
+//                   <Skeleton className="h-5 w-32 rounded-md" />
+//                 </div>
+
+//                 {/* Badges (submissions + pending) */}
+//                 <div className="flex items-center justify-between mt-2">
+//                   <Skeleton className="h-6 w-28 rounded-full" />
+//                   <Skeleton className="h-6 w-20 rounded-full" />
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       ))}
+//     </div>
+//   )
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

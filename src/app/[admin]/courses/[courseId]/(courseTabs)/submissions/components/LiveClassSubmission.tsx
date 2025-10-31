@@ -8,6 +8,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import {LiveClassSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 interface LiveClassSubmissionsProps {
     courseId: string
@@ -102,16 +104,9 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
             })
         }
     }
-
-
     if (loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            </div>
-        )
+        return <LiveClassSubmissionSkeleton/>
     }
-
     // Flatten all live classes from all modules
     const allLiveClasses = liveClassData.flatMap((module) =>
         (module.moduleChapterData || []).map((liveClass: any) => ({

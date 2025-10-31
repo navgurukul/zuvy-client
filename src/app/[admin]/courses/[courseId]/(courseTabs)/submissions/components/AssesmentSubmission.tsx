@@ -13,15 +13,18 @@ import {
     APIResponses,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 // import assesmentNotfound from @/public
+import {AssessmentSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
     const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(
         null
     )
+    const [isLoading, setIsLoading] = useState(true)
     const debouncedSearch = useDebounce(searchTerm, 300)
 
     const getAssessments = useCallback(async () => {
         try {
+             setIsLoading(true)
             const url = debouncedSearch
                 ? `/admin/bootcampAssessment/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
                 : `/admin/bootcampAssessment/bootcamp_id${courseId}`
@@ -33,7 +36,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                 title: 'Error',
                 description: 'Error fetching assessments:',
             })
-        }
+        } finally {
+           setIsLoading(false) 
+       }
     }, [courseId, debouncedSearch])
 
     useEffect(() => {
@@ -227,7 +232,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             })
         }
     }
-
+     if(isLoading){
+        return<AssessmentSubmissionSkeleton />
+    }
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {assesments ? (
@@ -306,7 +313,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
                         />
                     </div>
                 )
-            ) : (
+            ): (
                 <div className="flex flex-col justify-center items-center">
                     <p className="text-center text-muted-foreground max-w-md">
                         No Assessment submissions available from the students
@@ -324,5 +331,13 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         </div>
     )
 }
-
 export default AssesmentSubmissionComponent
+
+
+
+
+
+
+
+
+
