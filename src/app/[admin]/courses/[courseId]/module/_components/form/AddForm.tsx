@@ -5,8 +5,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Pencil, PlusCircle } from 'lucide-react'
-import { getUser } from '@/store/store'
+import { Pencil, PlusCircle, Eye } from 'lucide-react'
 // Internal imports
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,9 +21,9 @@ import {
     FormLabel,
     FormMessage,
 } from '@/components/ui/form'
-import { getChapterUpdateStatus, getFormPreviewStore } from '@/store/store'
-import { Eye } from 'lucide-react'
+import { getChapterUpdateStatus, getFormPreviewStore, getUser } from '@/store/store'
 import { useRouter } from 'next/navigation'
+import useEditChapter from '@/hooks/useEditChapter'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import {
     AddFormProps,
@@ -78,6 +77,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const [isSaved, setIsSaved] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isDataLoading, setIsDataLoading] = useState(true)
+    const { editChapter } = useEditChapter()
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -359,10 +359,10 @@ useEffect(() => {
         }
 
         try {
-            const editChapterResponse = await api.put(
-                `Content/editChapterOfModule/${moduleId}?chapterId=${content.id}`,
-                { title, description }
-            )
+            const editChapterResponse = await editChapter(moduleId, content.id, {
+                title,
+                description,
+            })
 
             const questionsRespons = await api.post(
                 `Content/createAndEditForm/${content.id}`,

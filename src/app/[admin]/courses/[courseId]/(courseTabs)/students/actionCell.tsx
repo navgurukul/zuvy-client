@@ -15,17 +15,7 @@ import { Button } from "@/components/ui/button"
 import EditModal from './components/editModal'
 import { AlertDialogDemo } from './components/deleteModalNew'
 import DeleteModalDialog from './components/deleteModal'
-
-interface ActionCellProps {
-    student: {
-        userId: string
-        bootcampId: string
-        name: string
-        email: string
-        status?: string
-        batchId?: string
-    }
-}
+import { ActionCellProps } from './studentComponentTypes'
 
 const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
     const { user } = getUser()

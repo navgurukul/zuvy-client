@@ -11,7 +11,7 @@ import {
     FileSpreadsheet,
     UserPlus,
 } from 'lucide-react'
-import { getUser } from '@/store/store'
+import { getUser, getBatchData } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -19,7 +19,6 @@ import { DataTable } from '../../../../../_components/datatable/data-table'
 import { ROWS_PER_PAGE } from '@/utils/constant'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { columns } from './columns'
-import { getBatchData } from '@/store/store'
 import { useStudentData } from './components/useStudentData'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { api } from '@/utils/axios.config'
@@ -36,6 +35,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import {StudentPageSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import { Student } from './studentComponentTypes'
 
 export type StudentData = {
     email: string
@@ -47,11 +47,6 @@ export type StudentData = {
     progress: number
     profilePicture: string
     enrolledDate?: string | null
-}
-
-interface Student {
-    email: string
-    name: string
 }
 
 type StudentDataState = Student[]
@@ -457,23 +452,23 @@ const StudentsPage = ({ params }: { params: any }) => {
                     )}
                 </div>
 
-        {/* Filters Row (on mobile both in one row) */}
-        <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 md:gap-y-0 mt-10">
-          {/* Status Filter */}
-          <div className="w-full sm:w-[160px] mt-2">
-            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-              <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Status" /></SelectTrigger>
-              <SelectContent><SelectItem value="all">All Status</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="dropout">Dropout</SelectItem><SelectItem value="graduate">Graduate</SelectItem></SelectContent>
-            </Select>
-          </div>
+                {/* Filters Row (on mobile both in one row) */}
+                <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 md:gap-y-0 mt-10">
+                  {/* Status Filter */}
+                  <div className="w-full sm:w-[160px] mt-2">
+                    <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+                      <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Status" /></SelectTrigger>
+                      <SelectContent><SelectItem value="all">All Status</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="dropout">Dropout</SelectItem><SelectItem value="graduate">Graduate</SelectItem></SelectContent>
+                    </Select>
+                  </div>
 
-          {/* Batch Filter (placed after Status) */}
-          <div className="w-full sm:w-[160px] mt-2">
-            <Select value={batchFilter} onValueChange={handleBatchFilterChange}>
-              <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Batches" /></SelectTrigger>
-              <SelectContent><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
-            </Select>
-          </div>
+                  {/* Batch Filter (placed after Status) */}
+                  <div className="w-full sm:w-[160px] mt-2">
+                    <Select value={batchFilter} onValueChange={handleBatchFilterChange}>
+                      <SelectTrigger className="text-sm w-full"><SelectValue placeholder="All Batches" /></SelectTrigger>
+                      <SelectContent><SelectItem value="all">All Batches</SelectItem>{(newBatchData || []).map((b) => (<SelectItem key={b.value} value={String(b.value)}>{b.label}</SelectItem>))}</SelectContent>
+                    </Select>
+                  </div>
 
                     {/* Enrolled Date filter */}
                     <div className="w-full sm:w-[160px] mt-2">
