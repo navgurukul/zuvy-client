@@ -143,7 +143,6 @@ const SettingsPage: React.FC = () => {
                     Manage Role Functions
                 </Button>
             </div>
-
             {activeTab === 'users' && (
                 <>
                     {/* Invite Users via Link Section */}

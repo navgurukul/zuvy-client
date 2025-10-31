@@ -83,7 +83,6 @@ const QuizResults = ({
             </div>
         )
     }
-
     // Show no questions state
     if (!quizResults?.mcqs?.length) {
         return (

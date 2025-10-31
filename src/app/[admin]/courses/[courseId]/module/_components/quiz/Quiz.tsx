@@ -32,6 +32,7 @@ import CodingTopics from '../codingChallenge/CodingTopics'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import {SkeletonQuiz}  from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import useEditChapter from '@/hooks/useEditChapter' 
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
 
@@ -357,13 +358,14 @@ function Quiz(props: QuizProps) {
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">Loading Quiz details...</div>
-                </div>
-            </div>
-        )
+        // return (
+        //     <div className="px-5">
+        //         <div className="w-full flex justify-center items-center py-8">
+        //             <div className="animate-pulse">Loading Quiz details...</div>
+        //         </div>
+        //     </div>
+        // )
+        return <SkeletonQuiz/>
     }
 
     return (
@@ -579,5 +581,4 @@ function Quiz(props: QuizProps) {
         </div>
     )
 }
-
 export default Quiz

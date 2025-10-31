@@ -34,6 +34,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {StudentPageSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import { Student } from './studentComponentTypes'
 
 export type StudentData = {
@@ -77,6 +78,8 @@ const StudentsPage = ({ params }: { params: any }) => {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [batchFilter, setBatchFilter] = useState<string>('all')
   const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
+    const [loading, setLoading] = useState(true)
+
 
   // Fetch data with filters
   const fetchFilteredData = useCallback(async () => {
@@ -330,6 +333,14 @@ const StudentsPage = ({ params }: { params: any }) => {
     return () => { window.removeEventListener('refreshStudentData', handleRefresh) }
   }, [fetchFilteredData])
 
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600)
+    return () => clearTimeout(timer)
+  }, [])
+  if (loading) {
+    return <StudentPageSkeleton />
+  }
     // Normal table view (no conditional rendering needed)
     return (
         <div className="text-foreground">

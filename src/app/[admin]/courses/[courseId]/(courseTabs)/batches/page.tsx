@@ -46,7 +46,6 @@ import {
 import { CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/use-toast'
-import { Spinner } from '@/components/ui/spinner'
 import { Label } from '@/components/ui/label'
 import AddStudentsModal from '../../_components/addStudentsmodal'
 import { api } from '@/utils/axios.config'
@@ -91,6 +90,8 @@ import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
 import AddStudentOptions from '../../_components/AddStudentOptions'
+import {BatchesSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 // Enhanced Batch interface to match new design
 interface EnhancedBatch {
@@ -610,10 +611,11 @@ const Page = ({ params }: { params: ParamsType }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
-        }, 1000)
+        }, 600)
 
         return () => clearTimeout(timer)
     }, [])
+
 
     const getUnAssignedStudents = useCallback(async () => {
         try {
@@ -1294,6 +1296,10 @@ const Page = ({ params }: { params: ParamsType }) => {
 
     if (courseData?.id) {
         return (
+             <>
+           {loading ? (
+           <BatchesSkeleton/>  
+        ) : (
             <div className="w-full max-w-none pb-8">
                 {/* Header */}
                 <div className="flex items-center justify-between">
@@ -1325,22 +1331,13 @@ const Page = ({ params }: { params: ParamsType }) => {
                             />
                         </div>
                     </div>
-                {loading ? (
-                    <div className="my-5 flex justify-center items-center">
-                        <div className="absolute h-screen">
-                            <div className="relative top-[70%]">
-                                <Spinner className="text-secondary" />
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    /* Batch Cards Grid - Updated Design */
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {(enhancedBatchData?.length ?? 0) > 0 ? (
                             enhancedBatchData?.map((batch: EnhancedBatch) => (
                                 <Card
                                     key={batch.id}
                                     className="hover:shadow-lg transition-all duration-200 flex flex-col w-[380px]"
+                                    
                                 >
                                     <CardHeader className="pb-3">
                                         <div className="flex items-start justify-between">
@@ -1498,7 +1495,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                             </div>
                         )}
                     </div>
-                )}
+                {/* )} */}
 
                 {/* Edit Modal */}
                 {renderEditModal()}
@@ -1518,6 +1515,9 @@ const Page = ({ params }: { params: ParamsType }) => {
                     instructorInfo={batchToDelete}
                 />
             </div>
+        )}
+        </>
+        
         )
     }
 

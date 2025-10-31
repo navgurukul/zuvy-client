@@ -10,6 +10,7 @@ import { getCourseData } from '@/store/store'
 import Link from 'next/link'
 import { useParams, useRouter, usePathname } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
+import {CourseLayoutSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import {
     ArrowLeft,
     GraduationCap,
@@ -32,6 +33,7 @@ function CourseLayout() {
     // get the role from current path like if the url is this - admin/courses/721/details  then get admin from it
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+     const [loading, setLoading] = useState(true)
 
     const courseMenu = [
         {
@@ -105,6 +107,10 @@ function CourseLayout() {
         handleFetch()
     }, [])
 
+
+if (!courseData || !courseData?.id) {
+  return <CourseLayoutSkeleton/>
+}
     return (
         <div className="pl-6 pr-3">
             {/* <Breadcrumb crumbs={crumbs} /> */}
@@ -182,3 +188,9 @@ function CourseLayout() {
 }
 
 export default CourseLayout
+
+
+
+
+
+

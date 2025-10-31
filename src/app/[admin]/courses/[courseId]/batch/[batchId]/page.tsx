@@ -802,11 +802,11 @@ const BatchesInfo = ({
                         </div>
                     </div>
                 </div>
-                {loading ? (
+                {/* {loading ? (
                     <div className="flex justify-center">
                         <Spinner className="text-[rgb(81,134,114)]" />
                     </div>
-                ) : (
+                ) : ( */}
                     <div>
                         <DataTable
                             columns={columns}
@@ -820,7 +820,7 @@ const BatchesInfo = ({
                             fetchStudentData={fetchStudentData}
                         />
                     </div>
-                )}
+                {/* )} */}
             </MaxWidthWrapper>
         </>
     )

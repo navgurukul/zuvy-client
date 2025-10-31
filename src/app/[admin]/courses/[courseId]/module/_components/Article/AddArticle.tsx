@@ -35,6 +35,7 @@ import {
     ContentArticle,
 } from '@/app/[admin]/courses/[courseId]/module/_components/Article/courseModuleArticleType'
 import { BookOpenText } from 'lucide-react'
+import {ArticleSkeletons}  from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import useEditChapter from '@/hooks/useEditChapter'
 import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
@@ -421,15 +422,16 @@ const AddArticle: React.FC<AddArticleProps> = ({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Chapter details...
-                    </div>
-                </div>
-            </div>
-        )
+        // return (
+        //     <div className="px-5">
+        //         <div className="w-full flex justify-center items-center py-8">
+        //             <div className="animate-pulse">
+        //                 Loading Chapter details...
+        //             </div>
+        //         </div>
+        //     </div>
+        // )
+        return <ArticleSkeletons/>
     }
 
     return (

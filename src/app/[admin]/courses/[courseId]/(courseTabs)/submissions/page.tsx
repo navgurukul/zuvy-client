@@ -20,6 +20,8 @@ import VideoSubmission from './components/VideoSubmission'
 import Image from 'next/image'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
+import {CourseSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 interface SearchSuggestion {
     id: string
@@ -397,13 +399,7 @@ const Page = ({ params }: { params: any }) => {
     return (
         <div className="">
             {loading ? (
-                <div className="my-5 flex justify-center items-center">
-                    <div className="absolute h-screen">
-                        <div className="relative top-[75%]">
-                            <Spinner className="text-[rgb(81,134,114)]" />
-                        </div>
-                    </div>
-                </div>
+                <CourseSubmissionSkeleton/>
             ) : (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
@@ -692,7 +688,7 @@ const Page = ({ params }: { params: any }) => {
                         ))}
                     </Tabs>
                 </div>
-            )}
+            )} 
         </div>
     )
 }

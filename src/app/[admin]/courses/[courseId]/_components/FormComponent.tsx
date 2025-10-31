@@ -7,7 +7,7 @@ import { ChevronRight, MessageSquare, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { FormComponentProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
-
+import {FeedbackSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 const FormComponent = ({
     bootcampId,
     moduleId,
@@ -15,17 +15,26 @@ const FormComponent = ({
     moduleName,
 }: FormComponentProps) => {
     const [totalStudents, setTotalStudents] = useState(0)
+    const [isLoading, setIsLoading] = useState(true)
+     useEffect(() => {
+    const fetchFormDataHandler = async () => {
+      try {
+        setIsLoading(true)
+        const url = `/submission/submissionsOfAssignment/${bootcampId}`
+        const res = await api.get(url)
+        setTotalStudents(res.data.data.totalStudents)
+      } catch (error) {
+        console.error('Error fetching form data', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchFormDataHandler()
+  }, [bootcampId])
 
-    useEffect(() => {
-        const fetchFormDataHandler = async () => {
-            const url = `/submission/submissionsOfAssignment/${bootcampId}`
-            const res = await api.get(url)
-            setTotalStudents(res.data.data.totalStudents)
-        }
-
-        fetchFormDataHandler()
-    }, [bootcampId])
-
+    if (isLoading) {
+    return <FeedbackSubmissionSkeleton />
+  }
     return (
         <div className="relative bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
             <div className="flex flex-col w-full justify-between">
@@ -83,5 +92,4 @@ const FormComponent = ({
         </div>
     )
 }
-
 export default FormComponent

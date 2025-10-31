@@ -11,7 +11,6 @@ import CurricullumCard from '@/app/[admin]/courses/[courseId]/_components/curric
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import NewModuleDialog from '@/app/[admin]/courses/[courseId]/_components/newModuleDialog'
 import { Reorder, useDragControls } from 'framer-motion'
-import { Spinner } from '@/components/ui/spinner'
 import EditModuleDialog from '../../_components/EditModuleDialog'
 import { X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
@@ -23,6 +22,7 @@ import {
     PermissionsType,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType'
 import { Plus } from 'lucide-react'
+import {CurriculumSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 function Page() {
     const router = useRouter()
@@ -404,11 +404,14 @@ function Page() {
         }
     }
 
+
     useEffect(() => {
         if (courseData?.id) {
             fetchCourseModules()
         }
     }, [courseData?.id])
+
+
 
     // New function to trigger border flash for specific module
     const triggerBorderFlash = (moduleId: number) => {
@@ -577,6 +580,7 @@ function Page() {
         }
     }, [reorderTimeout, borderFlashTimeout])
 
+
     if (isCourseDeleted) {
         return (
             <div className="flex flex-col justify-center items-center h-full mt-20">
@@ -599,14 +603,10 @@ function Page() {
         )
     }
 
-    
+
     if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Spinner className="text-secondary" />
-            </div>
-        )
-    }
+    return <CurriculumSkeleton />
+}
 
     return (
         <div className="w-full">
@@ -661,16 +661,6 @@ function Page() {
                     />
                 </Dialog>
             )}
-
-            {loading ? (
-                <div className="my-5 flex justify-center items-center ">
-                    <div className="absolute h-screen">
-                        <div className="relative top-[75%]">
-                            <Spinner className="text-[rgb(81,134,114)]" />
-                        </div>
-                    </div>
-                </div>
-            ) : (
                 <div className="flex flex-col items-center justify-center overflow-hidden">
                     {curriculum.length > 0 ? (
                         <Reorder.Group
@@ -753,7 +743,6 @@ function Page() {
                         </div>
                     )}
                 </div>
-            )}
         </div>
     )
 }

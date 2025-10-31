@@ -19,7 +19,7 @@ import {
     getTopicId,
     getActiveChapter,
 } from '@/store/store'
-import { Spinner } from '@/components/ui/spinner'
+// import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
@@ -218,15 +218,6 @@ export default function Page({
         } else {
             return (
                 <>
-                    {loading ? (
-                        <div className="my-5 flex justify-center items-center">
-                            <div className="absolute h-screen">
-                                <div className="relative top-[70%]">
-                                    <Spinner className="text-[rgb(81,134,114)]" />
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
                         <div className="flex flex-col items-center justify-center min-h-[80vh] relative">
                             <div className="absolute left-1/2 -translate-x-1/2 md:left-[380px] md:translate-x-0">
                                 <img
@@ -239,7 +230,6 @@ export default function Page({
                                 </p>
                             </div>
                         </div>
-                    )}
                 </>
             )
         }

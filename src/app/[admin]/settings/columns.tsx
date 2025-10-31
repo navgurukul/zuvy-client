@@ -7,7 +7,6 @@ import { Edit, Trash2 } from 'lucide-react'
 import DeleteUser from './_components/DeleteUser'
 import { ChangeUserRole } from './_components/ChangeUserRole'
 import { formatDate } from '@/lib/utils'
-
 export interface User {
     createdAt: any
     id: number

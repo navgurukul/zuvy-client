@@ -3,7 +3,7 @@ import React from "react";
 function Loading() {
   return (
     <div className="flex justify-center items-center h-[100vh]">
-      <div role="status">
+      {/* <div role="status">
         <svg
           aria-hidden="true"
           className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-secondary"
@@ -20,8 +20,8 @@ function Loading() {
             fill="currentFill"
           />
         </svg>
-        {/* <span className="sr-only">Loading...</span> */}
-      </div>
+        <span className="sr-only">Loading...</span>
+      </div> */}
     </div>
   );
 }
