@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 // import '@/app/_components/editor/Tiptap.css'
-import { ArrowUpRightSquare, CalendarIcon, Pencil } from 'lucide-react'
+import { ArrowUpRightSquare, CalendarIcon, Pencil, PencilLine } from 'lucide-react'
 import {
     Popover,
     PopoverContent,
@@ -36,15 +36,14 @@ import { Calendar } from '@/components/ui/calendar'
 import {
     getChapterUpdateStatus,
     getAssignmentPreviewStore,
+    getUser,
 } from '@/store/store'
-import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import UploadArticle from '../Article/UploadPdf'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { getUser } from '@/store/store'
 import {
     Tooltip,
     TooltipContent,
@@ -59,8 +58,10 @@ import {
     ChapterDetailsResponse,
     EditorContent,
 } from '@/app/[admin]/courses/[courseId]/module/_components/assignment/moduleComponentAssignmentType'
-import { PencilLine } from 'lucide-react'
-
+import useEditChapter from '@/hooks/useEditChapter'
+import useUploadPdf from '@/hooks/useUploadPdf'
+import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+ 
 const AddAssignent = ({
     content,
     courseId,
@@ -72,7 +73,6 @@ const AddAssignent = ({
     const formSchema = z.object({
         title: z
             .string()
-            .min(1, { message: 'Title is required.' })
             .max(50, { message: 'You can enter up to 50 characters only.' }),
         startDate: z.date({
             required_error: 'A start date is required.',
@@ -107,6 +107,9 @@ const AddAssignent = ({
     const [hasUserManuallySaved, setHasUserManuallySaved] = useState(false)
     const [isUserInteracting, setIsUserInteracting] = useState(false)
     const [initialLoadComplete, setInitialLoadComplete] = useState(false)
+    const { editChapter } = useEditChapter()
+    const { uploadPdf, loading: uploadLoading } = useUploadPdf()
+    const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -179,10 +182,8 @@ const AddAssignent = ({
                 articleContent: initialContentString,
             }
 
-            await api.put(
-                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                requestBody
-            )
+            await editChapter(content.moduleId, content.id, requestBody)
+
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(!isEditorContentEmpty(initialContent))
@@ -207,9 +208,12 @@ const AddAssignent = ({
     const getAssignmentContent = async () => {
         setIsDataLoading(true)
         try {
-            const response = await api.get<ChapterDetailsResponse>(
-                `/Content/chapterDetailsById/${content.id}?bootcampId=${courseId}&moduleId=${content.moduleId}&topicId=${content.topicId}`
-            )
+            const response = await getChapterDetails({
+                chapterId: content.id,
+                bootcampId: courseId,
+                moduleId: content.moduleId,
+                topicId: content.topicId,
+            })
 
             // Convert string to Date object
             if (response.data.completionDate) {
@@ -314,10 +318,8 @@ const AddAssignent = ({
                 articleContent: initialContentString,
             }
 
-            await api.put(
-                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                requestBody
-            )
+            await editChapter(content.moduleId, content.id, requestBody)
+
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true)
@@ -428,14 +430,7 @@ const AddAssignent = ({
             formData.append('pdf', file, file.name)
 
             try {
-                await api.post(
-                    `/Content/curriculum/upload-pdf?moduleId=${content.moduleId}&chapterId=${content.id}`,
-                    formData, // ← pass FormData directly
-                    {
-                        // OPTIONAL: axios will set the correct Content-Type boundary for you
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                    }
-                )
+                await uploadPdf(content.moduleId, content.id, formData)
 
                 const deadlineDate = convertToISO(deadline)
 
@@ -444,10 +439,7 @@ const AddAssignent = ({
                     completionDate: deadlineDate,
                 }
 
-                await api.put(
-                    `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                    requestBody
-                )
+                await editChapter(content.moduleId, content.id, requestBody)
 
                 toast.success({
                     title: 'Success',
@@ -493,33 +485,33 @@ const AddAssignent = ({
 
         const deadlineDate = convertToISO(deadline)
 
-        await api
-            .put(
-                `/Content/editChapterOfModule/${content.moduleId}?chapterId=${content.id}`,
-                { title: titles, links: null, completionDate: deadlineDate }
-            )
-            .then((res) => {
-                toast.success({
-                    title: 'Success',
-                    description: 'PDF Deleted Successfully',
-                })
-                setIsPdfUploaded(false)
-                setpdfLink(null)
-                setDefaultValue('editor')
-                setIsEditorSaved(false)
-                // Reset manual save flag when switching to editor
-                setHasUserManuallySaved(false)
+        try {
+            await editChapter(content.moduleId, content.id, {
+                title: titles,
+                links: null,
+                completionDate: deadlineDate,
             })
-            .catch((err: any) => {
-                toast.error({
-                    title: 'Delete PDF failed',
-                    description:
-                        err.response?.data?.message ||
-                        err.message ||
-                        'An error occurred.',
-                })
+            toast.success({
+                title: 'Success',
+                description: 'PDF Deleted Successfully',
             })
-        setIsLoading(false)
+            setIsPdfUploaded(false)
+            setpdfLink(null)
+            setDefaultValue('editor')
+            setIsEditorSaved(false)
+            // Reset manual save flag when switching to editor
+            setHasUserManuallySaved(false)
+        } catch (err: any) {
+            toast.error({
+                title: 'Delete PDF failed',
+                description:
+                    err.response?.data?.message ||
+                    err.message ||
+                    'An error occurred.',
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     if (isDataLoading) {
@@ -917,8 +909,7 @@ const AddAssignent = ({
                                             disabled={
                                                 !hasEditorContent ||
                                                 isSaving ||
-                                                !isValid ||
-                                                !titles.trim()
+                                                !isValid
                                             }
                                         >
                                             {isSaving ? 'Saving...' : 'Save'}
@@ -934,8 +925,7 @@ const AddAssignent = ({
                                                     loading ||
                                                     !form.formState.isValid ||
                                                     (!file && !ispdfUploaded) ||
-                                                    disabledUploadButton ||
-                                                    !titles.trim()
+                                                    disabledUploadButton
                                                 }
                                             >
                                                 {loading ? 'Saving...' : 'Save'}
