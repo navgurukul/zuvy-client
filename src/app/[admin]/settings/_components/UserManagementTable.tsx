@@ -31,6 +31,8 @@ import { useRoles } from '@/hooks/useRoles'
 import { SearchBox } from '@/utils/searchBox'
 import { api } from '@/utils/axios.config'
 import type { User } from '../columns'
+import {UserManagementSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -220,9 +222,12 @@ export function UserManagementTable<TData extends User, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    Loading...
+                                     <UserManagementSkeleton />
                                 </TableCell>
                             </TableRow>
+                            
+                            
+                            
                         ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow

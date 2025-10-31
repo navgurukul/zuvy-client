@@ -8,6 +8,7 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export const CoursesSkeleton: React.FC = () => {
     return (
@@ -900,23 +901,6 @@ export const ModuleContentSkeletons = () => {
                 ))}
               </div>
             </div>
-
-            {/* Second Topic Skeleton */}
-            {/* <div className="space-y-2">
-              <div className="h-10 bg-muted rounded animate-pulse"></div>
-              
-              <div className="space-y-1 pl-0">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-start gap-2 p-2">
-                    <div className="w-6 h-6 bg-muted rounded animate-pulse flex-shrink-0 mt-1"></div>
-                    <div className="flex-1 min-w-0">
-                      <div className="h-4 bg-muted rounded animate-pulse mb-1"></div>
-                      <div className="h-3 bg-muted rounded animate-pulse w-16"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div> */}
           </div>
           <ScrollBar />
         </ScrollArea>
@@ -1116,4 +1100,39 @@ export const OpenEndedQuestionsSkeleton = () => {
             </div>
         </MaxWidthWrapper>
     )
+}
+
+
+
+
+export function UserManagementSkeleton() {
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden w-full w-full overflow-x-auto">
+      <Table>
+        {/* Rows */}
+        <TableBody>
+          {[...Array(6)].map((_, i) => (
+            <TableRow key={i} className="border-b border-gray-100 hover:bg-gray-50">
+              <TableCell className="py-3 px-4">
+                <Skeleton className="h-5 w-32 rounded-md" />
+              </TableCell>
+              <TableCell className="py-3 px-4">
+                <Skeleton className="h-5 w-60 rounded-md" />
+              </TableCell>
+              <TableCell className="py-3 px-4">
+                <Skeleton className="h-6 w-24 rounded-md" />
+              </TableCell>
+              <TableCell className="py-3 px-4">
+                <Skeleton className="h-5 w-28 rounded-md" />
+              </TableCell>
+              <TableCell className="py-3 px-4 flex gap-3">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="h-5 w-5 rounded-full" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
 }
