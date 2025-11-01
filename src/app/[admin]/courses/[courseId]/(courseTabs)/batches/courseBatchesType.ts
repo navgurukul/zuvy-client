@@ -34,3 +34,22 @@ export interface DataTableProps<TData, TValue> {
     setSelectedRows?: any
     mcqSide?: boolean
 }
+
+// Additional types moved from page.tsx for reuse
+export interface EnhancedBatch {
+    id: string | number
+    name: string
+    instructorEmail: string
+    capEnrollment: number
+    students_enrolled: number
+    status: string
+    startDate?: string
+    endDate?: string
+}
+
+export interface PermissionsType {
+    createBatch: boolean
+    deleteBatch: boolean
+    editBatch: boolean
+    viewBatch: boolean
+}
