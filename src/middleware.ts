@@ -20,10 +20,10 @@ export function middleware(request: NextRequest) {
     // If request is for root ("/" or empty) and user is authenticated and not a student,
     // redirect immediately to the Admin courses page. This centralizes the root redirect
     // so client-side and other server branches don't race to redirect elsewhere.
-    const reqPath = request.nextUrl.pathname || '/'
-    if ((reqPath === '/' || reqPath.trim() === '') && user !== 'false' && user !== 'student') {
-        return NextResponse.redirect(new URL('/Admin/courses', request.url))
-    }
+    // const reqPath = request.nextUrl.pathname || '/'
+    // if ((reqPath === '/' || reqPath.trim() === '') && user !== 'false' && user !== 'student') {
+    //     return NextResponse.redirect(new URL('/Admin/courses', request.url))
+    // }
 
     if (user === 'false') {
         if (request.nextUrl.pathname.startsWith('/student')) {

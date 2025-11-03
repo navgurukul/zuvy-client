@@ -1,7 +1,7 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter} from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
@@ -20,7 +20,7 @@ export default function RootLayout({
     const pathname = usePathname()
     const { roles, loading } = useRoles()
     const { user } = getUser()
-
+    const router = useRouter()
     const roleFromPath = pathname.split('/')[1]?.toLowerCase() || ''
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
@@ -32,6 +32,16 @@ export default function RootLayout({
     const isAssessmentRouteClasses = (route: string) => {
         const adminRoutes = /admin.*courses.*module.*chapters/
         return adminRoutes.test(route || '') ? 'overflow-hidden' : ''
+    }
+     
+    if ((pathname === '/' || pathname.trim() === '') && userRole !== 'false') {
+        // return  router.push(`/${userRole}/courses`)
+         return (
+            <Notfound
+                error={new Error('Unauthorized access')}
+                reset={() => console.error('URL Not Found')}
+            />
+        )
     }
 
     if(roleFromPath === userRole) {
