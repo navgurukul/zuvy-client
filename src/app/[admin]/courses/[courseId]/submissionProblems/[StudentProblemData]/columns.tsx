@@ -57,7 +57,7 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: 'emailId',
+        accessorKey: 'email',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Email" />
         ),
@@ -68,7 +68,7 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex space-x-2">
                     {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
                     <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue('emailId')}
+                        {row.getValue('email')}
                     </span>
                 </div>
             )

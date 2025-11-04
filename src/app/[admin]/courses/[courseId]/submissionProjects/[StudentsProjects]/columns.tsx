@@ -46,12 +46,12 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: 'userName',
+        accessorKey: 'name',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Students Name" />
         ),
         cell: ({ row }) => {
-            const name = row.original.userName
+            const name = row.original.name
 
             return (
                 <div className="flex space-x-2">
@@ -65,12 +65,12 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: 'userEmail',
+        accessorKey: 'email',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Email" />
         ),
         cell: ({ row }) => {
-            const email = row.original.userEmail
+            const email = row.original.email
 
             return (
                 <div className="flex space-x-2">

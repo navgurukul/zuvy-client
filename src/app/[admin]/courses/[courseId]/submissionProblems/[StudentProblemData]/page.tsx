@@ -55,7 +55,7 @@ const PracticeProblems = ({ params }: any) => {
 
         const students = res.data.data.map((student: any) => ({
             ...student,
-            email: student.emailId,
+            // email: student.emailId,
             bootcampId: params.courseId,
             questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
             moduleId: params.StudentProblemData,
@@ -74,7 +74,7 @@ const PracticeProblems = ({ params }: any) => {
 
         const students = res.data.data.map((student: any) => ({
             ...student,
-            email: student.emailId,
+            // email: student.emailId,
             bootcampId: params.courseId,
             questionId: matchingData.moduleChapterData[0].codingQuestionDetails.id,
             moduleId: params.StudentProblemData,

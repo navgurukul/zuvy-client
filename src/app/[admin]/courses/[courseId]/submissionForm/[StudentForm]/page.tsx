@@ -122,7 +122,7 @@ const Page = ({ params }: any) => {
                 response.data.combinedData?.map((student: any) => ({
                     id: student.id,
                     name: student.name,
-                    email: student.emailId,
+                    email: student.email,
                     ...student,
                 })) || []
             )
@@ -150,7 +150,7 @@ const Page = ({ params }: any) => {
                     moduleId: response.data.moduleId,
                     chapterId: response.data.chapterId,
                     userId: student.id,
-                    email: student.emailId,
+                    email: student.email,
                 })) || []
             // Only update table-related state, NOT overallStats
             setStudentStatus(data)
@@ -175,7 +175,7 @@ const Page = ({ params }: any) => {
                 moduleId: response.data.moduleId,
                 chapterId: response.data.chapterId,
                 userId: student.id,
-                email: student.emailId,
+                email: student.email,
             })) || []
 
         setStudentStatus(data)
