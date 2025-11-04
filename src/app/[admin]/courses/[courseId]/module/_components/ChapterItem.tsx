@@ -75,7 +75,7 @@ function ChapterItem({
 
     const setActiveChapterItem = () => {
         return activeChapter === chapterId
-            ? 'bg-blue-50 border border-blue-600 text-blue-700'
+            ? 'bg-primary-light border border-primary text-primary'
             : 'bg-white hover:bg-gray-50 border border-gray-200'
     }
 

@@ -377,7 +377,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                 <Button
                                     type="submit"
                                     variant="outline"
-                                    className="w-3/3 bg-white hover:bg-red-500 opacity-75"
+                                    className="w-3/3"
                                 >
                                     Cancel
                                 </Button>

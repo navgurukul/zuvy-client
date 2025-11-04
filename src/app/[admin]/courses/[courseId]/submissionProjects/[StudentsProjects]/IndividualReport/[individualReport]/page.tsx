@@ -189,7 +189,7 @@ const Page = ({ params }: PageParams) => {
                                 Project Link
                             </h3>
                             <div className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                <div className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
+                                <div className="flex items-center space-x-3 p-4 bg-muted/20 rounded-lg">
                                     <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                                     <Link
                                         href={`${indiviDualStudentData?.projectSubmissionDetails?.projectTrackingData[0].projectLink}`}

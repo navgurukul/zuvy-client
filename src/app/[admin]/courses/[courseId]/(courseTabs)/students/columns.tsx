@@ -338,17 +338,17 @@ export const columns: ColumnDef<Task>[] = [
                     case 'active':
                         return {
                             label: 'Active',
-                            className: 'bg-primary text-muted border-primary',
+                            className: 'bg-primary text-primary-foreground border-primary',
                         }
                     case 'dropout':
                         return {
                             label: 'Dropout',
-                            className: 'bg-destructive text-muted border-destructive',
+                            className: 'bg-destructive text-destructive-foreground border-destructive',
                         }
                     case 'graduate':
                         return {
                             label: 'Graduate',
-                            className: 'bg-secondary text-muted border-secondary',
+                            className: 'bg-secondary text-secondary-foreground border-secondary',
                         }
                     default:
                         return {

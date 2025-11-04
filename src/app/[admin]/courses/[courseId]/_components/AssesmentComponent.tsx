@@ -17,7 +17,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
     const isDisabled = props.studentsSubmitted === 0
 
     return (
-        <div className="bg-muted border border-gray-200 rounded-md p-3 hover:shadow-lg transition-shadow w-full mb-4">
+        <div className="bg-card border border-gray-200 rounded-md p-3 hover:shadow-lg transition-shadow w-full mb-4">
             <div className="flex items-start justify-between">
                 {/* Icon + Title */}
                 <div className="flex items-center gap-2">

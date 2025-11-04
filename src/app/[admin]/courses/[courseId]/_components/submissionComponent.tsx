@@ -83,7 +83,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
         props.totalSubmissions > 0 && props.studentsSubmitted > 0
 
     return (
-        <div className="bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
+        <div className="bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full mb-5">
             <div className="flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

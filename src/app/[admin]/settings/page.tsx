@@ -115,15 +115,15 @@ const SettingsPage: React.FC = () => {
     }
 
     return (
-        <div className="p-6 bg-white min-h-screen">
+        <div className="p-6 bg-background min-h-screen">
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-2">
                 <Button
                     onClick={() => handleTabChange('users')}
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors ${
                         activeTab === 'users'
-                            ? 'bg-primary text-white'
-                            : 'bg-transparent text-muted-foreground hover:text-gray-900 hover:bg-gray-100'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
                     }`}
                 >
                     <Users className="w-4 h-4" />
@@ -134,8 +134,8 @@ const SettingsPage: React.FC = () => {
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors
                         ${
                             activeTab === 'roles'
-                                ? 'bg-primary text-white'
-                                : 'bg-transparent text-muted-foreground hover:text-gray-900 hover:bg-gray-100'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
                         }
                     `}
                 >
@@ -155,7 +155,7 @@ const SettingsPage: React.FC = () => {
                     <div className="py-4">
                         <div className="flex justify-between items-center mb-4">
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-900 text-start">
+                                <h2 className="text-lg font-semibold text-foreground text-start">
                                     Users ({users.length})
                                 </h2>
                                 <p className="text-muted-foreground text-[1.1rem] text-start">
@@ -165,7 +165,7 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                                 <DialogTrigger asChild>
-                                    <Button onClick={() => { setIsEditMode(false)}} className="bg-primary hover:bg-blue-700 text-white">
+                                    <Button onClick={() => { setIsEditMode(false)}} >
                                         <Plus className="w-4 h-4 mr-2" />
                                         Add User
                                     </Button>
@@ -193,7 +193,7 @@ const SettingsPage: React.FC = () => {
                                 </div>
                             </div>
                         ) : usersError ? (
-                            <div className="flex flex-col items-center py-8 text-red-600">
+                            <div className="flex flex-col items-center py-8 text-destructive">
                                 <div>Error loading users</div>
                                 <Button
                                     onClick={() => refetchUsers(offset)}

@@ -156,7 +156,7 @@ const PracticeProblems = ({ params }: any) => {
                     Back to Course Submissions
                 </Button>
             </div>
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                 <CardHeader>
                     <CardTitle className="text-2xl text-gray-800 text-left">
                         {matchingData?.moduleChapterData[0]?.codingQuestionDetails?.title}
@@ -194,7 +194,7 @@ const PracticeProblems = ({ params }: any) => {
                         </div>
                 </CardContent>
             </Card>
-            <Card className="bg-muted">
+            <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl text-gray-800">

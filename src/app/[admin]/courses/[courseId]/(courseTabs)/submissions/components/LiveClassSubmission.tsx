@@ -147,10 +147,9 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                 return (
                     <div
                         key={liveClass.id}
-                        className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
+                        className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow mb-5"
                     >
-
-<div className="absolute top-2 right-2 z-10 flex items-center">
+                        <div className="absolute top-2 right-2 z-10 flex items-center">
                             <button
                                 onClick={() => {
                                     if (submissions > 0) {

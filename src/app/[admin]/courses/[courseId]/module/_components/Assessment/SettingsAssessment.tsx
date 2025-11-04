@@ -1097,7 +1097,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 }
                                                                 className={
                                                                     field.value
-                                                                        ? 'bg-[#274edd]'
+                                                                        ? 'bg-primary'
                                                                         : 'bg-gray-300'
                                                                 }
                                                             />

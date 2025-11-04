@@ -81,11 +81,13 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel 
-                        className="!text-gray-600 hover:border-[rgb(81,134,114)]"
-                        disabled={isDeleting}  // ✅ Disable during delete
-                    >
-                        Cancel
+                    <AlertDialogCancel asChild>
+                        <Button
+                            variant="outline"
+                            disabled={isDeleting}  // ✅ Disable during delete
+                        >
+                            Cancel
+                        </Button>
                     </AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-red-500 hover:bg-red-600"

@@ -393,7 +393,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 </div>
                 <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Button>
                             <Plus className="w-4 h-4 mr-2" />
                             Add New Role
                         </Button>
@@ -418,7 +418,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         <Button
                                             onClick={() => handleRoleChange(role.name, role.id)}
                                             className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
-                                                ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                                                ? 'border-primary text-gray-900 hover:bg-transparent'
                                                 : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                                 }`}
                                         >
@@ -474,8 +474,8 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                             handleActionSelect(action.id)
                                         }
                                         className={`p-3 rounded-lg cursor-pointer transition-colors ${selectedAction === action.id
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-white hover:bg-gray-50 border border-gray-200'
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-card hover:bg-gray-50 border border-gray-200'
                                             }`}
                                     >
                                         <h5 className="font-medium text-start text-[1rem] mb-1">
@@ -483,7 +483,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         </h5>
                                         <p
                                             className={`text-sm text-start ${selectedAction === action.id
-                                                ? 'text-blue-100'
+                                                ? 'text-primary-foreground'
                                                 : 'text-gray-600'
                                                 }`}
                                         >
@@ -612,7 +612,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         variant="outline"
                                         size="sm"
                                         onClick={handleAssignPermissions}
-                                        className="text-xs bg-accent text-white hover:bg-accent/90"
+                                        className="text-xs bg-accent text-white"
                                     // disabled={assigning}
                                     >
                                         {/* {assigning

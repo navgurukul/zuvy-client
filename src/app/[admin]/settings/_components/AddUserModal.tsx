@@ -68,7 +68,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
             onClick={() => onSelect && onSelect(id)}
             className={`w-full text-left border rounded-lg p-4 transition-colors ${
                 selected
-                    ? 'border-blue-600 bg-blue-50'
+                    ? 'border-primary bg-primary-light'
                     : 'border-gray-200 hover:border-gray-300'
             }`}
         >
@@ -76,15 +76,15 @@ const RoleCard: React.FC<RoleCardProps> = ({
                 <div
                     className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
                         selected
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-700'
+                            ? 'bg-blue-100 text-primary'
+                            : 'bg-gray-100 text-foreground'
                     }`}
                 >
                     {icon}
                 </div>
                 <div>
-                    <div className="font-medium text-gray-900 capitalize">{title}</div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="font-medium text-foreground capitalize">{title}</div>
+                    <div className="text-sm text-muted-foreground mt-1">
                         {description}
                     </div>
                 </div>
@@ -350,7 +350,6 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 </DialogClose>
                 <DialogClose asChild>
                     <Button
-                        className="bg-primary hover:bg-blue-700"
                         disabled={!canSubmit || isFetchingFreshData}
                         onClick={handleSubmit}
                     >

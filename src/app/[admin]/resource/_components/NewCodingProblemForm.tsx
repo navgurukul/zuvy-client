@@ -1217,7 +1217,6 @@ export default function NewCodingProblemForm({
                                     </Button>
                                     <Button
                                         type="submit"
-                                        className="bg-primary hover:bg-primary-dark"
                                     >
                                         Create Question
                                     </Button>
