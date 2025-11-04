@@ -153,7 +153,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         : 0
                                                 return (
                                                     <div
-                                                        className="relative bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full"
+                                                        className="relative bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full"
                                                         key={moduleData.id}
                                                     >
                                                         <div className="flex items-center gap-3">

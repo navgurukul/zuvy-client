@@ -1156,9 +1156,10 @@ const NewMcqProblemForm = ({
                     {generatedQuestions.length > 0 && (
                         <div className="flex justify-end items-center gap-4">
                             <Button
+                                variant={'outline'}
                                 type="button"
                                 onClick={handleClear}
-                                className="flex items-center bg-gray-300 text-black"
+                                className="flex items-center"
                                 disabled={saving}
                             >
                                 Clear Questions

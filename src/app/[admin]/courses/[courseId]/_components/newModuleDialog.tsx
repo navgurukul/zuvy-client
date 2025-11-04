@@ -156,7 +156,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                     <Input
                                                         type="radio"
                                                         id="learning-material"
-                                                        className="size-4"
+                                                        className="size-4 accent-primary"
                                                         value="learning-material"
                                                         checked={
                                                             field.value ===
@@ -194,7 +194,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                     <Input
                                                         type="radio"
                                                         id="project"
-                                                        className="size-4"
+                                                        className="size-4 accent-primary"
                                                         value="project"
                                                         checked={
                                                             field.value ===

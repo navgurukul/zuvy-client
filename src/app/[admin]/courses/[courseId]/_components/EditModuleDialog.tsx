@@ -248,7 +248,6 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                         <DialogClose asChild>
                             <Button
                                 onClick={form.handleSubmit(onSubmit)}
-                                className="bg-[rgb(81,134,114)]"
                             >
                                 Edit Module
                             </Button>

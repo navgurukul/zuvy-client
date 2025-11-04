@@ -258,8 +258,8 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                             </DialogTitle>
                         </div>
                         
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
-                            <p className="text-blue-800 text-sm">
+                        <div className="bg-primary-light border border-primary rounded-lg p-3 mt-4">
+                            <p className="text-primary text-sm">
                                 Questions can be made for these topics in the content bank.
                             </p>
                         </div>
@@ -270,7 +270,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                         <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 h-[200px] overflow-y-auto">
                             {loading ? (
                                 <div className="flex items-center justify-center h-full">
-                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                                 </div>
                             ) : topics.length === 0 ? (
                                 <div className="flex items-center justify-center h-full text-gray-500">
@@ -305,7 +305,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                                         <div className="flex justify-center pt-2 pb-2">
                                             <button
                                                 onClick={() => setShowAllTopics(!showAllTopics)}
-                                                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+                                                className="flex items-center gap-2 text-primary hover:text-primary-dark text-sm font-medium transition-colors"
                                             >
                                                 {showAllTopics ? (
                                                     <>
@@ -330,14 +330,14 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                             {!showAddTopicInput ? (
                                 <button
                                     onClick={() => setShowAddTopicInput(true)}
-                                    className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                                    className="flex items-center gap-2 text-muted-dark hover:text-foreground transition-colors"
                                 >
                                     <Plus className="h-4 w-4" />
                                     <span className="text-sm font-medium">Add New Topic</span>
                                 </button>
                             ) : (
                                 <div className="space-y-3">
-                                    <div className="flex items-center gap-2 text-gray-600">
+                                    <div className="flex items-center gap-2 text-foreground">
                                         <Plus className="h-4 w-4" />
                                         <span className="text-sm font-medium">Add New Topic</span>
                                     </div>
@@ -347,7 +347,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                                             placeholder="Enter topic name..."
                                             value={newTopicName}
                                             onChange={handleInputChange}
-                                            className="border-blue-200 focus:border-blue-400"
+                                            className="text-foreground"
                                             autoFocus
                                         />
                                         
@@ -372,7 +372,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                                         <Button
                                             onClick={handleCreateTopic}
                                             disabled={isAddButtonDisabled}
-                                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2"
+                                            className="px-4 py-2"
                                         >
                                             Add
                                         </Button>
@@ -386,7 +386,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                         <Button
                             onClick={handleDone}
                             disabled={isCreating}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+                            className="px-6 py-2"
                         >
                             {isCreating ? 'Creating...' : 'Done'}
                         </Button>

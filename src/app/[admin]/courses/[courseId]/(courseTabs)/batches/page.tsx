@@ -319,7 +319,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                 <Dialog>
                     <DialogTrigger asChild>
                         {permissions.createBatch && (
-                            <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700">
+                            <Button className="lg:max-w-[200px] w-full mt-5">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Create New Batch
                             </Button>
@@ -347,7 +347,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                     <DialogTrigger asChild>
                         {permissions.createBatch && (
                             <Button
-                                className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700"
+                                className="lg:max-w-[200px] w-full mt-5"
                                 onClick={() => {
                                     // Reset everything before opening
                                     form.reset({

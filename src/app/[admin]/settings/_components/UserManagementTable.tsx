@@ -188,13 +188,13 @@ export function UserManagementTable<TData extends User, TValue>({
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+            <div className="bg-background rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow
                                 key={headerGroup.id}
-                                className="bg-gray-50 border-b border-gray-200"
+                                className="border-b border-gray-200"
                             >
                                 {headerGroup.headers.map((header) => (
                                     <TableHead
@@ -227,7 +227,7 @@ export function UserManagementTable<TData extends User, TValue>({
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
-                                    className="border-b border-gray-100 hover:bg-gray-50"
+                                    className="border-b border-gray-100 hover:bg-muted/20"
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell

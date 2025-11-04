@@ -116,7 +116,6 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded })=> {
                 </DialogClose>
                 <DialogClose asChild>
                     <Button
-                        className="bg-primary hover:bg-blue-700"
                         disabled={!canSubmit}
                         onClick={handleAddRole}
                     >

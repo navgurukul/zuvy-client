@@ -148,14 +148,14 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                         </div>
 
                         <div 
-                            className="flex-1 flex items-center justify-between hover:bg-muted/50 p-2 rounded-md transition-colors"
+                            className="flex-1 flex items-center justify-between hover:bg-muted/20 p-2 rounded-md transition-colors"
                             onClick={handleModuleRoute}
                         >
                             <div className="text-left flex items-center gap-3 cursor-pointer w-full">
                                 <div
                                     className={`p-2 rounded-md ${
                                         props.typeId === 2
-                                            ? 'bg-yellow-100 text-secondary'
+                                            ? 'bg-yellow-100 text-primary'
                                             : 'bg-primary/10 text-primary'
                                     }`}
                                 >

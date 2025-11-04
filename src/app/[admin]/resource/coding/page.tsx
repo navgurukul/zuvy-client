@@ -439,7 +439,7 @@ const CodingProblems = () => {
                                         onOpenChange={setIsDialogOpen}
                                     >
                                         <DialogTrigger asChild>
-                                            <Button className="bg-primary hover:bg-primary-dark shadow-4dp">
+                                            <Button className="shadow-4dp">
                                                 + Create Problems
                                             </Button>
                                         </DialogTrigger>

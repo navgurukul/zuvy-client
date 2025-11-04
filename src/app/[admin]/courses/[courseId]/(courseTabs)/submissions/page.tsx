@@ -559,7 +559,7 @@ const Page = ({ params }: { params: any }) => {
                                                     return (
                                                         <div
                                                             key={item.id}
-                                                            className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                                                            className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
                                                         >
                                                             <div className="absolute top-2 right-1 z-10 flex items-center gap-0">
 

@@ -487,7 +487,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'coding'
-                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                                    ? 'border-primary text-gray-900 hover:bg-transparent'
                                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                             }`}
                             onClick={handleCodingButtonClick}
@@ -497,7 +497,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'mcq'
-                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                                    ? 'border-primary text-gray-900 hover:bg-transparent'
                                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                             }`}
                             onClick={handleMCQButtonClick}
@@ -507,7 +507,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'open-ended'
-                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
+                                    ? 'border-primary text-gray-900 hover:bg-transparent'
                                     : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                             }`}
                             onClick={handleOpenEndedButtonClick}
