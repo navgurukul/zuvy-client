@@ -40,6 +40,9 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
             
             const res = await api.delete(`/users/deleteUser/${userId}`)
             
+            // Log the full response for easier debugging in DevTools
+            console.log('deleteUser response', res)
+
             toast.success({
                 title: 'User Deleted Successfully!',
                 description: res.data.message,
@@ -52,6 +55,22 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
             }
 
         } catch (error: any) {
+            // Log the error for debugging
+            console.error('deleteUser error', error?.response || error)
+
+            // If server returns 404 it may mean the user was already deleted
+            // trigger the parent refresh so the UI stays in sync.
+            if (error?.response?.status === 404) {
+                toast.success({
+                    title: 'User Deleted Successfully!',
+                    description:
+                        error.response?.data?.message || 'User not found',
+                })
+                setOpen(false)
+                if (onDeleteSuccess) onDeleteSuccess(userId)
+                setIsDeleting(false)
+                return
+            }
             toast.error({
                 title: 'Failed to Delete User',
                 description: error.response?.data?.message || 'An error occurred.',
@@ -65,10 +84,12 @@ export const DeleteUser: React.FC<DeleteUserProps> = ({
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button 
+                <Button
                     className=" text-red-600 hover:bg-red-200 hover:text-red-600"
                     variant="ghost"
                     size="sm"
+                    disabled={isDeleting}
+                    aria-busy={isDeleting}
                 >
                     <Trash2 className="w-4 h-4" />
                 </Button>
