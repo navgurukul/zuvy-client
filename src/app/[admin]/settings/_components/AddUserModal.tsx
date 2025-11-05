@@ -212,10 +212,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     description: 'The new user has been added.',
                 })
             }
-        } catch (error) {
+        } catch (error:any) {
             toast.error({
                 title: 'Error adding user',
-                description: 'There was an issue adding the new user.',
+                description: error?.response?.data?.message || 'There was an issue adding the new user.',
             })
             console.error('Error adding user:', error)
             return
@@ -254,10 +254,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     description: 'The user details have been updated.',
                 })
             }
-        } catch (error) {
+        } catch (error:any) {
             toast.error({
                 title: 'Error updating user',
-                description: 'There was an issue updating the user details.',
+                description: error?.response?.data?.message || 'There was an issue updating the user details.',
             })
             console.error('Error updating user:', error)
             return
