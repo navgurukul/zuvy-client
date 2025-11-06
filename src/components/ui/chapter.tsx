@@ -355,7 +355,7 @@ function Chapter() {
                 <div className="flex">
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <div className="w-full mb-4 pb-4 pr-4 border-b border-gray-200">
+                            <div className="w-full mb-4 pb-4 pr-4 border-b border-muted-light">
                                 <Button
                                     variant="outline"
                                     className="py-2 px-2 h-full w-full mr-4"

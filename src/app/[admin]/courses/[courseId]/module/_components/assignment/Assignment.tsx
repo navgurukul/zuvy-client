@@ -638,7 +638,7 @@ const AddAssignent = ({
                                                             value="editor"
                                                             disabled={!!pdfLink}
                                                             id="r1"
-                                                            className="mt-1 text-black border-black"
+                                                            className="mt-1 text-foreground border-foreground"
                                                         />
                                                     </TooltipTrigger>
                                                     {pdfLink && (
@@ -651,7 +651,7 @@ const AddAssignent = ({
                                                 </Tooltip>
                                                 <Label
                                                     htmlFor="r1"
-                                                    className="font-light text-md text-black"
+                                                    className="font-light text-md text-foreground"
                                                 >
                                                     Editor
                                                 </Label>
@@ -663,7 +663,7 @@ const AddAssignent = ({
                                                         <RadioGroupItem
                                                             value="pdf"
                                                             id="r2"
-                                                            className="mt-1 text-black border-black"
+                                                            className="mt-1 text-foreground border-foreground"
                                                             disabled={
                                                                 isEditorSaved
                                                             }
@@ -681,7 +681,7 @@ const AddAssignent = ({
                                                 </Tooltip>
                                                 <Label
                                                     htmlFor="r2"
-                                                    className="font-light text-md text-black"
+                                                    className="font-light text-md text-foreground"
                                                 >
                                                     Upload PDF
                                                 </Label>
@@ -689,7 +689,7 @@ const AddAssignent = ({
                                         </TooltipProvider>
                                     </RadioGroup>
 
-                                    <div className="bg-card rounded-lg shadow-sm border">
+                                    <div className="bg-card text-foreground rounded-lg shadow-sm border">
                                         <div className="p-6">
                                             <p className="text-xl text-start font-semibold">
                                                 Assignment Details
@@ -775,7 +775,7 @@ const AddAssignent = ({
                                                                                     Date*
                                                                                 </p>
                                                                                 <div
-                                                                                    className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-2 text-sm text-gray-700 hover:border-[rgb(81,134,114)] ${
+                                                                                    className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-2 text-sm text-muted-dark hover:border-primary ${
                                                                                         !field.value &&
                                                                                         'text-muted-foreground'
                                                                                     }`}

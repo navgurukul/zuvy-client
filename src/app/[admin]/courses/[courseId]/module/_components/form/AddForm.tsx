@@ -444,7 +444,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                             </div>
                                         </div> */}
                                         <>
-                                            <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                                            <FormLabel className="flex text-left text-sm text-muted-dark font-semibold mb-1">
                                                 Form Title
                                             </FormLabel>
                                             <Input
@@ -480,13 +480,13 @@ const AddForm: React.FC<AddFormProps> = ({
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                                    <FormLabel className="flex text-left text-sm text-muted-dark font-semibold mb-1">
                                         Description
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            className="w-full px-3 py-2 border text-gray-600 rounded-md"
+                                            className="w-full px-3 py-2 border text-muted-dark rounded-md"
                                             placeholder="Add Description"
                                         />
                                     </FormControl>
@@ -526,7 +526,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                 {/* ✅ ERROR MESSAGE DISPLAY */}
                                 {form.formState.errors.questions?.[index]
                                     ?.options && (
-                                    <p className="text-sm text-red-500 mt-2">
+                                    <p className="text-sm text-destructive mt-2">
                                         {
                                             form.formState.errors.questions[
                                                 index

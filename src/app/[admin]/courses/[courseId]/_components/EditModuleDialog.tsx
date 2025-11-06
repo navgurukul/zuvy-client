@@ -79,7 +79,7 @@ const EditModuleDialog: React.FC<editModuleDialogProps> = ({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4 "
             >
-                <DialogContent className="text-gray-600">
+                <DialogContent className="text-foreground">
                     <DialogHeader>
                         <DialogTitle>Edit Module</DialogTitle>
                         <div className="py-4">

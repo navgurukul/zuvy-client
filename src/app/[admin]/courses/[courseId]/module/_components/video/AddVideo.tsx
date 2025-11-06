@@ -395,7 +395,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                     }
                                     className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
                                         !isDirty || !isValid || isSubmitting
-                                            ? 'bg-gray-300 cursor-not-allowed opacity-70'
+                                            ? 'bg-muted/20 cursor-not-allowed opacity-70'
                                             : 'bg-primary'
                                     }`}
                                 >
