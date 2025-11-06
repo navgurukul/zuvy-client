@@ -93,10 +93,17 @@ const SettingsPage: React.FC = () => {
     }
 
     const handleDelete = async (userId: number) => {
-
-        // Call your API to delete the user
-        // await deleteUser(userId)
-        // refetchUsers()
+        // After DeleteUser component successfully deletes the user on the server
+        // refresh the users list so the table reflects the change immediately
+        try {
+            // refetchUsers is provided by the useAllUsers hook and accepts an offset
+            await refetchUsers(offset)
+        } catch (err) {
+            // If refetch fails, swallow the error silently — the DeleteUser
+            // component already shows success/error toasts for the delete call.
+            // We could show an additional toast here if desired.
+            console.error('Failed to refresh users after delete', err)
+        }
     }
 
     // Create columns with the fetched roles and callbacks
