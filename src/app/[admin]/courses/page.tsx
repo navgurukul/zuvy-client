@@ -21,7 +21,7 @@ import { toast } from '@/components/ui/use-toast'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useStudentData } from '@/store/store'
 import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
+// import { Spinner } from '@/components/ui/spinner'
 import { getPermissions } from '@/lib/GetPermissions'
 import {
     Course,
@@ -34,6 +34,7 @@ import { useBootcamps } from '@/hooks/useBootcamps'
 import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
 import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
+import {CoursesSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -216,9 +217,10 @@ const Courses: React.FC = () => {
     return (
         <>
             {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-[rgb(81,134,114)]" />
-                </div>
+                // <div className="flex justify-center items-center h-screen">
+                //     <Spinner className="text-[rgb(81,134,114)]" />
+                // </div>
+                <CoursesSkeleton/>
             ) : (
                 <div className="w-full px-6 py-8 font-manrope">
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}

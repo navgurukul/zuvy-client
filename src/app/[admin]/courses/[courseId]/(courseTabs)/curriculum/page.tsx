@@ -599,7 +599,6 @@ function Page() {
         )
     }
 
-    
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -607,7 +606,6 @@ function Page() {
             </div>
         )
     }
-
     return (
         <div className="w-full">
             <div className="w-full flex flex-col items-center justify-center">

@@ -4,7 +4,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { usePathname, useRouter} from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
-import { Spinner } from '@/components/ui/spinner'
+// import { Spinner } from '@/components/ui/spinner'
 import '../globals.css'
 import StudentNavbar from '../_components/navbar'
 import { useRoles } from '@/hooks/useRoles'
@@ -63,7 +63,7 @@ export default function RootLayout({
     if (user.email.length === 0 || loading) {
         return (
             <div className="flex items-center justify-center h-[680px] font-manrope">
-                <Spinner className="text-[rgb(81,134,114)]" />
+                {/* <Spinner className="text-[rgb(81,134,114)]" /> */}
             </div>
         )
     }
