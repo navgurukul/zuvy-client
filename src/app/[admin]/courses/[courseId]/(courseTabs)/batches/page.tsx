@@ -1,19 +1,6 @@
-'use client'
-import React, {
-    useCallback,
-    useEffect,
-    useState,
-    useRef,
-    KeyboardEvent,
-    useMemo,
-} from 'react'
+"use client"
+import React from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import * as z from 'zod'
-
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -45,23 +32,11 @@ import {
 } from '@/components/ui/form'
 import { CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { toast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import { Label } from '@/components/ui/label'
 import AddStudentsModal from '../../_components/addStudentsmodal'
-import { api } from '@/utils/axios.config'
-import {
-    getBatchData,
-    getCourseData,
-    getStoreStudentData,
-    getDeleteStudentStore,
-} from '@/store/store'
-import useDebounce from '@/hooks/useDebounce'
-import { fetchStudentData } from '@/utils/students'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { useStudentData } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
-import { createColumns } from './columns'
 import {
     Tooltip,
     TooltipContent,
@@ -85,589 +60,73 @@ import {
     BatchSuggestion,
     StudentDataState,
     ParamsType,
+    EnhancedBatch,
+    PermissionsType,
 } from './courseBatchesType'
+import useBatches from '@/hooks/useBatches'
 import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
 import AddStudentOptions from '../../_components/AddStudentOptions'
 
-// Enhanced Batch interface to match new design
-interface EnhancedBatch {
-    id: string | number
-    name: string
-    instructorEmail: string
-    capEnrollment: number
-    students_enrolled: number
-    status: string
-    startDate?: string
-    endDate?: string
-}
-
-interface PermissionsType {
-    createBatch: boolean
-    deleteBatch: boolean
-    editBatch: boolean
-    viewBatch: boolean
-}
-
 const Page = ({ params }: { params: ParamsType }) => {
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    const { students } = useStudentData(params.courseId)
-    const { courseData, fetchCourseDetails } = getCourseData()
-    const { batchData, setBatchData } = getBatchData()
-    const { setStoreStudentData } = getStoreStudentData()
-    const { setDeleteModalOpen, isDeleteModalOpen } = getDeleteStudentStore()
+    // Use the extracted hook for all logic and state
+    const {
+        courseData,
+        enhancedBatchData,
+        loading,
+        permissions,
+        isCreateModalOpen,
+        setIsCreateModalOpen,
+        isEditModalOpen,
+        setIsEditModalOpen,
+        editingBatch,
+        setEditingBatch,
+        currentStep,
+        setCurrentStep,
+        batchToDelete,
+        setBatchToDelete,
+        assignStudents,
+        setAssignStudents,
+        manualAssignmentMethod,
+        setManualAssignmentMethod,
+        selectedRows,
+        setSelectedRows,
+        totalStudents,
+        searchStudent,
+        handleSearchStudents,
+        studentData,
+        setStudentData,
+        isManualValid,
+        setIsManualValid,
+    setSingleStudentData,
+        searchQuery,
+        csvFile,
+        setCsvFile,
+        singleStudentData,
+        handleSingleStudentChange,
+        fetchSuggestionsApi,
+        fetchSearchResultsApi,
+        defaultFetchApi,
+        handleEditBatch,
+        handleDeleteBatch,
+        batchDeleteHandler,
+        handleUpdateBatch,
+        handleViewStudents,
+        handleCsvFileChange,
+        onSubmit,
+        columns,
+        getStatusColor,
+        formatDate,
+        assignLearners,
+        form,
+        getUnAssignedStudents,
+        isDeleteModalOpen,
+        setDeleteModalOpen,
+    } = useBatches(params)
 
-    // Other states
-    const [loading, setLoading] = useState(true)
-    const [assignStudents, setAssignStudents] = useState('')
-    const [manualAssignmentMethod, setManualAssignmentMethod] =
-        useState('unassigned')
-    const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
-    const [totalStudents, setTotalStudents] = useState([...students])
-    const [searchStudent, setSearchStudent] = useState('')
-    const debouncedSearchStudent = useDebounce(searchStudent, 1000)
-    const [studentData, setStudentData] = useState<StudentDataState | any>({})
-    const [isManualValid, setIsManualValid] = useState(false)
-    const [searchQuery, setSearchQuery] = useState('')
-    const [csvFile, setCsvFile] = useState<File | null>(null)
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-    const [singleStudentData, setSingleStudentData] = useState({
-        name: '',
-        email: '',
-    })
-    const [permissions, setPermissions] = useState<PermissionsType>({
-        createBatch: false,
-        deleteBatch: false,
-        editBatch: false,
-        viewBatch: false,
-    })
-
-    // New states for edit functionality
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-    const [editingBatch, setEditingBatch] = useState<EnhancedBatch | null>(null)
-    const [currentStep, setCurrentStep] = useState(1)
-
-    // Delete states
-    const [batchToDelete, setBatchToDelete] = useState<EnhancedBatch | null>(
-        null
-    )
-
-    // Helper function to get status color
-    const getStatusColor = (status: string) => {
-        const normalizedStatus = status?.toLowerCase()
-        switch (normalizedStatus) {
-            case 'ongoing':
-                return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-            case 'not_started':
-                return 'bg-blue-100 text-blue-800 border-blue-200'
-            case 'completed':
-                return 'bg-green-100 text-green-800 border-green-200'
-            default:
-                return 'bg-gray-100 text-gray-800 border-gray-200'
-        }
-    }
-
-    // Helper function to determine batch status based on dates or enrollment
-    const determineBatchStatus = (
-        batch: any
-    ): 'not_started' | 'ongoing' | 'completed' => {
-        if (batch.status) return batch.status
-
-        // If no explicit status, determine based on student enrollment
-        if (batch.students_enrolled === 0) return 'not_started'
-        if (batch.students_enrolled >= batch.capEnrollment) return 'completed'
-        return 'ongoing'
-    }
-
-    // Convert batch data to enhanced format
-    const enhancedBatchData: EnhancedBatch[] = useMemo(() => {
-        if (!batchData) return []
-
-        return batchData
-            .map((batch: any) => ({
-                id: batch.id,
-                name: batch.name,
-                instructorEmail:
-                    batch.instructorEmail || 'instructor@example.com',
-                capEnrollment: batch.capEnrollment || 30,
-                students_enrolled: batch.students_enrolled || 0,
-                status: determineBatchStatus(batch),
-                startDate: batch.startDate || '2024-01-15',
-                endDate: batch.endDate || '2024-04-15',
-            }))
-            .sort((a, b) => {
-                return (
-                    new Date(a.startDate).getTime() -
-                    new Date(b.endDate).getTime()
-                )
-            })
-    }, [batchData])
-
-    const formatDate = (dateString: string): string => {
-        if (!dateString) return ''
-
-        try {
-            const date = new Date(dateString)
-            // Format to YYYY-MM-DD only
-            return date.toISOString().split('T')[0]
-        } catch (error) {
-            console.error('Date formatting error:', error)
-            // Fallback: extract first 10 characters
-            return dateString.split('T')[0] || dateString.substring(0, 10)
-        }
-    }
-
-    // API functions for the hook
-    const fetchSuggestionsApi = useCallback(
-        async (query: string): Promise<BatchSuggestion[]> => {
-            const response = await api.get(
-                `/bootcamp/searchBatch/${
-                    params.courseId
-                }?searchTerm=${query.trim()}`
-            )
-            return response.data || []
-        },
-        [params.courseId]
-    )
-
-    const fetchSearchResultsApi = useCallback(
-        async (query: string) => {
-            setSearchQuery(query)
-            const response = await api.get(
-                `/bootcamp/searchBatch/${
-                    params.courseId
-                }?searchTerm=${query.trim()}`
-            )
-            setBatchData(response.data || [])
-            return response.data || []
-        },
-        [params.courseId, setBatchData]
-    )
-
-    const defaultFetchApi = useCallback(async () => {
-        setSearchQuery('')
-        const response = await api.get(`/bootcamp/batches/${params.courseId}`)
-        setBatchData(response.data?.data || [])
-        setPermissions(response.data?.permissions)
-        return response.data?.data || []
-    }, [params.courseId, setBatchData])
-
-    const formSchema = z.object({
-        name: z.string().min(3, {
-            message: 'Batch name must be at least 3 characters.',
-        }),
-        instructorEmail: z.string().email({
-            message: 'Please enter a valid email address.',
-        }),
-        bootcampId: z
-            .string()
-            .refine((bootcampId) => !isNaN(parseInt(bootcampId))),
-        capEnrollment: z.string().refine(
-            (capEnrollment) => {
-                const parsedValue = parseInt(capEnrollment)
-                return (
-                    !isNaN(parsedValue) &&
-                    parsedValue > 0 &&
-                    parsedValue <= 100000
-                )
-            },
-            {
-                message:
-                    'Cap Enrollment must be a positive number between 1 and 100,000',
-            }
-        ),
-        assignLearners: z.string(),
-    })
-
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            name: '',
-            instructorEmail: '',
-            bootcampId: courseData?.id.toString() ?? '',
-            capEnrollment: '',
-            assignLearners: 'all',
-        },
-        // values: {
-        //     name: '',
-        //     instructorEmail: '',
-        //     bootcampId: courseData?.id.toString() ?? '',
-        //     capEnrollment: '',
-        //     assignLearners: 'all',
-        // },
-        mode: 'onChange',
-    })
-
-    // Handle edit batch
-    const handleEditBatch = (batch: EnhancedBatch) => {
-        setEditingBatch(batch)
-        form.reset({
-            name: batch.name,
-            instructorEmail: batch.instructorEmail,
-            bootcampId: courseData?.id.toString() ?? '',
-            capEnrollment: batch.capEnrollment.toString(),
-            assignLearners: 'all',
-        })
-        setIsEditModalOpen(true)
-        setCurrentStep(1)
-    }
-
-    // Handle delete batch
-    const handleDeleteBatch = (batch: EnhancedBatch) => {
-        setBatchToDelete(batch)
-        setDeleteModalOpen(true)
-    }
-
-    // Batch delete handler
-    const batchDeleteHandler = async () => {
-        if (!batchToDelete) return
-
-        try {
-            await api.delete(`/batch/${batchToDelete.id}`)
-            toast.success({
-                title: 'Batch Deleted Successfully',
-            })
-            setDeleteModalOpen(false)
-            setBatchToDelete(null)
-            // Refresh batch data
-            defaultFetchApi()
-        } catch (error) {
-            toast.error({
-                title: 'Batch not Deleted',
-                description: 'An error occurred while deleting the batch',
-            })
-        }
-    }
-
-    // Handle update batch
-    const handleUpdateBatch = async (values: z.infer<typeof formSchema>) => {
-        if (!editingBatch) return
-
-        try {
-            const convertedData = {
-                name: values.name,
-                instructorEmail: values.instructorEmail,
-                capEnrollment: +values.capEnrollment,
-            }
-
-            // Call API to update batch
-            const res = await api.put(
-                `/batch/${editingBatch.id}`,
-                convertedData
-            )
-
-            // Refresh data
-            defaultFetchApi()
-            setIsEditModalOpen(false)
-            setEditingBatch(null)
-
-            toast.success({
-                title: 'Success',
-                description: 'Batch updated successfully',
-            })
-        } catch (error: any) {
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'Failed to update batch',
-            })
-        }
-    }
-
-    // Handle view students - navigate to students with batch filter
-    const handleViewStudents = (
-        batchId: string | number,
-        batchName: string
-    ) => {
-        router.push(`/admin/courses/${params.courseId}/batch/${batchId}`)
-    }
-
-    // Handle CSV file upload
-    const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file && file.type === 'text/csv') {
-            setCsvFile(file)
-        } else {
-            toast.error({
-                title: 'Invalid File',
-                description: 'Please select a valid CSV file',
-            })
-        }
-    }
-
-    // Handle single student form
-    const handleSingleStudentChange = (field: string, value: string) => {
-        setSingleStudentData((prev) => ({
-            ...prev,
-            [field]: value,
-        }))
-    }
-    // Fixed onSubmit function with proper manual assignment handling
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        // If editing, use update handler
-        if (isEditModalOpen && editingBatch) {
-            return handleUpdateBatch(values)
-        }
-
-        try {
-            let studentIds: number[] = []
-            let assignAll = true
-            let studentsToAdd: any[] = [] // For single student or CSV upload
-
-            // Handle different assignment methods
-            if (assignStudents === 'manually') {
-                assignAll = false // Always false for manual assignment
-
-                if (manualAssignmentMethod === 'unassigned') {
-                    // Use selected rows from unassigned students
-                    studentIds = selectedRows.map((student) => student.id)
-
-                    // If no students selected, don't create batch
-                    if (studentIds.length === 0) {
-                        toast.error({
-                            title: 'No Students Selected',
-                            description:
-                                'Please select at least one student to assign to the batch',
-                        })
-                        return false
-                    }
-                } else if (manualAssignmentMethod === 'single') {
-                    // Validate single student data
-                    if (
-                        !singleStudentData.name.trim() ||
-                        !singleStudentData.email.trim()
-                    ) {
-                        toast.error({
-                            title: 'Incomplete Student Data',
-                            description:
-                                'Please provide both student name and email',
-                        })
-                        return false
-                    }
-
-                    // Validate email format
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-                    if (!emailRegex.test(singleStudentData.email)) {
-                        toast.error({
-                            title: 'Invalid Email',
-                            description: 'Please provide a valid email address',
-                        })
-                        return false
-                    }
-
-                    studentsToAdd = [
-                        {
-                            name: singleStudentData.name.trim(),
-                            email: singleStudentData.email.trim(),
-                        },
-                    ]
-                } else if (manualAssignmentMethod === 'csv') {
-                    if (
-                        !studentData ||
-                        !Array.isArray(studentData) ||
-                        studentData.length === 0
-                    ) {
-                        toast.error({
-                            title: 'No CSV Data',
-                            description:
-                                'Please upload a valid CSV file with student data',
-                        })
-                        return false
-                    }
-                    studentsToAdd = studentData
-                }
-            }
-
-            const bootcampId = parseInt(String(params.courseId))
-
-            if (isNaN(bootcampId) || bootcampId <= 0) {
-                console.error('Invalid courseId:', params.courseId)
-                toast({
-                    title: 'Invalid Course ID',
-                    description:
-                        'Course ID is not valid. Please refresh the page.',
-                    variant: 'destructive',
-                })
-                return false
-            }
-
-            // Create batch data
-            const batchPayload = {
-                name: values.name,
-                instructorEmail: values.instructorEmail,
-                bootcampId: bootcampId,
-                capEnrollment: +values.capEnrollment,
-                assignAll: assignAll,
-                studentIds: studentIds,
-            }
-
-            if (
-                !batchPayload.name ||
-                !batchPayload.instructorEmail ||
-                !batchPayload.bootcampId ||
-                !batchPayload.capEnrollment
-            ) {
-                toast({
-                    title: 'Missing Required Fields',
-                    description: 'Please fill in all required fields',
-                    variant: 'destructive',
-                })
-                return false
-            }
-            // Check for duplicate batch name
-            const convertedName = batchPayload.name
-                .replace(/\s+/g, '')
-                .toLowerCase()
-            const matchedBatchData = enhancedBatchData?.find(
-                (batch) =>
-                    convertedName ===
-                    batch.name.replace(/\s+/g, '').toLowerCase()
-            )
-
-            if (matchedBatchData) {
-                toast.error({
-                    title: 'Cannot Create New Batch',
-                    description: 'This Batch Name Already Exists',
-                })
-                return false
-            }
-
-            // Create batch
-            const batchResponse = await api.post(`/batch`, batchPayload)
-            const newBatchId =
-                batchResponse.data.data?.id || batchResponse.data.id
-
-            // If new students to add (single/CSV), add them to course and batch
-            if (studentsToAdd.length > 0) {
-                try {
-                    // Use same API pattern as AddStudentsModal
-                    const studentsPayload = {
-                        students: studentsToAdd,
-                    }
-
-                    // Add students to course with batch assignment
-                    await api.post(
-                        `/bootcamp/students/${params.courseId}?batch_id=${newBatchId}`,
-                        studentsPayload
-                    )
-                } catch (error) {
-                    console.error('Error adding students:', error)
-                    // Batch created but students not added
-                    toast.warning({
-                        title: 'Partial Success',
-                        description:
-                            'Batch created but some students could not be added',
-                    })
-                }
-            }
-
-            // Reset all form states
-            setAssignStudents('')
-            setManualAssignmentMethod('unassigned')
-            setSelectedRows([])
-            setStudentData({})
-            setSingleStudentData({ name: '', email: '' })
-
-            // Refresh data
-            if (params.courseId) {
-                fetchStudentData(params.courseId, setStoreStudentData)
-                fetchCourseDetails(params.courseId)
-                defaultFetchApi()
-            }
-
-            toast.success({
-                title: 'Success',
-                description: 'Batch created successfully',
-            })
-
-            getUnAssignedStudents()
-            return true
-        } catch (error: any) {
-            setAssignStudents('')
-            setManualAssignmentMethod('unassigned')
-            setSelectedRows([])
-
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'Failed to create batch.',
-            })
-            console.error('Error creating batch:', error)
-            return false
-        }
-    }
-    // Rest of the existing useEffect and other functions remain the same
-    useEffect(() => {
-        if (params.courseId) {
-            fetchCourseDetails(params.courseId)
-        }
-    }, [params.courseId, fetchCourseDetails])
-
-    useEffect(() => {
-        console.log('CourseData updated:', courseData)
-    }, [courseData])
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false)
-        }, 1000)
-
-        return () => clearTimeout(timer)
-    }, [])
-
-    const getUnAssignedStudents = useCallback(async () => {
-        try {
-            const res = await api.get(
-                `/batch/allUnassignStudent/${params.courseId}?searchTerm=${debouncedSearchStudent}`
-            )
-            setTotalStudents(res.data.data)
-        } catch (err) {
-            console.error('Failed to fetch unassigned students:', err)
-        }
-    }, [debouncedSearchStudent, params.courseId])
-
-    useEffect(() => {
-        getUnAssignedStudents()
-    }, [getUnAssignedStudents, debouncedSearchStudent, params.courseId])
-
-    const handleSearchStudents = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchStudent(e.target.value)
-    }
-
-    const assignLearners = form.watch('assignLearners')
+    // Local UI-only value derived from the form provided by the hook
     const capEnrollmentValue = form.watch('capEnrollment')
-
-    const columns = useMemo(
-        () => createColumns(Number(capEnrollmentValue)),
-        [capEnrollmentValue]
-    )
-
-    const handleModal = (isOpen: boolean) => {
-        setIsCreateModalOpen(isOpen)
-        if (!isOpen) {
-            // Form completely reset
-            form.reset({
-                name: '',
-                instructorEmail: '',
-                bootcampId: courseData?.id.toString() ?? '',
-                capEnrollment: '',
-                assignLearners: 'all',
-            })
-
-            // All states reset
-            setAssignStudents('')
-            setManualAssignmentMethod('unassigned')
-            setCsvFile(null)
-            setSingleStudentData({ name: '', email: '' })
-            setEditingBatch(null)
-            setIsEditModalOpen(false)
-            setCurrentStep(1)
-            setSelectedRows([])
-            setStudentData({})
-        }
-    }
 
     // Render manual assignment method selection
     const renderManualAssignmentMethod = () => {
@@ -860,7 +319,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                 <Dialog>
                     <DialogTrigger asChild>
                         {permissions.createBatch && (
-                            <Button className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700">
+                            <Button className="lg:max-w-[200px] w-full mt-5">
                                 <Plus className="h-4 w-4 mr-2" />
                                 Create New Batch
                             </Button>
@@ -871,7 +330,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                         message={true}
                         id={courseData?.id || 0}
                         batch={false}
-                        batchData={batchData ? batchData?.length > 0 : false}
+                        batchData={enhancedBatchData ? enhancedBatchData.length > 0 : false}
                         batchId={0}
                         setStudentData={setStudentData}
                         studentData={studentData}
@@ -883,14 +342,12 @@ const Page = ({ params }: { params: ParamsType }) => {
             return (
                 <Dialog
                     open={isCreateModalOpen}
-                    onOpenChange={(open) => {
-                        handleModal(open)
-                    }}
+                    onOpenChange={(open) => setIsCreateModalOpen(open)}
                 >
                     <DialogTrigger asChild>
                         {permissions.createBatch && (
                             <Button
-                                className="lg:max-w-[200px] w-full mt-5 bg-blue-600 hover:bg-blue-700"
+                                className="lg:max-w-[200px] w-full mt-5"
                                 onClick={() => {
                                     // Reset everything before opening
                                     form.reset({
@@ -1296,7 +753,7 @@ const Page = ({ params }: { params: ParamsType }) => {
 
     if (courseData?.id) {
         return (
-            <div className="w-full max-w-none space-y-6 pb-8">
+            <div className="w-full max-w-none pb-8">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -1309,7 +766,24 @@ const Page = ({ params }: { params: ParamsType }) => {
                     </div>
                     {renderModal(false)}
                 </div>
-
+                <div className="flex flex-col lg:flex-row justify-between items-center mb-8">
+                <div className="relative w-full lg:max-w-[500px]">
+                            <SearchBox
+                                placeholder="Search Classes"
+                                fetchSuggestionsApi={fetchSuggestionsApi}
+                                fetchSearchResultsApi={fetchSearchResultsApi}
+                                defaultFetchApi={defaultFetchApi}
+                                getSuggestionLabel={(s) => (
+                                    <div>
+                                        <div className="font-medium">
+                                            {s.name}
+                                        </div>
+                                    </div>
+                                )}
+                                inputWidth="relative lg:w-[400px] w-full"
+                            />
+                        </div>
+                    </div>
                 {loading ? (
                     <div className="my-5 flex justify-center items-center">
                         <div className="absolute h-screen">
@@ -1445,7 +919,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                     batch.name
                                                 )
                                             }
-                                            className="w-ful bg-blue-600 text-white hover:bg-blue-700"
+                                            className="w-full h-10"
                                         >
                                             <Eye className="h-4 w-4 mr-2" />
                                             View Students

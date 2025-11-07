@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { api } from '@/utils/axios.config'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Reorder } from 'framer-motion'
 import ChapterItem from '@/app/[admin]/courses/[courseId]/module/_components/ChapterItem'
@@ -24,10 +24,11 @@ import {
     getCurrentModuleName,
     getChapterUpdateStatus,
     getCourseData,
+    getUser,
 } from '@/store/store'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
+import { QuizOptions, QuizQuestionDetails } from '@/components/appComponentFileType'
 
 type Chapter = {
     chapterId: number
@@ -37,25 +38,10 @@ type Chapter = {
     order: number
 }
 
-interface QuizOptions {
-    option1: string
-    option2: string
-    option3: string
-    option4: string
-}
-
-interface QuizQuestionDetails {
-    id: number
-    question: string
-    options: QuizOptions
-    correctOption: string
-    marks: null | number
-    difficulty: string
-    tagId: number
-}
-
 function Chapter() {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseId, moduleId, chapterID } = useParams()
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
@@ -150,7 +136,7 @@ function Chapter() {
                 (item: any) => item.chapterId
             )
         } catch (error) {
-            router.replace(`/admin/courses/${courseId}/curriculum`)
+            router.replace(`/${userRole}/courses/${courseId}/curriculum`)
             toast.info({
                 title: 'Caution',
                 description: 'The Module has been deleted by another Admin',
@@ -369,7 +355,7 @@ function Chapter() {
                 <div className="flex">
                     <Dialog open={open} onOpenChange={setOpen}>
                         <DialogTrigger asChild>
-                            <div className="w-full mb-4 pb-4 pr-4 border-b border-gray-200">
+                            <div className="w-full mb-4 pb-4 pr-4 border-b border-muted-light">
                                 <Button
                                     variant="outline"
                                     className="py-2 px-2 h-full w-full mr-4"

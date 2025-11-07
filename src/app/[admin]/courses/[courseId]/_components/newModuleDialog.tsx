@@ -40,7 +40,17 @@ const moduleSchema = z.object({
     months: z.number().min(0, { message: 'Months Should not be empty.' }),
     weeks: z.number().min(0, { message: 'Weeks Should not be empty.' }),
     days: z.number().min(0, { message: 'Days Should not be empty.' }),
-})
+}).refine(
+    (data) => {
+        // At least one time field should be greater than 0
+        return data.months > 0 || data.weeks > 0 || data.days > 0
+    },
+    {
+        message:
+            'Please specify time duration (months, weeks, or days).',
+        path: ['timeAllotted'], // Custom path for time validation
+    }
+)
 
 const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     moduleData,
@@ -105,10 +115,10 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
         form.setValue('name', moduleData.name)
         form.setValue('description', moduleData.description)
 
-        // Handle time data properly
-        form.setValue('months', timeData.months > -1 ? timeData.months : 0)
-        form.setValue('weeks', timeData.weeks > -1 ? timeData.weeks : 0)
-        form.setValue('days', timeData.days > -1 ? timeData.days : 0)
+        // Handle time data properly - ensure no negative values
+        form.setValue('months', Math.max(0, timeData.months))
+        form.setValue('weeks', Math.max(0, timeData.weeks))
+        form.setValue('days', Math.max(0, timeData.days))
     }, [moduleData, timeData, typeId, form, isOpen]) // Added isOpen to dependencies
 
     // FIXED: Enhanced handleTypeChange wrapper
@@ -131,7 +141,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4 "
             >
-                <DialogContent className="text-gray-600">
+                <DialogContent className="text-foreground">
                     <DialogHeader>
                         <DialogTitle>New Module</DialogTitle>
                         <div className="main_container flex items-center align-middle text-center">
@@ -146,7 +156,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                     <Input
                                                         type="radio"
                                                         id="learning-material"
-                                                        className="size-4"
+                                                        className="size-4 accent-primary"
                                                         value="learning-material"
                                                         checked={
                                                             field.value ===
@@ -184,7 +194,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                     <Input
                                                         type="radio"
                                                         id="project"
-                                                        className="size-4"
+                                                        className="size-4 accent-primary"
                                                         value="project"
                                                         checked={
                                                             field.value ===
@@ -384,11 +394,11 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                             field.value || ''
                                                         } // FIXED: Use form field value
                                                         onChange={(e) => {
-                                                            const value =
+                                                            const value = 
                                                                 parseInt(
                                                                     e.target
                                                                         .value
-                                                                ) || 0
+                                                                    ) || 0
                                                             field.onChange(
                                                                 value
                                                             ) // Update form state
@@ -399,9 +409,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         name="days"
                                                         onKeyDown={(e) => {
                                                             if (
-                                                                e.key === '-' ||
-                                                                e.key === 'e'
-                                                            )
+                                                                e.key === '-' || e.key === 'e' || e.key === '+')
                                                                 e.preventDefault()
                                                         }}
                                                         min={0}
@@ -413,6 +421,13 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                     />
                                 </div>
                             </div>
+
+                            {/* Global time validation error */}
+                            {((form.formState.errors) as any).timeAllotted && (
+                                <p className="text-sm text-destructive mt-2">
+                                    {((form.formState.errors) as any).timeAllotted?.message}
+                                </p>
+                            )}
                         </div>
                     </DialogHeader>
                     <DialogFooter className="sm:justify-end">

@@ -6,6 +6,7 @@ import { Combobox } from '@/components/ui/combobox'
 import ClassCard from '../../_components/classCard'
 import { api } from '@/utils/axios.config'
 import { setStoreBatchValue } from '@/store/store'
+import { getUser } from '@/store/store'
 import RecordingCard from '../../_components/RecordingCard'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
@@ -26,7 +27,8 @@ import { SearchBox } from '@/utils/searchBox'
 function Page({ params }: ParamsType) {
     const router = useRouter()
     const searchParams = useSearchParams()
-
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [classes, setClasses] = useState<CourseClassItem[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()
@@ -123,9 +125,8 @@ function Page({ params }: ParamsType) {
     const handleTabChange = (tab: string) => {
         setActiveTab(tab)
         localStorage.setItem('sessionTab', tab)
-        setClasses([]) // Clear existing classes immediately
+        setClasses([]) 
 
-        // Fetch new data for the selected tab without loading state
         fetchClassesData(0, currentSearchQuery)
         setOffset(0)
         setCurrentPage(1)
@@ -233,7 +234,7 @@ function Page({ params }: ParamsType) {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/admin/courses`)
+                    router.push(`/${userRole}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:

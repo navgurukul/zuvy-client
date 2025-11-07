@@ -12,11 +12,12 @@ const CourseDeleteModal: React.FC<CourseDeleteModalProps> = ({
     onClose,
     onConfirm,
     loading = false,
+    courseName,
 }) => {
     const [inputValue, setInputValue] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
 
-    const confirmationText = "Delete Course"
+    const confirmationText = courseName
 
     useEffect(() => {
         if (!isOpen) {

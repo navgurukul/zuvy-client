@@ -127,7 +127,7 @@ export function getAssesmentBackgroundColorClass(totalNo: number, no: number) {
 export const formatDate = (dateString: string): string => {
     const options: Intl.DateTimeFormatOptions = {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric',
         // hour: '2-digit',
         // minute: '2-digit',

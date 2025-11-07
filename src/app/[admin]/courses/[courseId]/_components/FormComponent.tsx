@@ -27,7 +27,7 @@ const FormComponent = ({
     }, [bootcampId])
 
     return (
-        <div className="relative bg-muted border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
+        <div className="relative bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
             <div className="flex flex-col w-full justify-between">
                 <div className="flex items-center gap-2">
                     <div className="p-2rounded-md">

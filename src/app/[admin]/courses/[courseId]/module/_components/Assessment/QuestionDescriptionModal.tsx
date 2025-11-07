@@ -29,7 +29,7 @@ const QuestionDescriptionModal = ({
                     <DialogTitle className="text-xl text-foreground font-bold">
                         Coding Problem Preview
                         {tagName && (
-                            <span className="text-[12px] text-success bg-success-foreground rounded-[100px] ml-2 py-1 px-[8px]">
+                            <span className="text-xs text-success bg-success-foreground rounded-[100px] ml-2 py-1 px-[8px]">
                                 {tagName}
                             </span>
                         )}
@@ -86,14 +86,14 @@ const QuestionDescriptionModal = ({
                                 </div>
 
                                 {/* Function Name */}
-                                <div>
+                                {/* <div>
                                     <h4 className="font-semibold text-foreground text-lg mb-3">
                                         Function Name to Start With:{' '}
                                         <span className="font-light text-base">
                                             minJumps
                                         </span>
                                     </h4>
-                                </div>
+                                </div> */}
 
                                 {/* Input */}
                                 <div>

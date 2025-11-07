@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Calendar as CalendarIcon } from 'lucide-react'
+import { getUser } from '@/store/store'
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -49,7 +50,9 @@ const formSchema = z
     .object({
         sessionTitle: z.string().min(2, {
             message: 'Session Title must be at least 2 characters.',
-        }),
+        })
+        .max(50, { message: 'You can enter up to 50 characters only.' }),
+
         description: z.string().optional(),
         startDate: z.date({
             required_error: 'A start date is required.',
@@ -128,6 +131,8 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     fetchingChapters,
     onClose,
 }) => {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const params = useParams()
     const router = useRouter()
@@ -250,7 +255,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
             const latestChapter = chapters[chapters.length - 1]
             if (latestChapter) {
                 router.push(
-                    `/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
+                    `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
                 )
             }
             toast.success({
@@ -314,18 +319,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         disabled={isLoading}
                                         {...field}
                                         onChange={(e) => {
-                                            const newValue = e.target.value
-                                            if (newValue.length>50) {
-                                                  toast.error({
-                                                    title: 'Character Limit Reached',
-                                                    description:
-                                                        'You can enter up to 50 characters only',
-                                                })
-                                               
-                                            } else {
-                                                field.onChange(newValue)
-                                              
-                                            }
+                                             field.onChange(e.target.value)
                                         }}
                                     />
                                 </FormControl>

@@ -47,7 +47,7 @@ import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
 import { POSITION, OFFSET } from '@/utils/constant'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import CreatTag from '../_components/creatTag'
+import ManageTopics from '../_components/ManageTopics'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import {
@@ -86,6 +86,7 @@ const OpenEndedQuestions = (props: Props) => {
     const { openEndedQuestions, setOpenEndedQuestions } =
         getopenEndedQuestionstate()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false) // NEW STATE
     const [newTopic, setNewTopic] = useState<string>('')
     const [currentPage, setCurrentPage] = useState(1)
     const [totalOpenEndedQuestion, setTotalOpenEndedQuestion] = useState<any>(0)
@@ -313,31 +314,6 @@ const OpenEndedQuestions = (props: Props) => {
         localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
-    const handleNewTopicChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-    ) => {
-        setNewTopic(event.target.value)
-    }
-
-    const handleCreateTopic = async () => {
-        try {
-            const res = await api.post(`/Content/createTag`, {
-                tagName: newTopic,
-            })
-            toast.success({
-                title: `${newTopic} Topic created`,
-                description: res.data.message,
-            })
-            getAllTags(setTags, setOptions)
-            setNewTopic('')
-        } catch (error) {
-            toast.error({
-                title: 'Network error',
-                description: 'Unable to create topic.',
-            })
-        }
-    }
-
     const selectedTagCount = selectedOptions.length
     const difficultyCount = difficulty.length
 
@@ -436,26 +412,15 @@ const OpenEndedQuestions = (props: Props) => {
                                 </div>
 
                                 <div className="flex flex-row items-center gap-2">
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button
-                                                variant={'outline'}
-                                                className="lg:max-w-[150px] w-full"
-                                            >
-                                                <p>Create Topic</p>
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogOverlay />
-                                        <CreatTag
-                                            newTopic={newTopic}
-                                            handleNewTopicChange={
-                                                handleNewTopicChange
-                                            }
-                                            handleCreateTopic={
-                                                handleCreateTopic
-                                            }
-                                        />
-                                    </Dialog>
+                                    {/* UPDATED: Replace Create Topic Dialog with Manage Topics Button */}
+                                    <Button
+                                        variant={'outline'}
+                                        className="lg:max-w-[150px] w-full shadow-4dp"
+                                        onClick={() => setIsManageTopicsOpen(true)}
+                                    >
+                                        <p>Manage Topics</p>
+                                    </Button>
+                                    
                                     <Dialog
                                         onOpenChange={setIsDialogOpen}
                                         open={isDialogOpen}
@@ -614,14 +579,26 @@ const OpenEndedQuestions = (props: Props) => {
                             </MaxWidthWrapper>
                         </>
                     )}
-                    <DataTablePagination
-                        totalStudents={totalOpenEndedQuestion}
-                        lastPage={lastPage}
-                        pages={totalPages}
-                        fetchStudentData={fetchCodingQuestions}
-                    />
+                    <div className='pb-4 flex justify-end'>
+                        <DataTablePagination
+                            totalStudents={totalOpenEndedQuestion}
+                            lastPage={lastPage}
+                            pages={totalPages}
+                            fetchStudentData={fetchCodingQuestions}
+                        />
+                    </div>
                 </div>
             )}
+
+            {/* NEW: Manage Topics Dialog */}
+            <ManageTopics
+                isOpen={isManageTopicsOpen}
+                onClose={() => setIsManageTopicsOpen(false)}
+                onTopicCreated={() => {
+                    getAllTags(setTags, setOptions)
+                    setIsManageTopicsOpen(false)
+                }}
+            />
         </>
     )
 }

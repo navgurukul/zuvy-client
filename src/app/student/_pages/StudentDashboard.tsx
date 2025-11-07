@@ -3,7 +3,6 @@ import { useState , useEffect ,  } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Carousel,
   CarouselContent,
@@ -69,7 +68,7 @@ const StudentDashboard = () => {
 
     if (bootcamp.progress === 0) {
       return (
-        <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" asChild>
+        <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark  " asChild>
           <Link href={`/student/course/${bootcamp.id}`}>
             <Play className="w-4 h-4 mr-2" />
             Start Learning
@@ -165,7 +164,7 @@ const StudentDashboard = () => {
         {/* Course Cards */}
         <div className="space-y-6 mb-12">
           {filteredBootcamps.map((bootcamp) => (
-            <Card key={bootcamp.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200">
+            <Card key={bootcamp.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card ">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Course Image */}

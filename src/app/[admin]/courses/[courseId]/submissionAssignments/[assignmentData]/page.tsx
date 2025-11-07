@@ -111,7 +111,7 @@ const Page = ({ params }: { params: any }) => {
             </div>
 
             {/* Assessment Info Card */}
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                 <CardHeader>
                     <CardTitle className="text-2xl text-gray-800 text-left">
                         {assignmentTitle || 'Loading...'}
@@ -155,7 +155,7 @@ const Page = ({ params }: { params: any }) => {
                     </div>
                 </CardContent>
             </Card>
-            <Card className="bg-muted">
+            <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl text-gray-800">

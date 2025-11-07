@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { api } from '@/utils/axios.config'
+import { getUser } from '@/store/store'
 import AddVideo from '@/app/[admin]/courses/[courseId]/module/_components/video/AddVideo'
 import AddArticle from '@/app/[admin]/courses/[courseId]/module/_components/Article/AddArticle'
 import CodingChallenge from '@/app/[admin]/courses/[courseId]/module/_components/codingChallenge/CodingChallenge'
@@ -31,6 +32,8 @@ export default function Page({
 }) {
     const router = useRouter()
     const heightClass = useResponsiveHeight()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseId, moduleId, chapterID } = useParams()
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const chapter_id = Array.isArray(chapterID)
@@ -91,7 +94,7 @@ export default function Page({
             if (moduleData.length > 0) {
                 const firstChapterId = moduleData[0].chapterId
                 router.replace(
-                    `/admin/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
+                    `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
                 )
             }
             setActiveChapter(0)

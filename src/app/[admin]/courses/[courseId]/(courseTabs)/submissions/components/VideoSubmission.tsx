@@ -85,7 +85,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                 : 0
                                         return (
                                             <div
-                                                className="relative bg-muted border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
+                                                className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
                                                 key={video.id}
                                             >
                                                 {/* Content */}

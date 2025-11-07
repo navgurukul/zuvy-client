@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { fetchPreviewData } from '@/utils/admin'
 import { ChevronRight, Clock, DoorClosed, Timer, X } from 'lucide-react'
+import { getUser } from '@/store/store'
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
@@ -15,6 +16,8 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/PreviewPageType'
 
 function AllQuestions({ params }: { params: Params }) {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [assessmentPreviewContent, setAssessmentPreviewContent] =
         useState<any>([])
     const [assessmentPreviewCodingContent, setAssessmentPreviewCodingContent] =
@@ -47,19 +50,19 @@ function AllQuestions({ params }: { params: Params }) {
 
     function solveCodingQuestion(codingQuestionId: any) {
         router.push(
-            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`
+            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`
         )
     }
 
     function attemptQuizPreview() {
         router.push(
-            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`
+            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`
         )
     }
 
     function attemptOpenEndedPreview() {
         router.push(
-            `/admin/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`
+            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`
         )
     }
 

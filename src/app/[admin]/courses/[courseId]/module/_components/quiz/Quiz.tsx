@@ -17,9 +17,10 @@ import {
     getAllQuizData,
     getChapterUpdateStatus,
     getQuizPreviewStore,
+    getUser,
+    getChapterDataState,
 } from '@/store/store'
-import { ArrowUpRightSquare, Pencil } from 'lucide-react'
-import { Eye } from 'lucide-react'
+import { ArrowUpRightSquare, Pencil, FileQuestion } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
     QuizProps,
@@ -27,10 +28,24 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import useDebounce from '@/hooks/useDebounce'
 import CodingTopics from '../codingChallenge/CodingTopics'
-import { FileQuestion } from 'lucide-react'
+
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import useEditChapter from '@/hooks/useEditChapter' 
+import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+
+const quizSchema = z.object({
+    title: z
+        .string()
+        .min(1, 'Quiz title is required')
+        .max(50, 'You can enter up to 50 characters only.'),
+})
 
 function Quiz(props: QuizProps) {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [tags, setTags] = useState<PageTag[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [addQuestion, setAddQuestion] = useState<QuizDataLibrary[]>([])
@@ -63,6 +78,18 @@ function Quiz(props: QuizProps) {
         easyQuestions: [],
         mediumQuestions: [],
         hardQuestions: [],
+    })
+
+    const { editChapter } = useEditChapter()
+    const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
+    const { chapterData, setChapterData } = getChapterDataState()
+
+    const form = useForm<z.infer<typeof quizSchema>>({
+        resolver: zodResolver(quizSchema),
+        defaultValues: {
+            title: inputValue || '',
+        },
+        mode: 'onChange',
     })
 
     const fetchQuizQuestions = useCallback(
@@ -173,6 +200,7 @@ function Quiz(props: QuizProps) {
     // Update isSaved state when addQuestion changes
     useEffect(() => {
         setIsSaved(checkIfSaved())
+        form.trigger("title") 
     }, [addQuestion, savedQuestions])
 
     const openModal = () => setIsOpen(true)
@@ -205,46 +233,83 @@ function Quiz(props: QuizProps) {
         requestBody: Record<string, any>
     ) => {
         try {
-            const response = await api.put(
-                `/Content/editChapterOfModule/${props.moduleId}?chapterId=${props.chapterId}`,
+            const response = await editChapter(
+                props.moduleId,
+                props.chapterId,
                 requestBody
             )
             toast.success({
                 title: 'Success',
                 description: response?.data?.message || 'Saved successfully!',
             })
+            return response
         } catch (error: any) {
             toast.error({
                 title: 'Error',
                 description: 'An error occurred while saving the chapter.',
             })
+            throw error
         }
     }
 
-    const handleSaveQuiz = () => {
+    const handleSaveQuiz = async (titleParam?: string) => {
+        const titleToSave = titleParam ?? inputValue
         const selectedIds = addQuestion?.map((item) => item.id)
         const requestBody = {
-            title: inputValue,
+            title: titleToSave,
             quizQuestions: selectedIds,
         }
-        saveQuizQuestionHandler(requestBody)
-        setIsChapterUpdated(!isChapterUpdated)
 
-        setIsSaved(true)
-        setSavedQuestions([...addQuestion])
+        try {
+            await saveQuizQuestionHandler(requestBody)
+
+            // Optimistically update chapter list so UI reflects new title immediately
+            if (setChapterData && Array.isArray(chapterData)) {
+                const updated = chapterData.map((c: any) =>
+                    c.chapterId === props.chapterId
+                        ? { ...c, chapterTitle: titleToSave }
+                        : c
+                )
+                setChapterData(updated)
+            }
+
+            // toggle shared flag after successful save so other components re-fetch if needed
+            setIsChapterUpdated(!isChapterUpdated)
+
+            setIsSaved(true)
+            setSavedQuestions([...addQuestion])
+            // keep local input/quiz title in sync after save
+            setInputValue(titleToSave)
+            setQuizTitle(titleToSave)
+
+            // ensure form reflects saved title
+            form.reset({ title: titleToSave })
+        } catch (err) {
+            // error handled in saveQuizQuestionHandler
+            console.error('Save quiz failed', err)
+        }
     }
 
     const getAllSavedQuizQuestion = useCallback(async () => {
         if (!props.chapterId || props.chapterId === 0) return
 
         try {
-            const res = await api.get<ChapterDetailsResponse>(
-                `/Content/chapterDetailsById/${props.chapterId}?bootcampId=${props.courseId}&moduleId=${props.moduleId}&topicId=${props.content.topicId}`
-            )
+            const res = await getChapterDetails({
+                chapterId: props.chapterId,
+                bootcampId: props.courseId,
+                moduleId: props.moduleId,
+                topicId: props.content.topicId,
+            })
             setAddQuestion(res.data.quizQuestionDetails)
             setQuizTitle(res.data.title)
             setSavedQuestions(res.data.quizQuestionDetails)
             setIsSaved(true)
+
+            // ensure input and form reflect server title
+            if (res.data.title) {
+                setInputValue(res.data.title)
+                form.reset({ title: res.data.title })
+            }
         } catch (error) {
             console.error('Failed to fetch chapter details', error)
         }
@@ -287,7 +352,7 @@ function Quiz(props: QuizProps) {
             quizQuestionDetails: addQuestion,
         })
         router.push(
-            `/admin/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+            `/${userRole}/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
         )
     }
 
@@ -308,7 +373,7 @@ function Quiz(props: QuizProps) {
                     <div className="w-full flex flex-col items-start">
                         {/* Input Field */}
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-2/4 flex justify-center align-middle items-center relative">
+                            {/* <div className="w-2/4 flex justify-center align-middle items-center relative">
                                 <Input
                                     required
                                     onChange={(e) => {
@@ -345,7 +410,7 @@ function Quiz(props: QuizProps) {
                                     <Eye size={18} />
                                     <h6 className="ml-1 text-sm">Preview</h6>
                                 </div> */}
-                                {addQuestion?.length > 0 && (
+                            {/* {addQuestion?.length > 0 && (
                                     <div className="mt-5">
                                         <Button
                                             onClick={handleSaveQuiz}
@@ -355,16 +420,89 @@ function Quiz(props: QuizProps) {
                                         </Button>
                                     </div>
                                 )}
-                            </div>
+                            </div>  */}
+
+                            <form
+                                onSubmit={form.handleSubmit(async (data) => {
+                                    // await save so chapter list updates after server confirms
+                                    await handleSaveQuiz(data.title)
+                                })}
+                                className="flex justify-between items-center w-full"
+                            >
+                                <div className="w-2/4 flex flex-col justify-center relative">
+                                    <Input
+                                        {...form.register('title')}
+                                        placeholder="Untitled Quiz"
+                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                    />
+                                    {!form.watch('title') && (
+                                        <Pencil
+                                            fill="true"
+                                            fillOpacity={0.4}
+                                            size={20}
+                                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                        />
+                                    )}
+                                    {form.formState.errors.title && (
+                                        <p className="text-destructive text-sm mt-1">
+                                            {
+                                                form.formState.errors.title
+                                                    .message
+                                            }
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    {addQuestion?.length > 0 && (
+                                        <div className="mt-5">
+                                            {/* <Button
+                                                type="submit"
+                                                disabled={
+                                                    !form.formState.isValid ||
+                                                    form.formState.isSubmitting
+                                                }
+                                                className={`bg-primary opacity-75 ${
+                                                    !form.formState.isValid
+                                                        ? 'cursor-not-allowed opacity-50'
+                                                        : ''
+                                                }`}
+                                            >
+                                                Save
+                                            </Button> */}
+
+
+                                            <Button
+                                                type="submit"
+                                                disabled={
+                                                    form.formState.isSubmitting ||
+                                                    !form.formState.isValid ||
+                                                    isSaved
+                                                }
+                                                className={`bg-primary ${
+                                                    form.formState.isSubmitting || !form.formState.isValid || isSaved
+                                                    ? 'opacity-50 cursor-not-allowed'
+                                                    : 'opacity-75'
+                                                }`}
+                                                >
+                                                {form.formState.isSubmitting
+                                                    ? 'Saving...'
+                                                    : isSaved
+                                                    ? 'Saved'
+                                                    : 'Save'}
+                                            </Button>
+
+                                        </div>
+                                    )}
+                                </div>
+                            </form>
                         </div>
                         <div className="flex items-center gap-2">
                             <FileQuestion
                                 size={20}
                                 className="transition-colors"
                             />
-                            <p className="text-muted-foreground">
-                                Quiz
-                            </p>
+                            <p className="text-muted-foreground">Quiz</p>
                         </div>
                     </div>
                 </div>
@@ -384,7 +522,7 @@ function Quiz(props: QuizProps) {
                         chapterTitle={''}
                     />
                     <div className="w-full h-max-content ">
-                        <h2 className="text-left mt-4 ml-1 text-gray-600 text-[15px] font-semibold">
+                        <h2 className="text-left mt-4 ml-1 text-muted-dark text-[15px] font-semibold">
                             MCQ Library
                         </h2>
                         <div className="flex">
@@ -395,17 +533,17 @@ function Quiz(props: QuizProps) {
                                 quizData={quizData}
                             />
 
-                            <div className="w-full border-l border-gray-200 ml-4 pl-4">
+                            <div className="w-full border-l border-muted-light ml-4 pl-4">
                                 <div>
                                     <div className="flex flex-col items-center justify-between">
                                         <div className="flex justify-between w-full">
-                                            <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
+                                            <h2 className="text-left text-muted-dark text-[15px] w-full font-semibold">
                                                 Selected Question
                                             </h2>
                                         </div>
                                         <div className="text-left w-full">
                                             {addQuestion?.length === 0 && (
-                                                <h1 className="text-left text-gray-600 text-[15px] italic">
+                                                <h1 className="text-left text-muted-dark text-[15px] italic">
                                                     No Selected Questions
                                                 </h1>
                                             )}

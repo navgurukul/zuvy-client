@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import moment from 'moment'
 import { api } from '@/utils/axios.config'
+import { getUser } from '@/store/store'
 import { getCourseData } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import CurricullumCard from '@/app/[admin]/courses/[courseId]/_components/curricullumCard'
@@ -27,6 +28,8 @@ function Page() {
     const router = useRouter()
     const params = useParams()
     const courseId = params.courseId
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
     const [originalCurriculum, setOriginalCurriculum] = useState<
@@ -73,9 +76,9 @@ function Page() {
         description: '',
     })
     const [timeData, setTimeData] = useState({
-        months: -1,
-        weeks: -1,
-        days: -1,
+        months: 0,  // Changed from -1 to 0
+        weeks: 0,   // Changed from -1 to 0
+        days: 0,    // Changed from -1 to 0
     })
     const dragControls = useDragControls()
 
@@ -123,17 +126,24 @@ function Page() {
     }
     // Convert seconds to months, weeks and days:-
     const convertSeconds = (seconds: number) => {
-        const SECONDS_IN_A_MINUTE = 60
-        const SECONDS_IN_AN_HOUR = 60 * SECONDS_IN_A_MINUTE
-        const SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
+        // Handle negative or zero seconds
+        if (seconds <= 0) {
+            return {
+                months: 0,
+                weeks: 0,
+                days: 0,
+            }
+        }
+
+        const SECONDS_IN_A_DAY = 24 * 60 * 60 // 86400
         const SECONDS_IN_A_WEEK = 7 * SECONDS_IN_A_DAY
         const SECONDS_IN_A_MONTH = 28 * SECONDS_IN_A_DAY
         const months = Math.floor(seconds / SECONDS_IN_A_MONTH)
-        seconds %= SECONDS_IN_A_MONTH
-        const weeks = Math.floor(seconds / SECONDS_IN_A_WEEK)
-        seconds %= SECONDS_IN_A_WEEK
-        const days = Math.floor(seconds / SECONDS_IN_A_DAY)
-        seconds %= SECONDS_IN_A_DAY
+        const remainingAfterMonths = seconds % SECONDS_IN_A_MONTH
+        const weeks = Math.floor(remainingAfterMonths / SECONDS_IN_A_WEEK)
+        const remainingAfterWeeks = remainingAfterMonths % SECONDS_IN_A_WEEK
+        const days = Math.floor(remainingAfterWeeks / SECONDS_IN_A_DAY)
+
         return {
             months: months,
             weeks: weeks,
@@ -148,9 +158,9 @@ function Page() {
                 description: '',
             })
             setTimeData({
-                months: -1,
-                weeks: -1,
-                days: -1,
+                months: 0,  // Changed from -1 to 0
+                weeks: 0,   // Changed from -1 to 0
+                days: 0,    // Changed from -1 to 0
             })
 
             setTypeId(1)
@@ -178,9 +188,9 @@ function Page() {
                 description: '',
             })
             setTimeData({
-                months: -1,
-                weeks: -1,
-                days: -1,
+                months: 0,  // Changed from -1 to 0
+                weeks: 0,   // Changed from -1 to 0
+                days: 0,    // Changed from -1 to 0
             })
         }
     }, [selectedModuleData])
@@ -226,7 +236,13 @@ function Page() {
         }
 
         const { days, weeks, months } = timeData
-        const totalDays = days + weeks * 7 + months * 28
+        
+        // Ensure no negative values
+        const safeDays = Math.max(0, days || 0)
+        const safeWeeks = Math.max(0, weeks || 0)
+        const safeMonths = Math.max(0, months || 0)
+        
+        const totalDays = safeDays + safeWeeks * 7 + safeMonths * 28
         const totalSeconds = totalDays * 86400
         const moduleDto = {
             ...moduleData,
@@ -305,7 +321,13 @@ function Page() {
         }
 
         const { days, weeks, months } = timeData
-        const totalDays = days + weeks * 7 + months * 28
+        
+        // Ensure no negative values
+        const safeDays = Math.max(0, days || 0)
+        const safeWeeks = Math.max(0, weeks || 0)
+        const safeMonths = Math.max(0, months || 0)
+        
+        const totalDays = safeDays + safeWeeks * 7 + safeMonths * 28
         const totalSeconds = totalDays * 86400
 
         if (totalSeconds === 0) {
@@ -365,7 +387,7 @@ function Page() {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/admin/courses`)
+                    router.push(`/${userRole}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:
@@ -408,8 +430,6 @@ function Page() {
     async function handleReorder(newOrderModules: CurriculumItem[]) {
         if (!courseData?.id || !draggedModuleId) return
 
-        // setIsReordering(true)
-
         const newPosition =
             newOrderModules.findIndex((item) => item.id === draggedModuleId) + 1
 
@@ -424,15 +444,11 @@ function Page() {
         // If position hasn't changed, don't make API call
         if (!hasActuallyChanged) {
             setIsReordering(false)
-            return // Early return - no API call, no toast
+            return
         }
 
         setIsReordering(true)
 
-        const updatedModules = newOrderModules.map((item, index) => ({
-            ...item,
-            order: index + 1,
-        }))
         try {
             const response = await api.put(
                 `/Content/editModuleOfBootcamp/${courseData.id}?moduleId=${draggedModuleId}`,
@@ -440,7 +456,7 @@ function Page() {
                     reOrderDto: { newOrder: newPosition },
                 }
             )
-            // setOriginalCurriculum([...updatedModules])
+            
             const warningMsg = response.data?.[0]?.message ?? ''
 
             if (warningMsg.includes('started by')) {
@@ -457,7 +473,9 @@ function Page() {
                 setOriginalCurriculum(updatedOriginal)
                 setCurriculum(updatedOriginal)
             } else {
-                setOriginalCurriculum([...updatedModules])
+                // Update both curriculum and original with the new order
+                setOriginalCurriculum([...newOrderModules])
+                setCurriculum([...newOrderModules])
                 toast.success({
                     title: 'Success',
                     description: 'Module order updated successfully',
@@ -479,15 +497,11 @@ function Page() {
     }
 
     const handleReorderModules = async (newOrderModules: CurriculumItem[]) => {
-        // Update curriculum immediately for smooth UI
-        const updatedModules = newOrderModules.map((item, index) => ({
-            ...item,
-            order: index + 1,
-        }))
-        setCurriculum(updatedModules)
+        // Only update the visual order during drag, don't update the actual order values
+        setCurriculum(newOrderModules)
 
         const oldOrder = originalCurriculum.map((item) => item.id)
-        const newOrder = updatedModules.map((item) => item.id)
+        const newOrder = newOrderModules.map((item) => item.id)
 
         const orderChanged =
             JSON.stringify(oldOrder) !== JSON.stringify(newOrder)
@@ -502,33 +516,36 @@ function Page() {
             setReorderTimeout(null)
         }
 
+        // Don't set timeout during dragging - only when drag ends
         if (!isDragging) {
-            // Only set timeout if drag is not active (this means it's the final drop)
             const timeout = setTimeout(() => {
                 if (hasOrderChanged) {
-                    handleReorder(updatedModules)
+                    // Update order values only when drag is complete
+                    const updatedModulesWithOrder = newOrderModules.map((item, index) => ({
+                        ...item,
+                        order: index + 1,
+                    }))
+                    handleReorder(updatedModulesWithOrder)
                     setHasOrderChanged(false)
                 }
-            }, 200) // Reduced timeout since it's only for final drop
+            }, 200)
 
             setReorderTimeout(timeout)
         }
     }
 
-    const handleDragStart = () => {
+    // Handle the start of a drag: mark dragging and remember which module is being dragged
+    const handleDragStart = (moduleId: number) => {
         setIsDragging(true)
-        setHasOrderChanged(false)
+        setDraggedModuleId(moduleId)
     }
 
     const handleDragEnd = () => {
         setIsDragging(false)
 
-        // After drag ends, check if we need to save
+        // After drag ends, update the order values
         setTimeout(() => {
             if (hasOrderChanged) {
-                // handleReorder(curriculum)
-                // setHasOrderChanged(false)
-
                 const currentOrder = curriculum.map((item) => item.id)
                 const originalOrder = originalCurriculum.map((item) => item.id)
 
@@ -536,7 +553,12 @@ function Page() {
                     JSON.stringify(currentOrder) !==
                     JSON.stringify(originalOrder)
                 ) {
-                    handleReorder(curriculum)
+                    // Update the order values when drag is complete
+                    const updatedModulesWithOrder = curriculum.map((item, index) => ({
+                        ...item,
+                        order: index + 1,
+                    }))
+                    handleReorder(updatedModulesWithOrder)
                 }
                 setHasOrderChanged(false)
             }
@@ -568,7 +590,7 @@ function Page() {
                     This course has been deleted.
                 </p>
                 <Button
-                    onClick={() => router.push('/admin/courses')}
+                    onClick={() => router.push(`/${userRole}/courses`)}
                     className="mt-6 bg-secondary"
                 >
                     Back to Courses
@@ -577,6 +599,7 @@ function Page() {
         )
     }
 
+    
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -681,7 +704,7 @@ function Page() {
                                     projectId={item.projectId}
                                     chapterId={item.ChapterId}
                                     setDraggedModuleId={setDraggedModuleId}
-                                    onDragStart={handleDragStart}
+                                    onDragStart={() => handleDragStart(item.id)}
                                     onDragEnd={handleDragEnd}
                                     showBorderFlash={
                                         flashingModuleId === item.id

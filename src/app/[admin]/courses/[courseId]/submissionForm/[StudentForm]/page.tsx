@@ -122,7 +122,7 @@ const Page = ({ params }: any) => {
                 response.data.combinedData?.map((student: any) => ({
                     id: student.id,
                     name: student.name,
-                    email: student.emailId,
+                    email: student.email,
                     ...student,
                 })) || []
             )
@@ -150,7 +150,7 @@ const Page = ({ params }: any) => {
                     moduleId: response.data.moduleId,
                     chapterId: response.data.chapterId,
                     userId: student.id,
-                    email: student.emailId,
+                    email: student.email,
                 })) || []
             // Only update table-related state, NOT overallStats
             setStudentStatus(data)
@@ -175,7 +175,7 @@ const Page = ({ params }: any) => {
                 moduleId: response.data.moduleId,
                 chapterId: response.data.chapterId,
                 userId: student.id,
-                email: student.emailId,
+                email: student.email,
             })) || []
 
         setStudentStatus(data)
@@ -269,7 +269,7 @@ const Page = ({ params }: any) => {
             </div>
 
             {overallStats.isInitialized ? (
-                <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+                <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                     <CardHeader>
                         <CardTitle className="text-2xl text-gray-800 text-left">
                             {chapterDetails?.title || 'Loading...'}
@@ -338,7 +338,7 @@ const Page = ({ params }: any) => {
                     <Skeleton className="h-[85px] w-[200px] rounded-lg" />
                 </div>
             )}
-            <Card className="bg-muted">
+            <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl text-gray-800">

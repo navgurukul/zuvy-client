@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { getUser } from '@/store/store'
 import * as z from 'zod'
 import { ChevronLeft, AlertCircle, Info } from 'lucide-react'
 import {
@@ -64,6 +65,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     setIsNewQuestionAdded,
     setChapterTitle,
 }) => {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseId, moduleId, chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
     const mcqMax = selectedQuizQuesIds.length
@@ -607,7 +610,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const backToAssessment = () => {
         setQuestionType('coding')
         router.push(
-            `/admin/courses/${courseId}/module/${moduleId}/chapters/${chapterID}`
+            `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${chapterID}`
         )
     }
 
@@ -619,8 +622,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     onClick={backToAssessment}
                     className="flex items-center mb-6 cursor-pointer box-border"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-2 box-border text-gray-600" />
-                    <span className="font-semibold text-gray-600">
+                    <ChevronLeft className="w-4 h-4 mr-2 box-border text-muted-dark" />
+                    <span className="font-semibold text-muted-dark">
                         Back to{' '}
                         {/* {content?.ModuleAssessment?.title || 'Assessment'} */}
                         {chapterTitle}
@@ -634,7 +637,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                     >
                         <div className="flex justify-between w-full items-center mb-6">
                             <div className="flex items-center">
-                                <h1 className="text-lg font-bold text-gray-600">
+                                <h1 className="text-lg font-bold text-muted-dark">
                                     Manage Settings
                                 </h1>
                                 {currentAssessmentStatus && (
@@ -696,7 +699,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                             </Dialog>
                         </div>
 
-                        <div className="flex items-center mb-6 text-gray-600">
+                        <div className="flex items-center mb-6 text-muted-dark">
                             <label
                                 className="font-semibold mr-2 mt-1"
                                 htmlFor="description"
@@ -715,17 +718,17 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                         {/* Section 1: Choose number of questions */}
                         <section>
-                            <h2 className="font-semibold mb-2 text-gray-600 text-[15px]">
+                            <h2 className="font-semibold mb-2 text-muted-dark text-[15px]">
                                 Choose number of questions shown to students
                             </h2>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-sm text-muted-dark mb-4">
                                 Students will receive at least 1 question from
                                 each difficulty level of each question type.
                                 Additionally, the questions will be randomized
                                 for each question type.
                             </p>
 
-                            <div className="flex justify-between items-start text-gray-600">
+                            <div className="flex justify-between items-start text-muted-dark">
                                 {[
                                     {
                                         title: 'Coding Problems',
@@ -778,7 +781,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                             field
                                                                                 .name
                                                                         ]
-                                                                            ? 'border-red-500 outline-red-500 text-red-500'
+                                                                            ? 'border-destructive outline-destructive text-destructive'
                                                                             : 'border-gray-300'
                                                                     }`}
                                                                     onChange={(
@@ -874,7 +877,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                     .errors[
                                                                     field.name
                                                                 ] && (
-                                                                    <div className="flex items-center gap-1 mt-1 text-red-500">
+                                                                    <div className="flex items-center gap-1 mt-1 text-destructive">
                                                                         <AlertCircle color="#db3939" />
                                                                         <FormMessage className="text-sm">
                                                                             {
@@ -939,10 +942,10 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         {/* Section 2: Individual Section Weightage */}
                         <div className="flex space-x-48 my-8 ">
                             <section>
-                                <h2 className="font-semibold mb-2 text-gray-600 text-[15px]">
+                                <h2 className="font-semibold mb-2 text-muted-dark text-[15px]">
                                     Individual Section Weightage
                                 </h2>
-                                <p className="text-sm text-gray-600 mb-4">
+                                <p className="text-sm text-muted-dark mb-4">
                                     Total from both categories should be 100%
                                 </p>
                                 {[
@@ -977,7 +980,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                             type="number"
                                                             className={`w-16 mr-2 no-spinners ${
                                                                 isError
-                                                                    ? 'border-red-500 outline-red-500 text-red-500'
+                                                                    ? 'border-destructive outline-destructive text-destructive'
                                                                     : 'border-gray-300'
                                                             }`}
                                                             disabled={
@@ -996,8 +999,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                     <FormLabel
                                                         className={`text-sm ${
                                                             isError
-                                                                ? 'text-red-500'
-                                                                : 'text-gray-700'
+                                                                ? 'text-destructive'
+                                                                : 'text-muted-dark'
                                                         }`}
                                                     >
                                                         {category.title}
@@ -1012,7 +1015,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                     .codingProblemsWeightage && (
                                     <div className="flex gap-2">
                                         <AlertCircle color="#db3939" />
-                                        <FormMessage className="text-red-500 text-sm mt-1">
+                                        <FormMessage className="text-destructive text-sm mt-1">
                                             {
                                                 form.formState.errors
                                                     .codingProblemsWeightage
@@ -1024,7 +1027,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                 {form.formState.errors.mcqsWeightage && (
                                     <div className="flex gap-2">
                                         <AlertCircle color="#db3939" />
-                                        <FormMessage className="text-red-500 text-sm mt-1">
+                                        <FormMessage className="text-destructive text-sm mt-1">
                                             {
                                                 form.formState.errors
                                                     .mcqsWeightage.message
@@ -1036,7 +1039,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                             {/* Section 3: Manage Proctoring Settings */}
                             <section className="w-1/3">
-                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
+                                <h2 className="font-semibold mb-4 text-muted-dark text-[15px]">
                                     Manage Proctoring Settings
                                 </h2>
                                 {proctoringOptions.map((option, index) => (
@@ -1056,7 +1059,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                 >
                                                     <div className="flex items-center justify-between space-x-2 w-1/3">
                                                         <div>
-                                                            <FormLabel className="text-sm text-center font-normal text-gray-600">
+                                                            <FormLabel className="text-sm text-center font-normal text-muted-dark">
                                                                 {option.label}
                                                             </FormLabel>
                                                         </div>
@@ -1070,7 +1073,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                             e.preventDefault()
                                                                         }
                                                                     >
-                                                                        <Info className="text-gray-500 w-4 h-4 cursor-default" />
+                                                                        <Info className="text-muted-dark w-4 h-4 cursor-default" />
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
                                                                         <p className="text-sm max-w-xs">
@@ -1094,8 +1097,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                                 }
                                                                 className={
                                                                     field.value
-                                                                        ? 'bg-[#274edd]'
-                                                                        : 'bg-gray-300'
+                                                                        ? 'bg-primary'
+                                                                        : 'bg-muted-light'
                                                                 }
                                                             />
                                                         </FormControl>
@@ -1112,7 +1115,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                         <div className="flex space-x-44">
                             {/* Section 1: Time Limit */}
                             <section className="w-1/4">
-                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
+                                <h2 className="font-semibold mb-4 text-muted-dark text-[15px]">
                                     Time limit
                                 </h2>
                                 <div className="flex flex-col space-y-4 ">
@@ -1211,7 +1214,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 
                             {/* Section 5: Set Pass Percentage */}
                             <section className="">
-                                <h2 className="font-semibold mb-4 text-gray-600 text-[15px]">
+                                <h2 className="font-semibold mb-4 text-muted-dark text-[15px]">
                                     Pass Percentage (Out Of 100)
                                 </h2>
                                 <FormField
@@ -1228,8 +1231,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                             form.formState
                                                                 .errors
                                                                 .passPercentage
-                                                                ? 'border-red-500 outline-red-500 text-red-500'
-                                                                : 'border-gray-300'
+                                                                ? 'border-destructive outline-destructive text-destructive'
+                                                                : 'border-muted-light'
                                                         }`}
                                                         onChange={(e) => {
                                                             const value =
@@ -1248,8 +1251,8 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                                     className={`text-md ${
                                                         form.formState.errors
                                                             .passPercentage
-                                                            ? 'border-red-500 outline-red-500 text-red-500'
-                                                            : 'border-gray-300'
+                                                            ? 'border-destructive outline-destructive text-destructive'
+                                                            : 'border-muted-light'
                                                     }`}
                                                 >
                                                     %
@@ -1257,7 +1260,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             </div>
                                             {form.formState.errors
                                                 .passPercentage && (
-                                                <div className="flex items-center gap-2 mt-1 text-red-500">
+                                                <div className="flex items-center gap-2 mt-1 text-destructive">
                                                     <AlertCircle color="#db3939" />
                                                     <FormMessage className="text-sm">
                                                         {

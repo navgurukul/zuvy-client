@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { GraduationCap, Shield, Cog } from 'lucide-react'
 import {
     DialogContent,
     DialogHeader,
@@ -15,6 +14,27 @@ import { Label } from '@/components/ui/label'
 import { useRoles } from '@/hooks/useRoles'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
+import {
+    GraduationCap,
+    Shield,
+    Cog,
+    User,
+    Briefcase,
+    Users,
+    Code,
+    Palette,
+    Headphones,
+    CheckCircle,
+    Edit,
+    Eye,
+    UserCircle,
+    BarChart,
+    Award,
+    CalendarCheck,
+    DollarSign,
+    TrendingUp,
+    Megaphone,
+} from 'lucide-react'
 
 type AddUserModalProps = {
   isEditMode: boolean;
@@ -48,7 +68,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
             onClick={() => onSelect && onSelect(id)}
             className={`w-full text-left border rounded-lg p-4 transition-colors ${
                 selected
-                    ? 'border-blue-600 bg-blue-50'
+                    ? 'border-primary bg-primary-light'
                     : 'border-gray-200 hover:border-gray-300'
             }`}
         >
@@ -56,15 +76,15 @@ const RoleCard: React.FC<RoleCardProps> = ({
                 <div
                     className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
                         selected
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'bg-gray-100 text-gray-700'
+                            ? 'bg-blue-100 text-primary'
+                            : 'bg-gray-100 text-foreground'
                     }`}
                 >
                     {icon}
                 </div>
                 <div>
-                    <div className="font-medium text-gray-900 capitalize">{title}</div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="font-medium text-foreground capitalize">{title}</div>
+                    <div className="text-sm text-muted-foreground mt-1">
                         {description}
                     </div>
                 </div>
@@ -96,7 +116,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             const fetchFreshUserData = async () => {
                 setIsFetchingFreshData(true)
                 try {
-                    const response = await api.get(`/users/${user.id}`)
+                    const response = await api.get(`/users/getUser/${user.id}`)
                     setFreshUserData(response.data)
                     setNewUser({
                         name: response.data.name || '',
@@ -138,8 +158,27 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         newUser.email.trim().length > 0 &&
         !!pendingUserRole
 
+     const iconList = [
+        User,
+        Briefcase,
+        Users,
+        Code,
+        Palette,
+        Headphones,
+        CheckCircle,
+        Edit,
+        Eye,
+        UserCircle,
+        BarChart,
+        Award,
+        CalendarCheck,
+        DollarSign,
+        TrendingUp,
+        Megaphone,
+    ]
+
     const getRoleIcon = useCallback((role: string) => {
-        switch (role) {
+        switch (role.toLowerCase()) {
             case 'admin':
                 return <Shield className="w-5 h-5" />
             case 'ops':
@@ -147,7 +186,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             case 'instructor':
                 return <GraduationCap className="w-5 h-5" />
             default:
-                return  <Cog className="w-5 h-5" />
+                 // Get icon sequentially from the list based on role name
+                const roleIndex = role
+                    .split('')
+                    .reduce((acc, char) => acc + char.charCodeAt(0), 0)
+                const IconComponent = iconList[roleIndex % iconList.length]
+                return <IconComponent className="w-5 h-5" />
         }
     }, [])
 
@@ -168,10 +212,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     description: 'The new user has been added.',
                 })
             }
-        } catch (error) {
+        } catch (error:any) {
             toast.error({
                 title: 'Error adding user',
-                description: 'There was an issue adding the new user.',
+                description: error?.response?.data?.message || 'There was an issue adding the new user.',
             })
             console.error('Error adding user:', error)
             return
@@ -210,10 +254,10 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     description: 'The user details have been updated.',
                 })
             }
-        } catch (error) {
+        } catch (error:any) {
             toast.error({
                 title: 'Error updating user',
-                description: 'There was an issue updating the user details.',
+                description: error?.response?.data?.message || 'There was an issue updating the user details.',
             })
             console.error('Error updating user:', error)
             return
@@ -245,7 +289,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
             {/* Form Body */}
             {!isFetchingFreshData && (
-                <div className="space-y-6">
+                <div className="space-y-6 h-[25rem] overflow-y-auto pr-2 pl-2">
                     {/* Name & Email */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="text-left">
@@ -289,13 +333,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                                     icon={getRoleIcon(role.name)}
                                     title={role.name}
                                     description={role.description}
-                                    selected={
-                                        pendingUserRole ===
-                                        role.id
-                                    }
-                                    onSelect={
-                                        setPendingUserRole
-                                    }
+                                    selected={pendingUserRole === role.id}
+                                    onSelect={setPendingUserRole}
                                 />
                             ))}
                         </div>
@@ -305,16 +344,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button
-                        variant="outline"
-                        className="bg-white"
-                    >
+                    <Button variant="outline" className="bg-white">
                         Cancel
                     </Button>
                 </DialogClose>
                 <DialogClose asChild>
                     <Button
-                        className="bg-primary hover:bg-blue-700"
                         disabled={!canSubmit || isFetchingFreshData}
                         onClick={handleSubmit}
                     >

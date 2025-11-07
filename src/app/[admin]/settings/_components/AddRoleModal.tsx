@@ -16,9 +16,14 @@ import { toast } from '@/components/ui/use-toast'
 
 type AddUserModalProps = {
     onClose: () => void
+    onRoleAdded: () => void;
+}
+type AddRoleModalProps = {
+    onClose: () => void;
+    onRoleAdded: () => void;
 }
 
-const AddRoleModal = () => {
+const AddRoleModal: React.FC<AddRoleModalProps> = ({ onClose, onRoleAdded })=> {
     const [newRole, setNewRole] = useState<{
         name: string
         description: string
@@ -45,6 +50,7 @@ const AddRoleModal = () => {
             }
 
             const response = await api.post('/users/create/user/role', payload)
+            onRoleAdded?.();
 
             // Reset form
             setNewRole({
@@ -110,7 +116,6 @@ const AddRoleModal = () => {
                 </DialogClose>
                 <DialogClose asChild>
                     <Button
-                        className="bg-primary hover:bg-blue-700"
                         disabled={!canSubmit}
                         onClick={handleAddRole}
                     >

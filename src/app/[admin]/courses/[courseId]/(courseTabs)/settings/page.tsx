@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Info } from 'lucide-react'
 import { AlertCircle, RefreshCw, AlertTriangle, Trash2 } from 'lucide-react'
-
+import { getUser } from '@/store/store'
 import { api } from '@/utils/axios.config'
 import CourseDeleteModal from '../../_components/CourseDeleteModal'
 import { getCourseData } from '@/store/store'
@@ -22,7 +22,8 @@ import { PageProps } from '@/app/[admin]/courses/[courseId]/(courseTabs)/setting
 const Page = ({ params }: { params: PageProps }) => {
     const router = useRouter()
     const { courseData } = getCourseData()
-
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     // Use the custom hooks
     const { bootcampSettings, loading, error, updateError, updateSettings } =
         useBootcampSettings(params.courseId)
@@ -129,7 +130,7 @@ const Page = ({ params }: { params: PageProps }) => {
             <div className="flex justify-center items-center h-screen">
                 <div className="text-center">
                     <p className="text-destructive mb-4">{error}</p>
-                    <Button onClick={() => router.push('/admin/courses')}>
+                    <Button onClick={() => router.push(`/${userRole}/courses`)}>
                         Back to Courses
                     </Button>
                 </div>
@@ -331,6 +332,7 @@ const Page = ({ params }: { params: PageProps }) => {
                 onClose={() => setDeleteModalOpen(false)}
                 onConfirm={handleDelete}
                 loading={isDeleting}
+                courseName={courseData?.name || ''}
             />
         </div>
     )

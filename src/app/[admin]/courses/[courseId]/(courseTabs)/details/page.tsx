@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { format } from 'date-fns'
 import { CalendarIcon, Upload, Trash2 } from 'lucide-react'
 import Cropper from 'react-cropper'
-// import 'cropperjs/dist/cropper.css'
+import 'cropperjs/dist/cropper.css'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -84,8 +84,6 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         validateImageFile,
     } = useCourseDetails()
 
-    console.log('Permissions in details', Permissions)
-
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -158,9 +156,6 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     // Populate form when courseData changes
     useEffect(() => {
         if (courseData) {
-            // Reset image states first to ensure clean slate
-            resetImageStates()
-
             form.reset({
                 name: courseData.name || '',
                 bootcampTopic: courseData.bootcampTopic || '',
@@ -215,14 +210,24 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
     }
 
     async function onSubmit(data: z.infer<typeof FormSchema>) {
-        const success = await updateCourseDetails(data, croppedImage)
+        // If collaborator type is image, set the collaborator field to the cropped image URL
+        const formDataToSubmit = {
+            ...data,
+            collaborator: collaboratorType === 'image' ? croppedCollaboratorImage || '' : data.collaborator || ''
+        }
+
+        const success = await updateCourseDetails(
+            formDataToSubmit, 
+            croppedImage,
+            collaboratorType === 'image' ? croppedCollaboratorImage : null
+        )
+        
         if (!success) {
             return
         }
 
-        // Handle collaborator image upload (only if type is image and there's a cropped image)
-        // Note: Ye logic aapko apne updateCourseDetails function mein add karna padega
-        // ya separately handle karna padega based on your API structure
+        // Don't reset image states after successful submission
+        // The useEffect will handle updating the form with new data from courseData
     }
 
     // Image upload handler - validation hook se kar rahe hain
@@ -231,9 +236,12 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         if (file && validateImageFile(file)) {
             const reader = new FileReader()
             reader.onloadend = () => {
-                setImage(reader.result as string)
-                setIsCropping(true)
-                setCroppedImage(null)
+                // Add a small delay to ensure proper rendering
+                setTimeout(() => {
+                    setImage(reader.result as string)
+                    setIsCropping(true)
+                    setCroppedImage(null)
+                }, 100)
             }
             reader.readAsDataURL(file)
         }
@@ -246,9 +254,12 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         if (file && validateImageFile(file)) {
             const reader = new FileReader()
             reader.onloadend = () => {
-                setCollaboratorImage(reader.result as string)
-                setIsCollaboratorCropping(true)
-                setCroppedCollaboratorImage(null)
+                // Add a small delay to ensure proper rendering
+                setTimeout(() => {
+                    setCollaboratorImage(reader.result as string)
+                    setIsCollaboratorCropping(true)
+                    setCroppedCollaboratorImage(null)
+                }, 100)
             }
             reader.readAsDataURL(file)
         }
@@ -338,17 +349,19 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                             <div>
                                 <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted relative group">
                                     {isCropping && image ? (
-                                        <Cropper
-                                            src={image}
-                                            style={{
-                                                height: '100%',
-                                                width: '100%',
-                                            }}
-                                            aspectRatio={16 / 9}
-                                            onInitialized={(instance) =>
-                                                setCropper(instance)
-                                            }
-                                        />
+                                        <div key={image} className="w-full h-full">
+                                            <Cropper
+                                                src={image}
+                                                style={{
+                                                    height: '100%',
+                                                    width: '100%',
+                                                }}
+                                                aspectRatio={16 / 9}
+                                                onInitialized={(instance) => {
+                                                    setCropper(instance)
+                                                }}
+                                            />
+                                        </div>
                                     ) : croppedImage ? (
                                         <img
                                             src={croppedImage}
@@ -491,23 +504,19 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                                                 <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted relative group">
                                                     {isCollaboratorCropping &&
                                                     collaboratorImage ? (
-                                                        <Cropper
-                                                            src={
-                                                                collaboratorImage
-                                                            }
-                                                            style={{
-                                                                height: '100%',
-                                                                width: '100%',
-                                                            }}
-                                                            aspectRatio={16 / 9}
-                                                            onInitialized={(
-                                                                instance
-                                                            ) =>
-                                                                setCollaboratorCropper(
-                                                                    instance
-                                                                )
-                                                            }
-                                                        />
+                                                        <div key={collaboratorImage} className="w-full h-full">
+                                                            <Cropper
+                                                                src={collaboratorImage}
+                                                                style={{
+                                                                    height: '100%',
+                                                                    width: '100%',
+                                                                }}
+                                                                aspectRatio={16 / 9}
+                                                                onInitialized={(instance) => {
+                                                                    setCollaboratorCropper(instance)
+                                                                }}
+                                                            />
+                                                        </div>
                                                     ) : croppedCollaboratorImage ? (
                                                         <img
                                                             src={

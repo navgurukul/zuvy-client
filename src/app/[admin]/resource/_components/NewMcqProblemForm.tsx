@@ -135,25 +135,63 @@ const NewMcqProblemForm = ({
         new Promise((resolve) => setTimeout(resolve, ms))
 
     const handleCreateQuizQuestion = async (
-        requestBody: NewMcqRequestBodyType
-    ) => {
-        try {
-            const res = await api.post(`/Content/quiz`, requestBody)
-            setIsMcqModalOpen(false)
-            setMcqType('')
-            handleClear()
-            toast.success({
-                title: res.data.status || 'Success',
-                description: res.data.message || 'Quiz Question Created',
-            })
-        } catch (error) {
-            toast.error({
-                title: 'Error',
-                description:
-                    'There was an error creating the quiz question. Please try again.',
-            })
-        }
+    requestBody: NewMcqRequestBodyType
+) => {
+    if (!requestBody.quizzes || requestBody.quizzes.length === 0) {
+        toast.error({
+            title: 'No questions to save',
+            description: 'Please generate or add questions before saving.',
+        })
+        return
     }
+    
+    setSaving(true)
+    
+    try {
+        const res = await api.post(`/Content/quiz`, requestBody)
+
+        toast.success({
+            title: res.data.status || 'Success',
+            description: res.data.message || 'Quiz Questions Created Successfully',
+        })
+
+        // Clear form and close modal first
+        handleClear()
+        setMcqType('')
+        closeModal()
+
+        // Then refresh data after a small delay to prevent table errors
+        setTimeout(async () => {
+            try {
+                if (typeof getAllQuizQuesiton === 'function') {
+                    await getAllQuizQuesiton(
+                        setStoreQuizData,
+                        0, // Reset offset
+                        10, // Limit
+                        [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
+                        [{ value: '-1', label: 'All Topics' }], // Reset topic filter
+                        () => {}, // setTotalMCQQuestion placeholder
+                        () => {}, // setLastPage placeholder
+                        () => {}, // setTotalPages placeholder
+                        '' // No search term
+                    )
+                }
+            } catch (err) {
+                console.error('Error refreshing data:', err)
+            }
+        }, 100) // Small delay to let UI settle
+
+    } catch (error) {
+        console.error('Error creating quiz questions:', error)
+        toast.error({
+            title: 'Error',
+            description:
+                'There was an error creating the quiz questions. Please try again.',
+        })
+    } finally {
+        setSaving(false)
+    }
+}
 
     const { control, handleSubmit, setValue } = form
 
@@ -254,7 +292,7 @@ const NewMcqProblemForm = ({
             }
 
             const response = await axios.post(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
                 requestBodyAI,
                 {
                     headers: {
@@ -393,11 +431,13 @@ const NewMcqProblemForm = ({
                     setGeneratedQuestions(generatedQuestions)
 
                     setRequestBody(requestBody)
+
+                    // remove this lines - don't close modal automatically
                     // await handleCreateQuizQuestion(requestBody)
-                    const quizData = await getAllQuizQuesiton() // ✅ No arguments here
-                    setStoreQuizData(quizData)
+                    // const quizData = await getAllQuizQuesiton() 
+                    // setStoreQuizData(quizData)
                     // await getAllQuizQuesiton(setStoreQuizData)
-                    closeModal()
+                    // closeModal()
                 }
 
                 toast.success({
@@ -543,7 +583,7 @@ const NewMcqProblemForm = ({
 
                     try {
                         const response = await axios.post(
-                            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+                            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
                             requestBodyAI,
                             {
                                 headers: {
@@ -709,9 +749,9 @@ const NewMcqProblemForm = ({
                     description: `Only ${generatedQuestions.length} unique MCQs were generated.`,
                 })
             } else {
-                toast.error({
+                toast.success({
                     title: 'Success',
-                    description: `${generatedQuestions.length} MCQs generated and saved successfully.`,
+                    description: `${generatedQuestions.length} MCQs generated successfully.`,
                 })
             }
 
@@ -736,10 +776,12 @@ const NewMcqProblemForm = ({
 
                 setGeneratedQuestions(generatedQuestions)
                 setRequestBody(requestBody)
-                const quizData = await getAllQuizQuesiton()
-                setStoreQuizData(quizData)
+
+                // remove this lines - don't close modal automatically
+                // const quizData = await getAllQuizQuesiton()
+                // setStoreQuizData(quizData)
                 // await getAllQuizQuesiton(setStoreQuizData)
-                closeModal()
+                // closeModal()
             }
         } catch (error: any) {
             console.error('Error generating bulk MCQs:', error)
@@ -796,16 +838,39 @@ const NewMcqProblemForm = ({
     }
 
     const handleQuestionConfirm = (
-        questionId: any,
-        setDeleteModalOpen: any
-    ) => {
-        const updateQuestions = generatedQuestions.filter(
-            (item: any) => item.questionId !== questionId
-        )
-        setGeneratedQuestions(updateQuestions)
-        setDeleteModalOpen(false)
+    questionId: any,
+    setDeleteModalOpen: any
+) => {
+    const updateQuestions = generatedQuestions.filter(
+        (item: any) => item.questionId !== questionId
+    )
+    setGeneratedQuestions(updateQuestions)
+    
+    // 🔥 Update requestBody
+    if (updateQuestions.length > 0) {
+        const bulkQuestions = updateQuestions.map((question) => {
+            return {
+                tagId: question.tagId,
+                difficulty: question.difficulty,
+                variantMCQs: [
+                    {
+                        question: question.question,
+                        options: question.options,
+                        correctOption: question.correctOption,
+                    },
+                ],
+            }
+        })
+        const updatedRequestBody = {
+            quizzes: bulkQuestions,
+        }
+        setRequestBody(updatedRequestBody)
+    } else {
+        setRequestBody({ quizzes: [] })
     }
-
+    
+    setDeleteModalOpen(false)
+}
     useEffect(() => {
         if (loadingAI) {
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -1091,37 +1156,28 @@ const NewMcqProblemForm = ({
                     {generatedQuestions.length > 0 && (
                         <div className="flex justify-end items-center gap-4">
                             <Button
+                                variant={'outline'}
                                 type="button"
                                 onClick={handleClear}
-                                className="flex items-center bg-gray-300 text-black"
+                                className="flex items-center"
+                                disabled={saving}
                             >
                                 Clear Questions
                             </Button>
-                            {/* <Button
-                                type="submit"
-                                disabled={saving}
+                            <Button
+                                type="button"
+                                onClick={() => handleCreateQuizQuestion(requestBody)}
                                 className="w-1/3 flex items-center justify-center"
+                                disabled={saving}
                             >
                                 {saving ? (
                                     <>
-                                        <Spinner
-                                            size="small"
-                                            className="mr-2"
-                                        />
+                                        <Spinner size="small" className="mr-2" />
                                         Saving...
                                     </>
                                 ) : (
-                                    'Add Questions'
+                                    'Save Questions'
                                 )}
-                            </Button> */}
-                            <Button
-                                type="button"
-                                onClick={() =>
-                                    handleCreateQuizQuestion(requestBody)
-                                }
-                                className="w-1/3 flex items-center justify-center"
-                            >
-                                Save Questions
                             </Button>
                         </div>
                     )}

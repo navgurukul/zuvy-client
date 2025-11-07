@@ -15,7 +15,7 @@ export default function PracticeProblems({
     return (
         <div className="w-full mb-10">
             <h1 className=" text-start text-lg font-semibold">{name}</h1>
-            <section className=" bg-white dark:bg-gray-900">
+            <section className="dark:bg-gray-900">
                 <div className="mx-auto">
                     <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-4">
                         {submission.map(
