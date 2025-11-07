@@ -540,7 +540,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                 value="editor"
                                                 disabled={!!pdfLink}
                                                 id="r1"
-                                                className="mt-1 text-black border-black"
+                                                className="mt-1 text-foreground border-foreground"
                                             />
                                         </TooltipTrigger>
                                         {pdfLink && (
@@ -552,7 +552,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                     </Tooltip>
                                     <Label
                                         htmlFor="r1"
-                                        className="font-light text-md text-black"
+                                        className="font-light text-md text-foreground"
                                     >
                                         Editor
                                     </Label>
@@ -564,7 +564,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                             <RadioGroupItem
                                                 value="pdf"
                                                 id="r2"
-                                                className="mt-1 text-black border-black"
+                                                className="mt-1 text-foreground border-foreground"
                                                 disabled={isEditorSaved}
                                             />
                                         </TooltipTrigger>
@@ -578,7 +578,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                     </Tooltip>
                                     <Label
                                         htmlFor="r2"
-                                        className="font-light text-md text-black"
+                                        className="font-light text-md text-foreground"
                                     >
                                         Upload PDF
                                     </Label>
@@ -588,7 +588,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
                         <div className="bg-card rounded-lg shadow-sm border">
                             <div className="p-6">
-                                <p className="text-xl text-start font-semibold">
+                                <p className="text-xl text-start text-foreground font-semibold">
                                     Article Details
                                 </p>
                                 {/* <Form {...form}>

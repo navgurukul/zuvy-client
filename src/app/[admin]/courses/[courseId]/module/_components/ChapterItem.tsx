@@ -208,7 +208,7 @@ function ChapterItem({
                                         : 'grab',
                                     pointerEvents: 'auto',
                                 }}
-                                className="text-gray-600 hover:text-gray-600 transition-colors"
+                                className="text-muted-dark hover:text-muted-dark transition-colors"
                                 onPointerDown={(e) => {
                                     e.preventDefault()
                                     e.stopPropagation()

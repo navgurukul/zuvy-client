@@ -444,7 +444,7 @@ function Quiz(props: QuizProps) {
                                         />
                                     )}
                                     {form.formState.errors.title && (
-                                        <p className="text-red-500 text-sm mt-1">
+                                        <p className="text-destructive text-sm mt-1">
                                             {
                                                 form.formState.errors.title
                                                     .message
@@ -522,7 +522,7 @@ function Quiz(props: QuizProps) {
                         chapterTitle={''}
                     />
                     <div className="w-full h-max-content ">
-                        <h2 className="text-left mt-4 ml-1 text-gray-600 text-[15px] font-semibold">
+                        <h2 className="text-left mt-4 ml-1 text-muted-dark text-[15px] font-semibold">
                             MCQ Library
                         </h2>
                         <div className="flex">
@@ -533,17 +533,17 @@ function Quiz(props: QuizProps) {
                                 quizData={quizData}
                             />
 
-                            <div className="w-full border-l border-gray-200 ml-4 pl-4">
+                            <div className="w-full border-l border-muted-light ml-4 pl-4">
                                 <div>
                                     <div className="flex flex-col items-center justify-between">
                                         <div className="flex justify-between w-full">
-                                            <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
+                                            <h2 className="text-left text-muted-dark text-[15px] w-full font-semibold">
                                                 Selected Question
                                             </h2>
                                         </div>
                                         <div className="text-left w-full">
                                             {addQuestion?.length === 0 && (
-                                                <h1 className="text-left text-gray-600 text-[15px] italic">
+                                                <h1 className="text-left text-muted-dark text-[15px] italic">
                                                     No Selected Questions
                                                 </h1>
                                             )}
