@@ -1,6 +1,6 @@
 'use client'
 // External imports
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { ChevronLeft } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -21,7 +21,6 @@ import {
     getMcqSearch,
     getSelectedMCQOptions,
 } from '@/store/store'
-import ManageTopics from '../_components/ManageTopics'
 import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
@@ -30,6 +29,7 @@ import { POSITION, OFFSET } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {McqSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 import { 
     Dialog, 
@@ -79,6 +79,7 @@ interface Option {
 }
 
 const Mcqs = (props: Props) => {
+    const hasLoaded = useRef(false);
     const router = useRouter()
     const searchParams = useSearchParams()
 
@@ -110,8 +111,6 @@ const Mcqs = (props: Props) => {
     const { mcqSearch, setmcqSearch } = getMcqSearch()
     const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
 
     // Updated URL function to create clean URLs without encoding issues
     const updateURL = useCallback((searchTerm: string, topics: PageOption[], difficulties: PageOption[]) => {
@@ -414,6 +413,12 @@ const Mcqs = (props: Props) => {
         if (options.length > 0) {
             const searchFilter = searchParams.get('search') || ''
             fetchCodingQuestions(offset, searchFilter)
+             .then(() => {
+                setTimeout(() => setLoading(false), 400);
+            })
+            .catch(() => {
+                setLoading(false);
+            });
         }
     }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions])
 
@@ -500,10 +505,15 @@ const Mcqs = (props: Props) => {
                 )
         }
     }
-
+   
     return (
         <>
+         {loading ? (
+                    <McqSkeleton/>
+                    ) : (
+                <>
             {/* Edit Modal */}
+
             <Dialog open={isEditQuizModalOpen} onOpenChange={setIsEditModalOpen}>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
@@ -576,14 +586,23 @@ const Mcqs = (props: Props) => {
                             </h1>
                         </div>
                         <div className="flex flex-row items-center gap-2">
-                                <Button
-                                 variant="outline"
-                                 className="lg:max-w-[150px] w-full shadow-4dp mt-5"
-                                 onClick={() => setIsManageTopicsOpen(true)}
-                                >
-                                    <p>Manage Topics</p>
-                                </Button>
-                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        variant={'outline'}
+                                        className="lg:max-w-[150px] w-full mt-5"
+                                    >
+                                        <p>Create Topic</p>
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogOverlay />
+                                <CreatTag
+                                    newTopic={newTopic}
+                                    handleNewTopicChange={handleNewTopicChange}
+                                    handleCreateTopic={handleCreateTopic}
+                                />
+                            </Dialog>
+                            <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button className="mt-5 bg-primary hover:bg-primary-dark shadow-4dp">
                                         + Create MCQ
@@ -637,6 +656,8 @@ const Mcqs = (props: Props) => {
                         columns={columns}
                         mcqSide={true}
                     />
+
+
                     {totalMCQQuestion > 0 && (
                         <div className='py-4 flex justify-end'>
                             <DataTablePagination
@@ -649,17 +670,9 @@ const Mcqs = (props: Props) => {
                     )}
                 </MaxWidthWrapper>
             )}
-             {/* Manage Topics Dialog */}
-                <ManageTopics
-                 isOpen={isManageTopicsOpen}
-                 onClose={() => setIsManageTopicsOpen(false)}
-                 onTopicCreated={() => {
-                 getAllTags() // Refresh the topics list
-                 setIsManageTopicsOpen(false)
-                }}
-            />
-        </>
+      </>
+    )}
+    </>
     )
 }
-
 export default Mcqs
