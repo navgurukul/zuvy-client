@@ -23,18 +23,26 @@ const FormSchema = z.object({
     sheeturl: z.string().url(),
 })
 
-const BulkUploadMcq = ({ setIsMcqModalOpen }: BulkMcqProps) => {
+const BulkUploadMcq = ({ closeModal, getAllQuizQuesiton }: BulkMcqProps) => {
     const [mcqData, setMcqData] = useState(null)
 
     async function handleSubmit(e: any) {
         e.preventDefault()
+        if (!mcqData) {
+            toast.error({
+                title: 'Error',
+                description: 'Please upload a file first.',
+            })
+            return
+        }
         try {
             await api.post(`/Content/quiz`, mcqData)
             toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
             })
-            setIsMcqModalOpen(false)
+            await getAllQuizQuesiton()
+            closeModal()
         } catch (error: any) {
             toast.error({
                 title: 'Error',

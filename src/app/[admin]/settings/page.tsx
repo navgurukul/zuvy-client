@@ -28,6 +28,7 @@ const SettingsPage: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
+    const [isSearching, setIsSearching] = useState(false) 
     
     // Set the first role as selected once roles are loaded
     useEffect(() => {
@@ -92,10 +93,17 @@ const SettingsPage: React.FC = () => {
     }
 
     const handleDelete = async (userId: number) => {
-
-        // Call your API to delete the user
-        // await deleteUser(userId)
-        // refetchUsers()
+        // After DeleteUser component successfully deletes the user on the server
+        // refresh the users list so the table reflects the change immediately
+        try {
+            // refetchUsers is provided by the useAllUsers hook and accepts an offset
+            await refetchUsers(offset)
+        } catch (err) {
+            // If refetch fails, swallow the error silently — the DeleteUser
+            // component already shows success/error toasts for the delete call.
+            // We could show an additional toast here if desired.
+            console.error('Failed to refresh users after delete', err)
+        }
     }
 
     // Create columns with the fetched roles and callbacks
@@ -114,15 +122,15 @@ const SettingsPage: React.FC = () => {
     }
 
     return (
-        <div className="py-2 bg-white min-h-screen">
+        <div className="p-6 bg-background min-h-screen">
             {/* Tab Navigation */}
             <div className="flex gap-1 mb-2">
                 <Button
                     onClick={() => handleTabChange('users')}
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors ${
                         activeTab === 'users'
-                            ? 'bg-primary text-white'
-                            : 'bg-transparent text-muted-foreground hover:text-gray-900 hover:bg-gray-100'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
                     }`}
                 >
                     <Users className="w-4 h-4" />
@@ -133,12 +141,12 @@ const SettingsPage: React.FC = () => {
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors
                         ${
                             activeTab === 'roles'
-                                ? 'bg-primary text-white'
-                                : 'bg-transparent text-muted-foreground hover:text-gray-900 hover:bg-gray-100'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
                         }
                     `}
                 >
-                    <Settings className="w-4 h-4" />
+                    <Shield className="w-4 h-4" />
                     Manage Role Functions
                 </Button>
             </div>
@@ -151,10 +159,10 @@ const SettingsPage: React.FC = () => {
                     /> */}
 
                     {/* Users Management Section */}
-                    <div className="py-8">
+                    <div className="py-4">
                         <div className="flex justify-between items-center mb-4">
                             <div>
-                                <h2 className="text-lg font-semibold text-gray-900 text-start">
+                                <h2 className="text-lg font-semibold text-foreground text-start">
                                     Users ({users.length})
                                 </h2>
                                 <p className="text-muted-foreground text-[1.1rem] text-start">
@@ -164,7 +172,7 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                                 <DialogTrigger asChild>
-                                    <Button onClick={() => { setIsEditMode(false)}} className="bg-primary hover:bg-blue-700 text-white">
+                                    <Button onClick={() => { setIsEditMode(false)}} >
                                         <Plus className="w-4 h-4 mr-2" />
                                         Add User
                                     </Button>
@@ -192,7 +200,7 @@ const SettingsPage: React.FC = () => {
                                 </div>
                             </div>
                         ) : usersError ? (
-                            <div className="flex flex-col items-center py-8 text-red-600">
+                            <div className="flex flex-col items-center py-8 text-destructive">
                                 <div>Error loading users</div>
                                 <Button
                                     onClick={() => refetchUsers(offset)}
@@ -207,21 +215,20 @@ const SettingsPage: React.FC = () => {
                                 <UserManagementTable
                                     columns={columns}
                                     data={users}
+                                    onSearchChange={setIsSearching}
                                 />
-
-                                {/* Pagination */}
-                                <DataTablePagination
-                                    totalStudents={totalRows}
-                                    lastPage={totalPages}
-                                    pages={totalPages}
-                                    // fetchStudentData={handlePaginationChange}
-                                    fetchStudentData={(
-                                            newOffset: number
-                                        ) => {
+                                {!isSearching && (
+                                    <DataTablePagination
+                                        totalStudents={totalRows}
+                                        lastPage={totalPages}
+                                        pages={totalPages}
+                                        // fetchStudentData={handlePaginationChange}
+                                        fetchStudentData={(newOffset: number) => {
                                             setOffset(newOffset)
-                                            refetchUsers(newOffset) // instead of getBootcamp(newOffset)
+                                            refetchUsers(newOffset)
                                         }}
-                                />
+                                    />
+                                )}
                             </>
                         )}
                     </div>

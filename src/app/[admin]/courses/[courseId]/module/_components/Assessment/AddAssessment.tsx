@@ -1,5 +1,4 @@
 'use client'
-
 import { EditIcon, Eye, Pencil, Settings, ArrowRight } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import { Input } from '@/components/ui/input'
@@ -17,7 +16,7 @@ import SettingsAssessment from '@/app/[admin]/courses/[courseId]/module/_compone
 import SelectedQuestions from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/SelectedQuestions'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
-import { getAssessmentPreviewStore } from '@/store/store'
+import { getAssessmentPreviewStore, getUser } from '@/store/store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
@@ -27,6 +26,16 @@ import {
     CodingQuestiones,
 } from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType'
 
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const chapterSchema = z.object({
+    title: z
+        .string()
+        .min(1, 'Assessment title is required')
+        .max(50, 'You can enter up to 50 characters only.'),
+})
 const AddAssessment: React.FC<AddAssessmentProps> = ({
     chapterData,
     content,
@@ -35,7 +44,15 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     topicId,
     activeChapterTitle,
 }) => {
+    const form = useForm<z.infer<typeof chapterSchema>>({
+        resolver: zodResolver(chapterSchema),
+        defaultValues: { title: activeChapterTitle || '' },
+        mode: 'onChange',
+    })
+
     const searchParams = useSearchParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const initialTab = searchParams.get('tab') || ''
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
@@ -155,7 +172,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
         router.push(
-            `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
+            `/${userRole}/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
         )
     }
 
@@ -167,7 +184,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         ) {
             setAssessmentPreviewContent(content)
             router.push(
-                `/admin/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
+                `/${userRole}/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
         } else {
             toast.error({
@@ -366,71 +383,112 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         <div className="w-full pb-2">
             <div className="px-5 border-b border-gray-200">
                 {questionType !== 'settings' && (
+                    // <div className="flex items-center mb-5 w-full justify-between">
+                    //     <div className="w-2/6 flex justify-center align-middle items-center relative">
+                    //         <Input
+                    //             required
+                    //             onChange={(e) => {
+                    //                 const newValue = e.target.value
+                    //                  if (newValue.length>50) {
+                    //                       toast.error({
+                    //                         title: "Character Limit Reached",
+                    //                         description: "You can enter up to 50 characters only",
+                    //                     })
+
+                    //                  } else {
+                    //                     setChapterTitle(newValue)
+                    //              }
+
+                    //             }}
+                    //             value={chapterTitle}
+                    //             // placeholder={content?.ModuleAssessment?.title}
+                    //             placeholder="Untitled Assessment"
+                    //             className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
+                    //         />
+                    //         {/* {chapterTitle.length == 0 && (
+                    //             <Pencil
+                    //                 fill="true"
+                    //                 fillOpacity={0.4}
+                    //                 size={20}
+                    //                 className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                    //             />
+                    //         )} */}
+
+                    //     </div>
+
+                    //     {/* preview & settings buttons */}
+                    //     <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
+                    //         {/* <div
+                    //             id="previewAssessment"
+                    //             onClick={previewAssessment}
+                    //             className="flex hover:bg-gray-300 rounded-md p-1"
+                    //         >
+                    //             <Eye size={18} />
+                    //             <h6 className="ml-1 text-sm">Preview</h6>
+                    //         </div> */}
+
+                    //         <div
+                    //             onClick={handleSettingsButtonClick}
+                    //             id="settingsAssessment"
+                    //             className="flex hover:bg-gray-300 rounded-md p-1"
+                    //         >
+                    //             {/* <Settings size={18} />
+                    //             <h6 className="mx-1 text-sm">Settings</h6> */}
+                    //             <h6 className="mx-1 text-sm">Next</h6>
+                    //             <ArrowRight size={20} />
+                    //         </div>
+                    //     </div>
+                    // </div>
+
                     <div className="flex items-center mb-5 w-full justify-between">
-                        <div className="w-2/6 flex justify-center align-middle items-center relative">
+                        <div className="w-2/6 relative">
                             <Input
-                                required
-                                onChange={(e) => {
-                                    const newValue = e.target.value
-                                     if (newValue.length>50) {
-                                          toast.error({
-                                            title: "Character Limit Reached",
-                                            description: "You can enter up to 50 characters only",
-                                        })
-                                        
-                                     } else {
-                                        setChapterTitle(newValue)
-                                 }
-                                    
-                                }}
-                                value={chapterTitle}
-                                // placeholder={content?.ModuleAssessment?.title}
+                                {...form.register('title')}
                                 placeholder="Untitled Assessment"
-                                className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
+                                className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
                             />
-                            {/* {chapterTitle.length == 0 && (
-                                <Pencil
-                                    fill="true"
-                                    fillOpacity={0.4}
-                                    size={20}
-                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                                />
-                            )} */}
-                            
+                            {form.formState.errors.title && (
+                                <p className="text-destructive text-sm mt-1">
+                                    {form.formState.errors.title.message}
+                                </p>
+                            )}
                         </div>
 
-                        {/* preview & settings buttons */}
-                        <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
-                            {/* <div
-                                id="previewAssessment"
-                                onClick={previewAssessment}
-                                className="flex hover:bg-gray-300 rounded-md p-1"
+                        <form
+                            onSubmit={form.handleSubmit((data) => {
+                                // Save the validated title
+                                setChapterTitle(data.title)
+                                handleSettingsButtonClick()
+                            })}
+                            className="flex items-center gap-2"
+                        >
+                            <Button
+                                type="submit"
+                                disabled={
+                                    !form.formState.isValid ||
+                                    form.formState.isSubmitting
+                                }
+                                className={`flex items-center gap-1 ${
+                                    !form.formState.isValid ||
+                                    form.formState.isSubmitting
+                                        ? 'opacity-50 cursor-not-allowed'
+                                        : ''
+                                }`}
                             >
-                                <Eye size={18} />
-                                <h6 className="ml-1 text-sm">Preview</h6>
-                            </div> */}
-
-                            <div
-                                onClick={handleSettingsButtonClick}
-                                id="settingsAssessment"
-                                className="flex hover:bg-gray-300 rounded-md p-1"
-                            >
-                                {/* <Settings size={18} />
-                                <h6 className="mx-1 text-sm">Settings</h6> */}
                                 <h6 className="mx-1 text-sm">Next</h6>
                                 <ArrowRight size={20} />
-                            </div>
-                        </div>
+                            </Button>
+                        </form>
                     </div>
                 )}
                 {/* select type of questions */}
                 {questionType !== 'settings' && (
-                    <div className="flex gap-2 mb-5 border-b border-gray-200 w-1/2">
+                    <div className="flex gap-2 mb-5 border-b border-muted-light w-1/2">
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'coding'
-                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleCodingButtonClick}
                         >
@@ -439,8 +497,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'mcq'
-                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleMCQButtonClick}
                         >
@@ -449,8 +507,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'open-ended'
-                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleOpenEndedButtonClick}
                         >
@@ -483,7 +541,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             />
                         </div>
                         <div className="flex justify-between w-2/3">
-                            <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
+                            <h3 className="text-left text-[15px] text-muted-dark font-bold mb-5 ml-2">
                                 {questionType === 'coding'
                                     ? 'Coding Problem Library'
                                     : questionType === 'mcq'
@@ -492,7 +550,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     ? 'Open-Ended Question Library'
                                     : ''}
                             </h3>
-                            <h1 className="text-left text-[15px] text-gray-600 font-bold mb-5 mr-3">
+                            <h1 className="text-left text-[15px] text-muted-dark font-bold mb-5 mr-3">
                                 Selected Questions
                             </h1>
                         </div>
@@ -597,7 +655,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         />
 
                         {questionType !== 'settings' && (
-                            <div className="h-screen border-l border-gray-200 pl-4">
+                            <div className="h-screen border-l border-muted-light pl-4">
                                 <ScrollArea className="h-96 px-2 pb-4">
                                     <ScrollBar
                                         orientation="vertical"
@@ -633,7 +691,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                             }
                                         />
                                     ) : (
-                                        <h1 className="text-left text-gray-600 text-[18px] italic pl-5">
+                                        <h1 className="text-left text-muted-dark text-[18px] italic pl-5">
                                             No Selected questions
                                         </h1>
                                     )}

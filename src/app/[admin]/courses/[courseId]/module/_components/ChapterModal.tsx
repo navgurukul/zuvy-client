@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { getUser } from '@/store/store'
 import {
     Dialog,
     DialogClose,
@@ -38,6 +39,8 @@ function ChapterModal({
 }: ChapterModalProps) {
     const { setTopicId } = getTopicId()
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [classType, setClassType] = useState('createLiveClass')
     const [liveDialogOpen, setLiveDialogOpen] = useState(false)
     const [currentUserId, setCurrentUserId] = useState<number | null>(null)
@@ -53,7 +56,7 @@ function ChapterModal({
             .then((res) => {
                 const data = res?.data?.module[0]
                 router.push(
-                    `/admin/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
+                    `/${userRole}/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
                 )
                 toast.success({
                     title: res?.data?.module[0]?.title,

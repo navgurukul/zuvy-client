@@ -159,8 +159,8 @@ export const columns: ColumnDef<any>[] = [
                     <Badge 
                         className={
                             isPresent 
-                                ? "text-green-600 bg-green-100 hover:bg-muted" 
-                                : "text-red-600 bg-red-100 hover:bg-muted"
+                                ? "text-success bg-green-100" 
+                                : "text-destructive bg-red-100"
                         }
                     >
                         {status}

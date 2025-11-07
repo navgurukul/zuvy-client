@@ -146,12 +146,34 @@ export default function NewMcqForm({
         }
 
         try {
-            await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
+            const res = await api.post(`/Content/quiz`, { quizzes: [transformedObj] })
+
             toast.success({
                 title: 'Success',
                 description: 'Question Created Successfully',
             })
-            setIsMcqModalOpen(false)
+
+            try {
+                // Use the proper function signature for getAllQuizQuesiton
+                await getAllQuizQuesiton(
+                    setStoreQuizData,
+                    0, // Reset offset
+                    10, // Limit
+                    [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
+                    [{ value: '-1', label: 'All Topics' }], // Reset topic filter
+                    () => {}, // setTotalMCQQuestion placeholder
+                    () => {}, // setLastPage placeholder
+                    () => {}, // setTotalPages placeholder
+                    '' // No search term
+                )
+            } catch (fetchError) {
+                console.error('Error refreshing data after question creation:', fetchError)
+            }
+
+            // Reset form and close modal after successful save and refresh
+            form.reset()
+            closeModal()
+
         } catch (error: any) {
             toast.error({
                 title: 'Error',
@@ -165,13 +187,13 @@ export default function NewMcqForm({
             {/* <div dangerouslySetInnerHTML={{ __html: codeSnippet }} /> */}
             <form
                 onSubmit={form.handleSubmit(onSubmitHandler)}
-                className="space-y-8 mr-12 w-[700px] flex flex-col justify-center items-center "
+                className="space-y-8 w-[700px] flex flex-col justify-center items-center "
             >
                 <FormField
                     control={form.control}
                     name="difficulty"
                     render={({ field }) => (
-                        <div className="w-full ml-[140px] text-foreground">
+                        <div className="w-full text-foreground">
                             <FormItem className="space-y-3 text-start ">
                                 <FormControl>
                                     <RadioGroup
@@ -211,7 +233,7 @@ export default function NewMcqForm({
                     control={form.control}
                     name="topics"
                     render={({ field }) => (
-                        <div className="w-full ml-[140px]">
+                        <div className="w-full">
                             <FormItem className="text-start flex flex-col flex-start">
                                 <FormLabel className="font-semibold text-sm text-foreground">
                                     Topics
@@ -268,7 +290,7 @@ export default function NewMcqForm({
                     )}
                 />
 
-                <div className="space-y-4 ml-[145px]">
+                <div className="space-y-4">
                     <FormLabel className="mt-5 font-semibold text-md flex ">
                         Variants
                     </FormLabel>

@@ -1,6 +1,6 @@
 'use client'
 
-import { PlusCircle, Pencil } from 'lucide-react'
+import { PlusCircle, Pencil, SquareCode, Eye } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -13,12 +13,12 @@ import {
     getChapterUpdateStatus,
     getCodingQuestionTags,
     getCodingPreviewStore,
+    getUser,
 } from '@/store/store'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import QuestionDescriptionModal from '../Assessment/QuestionDescriptionModal'
 import { Button } from '@/components/ui/button'
 import { handleSaveChapter } from '@/utils/admin'
-import { Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -27,7 +27,9 @@ import {
     CodingTopicsTag,
 } from '@/app/[admin]/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType'
 import { AnyARecord } from 'dns'
-import { SquareCode } from 'lucide-react'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
 function CodingChallenge({
     content,
@@ -36,7 +38,26 @@ function CodingChallenge({
     courseId,
 }: ChallangesProps) {
     const router = useRouter()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { setCodingPreviewContent } = getCodingPreviewStore()
+
+    const chapterSchema = z.object({
+        title: z
+            .string()
+            .min(1, 'Chapter title is required')
+            .max(50, 'Chapter title must be at most 50 characters'),
+    })
+
+    const form = useForm<z.infer<typeof chapterSchema>>({
+        resolver: zodResolver(chapterSchema),
+         mode: 'onChange',
+        defaultValues: {
+            title: activeChapterTitle || '',
+        },
+       
+    })
+    // ====
     const [searchTerm, setSearchTerm] = useState('')
     const debouncedSearch = useDebounce(searchTerm, 1000)
     const { tags, setTags } = getCodingQuestionTags()
@@ -80,10 +101,10 @@ function CodingChallenge({
     const [savedTitle, setSavedTitle] = useState<string>(activeChapterTitle)
     const [hasTitleChanged, setHasTitleChanged] = useState(false)
 
-    const handleSaveClick = async () => {
+    const handleSaveClick = async (data: { title: string }) => {
         try {
             const titleToSave =
-                chapterTitle.trim() === '' ? savedTitle : chapterTitle
+                data.title.trim() === '' ? savedTitle : data.title
 
             await handleSaveChapter(moduleId, content.id, {
                 title: titleToSave,
@@ -98,7 +119,7 @@ function CodingChallenge({
 
             toast.success({
                 title: 'Success',
-                description: ' Chapter edited successfully',
+                description: 'Chapter edited successfully',
             })
         } catch (error) {
             toast.error({
@@ -107,21 +128,12 @@ function CodingChallenge({
             })
         }
     }
+
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = e.target.value
-          if (newTitle.length>50) {
-            toast.error({
-              title: 'Character Limit Reached',
-              description: 'You can enter up to 50 characters only.',
-           })
-       
-    } else {
-         setChapterTitle(newTitle)
+        setChapterTitle(newTitle)
         setHasTitleChanged(newTitle !== savedTitle)
-       
-    }
-        // setChapterTitle(newTitle)
-        // setHasTitleChanged(newTitle !== savedTitle)
+        form.trigger('title')
     }
     useEffect(() => {
         const newQuestions = content?.codingQuestionDetails || []
@@ -265,11 +277,9 @@ function CodingChallenge({
         }
         setCodingPreviewContent(updatedContent)
         router.push(
-            `/admin/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
+            `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
         )
     }
-
-
 
     if (isDataLoading) {
         return (
@@ -289,41 +299,63 @@ function CodingChallenge({
                 <div className="px-5 pb-4 border-b border-gray-200">
                     <div className="flex flex-col items-start mb-15">
                         <div className="flex justify-between items-center w-full">
-                            <div className="w-2/4 flex justify-center align-middle items-center relative">
-                                <Input
-                                    required
-                                    onChange={handleTitleChange}
-                                    value={chapterTitle}
-                                    placeholder="Untitled Coding Problem"
-                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
-                                />
-                                {!chapterTitle && (
-                                    <Pencil
-                                        fill="true"
-                                        fillOpacity={0.4}
-                                        size={20}
-                                        className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+
+                            <form
+                                onSubmit={form.handleSubmit(handleSaveClick)}
+                                className="flex justify-between items-center w-full gap-4"
+                            >
+                                <div className="w-2/4 relative">
+                                    <Input
+                                        {...form.register('title')}
+                                        placeholder="Untitled Coding Problem"
+                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground w-full"
                                     />
-                                )}
-                            </div>
-                            <div className="flex items-center justify-between">
-                                {/* <div
-                                    id="previewCodingChallenge"
-                                    onClick={previewCodingChallenge}
-                                    className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer mt-5 mr-2"
-                                >
-                                    <Eye size={18} />
-                                    <h6 className="ml-1 text-sm">Preview</h6>
-                                </div> */}
-                                {selectedQuestions?.length > 0 && (
-                                    <Button
-                                        onClick={handleSaveClick}
-                                        className="mt-5 bg-primary opacity-75"
+                                    {!form.getValues('title') && (
+                                        <Pencil
+                                            fill="true"
+                                            fillOpacity={0.4}
+                                            size={20}
+                                            className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                        />
+                                    )}
+                                    {form.formState.errors.title && (
+                                        <p className="text-red-500 text-sm mt-1">
+                                            {
+                                                form.formState.errors.title
+                                                    .message
+                                            }
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <div
+                                        id="previewCodingChallenge"
+                                        onClick={previewCodingChallenge}
+                                        className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer"
                                     >
-                                        Save
-                                    </Button>
-                                )}
-                            </div>
+                                        <Eye size={18} />
+                                        <h6 className="ml-1 text-sm">
+                                            Preview
+                                        </h6>
+                                    </div>
+
+                                    {selectedQuestions?.length > 0 && (
+                                        <Button
+                                            type="submit"
+                                            disabled={!form.formState.isValid || form.formState.isSubmitting}
+                                            className={`bg-primary text-white ${
+                                                !form.formState.isValid ||
+                                                form.formState.isSubmitting
+                                                    ? 'opacity-50 cursor-not-allowed'
+                                                    : ''
+                                            }`}
+                                        >
+                                            Save
+                                        </Button>
+                                    )}
+                                </div>
+                            </form>
                         </div>
                         <div className="flex items-center gap-2 pb-4">
                             <SquareCode
@@ -359,8 +391,6 @@ function CodingChallenge({
                     <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
                         Coding Library
                     </h1>
-
-                
 
                     <div className="grid grid-cols-2">
                         <div className="">
@@ -451,6 +481,8 @@ function CodingChallenge({
                                                                                 20
                                                                             }
                                                                         />
+
+                                                                         
                                                                     )}
                                                                 </div>
                                                             </div>

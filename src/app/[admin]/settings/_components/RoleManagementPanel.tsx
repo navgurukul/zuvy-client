@@ -11,8 +11,15 @@ import { useAssignPermissions } from '@/hooks/useAssignPermissions'
 import { COLOR_PALETTE } from '@/lib/utils'
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import AddRoleModal from './AddRoleModal'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { usePathname } from 'next/navigation'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface RoleAction {
     id: number
@@ -31,6 +38,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     selectedRole,
     onRoleChange,
 }) => {
+    const searchParams = useSearchParams()
+    const { roles,refetchRoles } = useRoles()
+    const { assignPermissions, loading: assigning } = useAssignPermissions()
     const [selectedAction, setSelectedAction] = useState<number>(12)
     const [roleId, setRoleId] = useState<number>(1)
     const [selectedPermissions, setSelectedPermissions] = useState<Record<number, boolean>>({})
@@ -216,6 +226,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         const changeRole = () => {
             onRoleChange(roleName)
             setRoleId(newRoleId)
+            const newParams = new URLSearchParams(searchParams);
+            newParams.set('role', roleName);
+            router.push(`?${newParams.toString()}`, { scroll: false });
             // Reset permissions when changing roles
             setSelectedPermissions({})
             setOriginalPermissions({})
@@ -250,13 +263,27 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         }
     }
 
-    const { roles } = useRoles()
-    const { assignPermissions, loading: assigning } = useAssignPermissions()
+    // Initialize role from URL on mount
+    useEffect(() => {
+        const roleFromUrl = searchParams.get('role');
+        if (roleFromUrl && roles.length > 0) {
+            const matchingRole = roles.find(role => role.name === roleFromUrl);
+            if (matchingRole) {
+                onRoleChange(matchingRole.name);
+                setRoleId(matchingRole.id);
+            }
+        }
+    }, [roles]);
 
     // Select first role by default when roles are loaded
     useEffect(() => {
         if (roles.length > 0 && !selectedRole) {
-            onRoleChange(roles[0].name);
+            // onRoleChange(roles[0].name);
+            const roleFromUrl = searchParams.get('role');
+            if (!roleFromUrl) {
+                onRoleChange(roles[0].name);
+                setRoleId(roles[0].id);
+            }
         }
     }, [roles, selectedRole, onRoleChange]);
 
@@ -324,7 +351,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 py-4">
             {/* Unsaved Changes Warning Modal */}
             <Dialog open={showWarningModal} onOpenChange={setShowWarningModal}>
                 <DialogContent className="sm:max-w-[425px]">
@@ -357,22 +384,25 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h2 className="text-xl text-start font-bold text-gray-900 mb-2">
+                    <h2 className="text-lg text-start font-semibold text-gray-900">
                         Manage Role Functions
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-muted-foreground text-[1.1rem]">
                         Configure role permissions and manage system actions
                     </p>
                 </div>
                 <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                     <DialogTrigger asChild>
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                        <Button>
                             <Plus className="w-4 h-4 mr-2" />
                             Add New Role
                         </Button>
                     </DialogTrigger>
                     {isAddModalOpen && (
-                        <AddRoleModal />
+                        <AddRoleModal
+                            onClose={() => setIsAddModalOpen(false)}
+                            onRoleAdded={refetchRoles}
+                         />
                     )}
                 </Dialog>
             </div>
@@ -382,31 +412,41 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 {
                     roles.map((role, index) => {
                         return (
-                            <Button
-                                key={role.id}
-                                onClick={() => handleRoleChange(role.name, role.id)}
-                                className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
-                                    ? 'border-blue-500 text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                    }`}
-                            >
-                                <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
-                                <span className="font-medium text-[1rem] capitalize">{role.name}</span>
-                                {/* Show unsaved indicator */}
-                                {selectedRole === role.name && hasUnsavedChanges && (
-                                    <div className="w-2 h-2 bg-warning rounded-full"></div>
-                                )}
-                            </Button>
+                            <TooltipProvider key={role.id}>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            onClick={() => handleRoleChange(role.name, role.id)}
+                                            className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
+                                                ? 'border-primary text-gray-900 hover:bg-transparent'
+                                                : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
+                                            <span className="font-medium text-[1rem] capitalize">{role.name}</span>
+                                            {/* Show unsaved indicator */}
+                                            {selectedRole === role.name && hasUnsavedChanges && (
+                                                <div className="w-2 h-2 bg-warning rounded-full"></div>
+                                            )}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    {role.description && (
+                                        <TooltipContent>
+                                            <p>{role.description}</p>
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                            </TooltipProvider>
                         )
                     })
                 }
             </div>
 
             {/* Main Content - Two Column Layout */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-3 gap-6">
                 {/* Left Column - Role Actions */}
                 <div className="col-span-1">
-                    <div className="bg-white rounded-lg border border-gray-200 p-4 h-[600px] flex flex-col">
+                    <div className="bg-white rounded-lg border border-gray-200 p-4 h-[calc(100vh-20rem)]  flex flex-col">
 
                         {/* Role Actions Title */}
                         <h4 className="font-semibold text-[1rem] text-start text-gray-900 mb-4 capitalize">
@@ -434,8 +474,8 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                             handleActionSelect(action.id)
                                         }
                                         className={`p-3 rounded-lg cursor-pointer transition-colors ${selectedAction === action.id
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-white hover:bg-gray-50 border border-gray-200'
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-card hover:bg-gray-50 border border-gray-200'
                                             }`}
                                     >
                                         <h5 className="font-medium text-start text-[1rem] mb-1">
@@ -443,7 +483,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         </h5>
                                         <p
                                             className={`text-sm text-start ${selectedAction === action.id
-                                                ? 'text-blue-100'
+                                                ? 'text-primary-foreground'
                                                 : 'text-gray-600'
                                                 }`}
                                         >
@@ -457,7 +497,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
 
                 {/* Right Column - Permissions */}
                 <div className="col-span-2">
-                    <div className="bg-white rounded-lg border border-gray-200 p-6 h-[600px] flex flex-col">
+                    <div className="bg-white rounded-lg border border-gray-200 p-6 h-[calc(100vh-20rem)]  flex flex-col">
                         {/* Permissions Header */}
                         <div className="flex justify-between items-center mb-4">
                             <div>
@@ -572,7 +612,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         variant="outline"
                                         size="sm"
                                         onClick={handleAssignPermissions}
-                                        className="text-xs"
+                                        className="text-xs bg-accent text-white"
                                     // disabled={assigning}
                                     >
                                         {/* {assigning

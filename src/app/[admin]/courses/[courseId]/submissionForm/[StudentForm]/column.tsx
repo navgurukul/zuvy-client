@@ -126,12 +126,12 @@ export const columns: ColumnDef<Task>[] = [
                 <div className="flex space-x-2">
                     <Button
                         variant={'ghost'}
-                        className="text-lg font-bold  hover:bg-muted"
+                        className="text-lg font-bold  hover:bg-muted/30"
                         disabled={isSubmitted}
                     >
                         <Link
                             href={`/admin/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
-                            className="max-w-[500px] text-[rgb(81,134,114)] font-medium flex items-center"
+                            className="max-w-[500px] text-primary font-medium flex items-center"
                         >
                             <FileText size={16} />
                             <p className="text-[15px]"> View Report</p>

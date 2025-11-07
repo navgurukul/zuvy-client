@@ -353,4 +353,5 @@ export interface CourseDeleteModalProps {
     onClose: () => void;
     onConfirm: () => void;
     loading?: boolean;
+    courseName: string;
 }

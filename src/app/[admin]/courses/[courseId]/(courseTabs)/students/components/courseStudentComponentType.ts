@@ -48,3 +48,21 @@ export interface DeleteModalDialogProps {
     setSelectedRows?: React.Dispatch<React.SetStateAction<any[]>> // Add this line
 }
 
+// StudentDetailsView.tsx
+export interface StudentDetailsViewProps {
+    courseId: string
+    studentId: string
+    onBack: () => void
+}
+
+export interface ClassData {
+    id: number
+    title: string
+    startTime: string
+    endTime: string
+    s3Link: string | null
+    moduleId: number | null
+    chapterId: number | null
+    attendanceStatus: string
+    duration: number
+}

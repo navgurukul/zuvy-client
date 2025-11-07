@@ -32,7 +32,7 @@ export default function RootLayout({
         <html lang="en" className="light">
             <body
                 className={cn(
-                    'min-h-screen text-center antialiased',
+                    'min-h-screen text-center font-body antialiased',
                     karla.className
                 )}
             >

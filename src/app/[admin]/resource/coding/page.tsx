@@ -43,7 +43,7 @@ import { Spinner } from '@/components/ui/spinner'
 import EditCodingQuestionForm from '../_components/EditCodingQuestionForm'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
-import CreatTag from '../_components/creatTag'
+import ManageTopics from '../_components/ManageTopics'
 import { toast } from '@/components/ui/use-toast'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { ROWS_PER_PAGE } from '@/utils/constant'
@@ -88,12 +88,11 @@ const CodingProblems = () => {
         const page = searchParams.get('page')
         return page ? parseInt(page) : OFFSET
     }, [searchParams])
-    const [newTopic, setNewTopic] = useState<string>('')
     const [urlInitialized, setUrlInitialized] = useState(false)
     const [isSearchActive, setIsSearchActive] = useState(false)
     const [lastSearchQuery, setLastSearchQuery] = useState('')
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    // const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+    const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
 
     // Custom hook for search with suggestions
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -427,52 +426,20 @@ const CodingProblems = () => {
                                     </h1>
                                 </div>
                                 <div className="flex flex-row items-center gap-2">
-                                    <Dialog>
-                                        <DialogTrigger asChild>
                                             <Button
                                                 variant="outline"
                                                 className="lg:max-w-[150px] w-full shadow-4dp"
+                                        onClick={() => setIsManageTopicsOpen(true)}
                                             >
-                                                <p>Create Topic</p>
+                                        <p>Manage Topics</p>
                                             </Button>
-                                        </DialogTrigger>
-                                        <DialogOverlay />
-                                        <CreatTag
-                                            newTopic={newTopic}
-                                            handleNewTopicChange={(e) =>
-                                                setNewTopic(e.target.value)
-                                            }
-                                            handleCreateTopic={() => {
-                                                api.post(`/Content/createTag`, {
-                                                    tagName: newTopic,
-                                                })
-                                                    .then(() => {
-                                                        toast({
-                                                            title: 'Success',
-                                                            description: `${newTopic} topic created`,
-                                                        })
-                                                        getAllTags()
-                                                        setNewTopic('')
-                                                    })
-                                                    .catch(() => {
-                                                        toast({
-                                                            title: 'Error',
-                                                            description:
-                                                                'Unable to create topic',
-                                                            variant:
-                                                                'destructive',
-                                                        })
-                                                    })
-                                            }}
-                                        />
-                                    </Dialog>
 
                                     <Dialog
                                         open={isDialogOpen}
                                         onOpenChange={setIsDialogOpen}
                                     >
                                         <DialogTrigger asChild>
-                                            <Button className="bg-primary hover:bg-primary-dark shadow-4dp">
+                                            <Button className="shadow-4dp">
                                                 + Create Problems
                                             </Button>
                                         </DialogTrigger>
@@ -649,15 +616,27 @@ const CodingProblems = () => {
                     </Dialog>
 
                     {!isCodingDialogOpen && !isCodingEditDialogOpen && (
-                        <DataTablePagination
-                            totalStudents={totalCodingQuestion}
-                            lastPage={lastPage}
-                            pages={totalPages}
-                            fetchStudentData={fetchCodingQuestions}
-                        />
+                        <div className='pb-4 flex justify-end'>
+                            <DataTablePagination
+                                totalStudents={totalCodingQuestion}
+                                lastPage={lastPage}
+                                pages={totalPages}
+                                fetchStudentData={fetchCodingQuestions}
+                            />
+                        </div>
                     )}
                 </div>
             )}
+
+            {/* Manage Topics Dialog */}
+            <ManageTopics
+                isOpen={isManageTopicsOpen}
+                onClose={() => setIsManageTopicsOpen(false)}
+                onTopicCreated={() => {
+                    getAllTags() // Refresh the topics list
+                    setIsManageTopicsOpen(false)
+                }}
+            />
         </>
     )
 }

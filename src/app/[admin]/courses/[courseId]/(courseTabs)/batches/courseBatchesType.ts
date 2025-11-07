@@ -11,14 +11,10 @@ export type StudentData = {
     progress: number
     profilePicture: string
 }
-
-
-
 // page.tsx
 export interface ParamsType{
   courseId: number;
 }
-
 export interface BatchSuggestion {
     id: number
     name: string
@@ -32,11 +28,28 @@ export interface Student {
 
 export type StudentDataState = Student[]
 
-
-
 export interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     setSelectedRows?: any
     mcqSide?: boolean
+}
+
+// Additional types moved from page.tsx for reuse
+export interface EnhancedBatch {
+    id: string | number
+    name: string
+    instructorEmail: string
+    capEnrollment: number
+    students_enrolled: number
+    status: string
+    startDate?: string
+    endDate?: string
+}
+
+export interface PermissionsType {
+    createBatch: boolean
+    deleteBatch: boolean
+    editBatch: boolean
+    viewBatch: boolean
 }

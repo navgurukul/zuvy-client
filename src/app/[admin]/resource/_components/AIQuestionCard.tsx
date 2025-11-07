@@ -11,11 +11,11 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import { getDeleteQuizQuestion } from '@/store/store'
 import { DELETE_AI_QUESTION_CONFIRMATION } from '@/utils/constant'
 import { handleDeleteQuizModal } from '@/utils/admin'
 import EditAIQuestion from './EditAIQuestion'
+import AIQuestionDeleteModal from './AIQuestionDeleteModal'
 import {
     QuestionCardProps,
     Tag,
@@ -36,6 +36,10 @@ export const AIQuestionCard = ({
 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const [isEditModalOpen, setEditModalOpen] = useState(false)
+
+    const handleDeleteConfirm = () => {
+        handleQuestionConfirm(questionId, setDeleteModalOpen)
+    }
 
     return (
         <>
@@ -93,20 +97,7 @@ export const AIQuestionCard = ({
                             className="text-destructive cursor-pointer"
                             size={20}
                         />
-                        <DeleteConfirmationModal
-                            isOpen={isDeleteModalOpen}
-                            onClose={() => setDeleteModalOpen(false)}
-                            onConfirm={() => {
-                                handleQuestionConfirm(
-                                    questionId,
-                                    setDeleteModalOpen
-                                )
-                            }}
-                            modalTitle={'Delete Question'}
-                            modalText={DELETE_AI_QUESTION_CONFIRMATION}
-                            buttonText="Delete Question"
-                            input={false}
-                        />
+                        
                     </div>
                 </div>
 
@@ -117,16 +108,32 @@ export const AIQuestionCard = ({
                     {Object.values(options).map((option, index) => (
                         <div
                             key={option}
-                            className="flex items-center px-4 py-3 rounded-md hover:bg-gray-100 cursor-pointer"
+                            className={`flex items-center px-4 py-3 rounded-md cursor-pointer ${
+                                correctOption === index + 1
+                                    ? 'bg-green-100 border border-green-300 hover:bg-green-200'
+                                    : 'hover:bg-gray-100'
+                            }`}
                         >
-                            <span className="font-medium mr-2">
+                            <span className={`font-medium mr-2 ${
+                                correctOption === index + 1 ? 'text-green-700' : ''
+                            }`}>
                                 {String.fromCharCode(65 + index)}.
                             </span>
-                            <span>{option}</span>
+                            <span className={correctOption === index + 1 ? 'text-green-700 font-medium' : ''}>
+                                {option}
+                            </span>
                         </div>
                     ))}
                 </div>
             </Card>
+
+            {/* Delete Confirmation Modal */}
+            <AIQuestionDeleteModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setDeleteModalOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                questionText={question}
+            />
         </>
     )
 }

@@ -21,6 +21,7 @@ import {
     getMcqSearch,
     getSelectedMCQOptions,
 } from '@/store/store'
+import ManageTopics from '../_components/ManageTopics'
 import { Spinner } from '@/components/ui/spinner'
 import MultiSelector from '@/components/ui/multi-selector'
 import difficultyOptions from '@/app/utils'
@@ -109,6 +110,8 @@ const Mcqs = (props: Props) => {
     const { mcqSearch, setmcqSearch } = getMcqSearch()
     const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
 
     // Updated URL function to create clean URLs without encoding issues
     const updateURL = useCallback((searchTerm: string, topics: PageOption[], difficulties: PageOption[]) => {
@@ -139,7 +142,8 @@ const Mcqs = (props: Props) => {
         window.history.replaceState({}, '', newURL)
     }, [])
     const fetchSuggestionsApi = useCallback(async (query: string): Promise<any[]> => {
-        if (!query.trim()) {
+        // Don't return empty if query has spaces - only check if completely empty
+        if (!query || query.trim().length === 0) {
             return []
         }
     
@@ -147,7 +151,7 @@ const Mcqs = (props: Props) => {
             // API call to fetch quiz questions based on the query
             const response = await api.get('Content/allQuizQuestions', {
                 params: {
-                    searchTerm: encodeURIComponent(query),
+                    searchTerm: query.trim(), // Remove encodeURIComponent here as axios handles it
                     // Add additional filters if needed (tags, difficulty, etc.)
                 }
             })
@@ -163,8 +167,8 @@ const Mcqs = (props: Props) => {
     
                         // Truncate the question for display purposes
                         // const truncatedText = plainText.length > 100 ? plainText.substring(0, 15) + '...' : plainText
-                        const truncatedText = plainText.length > 15
-                        ? plainText.split(' ').slice(0, 2).join(' ') + '...'
+                        const truncatedText = plainText.length > 45
+                        ? plainText.split(' ').slice(0, 6).join(' ') + '...'
                         : plainText                        // Get topic name from tags (backend should ideally return topic name too)
 
                         const tagName = tags.find(tag => tag.id === item.tagId)?.tagName || 'General'
@@ -368,22 +372,28 @@ const Mcqs = (props: Props) => {
         }
     }, []) // Empty dependency - runs only when component mounts
 
+    // Data fetching function को update करो
     const fetchCodingQuestions = useCallback(
         async (offset: number, searchTerm?: string) => {
-            if (offset >= 0) {
-                // Use the passed searchTerm if provided, otherwise use the current search from URL
-                const currentSearchTerm = searchTerm !== undefined ? searchTerm : (searchParams.get('search') || '')
-                filteredQuizQuestions(
-                    setStoreQuizData,
-                    offset,
-                    position,
-                    difficulty,
-                    selectedOptions,
-                    setTotalMCQQuestion,
-                    setLastPage,
-                    setTotalPages,
-                    currentSearchTerm
-                )
+            if (offset >= 0 && options.length > 0) { // Add options.length check
+                try {
+                    const currentSearchTerm = searchTerm !== undefined ? searchTerm : (searchParams.get('search') || '')
+                    await filteredQuizQuestions(
+                        setStoreQuizData,
+                        offset,
+                        position,
+                        difficulty,
+                        selectedOptions,
+                        setTotalMCQQuestion,
+                        setLastPage,
+                        setTotalPages,
+                        currentSearchTerm
+                    )
+                } catch (error) {
+                    console.error('Error fetching questions:', error)
+                    // Set empty data on error to prevent table crashes
+                    setStoreQuizData([])
+                }
             }
         },
         [
@@ -395,6 +405,7 @@ const Mcqs = (props: Props) => {
             setLastPage,
             setTotalPages,
             searchParams,
+            options.length, // Add this dependency
         ]
     )
 
@@ -443,7 +454,13 @@ const Mcqs = (props: Props) => {
     const renderTabContent = (tabValue: string) => {
         switch (tabValue) {
             case 'bulk':
-                return <BulkUploadMcq setIsMcqModalOpen={setIsMcqModalOpen} />
+                return (
+                    <BulkUploadMcq
+                        closeModal={() => setIsCreateMcqDialogOpen(false)}
+                        setStoreQuizData={setStoreQuizData}
+                        getAllQuizQuesiton={() => filteredQuizQuestions(setStoreQuizData)}
+                    />
+                )
             case 'oneatatime':
                 return (
                     <div className="flex items-start justify-center w-full">
@@ -559,23 +576,14 @@ const Mcqs = (props: Props) => {
                             </h1>
                         </div>
                         <div className="flex flex-row items-center gap-2">
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button
-                                        variant={'outline'}
-                                        className="lg:max-w-[150px] w-full mt-5"
-                                    >
-                                        <p>Create Topic</p>
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <CreatTag
-                                    newTopic={newTopic}
-                                    handleNewTopicChange={handleNewTopicChange}
-                                    handleCreateTopic={handleCreateTopic}
-                                />
-                            </Dialog>
-                            <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
+                                <Button
+                                 variant="outline"
+                                 className="lg:max-w-[150px] w-full shadow-4dp mt-5"
+                                 onClick={() => setIsManageTopicsOpen(true)}
+                                >
+                                    <p>Manage Topics</p>
+                                </Button>
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button className="mt-5 bg-primary hover:bg-primary-dark shadow-4dp">
                                         + Create MCQ
@@ -625,20 +633,31 @@ const Mcqs = (props: Props) => {
                     
 
                     <DataTable
-                        data={quizData}
+                        data={quizData || []} // Ensure data is never undefined
                         columns={columns}
                         mcqSide={true}
                     />
                     {totalMCQQuestion > 0 && (
-                        <DataTablePagination
-                            totalStudents={totalMCQQuestion}
-                            lastPage={lastPage}
-                            pages={totalPages}
-                            fetchStudentData={fetchCodingQuestions}
-                        />
+                        <div className='py-4 flex justify-end'>
+                            <DataTablePagination
+                                totalStudents={totalMCQQuestion}
+                                lastPage={lastPage}
+                                pages={totalPages}
+                                fetchStudentData={fetchCodingQuestions}
+                            />
+                        </div>
                     )}
                 </MaxWidthWrapper>
             )}
+             {/* Manage Topics Dialog */}
+                <ManageTopics
+                 isOpen={isManageTopicsOpen}
+                 onClose={() => setIsManageTopicsOpen(false)}
+                 onTopicCreated={() => {
+                 getAllTags() // Refresh the topics list
+                 setIsManageTopicsOpen(false)
+                }}
+            />
         </>
     )
 }

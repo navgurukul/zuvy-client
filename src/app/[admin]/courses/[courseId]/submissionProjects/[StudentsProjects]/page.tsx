@@ -21,6 +21,7 @@ const Page = ({ params }: any) => {
     const [bootcampData, setBootcampData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
     const [selectedBatch, setSelectedBatch] = useState('All Batches')
+    const [submitStudents, setSubmitStudents] = useState<number>(0)
 
     // Dummy batch data
     const batchOptions = [
@@ -72,6 +73,7 @@ const Page = ({ params }: any) => {
                 `/submission/submissionsOfProjects/${params.courseId}`
             )
             setData(res.data.data.bootcampModules[0])
+            setSubmitStudents(res.data.data.bootcampModules[0]?.projectData[0]?.submitStudents || 0)
             setTotalStudents(res.data.totalStudents)
         } catch (error) {
             console.error(error)
@@ -106,7 +108,7 @@ const Page = ({ params }: any) => {
             </div>
 
             {/* Assessment Info Card */}
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                 <CardHeader>
                     <CardTitle className="text-2xl text-gray-800 text-left">
                         {data?.projectData[0].title || 'Loading...'}
@@ -117,7 +119,7 @@ const Page = ({ params }: any) => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div className="text-left">
                             <div className="font-medium text-muted-foreground">Total Submissions:</div>
-                            <div className="text-lg font-semibold">{totalStudents || 0}</div>
+                            <div className="text-lg font-semibold">{submitStudents || 0}</div>
                         </div>
                         <div className="text-left">
                             <div className="text-sm text-gray-600 mb-1">Submission Type:</div>
@@ -149,7 +151,7 @@ const Page = ({ params }: any) => {
                     </div>
                 </CardContent>
             </Card>
-            <Card className='bg-muted'>
+            <Card className='bg-card'>
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl text-gray-800">

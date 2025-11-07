@@ -5,7 +5,7 @@ import { api } from '@/utils/axios.config'
 import { OFFSET, POSITION } from '@/utils/constant'
 import { useParams, useRouter } from 'next/navigation'
 import { existingClassColumns } from './existingLiveClassesColumn'
-import { getIsRowSelected } from '@/store/store'
+import { getUser, getIsRowSelected } from '@/store/store'
 import { Table } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
@@ -23,6 +23,8 @@ const ExistingLiveClass = ({
     fetchingChapters,
     onClose,
 }: ExistingLiveClassProps) => {
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [position, setPosition] = useState(POSITION)
     const [selectedRows, setSelectedRows] = useState<any[]>([])
     const [open, setOpen] = useState(false)
@@ -84,7 +86,7 @@ const ExistingLiveClass = ({
         const latestChapter = chapters[chapters.length - 1]
         if (latestChapter) {
             router.push(
-                `/admin/courses/${param.courseId}/module/${param.moduleId}/chapters/${latestChapter.chapterId}`
+                `/${userRole}/courses/${param.courseId}/module/${param.moduleId}/chapters/${latestChapter.chapterId}`
             )
         }
         setOpen(false)

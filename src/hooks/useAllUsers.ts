@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState, useMemo } from 'react'
 import { api } from '@/utils/axios.config'
 
 export interface User {
+    createdAt: any
     id: number
     roleId: number
     userId: number

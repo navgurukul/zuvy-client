@@ -6,10 +6,9 @@ import { useRouter, useParams } from 'next/navigation'
 import { ColumnDef } from '@tanstack/react-table'
 
 import { DataTableColumnHeader } from '../../../../../_components/datatable/data-table-column-header'
-
 import { fetchStudentData } from '@/utils/students'
 import { Task } from '@/utils/data/schema'
-import { getBatchData, getEditStudent, getStudentData } from '@/store/store'
+import { getBatchData, getEditStudent, getStudentData, getUser } from '@/store/store'
 import { getAttendanceColorClass } from '@/utils/students'
 import { ComboboxStudent } from './components/comboboxStudentDataTable'
 import { AlertDialogDemo } from './components/deleteModalNew'
@@ -21,6 +20,8 @@ import ActionCell from './actionCell'
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
     const { userId } = row.original
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { isStudent, setIsStudent } = getEditStudent()
     const { studentData, setStudentData } = getStudentData()
     const router = useRouter()
@@ -34,7 +35,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     }
     
     const handleStudentClick = () => {
-        router.push(`/admin/courses/${params.courseId}/${userId}`)
+        router.push(`/${userRole}/courses/${params.courseId}/${userId}`)
     }
     
     return (
@@ -337,17 +338,17 @@ export const columns: ColumnDef<Task>[] = [
                     case 'active':
                         return {
                             label: 'Active',
-                            className: 'bg-primary text-muted border-primary',
+                            className: 'bg-primary text-primary-foreground border-primary',
                         }
                     case 'dropout':
                         return {
                             label: 'Dropout',
-                            className: 'bg-destructive text-muted border-destructive',
+                            className: 'bg-destructive text-destructive-foreground border-destructive',
                         }
                     case 'graduate':
                         return {
                             label: 'Graduate',
-                            className: 'bg-secondary text-muted border-secondary',
+                            className: 'bg-secondary text-secondary-foreground border-secondary',
                         }
                     default:
                         return {
@@ -379,6 +380,9 @@ export const columns: ColumnDef<Task>[] = [
 
     {
         id: 'actions',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Actions" />
+        ),
         cell: ({ row }) => {
             const student = row.original
             return (

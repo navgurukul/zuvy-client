@@ -187,13 +187,13 @@ const Page = ({ params }: any) => {
                 </Button>
             </div>
             
-            <Card className="mb-8 border border-gray-200 shadow-sm bg-muted">
+            <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                 <CardHeader>
                     <CardTitle className="text-2xl text-gray-800 text-left">
                         {liveClassData?.title}
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="bg-muted">
+                <CardContent className="bg-card">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div className="text-left">
                             <div className="font-medium text-muted-foreground">Total Submissions:</div>
@@ -231,7 +231,7 @@ const Page = ({ params }: any) => {
                 </CardContent>
             </Card>
             
-            <Card className="bg-muted">
+            <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <CardTitle className="text-xl text-gray-800">
