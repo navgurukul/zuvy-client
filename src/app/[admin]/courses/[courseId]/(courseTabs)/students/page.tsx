@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -34,9 +33,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Student } from './studentComponentTypes'
 import {StudentPageSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
-
+import { Student } from './studentComponentTypes'
 
 export type StudentData = {
     email: string
@@ -78,12 +76,12 @@ const StudentsPage = ({ params }: { params: any }) => {
   const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [batchFilter, setBatchFilter] = useState<string>('all')
-  const [attendanceFilter, setAttendanceFilter] = useState<string>('') 
+  const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
   const [loading, setLoading] = useState(true)
+
 
   // Fetch data with filters
   const fetchFilteredData = useCallback(async () => {
-    setLoading(true)
     try {
       let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
       
@@ -122,11 +120,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     } catch (error) {
       console.error('Error fetching filtered data:', error)
       toast.error({ title: 'Error', description: 'Failed to fetch student data' })
-
     }
-  finally {
-    setLoading(false)   
-  }
   }, [params.courseId, limit, offset, enrolledDateFilter, statusFilter, batchFilter, lastActiveFilter, attendanceFilter, setStudents])
 
   // Update this helper function to handle new options
@@ -338,11 +332,16 @@ const StudentsPage = ({ params }: { params: any }) => {
     return () => { window.removeEventListener('refreshStudentData', handleRefresh) }
   }, [fetchFilteredData])
 
-    // Normal table view (no conditional rendering needed)
-  //   if (loading) {
-  //   return <StudentPageSkeleton />
-  // }
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 600)
+    return () => clearTimeout(timer)
+  }, [])
+
   
+  if (loading) {
+    return <StudentPageSkeleton />
+  }
     return (
         <div className="text-foreground">
             <div className="text-start mt-6">

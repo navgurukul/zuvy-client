@@ -82,7 +82,6 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                     (record.duration / 60).toFixed(2), // converting seconds to minutes (optional)
                 ]
             })
-
             // Draw table
             autoTable(doc, {
                 head: [columns],
@@ -104,7 +103,6 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
             })
         }
     }
-
 
     if (loading) {
          return <LiveClassSubmissionSkeleton/>

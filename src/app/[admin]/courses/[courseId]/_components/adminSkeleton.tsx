@@ -176,40 +176,61 @@ export const CurriculumSkeleton = () => {
 
 // studentPageSkeleton
 export const StudentPageSkeleton = () => {
-    return (
-        <div className="text-foreground">
-            <div className="text-start mt-6">
-                <Skeleton className="h-7 w-[150px] mb-2" />
-                <Skeleton className="h-5 w-[300px]" />
-            </div>
-            <div className="flex flex-col md:flex-row justify-between items-center gap-y-4 mt-6">
-                <div className="w-full md:w-1/2 lg:w-1/4">
-                    <Skeleton className="h-10" />
-                </div>
-                <div className="flex w-full flex-row mt-2 gap-x-4 md:w-auto">
-                    <Skeleton className="h-10 w-[180px]" />
-                    <Skeleton className="h-10 w-[160px]" />
-                </div>
-            </div>
-            <div className="flex flex-col md:flex-row items-center gap-y-4 md:gap-x-4 mt-10">
-                {[...Array(4)].map((_, index) => (
-                    <div key={index} className="w-full sm:w-[160px] mt-2">
-                        <Skeleton className="h-10" />
-                    </div>
-                ))}
-                <div className="w-full sm:w-[160px]">
-                    <Skeleton className="h-10" />
-                </div>
-            </div>
-            <div className="mt-6">
-                <Skeleton className="h-[400px] rounded-md" />
-            </div>
-            <div className="flex justify-end mt-6">
-                <Skeleton className="h-10 w-[200px] rounded-md" />
-            </div>
+  return (
+    <div className="text-foreground p-6">
+      <div className="text-start mt-2">
+        <Skeleton className="h-7 w-[160px] mb-2" />
+        <Skeleton className="h-5 w-[300px]" />
+      </div>
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8">
+        <div className="w-full md:w-1/2 lg:w-1/3">
+          <Skeleton className="h-10 w-full rounded-md" />
         </div>
-    )
+        <div className="flex w-full md:w-auto gap-4">
+          <Skeleton className="h-10 w-[180px] rounded-md" />
+          <Skeleton className="h-10 w-[160px] rounded-md" />
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-4 mt-10">
+        <Skeleton className="h-10 w-[160px] rounded-md" />
+        <Skeleton className="h-10 w-[160px] rounded-md" />
+        <Skeleton className="h-10 w-[160px] rounded-md" />
+        <Skeleton className="h-10 w-[160px] rounded-md" />
+      </div>
+      <div className="mt-6 border rounded-lg overflow-hidden">
+        <div className="grid grid-cols-7 bg-muted px-4 py-3">
+          <Skeleton className="h-5 w-[20px]" />
+          <Skeleton className="h-5 w-[100px]" />
+          <Skeleton className="h-5 w-[160px]" />
+          <Skeleton className="h-5 w-[100px]" />
+          <Skeleton className="h-5 w-[120px]" />
+          <Skeleton className="h-5 w-[80px]" />
+          <Skeleton className="h-5 w-[80px]" />
+        </div>
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="grid grid-cols-7 items-center px-4 py-4 border-t"
+          >
+            <Skeleton className="h-5 w-[20px]" />
+            <Skeleton className="h-5 w-[100px]" />
+            <Skeleton className="h-5 w-[160px]" />
+            <Skeleton className="h-5 w-[100px]" />
+            <Skeleton className="h-5 w-[120px]" />
+            <Skeleton className="h-5 w-[80px]" />
+            <Skeleton className="h-5 w-[80px]" />
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-end items-center gap-3 mt-6">
+        <Skeleton className="h-8 w-[80px] rounded-md" />
+        <Skeleton className="h-8 w-[100px] rounded-md" />
+        <Skeleton className="h-8 w-[120px] rounded-md" />
+      </div>
+    </div>
+  )
 }
+
 
 
 // BatchesSkeleton
@@ -508,7 +529,6 @@ export const LiveClassSubmissionSkeleton = () => {
       ))}
     </div>
   )
-
 }
 
 // SettingsSkeleton 
