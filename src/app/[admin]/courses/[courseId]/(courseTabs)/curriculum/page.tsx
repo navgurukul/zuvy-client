@@ -24,6 +24,8 @@ import {
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/curriculum/courseCurriculamType'
 import { Plus } from 'lucide-react'
 
+import {CurriculumSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 function Page() {
     const router = useRouter()
     const params = useParams()
@@ -577,6 +579,7 @@ function Page() {
         }
     }, [reorderTimeout, borderFlashTimeout])
 
+   
     if (isCourseDeleted) {
         return (
             <div className="flex flex-col justify-center items-center h-full mt-20">
@@ -599,13 +602,11 @@ function Page() {
         )
     }
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Spinner className="text-secondary" />
-            </div>
-        )
+
+     if (loading) {
+      return <CurriculumSkeleton />
     }
+    
     return (
         <div className="w-full">
             <div className="w-full flex flex-col items-center justify-center">

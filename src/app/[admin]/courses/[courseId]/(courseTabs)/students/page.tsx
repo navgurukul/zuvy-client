@@ -35,6 +35,8 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { Student } from './studentComponentTypes'
+import {StudentPageSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 export type StudentData = {
     email: string
@@ -76,10 +78,12 @@ const StudentsPage = ({ params }: { params: any }) => {
   const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [batchFilter, setBatchFilter] = useState<string>('all')
-  const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
+  const [attendanceFilter, setAttendanceFilter] = useState<string>('') 
+  const [loading, setLoading] = useState(true)
 
   // Fetch data with filters
   const fetchFilteredData = useCallback(async () => {
+    setLoading(true)
     try {
       let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
       
@@ -118,7 +122,11 @@ const StudentsPage = ({ params }: { params: any }) => {
     } catch (error) {
       console.error('Error fetching filtered data:', error)
       toast.error({ title: 'Error', description: 'Failed to fetch student data' })
+
     }
+  finally {
+    setLoading(false)   
+  }
   }, [params.courseId, limit, offset, enrolledDateFilter, statusFilter, batchFilter, lastActiveFilter, attendanceFilter, setStudents])
 
   // Update this helper function to handle new options
@@ -331,6 +339,10 @@ const StudentsPage = ({ params }: { params: any }) => {
   }, [fetchFilteredData])
 
     // Normal table view (no conditional rendering needed)
+  //   if (loading) {
+  //   return <StudentPageSkeleton />
+  // }
+  
     return (
         <div className="text-foreground">
             <div className="text-start mt-6">

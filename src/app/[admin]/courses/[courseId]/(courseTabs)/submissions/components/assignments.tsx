@@ -16,14 +16,18 @@ import {
     AssignmentApiResponse,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import { Badge } from '@/components/ui/badge'
+import {AssignmentSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchAssignmentDataHandler = async () => {
             try {
+                setLoading(true)
                 const url = debouncedSearch
                     ? `/submission/submissionsOfAssignment/${courseId}?searchAssignment=${debouncedSearch}`
                     : `/submission/submissionsOfAssignment/${courseId}`
@@ -35,6 +39,8 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                     title: 'Error',
                     description: 'Error while fetching assignment data',
                 })
+            }finally {
+              setLoading(false)
             }
         }
 
@@ -104,6 +110,9 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
         fetchData()
     }
 
+if (loading) {
+  return <AssignmentSubmissionSkeleton/>
+}
     return (
         <div className="">
             {assignmentData?.length > 0 ? (

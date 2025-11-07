@@ -68,6 +68,7 @@ import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
 import AddStudentOptions from '../../_components/AddStudentOptions'
+import {BatchesSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const Page = ({ params }: { params: ParamsType }) => {
     // Use the extracted hook for all logic and state
@@ -785,13 +786,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                         </div>
                     </div>
                 {loading ? (
-                    <div className="my-5 flex justify-center items-center">
-                        <div className="absolute h-screen">
-                            <div className="relative top-[70%]">
-                                <Spinner className="text-secondary" />
-                            </div>
-                        </div>
-                    </div>
+                      <BatchesSkeleton/>  
                 ) : (
                     /* Batch Cards Grid - Updated Design */
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

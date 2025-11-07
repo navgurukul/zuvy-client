@@ -127,13 +127,33 @@ export default function useBatches(params: ParamsType) {
         [params.courseId, setBatchData]
     )
 
+    // const defaultFetchApi = useCallback(async () => {
+    //     setSearchQuery('')
+    //     const response = await api.get(`/bootcamp/batches/${params.courseId}`)
+    //     setBatchData(response.data?.data || [])
+    //     setPermissions(response.data?.permissions)
+    //     return response.data?.data || []
+    // }, [params.courseId, setBatchData])
+
+
     const defaultFetchApi = useCallback(async () => {
-        setSearchQuery('')
-        const response = await api.get(`/bootcamp/batches/${params.courseId}`)
-        setBatchData(response.data?.data || [])
-        setPermissions(response.data?.permissions)
-        return response.data?.data || []
-    }, [params.courseId, setBatchData])
+    try {
+        setLoading(true);   
+
+        setSearchQuery('');
+        const response = await api.get(`/bootcamp/batches/${params.courseId}`);
+
+        setBatchData(response.data?.data || []);
+        setPermissions(response.data?.permissions);
+
+        return response.data?.data || [];
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setLoading(false);  
+    }
+}, [params.courseId, setBatchData]);
+
 
     const formSchema = z.object({
         name: z.string().min(3, { message: 'Batch name must be at least 3 characters.' }),
@@ -360,15 +380,17 @@ export default function useBatches(params: ParamsType) {
             return false
         }
     }
-
     useEffect(() => {
         if (params.courseId) fetchCourseDetails(params.courseId)
     }, [params.courseId, fetchCourseDetails])
 
     useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
+    if (courseData?.id) {
+        defaultFetchApi(); 
+    }
+}, [courseData?.id]);
+
+
 
     const getUnAssignedStudents = useCallback(async () => {
         try {
