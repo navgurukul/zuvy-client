@@ -141,7 +141,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full flex flex-col gap-4 "
             >
-                <DialogContent className="text-gray-600">
+                <DialogContent className="text-foreground">
                     <DialogHeader>
                         <DialogTitle>New Module</DialogTitle>
                         <div className="main_container flex items-center align-middle text-center">
@@ -424,7 +424,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
 
                             {/* Global time validation error */}
                             {((form.formState.errors) as any).timeAllotted && (
-                                <p className="text-sm text-red-500 mt-2">
+                                <p className="text-sm text-destructive mt-2">
                                     {((form.formState.errors) as any).timeAllotted?.message}
                                 </p>
                             )}

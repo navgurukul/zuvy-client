@@ -164,7 +164,7 @@ const LiveClass = ({
                             )}
                             <div className="flex items-center gap-2 mb-3">
                                 <Badge
-                                    variant="secondary"
+                                    // variant="secondary"
                                     className={`${getStatusColor(
                                         session.status
                                     )} font-medium px-3 py-1 flex items-center gap-1`}
@@ -183,11 +183,11 @@ const LiveClass = ({
                             <TooltipTrigger>
                             
                             <Button
-                                className="font-medium py-2 px-3 transition-all duration-200 bg-primary text-white"
+                                className="font-medium py-2 px-3 transition-all duration-200 bg-primary text-primary-foreground"
                                 onClick={handleDownloadAttendance}
                                 disabled={!session?.s3link || session?.s3link === 'not found'}
                             >
-                                <span className="text-white">Download Attendance</span>
+                                <span className="text-primary-foreground">Download Attendance</span>
                             </Button>
                             
                             <TooltipContent>
@@ -235,7 +235,7 @@ const LiveClass = ({
                                     <Video className="w-4 h-4" />
                                     Meeting Recording
                                 </h4>
-                                <div className="w-5/6 bg-black rounded-lg overflow-hidden">
+                                <div className="w-5/6 bg-foreground rounded-lg overflow-hidden">
                                     <iframe
                                         src={getEmbedLink(session.s3link)}
                                         className="w-full h-80 border-0"
@@ -247,7 +247,7 @@ const LiveClass = ({
                             </div>
                         ) : (
                             <Button
-                                className={`w-full font-medium py-2.5 transition-all duration-200 text-white ${
+                                className={`w-full font-medium py-2.5 transition-all duration-200 text-primary-foreground ${
                                     session.status.toLowerCase() !== 'ongoing'
                                         ? 'opacity-50 cursor-not-allowed'
                                         : ''
@@ -261,8 +261,8 @@ const LiveClass = ({
                                     window.open(session.hangoutLink, '_blank')
                                 }}
                             >
-                                <Video className="w-4 h-4 mr-2 text-white" />
-                                <span className="text-white">
+                                <Video className="w-4 h-4 mr-2 text-primary-foreground" />
+                                <span className="text-primary-foreground">
                                     {session.status.toLowerCase() ===
                                     'completed'
                                         ? 'Recording Not Available'

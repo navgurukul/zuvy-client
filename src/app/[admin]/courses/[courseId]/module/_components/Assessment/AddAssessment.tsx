@@ -448,7 +448,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
                             />
                             {form.formState.errors.title && (
-                                <p className="text-red-500 text-sm mt-1">
+                                <p className="text-destructive text-sm mt-1">
                                     {form.formState.errors.title.message}
                                 </p>
                             )}
@@ -483,12 +483,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 )}
                 {/* select type of questions */}
                 {questionType !== 'settings' && (
-                    <div className="flex gap-2 mb-5 border-b border-gray-200 w-1/2">
+                    <div className="flex gap-2 mb-5 border-b border-muted-light w-1/2">
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'coding'
-                                    ? 'border-primary text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleCodingButtonClick}
                         >
@@ -497,8 +497,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'mcq'
-                                    ? 'border-primary text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleMCQButtonClick}
                         >
@@ -507,8 +507,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'open-ended'
-                                    ? 'border-primary text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleOpenEndedButtonClick}
                         >
@@ -541,7 +541,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             />
                         </div>
                         <div className="flex justify-between w-2/3">
-                            <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
+                            <h3 className="text-left text-[15px] text-muted-dark font-bold mb-5 ml-2">
                                 {questionType === 'coding'
                                     ? 'Coding Problem Library'
                                     : questionType === 'mcq'
@@ -550,7 +550,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     ? 'Open-Ended Question Library'
                                     : ''}
                             </h3>
-                            <h1 className="text-left text-[15px] text-gray-600 font-bold mb-5 mr-3">
+                            <h1 className="text-left text-[15px] text-muted-dark font-bold mb-5 mr-3">
                                 Selected Questions
                             </h1>
                         </div>
@@ -655,7 +655,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         />
 
                         {questionType !== 'settings' && (
-                            <div className="h-screen border-l border-gray-200 pl-4">
+                            <div className="h-screen border-l border-muted-light pl-4">
                                 <ScrollArea className="h-96 px-2 pb-4">
                                     <ScrollBar
                                         orientation="vertical"
@@ -691,7 +691,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                             }
                                         />
                                     ) : (
-                                        <h1 className="text-left text-gray-600 text-[18px] italic pl-5">
+                                        <h1 className="text-left text-muted-dark text-[18px] italic pl-5">
                                             No Selected questions
                                         </h1>
                                     )}
