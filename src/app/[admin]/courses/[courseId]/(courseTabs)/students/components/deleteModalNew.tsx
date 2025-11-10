@@ -90,9 +90,9 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel className="!text-gray-600 hover:border-[rgb(81,134,114)]">Cancel</AlertDialogCancel>
+                    <AlertDialogCancel className="hover:bg-primary-light">Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                        className="bg-red-500"
+                        className="bg-red-500 hover:bg-red-500"
                         onClick={() => deleteStudentHandler(userId, bootcampId)}
                     >
                         Continue

@@ -116,7 +116,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
             transition={{ duration: 0.2 }}
         >
             <Card
-                className={`shadow-sm my-2 w-full transition-all duration-300 ${
+                className={`shadow-sm my-2 w-full transition-all duration-300 hover:shadow-md ${
                     showBorderFlash
                         ? 'border-2 border-green-400 shadow-lg shadow-green-300/50 animate-border-flash'
                         : ''
@@ -148,7 +148,7 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                         </div>
 
                         <div 
-                            className="flex-1 flex items-center justify-between hover:bg-muted/20 p-2 rounded-md transition-colors"
+                            className="flex-1 flex items-center justify-between  p-2 rounded-md transition-colors"
                             onClick={handleModuleRoute}
                         >
                             <div className="text-left flex items-center gap-3 cursor-pointer w-full">
