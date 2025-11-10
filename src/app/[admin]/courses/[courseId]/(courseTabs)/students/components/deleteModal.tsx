@@ -99,7 +99,7 @@ export const DeleteModalDialog: React.FC<DeleteModalDialogProps> = ({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting}>
+                    <AlertDialogCancel className='hover:bg-primary-light' disabled={isDeleting}>
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
