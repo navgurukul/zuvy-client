@@ -10,9 +10,14 @@ import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from '@/app/[admin]/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
 import ApproveReattempt from '@/app/[admin]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
 
-export const columns: ColumnDef<Task>[] = [
+// Add interface for context data
+interface ColumnContext {
+    courseId: string;
+    assessment_Id: string;
+}
+
+export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     {
         accessorKey: 'student',
         header: 'Student',
@@ -214,11 +219,9 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
-            const params = useParams()
-            const courseId = params.courseId as string
-            const assessment_Id = params.assessment_Id as string
-            
-            const { userId, id, title, submitedAt } = row.original
+            const { userId, id, title, submitedAt } = row.original;
+            // Use context values instead of row.original
+            const { courseId, assessment_Id } = context;
 
             return (
                 <div className="flex items-center gap-3">
@@ -266,3 +269,5 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
 ]
+
+export const columns = getColumns({ courseId: '', assessment_Id: '' })
