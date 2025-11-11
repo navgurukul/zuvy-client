@@ -10,6 +10,7 @@ import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from '@/app/[admin]/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
 import ApproveReattempt from '@/app/[admin]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -213,26 +214,18 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
-            const { bootcampId, assessment_Id, userId, id, title, submitedAt } = row.original;
-
-            const handleDownload = () => {
-                DownloadReport({
-                    userInfo: {
-                        userId: String(userId),
-                        id: String(id),
-                        title: title ?? '',
-                    },
-                    submitedAt,
-                });
-            };
+            const params = useParams()
+            const courseId = params.courseId as string
+            const assessment_Id = params.assessment_Id as string
+            
+            const { userId, id, title, submitedAt } = row.original
 
             return (
                 <div className="flex items-center gap-3">
-                    {/* Eye Icon */}
                     <Link
                         href={
                             submitedAt
-                                ? `/admin/courses/${bootcampId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                                ? `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
                                 : '#'
                         }
                         className={
@@ -247,9 +240,9 @@ export const columns: ColumnDef<Task>[] = [
                     {/* Download Icon */}
                     <DownloadReport
                         userInfo={{
-                            userId: String(row.original.userId),
-                            id: String(row.original.id),
-                            title: row.original.title ?? ''
+                            userId: String(userId),
+                            id: String(id),
+                            title: title ?? ''
                         }}
                         submitedAt={submitedAt}
                     />
