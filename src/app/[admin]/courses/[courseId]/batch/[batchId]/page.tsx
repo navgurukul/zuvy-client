@@ -29,11 +29,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { columns } from './columns'
 
-import {
-    // getDeleteStudentStore,
-    // getStoreStudentData,
-    // useStudentData,
-} from '@/store/store'
+import // getDeleteStudentStore,
+// getStoreStudentData,
+// useStudentData,
+'@/store/store'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 // logic handled by useBatchDetail hook
@@ -107,12 +106,13 @@ const BatchesInfo = ({
         userIds,
     } = useBatchDetail(params)
 
-    
+    const pathname = usePathname()
+    const role = pathname.split('/')[1]
 
     return (
         <>
             <Link
-                href={`/admin/courses/${params.courseId}/batches`}
+                href={`/${role}/courses/${params.courseId}/batches`}
                 className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ArrowLeft size={20} />
@@ -490,22 +490,28 @@ const BatchesInfo = ({
                                     instructorInfo={instructorsInfo}
                                 />
                                 <Dialog
-                                    open={isAddStudentModalOpen} onOpenChange={setIsAddStudentModalOpen}>
+                                    open={isAddStudentModalOpen}
+                                    onOpenChange={setIsAddStudentModalOpen}
+                                >
                                     <DialogTrigger asChild>
                                         <Button className=" gap-x-2">
                                             <Plus /> Add Students
                                         </Button>
-                                    </DialogTrigger> 
+                                    </DialogTrigger>
                                     <DialogOverlay />
-                               <DialogContent className="max-w-[800px]">
+                                    <DialogContent className="max-w-[800px]">
                                         <DialogHeader>
-                                            <DialogTitle>Add Students</DialogTitle>
+                                            <DialogTitle>
+                                                Add Students
+                                            </DialogTitle>
                                         </DialogHeader>
                                         <AddStudentOptions
                                             context="batch"
                                             courseId={+params.courseId || 0}
-                                        batchId={params.batchId}
-                                            capEnrollment={instructorsInfo?.capEnrollment}
+                                            batchId={params.batchId}
+                                            capEnrollment={
+                                                instructorsInfo?.capEnrollment
+                                            }
                                             onSuccess={() => {
                                                 fetchStudentData(offset)
                                                 setIsAddStudentModalOpen(false)

@@ -167,8 +167,14 @@ const Courses: React.FC = () => {
         }
     }
 
+    console.log('permissions', permissions)
+
     const handleCardClick = (id: number) => {
-        router.push(`courses/${id}/details`)
+        if(permissions.editCourse) {
+            router.push(`courses/${id}/details`)
+        }else {
+            router.push(`courses/${id}/curriculum`)
+        }
         localStorage.setItem('courseId', id.toString())
     }
 
