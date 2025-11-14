@@ -20,7 +20,7 @@ import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalN
 import EditModal from '../../(courseTabs)/students/components/editModal'
 import { Input } from '@/components/ui/input'
 
-export const columns: ColumnDef<Task>[] = [
+export const createColumns = (permissions:any): ColumnDef<Task>[] => [
     {
         id: 'select',
         header: ({ table }) => (
