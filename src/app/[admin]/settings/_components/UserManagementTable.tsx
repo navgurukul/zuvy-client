@@ -36,12 +36,16 @@ interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     onSearchChange?: (isSearching: boolean) => void
+    roleId?: string
+    onRoleIdChange?: (roleId: string) => void
 }
 
 export function UserManagementTable<TData extends User, TValue>({
     columns,
     data: propData, // Rename to propData
     onSearchChange,
+    roleId = 'all',
+    onRoleIdChange,
 }: UserManagementTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -115,7 +119,7 @@ export function UserManagementTable<TData extends User, TValue>({
             setIsSearching(false)
             setSearchData([])
         }
-    }, []) // Run only once on mount
+    }, [fetchSearchResultsApi]) // Run only once on mount
 
     const table = useReactTable({
         data: displayData,
@@ -155,16 +159,10 @@ export function UserManagementTable<TData extends User, TValue>({
 
                 <div className="mt-2">
                     <Select
-                        value={
-                            (table
-                                .getColumn('roleName')
-                                ?.getFilterValue() as string) ?? 'all'
-                        }
-                        onValueChange={(value) =>
-                            table
-                                .getColumn('roleName')
-                                ?.setFilterValue(value === 'all' ? '' : value)
-                        }
+                        value={roleId}
+                        onValueChange={(value) => {
+                            onRoleIdChange?.(value)
+                        }}
                     >
                         <SelectTrigger className="w-48 bg-white">
                             <SelectValue placeholder="All Roles" />
@@ -177,7 +175,7 @@ export function UserManagementTable<TData extends User, TValue>({
                                 </SelectItem>
                             ) : (
                                 roles.map((role) => (
-                                    <SelectItem key={role.id} value={role.name} className='capitalize'>
+                                    <SelectItem key={role.id} value={String(role.id)} className='capitalize'>
                                         {role.name}
                                     </SelectItem>
                                 ))
