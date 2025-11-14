@@ -32,13 +32,15 @@ type UseAllUsersArgs = {
     searchTerm: string
     offset: number
     initialFetch?: boolean
+    roleId?: string | number
 }
 
 export function useAllUsers({
     initialFetch,
     limit,
     searchTerm,
-    offset}: UseAllUsersArgs) {
+    offset,
+    roleId}: UseAllUsersArgs) {
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
@@ -57,12 +59,14 @@ export function useAllUsers({
     }, [limit])
 
     const getAllUsers = useCallback(
-        async (offset: number) => {
+        async (offset: number, filterRoleId?: string | number) => {
             try {
                 // setLoading(true)
                 setLoading(false)
                 setError(null)
-                const res = await api.get<UsersResponse>(`/users/get/all/users?limit=${stableLimit}&offset=${offset}`)
+                const roleIdParam = filterRoleId || roleId
+                const roleQuery = roleIdParam ? `&roleId=${roleIdParam}` : ''
+                const res = await api.get<UsersResponse>(`/users/get/all/users?limit=${stableLimit}&offset=${offset}${roleQuery}`)
                 const allUsers = res.data || []
 
                 setUsers(allUsers.data)
@@ -80,12 +84,12 @@ export function useAllUsers({
                 setLoading(false)
             }
         },
-        [limit]
+        [roleId, stableLimit]
     )
 
     useEffect(() => {
         if (initialFetch) getAllUsers(offset)
-    }, [initialFetch, getAllUsers, offset, searchTerm, stableLimit])
+    }, [initialFetch, getAllUsers, offset, searchTerm, stableLimit, roleId])
 
     return {
         users,
