@@ -23,7 +23,7 @@ export function useRoles(initialFetch = true) {
     const getRoles = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await api.get<RolesResponse>('/users/get/roles')
+            const res = await api.get<RolesResponse>('/users/get/all/roles')
             setRoles(res.data.data || [])
             setError(null)
         } catch (err) {
