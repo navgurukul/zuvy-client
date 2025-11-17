@@ -68,7 +68,6 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     setTotalStudents,
                     setCurrentPage,
                 })
-                // setSelectedRows([])
                 setIsRowUnSelected(!isRowUnSelected)
             })
         } catch (error: any) {
