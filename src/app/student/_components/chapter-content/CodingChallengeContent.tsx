@@ -8,6 +8,7 @@ import { useParams, useRouter } from 'next/navigation';
 import CodingChallengeResult from './CodingChallengeResult';
 import { getDifficultyColor } from '@/lib/utils';
 import {CodingChallengeContentProps,CodingQuestions} from "@/app/student/_components/chapter-content/componentChapterType"
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 
 const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -100,9 +101,17 @@ const CodingChallengeContent: React.FC<CodingChallengeContentProps> = ({ chapter
       </div>
 
       {/* Description */}
-      <p className="text-muted-foreground mb-6 text-left leading-relaxed">
-        {question.description}
-      </p>
+   <ScrollArea 
+  className="mb-6 max-h-[180px] md:max-h-[260px] rounded-md pr-2"
+>
+  <p className="text-muted-foreground max-h-[180px] md:max-h-[260px] text-left leading-relaxed">
+    {question.description}
+  </p>
+
+  {/* ScrollBar for vertical scroll */}
+  <ScrollBar orientation="vertical" />
+</ScrollArea>
+
 
       {/* Action Button */}
       <div className="flex justify-center">
