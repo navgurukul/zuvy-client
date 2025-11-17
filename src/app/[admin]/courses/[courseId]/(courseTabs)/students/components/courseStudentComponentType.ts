@@ -22,6 +22,7 @@ export interface DeleteAlertDialogProps {
     description: string
     userId: any
     bootcampId: any
+    batchId?:any
     fetchStudentData?: any
     setSelectedRows?: any
 }

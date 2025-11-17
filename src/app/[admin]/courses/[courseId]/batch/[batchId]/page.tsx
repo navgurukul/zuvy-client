@@ -521,6 +521,7 @@ const BatchesInfo = ({
                                     <>
                                         <AlertDialogDemo
                                             userId={userIds}
+                                            batchId={(params.batchId)}
                                             bootcampId={parseInt(
                                                 params.courseId
                                             )}
