@@ -71,7 +71,6 @@ export function UserManagementTable<TData extends User, TValue>({
                 ...user,
                 id: user.userId, // Use userId as id for SearchBox
             }))
-            console.log('Fetched suggestions:', suggestions)
 
             return suggestions
         } catch (error) {
