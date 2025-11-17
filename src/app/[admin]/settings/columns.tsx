@@ -31,7 +31,7 @@ export const createColumns = (
         accessorKey: 'name',
         header: 'Name',
         cell: ({ row }) => (
-            <div className="font-medium text-gray-900">
+            <div className="font-medium text-left text-gray-900">
                 {row.getValue('name')}
             </div>
         ),
@@ -40,7 +40,7 @@ export const createColumns = (
         accessorKey: 'email',
         header: 'Email',
         cell: ({ row }) => (
-            <div className="text-gray-600">{row.getValue('email')}</div>
+            <div className="text-left text-gray-600">{row.getValue('email')}</div>
         ),
     },
     {
@@ -59,7 +59,7 @@ export const createColumns = (
         cell: ({ row }) => {
              const createdAt = row.original.createdAt
             return (
-                <div className="text-gray-600">{formatDate(createdAt)}</div>
+                <div className="text-left text-gray-600">{formatDate(createdAt)}</div>
             )
         },
     },
@@ -69,7 +69,7 @@ export const createColumns = (
         cell: ({ row }) => {
             const selectedUser = row.original
             return (
-                <div className="flex gap-1">
+                <div className="flex gap-1 text-left">
                     <Button
                         variant="ghost"
                         size="sm"

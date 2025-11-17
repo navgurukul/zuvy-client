@@ -27,13 +27,11 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { columns } from './columns'
 
-import {
-    // getDeleteStudentStore,
-    // getStoreStudentData,
-    // useStudentData,
-} from '@/store/store'
+import // getDeleteStudentStore,
+// getStoreStudentData,
+// useStudentData,
+'@/store/store'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 // logic handled by useBatchDetail hook
@@ -57,6 +55,8 @@ const BatchesInfo = ({
         userRole,
         students,
         setStudents,
+        permissions,
+        columns,
         studentsData,
         setStoreStudentData,
         allBatches,
@@ -107,12 +107,13 @@ const BatchesInfo = ({
         userIds,
     } = useBatchDetail(params)
 
-    
+    const pathname = usePathname()
+    const role = pathname.split('/')[1]
 
     return (
         <>
             <Link
-                href={`/admin/courses/${params.courseId}/batches`}
+                href={`/${role}/courses/${params.courseId}/batches`}
                 className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ArrowLeft size={20} />
@@ -343,169 +344,202 @@ const BatchesInfo = ({
                                 />
                             </div>
                             <div className="flex items-center gap-x-4 text-sm">
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <button
-                                            className="flex"
-                                            onClick={toggleForm}
-                                        >
-                                            <Pencil
-                                                size={18}
-                                                className="mx-1"
-                                            />
-                                            Edit Batch
-                                        </button>
-                                    </DialogTrigger>
-                                    <DialogContent>
-                                        <DialogHeader>
-                                            <DialogTitle>
-                                                Update Batch
-                                            </DialogTitle>
-                                            <Form {...form}>
-                                                <form
-                                                    onSubmit={form.handleSubmit(
-                                                        onSubmit
-                                                    )}
-                                                    className="space-y-8"
-                                                >
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="name"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Batch Name
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="Batch Name"
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
+                                {permissions.editBatch && (
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <button
+                                                className="flex"
+                                                onClick={toggleForm}
+                                            >
+                                                <Pencil
+                                                    size={18}
+                                                    className="mx-1"
+                                                />
+                                                Edit Batch
+                                            </button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>
+                                                    Update Batch
+                                                </DialogTitle>
+                                                <Form {...form}>
+                                                    <form
+                                                        onSubmit={form.handleSubmit(
+                                                            onSubmit
                                                         )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="instructorEmail"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Instructor
-                                                                    Email
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="Instructor Email"
-                                                                        type="name"
-                                                                        {...field}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="capEnrollment"
-                                                        render={({ field }) => (
-                                                            <FormItem>
-                                                                <FormLabel>
-                                                                    Cap
-                                                                    Enrollment
-                                                                </FormLabel>
-                                                                <FormControl>
-                                                                    <Input
-                                                                        placeholder="Cap Enrollment"
-                                                                        type="name"
-                                                                        {...field}
-                                                                        onChange={(
-                                                                            e
-                                                                        ) => {
-                                                                            // Prevent entering more than 6 digits
-                                                                            const value =
+                                                        className="space-y-8"
+                                                    >
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name="name"
+                                                            render={({
+                                                                field,
+                                                            }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Batch
+                                                                        Name
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="Batch Name"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name="instructorEmail"
+                                                            render={({
+                                                                field,
+                                                            }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Instructor
+                                                                        Email
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="Instructor Email"
+                                                                            type="name"
+                                                                            {...field}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormField
+                                                            control={
+                                                                form.control
+                                                            }
+                                                            name="capEnrollment"
+                                                            render={({
+                                                                field,
+                                                            }) => (
+                                                                <FormItem>
+                                                                    <FormLabel>
+                                                                        Cap
+                                                                        Enrollment
+                                                                    </FormLabel>
+                                                                    <FormControl>
+                                                                        <Input
+                                                                            placeholder="Cap Enrollment"
+                                                                            type="name"
+                                                                            {...field}
+                                                                            onChange={(
                                                                                 e
-                                                                                    .target
-                                                                                    .value
-                                                                            if (
-                                                                                value.length <=
-                                                                                6
-                                                                            ) {
-                                                                                field.onChange(
+                                                                            ) => {
+                                                                                // Prevent entering more than 6 digits
+                                                                                const value =
                                                                                     e
-                                                                                )
-                                                                            }
-                                                                        }}
-                                                                    />
-                                                                </FormControl>
-                                                                <FormMessage />
-                                                            </FormItem>
-                                                        )}
-                                                    />
-                                                    <FormDescription>
-                                                        This form will Update
-                                                        the batch info
-                                                    </FormDescription>
-                                                    <div className="w-full flex flex-col items-end gap-y-5 ">
-                                                        <DialogClose asChild>
-                                                            <Button
-                                                                className="w-1/2"
-                                                                type="submit"
-                                                                disabled={
-                                                                    !form
-                                                                        .formState
-                                                                        .isValid
-                                                                }
+                                                                                        .target
+                                                                                        .value
+                                                                                if (
+                                                                                    value.length <=
+                                                                                    6
+                                                                                ) {
+                                                                                    field.onChange(
+                                                                                        e
+                                                                                    )
+                                                                                }
+                                                                            }}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormMessage />
+                                                                </FormItem>
+                                                            )}
+                                                        />
+                                                        <FormDescription>
+                                                            This form will
+                                                            Update the batch
+                                                            info
+                                                        </FormDescription>
+                                                        <div className="w-full flex flex-col items-end gap-y-5 ">
+                                                            <DialogClose
+                                                                asChild
                                                             >
-                                                                Update batch
-                                                            </Button>
-                                                        </DialogClose>
-                                                    </div>
-                                                </form>
-                                            </Form>
-                                        </DialogHeader>
-                                    </DialogContent>
-                                </Dialog>
-                                <Trash2
-                                    onClick={() => setDeleteModalOpen(true)}
-                                    className="text-destructive cursor-pointer"
-                                    size={20}
-                                ></Trash2>
-                                <span
-                                    onClick={() => setDeleteModalOpen(true)}
-                                    className=" cursor-pointer mr-2"
-                                >
-                                    Delete
-                                </span>
-
-                                <DeleteConfirmationModal
-                                    isOpen={isDeleteModalOpen}
-                                    onClose={() => setDeleteModalOpen(false)}
-                                    onConfirm={batchDeleteHandler}
-                                    modalText="Type the batch name to confirm deletion"
-                                    modalText2="Batch Name"
-                                    input={true}
-                                    buttonText="Delete Batch"
-                                    instructorInfo={instructorsInfo}
-                                />
+                                                                <Button
+                                                                    className="w-1/2"
+                                                                    type="submit"
+                                                                    disabled={
+                                                                        !form
+                                                                            .formState
+                                                                            .isValid
+                                                                    }
+                                                                >
+                                                                    Update batch
+                                                                </Button>
+                                                            </DialogClose>
+                                                        </div>
+                                                    </form>
+                                                </Form>
+                                            </DialogHeader>
+                                        </DialogContent>
+                                    </Dialog>
+                                )}
+                                {permissions.deleteBatch && (
+                                    <>
+                                        <Trash2
+                                            onClick={() =>
+                                                setDeleteModalOpen(true)
+                                            }
+                                            className="text-destructive cursor-pointer"
+                                            size={20}
+                                        ></Trash2>
+                                        <span
+                                            onClick={() =>
+                                                setDeleteModalOpen(true)
+                                            }
+                                            className=" cursor-pointer mr-2"
+                                        >
+                                            Delete
+                                        </span>
+                                        <DeleteConfirmationModal
+                                            isOpen={isDeleteModalOpen}
+                                            onClose={() =>
+                                                setDeleteModalOpen(false)
+                                            }
+                                            onConfirm={batchDeleteHandler}
+                                            modalText="Type the batch name to confirm deletion"
+                                            modalText2="Batch Name"
+                                            input={true}
+                                            buttonText="Delete Batch"
+                                            instructorInfo={instructorsInfo}
+                                        />
+                                    </>
+                                )}
                                 <Dialog
-                                    open={isAddStudentModalOpen} onOpenChange={setIsAddStudentModalOpen}>
+                                    open={isAddStudentModalOpen}
+                                    onOpenChange={setIsAddStudentModalOpen}
+                                >
                                     <DialogTrigger asChild>
                                         <Button className=" gap-x-2">
                                             <Plus /> Add Students
                                         </Button>
-                                    </DialogTrigger> 
+                                    </DialogTrigger>
                                     <DialogOverlay />
-                               <DialogContent className="max-w-[800px]">
+                                    <DialogContent className="max-w-[800px]">
                                         <DialogHeader>
-                                            <DialogTitle>Add Students</DialogTitle>
+                                            <DialogTitle>
+                                                Add Students
+                                            </DialogTitle>
                                         </DialogHeader>
                                         <AddStudentOptions
                                             context="batch"
                                             courseId={+params.courseId || 0}
-                                        batchId={params.batchId}
-                                            capEnrollment={instructorsInfo?.capEnrollment}
+                                            batchId={params.batchId}
+                                            capEnrollment={
+                                                instructorsInfo?.capEnrollment
+                                            }
                                             onSuccess={() => {
                                                 fetchStudentData(offset)
                                                 setIsAddStudentModalOpen(false)

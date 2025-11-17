@@ -14,6 +14,8 @@ import { POSITION } from '@/utils/constant'
 import { useStudentData } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
 import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
 import type { StudentDataPage } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
+import { PermissionsType } from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+import { createColumns } from '@/app/[admin]/courses/[courseId]/batch/[batchId]/columns'
 
 export default function useBatchDetail(params: { courseId: string; batchId: string }) {
     const router = useRouter()
@@ -44,6 +46,12 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const [loading, setLoading] = useState(true)
     const [selectedRows, setSelectedRows] = useState<StudentDataPage[]>([])
     const [studentDataTable, setStudentDataTable] = useState<StudentDataState | any>({})
+    const [permissions, setPermissions] = useState<PermissionsType>({
+        createBatch: false,
+        deleteBatch: false,
+        editBatch: false,
+        viewBatch: false,
+    })
 
     const formSchema = z.object({
         name: z.string().min(2, { message: 'Batch name must be at least 2 characters.' }),
@@ -87,9 +95,10 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const fetchBatches = useCallback(
         async (courseId: string) => {
             try {
-                const response = await api.get<{ data: any[] }>(`/bootcamp/batches/${courseId}`)
+                const response = await api.get(`/bootcamp/batches/${courseId}`)
                 const batchData: BatchOption[] = response.data.data?.map((data: any) => ({ value: data.id, label: data.name }))
                 setAllBatches(batchData)
+                setPermissions(response.data?.permissions)
             } catch (error: any) {
                 if (axios.isAxiosError(error)) {
                     if (error?.response?.data.message === 'Bootcamp not found!') {
@@ -219,12 +228,15 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     }, [fetchStudentData])
 
     const userIds = selectedRows.map((item: SelecteItem) => item.userId)
+    const columns = useMemo(() => createColumns(permissions), [permissions])
 
     return {
         router,
         userRole,
         students,
         setStudents,
+        permissions,
+        columns,
         studentsData,
         setStoreStudentData,
         allBatches,
