@@ -33,7 +33,7 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     setSelectedRows,
 }) => {
     const params = useParams()
-    const actualBatchId = batchId || params.batchId
+    const selectedBatchId = batchId || params.batchId
     
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
     const {
@@ -58,7 +58,7 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                 })
                 fetchBatchStudentsHandler({
                     courseId: bootcampId,
-                    batchId:actualBatchId,
+                    batchId:selectedBatchId,
                     limit,
                     offset,
                     searchTerm: search,
