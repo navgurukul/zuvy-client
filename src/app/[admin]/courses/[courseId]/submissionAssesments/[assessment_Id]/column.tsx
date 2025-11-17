@@ -11,7 +11,13 @@ import DownloadReport from '@/app/[admin]/courses/[courseId]/submissionAssesment
 import ApproveReattempt from '@/app/[admin]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
 
-export const columns: ColumnDef<Task>[] = [
+// Add interface for context data
+interface ColumnContext {
+    courseId: string;
+    assessment_Id: string;
+}
+
+export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     {
         accessorKey: 'student',
         header: 'Student',
@@ -213,26 +219,16 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
-            const { bootcampId, assessment_Id, userId, id, title, submitedAt } = row.original;
-
-            const handleDownload = () => {
-                DownloadReport({
-                    userInfo: {
-                        userId: String(userId),
-                        id: String(id),
-                        title: title ?? '',
-                    },
-                    submitedAt,
-                });
-            };
+            const { userId, id, title, submitedAt } = row.original;
+            // Use context values instead of row.original
+            const { courseId, assessment_Id } = context;
 
             return (
                 <div className="flex items-center gap-3">
-                    {/* Eye Icon */}
                     <Link
                         href={
                             submitedAt
-                                ? `/admin/courses/${bootcampId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                                ? `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
                                 : '#'
                         }
                         className={
@@ -247,9 +243,9 @@ export const columns: ColumnDef<Task>[] = [
                     {/* Download Icon */}
                     <DownloadReport
                         userInfo={{
-                            userId: String(row.original.userId),
-                            id: String(row.original.id),
-                            title: row.original.title ?? ''
+                            userId: String(userId),
+                            id: String(id),
+                            title: title ?? ''
                         }}
                         submitedAt={submitedAt}
                     />
@@ -273,3 +269,5 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
 ]
+
+export const columns = getColumns({ courseId: '', assessment_Id: '' })
