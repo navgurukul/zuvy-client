@@ -39,7 +39,6 @@ export type TestCase = {
     time?: number;
     stdout:string
   testCases: {
-    // TestCase
     map(arg0: (testCase: TestCase, index: number) => JSX.Element): import("react").ReactNode;
     inputs: any;
     expectedOutput: {

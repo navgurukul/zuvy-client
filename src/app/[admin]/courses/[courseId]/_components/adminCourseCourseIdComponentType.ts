@@ -172,6 +172,7 @@ export type FormComponentProps = {
     moduleId: number
     data: any
     moduleName: string
+    totalStudents: number
     debouncedSearch: string
 }
 
