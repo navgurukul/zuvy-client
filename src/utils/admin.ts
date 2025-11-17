@@ -712,6 +712,58 @@ export const fetchStudentsHandler = async ({
     }
 }
 
+interface FetchBatchStudentsParams {
+    courseId: string
+    batchId: string
+    limit: number
+    offset: number
+    searchTerm: string
+    setLoading: (loading: boolean) => void
+    setStudents: (students: any[]) => void
+    setTotalPages: (pages: number) => void
+    setTotalStudents: (count: number) => void
+    setCurrentPage: (page: number) => void
+    showError?: boolean
+}
+
+export const fetchBatchStudentsHandler = async ({
+    courseId,
+    batchId,
+    limit,
+    offset,
+    searchTerm,
+    setLoading,
+    setStudents,
+    setTotalPages,
+    setTotalStudents,
+    setCurrentPage,
+    showError = true,
+}: FetchBatchStudentsParams) => {
+    setLoading(true)
+    const endpoint = searchTerm
+    ? `/bootcamp/students/${courseId}?batch_id=${batchId}&searchTerm=${searchTerm}`
+    : `/bootcamp/students/${courseId}?batch_id=${batchId}&limit=${limit}&offset=${offset}`
+
+    try {
+        const res = await api.get(endpoint)
+        setStudents(res.data.modifiedStudentInfo)
+        setTotalPages(res.data.totalPages)
+        setTotalStudents(res.data.totalNumberOfStudents || res.data.totalStudentsCount)
+        setCurrentPage(res.data.currentPage)
+
+    } catch (error) {
+        if (showError) {
+            toast.error({
+                title: "Error",
+                description: "Failed to fetch students",
+            })
+        }
+    } finally {
+        setLoading(false)
+    }
+}
+
+
 export function cleanUpValues(value: string) {
     if (!value) return ''
 

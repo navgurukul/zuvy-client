@@ -13,30 +13,19 @@ const FormComponent = ({
     moduleId,
     data,
     moduleName,
+    totalStudents,
 }: FormComponentProps) => {
-    const [totalStudents, setTotalStudents] = useState(0)
-
-    useEffect(() => {
-        const fetchFormDataHandler = async () => {
-            const url = `/submission/submissionsOfAssignment/${bootcampId}`
-            const res = await api.get(url)
-            setTotalStudents(res.data.data.totalStudents)
-        }
-
-        fetchFormDataHandler()
-    }, [bootcampId])
-
     return (
         <div className="relative bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full">
             <div className="flex flex-col w-full justify-between">
                 <div className="flex items-center gap-2">
-                    <div className="p-2rounded-md">
+                    <div className="p-2 rounded-md">
                         <MessageSquare className="w-4 h-4"/>
                     </div>
                     <h3 className="font-medium text-base">{data.title}</h3>
                 </div>
                 <div className="absolute top-2 right-1">
-                {data.submitStudents > 0 ? (
+                    {data.submitStudents > 0 ? (
                         <Link
                             href={{
                                 pathname: `/admin/courses/${bootcampId}/submissionForm/${data.id}`,
@@ -45,22 +34,21 @@ const FormComponent = ({
                                 },
                             }}
                         >
-                                <Button
-                                    variant="ghost"
-                                    className="hover:bg-white-600 hover:text-gray-700 transition-colors"                               
-                                >
-                                    
-                                    <Eye size={20}  className="text-gray-500" />
-                                </Button>
+                            <Button
+                                variant="ghost"
+                                className="hover:bg-white-600 hover:text-gray-700 transition-colors"                               
+                            >
+                                <Eye size={20} className="text-gray-500" />
+                            </Button>
                         </Link>
                     ) : (
-                            <Button
-                                className="text-gray-400"
-                                variant="ghost"
-                                disabled={data.submitStudents === 0}
-                            >
-                                <Eye size={20}  className="ml-1" />
-                            </Button>
+                        <Button
+                            className="text-gray-400"
+                            variant="ghost"
+                            disabled={data.submitStudents === 0}
+                        >
+                            <Eye size={20}  className="ml-1" />
+                        </Button>
                     )}
                 </div>
                 <div className="flex items-center justify-between mt-4 text-sm">

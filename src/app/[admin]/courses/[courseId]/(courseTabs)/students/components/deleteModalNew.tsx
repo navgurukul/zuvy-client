@@ -14,22 +14,27 @@ import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import { fetchStudentsHandler } from '@/utils/admin'
+import { fetchBatchStudentsHandler } from '@/utils/admin'
 import {
     getStoreStudentDataNew,
     getStoreStudentData,
     getIsRowSelected,
 } from '@/store/store'
 import{DeleteAlertDialogProps} from "@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/courseStudentComponentType"
+import { useParams } from 'next/navigation'
 
 export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
     title,
     description,
     userId,
     bootcampId,
+    batchId,
     fetchStudentData,
     setSelectedRows,
 }) => {
+    const params = useParams()
+    const selectedBatchId = batchId || params.batchId
+    
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
     const {
         setStudents,
@@ -51,9 +56,9 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     title: 'User Deleted Successfully!',
                     description: res.data.message,
                 })
-                fetchStudentData && fetchStudentData()
-                fetchStudentsHandler({
+                fetchBatchStudentsHandler({
                     courseId: bootcampId,
+                    batchId:selectedBatchId,
                     limit,
                     offset,
                     searchTerm: search,
@@ -63,7 +68,6 @@ export const AlertDialogDemo: React.FC<DeleteAlertDialogProps> = ({
                     setTotalStudents,
                     setCurrentPage,
                 })
-                // setSelectedRows([])
                 setIsRowUnSelected(!isRowUnSelected)
             })
         } catch (error: any) {
