@@ -93,8 +93,8 @@ const Page = ({ params }: PageParams) => {
         <>
             {codingSubmissiondata && (
                 <div>
-                    <MaxWidthWrapper className="flex flex-col gap-y-4 text-gray-600">
-                        <div className="flex items-center gap-4 mb-8">
+                    <MaxWidthWrapper className="container mx-auto px-2 pt-2 pb-2 max-w-7xl">
+                        <div className="flex items-center gap-4 mb-8 mt-8">
                             <Button
                                 variant="ghost"
                                 onClick={() => router.back()}
