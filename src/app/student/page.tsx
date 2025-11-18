@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import StudentDashboard from './_pages/StudentDashboard';
-import FlashAnnouncementDialog from '../_components/FlashAnnouncement';
+// import FlashAnnouncementDialog from '../_components/FlashAnnouncement';
 
 
 
@@ -27,7 +27,7 @@ const Page = () => {
 
   return (
     <div>
-      {showAnnouncement && <FlashAnnouncementDialog />}
+      {/* {showAnnouncement && <FlashAnnouncementDialog />} */}
       <StudentDashboard />
     </div>
   );
