@@ -18,7 +18,7 @@ interface PermissionAlertProps {
 const PermissionAlert: React.FC<PermissionAlertProps> = ({
     alertOpen,
     setAlertOpen,
-    message = "You don&apos;t have permission to edit this chapter. Please contact an admin to request access.",
+    message = "You don't have permission to edit this chapter. Please contact an admin to request access.",
 }) => {
     return (
         <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
