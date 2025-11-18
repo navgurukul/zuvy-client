@@ -29,11 +29,13 @@ const Dropzone = ({
     setIsPdfUploaded,
     onDeletePdfhandler,
     setDisableButton,
+    disabled = false,
 }: UploadProps) => {
     const [previewPdfLink, setPreviewPdfLink] = useState<string | null>(null)
     const [open, setIsOpen] = useState(false)
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
+        if (disabled) return
         const pdfFile = acceptedFiles[0]
         if (pdfFile && pdfFile.type === 'application/pdf') {
             setFile(pdfFile)
@@ -59,9 +61,11 @@ const Dropzone = ({
             'application/pdf': ['.pdf'],
         },
         onDrop,
+        disabled,
     })
 
     function onConfirm() {
+        if (disabled) return
         onDeletePdfhandler()
         removeFile()
         setDisableButton(true)
@@ -84,6 +88,12 @@ const Dropzone = ({
                 {...getRootProps({
                     className: `border-2 border-dashed border-gray-300 rounded-lg cursor-pointer w-full h-[150px] flex justify-center items-center transition-colors hover:border-gray-500 ${className}`,
                 })}
+                aria-disabled={disabled}
+                style={
+                    disabled
+                        ? { pointerEvents: 'none', opacity: 0.6 }
+                        : undefined
+                }
             >
                 <input {...getInputProps()} />
                 {isDragActive ? (
@@ -129,8 +139,14 @@ const Dropzone = ({
                                                 )}
                                         </Link>
                                         <Dialog>
-                                            <DialogTrigger>
-                                                <Trash2 className="text-red-500 w-4 cursor-pointer " />
+                                            <DialogTrigger asChild>
+                                                <button
+                                                    type="button"
+                                                    disabled={disabled}
+                                                    className="disabled:cursor-not-allowed"
+                                                >
+                                                    <Trash2 className="text-red-500 w-4 cursor-pointer disabled:opacity-50" />
+                                                </button>
                                             </DialogTrigger>
                                             <DialogContent className="sm:max-w-md [&>button.absolute.right-4.top-4]:hidden">
                                                 <DialogHeader>
@@ -153,6 +169,7 @@ const Dropzone = ({
                                                     <Button
                                                         variant="destructive"
                                                         onClick={onConfirm}
+                                                        disabled={disabled}
                                                     >
                                                         Delete
                                                     </Button>

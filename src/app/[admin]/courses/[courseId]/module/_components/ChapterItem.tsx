@@ -40,6 +40,7 @@ function ChapterItem({
     onDragStart,
     onDragEnd,
     showBorderFlash,
+    canDeleteChapter = true,
 }: ChapterItems) {
     // states and variables
     const { courseId } = useParams()
@@ -187,20 +188,22 @@ function ChapterItem({
                             </h5>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Trash2
-                                onClick={(e) => {
-                                    if (!isBeingDragged && !isDragging) {
-                                        handleDeleteModal()
-                                    }
-                                }}
-                                className="hover:text-destructive cursor-pointer transition-colors"
-                                size={15}
-                                style={{
-                                    pointerEvents: isBeingDragged
-                                        ? 'none'
-                                        : 'auto',
-                                }}
-                            />
+                            {canDeleteChapter && (
+                                <Trash2
+                                    onClick={(e) => {
+                                        if (!isBeingDragged && !isDragging) {
+                                            handleDeleteModal()
+                                        }
+                                    }}
+                                    className="hover:text-destructive cursor-pointer transition-colors"
+                                    size={15}
+                                    style={{
+                                        pointerEvents: isBeingDragged
+                                            ? 'none'
+                                            : 'auto',
+                                    }}
+                                />
+                            )}
                             <GripVertical
                                 style={{
                                     cursor: isBeingDragged

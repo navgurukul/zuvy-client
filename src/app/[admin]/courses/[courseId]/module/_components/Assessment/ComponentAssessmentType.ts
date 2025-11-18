@@ -8,6 +8,7 @@ export type AddAssessmentProps = {
     moduleId: string
     topicId: number
     activeChapterTitle: string
+    canEdit?: boolean
 }
 
 export type Tag = {

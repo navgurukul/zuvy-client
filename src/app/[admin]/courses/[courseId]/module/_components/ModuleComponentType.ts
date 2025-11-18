@@ -39,6 +39,7 @@ export type ChapterItems={
     onDragStart: () => void
     onDragEnd: () => void
     showBorderFlash?: boolean
+    canDeleteChapter?: boolean
 }
 
 

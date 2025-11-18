@@ -28,6 +28,7 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/_components/video/ModuleVideoType'
 import { getEmbedLink, isLinkValid } from '@/utils/admin'
 import useEditChapter from '@/hooks/useEditChapter'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 
@@ -59,6 +60,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
     courseId,
     content,
     fetchChapterContent,
+    canEdit = true,
 }) => {
     // const heightClass = useResponsiveHeight()
     const router = useRouter()
@@ -73,6 +75,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
     const { editChapter, loading: editChapterLoading } = useEditChapter()
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -94,6 +97,9 @@ const AddVideo: React.FC<AddVideoProps> = ({
     } = form
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        if (!canEdit) {
+            return
+        }
         const modifiedLink = getEmbedLink(values.links)
 
         const convertedObj = {
@@ -139,6 +145,9 @@ const AddVideo: React.FC<AddVideoProps> = ({
     }, [content?.contentDetails, form])
 
     const handleClose = async () => {
+        if (!canEdit) {
+            return
+        }
         setShowVideoBox(false)
         form.setValue('links', '')
         form.setValue('description', '')
@@ -221,6 +230,13 @@ const AddVideo: React.FC<AddVideoProps> = ({
                     />
                 ) : ( */}
                 <>
+                    {!canEdit && (
+                        <PermissionAlert
+                            alertOpen={alertOpen}
+                            setAlertOpen={setAlertOpen}
+                        />
+                    )}
+                    <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                     <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(onSubmit)}
@@ -246,6 +262,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                         'Untitled Video'
                                                     }
                                                     className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                    disabled={!canEdit}
                                                 />
                                                 {/* {!videoTitle && (
                                                     <Pencil
@@ -344,6 +361,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                 {...field}
                                                 className="px-3 py-2 border rounded-md "
                                                 placeholder="Type your Description here."
+                                                disabled={!canEdit}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -367,6 +385,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                                 {...field}
                                                 className="px-3 py-2 border rounded-md "
                                                 placeholder="Paste your link here "
+                                                disabled={!canEdit}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -375,9 +394,10 @@ const AddVideo: React.FC<AddVideoProps> = ({
                             />
                             <div className="flex justify-end items-center gap-4 pt-6">
                                 <Button
-                                    type="submit"
+                                    type="button"
                                     variant="outline"
                                     className="w-3/3"
+                                    disabled={!canEdit}
                                 >
                                     Cancel
                                 </Button>
@@ -391,10 +411,16 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                 <Button
                                     type="submit"
                                     disabled={
-                                        !isDirty || !isValid || isSubmitting
+                                        !canEdit ||
+                                        !isDirty ||
+                                        !isValid ||
+                                        isSubmitting
                                     }
                                     className={`w-3/3 text-primary-foreground hover:bg-primary/90 ${
-                                        !isDirty || !isValid || isSubmitting
+                                        !canEdit ||
+                                        !isDirty ||
+                                        !isValid ||
+                                        isSubmitting
                                             ? 'bg-muted/20 cursor-not-allowed opacity-70'
                                             : 'bg-primary'
                                     }`}
@@ -406,6 +432,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                             </div>
                         </form>
                     </Form>
+                    </div>
                 </>
                 {/* )} */}
             </div>

@@ -394,6 +394,29 @@ type Chapter = {
     order: number
 }
 
+export type ChapterPermissions = {
+    viewChapter?: boolean
+    createChapter?: boolean
+    editChapter?: boolean
+    deleteChapter?: boolean
+}
+
+type ChapterPermissionState = {
+    chapterPermissions: ChapterPermissions | null
+    setChapterPermissions: (
+        newValue: ChapterPermissions | null
+    ) => void
+}
+
+export const getChapterPermissionState = create<ChapterPermissionState>(
+    (set) => ({
+        chapterPermissions: null,
+        setChapterPermissions: (newValue) => {
+            set({ chapterPermissions: newValue })
+        },
+    })
+)
+
 type chapterData = {
     chapterData: Chapter[]
     setChapterData: (newValue: Chapter[]) => void

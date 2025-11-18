@@ -3,6 +3,7 @@ export type LiveClassProps = {
     content: any
     moduleId: any
     courseId: any
+    canEdit?: boolean
 }
 
 export interface SessionDetail{

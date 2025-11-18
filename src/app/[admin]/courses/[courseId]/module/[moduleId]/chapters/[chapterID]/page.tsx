@@ -18,6 +18,7 @@ import {
     getCurrentChapterState,
     getTopicId,
     getActiveChapter,
+    getChapterPermissionState,
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -48,6 +49,8 @@ export default function Page({
     const [activeChapter, setActiveChapter] = useState(chapter_id)
     // const { activeChapter, setActiveChapter } = getActiveChapter(chapter_id)()
     const { topicId } = getTopicId()
+    const { chapterPermissions } = getChapterPermissionState()
+    const canEditChapter = chapterPermissions?.editChapter ?? true
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
@@ -129,6 +132,7 @@ export default function Page({
                             courseId={courseId}
                             content={chapterContent}
                             fetchChapterContent={fetchChapterContent}
+                            canEdit={canEditChapter}
                         />
                     )
                 case 2:
@@ -141,6 +145,7 @@ export default function Page({
                             setArticleUpdateOnPreview={
                                 setArticleUpdateOnPreview
                             }
+                            canEdit={canEditChapter}
                         />
                     )
                 case 3:
@@ -151,6 +156,7 @@ export default function Page({
                             courseId={courseId}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
+                            canEdit={canEditChapter}
                         />
                     )
                 case 4:
@@ -162,6 +168,7 @@ export default function Page({
                             courseId={courseId}
                             content={chapterContent}
                             activeChapterTitle={activeChapterTitle}
+                            canEdit={canEditChapter}
                         />
                     )
                 case 5:
@@ -176,6 +183,7 @@ export default function Page({
                             setAssignmentUpdateOnPreview={
                                 setAssignmentUpdateOnPreview
                             }
+                            canEdit={canEditChapter}
                         />
                     )
                 case 6:
@@ -188,6 +196,7 @@ export default function Page({
                             moduleId={moduleID}
                             topicId={topicId}
                             activeChapterTitle={activeChapterTitle}
+                            canEdit={canEditChapter}
                         />
                     )
                 case 7:
@@ -199,6 +208,7 @@ export default function Page({
                             // fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
                             courseId={courseId}
+                            canEdit={canEditChapter}
                         />
                     )
 
@@ -210,6 +220,7 @@ export default function Page({
                             // fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
                             courseId={courseId}
+                            canEdit={canEditChapter}
                         />
                     )
                 default:
