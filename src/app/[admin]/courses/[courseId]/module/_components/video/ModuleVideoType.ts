@@ -33,6 +33,8 @@ export type AddVideoProps = {
   courseId: any 
   content: Content
   fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
+  setIsChapterLoading: (value: boolean) => void;  
+  isChapterLoading: boolean;  
 }
 
 // PreviewVideo

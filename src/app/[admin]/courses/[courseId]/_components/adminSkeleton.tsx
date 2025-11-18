@@ -3,6 +3,8 @@ import React from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator'
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+
 
 // CoursesSkeleton
 export const CoursesSkeleton: React.FC = () => {
@@ -745,3 +747,85 @@ export const OpenEndedQuestionsSkeleton = () => {
     </div>
   )
 }
+
+
+
+// ModuleContentSkeletons
+export const ModuleContentSkeletons = () => {
+  return (
+    <div className="h-screen flex">
+      {/* Mobile Header Skeleton */}
+      <div className="lg:hidden px-4 py-4 border-b border-border flex items-center justify-between">
+        <div className="h-6 bg-muted rounded animate-pulse w-48"></div>
+        <div className="h-10 w-10 bg-muted rounded animate-pulse"></div>
+      </div>
+
+      {/* Desktop Sidebar Skeleton */}
+      <div className="hidden lg:block w-64 h-screen bg-background border-r border-border flex flex-col">
+        <div className="p-4 border-b border-border flex-shrink-0">
+          <div className="h-4 bg-muted rounded animate-pulse mb-4 w-24"></div>
+          <div className="h-6 bg-muted rounded animate-pulse mb-2"></div>
+          <div className="h-4 bg-muted rounded animate-pulse w-32"></div>
+        </div>
+        
+        <div className="border-t border-border flex-shrink-0"></div>
+        
+        <ScrollArea className="flex-1">
+          <div className="p-3 space-y-3">
+            {/* Topic Skeleton */}
+            <div className="space-y-2">
+              <div className="h-10 bg-muted rounded animate-pulse"></div>
+              
+              {/* Items Skeleton */}
+              <div className="space-y-1 pl-0">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                  <div key={i} className="flex items-start gap-2 p-2">
+                    <div className="w-6 h-6 bg-muted rounded animate-pulse flex-shrink-0 mt-1"></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="h-4 bg-muted rounded animate-pulse mb-1"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-20"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <ScrollBar />
+        </ScrollArea>
+      </div>
+    </div>
+  );
+};
+
+
+// Curriculam page VideoSkeletons
+export const VideoSkeletons = () => (
+    <div className="min-h-[70vh] bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0">
+        <div className="max-w-4xl mx-auto">
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                    <div className="space-y-4 w-full">
+                        <div className="h-7 w-2/3 bg-muted rounded animate-pulse"></div>{' '}
+                        {/* Title */}
+                        <div className="space-y-2">
+                            <div className="h-4 w-full bg-muted rounded animate-pulse"></div>
+                            <div className="h-4 w-5/6 bg-muted rounded animate-pulse"></div>
+                        </div>
+                    </div>
+                    <div className="h-6 w-20 bg-muted rounded animate-pulse"></div>{' '}
+                    {/* Badge */}
+                </div>
+                {/* Video Player */}
+                <div className="aspect-video w-full bg-muted rounded-xl animate-pulse relative">
+                    <div className="absolute top-4 left-4 h-6 w-20 bg-muted/70 rounded-full animate-pulse"></div>
+                </div>
+                {/* Mark as Watched Button */}
+                <div className="flex justify-end">
+                    <div className="h-10 w-40 bg-muted rounded-lg animate-pulse"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+)
+

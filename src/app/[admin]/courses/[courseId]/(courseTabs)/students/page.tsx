@@ -76,7 +76,7 @@ const StudentsPage = ({ params }: { params: any }) => {
   const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [batchFilter, setBatchFilter] = useState<string>('all')
-  const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
+  const [attendanceFilter, setAttendanceFilter] = useState<string>('') 
   const [loading, setLoading] = useState(true)
 
 

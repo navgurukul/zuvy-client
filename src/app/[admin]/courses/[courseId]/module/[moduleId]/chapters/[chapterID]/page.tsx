@@ -128,8 +128,9 @@ export default function Page({
                             moduleId={moduleID}
                             courseId={courseId}
                             content={chapterContent}
-                            fetchChapterContent={fetchChapterContent}
-                        />
+                            fetchChapterContent={fetchChapterContent} setIsChapterLoading={function (value: boolean): void {
+                                throw new Error('Function not implemented.')
+                            } } isChapterLoading={false}                        />
                     )
                 case 2:
                     return (

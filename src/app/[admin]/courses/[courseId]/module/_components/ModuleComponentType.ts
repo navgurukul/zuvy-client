@@ -20,7 +20,6 @@ export type AddLiveClass={
     moduleId: string
 }
 
-
 // ChapterItem
 export type ChapterItems={
     title: string
@@ -39,8 +38,11 @@ export type ChapterItems={
     onDragStart: () => void
     onDragEnd: () => void
     showBorderFlash?: boolean
+    // isChapterLoading: boolean
+    // setIsChapterLoading: (state: boolean) => void
+    // isChapterLoading: boolean;           
+    // setIsChapterLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
-
 
 // ChapterModal
 export interface ChapterModalProps{
