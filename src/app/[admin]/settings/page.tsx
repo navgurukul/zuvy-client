@@ -28,7 +28,8 @@ const SettingsPage: React.FC = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
-    const [isSearching, setIsSearching] = useState(false) 
+    const [isSearching, setIsSearching] = useState(false)
+    const [selectedRoleId, setSelectedRoleId] = useState<string>('all') 
     
     // Set the first role as selected once roles are loaded
     useEffect(() => {
@@ -51,7 +52,13 @@ const SettingsPage: React.FC = () => {
         totalRows,
         totalPages,
         refetchUsers,
-    } = useAllUsers({ initialFetch: true, limit: position, searchTerm: '', offset })
+    } = useAllUsers({ 
+        initialFetch: true, 
+        limit: position, 
+        searchTerm: '', 
+        offset,
+        roleId: selectedRoleId === 'all' ? undefined : selectedRoleId
+    })
     const {
       user,
         loading: userLoading,
@@ -119,6 +126,12 @@ const SettingsPage: React.FC = () => {
         setIsAddModalOpen(false)
         setEditingUserId(null)
         setIsEditMode(false)
+    }
+
+    const handleRoleIdChange = (newRoleId: string) => {
+        setSelectedRoleId(newRoleId)
+        setOffset(0) // Reset to first page when changing role filter
+        // The useAllUsers hook will automatically refetch when roleId changes
     }
 
     return (
@@ -216,6 +229,8 @@ const SettingsPage: React.FC = () => {
                                     columns={columns}
                                     data={users}
                                     onSearchChange={setIsSearching}
+                                    roleId={selectedRoleId}
+                                    onRoleIdChange={handleRoleIdChange}
                                 />
                                 {!isSearching && (
                                     <DataTablePagination

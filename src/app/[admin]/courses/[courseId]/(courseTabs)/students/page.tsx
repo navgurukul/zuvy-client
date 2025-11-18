@@ -385,7 +385,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                             }}
                         >
                             <DialogTrigger asChild>
-                                <Button className="flex-1 text-gray-800 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+                                <Button className="">
                                     <UserPlus className="h-4 w-4 mr-2" />
                                     Add Single Student
                                 </Button>

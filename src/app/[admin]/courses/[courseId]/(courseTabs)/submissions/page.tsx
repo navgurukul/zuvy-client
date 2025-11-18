@@ -21,6 +21,7 @@ import Image from 'next/image'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
 import {CourseSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import ProjectsComponent from './components/projectSubmissionComponent'
 
 interface SearchSuggestion {
     id: string
@@ -467,170 +468,13 @@ const Page = ({ params }: { params: any }) => {
                                         />
                                     )}
                                     {activeTab === 'projects' &&
-                                        (bootcampModules.length > 0 ? (
-                                            <div className="grid grid-cols-1 gap-8 mt-4 md:mt-8 md:grid-cols-2 lg:grid-cols-4">
-                                                {bootcampModules.map((item: any) => {
-                                                    const submissions = item.projectData?.[0]?.submitStudents || 0
-
-                                                    const handleDownloadPdf = async (id: any) => {
-                                                        const projectId = item.projectData?.[0]?.id
-                                                        if (!projectId) return
-
-                                                        const apiUrl = `/submission/projects/students?projectId=${projectId}&bootcampId=${params.courseId}`
-
-                                                        async function fetchData() {
-                                                            try {
-                                                                const response = await api.get(
-                                                                    apiUrl
-                                                                )
-                                                                const assessments =
-                                                                    response.data
-                                                                        ?.projectSubmissionData
-                                                                        ?.projectTrackingData || []
-
-                                                                const doc = new jsPDF()
-
-                                                                doc.setFontSize(18)
-                                                                doc.setFont('Regular', 'normal')
-                                                                doc.setFontSize(15)
-                                                                doc.setFont('Regular', 'normal')
-                                                                doc.text(
-                                                                    'List of Students-:',
-                                                                    14,
-                                                                    23
-                                                                )
-
-                                                                const columns = [
-                                                                    {
-                                                                        header: 'Name',
-                                                                        dataKey: 'userName',
-                                                                    },
-                                                                    {
-                                                                        header: 'Email',
-                                                                        dataKey: 'userEmail',
-                                                                    },
-                                                                ]
-
-                                                                const rows = assessments.map(
-                                                                    (assessment: {
-                                                                        userName: string
-                                                                        userEmail: string
-                                                                        // status: string;
-                                                                    }) => ({
-                                                                        name:
-                                                                            assessment.userName ||
-                                                                            'N/A',
-                                                                        email:
-                                                                            assessment.userEmail ||
-                                                                            'N/A',
-                                                                    })
-                                                                )
-
-                                                                autoTable(doc, {
-                                                                    head: [columns.map((col) => col.header)],
-                                                                    body: rows.map((row: { name: string; email: string }) => [
-                                                                        row.name,
-                                                                        row.email,
-                                                                    ]),
-                                                                    startY: 25,
-                                                                    margin: { horizontal: 10 },
-                                                                    styles: { overflow: 'linebreak', halign: 'center' },
-                                                                    headStyles: { fillColor: [22, 160, 133] },
-                                                                    theme: 'grid',
-                                                                })
-
-                                                                doc.save(`${item.projectData?.[0]?.title || 'project'}.pdf`)
-                                                            } catch (error) {
-                                                                console.error('Error generating PDF:', error)
-                                                                toast({
-                                                                    title: 'Error',
-                                                                    description: 'Failed to generate PDF',
-                                                                    variant: 'destructive',
-                                                                })
-                                                            }
-                                                        }
-                                                        fetchData()
-                                                    }
-
-                                                    return (
-                                                        <div
-                                                            key={item.id}
-                                                            className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
-                                                        >
-                                                            <div className="absolute top-2 right-1 z-10 flex items-center gap-0">
-
-                                                                <button
-                                                                    onClick={submissions > 0 ? handleDownloadPdf : undefined}
-                                                                    className={`cursor-pointer ${submissions > 0 ? 'text-gray-500 hover:text-gray-700' : 'text-gray-400'
-                                                                        }`}
-                                                                    title="Download Report"
-                                                                    disabled={submissions === 0}
-                                                                >
-                                                                    <ArrowDownToLine size={20} className="" />
-                                                                </button>
-                                                                {submissions > 0 ? (
-                                                                    <Link
-                                                                        href={`/admin/courses/${params.courseId}/submissionProjects/${item.projectData?.[0]?.id}`}
-                                                                    >
-                                                                        <Button variant={'ghost'} className="hover:bg-white-600 hover:text-gray-700 transition-colors">
-                                                                            <Eye className="text-gray-500" size={20} />
-                                                                        </Button>
-                                                                    </Link>
-                                                                ) : (
-                                                                    <Button
-                                                                        variant={'ghost'}
-                                                                        className="text-gray-400 text-sm"
-                                                                        disabled
-                                                                    >
-                                                                        <Eye className="text-gray-400" size={20} />
-                                                                    </Button>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="flex flex-col w-full">
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className="p-2 rounded-md">
-                                                                        <BookOpen className="w-4 h-4" />
-                                                                    </div>
-                                                                    <h3 className="font-medium text-base">{item.projectData[0].title || 'Untitled Project'}</h3>
-                                                                </div>
-                                                                <div className="flex items-center justify-between mt-4 text-sm">
-                                                                    <div className="flex items-center gap-1">
-                                                                        <Badge
-                                                                            variant="outline"
-                                                                            className="text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600"
-                                                                        >
-                                                                            {submissions} submissions
-                                                                        </Badge>
-                                                                    </div>
-                                                                    <Badge
-                                                                        variant="secondary"
-                                                                        className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                                                                    >
-                                                                        {totalStudents - submissions} pending
-                                                                    </Badge>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center justify-center">
-                                                <p className="text-center text-muted-foreground max-w-md">
-                                                    {appliedSearchQuery
-                                                        ? `No Projects Found for "${appliedSearchQuery}"`
-                                                        : 'No Projects submissions available from the students yet. Please wait until the first submission'}
-                                                </p>
-                                                <Image
-                                                    src="/emptyStates/empty-submissions.png"
-                                                    alt="No Projects Found"
-                                                    width={120}
-                                                    height={120}
-                                                    className="mb-6"
-                                                />
-                                            </div>
-                                        ))}
+                                        <ProjectsComponent
+                                            courseId={params.courseId}
+                                            debouncedSearch={appliedSearchQuery}
+                                            bootcampModules={bootcampModules}
+                                            totalStudents={totalStudents}
+                                        />
+                                    }
                                     {activeTab === 'form' && (
                                         <div className="grid relative gap-8 mt-4 md:mt-8">
                                             {formData.length > 0 ? (
@@ -644,6 +488,7 @@ const Page = ({ params }: { params: any }) => {
                                                                 bootcampId={item.bootcampId}
                                                                 data={data}
                                                                 debouncedSearch={appliedSearchQuery}
+                                                                totalStudents={totalStudents}
                                                             />
                                                         ))
                                                     )}

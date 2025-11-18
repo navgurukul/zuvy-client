@@ -408,11 +408,15 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             </div>
 
             {/* Role Selection Tabs */}
-            <div className="flex gap-6 border-b border-gray-200">
-                {
-                    roles.map((role, index) => {
-                        return (
-                            <TooltipProvider key={role.id}>
+            <div className="border-b border-gray-200">
+                {/* horizontal scroll container when there are many roles - use shadcn ScrollArea */}
+                <div className="group">
+                    <ScrollArea className="py-2">
+                        <div className="flex gap-6 flex-nowrap px-1">
+                        {
+                            roles.map((role, index) => {
+                                return (
+                                    <TooltipProvider key={role.id}>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
                                         <Button
@@ -421,6 +425,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                 ? 'border-primary text-gray-900 hover:bg-transparent'
                                                 : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                                                 }`}
+                                            // prevent shrinking so overflow-x works as expected
+                                            // eslint-disable-next-line react/forbid-dom-props
+                                            style={{ flexShrink: 0 }}
                                         >
                                             <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
                                             <span className="font-medium text-[1rem] capitalize">{role.name}</span>
@@ -439,7 +446,15 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                             </TooltipProvider>
                         )
                     })
-                }
+                        }
+                        </div>
+                        {/* horizontal scrollbar from shadcn - only visible on hover */}
+                        <ScrollBar
+                            orientation="horizontal"
+                            className="transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+                        />
+                    </ScrollArea>
+                </div>
             </div>
 
             {/* Main Content - Two Column Layout */}

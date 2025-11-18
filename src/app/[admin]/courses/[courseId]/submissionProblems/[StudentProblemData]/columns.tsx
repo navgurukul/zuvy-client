@@ -114,12 +114,12 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: 'actions',
         cell: ({ row }) => {
-            const { bootcampId, id, questionId, moduleId } = row.original
+            const { bootcampId, userId, questionId, moduleId } = row.original
 
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/admin/courses/${bootcampId}/submissionProblems/individualCodingSubbmission/${id}?questionId=${questionId}&moduleId=${moduleId}`}
+                        href={`/admin/courses/${bootcampId}/submissionProblems/individualCodingSubbmission/${userId}?questionId=${questionId}&moduleId=${moduleId}`}
                         className="max-w-[500px] text-secondary font-medium flex items-center"
                     >
                         <FileText size={16} />

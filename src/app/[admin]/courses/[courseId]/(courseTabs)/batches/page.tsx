@@ -906,7 +906,7 @@ const Page = ({ params }: { params: ParamsType }) => {
 
                                     <CardFooter className="pt-3">
                                         <Button
-                                            variant="outline"
+                                           
                                             size="sm"
                                             onClick={() =>
                                                 handleViewStudents(

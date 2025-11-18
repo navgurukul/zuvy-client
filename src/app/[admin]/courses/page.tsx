@@ -1,6 +1,4 @@
-
 'use client'
-
 import React, { useState, useEffect, useCallback } from 'react'
 import {
     Plus,
@@ -86,17 +84,22 @@ const Courses: React.FC = () => {
         return response.data.data;
     }, []);
 
-    const fetchSearchResultsApi = useCallback(
-        async (query: string, offsetParam = offset) => {
-            setCurrentSearchQuery(query);
-            setOffset(offsetParam);
-            await refetchBootcamps(offsetParam);
-            return [];
-        },
-        [offset, refetchBootcamps]
-    );
+const fetchSearchResultsApi = useCallback(
+    async (query: string, pageOffset: number = 0) => {
+        console.log("SEARCH API CALLED", { query, pageOffset });
 
-    const defaultFetchApi = useCallback(
+        setCurrentSearchQuery(query);
+        setOffset(0);   
+
+        await refetchBootcamps(0);  
+        return [];
+    },
+    [refetchBootcamps]
+);
+
+
+
+const defaultFetchApi = useCallback(
         async (offsetParam = offset) => {
             setCurrentSearchQuery('');
             setOffset(offsetParam);
@@ -106,7 +109,8 @@ const Courses: React.FC = () => {
         [offset, refetchBootcamps]
     );
 
-    // Use the search hook
+
+// Use the search hook
     const {
         clearSearch,
     } = useSearchWithSuggestions({
@@ -167,17 +171,18 @@ const Courses: React.FC = () => {
             }
         }
     }
-
     const handleCardClick = (id: number) => {
-        router.push(`courses/${id}/details`)
+        if(permissions.editCourse) {
+            router.push(`courses/${id}/details`)
+        }else {
+            router.push(`courses/${id}/curriculum`)
+        }
         localStorage.setItem('courseId', id.toString())
     }
-
     function getValidImageUrl(url: string): string | null {
         if (typeof url !== 'string' || url.trim() === '') {
             return null
         }
-
         const trimmedUrl = url.trim()
         // Check if it starts with valid protocol or relative path
         const isValidStart =
@@ -206,13 +211,19 @@ const Courses: React.FC = () => {
 
         return ''
     }
-
     useEffect(() => {
         ; (async () => {
             const perms = await getPermissions()
             setPermissions(perms)
         })()
     }, [permissions])
+
+    
+    useEffect(() => {
+    if (currentSearchQuery.trim()) {
+        setOffset(0);
+    }
+}, [currentSearchQuery]);
 
     return (
         <>
@@ -322,31 +333,29 @@ const Courses: React.FC = () => {
                             {courses.length === 0 ? (
                                 <>
                                     {currentSearchQuery.length > 0 ? (
-                                        <div className="absolute h-screen">
-                                            <div className="relative top-[70%]">
-                                                <Alert
-                                                    variant="destructive"
-                                                    className="flex flex-col items-center gap-3"
+                                        <div className="flex justify-center items-center min-h-[60vh]">
+                                            <Alert
+                                                variant="destructive"
+                                                className="flex flex-col items-center gap-3 text-center max-w-md w-full"
+                                            >
+                                                <AlertTitle>
+                                                    No Course Found
+                                                </AlertTitle>
+                                                <AlertDescription>
+                                                    No course found with the
+                                                    name{' '}
+                                                    <span className="font-semibold">
+                                                        {currentSearchQuery}
+                                                    </span>
+                                                </AlertDescription>
+                                                <Button
+                                                    variant="outline"
+                                                    onClick={clearSearch}
+                                                    className="mt-2"
                                                 >
-                                                    <AlertTitle>
-                                                        No Course Found
-                                                    </AlertTitle>
-                                                    <AlertDescription>
-                                                        No course found with the
-                                                        name{' '}
-                                                        <span className="font-semibold">
-                                                            {currentSearchQuery}
-                                                        </span>
-                                                    </AlertDescription>
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={clearSearch}
-                                                        className="mt-2"
-                                                    >
-                                                        Clear Search
-                                                    </Button>
-                                                </Alert>
-                                            </div>
+                                                    Clear Search
+                                                </Button>
+                                            </Alert>
                                         </div>
                                     ) : (
                                         <div className="mt-24">
@@ -492,14 +501,20 @@ const Courses: React.FC = () => {
                                         ) => {
                                             setOffset(newOffset)
                                             // Use currentSearchQuery for pagination
+                                            // if (currentSearchQuery.trim()) {
+                                            //     fetchSearchResultsApi(
+                                            //         currentSearchQuery,
+                                            //         newOffset
+                                            //     )
+                                            // } else {
+                                            //     defaultFetchApi(newOffset)
+                                            // }
+
                                             if (currentSearchQuery.trim()) {
-                                                fetchSearchResultsApi(
-                                                    currentSearchQuery,
-                                                    newOffset
-                                                )
+                                                fetchSearchResultsApi(currentSearchQuery) 
                                             } else {
                                                 defaultFetchApi(newOffset)
-                                            }
+                                           }
                                         }}
                                     />
                                 </div>
