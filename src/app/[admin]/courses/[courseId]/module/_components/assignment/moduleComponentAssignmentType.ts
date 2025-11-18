@@ -24,6 +24,7 @@ export interface AssignmentProps {
     courseId: any
     assignmentUpdateOnPreview: boolean
     setAssignmentUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>
+    canEdit?: boolean
 }
 
 

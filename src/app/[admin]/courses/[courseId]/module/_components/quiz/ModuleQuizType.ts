@@ -4,6 +4,7 @@ export interface QuizProps{
   chapterId: number;
   courseId:any
   activeChapterTitle: string;
+  canEdit?: boolean;
 }
 
 export interface QuizData{

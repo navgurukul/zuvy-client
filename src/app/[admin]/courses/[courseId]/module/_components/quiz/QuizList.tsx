@@ -28,11 +28,13 @@ function QuizList({
     addQuestion = [],
     handleAddQuestion,
     tags,
+    canEdit = true,
 }: {
     questionData: any[]
     addQuestion: any[]
     handleAddQuestion: (questions: QuizListQuestion[]) => void
     tags: any
+    canEdit?: boolean
 }) {
     return (
         <ScrollArea className="h-[25.5rem] w-full  pr-3">
@@ -41,6 +43,7 @@ function QuizList({
                     (quest: QuizListQuestion) => quest?.id === question.id
                 )
                 const handleClick = () => {
+                    if (!canEdit) return
                     if (!isSelected) {
                         handleAddQuestion([...addQuestion, question])
                     } else {
@@ -107,7 +110,11 @@ function QuizList({
                                             ) : (
                                                 <PlusCircle
                                                     size={20}
-                                                    className="text-primary cursor-pointer "
+                                                    className={`text-primary ${
+                                                        canEdit
+                                                            ? 'cursor-pointer'
+                                                            : 'opacity-40 cursor-not-allowed'
+                                                    }`}
                                                     onClick={handleClick}
                                                 />
                                             )}

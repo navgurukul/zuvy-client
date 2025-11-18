@@ -38,12 +38,14 @@ import { BookOpenText } from 'lucide-react'
 import useEditChapter from '@/hooks/useEditChapter'
 import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 const AddArticle: React.FC<AddArticleProps> = ({
     content,
     courseId,
     articleUpdateOnPreview,
     setArticleUpdateOnPreview,
+    canEdit = true,
 }) => {
     const heightClass = useResponsiveHeight()
     const router = useRouter()
@@ -77,6 +79,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const { editChapter } = useEditChapter()
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     // misc
     const formSchema = z.object({
@@ -227,6 +230,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
     }
 
     const editArticleContent = async () => {
+        if (!canEdit) {
+            return
+        }
         try {
             setIsSaving(true)
             const initialContentString = initialContent
@@ -350,6 +356,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
     }
 
     const onFileUpload = async () => {
+        if (!canEdit) {
+            return
+        }
         if (file) {
             if (file.type !== 'application/pdf') {
                 return toast.error({
@@ -395,6 +404,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
     }
 
     async function onDeletePdfhandler() {
+        if (!canEdit) {
+            return
+        }
         setIsDeleteLoading(true)
         try {
             await editChapter(content.moduleId, content.id, {
@@ -435,6 +447,13 @@ const AddArticle: React.FC<AddArticleProps> = ({
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
             <div className="px-5 flex-1 overflow-y-auto space-y-2 pr-2">
+                {!canEdit && (
+                    <PermissionAlert
+                        alertOpen={alertOpen}
+                        setAlertOpen={setAlertOpen}
+                    />
+                )}
+                <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                 <div className="w-full ">
                     {/* <div className="flex justify-between items-center"> */}
                     {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
@@ -471,6 +490,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                             : 'Untitled PDF'
                                                     }
                                                     className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                    disabled={!canEdit}
                                                 />
                                             </>
                                         </FormControl>
@@ -529,7 +549,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     <div className="ml-1 mr-4">
                         <RadioGroup
                             className="flex items-center gap-x-6"
-                            onValueChange={(value) => setDefaultValue(value)}
+                            onValueChange={(value) =>
+                                canEdit && setDefaultValue(value)
+                            }
                             value={defaultValue}
                         >
                             <TooltipProvider>
@@ -538,7 +560,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                         <TooltipTrigger asChild>
                                             <RadioGroupItem
                                                 value="editor"
-                                                disabled={!!pdfLink}
+                                                disabled={!!pdfLink || !canEdit}
                                                 id="r1"
                                                 className="mt-1 text-foreground border-foreground"
                                             />
@@ -565,7 +587,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                 value="pdf"
                                                 id="r2"
                                                 className="mt-1 text-foreground border-foreground"
-                                                disabled={isEditorSaved}
+                                                disabled={isEditorSaved || !canEdit}
                                             />
                                         </TooltipTrigger>
                                         {isEditorSaved && (
@@ -658,6 +680,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                             setInitialContent={
                                                 setInitialContent
                                             }
+                                            preview={!canEdit}
                                         />
                                     </div>
                                 )}
@@ -677,6 +700,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                             setDisableButton={
                                                 setIsdisabledUploadButton
                                             }
+                                            disabled={!canEdit}
                                         />
                                     </div>
                                 )}
@@ -692,6 +716,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                 form="myForm"
                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                 disabled={
+                                    !canEdit ||
                                     isSaving || 
                                     !form.formState.isValid || 
                                     !hasEditorContent 
@@ -707,6 +732,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                     onClick={onFileUpload}
                                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                                     disabled={
+                                        !canEdit ||
                                         loading ||
                                         !form.formState.isValid ||
                                         (!file && !ispdfUploaded) ||
@@ -717,6 +743,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                 </Button>
                             </div>
                         )}
+                    </div>
                     </div>
                 </div>
             </div>

@@ -34,6 +34,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import useEditChapter from '@/hooks/useEditChapter' 
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 const quizSchema = z.object({
     title: z
@@ -43,6 +44,8 @@ const quizSchema = z.object({
 })
 
 function Quiz(props: QuizProps) {
+    const canEdit = props.canEdit ?? true
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -171,6 +174,7 @@ function Quiz(props: QuizProps) {
     ])
 
     const handleAddQuestion = (data: QuizDataLibrary[]) => {
+        if (!canEdit) return
         const uniqueData = data.filter((question: QuizDataLibrary) => {
             return !addQuestion.some(
                 (existingQuestion: QuizDataLibrary) =>
@@ -222,6 +226,7 @@ function Quiz(props: QuizProps) {
         }
     }
     const removeQuestionById = (questionId: number) => {
+        if (!canEdit) return
         setAddQuestion((prevQuestions: QuizDataLibrary[]) =>
             prevQuestions.filter(
                 (question: QuizDataLibrary) => question?.id !== questionId
@@ -253,6 +258,7 @@ function Quiz(props: QuizProps) {
     }
 
     const handleSaveQuiz = async (titleParam?: string) => {
+        if (!canEdit) return
         const titleToSave = titleParam ?? inputValue
         const selectedIds = addQuestion?.map((item) => item.id)
         const requestBody = {
@@ -369,6 +375,13 @@ function Quiz(props: QuizProps) {
     return (
         <div>
             <div className="">
+                {!canEdit && (
+                    <PermissionAlert
+                        alertOpen={alertOpen}
+                        setAlertOpen={setAlertOpen}
+                    />
+                )}
+                <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                 <div className="flex flex-row items-center justify-start gap-x-6 mb-5 mx-5">
                     <div className="w-full flex flex-col items-start">
                         {/* Input Field */}
@@ -434,6 +447,7 @@ function Quiz(props: QuizProps) {
                                         {...form.register('title')}
                                         placeholder="Untitled Quiz"
                                         className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                        disabled={!canEdit}
                                     />
                                     {!form.watch('title') && (
                                         <Pencil
@@ -475,12 +489,16 @@ function Quiz(props: QuizProps) {
                                             <Button
                                                 type="submit"
                                                 disabled={
+                                                    !canEdit ||
                                                     form.formState.isSubmitting ||
                                                     !form.formState.isValid ||
                                                     isSaved
                                                 }
                                                 className={`bg-primary ${
-                                                    form.formState.isSubmitting || !form.formState.isValid || isSaved
+                                                    !canEdit ||
+                                                    form.formState.isSubmitting ||
+                                                    !form.formState.isValid ||
+                                                    isSaved
                                                     ? 'opacity-50 cursor-not-allowed'
                                                     : 'opacity-75'
                                                 }`}
@@ -520,6 +538,7 @@ function Quiz(props: QuizProps) {
                         content={undefined}
                         moduleId={''}
                         chapterTitle={''}
+                        canEdit={canEdit}
                     />
                     <div className="w-full h-max-content ">
                         <h2 className="text-left mt-4 ml-1 text-muted-dark text-[15px] font-semibold">
@@ -531,6 +550,7 @@ function Quiz(props: QuizProps) {
                                 handleAddQuestion={handleAddQuestion}
                                 tags={tags}
                                 quizData={quizData}
+                                canEdit={canEdit}
                             />
 
                             <div className="w-full border-l border-muted-light ml-4 pl-4">
@@ -566,6 +586,7 @@ function Quiz(props: QuizProps) {
                                                     saveQuizQuestionHandler={
                                                         saveQuizQuestionHandler
                                                     }
+                                                    canEdit={canEdit}
                                                 />
                                             )
                                         )}
@@ -574,6 +595,7 @@ function Quiz(props: QuizProps) {
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>

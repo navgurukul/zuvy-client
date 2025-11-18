@@ -23,8 +23,10 @@ const SelectedProblems = ({
     moduleId,
     chapterTitle,
     tags,
+    canEdit = true,
 }: CodingTopicsProps) => {
     const handleRemoveLastQuestion = () => {
+        if (!canEdit) return
         setSelectedQuestions([])
         handleSaveChapter(
             moduleId,
@@ -91,7 +93,11 @@ const SelectedProblems = ({
                                                 </span>
 
                                                 <XCircle
-                                                    className="text-destructive cursor-pointer"
+                                                    className={`text-destructive ${
+                                                        canEdit
+                                                            ? 'cursor-pointer'
+                                                            : 'opacity-40 cursor-not-allowed'
+                                                    }`}
                                                     size={20}
                                                     onClick={
                                                         handleRemoveLastQuestion
