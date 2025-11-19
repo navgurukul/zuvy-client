@@ -38,6 +38,7 @@ import { BookOpenText } from 'lucide-react'
 import useEditChapter from '@/hooks/useEditChapter'
 import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import {ArticleSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const AddArticle: React.FC<AddArticleProps> = ({
     content,
@@ -169,7 +170,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
     const getArticleContent = async () => {
         try {
-            setIsDataLoading(true)
+            // setIsDataLoading(true)
             const response = await getChapterDetails({
                 chapterId: content.id,
                 bootcampId: courseId,
@@ -179,6 +180,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             const contentDetails = response?.data?.contentDetails?.[0]
 
             const link = contentDetails?.links?.[0]
+            setIsDataLoading(false)
             if (link) {
                 setpdfLink(link)
                 setDefaultValue('pdf')
@@ -219,11 +221,11 @@ const AddArticle: React.FC<AddArticleProps> = ({
             setPreviousContentHash(generateContentHash(parsedContent))
         } catch (error) {
             console.error('Error fetching article content:', error)
-        } finally {
-            setIsDataLoading(false)
-            // Mark initial load as complete after a short delay
-            setTimeout(() => setIsInitialLoad(false), 1000)
-        }
+        } 
+        // finally {
+        //     setIsDataLoading(false)
+
+        // }
     }
 
     const editArticleContent = async () => {
@@ -273,7 +275,10 @@ const AddArticle: React.FC<AddArticleProps> = ({
             hasFetched.current = true
             getArticleContent()
         }
-    }, [content?.id]) // More specific dependency
+    }, [content?.id]) 
+
+
+
 
     // Reset isEditorSaved if PDF is uploaded or deleted
     useEffect(() => {
@@ -420,17 +425,21 @@ const AddArticle: React.FC<AddArticleProps> = ({
         }
     }
 
+
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Chapter details...
-                    </div>
-                </div>
-            </div>
-        )
+        // return (
+        //     <div className="px-5">
+        //         <div className="w-full flex justify-center items-center py-8">
+        //             <div className="animate-pulse">
+        //                 Loading Chapter details...
+        //             </div>
+        //         </div>
+        //     </div>
+        // )
+        return <ArticleSkeletons/>
     }
+
+
 
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">

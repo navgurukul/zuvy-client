@@ -61,6 +61,8 @@ import {
 import useEditChapter from '@/hooks/useEditChapter'
 import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import {AssignmentSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
  
 const AddAssignent = ({
     content,
@@ -515,15 +517,7 @@ const AddAssignent = ({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading assignment details...
-                    </div>
-                </div>
-            </div>
-        )
+        return<AssignmentSkeletons/>
     }
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">

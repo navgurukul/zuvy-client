@@ -25,6 +25,8 @@ import {
     McqAccumulator,
     CodingQuestiones,
 } from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType'
+import {AssessmentSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -335,10 +337,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     useEffect(() => {
         if (chapterData.id && topicId > 0) {
-            setIsDataLoading(true)
+            // setIsDataLoading(true)
             fetchChapterContent(chapterData.id, topicId)
             setChapterTitle(content.ModuleAssessment?.title)
-            setChapterTitle(activeChapterTitle) // Always sync with the chapter title
+            setChapterTitle(activeChapterTitle)
             setIsDataLoading(false)
         }
     }, [chapterData.id, topicId, activeChapterTitle])
@@ -347,14 +349,16 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         if (hasLoaded.current) return
         hasLoaded.current = true
         const loadTags = async () => {
-            setIsDataLoading(true) // Start loading
+            // setIsDataLoading(true) 
             try {
                 await getAllTagsWithoutFilter(setTags)
+                 setIsDataLoading(false) 
             } catch (error) {
                 console.error('Error loading tags:', error)
-            } finally {
-                setIsDataLoading(false) // End loading
-            }
+            } 
+            // finally {
+            //     setIsDataLoading(false) 
+            // }
         }
         loadTags()
     }, [])
@@ -368,16 +372,21 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         }
     }, [content?.ModuleAssessment?.title, activeChapterTitle])
 
+    // if (isDataLoading) {
+    //     return (
+    //         <div className="px-5">
+    //             <div className="w-full flex justify-center items-center py-8">
+    //                 <div className="animate-pulse">
+    //                     Loading Assessment details...
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     )
+    // }
+
+
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Assessment details...
-                    </div>
-                </div>
-            </div>
-        )
+        return <AssessmentSkeleton/>
     }
     return (
         <div className="w-full pb-2">

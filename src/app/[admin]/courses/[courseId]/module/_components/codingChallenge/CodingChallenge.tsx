@@ -30,6 +30,7 @@ import { AnyARecord } from 'dns'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import {CodingChallengeSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 function CodingChallenge({
     content,
@@ -229,7 +230,7 @@ function CodingChallenge({
 
     async function getAllTags() {
         try {
-            setIsDataLoading(true)
+            // setIsDataLoading(true)
             const response = await api.get('Content/allTags')
             if (response) {
                 const tagArr = [
@@ -238,11 +239,13 @@ function CodingChallenge({
                 ]
                 setTags(tagArr)
             }
+            setIsDataLoading(false)
         } catch (error) {
             console.error('Error fetching tags:', error)
-        } finally {
-            setIsDataLoading(false)
-        }
+        } 
+        // finally {
+        //     setIsDataLoading(false)
+        // }
     }
 
     useEffect(() => {
@@ -282,15 +285,16 @@ function CodingChallenge({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Coding Problem details...
-                    </div>
-                </div>
-            </div>
-        )
+        // return (
+        //     <div className="px-5">
+        //         <div className="w-full flex justify-center items-center py-8">
+        //             <div className="animate-pulse">
+        //                 Loading Coding Problem details...
+        //             </div>
+        //         </div>
+        //     </div>
+        // )
+        return<CodingChallengeSkeleton/>
     }
     return (
         <>

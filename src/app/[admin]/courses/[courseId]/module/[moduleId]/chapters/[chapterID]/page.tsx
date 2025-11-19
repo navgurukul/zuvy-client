@@ -19,7 +19,7 @@ import {
     getTopicId,
     getActiveChapter,
 } from '@/store/store'
-import { Spinner } from '@/components/ui/spinner'
+// import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
@@ -223,7 +223,7 @@ export default function Page({
                         <div className="my-5 flex justify-center items-center">
                             <div className="absolute h-screen">
                                 <div className="relative top-[70%]">
-                                    <Spinner className="text-[rgb(81,134,114)]" />
+                                    {/* <Spinner className="text-[rgb(81,134,114)]" /> */}
                                 </div>
                             </div>
                         </div>

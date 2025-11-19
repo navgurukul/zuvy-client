@@ -34,6 +34,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import useEditChapter from '@/hooks/useEditChapter' 
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import {QuizSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const quizSchema = z.object({
     title: z
@@ -319,7 +320,7 @@ function Quiz(props: QuizProps) {
         if (hasLoaded.current) return
         hasLoaded.current = true
         const fetchData = async () => {
-            setIsDataLoading(true)
+            // setIsDataLoading(true)
             await getAllTags()
             if (props.chapterId && props.chapterId !== 0) {
                 await getAllSavedQuizQuestion()
@@ -357,13 +358,14 @@ function Quiz(props: QuizProps) {
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">Loading Quiz details...</div>
-                </div>
-            </div>
-        )
+        // return (
+        //     <div className="px-5">
+        //         <div className="w-full flex justify-center items-center py-8">
+        //             <div className="animate-pulse">Loading Quiz details...</div>
+        //         </div>
+        //     </div>
+        // )
+        return<QuizSkeleton/>
     }
 
     return (

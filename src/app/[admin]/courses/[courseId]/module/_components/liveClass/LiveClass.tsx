@@ -8,6 +8,7 @@ import { getEmbedLink } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {RecordingSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const LiveClass = ({
     chapterData,
@@ -16,6 +17,8 @@ const LiveClass = ({
     courseId,
 }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
+    const [isLoading, setIsLoading] = useState(true)
+
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
@@ -134,6 +137,17 @@ const LiveClass = ({
         }
     }
 
+    useEffect(() => {
+       if (content && content.sessionDetails?.length > 0) {
+        setIsLoading(false)
+       }
+    }, [content])
+
+
+    if (isLoading) {
+       return <RecordingSkeletons/>
+    }
+
     if (!content || !session) {
         return (
             <div className="w-3/4 mx-auto p-4">
@@ -147,6 +161,7 @@ const LiveClass = ({
             </div>
         )
     }
+
 
     return (
         <div className="w-3/4 mx-auto">
