@@ -31,17 +31,20 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {CodingChallengeSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 function CodingChallenge({
     content,
     activeChapterTitle,
     moduleId,
     courseId,
+    canEdit = true,
 }: ChallangesProps) {
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { setCodingPreviewContent } = getCodingPreviewStore()
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     const chapterSchema = z.object({
         title: z
@@ -103,6 +106,9 @@ function CodingChallenge({
     const [hasTitleChanged, setHasTitleChanged] = useState(false)
 
     const handleSaveClick = async (data: { title: string }) => {
+        if (!canEdit) {
+            return
+        }
         try {
             const titleToSave =
                 data.title.trim() === '' ? savedTitle : data.title
@@ -300,6 +306,13 @@ function CodingChallenge({
         <>
             <div key={contentKey}>
                 {/* SearchBar component */}
+                {!canEdit && (
+                    <PermissionAlert
+                        alertOpen={alertOpen}
+                        setAlertOpen={setAlertOpen}
+                    />
+                )}
+                <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>   
                 <div className="px-5 pb-4 border-b border-gray-200">
                     <div className="flex flex-col items-start mb-15">
                         <div className="flex justify-between items-center w-full">
@@ -313,6 +326,7 @@ function CodingChallenge({
                                         {...form.register('title')}
                                         placeholder="Untitled Coding Problem"
                                         className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground w-full"
+                                        disabled={!canEdit}
                                     />
                                     {!form.getValues('title') && (
                                         <Pencil
@@ -347,8 +361,13 @@ function CodingChallenge({
                                     {selectedQuestions?.length > 0 && (
                                         <Button
                                             type="submit"
-                                            disabled={!form.formState.isValid || form.formState.isSubmitting}
+                                            disabled={
+                                                !canEdit ||
+                                                !form.formState.isValid ||
+                                                form.formState.isSubmitting
+                                            }
                                             className={`bg-primary text-white ${
+                                                !canEdit ||
                                                 !form.formState.isValid ||
                                                 form.formState.isSubmitting
                                                     ? 'opacity-50 cursor-not-allowed'
@@ -391,6 +410,7 @@ function CodingChallenge({
                         content={undefined}
                         moduleId={''}
                         chapterTitle={''}
+                        canEdit={canEdit}
                     />
                     <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
                         Coding Library
@@ -474,13 +494,18 @@ function CodingChallenge({
                                                                     ) : (
                                                                         <PlusCircle
                                                                             onClick={() => {
+                                                                                if (!canEdit) return
                                                                                 setSelectedQuestions(
                                                                                     [
                                                                                         question,
                                                                                     ]
                                                                                 )
                                                                             }}
-                                                                            className="text-primary cursor-pointer"
+                                                                            className={`text-primary ${
+                                                                                canEdit
+                                                                                    ? 'cursor-pointer'
+                                                                                    : 'opacity-40 cursor-not-allowed'
+                                                                            }`}
                                                                             size={
                                                                                 20
                                                                             }
@@ -559,10 +584,12 @@ function CodingChallenge({
                             ): void {
                                 throw new Error('Function not implemented.')
                             }}
+                        canEdit={canEdit}
                         />
                     </div>
                 </div>
             </div>
+        </div>
         </>
     )
 }

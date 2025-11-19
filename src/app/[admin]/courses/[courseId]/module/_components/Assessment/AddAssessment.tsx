@@ -20,6 +20,7 @@ import { getAssessmentPreviewStore, getUser } from '@/store/store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 import {
     AddAssessmentProps,
     McqAccumulator,
@@ -45,13 +46,15 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     moduleId,
     topicId,
     activeChapterTitle,
+    canEdit = true,
 }) => {
     const form = useForm<z.infer<typeof chapterSchema>>({
         resolver: zodResolver(chapterSchema),
         defaultValues: { title: activeChapterTitle || '' },
         mode: 'onChange',
     })
-
+    const [alertOpen, setAlertOpen] = useState(!canEdit);
+    const [open, setOpen] = useState(true); // initially true when !canEdit
     const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -388,8 +391,16 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     if (isDataLoading) {
         return <AssessmentSkeleton/>
     }
+    
     return (
-        <div className="w-full pb-2">
+    <div className="w-full pb-2">
+        {!canEdit && (
+            <PermissionAlert
+                alertOpen={alertOpen}
+                setAlertOpen={setAlertOpen}
+            />
+            )}
+            <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
             <div className="px-5 border-b border-gray-200">
                 {questionType !== 'settings' && (
                     // <div className="flex items-center mb-5 w-full justify-between">
@@ -709,6 +720,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         )}
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     )

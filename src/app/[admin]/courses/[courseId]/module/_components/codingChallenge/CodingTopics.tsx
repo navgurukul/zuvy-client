@@ -23,12 +23,15 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
     setSelectedTopics,
     selectedDifficulties,
     setSelectedDifficulties,
+    canEdit = true,
 }) => {
     const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!canEdit) return
         setSearchTerm(event.target.value)
     }
 
     const handleTopicChange = (tag: CodingTopicsTag) => {
+        if (!canEdit) return
         setSelectedTopics((prev) => {
             if (tag.tagName === 'All Topics') {
                 return prev.some((t) => t.tagName === 'All Topics') ? [] : [tag]
@@ -52,6 +55,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
     }
 
     const handleDifficultyChange = (difficulty: string) => {
+        if (!canEdit) return
         setSelectedDifficulties((prev) => {
             if (difficulty === 'Any Difficulty') {
                 return prev.includes('Any Difficulty') ? [] : ['Any Difficulty']
@@ -103,6 +107,7 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                         className="bg-white w-full pl-10 pr-10" // pl-10 for left padding (space for icon)
                         value={searchTerm}
                         onChange={handleSearchChange}
+                        disabled={!canEdit}
                     />
                 </div>
             </div>
@@ -112,7 +117,10 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                 <div className="dropDownsContainer flex gap-2 mt-2">
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]">
+                            <Button
+                                className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]"
+                                disabled={!canEdit}
+                            >
                                 {getTopicsButtonText()}
                                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
@@ -150,7 +158,10 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
                     </Popover>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]">
+                            <Button
+                                className="w-48 sm:w-56 justify-between border border-input bg-background text-gray-600 hover:bg-transparent]"
+                                disabled={!canEdit}
+                            >
                                 {getDifficultiesButtonText()}
                                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>

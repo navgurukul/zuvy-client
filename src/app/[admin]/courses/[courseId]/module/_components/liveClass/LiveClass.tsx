@@ -9,15 +9,18 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {RecordingSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 const LiveClass = ({
     chapterData,
     content,
     moduleId,
     courseId,
+    canEdit = true,
 }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
     const [isLoading, setIsLoading] = useState(true)
+    const [alertOpen, setAlertOpen] = useState(false)
 
 
     const formatDate = (dateString: string) => {
@@ -53,6 +56,7 @@ const LiveClass = ({
     }
 
     const handleDownloadAttendance = async () => {
+        if (!canEdit) return
         try {
             const sessionId = session.id || session.meetingId || session.title
             const res = await api.get(`/classes/analytics/${sessionId}`)
@@ -165,6 +169,13 @@ const LiveClass = ({
 
     return (
         <div className="w-3/4 mx-auto">
+            {!canEdit && (
+                <PermissionAlert
+                    alertOpen={alertOpen}
+                    setAlertOpen={setAlertOpen}
+                />
+            )}
+            <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
             <div className="">
                 <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
@@ -200,7 +211,11 @@ const LiveClass = ({
                             <Button
                                 className="font-medium py-2 px-3 transition-all duration-200 bg-primary text-primary-foreground"
                                 onClick={handleDownloadAttendance}
-                                disabled={!session?.s3link || session?.s3link === 'not found'}
+                                disabled={
+                                    !canEdit ||
+                                    !session?.s3link ||
+                                    session?.s3link === 'not found'
+                                }
                             >
                                 <span className="text-primary-foreground">Download Attendance</span>
                             </Button>
@@ -263,14 +278,16 @@ const LiveClass = ({
                         ) : (
                             <Button
                                 className={`w-full font-medium py-2.5 transition-all duration-200 text-primary-foreground ${
+                                    !canEdit ||
                                     session.status.toLowerCase() !== 'ongoing'
                                         ? 'opacity-50 cursor-not-allowed'
                                         : ''
                                 }`}
                                 onClick={() => {
                                     if (
+                                        !canEdit ||
                                         session.status.toLowerCase() !==
-                                        'ongoing'
+                                            'ongoing'
                                     )
                                         return
                                     window.open(session.hangoutLink, '_blank')
@@ -295,6 +312,7 @@ const LiveClass = ({
                     </div>
                 </CardContent>
             </div>
+        </div>
         </div>
     )
 }

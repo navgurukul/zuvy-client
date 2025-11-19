@@ -35,6 +35,7 @@ export type AddVideoProps = {
   fetchChapterContent: (chapterId: number, topicId: number) => Promise<void>
   setIsChapterLoading: (value: boolean) => void;  
   isChapterLoading: boolean;  
+  canEdit?: boolean
 }
 
 // PreviewVideo

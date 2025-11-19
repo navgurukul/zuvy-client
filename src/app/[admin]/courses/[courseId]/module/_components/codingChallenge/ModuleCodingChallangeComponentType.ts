@@ -47,6 +47,7 @@ export interface ChallangesProps{
     activeChapterTitle: string
     moduleId: string
     courseId: any
+    canEdit?: boolean
 }
 
 
@@ -59,6 +60,7 @@ export interface CodingTopicsProps{
     setSelectedTopics: React.Dispatch<React.SetStateAction<CodingTopicsTag[]>>
     selectedDifficulties: string[]
     setSelectedDifficulties: React.Dispatch<React.SetStateAction<string[]>>
+    canEdit?: boolean
 }
 
 export type CodingTopicsTag = {
@@ -74,4 +76,5 @@ export interface CodingTopicsProps{
   moduleId: string;
   chapterTitle: string;
   tags: CodingTopicsTag[];
+  canEdit?: boolean
 }

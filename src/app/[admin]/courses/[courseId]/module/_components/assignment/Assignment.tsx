@@ -63,12 +63,14 @@ import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
 import {AssignmentSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
+import PermissionAlert from '@/app/_components/PermissionAlert'
  
 const AddAssignent = ({
     content,
     courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
+    canEdit = true,
 }: AssignmentProps) => {
     // misc
 
@@ -95,6 +97,7 @@ const AddAssignent = ({
     const [pdfLink, setpdfLink] = useState<any>()
     const [loading, setIsLoading] = useState(false)
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     const [initialContent, setInitialContent] = useState<
         { doc: AssignmentContentEditorDoc } | undefined
@@ -171,7 +174,7 @@ const AddAssignent = ({
 
     // UPDATED: Auto-save function with better conditions
     const autoSave = async () => {
-        if (isSaving) return // Prevent multiple simultaneous saves
+        if (!canEdit || isSaving) return // Prevent multiple simultaneous saves
 
         try {
             setIsSaving(true)
@@ -309,6 +312,7 @@ const AddAssignent = ({
 
     // UPDATED: Manual save function - sets the flag for manual save
     const editAssignmentContent = async (data: any) => {
+        if (!canEdit) return
         const deadlineDate = convertToISO(data.startDate)
         try {
             const initialContentString = initialContent
@@ -419,6 +423,7 @@ const AddAssignent = ({
     }
 
     const onFileUpload = async () => {
+        if (!canEdit) return
         if (file) {
             if (file.type !== 'application/pdf') {
                 return toast.error({
@@ -483,6 +488,7 @@ const AddAssignent = ({
     }
 
     const onDeletePdfhandler = async () => {
+        if (!canEdit) return
         setIsLoading(true)
 
         const deadlineDate = convertToISO(deadline)
@@ -523,6 +529,13 @@ const AddAssignent = ({
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">
             <div className="px-5">
                 <>
+                    {!canEdit && ( 
+                        <PermissionAlert
+                            alertOpen={alertOpen}
+                            setAlertOpen={setAlertOpen}
+                        />
+                    )}
+                    <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                     <div className="w-full ">
                         <Form {...form}>
                             <form
@@ -557,6 +570,7 @@ const AddAssignent = ({
                                                         }}
                                                         placeholder="Untitled Assignment"
                                                         className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                    disabled={!canEdit}
                                                         // autoFocus
                                                     />
                                                 </>
@@ -619,9 +633,10 @@ const AddAssignent = ({
                                 <div className="">
                                     <RadioGroup
                                         className="flex items-center gap-x-6 mt-4"
-                                        onValueChange={(value) =>
+                                        onValueChange={(value) => {
+                                            if (!canEdit) return
                                             setDefaultValue(value)
-                                        }
+                                        }}
                                         value={defaultValue}
                                     >
                                         <TooltipProvider>
@@ -630,7 +645,7 @@ const AddAssignent = ({
                                                     <TooltipTrigger asChild>
                                                         <RadioGroupItem
                                                             value="editor"
-                                                            disabled={!!pdfLink}
+                                                            disabled={!canEdit || !!pdfLink}
                                                             id="r1"
                                                             className="mt-1 text-foreground border-foreground"
                                                         />
@@ -659,6 +674,7 @@ const AddAssignent = ({
                                                             id="r2"
                                                             className="mt-1 text-foreground border-foreground"
                                                             disabled={
+                                                                !canEdit ||
                                                                 isEditorSaved
                                                             }
                                                         />
@@ -772,7 +788,19 @@ const AddAssignent = ({
                                                                                     className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-2 text-sm text-muted-dark hover:border-primary ${
                                                                                         !field.value &&
                                                                                         'text-muted-foreground'
+                                                                                    } ${
+                                                                                        !canEdit
+                                                                                            ? 'opacity-60 cursor-not-allowed'
+                                                                                            : ''
                                                                                     }`}
+                                                                                    style={
+                                                                                        !canEdit
+                                                                                            ? {
+                                                                                                  pointerEvents:
+                                                                                                      'none',
+                                                                                              }
+                                                                                            : undefined
+                                                                                    }
                                                                                     onClick={(
                                                                                         e
                                                                                     ) => {
@@ -863,6 +891,7 @@ const AddAssignent = ({
                                                             setInitialContent={
                                                                 setInitialContent
                                                             }
+                                                        preview={!canEdit}
                                                         />
                                                     </div>
                                                 )}
@@ -886,6 +915,7 @@ const AddAssignent = ({
                                                         setDisableButton={
                                                             setIsdisabledUploadButton
                                                         }
+                                                        disabled={!canEdit}
                                                     />
                                                 </div>
                                             )}
@@ -901,6 +931,7 @@ const AddAssignent = ({
                                             type="submit"
                                             form="myForm"
                                             disabled={
+                                                !canEdit ||
                                                 !hasEditorContent ||
                                                 isSaving ||
                                                 !isValid
@@ -916,6 +947,7 @@ const AddAssignent = ({
                                                 onClick={onFileUpload}
                                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                                 disabled={
+                                                !canEdit ||
                                                     loading ||
                                                     !form.formState.isValid ||
                                                     (!file && !ispdfUploaded) ||
@@ -929,6 +961,7 @@ const AddAssignent = ({
                                 </div>
                             </form>
                         </Form>
+                    </div>
                     </div>
                 </>
             </div>

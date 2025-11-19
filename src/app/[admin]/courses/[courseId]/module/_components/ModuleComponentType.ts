@@ -38,10 +38,7 @@ export type ChapterItems={
     onDragStart: () => void
     onDragEnd: () => void
     showBorderFlash?: boolean
-    // isChapterLoading: boolean
-    // setIsChapterLoading: (state: boolean) => void
-    // isChapterLoading: boolean;           
-    // setIsChapterLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    canDeleteChapter?: boolean
 }
 
 // ChapterModal

@@ -3,6 +3,7 @@ export interface AddArticleProps {
     courseId:any;  
     articleUpdateOnPreview: boolean;  
     setArticleUpdateOnPreview: React.Dispatch<React.SetStateAction<boolean>>;  
+    canEdit?: boolean;
 }
 
 export interface ContentDetailAddArticle{
@@ -42,5 +43,6 @@ export type UploadProps = {
     setIsPdfUploaded: React.Dispatch<React.SetStateAction<boolean>>;  
     onDeletePdfhandler: () => void;  
     setDisableButton: React.Dispatch<React.SetStateAction<boolean>>; 
+    disabled?: boolean;
 };
 
