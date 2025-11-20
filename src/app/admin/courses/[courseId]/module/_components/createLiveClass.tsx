@@ -49,7 +49,7 @@ const formSchema = z
     .object({
         sessionTitle: z.string().min(2, {
             message: 'Session Title must be at least 2 characters.',
-        }),
+        }).max(100, { message: 'You can enter up to 100 characters only.' }),
         description: z.string().optional(),
         startDate: z.date({
             required_error: 'A start date is required.',
