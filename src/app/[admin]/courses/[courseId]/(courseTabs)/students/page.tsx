@@ -79,9 +79,11 @@ const StudentsPage = ({ params }: { params: any }) => {
   const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
 
   // Fetch data with filters
-  const fetchFilteredData = useCallback(async () => {
+  const fetchFilteredData = useCallback(async (customOffset?: number) => {
     try {
-      let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
+      // Use the passed offset or fall back to the hook's offset
+      const currentOffset = customOffset !== undefined ? customOffset : offset
+      let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${currentOffset}`
       
       // Add enrolled date filter if not 'all'
       if (enrolledDateFilter && enrolledDateFilter !== 'all') {
