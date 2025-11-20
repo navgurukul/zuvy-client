@@ -57,7 +57,7 @@ export function DataTablePagination<TData>({
             <p className="text-sm text-gray-600 font-medium">Items Per Page</p>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button className='border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]'>
+                    <Button className='border border-input bg-background text-gray-600 hover:text-primary-foreground'>
                         {position} <ChevronDown className="ml-2" size={15} />
                     </Button>
                 </DropdownMenuTrigger>
