@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (hasViewPermission === null) {
         return (
             <div className="min-h-screen -mx-6 -md:mx-10 -my-5 p-5 flex items-center justify-center">
-                <div className="text-muted-foreground">Loading...</div>
+                {/* <div className="text-muted-foreground">Loading...</div> */}
             </div>
         )
     }

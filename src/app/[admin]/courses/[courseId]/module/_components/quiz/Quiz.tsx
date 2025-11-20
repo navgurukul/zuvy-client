@@ -114,7 +114,6 @@ function Quiz(props: QuizProps) {
                         selectedTagIds += `&tagId=${topic.id}`
                     }
                 })
-
                 // Handle multiple selected difficulties, but ignore 'Any Difficulty'
                 let selectedDiff = ''
                 selectedDifficulty.forEach((difficulty: string) => {
@@ -141,6 +140,7 @@ function Quiz(props: QuizProps) {
                 const response = await api.get(url)
 
                 const allQuestions: QuizDataLibrary[] = response?.data?.data
+                setIsDataLoading(false)
 
                 const easyQuestions = allQuestions.filter(
                     (question) => question.difficulty === 'Easy'
@@ -164,6 +164,11 @@ function Quiz(props: QuizProps) {
         },
         [debouncedSeatch, selectedOptions, selectedDifficulty]
     )
+
+
+
+
+    
 
     useEffect(() => {
         fetchQuizQuestions(debouncedSeatch, selectedOptions, selectedDifficulty)
@@ -322,19 +327,25 @@ function Quiz(props: QuizProps) {
         }
     }, [props.chapterId])
 
+
+
     useEffect(() => {
-        if (hasLoaded.current) return
-        hasLoaded.current = true
+        // if (hasLoaded.current) return
+        // hasLoaded.current = true
         const fetchData = async () => {
             // setIsDataLoading(true)
             await getAllTags()
             if (props.chapterId && props.chapterId !== 0) {
                 await getAllSavedQuizQuestion()
             }
-            setIsDataLoading(false)
+            // setIsDataLoading(false)
         }
         fetchData()
     }, [props.chapterId, getAllSavedQuizQuestion])
+
+
+
+
 
     function previewQuiz() {
         if (addQuestion.length === 0) {
@@ -343,7 +354,6 @@ function Quiz(props: QuizProps) {
                 description: 'Please select at least one question to preview.',
             })
         }
-
         // Check if questions are selected but not saved
         if (!isSaved) {
             return toast.error({
@@ -352,7 +362,6 @@ function Quiz(props: QuizProps) {
                     'Please save the selected questions before previewing.',
             })
         }
-
         // If questions are selected and saved
         setQuizPreviewContent({
             ...props.content,
@@ -364,13 +373,6 @@ function Quiz(props: QuizProps) {
     }
 
     if (isDataLoading) {
-        // return (
-        //     <div className="px-5">
-        //         <div className="w-full flex justify-center items-center py-8">
-        //             <div className="animate-pulse">Loading Quiz details...</div>
-        //         </div>
-        //     </div>
-        // )
         return<QuizSkeleton/>
     }
 

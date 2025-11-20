@@ -53,39 +53,77 @@ export default function Page({
     const canEditChapter = chapterPermissions?.editChapter ?? true
     const [key, setKey] = useState(0)
     const [loading, setLoading] = useState(true)
+    const [isDataLoading, setIsDataLoading] = useState(true)
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
     const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
         useState(false)
 
+    // const fetchChapterContent = useCallback(
+    //     async (chapterId: number, topicId: number) => {
+    //         try {
+    //             const response = await api.get(
+    //                 `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
+    //             )
+
+    //             setChapterId(chapterId)
+    //             const currentModule: any = moduleData.find(
+    //                 (myModule: any) => myModule.chapterId === chapterId
+    //             )
+
+    //             if (currentModule) {
+    //                 setActiveChapterTitle(currentModule?.chapterTitle)
+    //                 setCurrentChapter(currentModule)
+    //             }
+
+    //             setChapterContent(response.data)
+    //             setLoading(false)
+    //             setActiveChapter(chapterId)
+    //             setKey((prevKey: any) => prevKey + 1)
+    //             return response.data
+    //         } catch (error) {
+    //             console.error('Error fetching chapter content:', error)
+    //             setLoading(false)
+    //         }
+    //     },
+    //     [moduleData, courseId, moduleId]
+    // )
+
+
+
     const fetchChapterContent = useCallback(
-        async (chapterId: number, topicId: number) => {
-            try {
-                const response = await api.get(
-                    `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
-                )
+    async (chapterId: number, topicId: number) => {
+        try {
+            const response = await api.get(
+                `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
+            )
 
-                setChapterId(chapterId)
-                const currentModule: any = moduleData.find(
-                    (myModule: any) => myModule.chapterId === chapterId
-                )
+            setChapterId(chapterId)
+            const currentModule: any = moduleData.find(
+                (myModule: any) => myModule.chapterId === chapterId
+            )
 
-                if (currentModule) {
-                    setActiveChapterTitle(currentModule?.chapterTitle)
-                    setCurrentChapter(currentModule)
-                }
-
-                setChapterContent(response.data)
-                setLoading(false)
-                setActiveChapter(chapterId)
-                setKey((prevKey: any) => prevKey + 1)
-                return response.data
-            } catch (error) {
-                console.error('Error fetching chapter content:', error)
-                setLoading(false)
+            if (currentModule) {
+                setActiveChapterTitle(currentModule?.chapterTitle)
+                setCurrentChapter(currentModule)
             }
-        },
-        [moduleData, courseId, moduleId]
-    )
+
+            setChapterContent(response.data)
+
+        
+
+            setActiveChapter(chapterId)
+            setKey((prevKey: any) => prevKey + 1)
+
+            return response.data
+        } catch (error) {
+            console.error('Error fetching chapter content:', error)
+             
+            
+        }
+    },
+    [moduleData, courseId, moduleId]
+)
+
 
     useEffect(() => {
         if (chapterData.length > 0 && topicId != null && chapter_id > 0) {

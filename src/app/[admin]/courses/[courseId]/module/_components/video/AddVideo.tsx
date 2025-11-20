@@ -74,9 +74,9 @@ const AddVideo: React.FC<AddVideoProps> = ({
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setVideoPreviewContent } = getVideoPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
+   const { editChapter, loading: editChapterLoading } = useEditChapter()
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
     const hasLoaded = useRef(false)
-const { editChapter, loading: editChapterLoading } = useEditChapter()
-const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -209,13 +209,6 @@ const [alertOpen, setAlertOpen] = useState(!canEdit)
     }
 
     if (isDataLoading) {
-        // return (
-        //     <div className="px-5">
-        //         <div className="w-full flex justify-center items-center py-8">
-        //             <div className="animate-pulse">Loading Quiz details...</div>
-        //         </div>
-        //     </div>
-        // )
         return<VideoSkeletons/>
     }
 

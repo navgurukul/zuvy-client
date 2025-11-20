@@ -211,7 +211,7 @@ const AddAssignent = ({
     }
 
     const getAssignmentContent = async () => {
-        setIsDataLoading(true)
+        // setIsDataLoading(true)
         try {
             const response = await getChapterDetails({
                 chapterId: content.id,
@@ -219,17 +219,18 @@ const AddAssignent = ({
                 moduleId: content.moduleId,
                 topicId: content.topicId,
             })
-
+      
             // Convert string to Date object
             if (response.data.completionDate) {
                 setDeadline(parseISO(response.data.completionDate))
             } else {
                 setDeadline(null)
             }
-
+           
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
+            setIsDataLoading(false)
             if (contentDetails.links && contentDetails.links[0]) {
                 setpdfLink(contentDetails.links[0])
                 setIsPdfUploaded(true)
@@ -259,15 +260,10 @@ const AddAssignent = ({
                 setInitialContent(jsonData)
                 setPreviousContentHash(generateContentHash(jsonData))
             }
+             
         } catch (error) {
             console.error('Error fetching assignment content:', error)
-        } finally {
-            setIsDataLoading(false)
-            // Mark initial load as complete after a short delay
-            setTimeout(() => {
-                setInitialLoadComplete(true)
-            }, 1000)
-        }
+        } 
     }
 
     const [isEditorSaved, setIsEditorSaved] = useState(false)

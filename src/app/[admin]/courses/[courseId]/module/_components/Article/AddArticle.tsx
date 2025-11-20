@@ -55,7 +55,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
     // state - FIXED: Use single title state for both modes
     const [title, setTitle] = useState('')
-    const [isDataLoading, setIsDataLoading] = useState(true) // Add loading state
+    const [isDataLoading, setIsDataLoading] = useState(true) 
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [defaultValue, setDefaultValue] = useState('editor')
     const [file, setFile] = useState<any>(null)
@@ -81,6 +81,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
     const [alertOpen, setAlertOpen] = useState(!canEdit)
+    const hasLoaded = useRef(false)
 
     // misc
     const formSchema = z.object({
@@ -188,7 +189,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 setpdfLink(link)
                 setDefaultValue('pdf')
                 setIsPdfUploaded(true)
-                setIsEditorSaved(false) // <-- PDF hai to editor saved false
+                setIsEditorSaved(false) 
             } else {
                 setpdfLink(null)
                 setDefaultValue('editor')
@@ -198,14 +199,11 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 let hasEditorContent = false
                 if (data && data.length > 0) {
                     hasEditorContent = true
-                    // If content exists on load, consider it as previously saved
                     setHasUserSaved(true)
                     setWasContentNonEmptyWhenSaved(true)
                 }
                 setIsEditorSaved(hasEditorContent)
             }
-
-            // FIXED: Set title with fallback and ensure it's not empty
             const fetchedTitle = response.data.title || response.data.name || ''
             setTitle(fetchedTitle)
 
@@ -224,11 +222,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
             setPreviousContentHash(generateContentHash(parsedContent))
         } catch (error) {
             console.error('Error fetching article content:', error)
+           
         } 
-        // finally {
-        //     setIsDataLoading(false)
-
-        // }
+        
     }
 
     const editArticleContent = async () => {
@@ -282,8 +278,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
             getArticleContent()
         }
     }, [content?.id]) 
-
-
 
 
     // Reset isEditorSaved if PDF is uploaded or deleted
@@ -437,21 +431,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
         }
     }
 
-
     if (isDataLoading) {
-        // return (
-        //     <div className="px-5">
-        //         <div className="w-full flex justify-center items-center py-8">
-        //             <div className="animate-pulse">
-        //                 Loading Chapter details...
-        //             </div>
-        //         </div>
-        //     </div>
-        // )
         return <ArticleSkeletons/>
     }
-
-
 
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
