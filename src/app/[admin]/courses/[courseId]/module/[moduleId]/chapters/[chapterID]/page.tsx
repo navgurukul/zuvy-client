@@ -18,7 +18,6 @@ import {
     getCurrentChapterState,
     getTopicId,
     getActiveChapter,
-    getChapterPermissionState,
 } from '@/store/store'
 // import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -26,6 +25,7 @@ import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
 import { useRouter } from 'next/navigation'
 import { ChaptersQuizQuestionDetails } from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType'
+import { useModuleChapters } from '@/hooks/useModuleChapters';
 export default function Page({
     params,
 }: {
@@ -49,81 +49,43 @@ export default function Page({
     const [activeChapter, setActiveChapter] = useState(chapter_id)
     // const { activeChapter, setActiveChapter } = getActiveChapter(chapter_id)()
     const { topicId } = getTopicId()
-    const { chapterPermissions } = getChapterPermissionState()
-    const canEditChapter = chapterPermissions?.editChapter ?? true
+    const { permissions } = useModuleChapters(moduleID);
+    const canEditChapter = permissions?.editChapter ?? false;
     const [key, setKey] = useState(0)
-    const [loading, setLoading] = useState(true)
-    const [isDataLoading, setIsDataLoading] = useState(true)
+    const [contentLoading, setContentLoading] = useState(true)
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
     const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
         useState(false)
 
-    // const fetchChapterContent = useCallback(
-    //     async (chapterId: number, topicId: number) => {
-    //         try {
-    //             const response = await api.get(
-    //                 `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
-    //             )
-
-    //             setChapterId(chapterId)
-    //             const currentModule: any = moduleData.find(
-    //                 (myModule: any) => myModule.chapterId === chapterId
-    //             )
-
-    //             if (currentModule) {
-    //                 setActiveChapterTitle(currentModule?.chapterTitle)
-    //                 setCurrentChapter(currentModule)
-    //             }
-
-    //             setChapterContent(response.data)
-    //             setLoading(false)
-    //             setActiveChapter(chapterId)
-    //             setKey((prevKey: any) => prevKey + 1)
-    //             return response.data
-    //         } catch (error) {
-    //             console.error('Error fetching chapter content:', error)
-    //             setLoading(false)
-    //         }
-    //     },
-    //     [moduleData, courseId, moduleId]
-    // )
-
-
-
     const fetchChapterContent = useCallback(
-    async (chapterId: number, topicId: number) => {
-        try {
-            const response = await api.get(
-                `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
-            )
+        async (chapterId: number, topicId: number) => {
+            try {
+                const response = await api.get(
+                    `Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=${topicId}`
+                )
 
-            setChapterId(chapterId)
-            const currentModule: any = moduleData.find(
-                (myModule: any) => myModule.chapterId === chapterId
-            )
+                setChapterId(chapterId)
+                const currentModule: any = moduleData.find(
+                    (myModule: any) => myModule.chapterId === chapterId
+                )
 
-            if (currentModule) {
-                setActiveChapterTitle(currentModule?.chapterTitle)
-                setCurrentChapter(currentModule)
+                if (currentModule) {
+                    setActiveChapterTitle(currentModule?.chapterTitle)
+                    setCurrentChapter(currentModule)
+                }
+
+                setChapterContent(response.data)
+                setContentLoading(false)
+                setActiveChapter(chapterId)
+                setKey((prevKey: any) => prevKey + 1)
+                return response.data
+            } catch (error) {
+                console.error('Error fetching chapter content:', error)
+                setContentLoading(false)
             }
-
-            setChapterContent(response.data)
-
-        
-
-            setActiveChapter(chapterId)
-            setKey((prevKey: any) => prevKey + 1)
-
-            return response.data
-        } catch (error) {
-            console.error('Error fetching chapter content:', error)
-             
-            
-        }
-    },
-    [moduleData, courseId, moduleId]
-)
-
+        },
+        [moduleData, courseId, moduleId]
+    )
 
     useEffect(() => {
         if (chapterData.length > 0 && topicId != null && chapter_id > 0) {
@@ -142,7 +104,7 @@ export default function Page({
             setChapterContent([])
             setActiveChapterTitle('')
             setTimeout(() => {
-                setLoading(false) // Set loading to false after the delay
+                setContentLoading(false) // Set loading to false after the delay
             }, 1000)
         }
     }, [
@@ -164,15 +126,15 @@ export default function Page({
             switch (topicId) {
                 case 1:
                     return (
-                         <AddVideo
+                        <AddVideo
                             key={chapterId}
                             moduleId={moduleID}
                             courseId={courseId}
                             content={chapterContent}
                             fetchChapterContent={fetchChapterContent}
-                            setIsChapterLoading={setLoading}
-                            isChapterLoading={loading}
-                        />
+                            canEdit={canEditChapter} setIsChapterLoading={function (value: boolean): void {
+                                throw new Error('Function not implemented.')
+                            } } isChapterLoading={false}                        />
                     )
                 case 2:
                     return (
@@ -268,7 +230,7 @@ export default function Page({
         } else {
             return (
                 <>
-                    {loading ? (
+                    {contentLoading ? (
                         <div className="my-5 flex justify-center items-center">
                             <div className="absolute h-screen">
                                 <div className="relative top-[70%]">

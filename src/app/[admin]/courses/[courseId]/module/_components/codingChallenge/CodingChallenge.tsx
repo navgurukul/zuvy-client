@@ -182,57 +182,6 @@ function CodingChallenge({
     }, [selectedQuestions, savedQuestions])
 
 
-    // useEffect(() => {
-    //     async function getAllCodingQuestions() {
-    //         try {
-    //             let url = '/Content/allCodingQuestions'
-
-    //             const queryParams = []
-
-    //             let selectedTagIds = ''
-    //             selectedOptions.forEach((topic: any) => {
-    //                 if (topic.id !== -1 && topic.id !== 0) {
-    //                     selectedTagIds += `&tagId=${topic.id}`
-    //                 }
-    //             })
-    //             let selectedDiff = ''
-    //             selectedDifficulty.forEach((difficulty: string) => {
-    //                 if (difficulty !== 'Any Difficulty') {
-    //                     selectedDiff += `&difficulty=${difficulty}`
-    //                 }
-    //             })
-    //             if (selectedTagIds.length > 0) {
-    //                 queryParams.push(selectedTagIds.substring(1)) 
-    //             }
-    //             if (selectedDiff.length > 0) {
-    //                 queryParams.push(selectedDiff.substring(1)) 
-    //             }
-    //             if (debouncedSearch) {
-    //                 queryParams.push(
-    //                     `searchTerm=${encodeURIComponent(debouncedSearch)}`
-    //                 )
-    //             }
-    //             if (queryParams.length > 0) {
-    //                 url += `?${queryParams.join('&')}`
-    //             }
-    //             const response = await api.get(url)
-    //             setFilteredQuestions(response.data.data)
-    //             setIsDataLoading(false)
-    //         } catch (error) {
-    //             console.error('Error:', error)
-    //         }
-    //     }
-    //     getAllCodingQuestions()
-    // }, [
-    //     selectedDifficulty,
-    //     selectedQuestions,
-    //     debouncedSearch,
-    //     selectedOptions,
-    // ])
-
-
-
-
 useEffect(() => {
     async function getAllCodingQuestions() {
         try {
