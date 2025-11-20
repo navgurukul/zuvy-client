@@ -401,28 +401,12 @@ export type ChapterPermissions = {
     deleteChapter?: boolean
 }
 
-type ChapterPermissionState = {
-    chapterPermissions: ChapterPermissions | null
-    setChapterPermissions: (
-        newValue: ChapterPermissions | null
-    ) => void
-}
+type ChapterData = {
+    chapterData: Chapter[];
+    setChapterData: (newValue: Chapter[]) => void;
+};
 
-export const getChapterPermissionState = create<ChapterPermissionState>(
-    (set) => ({
-        chapterPermissions: null,
-        setChapterPermissions: (newValue) => {
-            set({ chapterPermissions: newValue })
-        },
-    })
-)
-
-type chapterData = {
-    chapterData: Chapter[]
-    setChapterData: (newValue: Chapter[]) => void
-}
-
-export const getChapterDataState = create<chapterData>((set) => ({
+export const getChapterDataState = create<ChapterData>((set) => ({
     chapterData: [],
     setChapterData: (newValue: Chapter[]) => {
         set({ chapterData: newValue })

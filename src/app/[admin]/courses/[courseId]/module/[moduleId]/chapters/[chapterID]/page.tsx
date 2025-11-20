@@ -18,7 +18,6 @@ import {
     getCurrentChapterState,
     getTopicId,
     getActiveChapter,
-    getChapterPermissionState,
 } from '@/store/store'
 import { Spinner } from '@/components/ui/spinner'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -26,6 +25,7 @@ import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import LiveClass from '../../../_components/liveClass/LiveClass'
 import { useRouter } from 'next/navigation'
 import { ChaptersQuizQuestionDetails } from '@/app/[admin]/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType'
+import { useModuleChapters } from '@/hooks/useModuleChapters';
 export default function Page({
     params,
 }: {
@@ -49,10 +49,10 @@ export default function Page({
     const [activeChapter, setActiveChapter] = useState(chapter_id)
     // const { activeChapter, setActiveChapter } = getActiveChapter(chapter_id)()
     const { topicId } = getTopicId()
-    const { chapterPermissions } = getChapterPermissionState()
-    const canEditChapter = chapterPermissions?.editChapter ?? true
+    const { permissions } = useModuleChapters(moduleID);
+    const canEditChapter = permissions?.editChapter ?? false;
     const [key, setKey] = useState(0)
-    const [loading, setLoading] = useState(true)
+    const [contentLoading, setContentLoading] = useState(true)
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
     const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
         useState(false)
@@ -75,13 +75,13 @@ export default function Page({
                 }
 
                 setChapterContent(response.data)
-                setLoading(false)
+                setContentLoading(false)
                 setActiveChapter(chapterId)
                 setKey((prevKey: any) => prevKey + 1)
                 return response.data
             } catch (error) {
                 console.error('Error fetching chapter content:', error)
-                setLoading(false)
+                setContentLoading(false)
             }
         },
         [moduleData, courseId, moduleId]
@@ -104,7 +104,7 @@ export default function Page({
             setChapterContent([])
             setActiveChapterTitle('')
             setTimeout(() => {
-                setLoading(false) // Set loading to false after the delay
+                setContentLoading(false) // Set loading to false after the delay
             }, 1000)
         }
     }, [
@@ -229,7 +229,7 @@ export default function Page({
         } else {
             return (
                 <>
-                    {loading ? (
+                    {contentLoading ? (
                         <div className="my-5 flex justify-center items-center">
                             <div className="absolute h-screen">
                                 <div className="relative top-[70%]">

@@ -25,12 +25,11 @@ import {
     getChapterUpdateStatus,
     getCourseData,
     getUser,
-    getChapterPermissionState,
-    ChapterPermissions,
 } from '@/store/store'
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { QuizOptions, QuizQuestionDetails } from '@/components/appComponentFileType'
+import { useModuleChapters } from '@/hooks/useModuleChapters'
 
 type Chapter = {
     chapterId: number
@@ -64,11 +63,13 @@ function Chapter() {
     const setModuleName = getCurrentModuleName((state) => state.setModuleName)
     const [key, setKey] = useState(0)
     const [open, setOpen] = useState(false)
-    const [permissions, setPermissions] = useState<ChapterPermissions | null>(
-        null
-    )
-    const { setChapterPermissions } = getChapterPermissionState()
-    const [hasViewPermission, setHasViewPermission] = useState(true)
+    const {
+        moduleName: fetchedModuleName,
+        chapters: moduleChapters,
+        permissions,
+        loading: moduleLoading,
+        refetch,
+    } = useModuleChapters(moduleID)
 
     // Drag and drop states
     const [isDragging, setIsDragging] = useState(false)
@@ -113,60 +114,9 @@ function Chapter() {
         setBorderFlashTimeout(timeout)
     }
 
-    const fetchChapters = useCallback(async () => {
+    const refreshChapters = useCallback(async () => {
         try {
-            const response = await api.get(
-                `/Content/allChaptersOfModule/${moduleId}`
-            )
-
-            const {
-                chapterWithTopic = [],
-                moduleName: moduleTitle = '',
-                permissions: permissionData = {},
-            } = response.data
-
-            const canView = permissionData?.viewChapter !== false
-
-            setPermissions(permissionData)
-            setChapterPermissions(permissionData)
-            setHasViewPermission(canView)
-            setModuleName(moduleTitle)
-
-            if (!canView) {
-                setChapterData([])
-                setModuleData([])
-                setOriginalChapterData([])
-                setCurrentChapter([])
-                setTopicId(0)
-                setChapterContent([])
-                setActiveChapter(0)
-                setChapterId(0)
-                setActiveChapterTitle('')
-                return
-            }
-
-            const clickedChapter = chapterWithTopic.find(
-                (item: any) => item.chapterId === chapter_id
-            )
-
-            if (typeof clickedChapter?.topicId === 'number') {
-                setTopicId(clickedChapter.topicId)
-            }
-            setCurrentChapter(clickedChapter)
-            setChapterData(chapterWithTopic)
-            setModuleData(chapterWithTopic)
-
-            // Store original data for comparison
-            setOriginalChapterData([
-                ...chapterWithTopic.map((item: any) => ({
-                    ...item,
-                })),
-            ])
-
-            // Initialize last order reference
-            lastOrderRef.current = chapterWithTopic.map(
-                (item: any) => item.chapterId
-            )
+            await refetch()
         } catch (error) {
             router.replace(`/${userRole}/courses/${courseId}/curriculum`)
             toast.info({
@@ -175,13 +125,63 @@ function Chapter() {
             })
             console.error('Error fetching chapters:', error)
         }
-    }, [moduleId, chapter_id, isChapterUpdated])
+    }, [refetch, router, userRole, courseId])
 
     useEffect(() => {
-        if (moduleId) {
-            fetchChapters()
+        if (isChapterUpdated) {
+            refreshChapters()
+            setIsChapterUpdated(false)
         }
-    }, [courseId, moduleId, fetchChapters])
+    }, [isChapterUpdated, refreshChapters, setIsChapterUpdated])
+
+    useEffect(() => {
+        if (moduleLoading) return
+
+        setModuleName(fetchedModuleName)
+
+        const canView = permissions?.viewChapter !== false
+
+        if (!canView) {
+            setChapterData([])
+            setModuleData([])
+            setOriginalChapterData([])
+            setCurrentChapter([])
+            setTopicId(0)
+            setChapterContent([])
+            setActiveChapter(0)
+            setChapterId(0)
+            setActiveChapterTitle('')
+            return
+        }
+
+        setChapterData(moduleChapters)
+        setModuleData(moduleChapters)
+        const clickedChapter = moduleChapters.find(
+            (item: any) => item.chapterId === chapter_id
+        )
+
+        if (typeof clickedChapter?.topicId === 'number') {
+            setTopicId(clickedChapter.topicId)
+        }
+        setCurrentChapter(clickedChapter)
+
+        setOriginalChapterData(
+            moduleChapters.map((item: any) => ({
+                ...item,
+            }))
+        )
+
+        lastOrderRef.current = moduleChapters.map(
+            (item: any) => item.chapterId
+        )
+    }, [
+        moduleLoading,
+        fetchedModuleName,
+        permissions,
+        moduleChapters,
+        chapter_id,
+        setModuleName,
+    ])
 
     useEffect(() => {
         if (chapterData.length > 0) {
@@ -406,7 +406,7 @@ function Chapter() {
                                 <ChapterModal
                                     courseId={courseId}
                                     moduleId={moduleId}
-                                    fetchChapters={fetchChapters}
+                                    fetchChapters={refreshChapters}
                                     newChapterOrder={chapterData.length}
                                     scrollToBottom={scrollToBottom}
                                     onClose={() => setOpen(false)} // <-- Pass onClose prop
@@ -443,7 +443,7 @@ function Chapter() {
                                     title={item.chapterTitle}
                                     topicId={item.topicId}
                                     topicName={item.topicName}
-                                    fetchChapters={fetchChapters}
+                                    fetchChapters={refreshChapters}
                                     setActiveChapter={setActiveChapter}
                                     activeChapter={activeChapter}
                                     moduleId={moduleID}
