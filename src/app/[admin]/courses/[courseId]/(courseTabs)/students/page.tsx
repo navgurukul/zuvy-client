@@ -118,6 +118,7 @@ const StudentsPage = ({ params }: { params: any }) => {
       const response = await api.get(url)
       setStudents(response.data.modifiedStudentInfo || [])
       setSelectedRows([])
+      setLoading(false)
       
     } catch (error) {
       console.error('Error fetching filtered data:', error)
@@ -333,12 +334,6 @@ const StudentsPage = ({ params }: { params: any }) => {
     window.addEventListener('refreshStudentData', handleRefresh)
     return () => { window.removeEventListener('refreshStudentData', handleRefresh) }
   }, [fetchFilteredData])
-
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 600)
-    return () => clearTimeout(timer)
-  }, [])
 
   
   if (loading) {

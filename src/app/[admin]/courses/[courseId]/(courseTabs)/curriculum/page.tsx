@@ -354,7 +354,6 @@ function Page() {
                 setIsLoading(false)
             })
             .catch(() => {
-                setIsLoading(false)
                 toast.error({
                     title: 'Error',
                     description: "'Error creating module'",
@@ -402,7 +401,6 @@ function Page() {
                     })
                 }
             }
-            setLoading(false)
         }
     }
 

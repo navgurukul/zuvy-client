@@ -95,13 +95,39 @@ const CodingProblems = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
 
-    // Custom hook for search with suggestions
+    // // Custom hook for search with suggestions
+    // const fetchSuggestionsApi = useCallback(async (query: string) => {
+    //     const response = await api.get('/Content/allCodingQuestions', {
+    //         params: {
+    //             searchTerm: query,
+    //         },
+    //     })
+    //     let questionsData = response.data
+    //     if (response.data.data) questionsData = response.data.data
+    //     if (response.data.questions) questionsData = response.data.questions
+    //     if (!Array.isArray(questionsData)) {
+    //         console.error('Expected array but got:', typeof questionsData)
+    //         return []
+    //     }
+    //     const suggestions = questionsData.map((question: SearchSuggestion) => ({
+    //         id: question.id,
+    //         title: question.title,
+    //         difficulty: question.difficulty || 'N/A',
+    //     }))
+    //     return suggestions
+    // }, [])
+
+
+
+
     const fetchSuggestionsApi = useCallback(async (query: string) => {
+    try {
         const response = await api.get('/Content/allCodingQuestions', {
             params: {
                 searchTerm: query,
             },
         })
+
         let questionsData = response.data
         if (response.data.data) questionsData = response.data.data
         if (response.data.questions) questionsData = response.data.questions
@@ -117,7 +143,14 @@ const CodingProblems = () => {
             difficulty: question.difficulty || 'N/A',
         }))
         return suggestions
-    }, [])
+        
+    } catch (error) {
+        console.error("Error while fetching suggestions:", error)
+        return [] 
+
+    }
+}, [])
+
 
     const fetchSearchResultsApi = useCallback(
         async (query: string) => {

@@ -27,20 +27,18 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     useEffect(() => {
         const fetchAssignmentDataHandler = async () => {
             try {
-                setLoading(true)
                 const url = debouncedSearch
                     ? `/submission/submissionsOfAssignment/${courseId}?searchAssignment=${debouncedSearch}`
                     : `/submission/submissionsOfAssignment/${courseId}`
                 const res = await api.get<AssignmentApiResponse>(url)
                 setAssignmentData(res.data.data.trackingData)
                 setTotalStudents(res.data.data.totalStudents)
+            setLoading(false)
             } catch (error) {
                 toast.error({
                     title: 'Error',
                     description: 'Error while fetching assignment data',
                 })
-            }finally {
-              setLoading(false)
             }
         }
 

@@ -211,7 +211,6 @@ const AddAssignent = ({
     }
 
     const getAssignmentContent = async () => {
-        // setIsDataLoading(true)
         try {
             const response = await getChapterDetails({
                 chapterId: content.id,

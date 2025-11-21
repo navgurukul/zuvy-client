@@ -264,6 +264,7 @@ const OpenEndedQuestions = (props: Props) => {
                 setTotalOpenEndedQuestion(totalRows || 0)
                 setTotalPages(totalPages || 0)
                 setLastPage(totalPages || 0)
+                setLoading(false)
             } catch (error) {
                 console.error('Error fetching open-ended questions:', error)
             }
@@ -289,12 +290,6 @@ const OpenEndedQuestions = (props: Props) => {
         fetchCodingQuestions,
     ])
 
-    useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
-
-    // Load all questions for suggestions
     useEffect(() => {
         getAllOpenEndedQuestions((data: OpenEndedQuestionType[]) => {
             setAllOpenEndedQuestions(data)

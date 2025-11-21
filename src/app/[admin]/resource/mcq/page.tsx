@@ -388,6 +388,7 @@ const Mcqs = (props: Props) => {
                         setTotalPages,
                         currentSearchTerm
                     )
+                setLoading(false)
                 } catch (error) {
                     console.error('Error fetching questions:', error)
                     // Set empty data on error to prevent table crashes
@@ -404,7 +405,7 @@ const Mcqs = (props: Props) => {
             setLastPage,
             setTotalPages,
             searchParams,
-            options.length, // Add this dependency
+            options.length, 
         ]
     )
 
@@ -413,12 +414,6 @@ const Mcqs = (props: Props) => {
         if (options.length > 0) {
             const searchFilter = searchParams.get('search') || ''
             fetchCodingQuestions(offset, searchFilter)
-             .then(() => {
-                setTimeout(() => setLoading(false), 400);
-            })
-            .catch(() => {
-                setLoading(false);
-            });
         }
     }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions])
 

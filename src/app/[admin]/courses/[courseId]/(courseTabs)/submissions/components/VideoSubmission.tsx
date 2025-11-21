@@ -20,20 +20,18 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
 
     const getVideoSubmission = useCallback(async () => {
         try {
-            setLoading(true)
             const url = debouncedSearch
                 ? `/admin/bootcampModuleCompletion/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
                 : `/admin/bootcampModuleCompletion/bootcamp_id${courseId}`
 
             const res = await api.get(url)
             setVideoData(res.data)
+            setLoading(false)
         } catch (error) {
             toast.error({
                 title: 'Error',
                 description: 'Error fetching assessments:',
             })
-        }finally {
-           setLoading(false)
         }
     }, [courseId, debouncedSearch])
 

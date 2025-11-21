@@ -23,22 +23,20 @@ const PraticeProblemsComponent = ({
             // const res = await api.get(
             //     `/submission/submissionsOfPractiseProblems/${courseId}`
             // )
-            setLoading(true)
             const url = debouncedSearch
                 ? `/submission/submissionsOfPractiseProblems/${courseId}?searchPractiseProblem=${debouncedSearch}`
                 : `/submission/submissionsOfPractiseProblems/${courseId}`
             const res = await api.get<SubmissionsResponse>(url)
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
+            setLoading(false)
         } catch (error) {
             console.error('Error fetching submissions:', error)
             toast.error({
                 title: 'Error',
                 description: 'Error fetching submissions.',
             })
-        } finally {
-             setLoading(false)
-        }
+        } 
     }, [courseId, debouncedSearch])
 
     useEffect(() => {

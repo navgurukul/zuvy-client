@@ -264,6 +264,8 @@ const Page = ({ params }: { params: any }) => {
                 index === self.findIndex((s) => s.id === suggestion.id && s.type === suggestion.type)
         )
 
+        
+
         return uniqueSuggestions.slice(0, 8)
     }, [params.courseId, activeTab])
 
@@ -390,6 +392,7 @@ const Page = ({ params }: { params: any }) => {
         if (activeTab === 'live') getLiveClassData()
     }, [params.courseId, activeTab, appliedSearchQuery, getProjectsData, getFormData, getLiveClassData])
 
+    
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)

@@ -25,21 +25,19 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
     const getAssessments = useCallback(async () => {
         try {
-             setLoading(true)
             const url = debouncedSearch
                 ? `/admin/bootcampAssessment/bootcamp_id${courseId}?searchAssessment=${debouncedSearch}`
                 : `/admin/bootcampAssessment/bootcamp_id${courseId}`
 
             const res = await api.get(url)
             setAssesments(res.data)
+             setLoading(false)
         } catch (error) {
             toast.error({
                 title: 'Error',
                 description: 'Error fetching assessments:',
             })
-        }finally {
-           setLoading(false) 
-       }
+        }
     }, [courseId, debouncedSearch])
 
     useEffect(() => {

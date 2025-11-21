@@ -26,7 +26,6 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
     const getLiveClassData = useCallback(async () => {
         try {
-            setLoading(true)
             let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${courseId}`
             if (debouncedSearch) {
                 url += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
@@ -36,6 +35,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
             const trackingData = res.data?.data?.trackingData || []
             setLiveClassData(trackingData)
             setTotalStudents(res.data?.data?.totalStudents || 0)
+            setLoading(false)
         } catch (error) {
             console.error('Error fetching live class data:', error)
             setLiveClassData([])
@@ -45,9 +45,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                 description: 'Failed to fetch live class data',
                 variant: 'destructive',
             })
-        } finally {
-            setLoading(false)
-        }
+        } 
     }, [courseId, debouncedSearch])
 
     useEffect(() => {

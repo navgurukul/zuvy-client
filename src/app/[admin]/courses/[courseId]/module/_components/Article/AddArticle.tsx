@@ -174,7 +174,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
     const getArticleContent = async () => {
         try {
-            // setIsDataLoading(true)
             const response = await getChapterDetails({
                 chapterId: content.id,
                 bootcampId: courseId,
@@ -220,6 +219,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             // NEW: Set initial content states
             setHasEditorContent(!isEditorContentEmpty(parsedContent))
             setPreviousContentHash(generateContentHash(parsedContent))
+            
         } catch (error) {
             console.error('Error fetching article content:', error)
            

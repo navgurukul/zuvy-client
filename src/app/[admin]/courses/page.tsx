@@ -228,9 +228,6 @@ const defaultFetchApi = useCallback(
     return (
         <>
             {loading ? (
-                // <div className="flex justify-center items-center h-screen">
-                //     <Spinner className="text-[rgb(81,134,114)]" />
-                // </div>
                 <CoursesSkeleton/>
             ) : (
                 <div className="w-full px-6 py-8 font-manrope">

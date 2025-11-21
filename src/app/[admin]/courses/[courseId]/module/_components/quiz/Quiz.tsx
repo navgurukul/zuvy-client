@@ -330,15 +330,11 @@ function Quiz(props: QuizProps) {
 
 
     useEffect(() => {
-        // if (hasLoaded.current) return
-        // hasLoaded.current = true
         const fetchData = async () => {
-            // setIsDataLoading(true)
             await getAllTags()
             if (props.chapterId && props.chapterId !== 0) {
                 await getAllSavedQuizQuestion()
             }
-            // setIsDataLoading(false)
         }
         fetchData()
     }, [props.chapterId, getAllSavedQuizQuestion])
