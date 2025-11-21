@@ -11,9 +11,12 @@ import {
     VideoSubmissions,
     VideoData,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
+import {VideoSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const [videoData, setVideoData] = useState<VideoData | null>(null)
+    const [loading, setLoading] = useState(true)
 
     const getVideoSubmission = useCallback(async () => {
         try {
@@ -23,6 +26,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
 
             const res = await api.get(url)
             setVideoData(res.data)
+            setLoading(false)
         } catch (error) {
             toast.error({
                 title: 'Error',
@@ -35,6 +39,9 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
         getVideoSubmission()
     }, [getVideoSubmission])
 
+    if (loading) {
+        return<VideoSubmissionSkeleton/>
+    }
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (

@@ -20,7 +20,6 @@ export type AddLiveClass={
     moduleId: string
 }
 
-
 // ChapterItem
 export type ChapterItems={
     title: string
@@ -41,7 +40,6 @@ export type ChapterItems={
     showBorderFlash?: boolean
     canDeleteChapter?: boolean
 }
-
 
 // ChapterModal
 export interface ChapterModalProps{

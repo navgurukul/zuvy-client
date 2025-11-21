@@ -28,6 +28,7 @@ import {
 } from '@/app/[admin]/courses/[courseId]/module/_components/video/ModuleVideoType'
 import { getEmbedLink, isLinkValid } from '@/utils/admin'
 import useEditChapter from '@/hooks/useEditChapter'
+import {VideoSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
@@ -73,9 +74,9 @@ const AddVideo: React.FC<AddVideoProps> = ({
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setVideoPreviewContent } = getVideoPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
-    const hasLoaded = useRef(false)
-    const { editChapter, loading: editChapterLoading } = useEditChapter()
+   const { editChapter, loading: editChapterLoading } = useEditChapter()
     const [alertOpen, setAlertOpen] = useState(!canEdit)
+    const hasLoaded = useRef(false)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -126,23 +127,21 @@ const AddVideo: React.FC<AddVideoProps> = ({
         }
     }
 
-    useEffect(() => {
-        if (hasLoaded.current) return
-        hasLoaded.current = true
-        setIsDataLoading(true)
 
+    useEffect(() => {
         if (content?.contentDetails?.[0]?.links?.[0]) {
             form.reset({
                 videoTitle: content?.contentDetails?.[0]?.title ?? '',
                 description: content?.contentDetails?.[0]?.description ?? '',
                 links: content?.contentDetails?.[0]?.links?.[0] ?? '',
             })
+        setIsDataLoading(false)
         } else {
             setShowVideoBox(false)
         }
         setVideoTitle(content?.contentDetails?.[0]?.title ?? '')
-        setIsDataLoading(false)
     }, [content?.contentDetails, form])
+
 
     const handleClose = async () => {
         if (!canEdit) {
@@ -210,13 +209,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">Loading Quiz details...</div>
-                </div>
-            </div>
-        )
+        return<VideoSkeletons/>
     }
 
     return (

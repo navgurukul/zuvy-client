@@ -56,6 +56,7 @@ import {
     OpenOption,
 } from '@/app/[admin]/resource/open-ended/adminResourceOpenType'
 import { SearchBox } from '@/utils/searchBox'
+import {OpenEndedQuestionsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 type Props = {}
 
@@ -263,6 +264,7 @@ const OpenEndedQuestions = (props: Props) => {
                 setTotalOpenEndedQuestion(totalRows || 0)
                 setTotalPages(totalPages || 0)
                 setLastPage(totalPages || 0)
+                setLoading(false)
             } catch (error) {
                 console.error('Error fetching open-ended questions:', error)
             }
@@ -288,12 +290,6 @@ const OpenEndedQuestions = (props: Props) => {
         fetchCodingQuestions,
     ])
 
-    useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
-
-    // Load all questions for suggestions
     useEffect(() => {
         getAllOpenEndedQuestions((data: OpenEndedQuestionType[]) => {
             setAllOpenEndedQuestions(data)
@@ -397,9 +393,7 @@ const OpenEndedQuestions = (props: Props) => {
     return (
         <>
             {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-[rgb(81,134,114)]" />
-                </div>
+                 <OpenEndedQuestionsSkeleton />
             ) : (
                 <div>
                     {allOpenEndedQuestions?.length > 0 ? (

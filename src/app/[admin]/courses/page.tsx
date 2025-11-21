@@ -32,7 +32,7 @@ import { useBootcamps } from '@/hooks/useBootcamps'
 import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
 import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
-// import {CoursesSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import {CoursesSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -228,10 +228,7 @@ const defaultFetchApi = useCallback(
     return (
         <>
             {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    {/* <Spinner className="text-[rgb(81,134,114)]" /> */}
-                </div>
-                // <CoursesSkeleton/>
+                <CoursesSkeleton/>
             ) : (
                 <div className="w-full px-6 py-8 font-manrope">
                     {/* <div className="container mx-auto px-1 pt-2 pb-2 max-w-7xl"> */}

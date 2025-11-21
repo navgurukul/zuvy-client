@@ -22,6 +22,7 @@ import {
     Upload,
     ExternalLink
 } from 'lucide-react'
+import {CourseLayoutSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 function CourseLayout() {
     const router = useRouter()
@@ -29,9 +30,9 @@ function CourseLayout() {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { courseData, Permissions } = getCourseData()
-    // get the role from current path like if the url is this - admin/courses/721/details  then get admin from it
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    const [loading, setLoading] = useState(true)
 
     const courseMenu = [
         {
@@ -95,6 +96,7 @@ function CourseLayout() {
                             'The Course has been deleted by another Admin',
                     })
                 }
+                setLoading(false)
             } catch (error) {
                 console.error('Caught in handleFetch', error)
             }
@@ -105,6 +107,9 @@ function CourseLayout() {
         handleFetch()
     }, [])
 
+if (loading) {
+  return <CourseLayoutSkeleton/>
+}
     return (
         <div className="pl-6 pr-3">
             {/* <Breadcrumb crumbs={crumbs} /> */}

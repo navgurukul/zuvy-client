@@ -12,54 +12,51 @@ const moduleCache: Record<string, ModuleChaptersResponse> = {};
 
 export function useModuleChapters(moduleId: string | number | undefined) {
     const cacheKey = moduleId ? String(moduleId) : '';
-    const [data, setData] = useState<ModuleChaptersResponse | null>(
-        cacheKey && moduleCache[cacheKey] ? moduleCache[cacheKey] : null
-    );
-    const [loading, setLoading] = useState(!data && !!moduleId);
+
+    const [data, setData] = useState<ModuleChaptersResponse | null>(null);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
     const fetchData = useCallback(async () => {
         if (!moduleId) {
+            setLoading(false);
             setData(null);
-            setLoading(false);
-            return null;
-        }
-
-        setLoading(true);
-        try {
-            const response = await api.get(`/Content/allChaptersOfModule/${moduleId}`);
-            const normalized: ModuleChaptersResponse = {
-                chapterWithTopic: response.data.chapterWithTopic ?? [],
-                moduleName: response.data.moduleName ?? '',
-                permissions: response.data.permissions ?? {},
-            };
-            moduleCache[cacheKey] = normalized;
-            setData(normalized);
-            setError(null);
-            return normalized;
-        } catch (err) {
-            setError(err as Error);
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }, [moduleId, cacheKey]);
-
-    useEffect(() => {
-        if (!moduleId) {
-            setData(null);
-            setLoading(false);
             return;
         }
 
-        if (cacheKey && moduleCache[cacheKey]) {
-            setData(moduleCache[cacheKey]);
-            setLoading(false);
+        setLoading(true); 
+        try {
+            const res = await api.get(`/Content/allChaptersOfModule/${moduleId}`);
+
+            const normalized: ModuleChaptersResponse = {
+                chapterWithTopic: res.data.chapterWithTopic ?? [],
+                moduleName: res.data.moduleName ?? '',
+                permissions: res.data.permissions ?? {},
+            };
+
+            moduleCache[cacheKey] = normalized;
+            setData(normalized);
+            setError(null);
+        } catch (err) {
+            setError(err as Error);
+        } finally {
+            setLoading(false); 
+        }
+    }, [moduleId, cacheKey]);
+
+
+    useEffect(() => {
+        if (!moduleId) return;
+
+        if (moduleCache[cacheKey]) {
+            setData(moduleCache[cacheKey]);  
+            fetchData();                     
             return;
         }
 
         fetchData();
     }, [moduleId, cacheKey, fetchData]);
+
 
     return {
         moduleName: data?.moduleName ?? '',

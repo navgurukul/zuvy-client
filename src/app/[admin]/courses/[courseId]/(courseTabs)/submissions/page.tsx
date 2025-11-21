@@ -20,6 +20,7 @@ import VideoSubmission from './components/VideoSubmission'
 import Image from 'next/image'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
+import {CourseSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import ProjectsComponent from './components/projectSubmissionComponent'
 
 interface SearchSuggestion {
@@ -263,6 +264,8 @@ const Page = ({ params }: { params: any }) => {
                 index === self.findIndex((s) => s.id === suggestion.id && s.type === suggestion.type)
         )
 
+        
+
         return uniqueSuggestions.slice(0, 8)
     }, [params.courseId, activeTab])
 
@@ -340,6 +343,7 @@ const Page = ({ params }: { params: any }) => {
             setBootcampModules([])
             setTotalStudents(0)
         }
+
     }, [params.courseId, appliedSearchQuery, activeTab])
 
     const getFormData = useCallback(async () => {
@@ -388,6 +392,7 @@ const Page = ({ params }: { params: any }) => {
         if (activeTab === 'live') getLiveClassData()
     }, [params.courseId, activeTab, appliedSearchQuery, getProjectsData, getFormData, getLiveClassData])
 
+    
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false)
@@ -398,13 +403,7 @@ const Page = ({ params }: { params: any }) => {
     return (
         <div className="">
             {loading ? (
-                <div className="my-5 flex justify-center items-center">
-                    <div className="absolute h-screen">
-                        <div className="relative top-[75%]">
-                            <Spinner className="text-[rgb(81,134,114)]" />
-                        </div>
-                    </div>
-                </div>
+                 <CourseSubmissionSkeleton/>
             ) : (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">

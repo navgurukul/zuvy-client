@@ -7,7 +7,7 @@ import { ChevronRight, MessageSquare, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { FormComponentProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
-
+import {FeedbackSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 const FormComponent = ({
     bootcampId,
     moduleId,

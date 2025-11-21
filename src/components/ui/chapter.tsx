@@ -1,5 +1,4 @@
 'use client'
-
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
@@ -30,6 +29,7 @@ import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { QuizOptions, QuizQuestionDetails } from '@/components/appComponentFileType'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
+import {ModuleContentSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 type Chapter = {
     chapterId: number
@@ -93,6 +93,7 @@ function Chapter() {
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { courseData, fetchCourseDetails } = getCourseData()
     const draggedChapterRef = useRef<number | null>(null)
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (courseData?.name === '') fetchCourseDetails(courseID)
@@ -366,8 +367,14 @@ function Chapter() {
     //     }
     // }, [currentChapter])
 
+
+
     const canCreateChapter = permissions?.createChapter ?? false
     const canDeleteChapter = permissions?.deleteChapter ?? false
+
+    if (moduleLoading){
+      return<ModuleContentSkeletons/>
+    }
 
     return (
         <div className="flex flex-col h-screen pb-20 bg-card pl-4 pt-2">

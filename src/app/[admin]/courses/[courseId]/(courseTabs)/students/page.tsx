@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -34,6 +33,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {StudentPageSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import { Student } from './studentComponentTypes'
 
 export type StudentData = {
@@ -76,7 +76,9 @@ const StudentsPage = ({ params }: { params: any }) => {
   const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [batchFilter, setBatchFilter] = useState<string>('all')
-  const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
+  const [attendanceFilter, setAttendanceFilter] = useState<string>('') 
+  const [loading, setLoading] = useState(true)
+
 
   // Fetch data with filters
   const fetchFilteredData = useCallback(async (customOffset?: number) => {
@@ -116,6 +118,7 @@ const StudentsPage = ({ params }: { params: any }) => {
       const response = await api.get(url)
       setStudents(response.data.modifiedStudentInfo || [])
       setSelectedRows([])
+      setLoading(false)
       
     } catch (error) {
       console.error('Error fetching filtered data:', error)
@@ -332,7 +335,10 @@ const StudentsPage = ({ params }: { params: any }) => {
     return () => { window.removeEventListener('refreshStudentData', handleRefresh) }
   }, [fetchFilteredData])
 
-    // Normal table view (no conditional rendering needed)
+  
+  if (loading) {
+    return <StudentPageSkeleton />
+  }
     return (
         <div className="text-foreground">
             <div className="text-start mt-6">

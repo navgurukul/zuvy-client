@@ -61,6 +61,8 @@ import {
 import useEditChapter from '@/hooks/useEditChapter'
 import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import {AssignmentSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 import PermissionAlert from '@/app/_components/PermissionAlert'
  
 const AddAssignent = ({
@@ -209,7 +211,6 @@ const AddAssignent = ({
     }
 
     const getAssignmentContent = async () => {
-        setIsDataLoading(true)
         try {
             const response = await getChapterDetails({
                 chapterId: content.id,
@@ -217,17 +218,18 @@ const AddAssignent = ({
                 moduleId: content.moduleId,
                 topicId: content.topicId,
             })
-
+      
             // Convert string to Date object
             if (response.data.completionDate) {
                 setDeadline(parseISO(response.data.completionDate))
             } else {
                 setDeadline(null)
             }
-
+           
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
+            setIsDataLoading(false)
             if (contentDetails.links && contentDetails.links[0]) {
                 setpdfLink(contentDetails.links[0])
                 setIsPdfUploaded(true)
@@ -257,15 +259,10 @@ const AddAssignent = ({
                 setInitialContent(jsonData)
                 setPreviousContentHash(generateContentHash(jsonData))
             }
+             
         } catch (error) {
             console.error('Error fetching assignment content:', error)
-        } finally {
-            setIsDataLoading(false)
-            // Mark initial load as complete after a short delay
-            setTimeout(() => {
-                setInitialLoadComplete(true)
-            }, 1000)
-        }
+        } 
     }
 
     const [isEditorSaved, setIsEditorSaved] = useState(false)
@@ -521,15 +518,7 @@ const AddAssignent = ({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading assignment details...
-                    </div>
-                </div>
-            </div>
-        )
+        return<AssignmentSkeletons/>
     }
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">

@@ -29,6 +29,9 @@ import {
     AddFormProps,
     FormQuestionDetail,
 } from '@/app/[admin]/courses/[courseId]/module/_components/form/ModuleFormType'
+import {FeedbackFormSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
+
 import PermissionAlert from '@/app/_components/PermissionAlert'
 const formSchema = z.object({
     title: z
@@ -77,6 +80,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const [isSaved, setIsSaved] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const { editChapter } = useEditChapter()
+    const [isDataLoading, setIsDataLoading] = useState(true)
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
@@ -390,7 +394,18 @@ const AddForm: React.FC<AddFormProps> = ({
             )
         }
     }
+    
+ useEffect(() => {
+    if (content?.formQuestionDetails) {
+        setIsDataLoading(false)
+    }
+}, [content?.formQuestionDetails])
 
+
+
+    if (isDataLoading) {
+       return <FeedbackFormSkeleton/>
+    }
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
             <ScrollBar className="h-dvh " orientation="vertical" />

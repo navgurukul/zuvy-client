@@ -30,6 +30,7 @@ import { AnyARecord } from 'dns'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import {CodingChallengeSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
 function CodingChallenge({
@@ -180,62 +181,63 @@ function CodingChallenge({
         setIsSaved(checkIfSaved())
     }, [selectedQuestions, savedQuestions])
 
-    useEffect(() => {
-        async function getAllCodingQuestions() {
-            try {
-                let url = '/Content/allCodingQuestions'
 
-                const queryParams = []
+useEffect(() => {
+    async function getAllCodingQuestions() {
+        try {
 
-                let selectedTagIds = ''
-                selectedOptions.forEach((topic: any) => {
-                    if (topic.id !== -1 && topic.id !== 0) {
-                        // Skip 'All Topics'
-                        selectedTagIds += `&tagId=${topic.id}`
-                    }
-                })
+            let url = '/Content/allCodingQuestions'
+            const queryParams = []
 
-                // Handle multiple selected difficulties, but ignore 'Any Difficulty'
-                let selectedDiff = ''
-                selectedDifficulty.forEach((difficulty: string) => {
-                    if (difficulty !== 'Any Difficulty') {
-                        selectedDiff += `&difficulty=${difficulty}`
-                    }
-                })
-
-                if (selectedTagIds.length > 0) {
-                    queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
+            let selectedTagIds = ''
+            selectedOptions.forEach((topic: any) => {
+                if (topic.id !== -1 && topic.id !== 0) {
+                    selectedTagIds += `&tagId=${topic.id}`
                 }
-                if (selectedDiff.length > 0) {
-                    queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
-                }
-                if (debouncedSearch) {
-                    queryParams.push(
-                        `searchTerm=${encodeURIComponent(debouncedSearch)}`
-                    )
-                }
-                if (queryParams.length > 0) {
-                    url += `?${queryParams.join('&')}`
-                }
+            })
 
-                const response = await api.get(url)
+            let selectedDiff = ''
+            selectedDifficulty.forEach((difficulty: string) => {
+                if (difficulty !== 'Any Difficulty') {
+                    selectedDiff += `&difficulty=${difficulty}`
+                }
+            })
 
-                setFilteredQuestions(response.data.data)
-            } catch (error) {
-                console.error('Error:', error)
+            if (selectedTagIds.length > 0) {
+                queryParams.push(selectedTagIds.substring(1))
             }
+
+            if (selectedDiff.length > 0) {
+                queryParams.push(selectedDiff.substring(1))
+            }
+
+            if (debouncedSearch) {
+                queryParams.push(
+                    `searchTerm=${encodeURIComponent(debouncedSearch)}`
+                )
+            }
+
+            if (queryParams.length > 0) {
+                url += `?${queryParams.join('&')}`
+            }
+
+            const response = await api.get(url)
+            setFilteredQuestions(response.data.data)
+
+            setIsDataLoading(false)
+
+        } catch (error) {
+            console.error('Error:', error)
         }
-        getAllCodingQuestions()
-    }, [
-        selectedDifficulty,
-        selectedQuestions,
-        debouncedSearch,
-        selectedOptions,
-    ])
+    }
+
+    getAllCodingQuestions()
+}, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedOptions])
+
+
 
     async function getAllTags() {
         try {
-            setIsDataLoading(true)
             const response = await api.get('Content/allTags')
             if (response) {
                 const tagArr = [
@@ -246,9 +248,8 @@ function CodingChallenge({
             }
         } catch (error) {
             console.error('Error fetching tags:', error)
-        } finally {
-            setIsDataLoading(false)
-        }
+        } 
+        
     }
 
     useEffect(() => {
@@ -288,15 +289,7 @@ function CodingChallenge({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Coding Problem details...
-                    </div>
-                </div>
-            </div>
-        )
+        return<CodingChallengeSkeleton/>
     }
     return (
         <>
