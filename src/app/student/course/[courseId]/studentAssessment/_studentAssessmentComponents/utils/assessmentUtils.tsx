@@ -238,7 +238,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
               disabled={disabled}
               className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 shadow-8dp hover:shadow-16dp ${
                 disabled
-                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  ? "bg-primary hover:bg-primary-dark text-primary-foreground cursor-not-allowed opacity-50"
                   : "bg-primary hover:bg-primary-dark text-primary-foreground"
               }`}
             >
