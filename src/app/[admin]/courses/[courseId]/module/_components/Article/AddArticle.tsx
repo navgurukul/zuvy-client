@@ -81,6 +81,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
     const [alertOpen, setAlertOpen] = useState(!canEdit)
+    const [hasChangedAfterSave, setHasChangedAfterSave] = useState(false)
+
     const hasLoaded = useRef(false)
 
     // misc
@@ -116,15 +118,26 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
         // Check if all content is empty
         const hasRealContent = docContent.some((item: any) => {
-            if (item.type === 'paragraph' && item.content) {
-                return item.content.some(
-                    (textItem: any) =>
-                        textItem.type === 'text' &&
-                        textItem.text &&
-                        textItem.text.trim().length > 0
-                )
+            // Images and other non-paragraph content count as real content
+            if (item.type !== 'paragraph') {
+                return true
             }
-            return item.type !== 'paragraph' // Non-paragraph content is considered real content
+            
+            // Check paragraph content
+            if (item.type === 'paragraph' && item.content) {
+                return item.content.some((textItem: any) => {
+                    // Text with actual content
+                    if (textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0) {
+                        return true
+                    }
+                    // Images or other inline content
+                    if (textItem.type !== 'text') {
+                        return true
+                    }
+                    return false
+                })
+            }
+            return false
         })
 
         return !hasRealContent
@@ -222,9 +235,11 @@ const AddArticle: React.FC<AddArticleProps> = ({
             
         } catch (error) {
             console.error('Error fetching article content:', error)
-           
         } 
-        
+        finally {
+            setIsDataLoading(false)
+            setTimeout(() => setIsInitialLoad(false), 1000)
+        }
     }
 
     const editArticleContent = async () => {
@@ -245,7 +260,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
             setArticleUpdateOnPreview(!articleUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
-            setIsEditorSaved(!isEditorContentEmpty(initialContent))
             setIsEditorSaved(true)
 
             // IMPORTANT: Mark that user has manually saved and track if content was non-empty
@@ -256,7 +270,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
-
+            setHasChangedAfterSave(false)
             toast.success({
                 title: 'Success',
                 description: 'Article Chapter Edited Successfully',
@@ -285,16 +299,28 @@ const AddArticle: React.FC<AddArticleProps> = ({
         if (ispdfUploaded) setIsEditorSaved(false)
     }, [ispdfUploaded])
 
-    // Add this useEffect after your other useEffects
+    // FIXED: Update hasEditorContent whenever initialContent changes
     useEffect(() => {
-        // Skip if it's initial load or editor is not visible
-        if (isInitialLoad || defaultValue !== 'editor' || !initialContent)
-            return
+        if (!isInitialLoad && initialContent) {
+            const currentHash = generateContentHash(initialContent)
+            const hasContent = !isEditorContentEmpty(initialContent)
+            console.log('Content check:', hasContent, initialContent)
+            setHasEditorContent(hasContent)
+
+            // Check if content changed from last saved version
+            if (previousContentHash && currentHash !== previousContentHash) {
+                setHasChangedAfterSave(true) // Enable button
+            }
+        }
+    }, [initialContent, isInitialLoad, previousContentHash])
+
+    // Auto-save effect for content deletion
+    useEffect(() => {
+        if (isInitialLoad || defaultValue !== 'editor' || !initialContent) return
 
         const isEmpty = isEditorContentEmpty(initialContent)
         const currentHash = generateContentHash(initialContent)
 
-        setHasEditorContent(!isEmpty)
         if (
             hasUserSaved &&
             wasContentNonEmptyWhenSaved &&
@@ -445,296 +471,296 @@ const AddArticle: React.FC<AddArticleProps> = ({
                     />
                 )}
                 <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
-                <div className="w-full ">
-                    {/* <div className="flex justify-between items-center"> */}
-                    {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
-                    {/* <p className="text-2xl font-bold">{title}</p> */}
-                    <Form {...form}>
-                        <form
-                            id="myForm"
-                            onSubmit={form.handleSubmit(editArticleContent)}
-                            className="mr-4 mb-1"
-                        >
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormControl>
-                                            <>
-                                                <Input
-                                                    {...field}
-                                                    value={title} // Explicitly set value
-                                                    onChange={(e) => {
-                                                        setTitle(e.target.value)
-                                                        field.onChange(e)
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            e.preventDefault()
-                                                        }
-                                                    }}
-                                                    placeholder={
-                                                        defaultValue ===
-                                                        'editor'
-                                                            ? 'Untitled Article'
-                                                            : 'Untitled PDF'
-                                                    }
-                                                    className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                    disabled={!canEdit}
-                                                />
-                                            </>
-                                        </FormControl>
-                                        <FormMessage className="h-5" />
-                                    </FormItem>
-                                )}
-                            />
-                        </form>
-                    </Form>
-                    {/* {!title && (
-                            <Pencil
-                                fill="true"
-                                fillOpacity={0.4}
-                                size={20}
-                                className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                            />
-                        )} */}
-                    {/* </div> */}
-
-                    {/* <div className="flex justify-end mt-5">
-                        <div className="flex items-center justify-between mr-2">
-                            {defaultValue ===
-                                'editor' ? (
-                                <div
-                                    id="previewArticle"
-                                    onClick={
-                                        previewArticle
-                                    }
-                                    className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                >
-                                    <Eye size={18} />
-                                    <h6 className="ml-1 text-sm">
-                                        Preview Article
-                                    </h6>
-                                </div>
-                            ) : (
-                                <div
-                                    id="previewArticle"
-                                    onClick={previewPdf}
-                                    className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                >
-                                    <Eye size={18} />
-                                    <h6 className="ml-1 text-sm">
-                                        Preview PDF
-                                    </h6>
-                                </div>
-                            )}
-                        </div>
-                    </div> */}
-                    {/* </div> */}
-                    <div className="flex items-center gap-2 ml-1 pb-4">
-                        <BookOpenText size={20} className="transition-colors" />
-                        <p className="text-muted-foreground">Article</p>
-                    </div>
-
-                    <div className="ml-1 mr-4">
-                        <RadioGroup
-                            className="flex items-center gap-x-6"
-                            onValueChange={(value) =>
-                                canEdit && setDefaultValue(value)
-                            }
-                            value={defaultValue}
-                        >
-                            <TooltipProvider>
-                                <div className="flex gap-x-2">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <RadioGroupItem
-                                                value="editor"
-                                                disabled={!!pdfLink || !canEdit}
-                                                id="r1"
-                                                className="mt-1 text-foreground border-foreground"
-                                            />
-                                        </TooltipTrigger>
-                                        {pdfLink && (
-                                            <TooltipContent side="top">
-                                                You have uploaded a PDF, so the
-                                                editor is now disabled
-                                            </TooltipContent>
-                                        )}
-                                    </Tooltip>
-                                    <Label
-                                        htmlFor="r1"
-                                        className="font-light text-md text-foreground"
-                                    >
-                                        Editor
-                                    </Label>
-                                </div>
-
-                                <div className="flex gap-x-2">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <RadioGroupItem
-                                                value="pdf"
-                                                id="r2"
-                                                className="mt-1 text-foreground border-foreground"
-                                                disabled={isEditorSaved || !canEdit}
-                                            />
-                                        </TooltipTrigger>
-                                        {isEditorSaved && (
-                                            <TooltipContent side="top">
-                                                You have already saved the
-                                                assignment, so PDF upload is now
-                                                disabled
-                                            </TooltipContent>
-                                        )}
-                                    </Tooltip>
-                                    <Label
-                                        htmlFor="r2"
-                                        className="font-light text-md text-foreground"
-                                    >
-                                        Upload PDF
-                                    </Label>
-                                </div>
-                            </TooltipProvider>
-                        </RadioGroup>
-
-                        <div className="bg-card rounded-lg shadow-sm border">
-                            <div className="p-6">
-                                <p className="text-xl text-start text-foreground font-semibold">
-                                    Article Details
-                                </p>
-                                {/* <Form {...form}>
-                                <form
-                                    id="myForm"
-                                    onSubmit={form.handleSubmit(
-                                        editArticleContent
-                                    )}
-                                    className=""
-                                >
-                                    <FormField
-                                        control={form.control}
-                                        name="title"
-                                        render={({ field }) => (
-                                            <FormItem className="flex flex-col">
-                                                <FormControl>
-                                                    <>
-                                                        <p className="flex text-left text-lg mt-4">
-                                                            Title
-                                                        </p>
-                                                        <Input
-                                                            {...field}
-                                                            value={title} // Explicitly set value
-                                                            onChange={(e) => {
-                                                                // FIXED: Always update the same title state
-                                                                setTitle(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                                field.onChange(
-                                                                    e
-                                                                )
-                                                            }}
-                                                            onKeyDown={(e) => {
-                                                                if (
-                                                                    e.key ===
-                                                                    'Enter'
-                                                                ) {
-                                                                    e.preventDefault()
-                                                                }
-                                                            }}
-                                                            placeholder={
-                                                                defaultValue ===
-                                                                'editor'
-                                                                    ? 'Untitled Article'
-                                                                    : 'Untitled PDF'
+                    <div className="w-full ">
+                        {/* <div className="flex justify-between items-center"> */}
+                        {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
+                        {/* <p className="text-2xl font-bold">{title}</p> */}
+                        
+                        <Form {...form}>
+                            <form
+                                id="myForm"
+                                onSubmit={form.handleSubmit(editArticleContent)}
+                                className="mr-4 mb-1"
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col">
+                                            <FormControl>
+                                                <>
+                                                    <Input
+                                                        {...field}
+                                                        value={title} // Explicitly set value
+                                                        onChange={(e) => {
+                                                            setTitle(e.target.value)
+                                                            field.onChange(e)
+                                                        }}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault()
                                                             }
-                                                            className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                            // className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                            // className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
-                                                        />
-                                                    </>
-                                                </FormControl>
-                                                <FormMessage className="h-5" />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </form>
-                            </Form> */}
-                                {defaultValue === 'editor' && (
-                                    <div className="mt-2 text-start">
-                                        {/* <p className="flex text-left text-lg mt-6 mb-2">
-                                        Description
-                                    </p> */}
-                                        <RemirrorTextEditor
-                                            initialContent={initialContent}
-                                            setInitialContent={
-                                                setInitialContent
-                                            }
-                                            preview={!canEdit}
-                                        />
+                                                        }}
+                                                        placeholder={
+                                                            defaultValue ===
+                                                            'editor'
+                                                                ? 'Untitled Article'
+                                                                : 'Untitled PDF'
+                                                        }
+                                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                        disabled={!canEdit}
+                                                    />
+                                                </>
+                                            </FormControl>
+                                            <FormMessage className="h-5" />
+                                        </FormItem>
+                                    )}
+                                />
+                            </form>
+                        </Form>
+                        {/* {!title && (
+                                <Pencil
+                                    fill="true"
+                                    fillOpacity={0.4}
+                                    size={20}
+                                    className="absolute text-gray-100 pointer-events-none mt-1 right-5"
+                                />
+                            )} */}
+                        {/* </div> */}
+
+                        {/* <div className="flex justify-end mt-5">
+                            <div className="flex items-center justify-between mr-2">
+                                {defaultValue ===
+                                    'editor' ? (
+                                    <div
+                                        id="previewArticle"
+                                        onClick={
+                                            previewArticle
+                                        }
+                                        className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                    >
+                                        <Eye size={18} />
+                                        <h6 className="ml-1 text-sm">
+                                            Preview Article
+                                        </h6>
                                     </div>
-                                )}
-                                {defaultValue === 'pdf' && (
-                                    <div className="mt-4">
-                                        <UploadArticle
-                                            loading={loading}
-                                            file={file}
-                                            setFile={setFile}
-                                            className=""
-                                            isPdfUploaded={ispdfUploaded}
-                                            pdfLink={pdfLink}
-                                            setIsPdfUploaded={setIsPdfUploaded}
-                                            onDeletePdfhandler={
-                                                onDeletePdfhandler
-                                            }
-                                            setDisableButton={
-                                                setIsdisabledUploadButton
-                                            }
-                                            disabled={!canEdit}
-                                        />
+                                ) : (
+                                    <div
+                                        id="previewArticle"
+                                        onClick={previewPdf}
+                                        className="flex  hover:bg-gray-300 rounded-md p-1 cursor-pointer"
+                                    >
+                                        <Eye size={18} />
+                                        <h6 className="ml-1 text-sm">
+                                            Preview PDF
+                                        </h6>
                                     </div>
                                 )}
                             </div>
+                        </div> */}
+                        {/* </div> */}
+                        <div className="flex items-center gap-2 ml-1 pb-4">
+                            <BookOpenText size={20} className="transition-colors" />
+                            <p className="text-muted-foreground">Article</p>
                         </div>
-                    </div>
 
-                    <div className="flex justify-end mt-5 mr-3">
-                        {defaultValue === 'editor' ? (
-
-                            <Button
-                                type="submit"
-                                form="myForm"
-                                className="bg-primary text-primary-foreground hover:bg-primary/90"
-                                disabled={
-                                    !canEdit ||
-                                    isSaving || 
-                                    !form.formState.isValid || 
-                                    !hasEditorContent 
+                        <div className="ml-1 mr-4">
+                            <RadioGroup
+                                className="flex items-center gap-x-6"
+                                onValueChange={(value) =>
+                                    canEdit && setDefaultValue(value)
                                 }
+                                value={defaultValue}
                             >
-                                {isSaving ? 'Saving...' : 'Save'}
-                            </Button>
-                        ) : (
-                            <div>
+                                <TooltipProvider>
+                                    <div className="flex gap-x-2">
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <RadioGroupItem
+                                                    value="editor"
+                                                    disabled={!!pdfLink || !canEdit}
+                                                    id="r1"
+                                                    className="mt-1 text-foreground border-foreground"
+                                                />
+                                            </TooltipTrigger>
+                                            {pdfLink && (
+                                                <TooltipContent side="top">
+                                                    You have uploaded a PDF, so the
+                                                    editor is now disabled
+                                                </TooltipContent>
+                                            )}
+                                        </Tooltip>
+                                        <Label
+                                            htmlFor="r1"
+                                            className="font-light text-md text-foreground"
+                                        >
+                                            Editor
+                                        </Label>
+                                    </div>
 
+                                    <div className="flex gap-x-2">
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <RadioGroupItem
+                                                    value="pdf"
+                                                    id="r2"
+                                                    className="mt-1 text-foreground border-foreground"
+                                                    disabled={isEditorSaved || !canEdit}
+                                                />
+                                            </TooltipTrigger>
+                                            {isEditorSaved && (
+                                                <TooltipContent side="top">
+                                                    You have already saved the
+                                                    assignment, so PDF upload is now
+                                                    disabled
+                                                </TooltipContent>
+                                            )}
+                                        </Tooltip>
+                                        <Label
+                                            htmlFor="r2"
+                                            className="font-light text-md text-foreground"
+                                        >
+                                            Upload PDF
+                                        </Label>
+                                    </div>
+                                </TooltipProvider>
+                            </RadioGroup>
+
+                            <div className="bg-card rounded-lg shadow-sm border">
+                                <div className="p-6">
+                                    <p className="text-xl text-start text-foreground font-semibold">
+                                        Article Details
+                                    </p>
+                                    {/* <Form {...form}>
+                                    <form
+                                        id="myForm"
+                                        onSubmit={form.handleSubmit(
+                                            editArticleContent
+                                        )}
+                                        className=""
+                                    >
+                                        <FormField
+                                            control={form.control}
+                                            name="title"
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col">
+                                                    <FormControl>
+                                                        <>
+                                                            <p className="flex text-left text-lg mt-4">
+                                                                Title
+                                                            </p>
+                                                            <Input
+                                                                {...field}
+                                                                value={title} // Explicitly set value
+                                                                onChange={(e) => {
+                                                                    // FIXED: Always update the same title state
+                                                                    setTitle(
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                    field.onChange(
+                                                                        e
+                                                                    )
+                                                                }}
+                                                                onKeyDown={(e) => {
+                                                                    if (
+                                                                        e.key ===
+                                                                        'Enter'
+                                                                    ) {
+                                                                        e.preventDefault()
+                                                                    }
+                                                                }}
+                                                                placeholder={
+                                                                    defaultValue ===
+                                                                    'editor'
+                                                                        ? 'Untitled Article'
+                                                                        : 'Untitled PDF'
+                                                                }
+                                                                className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                                // className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                                // className="pl-1 pr-8 text-xl text-gray-600 text-left font-semibold capitalize placeholder:text-gray-400 placeholder:font-bold border-x-0 border-t-0 border-b-2 border-gray-400 border-dashed focus:outline-none"
+                                                            />
+                                                        </>
+                                                    </FormControl>
+                                                    <FormMessage className="h-5" />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </form>
+                                </Form> */}
+                                    {defaultValue === 'editor' && (
+                                        <div className="mt-2 text-start">
+                                            {/* <p className="flex text-left text-lg mt-6 mb-2">
+                                            Description
+                                        </p> */}
+                                            <RemirrorTextEditor
+                                                initialContent={initialContent}
+                                                setInitialContent={
+                                                    setInitialContent
+                                                }
+                                                preview={!canEdit}
+                                            />
+                                        </div>
+                                    )}
+                                    {defaultValue === 'pdf' && (
+                                        <div className="mt-4">
+                                            <UploadArticle
+                                                loading={loading}
+                                                file={file}
+                                                setFile={setFile}
+                                                className=""
+                                                isPdfUploaded={ispdfUploaded}
+                                                pdfLink={pdfLink}
+                                                setIsPdfUploaded={setIsPdfUploaded}
+                                                onDeletePdfhandler={
+                                                    onDeletePdfhandler
+                                                }
+                                                setDisableButton={
+                                                    setIsdisabledUploadButton
+                                                }
+                                                disabled={!canEdit}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end mt-5 mr-3">
+                            {defaultValue === 'editor' ? (
                                 <Button
-                                    type="button"
-                                    onClick={onFileUpload}
+                                    type="submit"
+                                    form="myForm"
                                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                                     disabled={
                                         !canEdit ||
-                                        loading ||
-                                        !form.formState.isValid ||
-                                        (!file && !ispdfUploaded) ||
-                                        disabledUploadButton
+                                        isSaving || 
+                                        !form.formState.isValid || 
+                                        !hasEditorContent ||
+                                        !hasChangedAfterSave
                                     }
                                 >
-                                    {loading ? 'Saving...' : 'Save'}
+                                    {isSaving ? 'Saving...' : 'Save'}
                                 </Button>
-                            </div>
-                        )}
-                    </div>
+                            ) : (
+                                <div>
+                                    <Button
+                                        type="button"
+                                        onClick={onFileUpload}
+                                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                                        disabled={
+                                            !canEdit ||
+                                            loading ||
+                                            !form.formState.isValid ||
+                                            (!file && !ispdfUploaded) ||
+                                            disabledUploadButton
+                                        }
+                                    >
+                                        {loading ? 'Saving...' : 'Save'}
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
