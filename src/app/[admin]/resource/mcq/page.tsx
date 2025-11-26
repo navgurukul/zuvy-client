@@ -101,9 +101,15 @@ const Mcqs = (props: Props) => {
     // Zustand stores
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const offset = useMemo(() => {
-        const page = searchParams.get('page');
-        return page ? parseInt(page) : OFFSET;
-    }, [searchParams]);
+        const page = searchParams.get('page')
+        const limit = searchParams.get('limit') || POSITION
+        if (page) {
+            const pageNum = parseInt(page)
+            const limitNum = parseInt(limit)
+            return (pageNum - 1) * limitNum
+        }
+        return 0
+    }, [searchParams])
     const { tags, setTags } = getCodingQuestionTags()
     const { quizData, setStoreQuizData } = getAllQuizData()
     const { mcqDifficulty: difficulty, setMcqDifficulty: setDifficulty } =
@@ -415,7 +421,7 @@ const Mcqs = (props: Props) => {
             const searchFilter = searchParams.get('search') || ''
             fetchCodingQuestions(offset, searchFilter)
         }
-    }, [offset, position, difficulty, selectedOptions, options, searchParams, fetchCodingQuestions])
+    }, [ difficulty, selectedOptions, options])
 
     const handleNewTopicChange = (
         event: React.ChangeEvent<HTMLInputElement>
