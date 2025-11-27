@@ -93,7 +93,7 @@ const IDE: React.FC<IDEProps> = ({
         { lang: 'java', id: 96 },
         { lang: 'python', id: 100 },
         { lang: 'javascript', id: 102 },
-        // { lang: 'cpp', id: 105 },
+        { lang: 'c++', id: 105 },
         // { lang: 'c', id: 104 },
     ]
 
@@ -280,6 +280,7 @@ const IDE: React.FC<IDEProps> = ({
         }
         getActions()
     }, [])
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
             {/* Header Bar with Navigation and Actions */}
