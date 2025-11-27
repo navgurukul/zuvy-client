@@ -93,7 +93,7 @@ const IDE: React.FC<IDEProps> = ({
         { lang: 'java', id: 96 },
         { lang: 'python', id: 100 },
         { lang: 'javascript', id: 102 },
-        { lang: 'c++', id: 105 },
+        { lang: 'cpp', id: 105 },
         // { lang: 'c', id: 104 },
     ]
 
@@ -559,7 +559,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                 value={lang.lang}
                                                                 className={`hover:bg-primary ${language === lang.lang ? 'text-white' : ''} focus:bg-primary cursor-pointer data-[highlighted]:bg-primary data-[state=checked]:bg-primary`}
                                                             >
-                                                                {lang.lang}
+                                                                {lang.lang === "cpp" ? "c++" : lang.lang}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
