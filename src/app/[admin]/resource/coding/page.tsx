@@ -475,7 +475,7 @@ const CodingProblems = () => {
                                                 + Create Problems
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                                        <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
                                             <DialogHeader>
                                                 <DialogTitle>
                                                     Create New Coding Problem
@@ -639,7 +639,7 @@ const CodingProblems = () => {
                         open={isCodingEditDialogOpen}
                         onOpenChange={setIsCodingEditDialogOpen}
                     >
-                        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
                                 <DialogTitle>Edit Coding Problem</DialogTitle>
                             </DialogHeader>

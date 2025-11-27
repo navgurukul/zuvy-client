@@ -192,7 +192,7 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
                                     }}
                                 />
                             </DialogTrigger>
-                            <DialogContent className="sm:max-w-[500px]">
+                            <DialogContent preventOutsideClose={true} className="sm:max-w-[500px]">
                                 <DialogHeader>
                                     <DialogTitle>
                                         Edit Open-Ended Question
