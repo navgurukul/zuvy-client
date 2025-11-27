@@ -64,15 +64,11 @@ const OpenEndedQuestions = (props: Props) => {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [selectedTag, setSelectedTag] = useState<OpenPageTag>(() => {
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('openEndedCurrentTag')
-            return storedTag !== null
-                ? JSON.parse(storedTag)
-                : { tagName: 'All Topics', id: -1 }
-        }
-        return { tagName: 'All Topics', id: -1 }
-    })
+    const [selectedTag, setSelectedTag] = useState<OpenPageTag>({
+        tagName: "All Topics",
+        id: -1,
+    });
+    
 
     const { selectedOptions, setSelectedOptions } =
         getSelectedOpenEndedOptions()
@@ -100,7 +96,13 @@ const OpenEndedQuestions = (props: Props) => {
     )
     const offset = useMemo(() => {
         const page = searchParams.get('page')
-        return page ? parseInt(page) : OFFSET
+        const limit = searchParams.get('limit') || POSITION
+        if (page) {
+            const pageNum = parseInt(page)
+            const limitNum = parseInt(limit)
+            return (pageNum - 1) * limitNum
+        }
+        return 0
     }, [searchParams])
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
@@ -183,14 +185,6 @@ const OpenEndedQuestions = (props: Props) => {
                     ? selectedDifficulties
                     : [{ value: 'None', label: 'All Difficulty' }]
             )
-        }
-
-        // Tag from localStorage
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('openEndedCurrentTag')
-            if (storedTag) {
-                setSelectedTag(JSON.parse(storedTag))
-            }
         }
 
         setHasSetInitialTopicsFromURL(true)
@@ -285,9 +279,9 @@ const OpenEndedQuestions = (props: Props) => {
     }, [
         difficulty,
         selectedOptions,
-        offset,
+        // offset,
         filtersInitialized,
-        fetchCodingQuestions,
+        // fetchCodingQuestions,
     ])
 
     useEffect(() => {
@@ -307,7 +301,6 @@ const OpenEndedQuestions = (props: Props) => {
             id: -1,
         }
         setSelectedTag(tag)
-        localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
     const selectedTagCount = selectedOptions.length
@@ -381,7 +374,6 @@ const OpenEndedQuestions = (props: Props) => {
             // Reset filters on route change
             setSelectedOptions([{ value: '-1', label: 'All Topics' }])
             setDifficulty([{ value: 'None', label: 'All Difficulty' }])
-            localStorage.removeItem('openEndedCurrentTag')
         }
         window.addEventListener('beforeunload', handleRouteChange)
         return () => {
