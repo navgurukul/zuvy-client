@@ -189,7 +189,7 @@ export function UserManagementTable<TData extends User, TValue>({
             {/* Table */}
             <DataTable
                 columns={columns}
-                data={propData}
+                data={displayData}
             />
         </div>
     )
