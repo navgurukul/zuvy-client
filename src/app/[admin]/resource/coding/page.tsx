@@ -87,7 +87,13 @@ const CodingProblems = () => {
     )
     const offset = useMemo(() => {
         const page = searchParams.get('page')
-        return page ? parseInt(page) : OFFSET
+        const limit = searchParams.get('limit') || POSITION
+        if (page) {
+            const pageNum = parseInt(page)
+            const limitNum = parseInt(limit)
+            return (pageNum - 1) * limitNum
+        }
+        return 0
     }, [searchParams])
     const [urlInitialized, setUrlInitialized] = useState(false)
     const [isSearchActive, setIsSearchActive] = useState(false)
@@ -370,7 +376,6 @@ const CodingProblems = () => {
         urlInitialized,
         selectedOptions,
         difficulty,
-        offset,
         fetchCodingQuestions,
         isSearchActive,
     ])

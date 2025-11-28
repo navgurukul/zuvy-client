@@ -373,9 +373,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     }
 
     const notSelect = Object.values(selectedPermissions).every((v) => v === false);
-    const notSelected = notSelect === false && (selectedPermissions[10]) ? false 
-    : notSelect === false && !(selectedPermissions[10]) ? true 
-    : notSelect === true && !(selectedPermissions[10]) ? false : true;
+    const hasViewPermission = Object.values(selectedPermissions)[1]
+    const notSelected = notSelect === false && (hasViewPermission) ? false 
+    : notSelect === false && !(hasViewPermission) ? true 
+    : notSelect === true && !(hasViewPermission) ? false : true;
 
     return (
         <div className="space-y-6 py-4">

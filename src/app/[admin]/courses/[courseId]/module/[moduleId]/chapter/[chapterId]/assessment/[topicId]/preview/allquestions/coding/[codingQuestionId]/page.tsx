@@ -49,7 +49,7 @@ function IdePreview({ params }: { params: QuestionParams }) {
         { lang: 'java', id: 91 },
         { lang: 'python', id: 71 },
         { lang: 'javascript', id: 93 },
-        { lang: 'cpp', id: 52 },
+        { lang: 'cpp', id: 105 },
         { lang: 'c', id: 48 },
     ]
 
@@ -308,9 +308,7 @@ function IdePreview({ params }: { params: QuestionParams }) {
                                                                             lang.lang
                                                                         }
                                                                     >
-                                                                        {
-                                                                            lang.lang
-                                                                        }
+                                                                        {lang.lang === "cpp" ? "c++" : lang.lang}
                                                                     </SelectItem>
                                                                 )
                                                             )}

@@ -115,6 +115,8 @@ const AddAssignent = ({
     const { editChapter } = useEditChapter()
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
+    const [hasChangedAfterSave, setHasChangedAfterSave] = useState(false)
+
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -243,9 +245,7 @@ const AddAssignent = ({
                 const data = contentDetails.content
                 let hasEditorContent = false
                 if (data && data.length > 0) {
-                    // Agar content array me kuch hai, to editor saved true
                     hasEditorContent = true
-                    // If content exists, mark as manually saved (existing content)
                     setHasUserManuallySaved(true)
                 }
                 setIsEditorSaved(hasEditorContent)
@@ -259,6 +259,10 @@ const AddAssignent = ({
                 setInitialContent(jsonData)
                 setPreviousContentHash(generateContentHash(jsonData))
             }
+            
+            setTimeout(() => {
+                setInitialLoadComplete(true)
+            }, 500)
              
         } catch (error) {
             console.error('Error fetching assignment content:', error)
@@ -267,22 +271,34 @@ const AddAssignent = ({
 
     const [isEditorSaved, setIsEditorSaved] = useState(false)
 
-    // Jab bhi initialContent change ho, editor empty hai ya nahi check karo
+    // FIXED: Properly update hasEditorContent when initialContent changes
     useEffect(() => {
-        if (defaultValue === 'editor') {
+        if (defaultValue === 'editor' && initialContent) {
+    
+            const isEmpty = isEditorContentEmpty(initialContent)
+            setHasEditorContent(!isEmpty)
+    
+            const currentHash = generateContentHash(initialContent) // FIXED: declare here
+    
+            // Auto-save if user interacted + initial load complete + content changed
             if (
-                !initialContent ||
-                !initialContent.doc ||
-                !initialContent.doc.content ||
-                initialContent.doc.content.length === 0 ||
-                (initialContent.doc.content.length === 1 &&
-                    initialContent.doc.content[0].type === 'paragraph' &&
-                    !initialContent.doc.content[0].content)
+                isEmpty &&
+                hasUserManuallySaved &&
+                previousContentHash !== '' &&
+                initialLoadComplete &&
+                isUserInteracting &&
+                previousContentHash !== currentHash
             ) {
-                setIsEditorSaved(false)
+                autoSave()
+            }
+    
+            // Enable save button when content changed
+            if (previousContentHash && currentHash !== previousContentHash) {
+                setHasChangedAfterSave(true)
             }
         }
     }, [initialContent, defaultValue])
+    
 
     // async
     useEffect(() => {
@@ -310,6 +326,7 @@ const AddAssignent = ({
         if (!canEdit) return
         const deadlineDate = convertToISO(data.startDate)
         try {
+            setIsSaving(true)
             const initialContentString = initialContent
                 ? [JSON.stringify(initialContent)]
                 : ''
@@ -324,6 +341,7 @@ const AddAssignent = ({
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true)
+            setHasChangedAfterSave(false)
 
             // IMPORTANT: Mark that user has manually saved
             setHasUserManuallySaved(true)
@@ -340,37 +358,10 @@ const AddAssignent = ({
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
+        } finally {
+            setIsSaving(false)
         }
     }
-
-    // UPDATED: Auto-save effect with better conditions
-    useEffect(() => {
-        // Don't run auto-save during initial load
-        if (!initialLoadComplete) return
-
-        if (defaultValue === 'editor' && initialContent) {
-            const isEmpty = isEditorContentEmpty(initialContent)
-            const currentHash = generateContentHash(initialContent)
-
-            setHasEditorContent(!isEmpty)
-            if (
-                isEmpty &&
-                hasUserManuallySaved &&
-                previousContentHash !== currentHash &&
-                isUserInteracting &&
-                previousContentHash !== '' // Ensure previous content existed
-            ) {
-                autoSave()
-            }
-        }
-    }, [
-        initialContent,
-        defaultValue,
-        hasUserManuallySaved,
-        previousContentHash,
-        isUserInteracting,
-        initialLoadComplete,
-    ])
 
     // UPDATED: Track user interaction with editor
     useEffect(() => {
@@ -929,7 +920,9 @@ const AddAssignent = ({
                                                 !canEdit ||
                                                 !hasEditorContent ||
                                                 isSaving ||
-                                                !isValid
+                                                !isValid ||
+                                                !hasChangedAfterSave
+
                                             }
                                         >
                                             {isSaving ? 'Saving...' : 'Save'}
