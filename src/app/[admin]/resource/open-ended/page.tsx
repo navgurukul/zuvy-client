@@ -56,6 +56,7 @@ import {
     OpenOption,
 } from '@/app/[admin]/resource/open-ended/adminResourceOpenType'
 import { SearchBox } from '@/utils/searchBox'
+import {OpenEndedQuestionsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 type Props = {}
 
@@ -63,15 +64,11 @@ const OpenEndedQuestions = (props: Props) => {
     const router = useRouter()
     const searchParams = useSearchParams()
 
-    const [selectedTag, setSelectedTag] = useState<OpenPageTag>(() => {
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('openEndedCurrentTag')
-            return storedTag !== null
-                ? JSON.parse(storedTag)
-                : { tagName: 'All Topics', id: -1 }
-        }
-        return { tagName: 'All Topics', id: -1 }
-    })
+    const [selectedTag, setSelectedTag] = useState<OpenPageTag>({
+        tagName: "All Topics",
+        id: -1,
+    });
+    
 
     const { selectedOptions, setSelectedOptions } =
         getSelectedOpenEndedOptions()
@@ -99,7 +96,13 @@ const OpenEndedQuestions = (props: Props) => {
     )
     const offset = useMemo(() => {
         const page = searchParams.get('page')
-        return page ? parseInt(page) : OFFSET
+        const limit = searchParams.get('limit') || POSITION
+        if (page) {
+            const pageNum = parseInt(page)
+            const limitNum = parseInt(limit)
+            return (pageNum - 1) * limitNum
+        }
+        return 0
     }, [searchParams])
     const [loading, setLoading] = useState(true)
     const selectedLanguage = ''
@@ -184,14 +187,6 @@ const OpenEndedQuestions = (props: Props) => {
             )
         }
 
-        // Tag from localStorage
-        if (typeof window !== 'undefined') {
-            const storedTag = localStorage.getItem('openEndedCurrentTag')
-            if (storedTag) {
-                setSelectedTag(JSON.parse(storedTag))
-            }
-        }
-
         setHasSetInitialTopicsFromURL(true)
         setFiltersInitialized(true)
     }, [options, hasSetInitialTopicsFromURL])
@@ -263,6 +258,7 @@ const OpenEndedQuestions = (props: Props) => {
                 setTotalOpenEndedQuestion(totalRows || 0)
                 setTotalPages(totalPages || 0)
                 setLastPage(totalPages || 0)
+                setLoading(false)
             } catch (error) {
                 console.error('Error fetching open-ended questions:', error)
             }
@@ -283,17 +279,11 @@ const OpenEndedQuestions = (props: Props) => {
     }, [
         difficulty,
         selectedOptions,
-        offset,
+        // offset,
         filtersInitialized,
-        fetchCodingQuestions,
+        // fetchCodingQuestions,
     ])
 
-    useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1000)
-        return () => clearTimeout(timer)
-    }, [])
-
-    // Load all questions for suggestions
     useEffect(() => {
         getAllOpenEndedQuestions((data: OpenEndedQuestionType[]) => {
             setAllOpenEndedQuestions(data)
@@ -311,7 +301,6 @@ const OpenEndedQuestions = (props: Props) => {
             id: -1,
         }
         setSelectedTag(tag)
-        localStorage.setItem('openEndedCurrentTag', JSON.stringify(tag))
     }
 
     const selectedTagCount = selectedOptions.length
@@ -385,7 +374,6 @@ const OpenEndedQuestions = (props: Props) => {
             // Reset filters on route change
             setSelectedOptions([{ value: '-1', label: 'All Topics' }])
             setDifficulty([{ value: 'None', label: 'All Difficulty' }])
-            localStorage.removeItem('openEndedCurrentTag')
         }
         window.addEventListener('beforeunload', handleRouteChange)
         return () => {
@@ -397,9 +385,7 @@ const OpenEndedQuestions = (props: Props) => {
     return (
         <>
             {loading ? (
-                <div className="flex justify-center items-center h-screen">
-                    <Spinner className="text-[rgb(81,134,114)]" />
-                </div>
+                 <OpenEndedQuestionsSkeleton />
             ) : (
                 <div>
                     {allOpenEndedQuestions?.length > 0 ? (

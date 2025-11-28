@@ -30,17 +30,21 @@ import { AnyARecord } from 'dns'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import {CodingChallengeSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 function CodingChallenge({
     content,
     activeChapterTitle,
     moduleId,
     courseId,
+    canEdit = true,
 }: ChallangesProps) {
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { setCodingPreviewContent } = getCodingPreviewStore()
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     const chapterSchema = z.object({
         title: z
@@ -102,6 +106,9 @@ function CodingChallenge({
     const [hasTitleChanged, setHasTitleChanged] = useState(false)
 
     const handleSaveClick = async (data: { title: string }) => {
+        if (!canEdit) {
+            return
+        }
         try {
             const titleToSave =
                 data.title.trim() === '' ? savedTitle : data.title
@@ -174,62 +181,63 @@ function CodingChallenge({
         setIsSaved(checkIfSaved())
     }, [selectedQuestions, savedQuestions])
 
-    useEffect(() => {
-        async function getAllCodingQuestions() {
-            try {
-                let url = '/Content/allCodingQuestions'
 
-                const queryParams = []
+useEffect(() => {
+    async function getAllCodingQuestions() {
+        try {
 
-                let selectedTagIds = ''
-                selectedOptions.forEach((topic: any) => {
-                    if (topic.id !== -1 && topic.id !== 0) {
-                        // Skip 'All Topics'
-                        selectedTagIds += `&tagId=${topic.id}`
-                    }
-                })
+            let url = '/Content/allCodingQuestions'
+            const queryParams = []
 
-                // Handle multiple selected difficulties, but ignore 'Any Difficulty'
-                let selectedDiff = ''
-                selectedDifficulty.forEach((difficulty: string) => {
-                    if (difficulty !== 'Any Difficulty') {
-                        selectedDiff += `&difficulty=${difficulty}`
-                    }
-                })
-
-                if (selectedTagIds.length > 0) {
-                    queryParams.push(selectedTagIds.substring(1)) // Remove the first '&'
+            let selectedTagIds = ''
+            selectedOptions.forEach((topic: any) => {
+                if (topic.id !== -1 && topic.id !== 0) {
+                    selectedTagIds += `&tagId=${topic.id}`
                 }
-                if (selectedDiff.length > 0) {
-                    queryParams.push(selectedDiff.substring(1)) // Remove the first '&'
-                }
-                if (debouncedSearch) {
-                    queryParams.push(
-                        `searchTerm=${encodeURIComponent(debouncedSearch)}`
-                    )
-                }
-                if (queryParams.length > 0) {
-                    url += `?${queryParams.join('&')}`
-                }
+            })
 
-                const response = await api.get(url)
+            let selectedDiff = ''
+            selectedDifficulty.forEach((difficulty: string) => {
+                if (difficulty !== 'Any Difficulty') {
+                    selectedDiff += `&difficulty=${difficulty}`
+                }
+            })
 
-                setFilteredQuestions(response.data.data)
-            } catch (error) {
-                console.error('Error:', error)
+            if (selectedTagIds.length > 0) {
+                queryParams.push(selectedTagIds.substring(1))
             }
+
+            if (selectedDiff.length > 0) {
+                queryParams.push(selectedDiff.substring(1))
+            }
+
+            if (debouncedSearch) {
+                queryParams.push(
+                    `searchTerm=${encodeURIComponent(debouncedSearch)}`
+                )
+            }
+
+            if (queryParams.length > 0) {
+                url += `?${queryParams.join('&')}`
+            }
+
+            const response = await api.get(url)
+            setFilteredQuestions(response.data.data)
+
+            setIsDataLoading(false)
+
+        } catch (error) {
+            console.error('Error:', error)
         }
-        getAllCodingQuestions()
-    }, [
-        selectedDifficulty,
-        selectedQuestions,
-        debouncedSearch,
-        selectedOptions,
-    ])
+    }
+
+    getAllCodingQuestions()
+}, [selectedDifficulty, selectedQuestions, debouncedSearch, selectedOptions])
+
+
 
     async function getAllTags() {
         try {
-            setIsDataLoading(true)
             const response = await api.get('Content/allTags')
             if (response) {
                 const tagArr = [
@@ -240,9 +248,8 @@ function CodingChallenge({
             }
         } catch (error) {
             console.error('Error fetching tags:', error)
-        } finally {
-            setIsDataLoading(false)
-        }
+        } 
+        
     }
 
     useEffect(() => {
@@ -282,20 +289,19 @@ function CodingChallenge({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Coding Problem details...
-                    </div>
-                </div>
-            </div>
-        )
+        return<CodingChallengeSkeleton/>
     }
     return (
         <>
             <div key={contentKey}>
                 {/* SearchBar component */}
+                {!canEdit && (
+                    <PermissionAlert
+                        alertOpen={alertOpen}
+                        setAlertOpen={setAlertOpen}
+                    />
+                )}
+                <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>   
                 <div className="px-5 pb-4 border-b border-gray-200">
                     <div className="flex flex-col items-start mb-15">
                         <div className="flex justify-between items-center w-full">
@@ -309,6 +315,7 @@ function CodingChallenge({
                                         {...form.register('title')}
                                         placeholder="Untitled Coding Problem"
                                         className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground w-full"
+                                        disabled={!canEdit}
                                     />
                                     {!form.getValues('title') && (
                                         <Pencil
@@ -343,8 +350,13 @@ function CodingChallenge({
                                     {selectedQuestions?.length > 0 && (
                                         <Button
                                             type="submit"
-                                            disabled={!form.formState.isValid || form.formState.isSubmitting}
+                                            disabled={
+                                                !canEdit ||
+                                                !form.formState.isValid ||
+                                                form.formState.isSubmitting
+                                            }
                                             className={`bg-primary text-white ${
+                                                !canEdit ||
                                                 !form.formState.isValid ||
                                                 form.formState.isSubmitting
                                                     ? 'opacity-50 cursor-not-allowed'
@@ -387,6 +399,7 @@ function CodingChallenge({
                         content={undefined}
                         moduleId={''}
                         chapterTitle={''}
+                        canEdit={canEdit}
                     />
                     <h1 className="text-left text-[15px] text-gray-600 font-bold mt-5 pb-3">
                         Coding Library
@@ -470,13 +483,18 @@ function CodingChallenge({
                                                                     ) : (
                                                                         <PlusCircle
                                                                             onClick={() => {
+                                                                                if (!canEdit) return
                                                                                 setSelectedQuestions(
                                                                                     [
                                                                                         question,
                                                                                     ]
                                                                                 )
                                                                             }}
-                                                                            className="text-primary cursor-pointer"
+                                                                            className={`text-primary ${
+                                                                                canEdit
+                                                                                    ? 'cursor-pointer'
+                                                                                    : 'opacity-40 cursor-not-allowed'
+                                                                            }`}
                                                                             size={
                                                                                 20
                                                                             }
@@ -555,10 +573,12 @@ function CodingChallenge({
                             ): void {
                                 throw new Error('Function not implemented.')
                             }}
+                        canEdit={canEdit}
                         />
                     </div>
                 </div>
             </div>
+        </div>
         </>
     )
 }

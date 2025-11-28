@@ -8,6 +8,7 @@ import {
     PractieProblemProps,
     SubmissionsResponse,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
+import {PracticeProblemSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 const PraticeProblemsComponent = ({
     courseId,
@@ -15,6 +16,7 @@ const PraticeProblemsComponent = ({
 }: PractieProblemProps) => {
     const [submissions, setSubmissions] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
+     const [loading, setLoading] = useState(true)
 
     const getSubmissions = useCallback(async () => {
         try {
@@ -27,14 +29,14 @@ const PraticeProblemsComponent = ({
             const res = await api.get<SubmissionsResponse>(url)
             setSubmissions(res.data.trackingData)
             setTotalStudents(res.data.totalStudents)
+            setLoading(false)
         } catch (error) {
             console.error('Error fetching submissions:', error)
             toast.error({
                 title: 'Error',
                 description: 'Error fetching submissions.',
             })
-        } finally {
-        }
+        } 
     }, [courseId, debouncedSearch])
 
     useEffect(() => {
@@ -45,6 +47,9 @@ const PraticeProblemsComponent = ({
         ({ moduleChapterData }) => moduleChapterData.length === 0
     )
 
+    if (loading) {
+       return<PracticeProblemSubmissionSkeleton/>
+    }
     if (allEmpty) {
         return (
             <div className="flex flex-col justify-center items-center">

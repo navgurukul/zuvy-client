@@ -66,6 +66,7 @@ const FormSection: React.FC<FormSectionProps> = ({
     form,
     deleteQuestion,
     formData,
+    canEdit = true
 }) => {
     const questionData = formData[index] || {}
     const [selectedSection, setSelectedSection] = useState(
@@ -199,6 +200,8 @@ const FormSection: React.FC<FormSectionProps> = ({
                         deleteQuestion(item.id)
                         // deleteQuestion(index)
                     }}
+                    disabled={!canEdit}
+                    style={!canEdit ? { opacity: 0.5, pointerEvents: 'none' } : {}}
                 >
                     <Trash2 className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
                 </button>
@@ -208,6 +211,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                 onValueChange={(e) => {
                     handleSectionType(e, index)
                 }}
+                disabled={!canEdit}
             >
                 {/* <div className="flex flex-row justify-between"> */}
                 <div className="mt-5">
@@ -255,6 +259,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                                             // checked={field.value}
                                             checked={questionData.isRequired}
                                             onCheckedChange={field.onChange}
+                                            disabled={!canEdit}
                                         />
                                     )}
                                 />
@@ -264,6 +269,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                             <Input
                                 {...field}
                                 placeholder="Type a question..."
+                                disabled={!canEdit}
                             />
                         </FormControl>
                         <FormMessage />
@@ -298,6 +304,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                                         field.onChange(e)
                                         handleOptionChange(e, optionIndex)
                                     }}
+                                    disabled={!canEdit}
                                 />
                             )}
                         />
@@ -305,6 +312,8 @@ const FormSection: React.FC<FormSectionProps> = ({
                             <button
                                 type="button"
                                 onClick={() => removeOption(optionIndex)}
+                                disabled={!canEdit}
+                                style={!canEdit ? { opacity: 0.5, pointerEvents: 'none' } : {}}
                             >
                                 <X className="h-5 w-5 ml-3 mt-2 text-muted-foreground" />
                             </button>
@@ -319,6 +328,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                         type="button"
                         onClick={addOption}
                         className="h-8 border-none"
+                        disabled={!canEdit}
                     >
                         <PlusCircle size={15} /> Add Option
                     </Button>

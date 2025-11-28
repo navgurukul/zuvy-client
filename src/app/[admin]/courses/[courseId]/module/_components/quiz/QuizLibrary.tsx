@@ -17,11 +17,13 @@ function QuizLibrary({
     handleAddQuestion,
     tags,
     quizData,
+    canEdit = true,
 }: {
     addQuestion: any
     handleAddQuestion: any
     tags: any
     quizData: any
+    canEdit?: boolean
 }) {
     // const [search, setSearch] = useState<string>('')
     // const debouncedSeatch = useDebounce(search, 1000)
@@ -128,9 +130,10 @@ function QuizLibrary({
                 handleAddQuestion={handleAddQuestion}
                 questionData={quizData.allQuestions}
                 tags={tags}
+                canEdit={canEdit}
             />
         )
-    }, [quizData, addQuestion, handleAddQuestion])
+    }, [quizData, addQuestion, handleAddQuestion, canEdit])
 
     return (
         <div className="w-full flex flex-col gap-3">

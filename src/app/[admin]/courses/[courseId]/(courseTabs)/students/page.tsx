@@ -1,5 +1,4 @@
 'use client'
-
 import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -34,6 +33,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {StudentPageSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import { Student } from './studentComponentTypes'
 
 export type StudentData = {
@@ -76,12 +76,16 @@ const StudentsPage = ({ params }: { params: any }) => {
   const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [batchFilter, setBatchFilter] = useState<string>('all')
-  const [attendanceFilter, setAttendanceFilter] = useState<string>('') // Add this
+  const [attendanceFilter, setAttendanceFilter] = useState<string>('') 
+  const [loading, setLoading] = useState(true)
+
 
   // Fetch data with filters
-  const fetchFilteredData = useCallback(async () => {
+  const fetchFilteredData = useCallback(async (customOffset?: number) => {
     try {
-      let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}`
+      // Use the passed offset or fall back to the hook's offset
+      const currentOffset = customOffset !== undefined ? customOffset : offset
+      let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${currentOffset}`
       
       // Add enrolled date filter if not 'all'
       if (enrolledDateFilter && enrolledDateFilter !== 'all') {
@@ -114,6 +118,7 @@ const StudentsPage = ({ params }: { params: any }) => {
       const response = await api.get(url)
       setStudents(response.data.modifiedStudentInfo || [])
       setSelectedRows([])
+      setLoading(false)
       
     } catch (error) {
       console.error('Error fetching filtered data:', error)
@@ -330,7 +335,10 @@ const StudentsPage = ({ params }: { params: any }) => {
     return () => { window.removeEventListener('refreshStudentData', handleRefresh) }
   }, [fetchFilteredData])
 
-    // Normal table view (no conditional rendering needed)
+  
+  if (loading) {
+    return <StudentPageSkeleton />
+  }
     return (
         <div className="text-foreground">
             <div className="text-start mt-6">
@@ -374,7 +382,7 @@ const StudentsPage = ({ params }: { params: any }) => {
                             }}
                         >
                             <DialogTrigger asChild>
-                                <Button className="flex-1 text-gray-800 border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+                                <Button className="">
                                     <UserPlus className="h-4 w-4 mr-2" />
                                     Add Single Student
                                 </Button>

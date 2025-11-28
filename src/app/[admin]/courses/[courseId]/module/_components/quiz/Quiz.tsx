@@ -34,6 +34,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import useEditChapter from '@/hooks/useEditChapter' 
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import {QuizSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 const quizSchema = z.object({
     title: z
@@ -43,6 +45,8 @@ const quizSchema = z.object({
 })
 
 function Quiz(props: QuizProps) {
+    const canEdit = props.canEdit ?? true
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -110,7 +114,6 @@ function Quiz(props: QuizProps) {
                         selectedTagIds += `&tagId=${topic.id}`
                     }
                 })
-
                 // Handle multiple selected difficulties, but ignore 'Any Difficulty'
                 let selectedDiff = ''
                 selectedDifficulty.forEach((difficulty: string) => {
@@ -137,6 +140,7 @@ function Quiz(props: QuizProps) {
                 const response = await api.get(url)
 
                 const allQuestions: QuizDataLibrary[] = response?.data?.data
+                setIsDataLoading(false)
 
                 const easyQuestions = allQuestions.filter(
                     (question) => question.difficulty === 'Easy'
@@ -161,6 +165,11 @@ function Quiz(props: QuizProps) {
         [debouncedSeatch, selectedOptions, selectedDifficulty]
     )
 
+
+
+
+    
+
     useEffect(() => {
         fetchQuizQuestions(debouncedSeatch, selectedOptions, selectedDifficulty)
     }, [
@@ -171,6 +180,7 @@ function Quiz(props: QuizProps) {
     ])
 
     const handleAddQuestion = (data: QuizDataLibrary[]) => {
+        if (!canEdit) return
         const uniqueData = data.filter((question: QuizDataLibrary) => {
             return !addQuestion.some(
                 (existingQuestion: QuizDataLibrary) =>
@@ -222,6 +232,7 @@ function Quiz(props: QuizProps) {
         }
     }
     const removeQuestionById = (questionId: number) => {
+        if (!canEdit) return
         setAddQuestion((prevQuestions: QuizDataLibrary[]) =>
             prevQuestions.filter(
                 (question: QuizDataLibrary) => question?.id !== questionId
@@ -253,6 +264,7 @@ function Quiz(props: QuizProps) {
     }
 
     const handleSaveQuiz = async (titleParam?: string) => {
+        if (!canEdit) return
         const titleToSave = titleParam ?? inputValue
         const selectedIds = addQuestion?.map((item) => item.id)
         const requestBody = {
@@ -315,19 +327,21 @@ function Quiz(props: QuizProps) {
         }
     }, [props.chapterId])
 
+
+
     useEffect(() => {
-        if (hasLoaded.current) return
-        hasLoaded.current = true
         const fetchData = async () => {
-            setIsDataLoading(true)
             await getAllTags()
             if (props.chapterId && props.chapterId !== 0) {
                 await getAllSavedQuizQuestion()
             }
-            setIsDataLoading(false)
         }
         fetchData()
     }, [props.chapterId, getAllSavedQuizQuestion])
+
+
+
+
 
     function previewQuiz() {
         if (addQuestion.length === 0) {
@@ -336,7 +350,6 @@ function Quiz(props: QuizProps) {
                 description: 'Please select at least one question to preview.',
             })
         }
-
         // Check if questions are selected but not saved
         if (!isSaved) {
             return toast.error({
@@ -345,7 +358,6 @@ function Quiz(props: QuizProps) {
                     'Please save the selected questions before previewing.',
             })
         }
-
         // If questions are selected and saved
         setQuizPreviewContent({
             ...props.content,
@@ -357,18 +369,19 @@ function Quiz(props: QuizProps) {
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">Loading Quiz details...</div>
-                </div>
-            </div>
-        )
+        return<QuizSkeleton/>
     }
 
     return (
         <div>
             <div className="">
+                {!canEdit && (
+                    <PermissionAlert
+                        alertOpen={alertOpen}
+                        setAlertOpen={setAlertOpen}
+                    />
+                )}
+                <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                 <div className="flex flex-row items-center justify-start gap-x-6 mb-5 mx-5">
                     <div className="w-full flex flex-col items-start">
                         {/* Input Field */}
@@ -434,6 +447,7 @@ function Quiz(props: QuizProps) {
                                         {...form.register('title')}
                                         placeholder="Untitled Quiz"
                                         className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                        disabled={!canEdit}
                                     />
                                     {!form.watch('title') && (
                                         <Pencil
@@ -444,7 +458,7 @@ function Quiz(props: QuizProps) {
                                         />
                                     )}
                                     {form.formState.errors.title && (
-                                        <p className="text-red-500 text-sm mt-1">
+                                        <p className="text-destructive text-sm mt-1">
                                             {
                                                 form.formState.errors.title
                                                     .message
@@ -475,12 +489,16 @@ function Quiz(props: QuizProps) {
                                             <Button
                                                 type="submit"
                                                 disabled={
+                                                    !canEdit ||
                                                     form.formState.isSubmitting ||
                                                     !form.formState.isValid ||
                                                     isSaved
                                                 }
                                                 className={`bg-primary ${
-                                                    form.formState.isSubmitting || !form.formState.isValid || isSaved
+                                                    !canEdit ||
+                                                    form.formState.isSubmitting ||
+                                                    !form.formState.isValid ||
+                                                    isSaved
                                                     ? 'opacity-50 cursor-not-allowed'
                                                     : 'opacity-75'
                                                 }`}
@@ -520,9 +538,10 @@ function Quiz(props: QuizProps) {
                         content={undefined}
                         moduleId={''}
                         chapterTitle={''}
+                        canEdit={canEdit}
                     />
                     <div className="w-full h-max-content ">
-                        <h2 className="text-left mt-4 ml-1 text-gray-600 text-[15px] font-semibold">
+                        <h2 className="text-left mt-4 ml-1 text-muted-dark text-[15px] font-semibold">
                             MCQ Library
                         </h2>
                         <div className="flex">
@@ -531,19 +550,20 @@ function Quiz(props: QuizProps) {
                                 handleAddQuestion={handleAddQuestion}
                                 tags={tags}
                                 quizData={quizData}
+                                canEdit={canEdit}
                             />
 
-                            <div className="w-full border-l border-gray-200 ml-4 pl-4">
+                            <div className="w-full border-l border-muted-light ml-4 pl-4">
                                 <div>
                                     <div className="flex flex-col items-center justify-between">
                                         <div className="flex justify-between w-full">
-                                            <h2 className="text-left text-gray-600 text-[15px] w-full font-semibold">
+                                            <h2 className="text-left text-muted-dark text-[15px] w-full font-semibold">
                                                 Selected Question
                                             </h2>
                                         </div>
                                         <div className="text-left w-full">
                                             {addQuestion?.length === 0 && (
-                                                <h1 className="text-left text-gray-600 text-[15px] italic">
+                                                <h1 className="text-left text-muted-dark text-[15px] italic">
                                                     No Selected Questions
                                                 </h1>
                                             )}
@@ -566,6 +586,7 @@ function Quiz(props: QuizProps) {
                                                     saveQuizQuestionHandler={
                                                         saveQuizQuestionHandler
                                                     }
+                                                    canEdit={canEdit}
                                                 />
                                             )
                                         )}
@@ -574,6 +595,7 @@ function Quiz(props: QuizProps) {
                             </div>
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>

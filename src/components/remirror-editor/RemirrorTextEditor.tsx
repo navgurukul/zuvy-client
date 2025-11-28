@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useCallback, useRef, useEffect } from 'react'
@@ -7,6 +8,8 @@ import {
     EditorComponent,
     ThemeProvider,
     useActive,
+    useCommands,
+    useEditorEvent,
 } from '@remirror/react'
 import {
     BoldExtension,
@@ -29,7 +32,51 @@ import './remirror-editor.css'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useThemeStore } from '@/store/store'
 import {RemirrorTextEditorProps} from "@/components/remirror-editor/componentRemirrorType"
+import { toast } from '@/components/ui/use-toast'
 
+// Image compression utility
+const compressImage = (file: File, maxWidth = 800, quality = 0.6): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            const img = new Image()
+            img.onload = () => {
+                const canvas = document.createElement('canvas')
+                let width = img.width
+                let height = img.height
+
+                // Calculate new dimensions
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width
+                    width = maxWidth
+                }
+
+                canvas.width = width
+                canvas.height = height
+
+                const ctx = canvas.getContext('2d')
+                if (!ctx) {
+                    reject(new Error('Could not get canvas context'))
+                    return
+                }
+
+                ctx.drawImage(img, 0, 0, width, height)
+
+                // Convert to compressed base64 with lower quality
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality)
+                
+                console.log('Original size:', (e.target?.result as string).length / 1024, 'KB')
+                console.log('Compressed size:', compressedBase64.length / 1024, 'KB')
+                
+                resolve(compressedBase64)
+            }
+            img.onerror = () => reject(new Error('Failed to load image'))
+            img.src = e.target?.result as string
+        }
+        reader.onerror = () => reject(new Error('Failed to read file'))
+        reader.readAsDataURL(file)
+    })
+}
 
 // Create empty content structure
 const createEmptyContent = () => {
@@ -76,6 +123,75 @@ const CodeBlockHelper = () => {
             </p>
         </div>
     )
+}
+
+// Custom hook to handle paste events
+const usePasteImageHandler = () => {
+    const commands = useCommands()
+    const toastShownRef = useRef(false)
+
+    useEditorEvent('paste', (event) => {
+        const clipboardData = event.clipboardData
+        if (!clipboardData) return false
+
+        const items = Array.from(clipboardData.items)
+        const imageItem = items.find(item => item.type.startsWith('image/'))
+
+        if (imageItem) {
+            event.preventDefault()
+            
+            const file = imageItem.getAsFile()
+            if (!file) return true
+
+            // Process image compression asynchronously
+            const processImage = async () => {
+                try {
+                    // Show loading toast
+                    if (!toastShownRef.current) {
+                        // toast.info({
+                        //     title: 'Processing Image',
+                        //     description: 'Compressing image, please wait...',
+                        // })
+                        toastShownRef.current = true
+                    }
+
+                    // Compress the image
+                    const compressedBase64 = await compressImage(file, 800, 0.6)
+
+                    // Insert the compressed image
+                    commands.insertImage({ src: compressedBase64 })
+
+                    // Show success toast
+                    setTimeout(() => {
+                        toast.success({
+                            title: 'Image Added',
+                            description: 'Image compressed and inserted successfully.',
+                        })
+                        toastShownRef.current = false
+                    }, 500)
+
+                } catch (error) {
+                    console.error('Failed to compress image:', error)
+                    toast.error({
+                        title: 'Error',
+                        description: 'Failed to process image. Please try again.',
+                    })
+                    toastShownRef.current = false
+                }
+            }
+
+            // Call async function without awaiting
+            processImage()
+            return true
+        }
+
+        return false
+    })
+}
+
+const EditorWithPasteHandler = () => {
+    usePasteImageHandler()
+    return null
 }
 
 export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
@@ -204,9 +320,12 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                     placeholder="Start typing..."
                 >
                     {!preview && (
-                        <div className="bg-white">
-                            <Toolbar />
-                        </div>
+                        <>
+                            <EditorWithPasteHandler />
+                            <div className="bg-white">
+                                <Toolbar />
+                            </div>
+                        </>
                     )}
 
                     <ScrollArea

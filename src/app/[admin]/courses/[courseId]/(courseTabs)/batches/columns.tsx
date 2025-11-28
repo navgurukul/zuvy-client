@@ -86,7 +86,8 @@ export const createColumns = (capEnrollment: number): ColumnDef<Task>[] => [
                                 sideOffset={8}
                             >
                                 <p className="max-w-xs whitespace-normal break-words text-center">
-                                    You’ve reached the cap enrollment limit. <br />
+                                    You’ve reached the cap enrollment limit.{' '}
+                                    <br />
                                     Deselect a student to add someone else, or
                                     increase the cap enrollment.
                                 </p>

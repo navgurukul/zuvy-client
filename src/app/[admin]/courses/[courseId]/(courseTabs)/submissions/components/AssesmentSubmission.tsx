@@ -13,11 +13,14 @@ import {
     APIResponses,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 // import assesmentNotfound from @/public
+import {AssessmentSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
     const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(
         null
     )
+    const [loading, setLoading] = useState(true)
     const debouncedSearch = useDebounce(searchTerm, 300)
 
     const getAssessments = useCallback(async () => {
@@ -28,6 +31,7 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
 
             const res = await api.get(url)
             setAssesments(res.data)
+             setLoading(false)
         } catch (error) {
             toast.error({
                 title: 'Error',
@@ -227,7 +231,9 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
             })
         }
     }
-
+    if(loading){
+        return<AssessmentSubmissionSkeleton/>
+    }
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {assesments ? (

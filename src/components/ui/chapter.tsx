@@ -1,5 +1,4 @@
 'use client'
-
 import { useCallback, useEffect, useState, useRef } from 'react'
 import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
@@ -29,6 +28,8 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { QuizOptions, QuizQuestionDetails } from '@/components/appComponentFileType'
+import { useModuleChapters } from '@/hooks/useModuleChapters'
+import {ModuleContentSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 type Chapter = {
     chapterId: number
@@ -62,6 +63,13 @@ function Chapter() {
     const setModuleName = getCurrentModuleName((state) => state.setModuleName)
     const [key, setKey] = useState(0)
     const [open, setOpen] = useState(false)
+    const {
+        moduleName: fetchedModuleName,
+        chapters: moduleChapters,
+        permissions,
+        loading: moduleLoading,
+        refetch,
+    } = useModuleChapters(moduleID)
 
     // Drag and drop states
     const [isDragging, setIsDragging] = useState(false)
@@ -76,10 +84,6 @@ function Chapter() {
     const [borderFlashTimeout, setBorderFlashTimeout] =
         useState<NodeJS.Timeout | null>(null)
 
-    const handleAddChapter = () => {
-        setOpen(true)
-    }
-
     const scrollAreaRef = useRef<HTMLDivElement | null>(null)
     const activeChapterRef = useRef<HTMLDivElement | null>(null)
     const [isNewChapterCreated, setIsNewChapterCreated] = useState(false)
@@ -89,6 +93,7 @@ function Chapter() {
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { courseData, fetchCourseDetails } = getCourseData()
     const draggedChapterRef = useRef<number | null>(null)
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (courseData?.name === '') fetchCourseDetails(courseID)
@@ -110,31 +115,9 @@ function Chapter() {
         setBorderFlashTimeout(timeout)
     }
 
-    const fetchChapters = useCallback(async () => {
+    const refreshChapters = useCallback(async () => {
         try {
-            const response = await api.get(
-                `/Content/allChaptersOfModule/${moduleId}`
-            )
-            const clickedChapter = response.data.chapterWithTopic.find(
-                (item: any) => item.chapterId === chapter_id
-            )
-            setTopicId(clickedChapter?.topicId)
-            setCurrentChapter(clickedChapter)
-            setChapterData(response.data.chapterWithTopic)
-            setModuleName(response.data.moduleName)
-            setModuleData(response.data.chapterWithTopic)
-
-            // Store original data for comparison
-            setOriginalChapterData([
-                ...response.data.chapterWithTopic.map((item: any) => ({
-                    ...item,
-                })),
-            ])
-
-            // Initialize last order reference
-            lastOrderRef.current = response.data.chapterWithTopic.map(
-                (item: any) => item.chapterId
-            )
+            await refetch()
         } catch (error) {
             router.replace(`/${userRole}/courses/${courseId}/curriculum`)
             toast.info({
@@ -143,13 +126,63 @@ function Chapter() {
             })
             console.error('Error fetching chapters:', error)
         }
-    }, [moduleId, chapter_id, isChapterUpdated])
+    }, [refetch, router, userRole, courseId])
 
     useEffect(() => {
-        if (moduleId) {
-            fetchChapters()
+        if (isChapterUpdated) {
+            refreshChapters()
+            setIsChapterUpdated(false)
         }
-    }, [courseId, moduleId, fetchChapters])
+    }, [isChapterUpdated, refreshChapters, setIsChapterUpdated])
+
+    useEffect(() => {
+        if (moduleLoading) return
+
+        setModuleName(fetchedModuleName)
+
+        const canView = permissions?.viewChapter !== false
+
+        if (!canView) {
+            setChapterData([])
+            setModuleData([])
+            setOriginalChapterData([])
+            setCurrentChapter([])
+            setTopicId(0)
+            setChapterContent([])
+            setActiveChapter(0)
+            setChapterId(0)
+            setActiveChapterTitle('')
+            return
+        }
+
+        setChapterData(moduleChapters)
+        setModuleData(moduleChapters)
+        const clickedChapter = moduleChapters.find(
+            (item: any) => item.chapterId === chapter_id
+        )
+
+        if (typeof clickedChapter?.topicId === 'number') {
+            setTopicId(clickedChapter.topicId)
+        }
+        setCurrentChapter(clickedChapter)
+
+        setOriginalChapterData(
+            moduleChapters.map((item: any) => ({
+                ...item,
+            }))
+        )
+
+        lastOrderRef.current = moduleChapters.map(
+            (item: any) => item.chapterId
+        )
+    }, [
+        moduleLoading,
+        fetchedModuleName,
+        permissions,
+        moduleChapters,
+        chapter_id,
+        setModuleName,
+    ])
 
     useEffect(() => {
         if (chapterData.length > 0) {
@@ -334,6 +367,15 @@ function Chapter() {
     //     }
     // }, [currentChapter])
 
+
+
+    const canCreateChapter = permissions?.createChapter ?? false
+    const canDeleteChapter = permissions?.deleteChapter ?? false
+
+    if (moduleLoading){
+      return<ModuleContentSkeletons/>
+    }
+
     return (
         <div className="flex flex-col h-screen pb-20 bg-card pl-4 pt-2">
             <Link
@@ -352,32 +394,34 @@ function Chapter() {
                 {moduleName}
             </p>
             <div className="flex flex-col overflow-hidden">
-                <div className="flex">
-                    <Dialog open={open} onOpenChange={setOpen}>
-                        <DialogTrigger asChild>
-                            <div className="w-full mb-4 pb-4 pr-4 border-b border-gray-200">
-                                <Button
-                                    variant="outline"
-                                    className="py-2 px-2 h-full w-full mr-4"
-                                >
-                                    <Plus className="w-4 h-4 mr-2" />
-                                    Add Chapter
-                                </Button>
-                            </div>
-                        </DialogTrigger>
-                        <DialogOverlay />
-                        <DialogContent>
-                            <ChapterModal
-                                courseId={courseId}
-                                moduleId={moduleId}
-                                fetchChapters={fetchChapters}
-                                newChapterOrder={chapterData.length}
-                                scrollToBottom={scrollToBottom}
-                                onClose={() => setOpen(false)} // <-- Pass onClose prop
-                            />
-                        </DialogContent>
-                    </Dialog>
-                </div>
+                {canCreateChapter && (
+                    <div className="flex">
+                        <Dialog open={open} onOpenChange={setOpen}>
+                            <DialogTrigger asChild>
+                                <div className="w-full mb-4 pb-4 pr-4 border-b border-muted-light">
+                                    <Button
+                                        variant="outline"
+                                        className="py-2 px-2 h-full w-full mr-4"
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        Add Chapter
+                                    </Button>
+                                </div>
+                            </DialogTrigger>
+                            <DialogOverlay />
+                            <DialogContent>
+                                <ChapterModal
+                                    courseId={courseId}
+                                    moduleId={moduleId}
+                                    fetchChapters={refreshChapters}
+                                    newChapterOrder={chapterData.length}
+                                    scrollToBottom={scrollToBottom}
+                                    onClose={() => setOpen(false)} // <-- Pass onClose prop
+                                />
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                )}
                 <ScrollArea
                     ref={scrollAreaRef}
                     className="h-screen pr-4 w-full mr-16 mt-2"
@@ -406,7 +450,7 @@ function Chapter() {
                                     title={item.chapterTitle}
                                     topicId={item.topicId}
                                     topicName={item.topicName}
-                                    fetchChapters={fetchChapters}
+                                    fetchChapters={refreshChapters}
                                     setActiveChapter={setActiveChapter}
                                     activeChapter={activeChapter}
                                     moduleId={moduleID}
@@ -422,6 +466,7 @@ function Chapter() {
                                     showBorderFlash={
                                         flashingChapterId === item.chapterId
                                     }
+                                    canDeleteChapter={canDeleteChapter}
                                 />
                             )
                         })}

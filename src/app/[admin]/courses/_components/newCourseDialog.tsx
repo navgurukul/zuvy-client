@@ -515,7 +515,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
             <DialogFooter className="sm:justify-end">
                 <DialogClose asChild>
-                    <Button variant="outline">
+                    <Button variant={"destructive"} >
                         Cancel
                     </Button>
                 </DialogClose>

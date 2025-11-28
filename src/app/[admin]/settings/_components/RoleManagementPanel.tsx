@@ -39,18 +39,18 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     onRoleChange,
 }) => {
     const searchParams = useSearchParams()
-    const { roles,refetchRoles } = useRoles()
+    const { roles, refetchRoles } = useRoles()
     const { assignPermissions, loading: assigning } = useAssignPermissions()
     const [selectedAction, setSelectedAction] = useState<number>(12)
     const [roleId, setRoleId] = useState<number>(1)
     const [selectedPermissions, setSelectedPermissions] = useState<Record<number, boolean>>({})
     const [originalPermissions, setOriginalPermissions] = useState<Record<number, boolean>>({})
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-    
+
     // Unsaved changes warning modal state
     const [showWarningModal, setShowWarningModal] = useState(false)
     const [pendingAction, setPendingAction] = useState<(() => void) | null>(null)
-    
+
     // Route change detection
     const router = useRouter()
     const pathname = usePathname()
@@ -194,6 +194,28 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         }))
     }
 
+    // const handlePermissionToggle = (permission: { id: number; name: string } | number, permissionName?: string) => {
+    //     const permissionId = typeof permission === 'number' ? permission : permission.id
+    //     const name = permissionName || (typeof permission === 'object' ? permission.name : '')
+
+    //     setSelectedPermissions((prev) => {
+    //         const newState = { ...prev }
+
+    //         // If unchecking "view", uncheck all other permissions
+    //         if (name?.toLowerCase() === 'view' && prev[permissionId]) {
+    //             // Unchecking view - clear all permissions
+    //             Object.keys(newState).forEach(key => {
+    //                 newState[Number(key)] = false
+    //             })
+    //             return newState
+    //         }
+
+    //         // Toggle the clicked permission
+    //         newState[permissionId] = !prev[permissionId]
+    //         return newState
+    //     })
+    // }
+
     const formatPermissionName = (permission: string) => {
         return permission
             .split('_')
@@ -316,10 +338,10 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     const handleDiscardChanges = () => {
         // First revert to original permissions
         setSelectedPermissions({ ...originalPermissions })
-        
+
         // Close the modal first
         setShowWarningModal(false)
-        
+
         // Use setTimeout to ensure modal closes before navigation
         setTimeout(() => {
             if (pendingAction) {
@@ -349,6 +371,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         setPendingAction(null)
         setPendingRoute(null)
     }
+
+    const notSelect = Object.values(selectedPermissions).every((v) => v === false);
+    const hasViewPermission = Object.values(selectedPermissions)[1]
+    const notSelected = notSelect === false && (hasViewPermission) ? false 
+    : notSelect === false && !(hasViewPermission) ? true 
+    : notSelect === true && !(hasViewPermission) ? false : true;
 
     return (
         <div className="space-y-6 py-4">
@@ -402,44 +430,59 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         <AddRoleModal
                             onClose={() => setIsAddModalOpen(false)}
                             onRoleAdded={refetchRoles}
-                         />
+                        />
                     )}
                 </Dialog>
             </div>
 
             {/* Role Selection Tabs */}
-            <div className="flex gap-6 border-b border-gray-200">
-                {
-                    roles.map((role, index) => {
-                        return (
-                            <TooltipProvider key={role.id}>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            onClick={() => handleRoleChange(role.name, role.id)}
-                                            className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
-                                                ? 'border-primary text-gray-900 hover:bg-transparent'
-                                                : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                                                }`}
-                                        >
-                                            <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
-                                            <span className="font-medium text-[1rem] capitalize">{role.name}</span>
-                                            {/* Show unsaved indicator */}
-                                            {selectedRole === role.name && hasUnsavedChanges && (
-                                                <div className="w-2 h-2 bg-warning rounded-full"></div>
-                                            )}
-                                        </Button>
-                                    </TooltipTrigger>
-                                    {role.description && (
-                                        <TooltipContent>
-                                            <p>{role.description}</p>
-                                        </TooltipContent>
-                                    )}
-                                </Tooltip>
-                            </TooltipProvider>
-                        )
-                    })
-                }
+            <div className="border-b border-gray-200">
+                {/* horizontal scroll container when there are many roles - use shadcn ScrollArea */}
+                <div className="group">
+                    <ScrollArea className="py-2">
+                        <div className="flex gap-6 flex-nowrap px-1">
+                            {
+                                roles.map((role, index) => {
+                                    return (
+                                        <TooltipProvider key={role.id}>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        onClick={() => handleRoleChange(role.name, role.id)}
+                                                        className={`flex items-center gap-3 pb-2 border-b-2 transition-colors bg-transparent ${selectedRole && selectedRole === role.name
+                                                            ? 'border-primary text-gray-900 hover:bg-transparent'
+                                                            : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                                            }`}
+                                                        // prevent shrinking so overflow-x works as expected
+                                                        // eslint-disable-next-line react/forbid-dom-props
+                                                        style={{ flexShrink: 0 }}
+                                                    >
+                                                        <div className={`w-3 h-3 rounded-full ${COLOR_PALETTE[index].bg}`}></div>
+                                                        <span className="font-medium text-[1rem] capitalize">{role.name}</span>
+                                                        {/* Show unsaved indicator */}
+                                                        {selectedRole === role.name && hasUnsavedChanges && (
+                                                            <div className="w-2 h-2 bg-warning rounded-full"></div>
+                                                        )}
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                {role.description && (
+                                                    <TooltipContent>
+                                                        <p>{role.description}</p>
+                                                    </TooltipContent>
+                                                )}
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    )
+                                })
+                            }
+                        </div>
+                        {/* horizontal scrollbar from shadcn - only visible on hover */}
+                        <ScrollBar
+                            orientation="horizontal"
+                            className="transition-opacity duration-200 opacity-0 group-hover:opacity-100"
+                        />
+                    </ScrollArea>
+                </div>
             </div>
 
             {/* Main Content - Two Column Layout */}
@@ -469,7 +512,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 roleActions.map((action) => (
                                     <div
                                         key={action.id}
-                                        onClick={() => 
+                                        onClick={() =>
                                             // action.id is the resourceId
                                             handleActionSelect(action.id)
                                         }
@@ -570,7 +613,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                 </label>
                                                 <Checkbox
                                                     id={permission.id}
+                                                    // checked={selectedPermissions[10] ? selectedPermissions[permission.id] || false : false}
                                                     checked={selectedPermissions[permission.id] || false}
+                                                    // disabled={!(selectedPermissions[10])}
                                                     onCheckedChange={() =>
                                                         handlePermissionToggle(
                                                             permission.id
@@ -613,7 +658,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         size="sm"
                                         onClick={handleAssignPermissions}
                                         className="text-xs bg-accent text-white"
-                                    // disabled={assigning}
+                                        disabled={notSelected}
                                     >
                                         {/* {assigning
                                             ? 'Saving...'

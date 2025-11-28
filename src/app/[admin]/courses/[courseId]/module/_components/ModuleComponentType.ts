@@ -20,7 +20,6 @@ export type AddLiveClass={
     moduleId: string
 }
 
-
 // ChapterItem
 export type ChapterItems={
     title: string
@@ -39,8 +38,8 @@ export type ChapterItems={
     onDragStart: () => void
     onDragEnd: () => void
     showBorderFlash?: boolean
+    canDeleteChapter?: boolean
 }
-
 
 // ChapterModal
 export interface ChapterModalProps{

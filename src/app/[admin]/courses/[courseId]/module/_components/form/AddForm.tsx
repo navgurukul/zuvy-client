@@ -29,7 +29,10 @@ import {
     AddFormProps,
     FormQuestionDetail,
 } from '@/app/[admin]/courses/[courseId]/module/_components/form/ModuleFormType'
+import {FeedbackFormSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
+
+import PermissionAlert from '@/app/_components/PermissionAlert'
 const formSchema = z.object({
     title: z
         .string()
@@ -66,6 +69,7 @@ const AddForm: React.FC<AddFormProps> = ({
     // fetchChapterContent,
     moduleId,
     courseId,
+    canEdit = true // default: editable if not specified
 }) => {
     const router = useRouter()
     const { user } = getUser()
@@ -76,6 +80,8 @@ const AddForm: React.FC<AddFormProps> = ({
     const [isSaved, setIsSaved] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const { editChapter } = useEditChapter()
+    const [isDataLoading, setIsDataLoading] = useState(true)
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -388,12 +394,30 @@ const AddForm: React.FC<AddFormProps> = ({
             )
         }
     }
+    
+ useEffect(() => {
+    if (content?.formQuestionDetails) {
+        setIsDataLoading(false)
+    }
+}, [content?.formQuestionDetails])
 
+
+
+    if (isDataLoading) {
+       return <FeedbackFormSkeleton/>
+    }
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">
             <ScrollBar className="h-dvh " orientation="vertical" />
             {/* <div className="flex flex-col gap-y-8 mx-auto px-5 items-center justify-center w-1/2"> */}
             <div className="flex flex-col gap-y-8 px-5 justify-center mx-auto w-full max-w-[52rem] bg-card rounded-lg shadow-sm border">
+                {!canEdit && (
+                    <PermissionAlert
+                        alertOpen={alertOpen}
+                        setAlertOpen={setAlertOpen}
+                    />
+                )}
+                <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                 <div className="w-2/6 flex justify-start align-middle items-center relative pt-4">
                     <p className="text-2xl font-bold">Create Feedback Form</p>
                 </div>
@@ -408,43 +432,8 @@ const AddForm: React.FC<AddFormProps> = ({
                             render={({ field }) => (
                                 <FormItem>
                                     <FormControl>
-                                        {/* <div className="flex justify-between items-center">
-                                            <div className="w-2/6 flex justify-center align-middle items-center relative">
-                                                <p className="flex text-left text-lg mt-4">
-                                                    Title
-                                                </p>
-                                                <Input
-                                                    required
-                                                    {...field}
-                                                    onChange={(e) => {
-                                                        setTitles(
-                                                            e.target.value
-                                                        )
-                                                        field.onChange(e)
-                                                    }}
-                                                    placeholder="Untitled Form"
-                                                    className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                />
-                                                {!titles && (
-                                                    <Pencil
-                                                        fill="true"
-                                                        fillOpacity={0.4}
-                                                        size={20}
-                                                        className="absolute text-gray-100 pointer-events-none mt-2 right-3"
-                                                    />
-                                                )}
-                                            </div>
-                                            <div className="flex justify-start">
-                                                <Button
-                                                    type="submit"
-                                                    className="w-3/3 bg-success-dark opacity-75"
-                                                >
-                                                    Save
-                                                </Button>
-                                            </div>
-                                        </div> */}
                                         <>
-                                            <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                                            <FormLabel className="flex text-left text-sm text-muted-dark font-semibold mb-1">
                                                 Form Title
                                             </FormLabel>
                                             <Input
@@ -456,6 +445,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                                 }}
                                                 placeholder="Untitled Form"
                                                 className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                disabled={!canEdit}
                                             />
                                         </>
                                     </FormControl>
@@ -480,14 +470,15 @@ const AddForm: React.FC<AddFormProps> = ({
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="flex text-left text-sm text-gray-600 font-semibold mb-1">
+                                    <FormLabel className="flex text-left text-sm text-muted-dark font-semibold mb-1">
                                         Description
                                     </FormLabel>
                                     <FormControl>
                                         <Input
                                             {...field}
-                                            className="w-full px-3 py-2 border text-gray-600 rounded-md"
+                                            className="w-full px-3 py-2 border text-muted-dark rounded-md"
                                             placeholder="Add Description"
+                                            disabled={!canEdit}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -504,6 +495,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                     type="button"
                                     onClick={addQuestion}
                                     className="gap-x-2 border-none border"
+                                    disabled={!canEdit}
                                     // className="gap-x-2 border-none border hover:text-[rgb(81,134,114)] hover:bg-popover"
                                 >
                                     <PlusCircle size={15} /> Add Question
@@ -522,11 +514,12 @@ const AddForm: React.FC<AddFormProps> = ({
                                     form={form}
                                     deleteQuestion={deleteQuestion}
                                     formData={questions}
+                                    canEdit={canEdit}
                                 />
                                 {/* ✅ ERROR MESSAGE DISPLAY */}
                                 {form.formState.errors.questions?.[index]
                                     ?.options && (
-                                    <p className="text-sm text-red-500 mt-2">
+                                    <p className="text-sm text-destructive mt-2">
                                         {
                                             form.formState.errors.questions[
                                                 index
@@ -540,9 +533,7 @@ const AddForm: React.FC<AddFormProps> = ({
                         <div className="flex justify-start">
                             <Button
                                 type="submit"
-                                disabled={
-                                    !form.formState.isValid || isSubmitting
-                                }
+                                disabled={!form.formState.isValid || isSubmitting || !canEdit}
                                 aria-label="Save form changes"
                                 aria-busy={isSubmitting}
                                 className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90"
@@ -553,6 +544,7 @@ const AddForm: React.FC<AddFormProps> = ({
                     </form>
                 </Form>
             </div>
+         </div>
         </ScrollArea>
     )
 }

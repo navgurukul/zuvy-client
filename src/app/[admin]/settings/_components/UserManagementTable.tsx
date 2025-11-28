@@ -31,17 +31,22 @@ import { useRoles } from '@/hooks/useRoles'
 import { SearchBox } from '@/utils/searchBox'
 import { api } from '@/utils/axios.config'
 import type { User } from '../columns'
+import { DataTable } from '@/app/_components/datatable/data-table'
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     onSearchChange?: (isSearching: boolean) => void
+    roleId?: string
+    onRoleIdChange?: (roleId: string) => void
 }
 
 export function UserManagementTable<TData extends User, TValue>({
     columns,
     data: propData, // Rename to propData
     onSearchChange,
+    roleId = 'all',
+    onRoleIdChange,
 }: UserManagementTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -115,7 +120,7 @@ export function UserManagementTable<TData extends User, TValue>({
             setIsSearching(false)
             setSearchData([])
         }
-    }, []) // Run only once on mount
+    }, [fetchSearchResultsApi]) // Run only once on mount
 
     const table = useReactTable({
         data: displayData,
@@ -155,16 +160,10 @@ export function UserManagementTable<TData extends User, TValue>({
 
                 <div className="mt-2">
                     <Select
-                        value={
-                            (table
-                                .getColumn('roleName')
-                                ?.getFilterValue() as string) ?? 'all'
-                        }
-                        onValueChange={(value) =>
-                            table
-                                .getColumn('roleName')
-                                ?.setFilterValue(value === 'all' ? '' : value)
-                        }
+                        value={roleId}
+                        onValueChange={(value) => {
+                            onRoleIdChange?.(value)
+                        }}
                     >
                         <SelectTrigger className="w-48 bg-white">
                             <SelectValue placeholder="All Roles" />
@@ -177,7 +176,7 @@ export function UserManagementTable<TData extends User, TValue>({
                                 </SelectItem>
                             ) : (
                                 roles.map((role) => (
-                                    <SelectItem key={role.id} value={role.name} className='capitalize'>
+                                    <SelectItem key={role.id} value={String(role.id)} className='capitalize'>
                                         {role.name}
                                     </SelectItem>
                                 ))
@@ -188,73 +187,10 @@ export function UserManagementTable<TData extends User, TValue>({
             </div>
 
             {/* Table */}
-            <div className="bg-background rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-                <Table>
-                    <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow
-                                key={headerGroup.id}
-                                className="border-b border-gray-200"
-                            >
-                                {headerGroup.headers.map((header) => (
-                                    <TableHead
-                                        key={header.id}
-                                        className="py-3 px-4 font-medium text-muted-foreground text-[1rem] text-left"
-                                    >
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </TableHead>
-                                ))}
-                            </TableRow>
-                        ))}
-                    </TableHeader>
-                    <TableBody>
-                        {loading ? (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    Loading...
-                                </TableCell>
-                            </TableRow>
-                        ) : table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    className="border-b border-gray-100 hover:bg-muted/20"
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell
-                                            key={cell.id}
-                                            className="py-3 px-4 text-[1rem] text-left"
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        ) : (
-                            <TableRow>
-                                <TableCell
-                                    colSpan={columns.length}
-                                    className="h-24 text-center"
-                                >
-                                    No results found.
-                                </TableCell>
-                            </TableRow>
-                        )}
-                    </TableBody>
-                </Table>
-            </div>
+            <DataTable
+                columns={columns}
+                data={displayData}
+            />
         </div>
     )
 }

@@ -8,6 +8,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import {LiveClassSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 interface LiveClassSubmissionsProps {
     courseId: string
@@ -24,7 +26,6 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
     const getLiveClassData = useCallback(async () => {
         try {
-            setLoading(true)
             let url = `/submission/livesession/zuvy_livechapter_submissions?bootcamp_id=${courseId}`
             if (debouncedSearch) {
                 url += `&searchTerm=${encodeURIComponent(debouncedSearch)}`
@@ -34,6 +35,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
             const trackingData = res.data?.data?.trackingData || []
             setLiveClassData(trackingData)
             setTotalStudents(res.data?.data?.totalStudents || 0)
+            setLoading(false)
         } catch (error) {
             console.error('Error fetching live class data:', error)
             setLiveClassData([])
@@ -43,9 +45,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                 description: 'Failed to fetch live class data',
                 variant: 'destructive',
             })
-        } finally {
-            setLoading(false)
-        }
+        } 
     }, [courseId, debouncedSearch])
 
     useEffect(() => {
@@ -80,7 +80,6 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                     (record.duration / 60).toFixed(2), // converting seconds to minutes (optional)
                 ]
             })
-
             // Draw table
             autoTable(doc, {
                 head: [columns],
@@ -103,13 +102,8 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
         }
     }
 
-
     if (loading) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-            </div>
-        )
+         return <LiveClassSubmissionSkeleton/>
     }
 
     // Flatten all live classes from all modules

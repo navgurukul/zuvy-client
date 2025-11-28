@@ -20,11 +20,14 @@ import { getAssessmentPreviewStore, getUser } from '@/store/store'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 import {
     AddAssessmentProps,
     McqAccumulator,
     CodingQuestiones,
 } from '@/app/[admin]/courses/[courseId]/module/_components/Assessment/ComponentAssessmentType'
+import {AssessmentSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -43,13 +46,15 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     moduleId,
     topicId,
     activeChapterTitle,
+    canEdit = true,
 }) => {
     const form = useForm<z.infer<typeof chapterSchema>>({
         resolver: zodResolver(chapterSchema),
         defaultValues: { title: activeChapterTitle || '' },
         mode: 'onChange',
     })
-
+    const [alertOpen, setAlertOpen] = useState(!canEdit);
+    const [open, setOpen] = useState(true); // initially true when !canEdit
     const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -335,26 +340,27 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
 
     useEffect(() => {
         if (chapterData.id && topicId > 0) {
-            setIsDataLoading(true)
             fetchChapterContent(chapterData.id, topicId)
             setChapterTitle(content.ModuleAssessment?.title)
-            setChapterTitle(activeChapterTitle) // Always sync with the chapter title
-            setIsDataLoading(false)
+            setChapterTitle(activeChapterTitle)
         }
+         setIsDataLoading(false)
     }, [chapterData.id, topicId, activeChapterTitle])
 
+
+
+
+
+
+
     useEffect(() => {
-        if (hasLoaded.current) return
-        hasLoaded.current = true
         const loadTags = async () => {
-            setIsDataLoading(true) // Start loading
             try {
                 await getAllTagsWithoutFilter(setTags)
             } catch (error) {
                 console.error('Error loading tags:', error)
-            } finally {
-                setIsDataLoading(false) // End loading
-            }
+            } 
+            
         }
         loadTags()
     }, [])
@@ -368,78 +374,22 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         }
     }, [content?.ModuleAssessment?.title, activeChapterTitle])
 
+  
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading Assessment details...
-                    </div>
-                </div>
-            </div>
-        )
+        return <AssessmentSkeleton/>
     }
+    
     return (
-        <div className="w-full pb-2">
+    <div className="w-full pb-2">
+        {!canEdit && (
+            <PermissionAlert
+                alertOpen={alertOpen}
+                setAlertOpen={setAlertOpen}
+            />
+            )}
+            <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
             <div className="px-5 border-b border-gray-200">
                 {questionType !== 'settings' && (
-                    // <div className="flex items-center mb-5 w-full justify-between">
-                    //     <div className="w-2/6 flex justify-center align-middle items-center relative">
-                    //         <Input
-                    //             required
-                    //             onChange={(e) => {
-                    //                 const newValue = e.target.value
-                    //                  if (newValue.length>50) {
-                    //                       toast.error({
-                    //                         title: "Character Limit Reached",
-                    //                         description: "You can enter up to 50 characters only",
-                    //                     })
-
-                    //                  } else {
-                    //                     setChapterTitle(newValue)
-                    //              }
-
-                    //             }}
-                    //             value={chapterTitle}
-                    //             // placeholder={content?.ModuleAssessment?.title}
-                    //             placeholder="Untitled Assessment"
-                    //             className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground"
-                    //         />
-                    //         {/* {chapterTitle.length == 0 && (
-                    //             <Pencil
-                    //                 fill="true"
-                    //                 fillOpacity={0.4}
-                    //                 size={20}
-                    //                 className="absolute text-gray-100 pointer-events-none mt-1 right-5"
-                    //             />
-                    //         )} */}
-
-                    //     </div>
-
-                    //     {/* preview & settings buttons */}
-                    //     <div className="text-[#4A4A4A] flex font-semibold items-center cursor-pointer mr-14 gap-2">
-                    //         {/* <div
-                    //             id="previewAssessment"
-                    //             onClick={previewAssessment}
-                    //             className="flex hover:bg-gray-300 rounded-md p-1"
-                    //         >
-                    //             <Eye size={18} />
-                    //             <h6 className="ml-1 text-sm">Preview</h6>
-                    //         </div> */}
-
-                    //         <div
-                    //             onClick={handleSettingsButtonClick}
-                    //             id="settingsAssessment"
-                    //             className="flex hover:bg-gray-300 rounded-md p-1"
-                    //         >
-                    //             {/* <Settings size={18} />
-                    //             <h6 className="mx-1 text-sm">Settings</h6> */}
-                    //             <h6 className="mx-1 text-sm">Next</h6>
-                    //             <ArrowRight size={20} />
-                    //         </div>
-                    //     </div>
-                    // </div>
-
                     <div className="flex items-center mb-5 w-full justify-between">
                         <div className="w-2/6 relative">
                             <Input
@@ -448,7 +398,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                 className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
                             />
                             {form.formState.errors.title && (
-                                <p className="text-red-500 text-sm mt-1">
+                                <p className="text-destructive text-sm mt-1">
                                     {form.formState.errors.title.message}
                                 </p>
                             )}
@@ -483,12 +433,12 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                 )}
                 {/* select type of questions */}
                 {questionType !== 'settings' && (
-                    <div className="flex gap-2 mb-5 border-b border-gray-200 w-1/2">
+                    <div className="flex gap-2 mb-5 border-b border-muted-light w-1/2">
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'coding'
-                                    ? 'border-primary text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleCodingButtonClick}
                         >
@@ -497,8 +447,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'mcq'
-                                    ? 'border-primary text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleMCQButtonClick}
                         >
@@ -507,8 +457,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         <Button
                             className={`flex items-center gap-3 text-[1rem] pb-2 border-b-2 transition-colors bg-transparent ${
                                 questionType === 'open-ended'
-                                    ? 'border-primary text-gray-900 hover:bg-transparent'
-                                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                                    ? 'border-primary text-foreground hover:bg-transparent'
+                                    : 'border-transparent text-muted-dark hover:text-foreground hover:bg-gray-100'
                             }`}
                             onClick={handleOpenEndedButtonClick}
                         >
@@ -541,7 +491,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             />
                         </div>
                         <div className="flex justify-between w-2/3">
-                            <h3 className="text-left text-[15px] text-gray-600 font-bold mb-5 ml-2">
+                            <h3 className="text-left text-[15px] text-muted-dark font-bold mb-5 ml-2">
                                 {questionType === 'coding'
                                     ? 'Coding Problem Library'
                                     : questionType === 'mcq'
@@ -550,7 +500,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                     ? 'Open-Ended Question Library'
                                     : ''}
                             </h3>
-                            <h1 className="text-left text-[15px] text-gray-600 font-bold mb-5 mr-3">
+                            <h1 className="text-left text-[15px] text-muted-dark font-bold mb-5 mr-3">
                                 Selected Questions
                             </h1>
                         </div>
@@ -655,7 +605,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         />
 
                         {questionType !== 'settings' && (
-                            <div className="h-screen border-l border-gray-200 pl-4">
+                            <div className="h-screen border-l border-muted-light pl-4">
                                 <ScrollArea className="h-96 px-2 pb-4">
                                     <ScrollBar
                                         orientation="vertical"
@@ -691,7 +641,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                                             }
                                         />
                                     ) : (
-                                        <h1 className="text-left text-gray-600 text-[18px] italic pl-5">
+                                        <h1 className="text-left text-muted-dark text-[18px] italic pl-5">
                                             No Selected questions
                                         </h1>
                                     )}
@@ -700,6 +650,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                         )}
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     )

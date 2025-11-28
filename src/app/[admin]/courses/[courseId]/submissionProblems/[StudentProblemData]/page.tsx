@@ -20,6 +20,7 @@ const PracticeProblems = ({ params }: any) => {
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [loading, setLoading] = useState(false)
     const [selectedBatch, setSelectedBatch] = useState('All Batches')
+    const [crumbData, setCrumbData] = useState<string[]>([])
 
     // Dummy batch data
     const batchOptions = [
@@ -93,18 +94,15 @@ const PracticeProblems = ({ params }: any) => {
         }
     }, [params.courseId])
 
-    // Store breadcrumb data in localStorage
-    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-        localStorage.setItem(
-            'crumbData',
-            JSON.stringify([
-                bootcampData?.name,
-                `${matchingData?.moduleChapterData[0]?.codingQuestionDetails
-                    ?.title} - Submissions`,
+    useEffect(() => {
+        if (bootcampData?.name && matchingData?.moduleChapterData) {
+            setCrumbData([
+                bootcampData.name,
+                `${matchingData.moduleChapterData[0].codingQuestionDetails?.title} - Submissions`
             ])
-        )
-    }
-
+        }
+    }, [bootcampData, matchingData])
+    
     // Initial data fetch - exactly like projects code
     useEffect(() => {
         const fetchInitialData = async () => {

@@ -25,8 +25,10 @@ const QuizModal = ({
     tags,
     addQuestion,
     saveQuizQuestionHandler,
+    canEdit = true,
 }: any) => {
     const handleClick = async () => {
+        if (!canEdit) return
         removeQuestionById(data.id)
         if (addQuestion.length == 1) {
             const requestBody = {
@@ -95,7 +97,11 @@ const QuizModal = ({
             <XCircle
                 size={20}
                 onClick={handleClick}
-                className="cursor-pointer text-red-600 mb-5 hover:text-red-800 transition-colors flex-shrink-0"
+                className={`${
+                    canEdit
+                        ? 'cursor-pointer'
+                        : 'opacity-40 cursor-not-allowed'
+                } text-red-600 mb-5 hover:text-red-800 transition-colors flex-shrink-0`}
             />
         </div>
     )

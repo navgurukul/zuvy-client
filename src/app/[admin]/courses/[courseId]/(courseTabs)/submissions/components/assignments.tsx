@@ -16,10 +16,13 @@ import {
     AssignmentApiResponse,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import { Badge } from '@/components/ui/badge'
+import {AssignmentSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchAssignmentDataHandler = async () => {
@@ -30,6 +33,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                 const res = await api.get<AssignmentApiResponse>(url)
                 setAssignmentData(res.data.data.trackingData)
                 setTotalStudents(res.data.data.totalStudents)
+            setLoading(false)
             } catch (error) {
                 toast.error({
                     title: 'Error',
@@ -104,6 +108,9 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
         fetchData()
     }
 
+if (loading) {
+  return <AssignmentSubmissionSkeleton/>
+}
     return (
         <div className="">
             {assignmentData?.length > 0 ? (

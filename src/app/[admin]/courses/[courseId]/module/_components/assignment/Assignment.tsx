@@ -61,12 +61,16 @@ import {
 import useEditChapter from '@/hooks/useEditChapter'
 import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
+import {AssignmentSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+
+import PermissionAlert from '@/app/_components/PermissionAlert'
  
 const AddAssignent = ({
     content,
     courseId,
     assignmentUpdateOnPreview,
     setAssignmentUpdateOnPreview,
+    canEdit = true,
 }: AssignmentProps) => {
     // misc
 
@@ -93,6 +97,7 @@ const AddAssignent = ({
     const [pdfLink, setpdfLink] = useState<any>()
     const [loading, setIsLoading] = useState(false)
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
+    const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     const [initialContent, setInitialContent] = useState<
         { doc: AssignmentContentEditorDoc } | undefined
@@ -110,6 +115,8 @@ const AddAssignent = ({
     const { editChapter } = useEditChapter()
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
+    const [hasChangedAfterSave, setHasChangedAfterSave] = useState(false)
+
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -169,7 +176,7 @@ const AddAssignent = ({
 
     // UPDATED: Auto-save function with better conditions
     const autoSave = async () => {
-        if (isSaving) return // Prevent multiple simultaneous saves
+        if (!canEdit || isSaving) return // Prevent multiple simultaneous saves
 
         try {
             setIsSaving(true)
@@ -206,7 +213,6 @@ const AddAssignent = ({
     }
 
     const getAssignmentContent = async () => {
-        setIsDataLoading(true)
         try {
             const response = await getChapterDetails({
                 chapterId: content.id,
@@ -214,17 +220,18 @@ const AddAssignent = ({
                 moduleId: content.moduleId,
                 topicId: content.topicId,
             })
-
+      
             // Convert string to Date object
             if (response.data.completionDate) {
                 setDeadline(parseISO(response.data.completionDate))
             } else {
                 setDeadline(null)
             }
-
+           
             const contentDetails = response.data.contentDetails[0]
             setTitle(contentDetails.title)
             setTitles(contentDetails.title)
+            setIsDataLoading(false)
             if (contentDetails.links && contentDetails.links[0]) {
                 setpdfLink(contentDetails.links[0])
                 setIsPdfUploaded(true)
@@ -238,9 +245,7 @@ const AddAssignent = ({
                 const data = contentDetails.content
                 let hasEditorContent = false
                 if (data && data.length > 0) {
-                    // Agar content array me kuch hai, to editor saved true
                     hasEditorContent = true
-                    // If content exists, mark as manually saved (existing content)
                     setHasUserManuallySaved(true)
                 }
                 setIsEditorSaved(hasEditorContent)
@@ -254,35 +259,46 @@ const AddAssignent = ({
                 setInitialContent(jsonData)
                 setPreviousContentHash(generateContentHash(jsonData))
             }
-        } catch (error) {
-            console.error('Error fetching assignment content:', error)
-        } finally {
-            setIsDataLoading(false)
-            // Mark initial load as complete after a short delay
+            
             setTimeout(() => {
                 setInitialLoadComplete(true)
-            }, 1000)
-        }
+            }, 500)
+             
+        } catch (error) {
+            console.error('Error fetching assignment content:', error)
+        } 
     }
 
     const [isEditorSaved, setIsEditorSaved] = useState(false)
 
-    // Jab bhi initialContent change ho, editor empty hai ya nahi check karo
+    // FIXED: Properly update hasEditorContent when initialContent changes
     useEffect(() => {
-        if (defaultValue === 'editor') {
+        if (defaultValue === 'editor' && initialContent) {
+    
+            const isEmpty = isEditorContentEmpty(initialContent)
+            setHasEditorContent(!isEmpty)
+    
+            const currentHash = generateContentHash(initialContent) // FIXED: declare here
+    
+            // Auto-save if user interacted + initial load complete + content changed
             if (
-                !initialContent ||
-                !initialContent.doc ||
-                !initialContent.doc.content ||
-                initialContent.doc.content.length === 0 ||
-                (initialContent.doc.content.length === 1 &&
-                    initialContent.doc.content[0].type === 'paragraph' &&
-                    !initialContent.doc.content[0].content)
+                isEmpty &&
+                hasUserManuallySaved &&
+                previousContentHash !== '' &&
+                initialLoadComplete &&
+                isUserInteracting &&
+                previousContentHash !== currentHash
             ) {
-                setIsEditorSaved(false)
+                autoSave()
+            }
+    
+            // Enable save button when content changed
+            if (previousContentHash && currentHash !== previousContentHash) {
+                setHasChangedAfterSave(true)
             }
         }
     }, [initialContent, defaultValue])
+    
 
     // async
     useEffect(() => {
@@ -307,8 +323,10 @@ const AddAssignent = ({
 
     // UPDATED: Manual save function - sets the flag for manual save
     const editAssignmentContent = async (data: any) => {
+        if (!canEdit) return
         const deadlineDate = convertToISO(data.startDate)
         try {
+            setIsSaving(true)
             const initialContentString = initialContent
                 ? [JSON.stringify(initialContent)]
                 : ''
@@ -323,6 +341,7 @@ const AddAssignent = ({
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true)
+            setHasChangedAfterSave(false)
 
             // IMPORTANT: Mark that user has manually saved
             setHasUserManuallySaved(true)
@@ -339,37 +358,10 @@ const AddAssignent = ({
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
+        } finally {
+            setIsSaving(false)
         }
     }
-
-    // UPDATED: Auto-save effect with better conditions
-    useEffect(() => {
-        // Don't run auto-save during initial load
-        if (!initialLoadComplete) return
-
-        if (defaultValue === 'editor' && initialContent) {
-            const isEmpty = isEditorContentEmpty(initialContent)
-            const currentHash = generateContentHash(initialContent)
-
-            setHasEditorContent(!isEmpty)
-            if (
-                isEmpty &&
-                hasUserManuallySaved &&
-                previousContentHash !== currentHash &&
-                isUserInteracting &&
-                previousContentHash !== '' // Ensure previous content existed
-            ) {
-                autoSave()
-            }
-        }
-    }, [
-        initialContent,
-        defaultValue,
-        hasUserManuallySaved,
-        previousContentHash,
-        isUserInteracting,
-        initialLoadComplete,
-    ])
 
     // UPDATED: Track user interaction with editor
     useEffect(() => {
@@ -417,6 +409,7 @@ const AddAssignent = ({
     }
 
     const onFileUpload = async () => {
+        if (!canEdit) return
         if (file) {
             if (file.type !== 'application/pdf') {
                 return toast.error({
@@ -481,6 +474,7 @@ const AddAssignent = ({
     }
 
     const onDeletePdfhandler = async () => {
+        if (!canEdit) return
         setIsLoading(true)
 
         const deadlineDate = convertToISO(deadline)
@@ -515,20 +509,19 @@ const AddAssignent = ({
     }
 
     if (isDataLoading) {
-        return (
-            <div className="px-5">
-                <div className="w-full flex justify-center items-center py-8">
-                    <div className="animate-pulse">
-                        Loading assignment details...
-                    </div>
-                </div>
-            </div>
-        )
+        return<AssignmentSkeletons/>
     }
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">
             <div className="px-5">
                 <>
+                    {!canEdit && ( 
+                        <PermissionAlert
+                            alertOpen={alertOpen}
+                            setAlertOpen={setAlertOpen}
+                        />
+                    )}
+                    <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                     <div className="w-full ">
                         <Form {...form}>
                             <form
@@ -563,6 +556,7 @@ const AddAssignent = ({
                                                         }}
                                                         placeholder="Untitled Assignment"
                                                         className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                    disabled={!canEdit}
                                                         // autoFocus
                                                     />
                                                 </>
@@ -625,9 +619,10 @@ const AddAssignent = ({
                                 <div className="">
                                     <RadioGroup
                                         className="flex items-center gap-x-6 mt-4"
-                                        onValueChange={(value) =>
+                                        onValueChange={(value) => {
+                                            if (!canEdit) return
                                             setDefaultValue(value)
-                                        }
+                                        }}
                                         value={defaultValue}
                                     >
                                         <TooltipProvider>
@@ -636,9 +631,9 @@ const AddAssignent = ({
                                                     <TooltipTrigger asChild>
                                                         <RadioGroupItem
                                                             value="editor"
-                                                            disabled={!!pdfLink}
+                                                            disabled={!canEdit || !!pdfLink}
                                                             id="r1"
-                                                            className="mt-1 text-black border-black"
+                                                            className="mt-1 text-foreground border-foreground"
                                                         />
                                                     </TooltipTrigger>
                                                     {pdfLink && (
@@ -651,7 +646,7 @@ const AddAssignent = ({
                                                 </Tooltip>
                                                 <Label
                                                     htmlFor="r1"
-                                                    className="font-light text-md text-black"
+                                                    className="font-light text-md text-foreground"
                                                 >
                                                     Editor
                                                 </Label>
@@ -663,8 +658,9 @@ const AddAssignent = ({
                                                         <RadioGroupItem
                                                             value="pdf"
                                                             id="r2"
-                                                            className="mt-1 text-black border-black"
+                                                            className="mt-1 text-foreground border-foreground"
                                                             disabled={
+                                                                !canEdit ||
                                                                 isEditorSaved
                                                             }
                                                         />
@@ -681,7 +677,7 @@ const AddAssignent = ({
                                                 </Tooltip>
                                                 <Label
                                                     htmlFor="r2"
-                                                    className="font-light text-md text-black"
+                                                    className="font-light text-md text-foreground"
                                                 >
                                                     Upload PDF
                                                 </Label>
@@ -689,7 +685,7 @@ const AddAssignent = ({
                                         </TooltipProvider>
                                     </RadioGroup>
 
-                                    <div className="bg-card rounded-lg shadow-sm border">
+                                    <div className="bg-card text-foreground rounded-lg shadow-sm border">
                                         <div className="p-6">
                                             <p className="text-xl text-start font-semibold">
                                                 Assignment Details
@@ -775,10 +771,22 @@ const AddAssignent = ({
                                                                                     Date*
                                                                                 </p>
                                                                                 <div
-                                                                                    className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-2 text-sm text-gray-700 hover:border-[rgb(81,134,114)] ${
+                                                                                    className={`flex items-center justify-between w-full border border-input rounded-md bg-background px-3 py-2 text-sm text-muted-dark hover:border-primary ${
                                                                                         !field.value &&
                                                                                         'text-muted-foreground'
+                                                                                    } ${
+                                                                                        !canEdit
+                                                                                            ? 'opacity-60 cursor-not-allowed'
+                                                                                            : ''
                                                                                     }`}
+                                                                                    style={
+                                                                                        !canEdit
+                                                                                            ? {
+                                                                                                  pointerEvents:
+                                                                                                      'none',
+                                                                                              }
+                                                                                            : undefined
+                                                                                    }
                                                                                     onClick={(
                                                                                         e
                                                                                     ) => {
@@ -869,6 +877,7 @@ const AddAssignent = ({
                                                             setInitialContent={
                                                                 setInitialContent
                                                             }
+                                                        preview={!canEdit}
                                                         />
                                                     </div>
                                                 )}
@@ -892,6 +901,7 @@ const AddAssignent = ({
                                                         setDisableButton={
                                                             setIsdisabledUploadButton
                                                         }
+                                                        disabled={!canEdit}
                                                     />
                                                 </div>
                                             )}
@@ -907,9 +917,12 @@ const AddAssignent = ({
                                             type="submit"
                                             form="myForm"
                                             disabled={
+                                                !canEdit ||
                                                 !hasEditorContent ||
                                                 isSaving ||
-                                                !isValid
+                                                !isValid ||
+                                                !hasChangedAfterSave
+
                                             }
                                         >
                                             {isSaving ? 'Saving...' : 'Save'}
@@ -922,6 +935,7 @@ const AddAssignent = ({
                                                 onClick={onFileUpload}
                                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                                 disabled={
+                                                !canEdit ||
                                                     loading ||
                                                     !form.formState.isValid ||
                                                     (!file && !ispdfUploaded) ||
@@ -935,6 +949,7 @@ const AddAssignent = ({
                                 </div>
                             </form>
                         </Form>
+                    </div>
                     </div>
                 </>
             </div>

@@ -8,14 +8,20 @@ import { getEmbedLink } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {RecordingSkeletons} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import PermissionAlert from '@/app/_components/PermissionAlert'
 
 const LiveClass = ({
     chapterData,
     content,
     moduleId,
     courseId,
+    canEdit = true,
 }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
+    const [isLoading, setIsLoading] = useState(true)
+    const [alertOpen, setAlertOpen] = useState(false)
+
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString)
@@ -50,6 +56,7 @@ const LiveClass = ({
     }
 
     const handleDownloadAttendance = async () => {
+        if (!canEdit) return
         try {
             const sessionId = session.id || session.meetingId || session.title
             const res = await api.get(`/classes/analytics/${sessionId}`)
@@ -134,6 +141,17 @@ const LiveClass = ({
         }
     }
 
+    useEffect(() => {
+       if (content && content.sessionDetails?.length > 0) {
+        setIsLoading(false)
+       }
+    }, [content])
+
+
+    if (isLoading) {
+       return <RecordingSkeletons/>
+    }
+
     if (!content || !session) {
         return (
             <div className="w-3/4 mx-auto p-4">
@@ -148,8 +166,16 @@ const LiveClass = ({
         )
     }
 
+
     return (
         <div className="w-3/4 mx-auto">
+            {!canEdit && (
+                <PermissionAlert
+                    alertOpen={alertOpen}
+                    setAlertOpen={setAlertOpen}
+                />
+            )}
+            <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
             <div className="">
                 <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
@@ -164,7 +190,7 @@ const LiveClass = ({
                             )}
                             <div className="flex items-center gap-2 mb-3">
                                 <Badge
-                                    variant="secondary"
+                                    // variant="secondary"
                                     className={`${getStatusColor(
                                         session.status
                                     )} font-medium px-3 py-1 flex items-center gap-1`}
@@ -183,11 +209,15 @@ const LiveClass = ({
                             <TooltipTrigger>
                             
                             <Button
-                                className="font-medium py-2 px-3 transition-all duration-200 bg-primary text-white"
+                                className="font-medium py-2 px-3 transition-all duration-200 bg-primary text-primary-foreground"
                                 onClick={handleDownloadAttendance}
-                                disabled={!session?.s3link || session?.s3link === 'not found'}
+                                disabled={
+                                    !canEdit ||
+                                    !session?.s3link ||
+                                    session?.s3link === 'not found'
+                                }
                             >
-                                <span className="text-white">Download Attendance</span>
+                                <span className="text-primary-foreground">Download Attendance</span>
                             </Button>
                             
                             <TooltipContent>
@@ -235,7 +265,7 @@ const LiveClass = ({
                                     <Video className="w-4 h-4" />
                                     Meeting Recording
                                 </h4>
-                                <div className="w-5/6 bg-black rounded-lg overflow-hidden">
+                                <div className="w-5/6 bg-foreground rounded-lg overflow-hidden">
                                     <iframe
                                         src={getEmbedLink(session.s3link)}
                                         className="w-full h-80 border-0"
@@ -247,22 +277,24 @@ const LiveClass = ({
                             </div>
                         ) : (
                             <Button
-                                className={`w-full font-medium py-2.5 transition-all duration-200 text-white ${
+                                className={`w-full font-medium py-2.5 transition-all duration-200 text-primary-foreground ${
+                                    !canEdit ||
                                     session.status.toLowerCase() !== 'ongoing'
                                         ? 'opacity-50 cursor-not-allowed'
                                         : ''
                                 }`}
                                 onClick={() => {
                                     if (
+                                        !canEdit ||
                                         session.status.toLowerCase() !==
-                                        'ongoing'
+                                            'ongoing'
                                     )
                                         return
                                     window.open(session.hangoutLink, '_blank')
                                 }}
                             >
-                                <Video className="w-4 h-4 mr-2 text-white" />
-                                <span className="text-white">
+                                <Video className="w-4 h-4 mr-2 text-primary-foreground" />
+                                <span className="text-primary-foreground">
                                     {session.status.toLowerCase() ===
                                     'completed'
                                         ? 'Recording Not Available'
@@ -280,6 +312,7 @@ const LiveClass = ({
                     </div>
                 </CardContent>
             </div>
+        </div>
         </div>
     )
 }

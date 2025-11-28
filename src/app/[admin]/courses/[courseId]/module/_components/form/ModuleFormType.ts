@@ -4,6 +4,7 @@ export type FormSectionProps = {
     form: any
     deleteQuestion: any
     formData: any
+    canEdit?: boolean // <-- use this for chapter/section controls
 }
 
 export interface FormQuestionDetail {
@@ -19,6 +20,7 @@ export type AddFormProps = {
     content: any
     moduleId: any
     courseId: any
+    canEdit?: boolean // <-- permission flag for editability (optional)
 }
 
 export interface chapterDetails {

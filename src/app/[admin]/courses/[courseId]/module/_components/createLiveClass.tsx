@@ -51,7 +51,7 @@ const formSchema = z
         sessionTitle: z.string().min(2, {
             message: 'Session Title must be at least 2 characters.',
         })
-        .max(50, { message: 'You can enter up to 50 characters only.' }),
+        .max(100, { message: 'You can enter up to 100 characters only.' }),
 
         description: z.string().optional(),
         startDate: z.date({

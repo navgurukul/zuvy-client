@@ -6,7 +6,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ArrowLeft, RefreshCw } from 'lucide-react'
 
 // Internal imports
-import { columns } from './column'
+import { getColumns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
@@ -73,6 +73,12 @@ const Page = ({ params }: any) => {
     const [lastPage, setLastPage] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
+
+    // Create columns with context
+    const columns = useMemo(() => getColumns({
+        courseId: params.courseId,
+        assessment_Id: params.assessment_Id
+    }), [params.courseId, params.assessment_Id])
 
     // Fetch batches from API
     const fetchBatches = useCallback(async () => {
