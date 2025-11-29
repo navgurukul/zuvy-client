@@ -135,7 +135,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                 description: content?.contentDetails?.[0]?.description ?? '',
                 links: content?.contentDetails?.[0]?.links?.[0] ?? '',
             })
-        setIsDataLoading(false)
+        // setIsDataLoading(false)
         } else {
             setShowVideoBox(false)
         }
@@ -208,9 +208,9 @@ const AddVideo: React.FC<AddVideoProps> = ({
         }
     }
 
-    if (isDataLoading) {
-        return<VideoSkeletons/>
-    }
+    // if (isDataLoading) {
+    //     return<VideoSkeletons/>
+    // }
 
     return (
         <ScrollArea className="h-dvh pr-4 pb-24" type="hover">

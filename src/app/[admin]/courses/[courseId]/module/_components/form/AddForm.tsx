@@ -418,7 +418,7 @@ const AddForm: React.FC<AddFormProps> = ({
                     />
                 )}
                 <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
-                <div className="w-2/6 flex justify-start align-middle items-center relative pt-4">
+                <div className="w-full flex justify-start align-middle items-center relative pt-4 mb-6">
                     <p className="text-2xl font-bold">Create Feedback Form</p>
                 </div>
                 <Form {...form}>
@@ -488,7 +488,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
                         <div className="flex justify-between items-center">
                             <p className="font-bold">Questions</p>
-                            <div className="flex justify-start">
+                            {/* <div className="flex justify-start">
                                 <Button
                                     // variant={'secondary'}
                                     // variant="outline"
@@ -500,7 +500,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                 >
                                     <PlusCircle size={15} /> Add Question
                                 </Button>
-                            </div>
+                            </div> */}
                         </div>
 
                         {questions.map((item, index) => (
@@ -529,6 +529,20 @@ const AddForm: React.FC<AddFormProps> = ({
                                 )}
                             </div>
                         ))}
+
+                        <div className="flex justify-end">
+                            <Button
+                                // variant={'secondary'}
+                                // variant="outline"
+                                type="button"
+                                onClick={addQuestion}
+                                className="gap-x-2 border-none border"
+                                disabled={!canEdit}
+                                // className="gap-x-2 border-none border hover:text-[rgb(81,134,114)] hover:bg-popover"
+                            >
+                                <PlusCircle size={15} /> Add Question
+                            </Button>
+                        </div>
 
                         <div className="flex justify-start">
                             <Button

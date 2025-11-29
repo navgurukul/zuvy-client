@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
     Select,
     SelectContent,
+    SelectContentWithScrollArea,
     SelectItem,
     SelectTrigger,
     SelectValue,
@@ -399,7 +400,7 @@ const EditMcqForm = ({
                                                 <SelectValue placeholder="Choose Topic" />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContentWithScrollArea>
                                             {tags.map((tag) => (
                                                 <SelectItem
                                                     key={tag.id}
@@ -408,7 +409,7 @@ const EditMcqForm = ({
                                                     {tag.tagName}
                                                 </SelectItem>
                                             ))}
-                                        </SelectContent>
+                                        </SelectContentWithScrollArea>
                                     </Select>
                                 </div>
                                 <FormMessage />

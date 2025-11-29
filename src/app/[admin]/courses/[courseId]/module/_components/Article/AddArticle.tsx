@@ -196,7 +196,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             const contentDetails = response?.data?.contentDetails?.[0]
 
             const link = contentDetails?.links?.[0]
-            setIsDataLoading(false)
+            // setIsDataLoading(false)
             if (link) {
                 setpdfLink(link)
                 setDefaultValue('pdf')
@@ -236,10 +236,10 @@ const AddArticle: React.FC<AddArticleProps> = ({
         } catch (error) {
             console.error('Error fetching article content:', error)
         } 
-        finally {
-            setIsDataLoading(false)
-            setTimeout(() => setIsInitialLoad(false), 1000)
-        }
+        // finally {
+        //     setIsDataLoading(false)
+        //     setTimeout(() => setIsInitialLoad(false), 1000)
+        // }
     }
 
     const editArticleContent = async () => {
@@ -457,9 +457,9 @@ const AddArticle: React.FC<AddArticleProps> = ({
         }
     }
 
-    if (isDataLoading) {
-        return <ArticleSkeletons/>
-    }
+    // if (isDataLoading) {
+    //     return <ArticleSkeletons/>
+    // }
 
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
