@@ -11,7 +11,6 @@ import DownloadReport from '@/app/[admin]/courses/[courseId]/submissionAssesment
 import ApproveReattempt from '@/app/[admin]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
 
-// Add interface for context data
 interface ColumnContext {
     courseId: string;
     assessment_Id: string;
@@ -29,7 +28,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                         <div className="text-left font-medium text-black">
                             {name}
                         </div>
-                        <div className="text-left text-sm text-muted-foreground">
+                        <div className="truncate max-w-[100px] font-mono text-left text-sm text-muted-foreground">
                             {email}
                         </div>
                     </div>
@@ -37,18 +36,20 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             )
         },
     },
-    {
-        accessorKey: 'batchName',
-        header: 'Batch',
-        cell: ({ row }) => {
-            const batchName = row.original.batchName || 'N/A'
-            return (
-                <Badge variant="outline" className="text-black border-black-200">
+{
+    accessorKey: 'batchName',
+    header: () => <div className="text-left w-full">Batch</div>,
+    cell: ({ row }) => {
+        const batchName = row.original.batchName || 'N/A'
+        return (
+            <div className="text-left w-full">
+                <Badge variant="outline" className="text-black border-black">
                     {batchName}
                 </Badge>
-            )
-        },
+            </div>
+        )
     },
+},
     {
         accessorKey: 'startedAt',
         cell: ({ row }) => {
@@ -151,7 +152,6 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
 
             return (
                 <div className="flex items-center gap-2 text-sm text-black">
-                    <Clock className="h-4 w-4 text-gray-400" />
                     {timeTaken}
                 </div>
             )
@@ -188,10 +188,10 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const isPassed = row.original.isPassed
             return (
                 <div className="flex items-center gap-2">
-                    <div
-                        className={`h-2 w-2 rounded-full ${
+                    <div 
+                         className={` ${
                             isPassed ? 'bg-green-500' : 'bg-red-500'
-                        }`}
+                        }`} 
                     />
                     <Badge
                         variant="outline"
@@ -259,7 +259,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                             // Optional: handle re-attempt logic or open a modal
                         }}
                     >
-                        <RefreshCw className="h-4 w-4" />
+                        {/* <RefreshCw className="h-4 w-4" /> */}
                     </Button>
 
                     {/* Approve Re-Attempt Button */}
