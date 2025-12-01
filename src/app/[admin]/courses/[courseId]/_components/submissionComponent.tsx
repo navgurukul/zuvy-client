@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 const SubmissionComponent = (props: SubmissionComponentProps) => {
-    const handleDownloadPdf = async (id: number) => {
+    const handleDownloadPdf = async () => {
         const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`
 
         async function fetchData() {
@@ -38,11 +38,11 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                 const rows = assessments.map(
                     (assessment: {
                         name: string
-                        emailId: string
+                        email: string
                         status: string
                     }) => ({
                         name: assessment.name || 'N/A',
-                        email: assessment.emailId || 'N/A',
+                        email: assessment.email || 'N/A',
                         status: assessment.status || 'N/A', // Correctly mapping status
                     })
                 )
@@ -101,7 +101,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                     : 'text-gray-500 hover:text-gray-700 cursor-pointer'
                             }`}
                             onClick={
-                                isDisabled ? undefined : () => handleDownloadPdf
+                                isDisabled ? undefined : () => handleDownloadPdf()
                             }
                             aria-label="Download full report"
                             disabled={isDisabled} // Disable button

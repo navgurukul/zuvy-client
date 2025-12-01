@@ -79,7 +79,7 @@ function Page() {
     })
     const [timeData, setTimeData] = useState({
         months: 0,  // Changed from -1 to 0
-        weeks: 0,   // Changed from -1 to 0
+        weeks: 0,   // Changed from -1 to 0f
         days: 0,    // Changed from -1 to 0
     })
     const dragControls = useDragControls()
@@ -289,17 +289,6 @@ function Page() {
 
     // Removed duplicate createModule function declaration
 
-    const checkIfCourseExists = async () => {
-        if (!courseId) return
-
-        try {
-            await api.get(`/bootcamp/${courseId}`)
-            setIsCourseDeleted(false)
-        } catch (error) {
-            setIsCourseDeleted(true)
-            getCourseData.setState({ courseData: null }) // Zustand clear
-        }
-    }
 
     // useEffect(() => {
     //     let interval: NodeJS.Timeout
@@ -719,8 +708,8 @@ function Page() {
                                 height={200}
                             />
                             <p className="text-gray-600 text-lg">
-                                Create new modules for the curriculum on Strapi
-                                CMS
+                                Create new modules for the curriculum
+                                
                             </p>
                             {permissions.createModule && (
                                 <Dialog open={isOpen} onOpenChange={setIsOpen}>

@@ -313,7 +313,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 <Card className="border-red-200">
                     <CardContent className="text-center py-8">
                         <div className="space-y-4">
-                            <p className="text-destructive">{error}</p>
+                            <p className="text-destructive">{'Student is not assigned to any batch yet'}</p>
                             <Button onClick={fetchCompletedClasses} variant="outline">
                                 Try Again
                             </Button>

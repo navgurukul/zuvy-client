@@ -723,29 +723,29 @@ export default function NewCodingProblemForm({
                         onValueChange={setActiveTab}
                         className="w-full"
                     >
-                       <TabsList className="grid w-full grid-cols-2 bg-white">
-    <TabsTrigger
-      value="details"
-      className="
+                        <TabsList className="grid w-full grid-cols-2 bg-white">
+                            <TabsTrigger
+                                value="details"
+                                className="
         bg-white text-black
         data-[state=active]:bg-primary
         data-[state=active]:text-white
       "
-    >
-      Details
-    </TabsTrigger>
+                            >
+                                Details
+                            </TabsTrigger>
 
-    <TabsTrigger
-      value="testcases"
-      className="
+                            <TabsTrigger
+                                value="testcases"
+                                className="
         bg-white text-black
         data-[state=active]:bg-primary
         data-[state=active]:text-white
       "
-    >
-      Test Cases
-    </TabsTrigger>
-  </TabsList>
+                            >
+                                Test Cases
+                            </TabsTrigger>
+                        </TabsList>
 
                         {/* Details Tab */}
                         <TabsContent value="details" className="space-y-4 mt-6">

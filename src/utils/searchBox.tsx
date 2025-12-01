@@ -49,6 +49,7 @@ export function SearchBox(props: SearchBoxProps) {
     }
   }, [value, searchQuery, setSearchQuery]);
 
+  
   return (
     <form
       onSubmit={(e) => 

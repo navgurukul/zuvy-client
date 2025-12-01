@@ -1300,3 +1300,37 @@ export const getEmbedLink = (url: string) => {
 
     return ''
 }
+
+ export const hasPermissionMismatchForResource = (
+        fetchedPerms: any,
+        selectedPerms: Record<number, boolean>,
+        resourceId: number | undefined
+    ): boolean => {
+        if (!fetchedPerms || !resourceId) return false
+
+        // Normalize fetchedPerms to an array of { id, granted, resourceId }
+        const permsArray: Array<any> = Array.isArray(fetchedPerms)
+            ? fetchedPerms
+            : Object.keys(fetchedPerms).map((k) => ({ id: Number(k), granted: fetchedPerms[k] }))
+
+        const relevant = permsArray.filter((p) => p.resourceId === resourceId || p.resource_id === resourceId || !('resourceId' in p))
+
+        if (relevant.length === 0) {
+            // If no permissions are associated (fallback), compare any keys present in selectedPerms
+            return Object.keys(selectedPerms).some((k) => {
+                const id = Number(k)
+                const selected = !!selectedPerms[id]
+                const original = !!(Array.isArray(fetchedPerms) ? fetchedPerms.find((x: any) => x.id === id)?.granted : fetchedPerms[id])
+                return selected !== original
+            })
+        }
+
+        // If any permission's selected state differs from the original granted state => mismatch
+        for (const p of relevant) {
+            const id = Number(p.id)
+            const originalGranted = !!p.granted
+            const selected = !!selectedPerms[id]
+            if (selected !== originalGranted) return true
+        }
+        return false
+    }
