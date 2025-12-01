@@ -27,6 +27,7 @@ import {
     SelectContent,
     SelectItem,
     Select,
+    SelectContentWithScrollArea,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -1043,7 +1044,7 @@ const NewMcqProblemForm = ({
                                                         <SelectValue placeholder="Choose Topic" />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent>
+                                                <SelectContentWithScrollArea>
                                                     {tags.map((tag) => (
                                                         <SelectItem
                                                             key={tag.id}
@@ -1052,7 +1053,7 @@ const NewMcqProblemForm = ({
                                                             {tag.tagName}
                                                         </SelectItem>
                                                     ))}
-                                                </SelectContent>
+                                                </SelectContentWithScrollArea>
                                             </Select>
                                             <FormMessage />
                                         </FormItem>

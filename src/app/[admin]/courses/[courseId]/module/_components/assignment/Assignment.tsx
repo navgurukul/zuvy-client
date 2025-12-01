@@ -555,8 +555,8 @@ const AddAssignent = ({
                                                             }
                                                         }}
                                                         placeholder="Untitled Assignment"
-                                                        className="text-md p-2 focus-visible:ring-0 placeholder:text-foreground"
-                                                    disabled={!canEdit}
+                                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                        disabled={!canEdit}
                                                         // autoFocus
                                                     />
                                                 </>

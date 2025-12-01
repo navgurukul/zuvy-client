@@ -16,6 +16,7 @@ import {
     SelectValue,
     SelectTrigger,
     SelectContent,
+    SelectContentWithScrollArea,
     SelectItem,
     Select,
 } from '@/components/ui/select'
@@ -229,7 +230,7 @@ function EditOpenEndedQuestionForm({
                                                 />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent>
+                                        <SelectContentWithScrollArea>
                                             {tags.map((tag: Tag) => (
                                                 <SelectItem
                                                     key={tag.id}
@@ -238,7 +239,7 @@ function EditOpenEndedQuestionForm({
                                                     {tag?.tagName}
                                                 </SelectItem>
                                             ))}
-                                        </SelectContent>
+                                        </SelectContentWithScrollArea>
                                     </Select>
                                     <FormMessage />
                                 </FormItem>

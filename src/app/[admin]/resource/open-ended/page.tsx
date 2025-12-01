@@ -417,7 +417,7 @@ const OpenEndedQuestions = (props: Props) => {
                                                 Create Question
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="sm:max-w-[500px]">
+                                        <DialogContent preventOutsideClose={true} className="sm:max-w-[500px]">
                                             <DialogHeader>
                                                 <DialogTitle>
                                                     New Open-Ended Questions
@@ -531,7 +531,7 @@ const OpenEndedQuestions = (props: Props) => {
                                     <DialogTrigger asChild>
                                         <Button> Create Question</Button>
                                     </DialogTrigger>
-                                    <DialogContent className="sm:max-w-[500px]">
+                                    <DialogContent preventOutsideClose={true} className="sm:max-w-[500px]">
                                         <DialogHeader>
                                             <DialogTitle>
                                                 New Open-Ended Questions

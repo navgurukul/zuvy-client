@@ -327,7 +327,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                         // variant={'secondary'}
                         type="button"
                         onClick={addOption}
-                        className="h-8 border-none"
+                        className="gap-x-2 h-8 border-none"
                         disabled={!canEdit}
                     >
                         <PlusCircle size={15} /> Add Option

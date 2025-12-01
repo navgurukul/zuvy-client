@@ -18,6 +18,7 @@ import {
     SelectValue,
     SelectTrigger,
     SelectContent,
+    SelectContentWithScrollArea,
     SelectItem,
     Select,
 } from '@/components/ui/select'
@@ -865,7 +866,7 @@ export default function NewCodingProblemForm({
                                                     <SelectValue placeholder="Choose Topic" />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent>
+                                            <SelectContentWithScrollArea>
                                                 {tags.map((tag: any) => (
                                                     <SelectItem
                                                         key={tag.id}
@@ -874,7 +875,7 @@ export default function NewCodingProblemForm({
                                                         {tag?.tagName}
                                                     </SelectItem>
                                                 ))}
-                                            </SelectContent>
+                                            </SelectContentWithScrollArea>
                                         </Select>
                                         <FormMessage />
                                     </FormItem>

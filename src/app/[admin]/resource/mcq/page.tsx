@@ -516,7 +516,7 @@ const Mcqs = (props: Props) => {
             {/* Edit Modal */}
 
             <Dialog open={isEditQuizModalOpen} onOpenChange={setIsEditModalOpen}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Edit MCQ Question</DialogTitle>
                     </DialogHeader>
@@ -531,7 +531,7 @@ const Mcqs = (props: Props) => {
 
             {/* Create MCQ Modal with Tabs */}
             <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogContent preventOutsideClose={true} className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Create New MCQ</DialogTitle>
                     </DialogHeader>
