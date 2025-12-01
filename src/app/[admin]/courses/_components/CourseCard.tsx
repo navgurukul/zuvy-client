@@ -19,33 +19,18 @@ const CourseCard = ({
             onClick={onClick}
         >
             <CardHeader className="p-0">
-                {validImageUrl ? (
+                {(
                     <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 relative">
                         <Image
-                            src={validImageUrl}
+                            src={validImageUrl || `/zuvy-logo-horizontal.png`}
                             alt={course.name}
                             fill
-                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-200"
+                            className={validImageUrl ? `h-full w-full object-cover group-hover:scale-105 transition-transform duration-200` : `object-scale-down group-hover:scale-105 transition-transform duration-200` }
                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         />
                     </div>
-                ) : (
-                    <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gradient-to-br from-primary-light to-primary flex items-center justify-center">
-                        <BookOpen className="h-12 w-12 text-primary opacity-60" />
-                    </div>
-                    // <div className="bg-muted flex justify-center h-[200px] relative overflow-hidden rounded-sm">
-                    //     <OptimizedImageWithFallback
-                    //         src={
-                    //             ''
-                    //         }
-                    //         alt={
-                    //             course.name ||
-                    //             'Course Image'
-                    //         }
-                    //         fallBackSrc="/logo_white.png"
-                    //     />
-                    // </div>
-                )}
+                )
+                }
             </CardHeader>
 
             <CardContent className=" p-6 flex-1">

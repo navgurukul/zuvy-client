@@ -429,7 +429,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                             }
                                         >
                                             <DialogTrigger asChild>
-                                                <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 w-full justify-start text-left font-normal">
+                                                <Button variant='default' className="border border-input bg-background hover:border-[rgb(81,134,114)] hover:text-white text-gray-600 w-full justify-start text-left font-normal">
                                                     {date ? (
                                                         format(
                                                             date,
@@ -440,7 +440,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                                             DD/MM/YYYY
                                                         </span>
                                                     )}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    <CalendarIcon className="ml-auto h-4 w-4 " />
                                                 </Button>
                                             </DialogTrigger>
                                             <DialogContent className="w-auto">
@@ -473,7 +473,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                         {/* Removed flex flex-col */}
                                         <Input
                                             type="time"
-                                            className="w-full flex flex-col"
+                                            className="w-full flex flex-col "
                                             value={time}
                                             onChange={(e) =>
                                                 setTime(e.target.value)

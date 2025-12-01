@@ -31,6 +31,7 @@ import { cleanUpValues, getPlaceholder, showSyntaxErrors } from '@/utils/admin'
 import test from 'node:test'
 import { NewCodingProblemFormProps } from '@/app/[admin]/resource/_components/adminResourceComponentType'
 import { useCreateCodingQuestion } from '@/hooks/useCreateCodingQuestion'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 
 const noSpecialCharacters = /^[a-zA-Z0-9\s]*$/
 
@@ -528,15 +529,15 @@ export default function NewCodingProblemForm({
                                 // For null values (invalid inputs), use appropriate defaults
                                 const defaultValue =
                                     input.type === 'arrayOfnum' ||
-                                    input.type === 'arrayOfStr'
+                                        input.type === 'arrayOfStr'
                                         ? []
                                         : input.type === 'int'
-                                        ? 0
-                                        : input.type === 'float'
-                                        ? 0.0
-                                        : input.type === 'str'
-                                        ? ''
-                                        : false
+                                            ? 0
+                                            : input.type === 'float'
+                                                ? 0.0
+                                                : input.type === 'str'
+                                                    ? ''
+                                                    : false
 
                                 return [
                                     {
@@ -591,18 +592,18 @@ export default function NewCodingProblemForm({
                     const finalInputs =
                         jsonInputs.length > 0
                             ? [
-                                  {
-                                      parameterType: 'jsonType',
-                                      parameterValue:
-                                          jsonInputs.length === 1
-                                              ? jsonInputs[0]
-                                              : jsonInputs,
-                                      parameterName: String.fromCharCode(
-                                          97 + parameterNameCounter++
-                                      ),
-                                  },
-                                  ...otherInputs,
-                              ]
+                                {
+                                    parameterType: 'jsonType',
+                                    parameterValue:
+                                        jsonInputs.length === 1
+                                            ? jsonInputs[0]
+                                            : jsonInputs,
+                                    parameterName: String.fromCharCode(
+                                        97 + parameterNameCounter++
+                                    ),
+                                },
+                                ...otherInputs,
+                            ]
                             : otherInputs
 
                     // Process output
@@ -687,7 +688,7 @@ export default function NewCodingProblemForm({
                     inputs: [{ id: Date.now(), type: 'int', value: '' }],
                     output: { type: 'int', value: '' },
                 },
-                {                    
+                {
                     id: 2,
                     inputs: [{ id: Date.now() + 1, type: 'int', value: '' }],
                     output: { type: 'int', value: '' },
@@ -722,12 +723,29 @@ export default function NewCodingProblemForm({
                         onValueChange={setActiveTab}
                         className="w-full"
                     >
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="details">Details</TabsTrigger>
-                            <TabsTrigger value="testcases">
-                                Test Cases
-                            </TabsTrigger>
-                        </TabsList>
+                       <TabsList className="grid w-full grid-cols-2 bg-white">
+    <TabsTrigger
+      value="details"
+      className="
+        bg-white text-black
+        data-[state=active]:bg-primary
+        data-[state=active]:text-white
+      "
+    >
+      Details
+    </TabsTrigger>
+
+    <TabsTrigger
+      value="testcases"
+      className="
+        bg-white text-black
+        data-[state=active]:bg-primary
+        data-[state=active]:text-white
+      "
+    >
+      Test Cases
+    </TabsTrigger>
+  </TabsList>
 
                         {/* Details Tab */}
                         <TabsContent value="details" className="space-y-4 mt-6">
@@ -757,7 +775,7 @@ export default function NewCodingProblemForm({
                                         <FormControl>
                                             <Textarea
                                                 placeholder="Write the Detailed Description Here"
-                                                className="min-h-[120px]"
+                                                className=" border-none outline-none h-[150px]"
                                                 {...field}
                                             />
                                         </FormControl>
@@ -765,6 +783,7 @@ export default function NewCodingProblemForm({
                                     </FormItem>
                                 )}
                             />
+
 
                             <FormField
                                 control={form.control}
@@ -891,7 +910,7 @@ export default function NewCodingProblemForm({
                                 {testCases.map((testCase, testCaseIndex) => (
                                     <div
                                         key={testCase.id}
-                                        className="my-4 p-4 border rounded-lg border-green-100 bg-green-50"
+                                        className="my-4 p-4 border rounded-lg border-green-100 bg-muted-light"
                                     >
                                         <h3 className="text-lg font-semibold mb-3 text-foreground">
                                             Test Case {testCaseIndex + 1}
@@ -939,38 +958,38 @@ export default function NewCodingProblemForm({
                                                                 }
                                                                 className={
                                                                     input.type ===
-                                                                    'jsonType'
+                                                                        'jsonType'
                                                                         ? 'hidden'
                                                                         : ''
                                                                 }
                                                             />
                                                             {input.type ===
                                                                 'jsonType' && (
-                                                                <Textarea
-                                                                    required
-                                                                    placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
-                                                                    value={
-                                                                        input.value
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        handleInputChange(
-                                                                            e,
-                                                                            testCaseIndex,
-                                                                            inputIndex,
-                                                                            testCases,
-                                                                            setTestCases
-                                                                        )
-                                                                    }
-                                                                    className="mt-2 overflow-auto"
-                                                                />
-                                                            )}
+                                                                    <Textarea
+                                                                        required
+                                                                        placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
+                                                                        value={
+                                                                            input.value
+                                                                        }
+                                                                        onChange={(
+                                                                            e
+                                                                        ) =>
+                                                                            handleInputChange(
+                                                                                e,
+                                                                                testCaseIndex,
+                                                                                inputIndex,
+                                                                                testCases,
+                                                                                setTestCases
+                                                                            )
+                                                                        }
+                                                                        className="mt-2 overflow-auto"
+                                                                    />
+                                                                )}
 
                                                             {testCase.inputs
                                                                 .length > 1 &&
                                                                 testCaseIndex ===
-                                                                    0 && (
+                                                                0 && (
                                                                     <X
                                                                         className="cursor-pointer text-red-500 hover:text-red-700"
                                                                         onClick={() => {
@@ -1086,7 +1105,7 @@ export default function NewCodingProblemForm({
                                                 </Select>
 
                                                 {testCase.output.type ===
-                                                'jsonType' ? (
+                                                    'jsonType' ? (
                                                     <Textarea
                                                         required
                                                         placeholder={`(Enter with brackets) - Object/ Array/ Array of Objects/ 2D Arrays.\nNote - Key should be in double quotes. Eg - {"Age": 25} or [{"Name": "John"}, {"Age": 25}] or {} or []`}
