@@ -177,7 +177,7 @@ const defaultFetchApi = useCallback(
         }else {
             router.push(`courses/${id}/curriculum`)
         }
-        localStorage.setItem('courseId', id.toString())
+        // localStorage.setItem('courseId', id.toString())
     }
     function getValidImageUrl(url: string): string | null {
         if (typeof url !== 'string' || url.trim() === '') {

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
     Form,
@@ -47,7 +47,7 @@ const moduleSchema = z.object({
     },
     {
         message:
-            'Please specify time duration (months, weeks, or days).',
+            'Total duration cannot be 0. Please enter valid time for at least one field.',
         path: ['timeAllotted'], // Custom path for time validation
     }
 )
@@ -64,6 +64,17 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
     setIsLoading,
     isLoading,
 }) => {
+    // Track which time fields have been touched/interacted with
+    const [touchedFields, setTouchedFields] = useState<{
+        months: boolean
+        weeks: boolean
+        days: boolean
+    }>({
+        months: false,
+        weeks: false,
+        days: false,
+    })
+
     const form = useForm<z.infer<typeof moduleSchema>>({
         resolver: zodResolver(moduleSchema),
         defaultValues: {
@@ -78,7 +89,7 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
 
     const onSubmit: any = (values: z.infer<typeof moduleSchema>) => {
         setIsLoading(true)
-        createModule()
+        createModule() // no argument
     }
 
     // FIXED: Dialog close pe form reset
@@ -103,22 +114,24 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                 weeks: 0,
                 days: 0,
             })
+            // Reset touched fields when dialog closes
+            setTouchedFields({
+                months: false,
+                weeks: false,
+                days: false,
+            })
         }
     }, [isOpen, form])
 
     // FIXED: Proper synchronization between parent state and form state
     useEffect(() => {
-        // Update form values when parent state changes
         const currentModuleType = typeId === 1 ? 'learning-material' : 'project'
-
         form.setValue('moduleType', currentModuleType)
         form.setValue('name', moduleData.name)
         form.setValue('description', moduleData.description)
-
-        // Handle time data properly - ensure no negative values
-        form.setValue('months', Math.max(0, timeData.months))
-        form.setValue('weeks', Math.max(0, timeData.weeks))
-        form.setValue('days', Math.max(0, timeData.days))
+        form.setValue('months', typeof timeData.months === 'number' ? timeData.months : 0)
+        form.setValue('weeks', typeof timeData.weeks === 'number' ? timeData.weeks : 0)
+        form.setValue('days', typeof timeData.days === 'number' ? timeData.days : 0)
     }, [moduleData, timeData, typeId, form, isOpen]) // Added isOpen to dependencies
 
     // FIXED: Enhanced handleTypeChange wrapper
@@ -300,31 +313,26 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         type="number"
                                                         id="months"
                                                         placeholder="Months"
-                                                        value={
-                                                            field.value || ''
-                                                        } // FIXED: Use form field value
-                                                        onChange={(e) => {
-                                                            const value =
-                                                                parseInt(
-                                                                    e.target
-                                                                        .value
-                                                                ) || 0
-                                                            field.onChange(
-                                                                value
-                                                            ) // Update form state
-                                                            handleTimeAllotedChange(
-                                                                e
-                                                            ) // Update parent state
+                                                        value={field.value === 0 && !touchedFields.months ? '' : field.value}
+                                                        onChange={e => {
+                                                            if (!touchedFields.months) {
+                                                                setTouchedFields(prev => ({ ...prev, months: true }))
+                                                            }
+                                                            const val = e.target.value
+                                                            field.onChange(val === '' ? 0 : parseInt(val, 10))
+                                                            handleTimeAllotedChange(e)
                                                         }}
-                                                        name="months"
+                                                        onFocus={() => {
+                                                            if (!touchedFields.months) {
+                                                                setTouchedFields(prev => ({ ...prev, months: true }))
+                                                            }
+                                                        }}
+                                                        name="months" 
                                                         onKeyDown={(e) => {
-                                                            if (
-                                                                e.key === '-' ||
-                                                                e.key === 'e'
-                                                            )
-                                                                e.preventDefault()
+                                                            if (e.key === '-' || e.key === 'e') e.preventDefault()
                                                         }}
                                                         min={0}
+                                                        onWheel={(e) => e.currentTarget.blur()}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -345,31 +353,26 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         type="number"
                                                         id="weeks"
                                                         placeholder="Weeks"
-                                                        value={
-                                                            field.value || ''
-                                                        } // FIXED: Use form field value
-                                                        onChange={(e) => {
-                                                            const value =
-                                                                parseInt(
-                                                                    e.target
-                                                                        .value
-                                                                ) || 0
-                                                            field.onChange(
-                                                                value
-                                                            ) // Update form state
-                                                            handleTimeAllotedChange(
-                                                                e
-                                                            ) // Update parent state
+                                                        value={field.value === 0 && !touchedFields.weeks ? '' : field.value}
+                                                        onChange={e => {
+                                                            if (!touchedFields.weeks) {
+                                                                setTouchedFields(prev => ({ ...prev, weeks: true }))
+                                                            }
+                                                            const val = e.target.value
+                                                            field.onChange(val === '' ? 0 : parseInt(val, 10))
+                                                            handleTimeAllotedChange(e)
+                                                        }}
+                                                        onFocus={() => {
+                                                            if (!touchedFields.weeks) {
+                                                                setTouchedFields(prev => ({ ...prev, weeks: true }))
+                                                            }
                                                         }}
                                                         name="weeks"
                                                         onKeyDown={(e) => {
-                                                            if (
-                                                                e.key === '-' ||
-                                                                e.key === 'e'
-                                                            )
-                                                                e.preventDefault()
+                                                            if (e.key === '-' || e.key === 'e') e.preventDefault()
                                                         }}
                                                         min={0}
+                                                        onWheel={(e) => e.currentTarget.blur()}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />
@@ -390,29 +393,26 @@ const NewModuleDialog: React.FC<newModuleDialogProps> = ({
                                                         type="number"
                                                         id="days"
                                                         placeholder="Days"
-                                                        value={
-                                                            field.value || ''
-                                                        } // FIXED: Use form field value
-                                                        onChange={(e) => {
-                                                            const value = 
-                                                                parseInt(
-                                                                    e.target
-                                                                        .value
-                                                                    ) || 0
-                                                            field.onChange(
-                                                                value
-                                                            ) // Update form state
-                                                            handleTimeAllotedChange(
-                                                                e
-                                                            ) // Update parent state
+                                                        value={field.value === 0 && !touchedFields.days ? '' : field.value}
+                                                        onChange={e => {
+                                                            if (!touchedFields.days) {
+                                                                setTouchedFields(prev => ({ ...prev, days: true }))
+                                                            }
+                                                            const val = e.target.value
+                                                            field.onChange(val === '' ? 0 : parseInt(val, 10))
+                                                            handleTimeAllotedChange(e)
+                                                        }}
+                                                        onFocus={() => {
+                                                            if (!touchedFields.days) {
+                                                                setTouchedFields(prev => ({ ...prev, days: true }))
+                                                            }
                                                         }}
                                                         name="days"
                                                         onKeyDown={(e) => {
-                                                            if (
-                                                                e.key === '-' || e.key === 'e' || e.key === '+')
-                                                                e.preventDefault()
+                                                            if (e.key === '-' || e.key === 'e' || e.key === '+') e.preventDefault()
                                                         }}
                                                         min={0}
+                                                        onWheel={(e) => e.currentTarget.blur()}
                                                     />
                                                 </FormControl>
                                                 <FormMessage />

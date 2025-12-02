@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
+import { getUser } from '@/store/store'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { courseId, moduleId, projectID } = useParams()
@@ -13,6 +14,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const { permissions, loading } = useModuleChapters(moduleID)
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || 'admin'
 
     if (loading) {
         return (
@@ -27,7 +30,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex h-screen flex-col bg-card">
                     <div className="px-6 pt-4">
                         <Link
-                            href={`/admin/courses/${courseId}/curriculum`}
+                            href={`/${userRole}/courses/${courseId}/curriculum`}
                             className="flex w-[180px] items-center space-x-2 text-foreground hover:text-primary"
                         >
                             <ArrowLeft size={20} />

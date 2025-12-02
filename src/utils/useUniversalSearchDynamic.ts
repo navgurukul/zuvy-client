@@ -47,7 +47,7 @@ import {
           return fallback;
         }
       },
-      []
+      [onError]
     );
   
     const updateURL = useCallback(
