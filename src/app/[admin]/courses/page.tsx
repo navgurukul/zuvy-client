@@ -216,14 +216,7 @@ const defaultFetchApi = useCallback(
             const perms = await getPermissions()
             setPermissions(perms)
         })()
-    }, [permissions])
-
-    
-    useEffect(() => {
-    if (currentSearchQuery.trim()) {
-        setOffset(0);
-    }
-}, [currentSearchQuery]);
+    }, [])
 
     return (
         <>

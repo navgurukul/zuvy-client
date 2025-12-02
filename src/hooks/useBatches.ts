@@ -55,7 +55,9 @@ export default function useBatches(params: ParamsType) {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [editingBatch, setEditingBatch] = useState<EnhancedBatch | null>(null)
     const [currentStep, setCurrentStep] = useState(1)
-
+    const [totalBatches, setTotalBatches] = useState(0);
+    const [batchesPerPage, setBatchesPerPage] = useState(10); // default value
+    
     const [batchToDelete, setBatchToDelete] = useState<EnhancedBatch | null>(null)
 
     const getStatusColor = (status: string) => {
@@ -136,23 +138,27 @@ export default function useBatches(params: ParamsType) {
     // }, [params.courseId, setBatchData])
 
 
-    const defaultFetchApi = useCallback(async () => {
-    try {
-        setLoading(true);   
+const defaultFetchApi = useCallback(
+    async (offset: number = 0, limit: number = batchesPerPage) => {
+        setLoading(true);
+        try {
+            const response = await api.get(
+                `/bootcamp/batches/${params.courseId}?limit=${limit}&offset=${offset}`
+            );
 
-        setSearchQuery('');
-        const response = await api.get(`/bootcamp/batches/${params.courseId}`);
+            setBatchData(response.data?.data || []);
+            setTotalBatches(response.data?.totalBatches || 0); // ✅ store total
+            setPermissions(response.data?.permissions);
 
-        setBatchData(response.data?.data || []);
-        setPermissions(response.data?.permissions);
-
-        return response.data?.data || [];
-    } catch (error) {
-        console.error(error);
-    } finally {
-        setLoading(false);  
-    }
-}, [params.courseId, setBatchData]);
+            return response.data?.data || [];
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    },
+    [params.courseId, batchesPerPage,setBatchData]
+);
 
 
     const formSchema = z.object({
@@ -464,5 +470,10 @@ export default function useBatches(params: ParamsType) {
         getUnAssignedStudents,
         isDeleteModalOpen,
         setDeleteModalOpen,
+        totalBatches,
+        batchesPerPage,
+        setBatchesPerPage,
     }
 }
+
+

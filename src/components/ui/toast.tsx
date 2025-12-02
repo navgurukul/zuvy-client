@@ -173,7 +173,7 @@ const ToastProgress = React.forwardRef<
     >
       <div
         className={cn(
-          "h-full transition-all duration-300 ease-out rounded-b-2xl absolute right-0",
+          "h-full transition-all duration-300 ease-out rounded-b-2xl absolute left-0",
           getProgressColor()
         )}
         style={{ 
