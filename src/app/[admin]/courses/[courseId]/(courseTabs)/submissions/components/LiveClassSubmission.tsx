@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import moment from 'moment'
 import {LiveClassSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 
 
@@ -70,25 +71,59 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
             doc.text(`Title: ${liveClassTitle}`, 14, 22)
             doc.text('Student Attendance:', 14, 30)
 
-            const columns = ['Name', 'Email', 'Status', 'Duration (min)']
+            const columns = ['Name', 'Email', 'Status', 'Start Time','End Time', 'Recording','Duration (min)']
+
+            // Format times to readable format
+            const formatTime = (timeStr: string) => {
+                if (!timeStr || timeStr === 'N/A') return 'N/A'
+                return moment(timeStr).format('DD MMM, HH:mm')
+            }
 
             const rows = students.map((record: any) => {
                 return [
                     record.user?.name || 'N/A',
                     record.user?.email || 'N/A',
                     record.status || 'N/A',
-                    (record.duration / 60).toFixed(2), // converting seconds to minutes (optional)
+                    formatTime(sessionData.startTime),
+                    formatTime(sessionData.endTime),
+                    sessionData.s3link ? '' : 'N/A', // Empty string for link cells, will be drawn in didDrawCell
+                    (record.duration / 60).toFixed(2), // converting seconds to minutes
                 ]
             })
+            
             // Draw table
             autoTable(doc, {
                 head: [columns],
                 body: rows,
                 startY: 35,
                 margin: { horizontal: 10 },
-                styles: { overflow: 'linebreak', halign: 'center' },
-                headStyles: { fillColor: [22, 160, 133] },
+                styles: { overflow: 'linebreak', halign: 'center', lineColor: [220, 220, 220], lineWidth: 0.4 },
+                headStyles: { fillColor: [22, 160, 133], textColor: 255, fontStyle: 'bold' },
                 theme: 'grid',
+                didDrawCell: (data: any) => {
+                    // Make Recording Link blue and clickable for column index 5 (Recording)
+                    if (data.section === 'body' && data.column.index === 5) {
+                        const rowIndex = data.row.index
+                        const link = sessionData.s3link
+                        
+                        if (link && link !== 'N/A') {
+                            const cellX = data.cell.x
+                            const cellY = data.cell.y
+                            const cellWidth = data.cell.width
+                            const cellHeight = data.cell.height
+                            
+                            // Set blue color and underline for link text
+                            doc.setTextColor(0, 0, 255)
+                            doc.setFont('helvetica', 'normal')
+                            doc.textWithLink('Recording', cellX + cellWidth / 2, cellY + cellHeight / 2 + 1, { 
+                                url: link,
+                                align: 'center'
+                            })
+                            // Reset color
+                            doc.setTextColor(0, 0, 0)
+                        }
+                    }
+                },
             })
 
             // Save PDF
