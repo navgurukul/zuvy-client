@@ -190,7 +190,7 @@ const AddStudentOptions: React.FC<AddStudentOptionsProps> = ({
                 {method === 'csv' && (
                     <div className="space-y-4">
                         <Dropzone studentData={csvStudents} setStudentData={setCsvStudents} className="px-5 py-2 border-dashed border-2 rounded-[10px] block" />
-                        <div className="text-center">
+                        {/* <div className="text-center">
                             <Button variant="ghost" size="sm" onClick={() => {
                                 const csvContent = 'name,email\nJohn Doe,john@example.com\nJane Smith,jane@example.com'
                                 const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -201,7 +201,7 @@ const AddStudentOptions: React.FC<AddStudentOptionsProps> = ({
                                 a.click()
                                 window.URL.revokeObjectURL(url)
                             }}>Download Sample CSV</Button>
-                        </div>
+                        </div> */}
                     </div>
                 )}
             </div>

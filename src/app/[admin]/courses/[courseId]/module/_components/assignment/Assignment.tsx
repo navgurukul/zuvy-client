@@ -98,6 +98,7 @@ const AddAssignent = ({
     const [loading, setIsLoading] = useState(false)
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
     const [alertOpen, setAlertOpen] = useState(!canEdit)
+    const [deleteLoading, setIsDeleteLoading] = useState(false)
 
     const [initialContent, setInitialContent] = useState<
         { doc: AssignmentContentEditorDoc } | undefined
@@ -106,17 +107,16 @@ const AddAssignent = ({
     const [hasEditorContent, setHasEditorContent] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [previousContentHash, setPreviousContentHash] = useState('')
+    const [isEditorSaved, setIsEditorSaved] = useState(false)
+    const [hasUserSaved, setHasUserSaved] = useState(false)
+    const [wasContentNonEmptyWhenSaved, setWasContentNonEmptyWhenSaved] = useState(false)
+    const [isInitialLoad, setIsInitialLoad] = useState(true)
+    const [hasChangedAfterSave, setHasChangedAfterSave] = useState(false)
     const hasLoaded = useRef(false)
 
-    // NEW: Track user interactions and manual saves
-    const [hasUserManuallySaved, setHasUserManuallySaved] = useState(false)
-    const [isUserInteracting, setIsUserInteracting] = useState(false)
-    const [initialLoadComplete, setInitialLoadComplete] = useState(false)
     const { editChapter } = useEditChapter()
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
-    const [hasChangedAfterSave, setHasChangedAfterSave] = useState(false)
-
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -138,6 +138,7 @@ const AddAssignent = ({
     const { handleSubmit, control, formState } = form
     const { isValid } = formState
 
+    // Check if editor content is empty
     const isEditorContentEmpty = (content?: EditorContent) => {
         if (!content || !content.doc || !content.doc.content) return true
 
@@ -154,29 +155,40 @@ const AddAssignent = ({
         }
 
         // Check if all content is empty
-        const hasRealContent = docContent.some((item: DocItem) => {
-            if (item.type === 'paragraph' && item.content) {
-                return item.content.some(
-                    (textItem: TextContent) =>
-                        textItem.type === 'text' &&
-                        textItem.text &&
-                        textItem.text.trim().length > 0
-                )
+        const hasRealContent = docContent.some((item: any) => {
+            // Images and other non-paragraph content count as real content
+            if (item.type !== 'paragraph') {
+                return true
             }
-            return item.type !== 'paragraph' // Non-paragraph content is considered real content
+            
+            // Check paragraph content
+            if (item.type === 'paragraph' && item.content) {
+                return item.content.some((textItem: any) => {
+                    // Text with actual content
+                    if (textItem.type === 'text' && textItem.text && textItem.text.trim().length > 0) {
+                        return true
+                    }
+                    // Images or other inline content
+                    if (textItem.type !== 'text') {
+                        return true
+                    }
+                    return false
+                })
+            }
+            return false
         })
 
         return !hasRealContent
     }
 
-    // Function to generate content hash for comparison
+    // Generate content hash for comparison
     const generateContentHash = (content: any) => {
         return JSON.stringify(content)
     }
 
-    // UPDATED: Auto-save function with better conditions
+    // Auto-save function with better conditions
     const autoSave = async () => {
-        if (!canEdit || isSaving) return // Prevent multiple simultaneous saves
+        if (isSaving) return
 
         try {
             setIsSaving(true)
@@ -184,7 +196,7 @@ const AddAssignent = ({
                 ? [JSON.stringify(initialContent)]
                 : ''
             const requestBody = {
-                title: titles,
+                title,
                 completionDate: deadline,
                 articleContent: initialContentString,
             }
@@ -198,11 +210,11 @@ const AddAssignent = ({
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
 
-            // Only show toast if user has interacted and this is a real auto-save scenario
-            if (isUserInteracting && hasUserManuallySaved) {
+            // Only show toast for actual auto-save (not initial load or manual save)
+            if (!isInitialLoad && hasUserSaved && wasContentNonEmptyWhenSaved) {
                 toast.success({
                     title: 'Auto-saved',
-                    description: 'Assignment content auto-saved successfully',
+                    description: 'Content removed and auto-saved successfully',
                 })
             }
         } catch (error: any) {
@@ -229,83 +241,53 @@ const AddAssignent = ({
             }
            
             const contentDetails = response.data.contentDetails[0]
-            setTitle(contentDetails.title)
-            setTitles(contentDetails.title)
+            const fetchedTitle = response.data.title || response.data.name || ''
+            setTitle(fetchedTitle)
+            
             setIsDataLoading(false)
-            if (contentDetails.links && contentDetails.links[0]) {
-                setpdfLink(contentDetails.links[0])
-                setIsPdfUploaded(true)
+            
+            const link = contentDetails?.links?.[0]
+            if (link) {
+                setpdfLink(link)
                 setDefaultValue('pdf')
-                setIsEditorSaved(false) // PDF hai to editor saved false
+                setIsPdfUploaded(true)
+                setIsEditorSaved(false)
             } else {
                 setpdfLink(null)
                 setIsPdfUploaded(false)
                 setDefaultValue('editor')
-                // --- Check if editor me content hai ---
-                const data = contentDetails.content
+                // Check if editor has content
+                const data = contentDetails?.content
                 let hasEditorContent = false
                 if (data && data.length > 0) {
                     hasEditorContent = true
-                    setHasUserManuallySaved(true)
+                    setHasUserSaved(true)
+                    setWasContentNonEmptyWhenSaved(true)
                 }
                 setIsEditorSaved(hasEditorContent)
             }
-            if (typeof contentDetails.content[0] === 'string') {
-                const parsedContent = JSON.parse(contentDetails.content[0])
-                setInitialContent(parsedContent)
-                setPreviousContentHash(generateContentHash(parsedContent))
-            } else {
-                const jsonData = { doc: contentDetails.content[0] }
-                setInitialContent(jsonData)
-                setPreviousContentHash(generateContentHash(jsonData))
-            }
             
-            setTimeout(() => {
-                setInitialLoadComplete(true)
-            }, 500)
-             
+            const data = contentDetails?.content
+            let parsedContent
+            if (typeof data?.[0] === 'string') {
+                parsedContent = JSON.parse(data[0])
+            } else {
+                parsedContent = { doc: data?.[0] }
+            }
+
+            setInitialContent(parsedContent)
+
+            // Set initial content states
+            setHasEditorContent(!isEditorContentEmpty(parsedContent))
+            setPreviousContentHash(generateContentHash(parsedContent))
+            
         } catch (error) {
             console.error('Error fetching assignment content:', error)
-        } 
-    }
-
-    const [isEditorSaved, setIsEditorSaved] = useState(false)
-
-    // FIXED: Properly update hasEditorContent when initialContent changes
-    useEffect(() => {
-        if (defaultValue === 'editor' && initialContent) {
-    
-            const isEmpty = isEditorContentEmpty(initialContent)
-            setHasEditorContent(!isEmpty)
-    
-            const currentHash = generateContentHash(initialContent) // FIXED: declare here
-    
-            // Auto-save if user interacted + initial load complete + content changed
-            if (
-                isEmpty &&
-                hasUserManuallySaved &&
-                previousContentHash !== '' &&
-                initialLoadComplete &&
-                isUserInteracting &&
-                previousContentHash !== currentHash
-            ) {
-                autoSave()
-            }
-    
-            // Enable save button when content changed
-            if (previousContentHash && currentHash !== previousContentHash) {
-                setHasChangedAfterSave(true)
-            }
+        } finally {
+            setIsDataLoading(false)
+            setTimeout(() => setIsInitialLoad(false), 1000)
         }
-    }, [initialContent, defaultValue])
-    
-
-    // async
-    useEffect(() => {
-        if (hasLoaded.current) return
-        hasLoaded.current = true
-        getAssignmentContent()
-    }, [content])
+    }
 
     const convertToISO = (dateInput: any): string => {
         const date = new Date(dateInput)
@@ -321,9 +303,10 @@ const AddAssignent = ({
         return `${year}-${month}-${day}`
     }
 
-    // UPDATED: Manual save function - sets the flag for manual save
+    // Manual save function
     const editAssignmentContent = async (data: any) => {
         if (!canEdit) return
+        
         const deadlineDate = convertToISO(data.startDate)
         try {
             setIsSaving(true)
@@ -341,12 +324,14 @@ const AddAssignent = ({
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true)
-            setHasChangedAfterSave(false)
 
-            // IMPORTANT: Mark that user has manually saved
-            setHasUserManuallySaved(true)
+            // Mark that user has manually saved and track if content was non-empty
+            setHasUserSaved(true)
+            setWasContentNonEmptyWhenSaved(!isEditorContentEmpty(initialContent))
 
+            // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
+            setHasChangedAfterSave(false)
 
             toast.success({
                 title: 'Success',
@@ -363,25 +348,58 @@ const AddAssignent = ({
         }
     }
 
-    // UPDATED: Track user interaction with editor
     useEffect(() => {
-        const handleUserInteraction = () => {
-            if (initialLoadComplete) {
-                setIsUserInteracting(true)
+        if (content?.id && !hasLoaded.current) {
+            hasLoaded.current = true
+            getAssignmentContent()
+        }
+    }, [content?.id])
+
+    // Reset isEditorSaved if PDF is uploaded or deleted
+    useEffect(() => {
+        if (ispdfUploaded) setIsEditorSaved(false)
+    }, [ispdfUploaded])
+
+    // Update hasEditorContent whenever initialContent changes
+    useEffect(() => {
+        if (!isInitialLoad && initialContent) {
+            const currentHash = generateContentHash(initialContent)
+            const hasContent = !isEditorContentEmpty(initialContent)
+            setHasEditorContent(hasContent)
+
+            // Check if content changed from last saved version
+            if (previousContentHash && currentHash !== previousContentHash) {
+                setHasChangedAfterSave(true)
             }
         }
+    }, [initialContent, isInitialLoad, previousContentHash])
 
-        // Add event listeners for user interaction
-        document.addEventListener('keydown', handleUserInteraction)
-        document.addEventListener('click', handleUserInteraction)
-        document.addEventListener('input', handleUserInteraction)
+    // Auto-save effect for content deletion
+    useEffect(() => {
+        if (isInitialLoad || defaultValue !== 'editor' || !initialContent) return
 
-        return () => {
-            document.removeEventListener('keydown', handleUserInteraction)
-            document.removeEventListener('click', handleUserInteraction)
-            document.removeEventListener('input', handleUserInteraction)
+        const isEmpty = isEditorContentEmpty(initialContent)
+        const currentHash = generateContentHash(initialContent)
+
+        if (
+            hasUserSaved &&
+            wasContentNonEmptyWhenSaved &&
+            isEmpty &&
+            isEditorSaved &&
+            previousContentHash !== currentHash &&
+            currentHash !== generateContentHash(undefined)
+        ) {
+            autoSave()
         }
-    }, [initialLoadComplete])
+    }, [
+        initialContent,
+        defaultValue,
+        isEditorSaved,
+        previousContentHash,
+        hasUserSaved,
+        wasContentNonEmptyWhenSaved,
+        isInitialLoad,
+    ])
 
     const previewAssignment = () => {
         if (defaultValue === 'editor') {
@@ -421,33 +439,26 @@ const AddAssignent = ({
             // build the FormData, with the *exact* field name your backend expects*
             const formData = new FormData()
             formData.append('pdf', file, file.name)
+            formData.append('title', title)
 
             try {
+                setIsLoading(true)
                 await uploadPdf(content.moduleId, content.id, formData)
-
-                const deadlineDate = convertToISO(deadline)
-
-                const requestBody = {
-                    title: titles,
-                    completionDate: deadlineDate,
-                }
-
-                await editChapter(content.moduleId, content.id, requestBody)
-
-                toast.success({
-                    title: 'Success',
-                    description: 'PDF uploaded successfully!',
-                })
-                setIsdisabledUploadButton(false)
+                setIsChapterUpdated(!isChapterUpdated)
 
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
                     getAssignmentContent()
+                    setIsLoading(false)
+                    toast.success({
+                        title: 'Success',
+                        description: 'PDF uploaded successfully!',
+                    })
                 }, 1000) //
             } catch (err: any) {
                 console.error(err)
-                toast.success({
+                toast.error({
                     title: 'Upload failed',
                     description:
                         err.response?.data?.message ||
@@ -475,13 +486,13 @@ const AddAssignent = ({
 
     const onDeletePdfhandler = async () => {
         if (!canEdit) return
-        setIsLoading(true)
+        setIsDeleteLoading(true)
 
         const deadlineDate = convertToISO(deadline)
 
         try {
             await editChapter(content.moduleId, content.id, {
-                title: titles,
+                title: title,
                 links: null,
                 completionDate: deadlineDate,
             })
@@ -491,10 +502,7 @@ const AddAssignent = ({
             })
             setIsPdfUploaded(false)
             setpdfLink(null)
-            setDefaultValue('editor')
-            setIsEditorSaved(false)
-            // Reset manual save flag when switching to editor
-            setHasUserManuallySaved(false)
+            setIsDeleteLoading(false)
         } catch (err: any) {
             toast.error({
                 title: 'Delete PDF failed',
@@ -503,8 +511,7 @@ const AddAssignent = ({
                     err.message ||
                     'An error occurred.',
             })
-        } finally {
-            setIsLoading(false)
+            setIsDeleteLoading(false)
         }
     }
 

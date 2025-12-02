@@ -488,6 +488,7 @@ const BatchesInfo = ({
                                 )}
                                 {permissions.deleteBatch && (
                                     <>
+                                    <div  className="flex items-center gap-1 cursor-pointer">
                                         <Trash2
                                             onClick={() =>
                                                 setDeleteModalOpen(true)
@@ -499,10 +500,11 @@ const BatchesInfo = ({
                                             onClick={() =>
                                                 setDeleteModalOpen(true)
                                             }
-                                            className=" cursor-pointer mr-2"
+                                            className=" cursor-pointer mr-2 font-medium"
                                         >
                                             Delete
                                         </span>
+                                        </div>
                                         <DeleteConfirmationModal
                                             isOpen={isDeleteModalOpen}
                                             onClose={() =>

@@ -40,6 +40,7 @@ export function SearchBox(props: SearchBoxProps) {
     fetchSearchResultsApi,
     defaultFetchApi,
     getSuggestionValue,
+    maxSuggestions: 50, // Increased to show more suggestions
   });
 
   //  Sync the parent value with the local searchQuery
@@ -100,7 +101,7 @@ export function SearchBox(props: SearchBoxProps) {
         >
           <div
             ref={suggestionsRef}
-            className="bg-white border border-border rounded-md shadow-lg overflow-hidden"
+            className="bg-white border border-border rounded-md shadow-lg overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
           >
             {filteredSuggestions.map((suggestion, index) => (
               <div

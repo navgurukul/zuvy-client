@@ -1,8 +1,11 @@
 "use client"
-import React from 'react'
+import React, { useState, useMemo,useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useSearchParams } from "next/navigation"
+
 import {
     Card,
     CardContent,
@@ -69,6 +72,7 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
 import AddStudentOptions from '../../_components/AddStudentOptions'
 import {BatchesSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
 const Page = ({ params }: { params: ParamsType }) => {
     // Use the extracted hook for all logic and state
@@ -100,7 +104,7 @@ const Page = ({ params }: { params: ParamsType }) => {
         setStudentData,
         isManualValid,
         setIsManualValid,
-    setSingleStudentData,
+        setSingleStudentData,
         searchQuery,
         csvFile,
         setCsvFile,
@@ -124,8 +128,19 @@ const Page = ({ params }: { params: ParamsType }) => {
         getUnAssignedStudents,
         isDeleteModalOpen,
         setDeleteModalOpen,
+        totalBatches,
+        batchesPerPage,
+        setBatchesPerPage,
     } = useBatches(params)
 
+    const searchParams = useSearchParams();
+    const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams]);
+    const position = useMemo(() => parseInt(searchParams.get('limit') || '10'), [searchParams]); // default 10 optional
+    const offset = useMemo(() => (currentPage - 1) * position, [currentPage, position]);
+    useEffect(() => {
+        setBatchesPerPage(position);   // update hook limit when URL changes
+    }, [position, setBatchesPerPage]);
+    
     // Local UI-only value derived from the form provided by the hook
     const capEnrollmentValue = form.watch('capEnrollment')
 
@@ -770,7 +785,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                 <div className="flex flex-col lg:flex-row justify-between items-center mb-8">
                 <div className="relative w-full lg:max-w-[500px]">
                             <SearchBox
-                                placeholder="Search Classes"
+                                placeholder="Search batches..."
                                 fetchSuggestionsApi={fetchSuggestionsApi}
                                 fetchSearchResultsApi={fetchSearchResultsApi}
                                 defaultFetchApi={defaultFetchApi}
@@ -970,6 +985,12 @@ const Page = ({ params }: { params: ParamsType }) => {
                     input={true}
                     buttonText="Delete Batch"
                     instructorInfo={batchToDelete}
+                />
+                <DataTablePagination
+                    totalStudents={totalBatches}
+                    pages={Math.ceil(totalBatches / position)}
+                    lastPage={Math.ceil(totalBatches / position)}
+                    fetchStudentData={(offset: number) => defaultFetchApi(offset, position)}
                 />
             </div>
         )
