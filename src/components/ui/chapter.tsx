@@ -379,7 +379,7 @@ function Chapter() {
     return (
         <div className="flex flex-col h-screen pb-20 bg-card pl-4 pt-2">
             <Link
-                href={`/admin/courses/${courseId}/curriculum`}
+                href={`/${userRole}/courses/${courseId}/curriculum`}
                 className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
             >
                 <ArrowLeft size={20} />

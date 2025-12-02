@@ -337,6 +337,17 @@
     .container-full-width {
         @apply w-full max-w-none px-6;
     }
+
+    /* Hide number input spinners */
+    .no-spinners::-webkit-inner-spin-button,
+    .no-spinners::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .no-spinners {
+        -moz-appearance: textfield;
+    }
 }
 .remirror-editor {
     white-space: pre-wrap !important;
