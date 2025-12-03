@@ -815,12 +815,29 @@ export default function EditCodingQuestionForm() {
                         onValueChange={setActiveTab}
                         className="w-full"
                     >
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="details">Details</TabsTrigger>
-                            <TabsTrigger value="testcases">
-                                Test Cases
+                        <TabsList className="grid w-full grid-cols-2 bg-white">
+                            <TabsTrigger
+                              value="details"
+                              className="
+                                bg-white text-black
+                                data-[state=active]:bg-primary
+                                data-[state=active]:text-white
+                              "
+                            >
+                              Details
                             </TabsTrigger>
-                        </TabsList>
+                        
+                            <TabsTrigger
+                              value="testcases"
+                              className="
+                                bg-white text-black
+                                data-[state=active]:bg-primary
+                                data-[state=active]:text-white
+                              "
+                            >
+                              Test Cases
+                            </TabsTrigger>
+                          </TabsList>
 
                         {/* Details Tab */}
                         <TabsContent value="details" className="space-y-4 mt-6">
@@ -988,7 +1005,7 @@ export default function EditCodingQuestionForm() {
                                 {testCases.map((testCase, testCaseIndex) => (
                                     <div
                                         key={testCase.id}
-                                        className="my-4 p-4 border rounded-lg border-green-100 bg-green-50"
+                                        className="my-4 p-4 border rounded-lg border-green-100 bg-muted-light"
                                     >
                                         <h3 className="text-lg font-semibold mb-3 text-foreground">
                                             Test Case {testCaseIndex + 1}

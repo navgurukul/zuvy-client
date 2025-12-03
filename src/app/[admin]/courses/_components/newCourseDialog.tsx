@@ -195,6 +195,10 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                 payload.collaborator = collaboratorValue
             }
 
+            if(newCourseDuration.trim()) {
+                payload.duration = parseInt(newCourseDuration.trim())
+            }
+
             resetForm()
             handleCreateCourse(payload)
         } catch (error: any) {

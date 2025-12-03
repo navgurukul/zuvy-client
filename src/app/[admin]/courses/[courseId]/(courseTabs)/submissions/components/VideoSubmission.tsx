@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, Play, Eye } from 'lucide-react'
+import { ChevronRight, Play, Eye, DownloadIcon } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,7 @@ import {
     VideoData,
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import {VideoSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import { ellipsis } from '@/lib/utils'
 
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
@@ -97,17 +98,27 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                             >
                                                 {/* Content */}
                                                 <div className="font-semibold  flex w-full flex-col justify-between">
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center ">
                                                         <div className="p-2 rounded-md">
                                                             <Play className="w-4 h-4" />
                                                         </div>
-                                                        <h3 className="font-medium text-base">{video.title}</h3>
+                                                        <h3 title={video.title} className="font-medium text-base">{ellipsis(video.title , 25)}</h3>
                                                     </div>
                                                 </div>
                                                 <div className="absolute top-3 right-3">
                                                     {video.completedStudents >
                                                         0 ? (
-                                                            
+                                                            <div className="flex items-end">
+                                                            <Button
+                                                            variant="ghost"
+                                                            className="hover:text-gray-400 transition-colors"
+                                                            disabled={
+                                                                true
+                                                            }
+                                                        >
+                                                           <DownloadIcon size={18} />
+                                                        </Button>
+
                                                         <Link
                                                             href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
                                                         >
@@ -120,13 +131,14 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                                     size={
                                                                         20
                                                                     }
-                                                                    className="ml-1"
+                                                                    className=""
                                                                 />
                                                         </Button>
                                                                
                                                            
 
                                                         </Link>
+                                                            </div>
 
                                                     ) : (
                                                         <Button

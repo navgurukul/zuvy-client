@@ -633,7 +633,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                 <Form {...form}>
                     <form
                         // onSubmit={form.handleSubmit(onSubmit)} // Submission is now triggered by dialog save
-                        className="mt-4"
+                        className="mt-4 ml-1"
                     >
                         <div className="flex justify-between w-full items-center mb-6">
                             <div className="flex items-center">

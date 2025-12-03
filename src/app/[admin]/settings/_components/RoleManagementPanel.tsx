@@ -20,6 +20,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { hasPermissionMismatchForResource } from '@/utils/admin'
 
 interface RoleAction {
     id: number
@@ -38,6 +39,8 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     selectedRole,
     onRoleChange,
 }) => {
+ 
+  
     const searchParams = useSearchParams()
     const { roles, refetchRoles } = useRoles()
     const { assignPermissions, loading: assigning } = useAssignPermissions()
@@ -64,6 +67,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         loading: permissionsLoading,
         error: permissionsError,
     } = useRbacPermissions(selectedAction, roleId)
+
 
     // Initialize selected permissions when permissions are fetched
     useEffect(() => {
@@ -192,35 +196,6 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
             ...prev,
             [permissionId]: !prev[permissionId]
         }))
-    }
-
-    // const handlePermissionToggle = (permission: { id: number; name: string } | number, permissionName?: string) => {
-    //     const permissionId = typeof permission === 'number' ? permission : permission.id
-    //     const name = permissionName || (typeof permission === 'object' ? permission.name : '')
-
-    //     setSelectedPermissions((prev) => {
-    //         const newState = { ...prev }
-
-    //         // If unchecking "view", uncheck all other permissions
-    //         if (name?.toLowerCase() === 'view' && prev[permissionId]) {
-    //             // Unchecking view - clear all permissions
-    //             Object.keys(newState).forEach(key => {
-    //                 newState[Number(key)] = false
-    //             })
-    //             return newState
-    //         }
-
-    //         // Toggle the clicked permission
-    //         newState[permissionId] = !prev[permissionId]
-    //         return newState
-    //     })
-    // }
-
-    const formatPermissionName = (permission: string) => {
-        return permission
-            .split('_')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ')
     }
 
     // Handle navigation with unsaved changes check
@@ -371,7 +346,6 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         setPendingAction(null)
         setPendingRoute(null)
     }
-
     const notSelect = Object.values(selectedPermissions).every((v) => v === false);
     const hasViewPermission = Object.values(selectedPermissions)[1]
     const notSelected = notSelect === false && (hasViewPermission) ? false 
@@ -602,11 +576,11 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                     {fetchedPermissions?.map(
                                         (permission: any) => (
                                             <div
-                                                key={permission.id}
+                                                key={permission.id}                                            
                                                 className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                                             >
                                                 <label
-                                                    htmlFor={permission.name}
+                                                    htmlFor={permission.id}
                                                     className="flex-1 text-sm text-start font-medium text-gray-900 cursor-pointer"
                                                 >
                                                     {permission.name}
@@ -658,11 +632,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         size="sm"
                                         onClick={handleAssignPermissions}
                                         className="text-xs bg-accent text-white"
-                                        disabled={notSelected}
+                                        disabled={!(hasPermissionMismatchForResource(
+                                            fetchedPermissions,
+                                            selectedPermissions,
+                                            selectedAction
+                                        ))}
                                     >
-                                        {/* {assigning
-                                            ? 'Saving...'
-                                            : 'Save Changes'} */}
                                         Save Changes
                                     </Button>
                                 </div>

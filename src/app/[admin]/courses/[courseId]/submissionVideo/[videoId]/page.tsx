@@ -106,7 +106,7 @@ const Page = ({ params }: any) => {
                         {videoData?.title || 'Loading...'}
                     </CardTitle>
                 </CardHeader>
-                <CardContent className="bg-muted">
+                <CardContent className="">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                             <div className="text-left">
                                 <div className="font-medium text-muted-foreground">Total Submissions:</div>
