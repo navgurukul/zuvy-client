@@ -27,6 +27,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     const [statusFilter, setStatusFilter] = useState('all')
     const [fromDate, setFromDate] = useState('')
     const [toDate, setToDate] = useState('')
+    const [dateRangeError, setDateRangeError] = useState<string | null>(null)
     const [studentInfo, setStudentInfo] = useState<{
         name: string
         email: string
@@ -111,10 +112,9 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch completed classes'
             setError(errorMessage)
 
-            toast({
+            toast.error({
                 title: 'API Error',
-                description: errorMessage,
-                variant: 'destructive'
+                description: errorMessage,            
             })
         } finally {
             setLoading(false)
@@ -122,6 +122,30 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     }
 
     const filterClasses = () => {
+        // Validate date range
+        if (toDate && !fromDate) {
+            toast.info({
+                title: 'Validation Error',
+                description:'Please select a From date.',            
+            })
+            setFilteredClasses(completedClasses)
+            return
+        }
+    
+        if (fromDate && toDate) {
+            const fromDateTime = new Date(fromDate)
+            const toDateTime = new Date(toDate)
+    
+            if (fromDateTime > toDateTime) {
+                toast.error({
+                    title: 'Error',
+                    description:'Invalid date range.',            
+                })
+                setFilteredClasses(completedClasses)
+                return
+            }
+        }
+    
         let filtered = completedClasses
 
         // Search filter by class name
@@ -139,20 +163,15 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         }
 
         // Date range filter
-        if (fromDate) {
+        if (fromDate && toDate) {
             const fromDateTime = new Date(fromDate)
-            filtered = filtered.filter(classItem => {
-                const classDate = new Date(classItem.startTime)
-                return classDate >= fromDateTime
-            })
-        }
-
-        if (toDate) {
+            fromDateTime.setHours(0, 0, 0, 0)
+    
             const toDateTime = new Date(toDate)
             toDateTime.setHours(23, 59, 59, 999) // End of day
             filtered = filtered.filter(classItem => {
                 const classDate = new Date(classItem.startTime)
-                return classDate <= toDateTime
+                return classDate >= fromDateTime && classDate <= toDateTime
             })
         }
 
@@ -259,8 +278,10 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                         type="date"
                         placeholder="From Date"
                         value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        max={toDate || undefined} // From date cannot be after To date
+                        onChange={(e) => {
+                            setFromDate(e.target.value)
+                            setDateRangeError(null)
+                        }}                        max={toDate || undefined} // From date cannot be after To date
                         className="w-[150px]"
                     />
                 </div>
@@ -272,8 +293,10 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                         type="date"
                         placeholder="To Date"
                         value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        min={fromDate || undefined} // To date cannot be before From date
+                        onChange={(e) => {
+                            setToDate(e.target.value)
+                            setDateRangeError(null)
+                        }}                        min={fromDate || undefined} // To date cannot be before From date
                         className="w-[150px]"
                     />
                 </div>
@@ -325,10 +348,19 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             {/* Data Table */}
             {!loading && !error && (
                 <div className="space-y-4">
-                    <DataTable
-                        columns={attendanceColumns}
-                        data={filteredClasses}
-                    />
+                    {filteredClasses.length === 0 && !dateRangeError && (
+                        <Card>
+                            <CardContent className="text-center py-8">
+                                <p className="text-muted-foreground">No records found.</p>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {filteredClasses.length > 0 && (
+                        <DataTable
+                            columns={attendanceColumns}
+                            data={filteredClasses}
+                        />
+                    )}
                 </div>
             )}
         </div>

@@ -27,6 +27,20 @@ import {
 } from '@/app/[admin]/courses/[courseId]/submissionForm/[StudentForm]/IndividualReport/studentFormIndividualReportType'
 import { SearchBox } from '@/utils/searchBox'
 type Props = {}
+interface Batch {
+    id: number;
+    name: string;
+    bootcampId: number;
+    instructorId: number;
+    capEnrollment: number;
+    createdAt: string;
+    updatedAt: string;
+    status: string;
+    startDate: string | null;
+    endDate: string | null;
+    students_enrolled: number;
+    instructorEmail: string;
+}
 
 const Page = ({ params }: any) => {
     const router = useRouter()
@@ -39,17 +53,12 @@ const Page = ({ params }: any) => {
     const [pages, setPages] = useState(0)
     const [lastPage, setLastPage] = useState(0)
     const [loading, setLoading] = useState(false)
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [batches, setBatches] = useState<Batch[]>([])
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A',
-    ]
     // Separate state for overall statistics (NEVER changes during search)
     const [overallStats, setOverallStats] = useState({
         totalStudents: 0,
@@ -72,7 +81,25 @@ const Page = ({ params }: any) => {
         [currentPage, position]
     )
 
-    // Fetch overall statistics ONCE when component mounts - Fixed version
+    // Fetch batches from API
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+            toast({
+                title: 'Error',
+                description: 'Error fetching batches',
+                variant: 'destructive',
+            })
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
+
+    // Fetch overall statistics ONCE when component mounts
     const fetchOverallStats = useCallback(async () => {
         if (!moduleId || overallStats.isInitialized) return
 
@@ -112,11 +139,16 @@ const Page = ({ params }: any) => {
         async (query: string) => {
             if (!moduleId || !query.trim()) return []
 
-            const url = `/submission/formsStatus/${
-                params.courseId
-            }/${moduleId}?chapterId=${
-                params.StudentForm
-            }&limit=5&offset=0&searchStudent=${encodeURIComponent(query)}`
+            const queryParams = new URLSearchParams()
+            queryParams.append('limit', '5')
+            queryParams.append('offset', '0')
+            queryParams.append('searchStudent', query)
+            
+            if (selectedBatch !== 'all') {
+                queryParams.append('batchId', selectedBatch)
+            }
+
+            const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`
             const response = await api.get(url)
             return (
                 response.data.combinedData?.map((student: any) => ({
@@ -127,20 +159,32 @@ const Page = ({ params }: any) => {
                 })) || []
             )
         },
-        [params.courseId, params.StudentForm, moduleId]
+        [params.courseId, params.StudentForm, moduleId, selectedBatch]
     )
 
     const fetchSearchResultsApi = useCallback(
         async (query: string) => {
             if (!moduleId) return []
             setLoading(true)
-            const url = `/submission/formsStatus/${
-                params.courseId
-            }/${moduleId}?chapterId=${
-                params.StudentForm
-            }&limit=${position}&offset=${offset}&searchStudent=${encodeURIComponent(
-                query
-            )}`
+            
+            const queryParams = new URLSearchParams()
+            queryParams.append('limit', position.toString())
+            queryParams.append('offset', offset.toString())
+            queryParams.append('searchStudent', query)
+            
+            if (selectedBatch !== 'all') {
+                queryParams.append('batchId', selectedBatch)
+            }
+            
+            if (sortField) {
+                queryParams.append('orderBy', sortField)
+            }
+            
+            if (sortDirection) {
+                queryParams.append('orderDirection', sortDirection)
+            }
+
+            const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`
             const response = await api.get(url)
 
             const data =
@@ -157,15 +201,33 @@ const Page = ({ params }: any) => {
             setTotalStudents(response.data.totalStudentsCount || 0)
             setPages(response.data.totalPages || 0)
             setLastPage(response.data.totalPages || 0)
+            setLoading(false)
             return data
         },
-        [params.courseId, params.StudentForm, moduleId, position, offset]
+        [params.courseId, params.StudentForm, moduleId, position, offset, selectedBatch, sortField, sortDirection]
     )
 
     const defaultFetchApi = useCallback(async () => {
         if (!moduleId) return []
         setLoading(true)
-        const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&limit=${position}&offset=${offset}`
+        
+        const queryParams = new URLSearchParams()
+        queryParams.append('limit', position.toString())
+        queryParams.append('offset', offset.toString())
+        
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        
+        if (sortField) {
+            queryParams.append('orderBy', sortField)
+        }
+        
+        if (sortDirection) {
+            queryParams.append('orderDirection', sortDirection)
+        }
+
+        const url = `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`
         const response = await api.get(url)
 
         const data =
@@ -182,8 +244,9 @@ const Page = ({ params }: any) => {
         setTotalStudents(response.data.totalStudentsCount || 0)
         setPages(response.data.totalPages || 0)
         setLastPage(response.data.totalPages || 0)
+        setLoading(false)
         return data
-    }, [params.courseId, params.StudentForm, moduleId, position, offset])
+    }, [params.courseId, params.StudentForm, moduleId, position, offset, selectedBatch, sortField, sortDirection])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -213,7 +276,17 @@ const Page = ({ params }: any) => {
         }
     }, [params.StudentForm])
 
-    // For pagination - we need to modify this to work with search
+    // Handle batch change
+    const handleBatchChange = useCallback((value: string) => {
+        setSelectedBatch(value)
+    }, [])
+
+    // Handle sorting change
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
     const getStudentFormDataHandler = useCallback(
         async (customOffset?: number) => {
             const searchTerm = searchParams.get('search')
@@ -234,14 +307,17 @@ const Page = ({ params }: any) => {
         const initializeData = async () => {
             if (!moduleId) return
 
-            await Promise.all([getBootcampHandler(), getChapterDetails()])
+            await Promise.all([
+                getBootcampHandler(), 
+                getChapterDetails(),
+                fetchBatches()
+            ])
 
-            // Fetch overall stats only once, after other data is loaded
             await fetchOverallStats()
         }
 
         initializeData()
-    }, [moduleId, getBootcampHandler, getChapterDetails, fetchOverallStats])
+    }, [moduleId, getBootcampHandler, getChapterDetails, fetchBatches, fetchOverallStats])
 
     // Pagination effect - this will handle data fetching based on search state
     useEffect(() => {
@@ -253,8 +329,12 @@ const Page = ({ params }: any) => {
         position,
         moduleId,
         overallStats.isInitialized,
+        selectedBatch,
+        sortField,
+        sortDirection,
         getStudentFormDataHandler,
     ])
+
     return (
         <>
             <div className="flex items-center gap-4 mb-8">
@@ -308,7 +388,8 @@ const Page = ({ params }: any) => {
                                 </label>
                                 <Select
                                     value={selectedBatch}
-                                    onValueChange={setSelectedBatch}
+                                    onValueChange={handleBatchChange}
+                                    disabled={isLoadingBatches}
                                 >
                                     <SelectTrigger className="w-full mt-1">
                                         <SelectValue placeholder="All Batches" />
@@ -317,12 +398,12 @@ const Page = ({ params }: any) => {
                                         <SelectItem value="all">
                                             All Batches
                                         </SelectItem>
-                                        {batchOptions.map((batch, index) => (
+                                        {batches.map((batch) => (
                                             <SelectItem
-                                                key={index}
-                                                value={batch}
+                                                key={batch.id}
+                                                value={batch.id.toString()}
                                             >
-                                                {batch}
+                                                {batch.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -365,7 +446,11 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={studentStatus || []} columns={columns} />
+                    <DataTable 
+                        data={studentStatus || []} 
+                        columns={columns}
+                        onSortingChange={handleSortingChange}
+                    />
                 </CardContent>
             </Card>
             {/* Show pagination only when data is loaded */}

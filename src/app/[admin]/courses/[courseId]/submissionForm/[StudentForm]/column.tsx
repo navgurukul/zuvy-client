@@ -8,21 +8,20 @@ import { Badge } from '@/components/ui/badge'
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
-const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Profile Pitcure" />
+            <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
         cell: ({ row }) => {
             const student = row.original
-            const profilePitcure = student.profilePicture
+            const profilePicture = student.profilePicture
             const ImageContainer = () => {
-                return profilePitcure ? (
+                return profilePicture ? (
                     <Image
-                        src={profilePitcure}
+                        src={profilePicture}
                         alt="profilePic"
                         height={10}
                         width={30}
@@ -47,9 +46,15 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'name',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Student Name" 
+                onSort={onSort}
+                sortField="name"
+            />
         ),
+        id: 'name',
         cell: ({ row }) => {
             const name = row.original.name
 
@@ -61,14 +66,19 @@ export const columns: ColumnDef<Task>[] = [
                 </div>
             )
         },
-        enableSorting: false,
         enableHiding: false,
     },
     {
         accessorKey: 'email',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Email" 
+                onSort={onSort}
+                sortField="email"
+            />
         ),
+        id: 'email',
         cell: ({ row }) => {
             const email = row.original.email
 
@@ -82,15 +92,15 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'batch',
-        header: 'Batch',
+        accessorKey: 'batchName',
+        header: () => <div className="text-left w-full">Batch</div>,
         cell: ({ row }) => {
-            const index = row.index
+            const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                <Badge variant="outline" className="text-black border-black-200">
-                    {mockBatches[index % mockBatches.length]}
-                </Badge>
+                    <Badge variant="outline" className="text-black border-black-200">
+                        {batchName}
+                    </Badge>
                 </div>
             )
         },
