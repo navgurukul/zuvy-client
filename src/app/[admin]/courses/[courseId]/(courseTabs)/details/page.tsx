@@ -38,7 +38,7 @@ const FormSchema = z.object({
     name: z
         .string()
         .min(3, 'Please enter a course name (minimum 3 characters).')
-        .max(100, 'Course name cannot exceed 100 characters.'),
+        .max(50, 'Course name cannot exceed 50 characters.'),
     bootcampTopic: z.string().optional(),
     description: z
         .string()
@@ -49,7 +49,7 @@ const FormSchema = z.object({
         required_error: 'Please choose a start date for the course.',
     }),
     coverImage: z.string().optional(),
-    collaborator: z.string().optional(),
+    collaborator: z.string().max(50, 'Collaborator name cannot exceed 50 characters.').optional(),
 })
 
 function GeneralDetailsPage({ params }: { params: PageParams }) {
@@ -195,6 +195,18 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         const currentValue = form.getValues('collaborator')
         return !currentValue || currentValue.trim() === ''
     }
+
+    const buildFormData = (collaboratorOverride?: string | null) => {
+        const values = form.getValues()
+        return {
+            ...values,
+            collaborator:
+                collaboratorType === 'image'
+                    ? collaboratorOverride ?? croppedCollaboratorImage ?? ''
+                    : values.collaborator || '',
+        }
+    }
+
     // Handle collaborator type change
     const handleCollaboratorTypeChange = (type: 'text' | 'image') => {
         setCollaboratorType(type)
@@ -210,12 +222,9 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         }
     }
 
-    async function onSubmit(data: z.infer<typeof FormSchema>) {
+    async function onSubmit(_data: z.infer<typeof FormSchema>) {
         // If collaborator type is image, set the collaborator field to the cropped image URL
-        const formDataToSubmit = {
-            ...data,
-            collaborator: collaboratorType === 'image' ? croppedCollaboratorImage || '' : data.collaborator || ''
-        }
+        const formDataToSubmit = buildFormData()
 
         const success = await updateCourseDetails(
             formDataToSubmit, 
@@ -266,7 +275,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         }
     }
 
-    const handleCrop = () => {
+    const handleCrop = async () => {
         if (cropper) {
             const croppedCanvas = cropper.getCroppedCanvas({
                 width: 800,
@@ -276,6 +285,14 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
             setCroppedImage(croppedImageData)
             setIsCropping(false)
             setImage(null)
+            form.setValue('coverImage', croppedImageData)
+
+            const formDataToSubmit = buildFormData()
+            await updateCourseDetails(
+                formDataToSubmit,
+                croppedImageData,
+                collaboratorType === 'image' ? croppedCollaboratorImage : null
+            )
         }
     }
 
@@ -290,15 +307,24 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         collaboratorFileInputRef.current?.click()
     }
 
-    const handleCollaboratorCrop = () => {
+    const handleCollaboratorCrop = async () => {
         if (collaboratorCropper) {
             const croppedCanvas = collaboratorCropper.getCroppedCanvas({
                 width: 800,
                 height: 400,
             })
-            setCroppedCollaboratorImage(croppedCanvas.toDataURL())
+            const collaboratorImageData = croppedCanvas.toDataURL()
+            setCroppedCollaboratorImage(collaboratorImageData)
             setIsCollaboratorCropping(false)
             setCollaboratorImage(null)
+            form.setValue('collaborator', collaboratorImageData)
+
+            const formDataToSubmit = buildFormData(collaboratorImageData)
+            await updateCourseDetails(
+                formDataToSubmit,
+                undefined,
+                collaboratorImageData
+            )
         }
     }
 
@@ -396,7 +422,7 @@ if (!courseData || !courseData.id) {
                                                 <Upload className="h-4 w-4 mr-2" />
                                                 {isImageUploading
                                                     ? 'Uploading...'
-                                                    : 'Upload New Image'}
+                                                    : 'Change Image'}
                                             </Button>
                                             <input
                                                 type="file"
@@ -558,8 +584,9 @@ if (!courseData || !courseData.id) {
                                                                     !Permissions?.editCourse ||
                                                                     isImageUploading
                                                                 }
+                                                                className='flex items-center'
                                                             >
-                                                                <Upload className="h-4 w-4 mr-2" />
+                                                                <Upload className="h-3 w-3" />
                                                                 {croppedCollaboratorImage
                                                                     ? 'Change Image'
                                                                     : 'Upload Image'}
@@ -587,8 +614,9 @@ if (!courseData || !courseData.id) {
                                                                     disabled={
                                                                         isImageUploading
                                                                     }
+                                                                    className='flex items-center'
                                                                 >
-                                                                    <Trash2 className="h-4 w-4 mr-2" />
+                                                                    <Trash2 className="h-3 w-3" />
                                                                     Remove Image
                                                                 </Button>
                                                             )}

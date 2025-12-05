@@ -260,6 +260,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
       if (event.data === 'assessment_tab_closed') {
         console.warn('Assessment tab was closed before submission');
         refetch();
+        window.location.reload();
         toast({
           title: 'Assessment Tab Closed',
           description: 'You closed the assessment before submitting.',
