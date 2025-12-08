@@ -61,6 +61,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const [file, setFile] = useState<any>(null)
     const [ispdfUploaded, setIsPdfUploaded] = useState(false)
     const [pdfLink, setpdfLink] = useState<any>()
+    const [hasNewPdfToSave, setHasNewPdfToSave] = useState(false)
     const [loading, setIsLoading] = useState(false)
     const [deleteLoading, setIsDeleteLoading] = useState(false)
     const { setArticlePreviewContent } = getArticlePreviewStore()
@@ -72,6 +73,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const [hasEditorContent, setHasEditorContent] = useState(false)
     const [previousContentHash, setPreviousContentHash] = useState('')
     const [isSaving, setIsSaving] = useState(false)
+    const [originalTitle, setOriginalTitle] = useState('')
 
     const [hasUserSaved, setHasUserSaved] = useState(false)
     const [wasContentNonEmptyWhenSaved, setWasContentNonEmptyWhenSaved] =
@@ -101,11 +103,13 @@ const AddArticle: React.FC<AddArticleProps> = ({
         mode: 'onChange',
     })
     // NEW: Function to check if editor content is empty
-    const isEditorContentEmpty = (content: any) => {
-        if (!content || !content.doc || !content.doc.content) return true
-
-        const docContent = content.doc.content
-        if (docContent.length === 0) return true
+    const isEditorContentEmpty = (content: any): boolean => {
+        if (!content) return true
+        
+        // Handle content with or without doc wrapper
+        const docContent = content.doc?.content || content.content
+        
+        if (!docContent || docContent.length === 0) return true
 
         // Check if only empty paragraphs
         if (
@@ -218,28 +222,33 @@ const AddArticle: React.FC<AddArticleProps> = ({
             }
             const fetchedTitle = response.data.title || response.data.name || ''
             setTitle(fetchedTitle)
+            setOriginalTitle(fetchedTitle)
 
             const data = contentDetails?.content
             let parsedContent
-            if (typeof data?.[0] === 'string') {
-                parsedContent = JSON.parse(data)
+            if (data && data.length > 0) {
+                if (typeof data[0] === 'string') {
+                    parsedContent = JSON.parse(data[0])
+                } else {
+                    parsedContent = data[0]
+                }
             } else {
-                parsedContent = { doc: data?.[0] }
+                // Empty content - create default empty doc structure
+                parsedContent = undefined
             }
 
             setInitialContent(parsedContent)
 
             // NEW: Set initial content states
-            setHasEditorContent(!isEditorContentEmpty(parsedContent))
+            setHasEditorContent(!isEditorContentEmpty(parsedContent ? { doc: parsedContent } : undefined))
             setPreviousContentHash(generateContentHash(parsedContent))
             
         } catch (error) {
             console.error('Error fetching article content:', error)
-        } 
-        // finally {
-        //     setIsDataLoading(false)
-        //     setTimeout(() => setIsInitialLoad(false), 1000)
-        // }
+        } finally {
+            setIsDataLoading(false)
+            setTimeout(() => setIsInitialLoad(false), 500)
+        }
     }
 
     const editArticleContent = async () => {
@@ -270,6 +279,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
             // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
+            setOriginalTitle(title)
             setHasChangedAfterSave(false)
             toast.success({
                 title: 'Success',
@@ -305,14 +315,30 @@ const AddArticle: React.FC<AddArticleProps> = ({
             const currentHash = generateContentHash(initialContent)
             const hasContent = !isEditorContentEmpty(initialContent)
             console.log('Content check:', hasContent, initialContent)
+            console.log('Previous hash:', previousContentHash)
+            console.log('Current hash:', currentHash)
+            console.log('Hashes equal?', previousContentHash === currentHash)
             setHasEditorContent(hasContent)
 
             // Check if content changed from last saved version
-            if (previousContentHash && currentHash !== previousContentHash) {
+            // Only check if previousContentHash is set (not empty string)
+            if (previousContentHash !== '' && currentHash !== previousContentHash) {
+                console.log('Content changed - enabling save button')
                 setHasChangedAfterSave(true) // Enable button
             }
         }
     }, [initialContent, isInitialLoad, previousContentHash])
+
+    // NEW: Enable Save button when title is changed (unsaved)
+    useEffect(() => {
+        if (!isInitialLoad) {
+            const titleChanged = title.trim() !== originalTitle.trim()
+            if (titleChanged && form.formState.isValid) {
+                setHasChangedAfterSave(true)
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [title, originalTitle, isInitialLoad])
 
     // Auto-save effect for content deletion
     useEffect(() => {
@@ -384,6 +410,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
         if (!canEdit) {
             return
         }
+
+        // Case 1: A new PDF is selected -> upload PDF + title
         if (file) {
             if (file.type !== 'application/pdf') {
                 return toast.error({
@@ -392,10 +420,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 })
             }
 
-            // build the FormData, with the *exact* field name your backend expects*
             const formData = new FormData()
             formData.append('pdf', file, file.name)
-            // FIXED: Use the same title state
             formData.append('title', title)
 
             try {
@@ -406,17 +432,18 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 setTimeout(() => {
                     setIsPdfUploaded(true)
                     setpdfLink('')
+                    setFile(null)
+                    setHasNewPdfToSave(false)
+                    setOriginalTitle(title)
                     getArticleContent()
                     setIsLoading(false)
                     toast.success({
                         title: 'Success',
                         description: 'PDF uploaded successfully!',
                     })
-                }, 1000) //
+                }, 1000)
             } catch (err: any) {
                 console.error(err)
-                // setIsdisabledUploadButton(true);
-
                 toast.error({
                     title: 'Upload failed',
                     description:
@@ -425,7 +452,40 @@ const AddArticle: React.FC<AddArticleProps> = ({
                         'An error occurred.',
                 })
             }
+            return
         }
+
+        // Case 2: No new PDF, but title changed -> update title only
+        const titleChanged = title.trim() !== originalTitle.trim()
+        if (titleChanged) {
+            try {
+                setIsLoading(true)
+                await editChapter(content.moduleId, content.id, { title })
+                setOriginalTitle(title)
+                setIsLoading(false)
+                toast.success({
+                    title: 'Success',
+                    description: 'Title updated successfully',
+                })
+            } catch (err: any) {
+                console.error(err)
+                setIsLoading(false)
+                toast.error({
+                    title: 'Update failed',
+                    description:
+                        err.response?.data?.message ||
+                        err.message ||
+                        'An error occurred.',
+                })
+            }
+            return
+        }
+
+        // Case 3: Nothing to save
+        toast.info({
+            title: 'No changes',
+            description: 'There are no changes to save.',
+        })
     }
 
     async function onDeletePdfhandler() {
@@ -707,7 +767,10 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                             <UploadArticle
                                                 loading={loading}
                                                 file={file}
-                                                setFile={setFile}
+                                                setFile={(newFile:any) => {
+                                                    setFile(newFile)
+                                                    setHasNewPdfToSave(!!newFile)
+                                                }}
                                                 className=""
                                                 isPdfUploaded={ispdfUploaded}
                                                 pdfLink={pdfLink}
@@ -752,7 +815,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                             !canEdit ||
                                             loading ||
                                             !form.formState.isValid ||
-                                            (!file && !ispdfUploaded) ||
+                                            (!hasNewPdfToSave && title.trim() === originalTitle.trim()) ||
                                             disabledUploadButton
                                         }
                                     >
