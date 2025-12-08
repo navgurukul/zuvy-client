@@ -57,6 +57,7 @@ function Quiz(props: QuizProps) {
     // const { quizData, setStoreQuizData } = getAllQuizData()
     const [quizTitle, setQuizTitle] = useState('')
     const [inputValue, setInputValue] = useState(props.activeChapterTitle)
+    const [originalTitle, setOriginalTitle] = useState<string>(props.activeChapterTitle || '')
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { setQuizPreviewContent } = getQuizPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
@@ -202,9 +203,14 @@ function Quiz(props: QuizProps) {
         }
 
         // Check if all selected questions are in saved questions
-        return addQuestion.every((selectedQ) =>
+        const questionsSaved = addQuestion.every((selectedQ) =>
             savedQuestions.some((savedQ) => savedQ.id === selectedQ.id)
         )
+
+        // Also ensure title matches the last saved/original title
+        const titleSaved = (inputValue || '').trim() === (originalTitle || '').trim()
+
+        return questionsSaved && titleSaved
     }
 
     // Update isSaved state when addQuestion changes
@@ -293,6 +299,7 @@ function Quiz(props: QuizProps) {
             // keep local input/quiz title in sync after save
             setInputValue(titleToSave)
             setQuizTitle(titleToSave)
+            setOriginalTitle(titleToSave)
 
             // ensure form reflects saved title
             form.reset({ title: titleToSave })
@@ -320,6 +327,7 @@ function Quiz(props: QuizProps) {
             // ensure input and form reflect server title
             if (res.data.title) {
                 setInputValue(res.data.title)
+                setOriginalTitle(res.data.title)
                 form.reset({ title: res.data.title })
             }
         } catch (error) {
@@ -448,6 +456,14 @@ function Quiz(props: QuizProps) {
                                         placeholder="Untitled Quiz"
                                         className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                         disabled={!canEdit}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value
+                                            form.setValue('title', newValue, { shouldValidate: true, shouldDirty: true })
+                                            setInputValue(newValue)
+                                            // Mark unsaved if title diverges from original
+                                            const titleSaved = newValue.trim() === (originalTitle || '').trim()
+                                            setIsSaved(titleSaved && checkIfSaved())
+                                        }}
                                     />
                                     {!form.watch('title') && (
                                         <Pencil
@@ -500,7 +516,7 @@ function Quiz(props: QuizProps) {
                                                     !form.formState.isValid ||
                                                     isSaved
                                                     ? 'opacity-50 cursor-not-allowed'
-                                                    : 'opacity-75'
+                                                    : ''
                                                 }`}
                                                 >
                                                 {form.formState.isSubmitting
