@@ -82,6 +82,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const { editChapter } = useEditChapter()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [alertOpen, setAlertOpen] = useState(!canEdit)
+    const [isTitleChanged, setIsTitleChanged] = useState(false)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -260,6 +261,8 @@ const AddForm: React.FC<AddFormProps> = ({
     }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        // full-form submit: reset title-changed flag here because we're saving everything
+        setIsTitleChanged(false)
         // ✅ VALIDATION CHECK
         const validationErrors = validateQuestionsWithOptions(values.questions)
 
@@ -378,6 +381,40 @@ const AddForm: React.FC<AddFormProps> = ({
         }
     }
 
+    // Save title only without validating entire form
+    const saveTitleOnly = async () => {
+        if (!canEdit) return
+        try {
+            setIsSubmitting(true)
+            await editChapter(moduleId, content.id, { title: titles })
+            toast.success({ title: 'Success', description: 'Title updated successfully' })
+            setIsChapterUpdated(!isChapterUpdated)
+            setIsTitleChanged(false)
+            setIsSaved(true)
+        } catch (err: any) {
+            toast.error({ title: 'Failed', description: err.response?.data?.message || err.message || 'An error occurred.' })
+        } finally {
+            setIsSubmitting(false)
+        }
+    }
+
+    const handleSaveClick = async () => {
+        // If the whole form is valid, submit full form
+        if (form.formState.isValid) {
+            // trigger form submission (this will call onSubmit)
+            await form.handleSubmit(onSubmit)()
+            return
+        }
+
+        // If form not valid but title changed, save title only
+        if (isTitleChanged) {
+            await saveTitleOnly()
+            return
+        }
+
+        // otherwise do nothing (button should be disabled)
+    }
+
     function previewForm() {
         if (!isSaved) {
             toast({
@@ -441,6 +478,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                                 {...field}
                                                 onChange={(e) => {
                                                     setTitles(e.target.value)
+                                                    setIsTitleChanged(true)
                                                     field.onChange(e)
                                                 }}
                                                 placeholder="Untitled Form"
@@ -546,8 +584,9 @@ const AddForm: React.FC<AddFormProps> = ({
 
                         <div className="flex justify-start">
                             <Button
-                                type="submit"
-                                disabled={!form.formState.isValid || isSubmitting || !canEdit}
+                                type="button"
+                                onClick={handleSaveClick}
+                                disabled={!canEdit || isSubmitting || (!form.formState.isValid && !isTitleChanged)}
                                 aria-label="Save form changes"
                                 aria-busy={isSubmitting}
                                 className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90"
