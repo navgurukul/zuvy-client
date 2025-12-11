@@ -13,7 +13,6 @@ export const useStudentData = (courseId: any) => {
         setTotalPages,
         loading,
         setLoading,
-        // offset,
         setOffset,
         totalStudents,
         setTotalStudents,
@@ -36,48 +35,48 @@ export const useStudentData = (courseId: any) => {
     }, [searchParams]);
 
     // Clear data immediately when courseId changes
-    useEffect(() => {
-        if (prevCourseId.current !== null && prevCourseId.current !== courseId) {
-            // Course changed - force clear everything
-            setSearch('')
-            setOffset(0)
-            setCurrentPage(1)
-            setStudents([]) // Clear students data immediately
-            setTotalPages(0)
-            setTotalStudents(0)
-        }
-        prevCourseId.current = courseId
-    }, [courseId, setStudents, setTotalPages, setTotalStudents, setSearch, setOffset, setCurrentPage])
+    // useEffect(() => {
+    //     if (prevCourseId.current !== null && prevCourseId.current !== courseId) {
+    //         // Course changed - force clear everything
+    //         setSearch('')
+    //         setOffset(0)
+    //         setCurrentPage(1)
+    //         setStudents([]) // Clear students data immediately
+    //         setTotalPages(0)
+    //         setTotalStudents(0)
+    //     }
+    //     prevCourseId.current = courseId
+    // }, [courseId, setStudents, setTotalPages, setTotalStudents, setSearch, setOffset, setCurrentPage])
 
     // Fetch data when courseId is ready
-    useEffect(() => {
-        if (courseId !== undefined) {
-            // Get search from URL params
-            const urlSearchQuery = searchParams.get('search') || ''
+    // useEffect(() => {
+    //     if (courseId !== undefined) {
+    //         // Get search from URL params
+    //         const urlSearchQuery = searchParams.get('search') || ''
             
-            // Clear existing data first
-            setStudents([])
-            setTotalPages(0)
-            setTotalStudents(0)
+    //         // Clear existing data first
+    //         setStudents([])
+    //         setTotalPages(0)
+    //         setTotalStudents(0)
             
-            // Set the search state from URL
-            setSearch(urlSearchQuery)
+    //         // Set the search state from URL
+    //         setSearch(urlSearchQuery)
             
-            // Then fetch new data with search if present
-            fetchStudentsHandler({
-                courseId,
-                limit,
-                offset: 0, // Always start from 0 when initializing
-                searchTerm: urlSearchQuery, // Use search from URL
-                setLoading,
-                setStudents,
-                setTotalPages,
-                setTotalStudents,
-                setCurrentPage,
-                showError: false,
-            })
-        }
-    }, [courseId, limit, searchParams, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage, setSearch])
+    //         // Then fetch new data with search if present
+    //         fetchStudentsHandler({
+    //             courseId,
+    //             limit,
+    //             offset: 0, // Always start from 0 when initializing
+    //             searchTerm: urlSearchQuery, // Use search from URL
+    //             setLoading,
+    //             setStudents,
+    //             setTotalPages,
+    //             setTotalStudents,
+    //             setCurrentPage,
+    //             showError: false,
+    //         })
+    //     }
+    // }, [courseId, limit, searchParams, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage, setSearch])
 
     const fetchData = useCallback(() => {
         fetchStudentsHandler({

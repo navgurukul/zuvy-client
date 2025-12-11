@@ -1,17 +1,44 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ArrowLeft, Mail, Calendar, Search, Filter, CalendarRange } from 'lucide-react'
+import { ArrowLeft, Mail } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { DataTable } from '../../../../../../_components/datatable/data-table'
 import { createAttendanceColumns } from './attendanceColumns'
 import { StudentDetailsViewProps, ClassData } from './courseStudentComponentType'
+import { SearchBox } from '@/utils/searchBox'
+import { z } from 'zod'
+
+const dateFilterSchema = z.object({
+    fromDate: z.string().optional(),
+    toDate: z.string().optional(),
+})
+.refine((data) => {
+    // If toDate is provided but fromDate is not, return error
+    if (data.toDate && !data.fromDate) {
+        return false
+    }
+    return true
+}, {
+    message: 'Please select a From date first.',
+    path: ['toDate']
+})
+.refine((data) => {
+    // If both dates exist, fromDate should not be after toDate
+    if (data.fromDate && data.toDate && data.fromDate > data.toDate) {
+        return false
+    }
+    return true
+}, {
+    message: 'From date cannot be after To date.',
+    path: ['fromDate']
+})
 
 const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     courseId,
@@ -19,14 +46,17 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     onBack
 }) => {
     const [completedClasses, setCompletedClasses] = useState<ClassData[]>([])
-    const [filteredClasses, setFilteredClasses] = useState<ClassData[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [attendancePercentage, setAttendancePercentage] = useState<number>(0)
-    const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
     const [fromDate, setFromDate] = useState('')
     const [toDate, setToDate] = useState('')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [dateErrors, setDateErrors] = useState<{
+        fromDate?: string
+        toDate?: string
+    }>({})
     const [studentInfo, setStudentInfo] = useState<{
         name: string
         email: string
@@ -44,19 +74,46 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         courseId, 
         studentId, 
         () => {
-            // Refresh data after status update
-            fetchCompletedClasses()
+            fetchCompletedClasses(searchTerm)
         }
     )
 
-    useEffect(() => {
-        fetchCompletedClasses()
-        fetchStudentInfo()
-    }, [studentId, courseId])
+    // Validate dates using Zod
+    const validateDates = (from: string, to: string) => {
+        try {
+            dateFilterSchema.parse({ fromDate: from, toDate: to })
+            setDateErrors({}) // Clear all errors if validation passes
+            return true
+        } catch (err) {
+            if (err instanceof z.ZodError) {
+                const errors: { fromDate?: string; toDate?: string } = {}
+                err.errors.forEach((error) => {
+                    const path = error.path[0] as 'fromDate' | 'toDate'
+                    errors[path] = error.message
+                })
+                setDateErrors(errors)
+                
+                // Show toast for the first error
+                const firstError = err.errors[0]
+            }
+            return false
+        }
+    }
 
     useEffect(() => {
-        filterClasses()
-    }, [completedClasses, searchTerm, statusFilter, fromDate, toDate])
+        fetchStudentInfo()
+
+        const params = new URLSearchParams(window.location.search)
+        const search = params.get("search") || ""
+
+        setSearchTerm(search)
+
+        if (search) {
+            fetchCompletedClasses(search)
+        } else {
+            fetchCompletedClasses("")
+        }
+    }, [studentId, courseId])
 
     const fetchStudentInfo = async () => {
         try {
@@ -82,23 +139,43 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         }
     }
 
-    const fetchCompletedClasses = async () => {
+    const fetchCompletedClasses = useCallback(async (searchTermParam?: string) => {
         try {
             setLoading(true)
             setError(null)
 
-            const endpoint = `/student/bootcamp/${courseId}/completed-classes?userId=${studentId}`
+            const params = new URLSearchParams({
+                userId: studentId.toString()
+            })
+
+            const currentSearchTerm = searchTermParam !== undefined ? searchTermParam : searchTerm
+            
+            if (currentSearchTerm && currentSearchTerm.trim()) {
+                params.append('searchTerm', currentSearchTerm.trim())
+            }
+            
+            if (statusFilter !== 'all') {
+                params.append('attendanceStatus', statusFilter)
+            }
+            
+            // Only add date filters if BOTH dates are selected and valid
+            if (fromDate && toDate && fromDate <= toDate) {
+                params.append('fromDate', fromDate)
+                params.append('toDate', toDate)
+            }
+
+            const endpoint = `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`             
             const response = await api.get(endpoint)
 
             const classes = response.data?.data?.classes || []
             setCompletedClasses(classes)
 
-            if (Array.isArray(classes) && classes.length > 0) {
+            const stats = response.data?.data?.attendanceStats
+            if (stats) {
+                setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
+            } else if (classes.length > 0) {
                 const totalClasses = classes.length
-                const attendedClasses = classes.filter((classData: ClassData) =>
-                    classData.attendanceStatus === 'present'
-                ).length
-
+                const attendedClasses = classes.filter((c: ClassData) => c.attendanceStatus === 'present').length
                 const percentage = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 100) : 0
                 setAttendancePercentage(percentage)
             } else {
@@ -111,52 +188,100 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch completed classes'
             setError(errorMessage)
 
-            toast({
+            toast.error({
                 title: 'API Error',
-                description: errorMessage,
-                variant: 'destructive'
+                description: errorMessage,            
             })
         } finally {
             setLoading(false)
         }
+    }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm])
+
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        if (!query.trim()) return []
+
+        try {
+            const params = new URLSearchParams({
+                userId: studentId.toString(),
+                searchTerm: query.trim()
+            })
+
+            if (statusFilter !== 'all') {
+                params.append('attendanceStatus', statusFilter)
+            }
+            
+            if (fromDate && toDate && fromDate <= toDate) {
+                params.append('fromDate', fromDate)
+                params.append('toDate', toDate)
+            }
+
+            const res = await api.get(
+                `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`
+            )
+            
+            return res.data?.data?.classes?.map((classItem: any) => ({
+                ...classItem,
+                name: classItem.title
+            })) || []
+        } catch (error) {
+            console.error('Search suggestions error:', error)
+            return []
+        }
+    }, [courseId, studentId, statusFilter, fromDate, toDate])
+
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        setSearchTerm(query)
+        await fetchCompletedClasses(query)
+    }, [fetchCompletedClasses])
+
+    const defaultFetchApi = useCallback(async () => {
+        setSearchTerm('')
+        await fetchCompletedClasses('')
+    }, [fetchCompletedClasses])
+
+    const handleFromDateChange = (value: string) => {
+        setFromDate(value)
+        // Validate with the new fromDate and existing toDate
+        validateDates(value, toDate)
     }
 
-    const filterClasses = () => {
-        let filtered = completedClasses
+    const handleToDateChange = (value: string) => {
+        setToDate(value)
+        // Validate with existing fromDate and new toDate
+        validateDates(fromDate, value)
+    }
 
-        // Search filter by class name
-        if (searchTerm) {
-            filtered = filtered.filter(classItem =>
-                classItem.title.toLowerCase().includes(searchTerm.toLowerCase())
-            )
+    // Trigger API call when filters change
+    useEffect(() => {
+        // Don't fetch if there are validation errors
+        if (Object.keys(dateErrors).length > 0) {
+            return
         }
 
-        // Status filter by attendance status
-        if (statusFilter !== 'all') {
-            filtered = filtered.filter(classItem =>
-                classItem.attendanceStatus.toLowerCase() === statusFilter.toLowerCase()
-            )
+        // Don't fetch if only fromDate is set (wait for toDate)
+        if (fromDate && !toDate) {
+            return
         }
 
-        // Date range filter
-        if (fromDate) {
-            const fromDateTime = new Date(fromDate)
-            filtered = filtered.filter(classItem => {
-                const classDate = new Date(classItem.startTime)
-                return classDate >= fromDateTime
-            })
+        const shouldFetch = 
+            statusFilter !== 'all' ||
+            (fromDate && toDate && fromDate <= toDate) ||
+            (!fromDate && !toDate)
+        
+        if (shouldFetch && !loading) {
+            const timer = setTimeout(() => {
+                fetchCompletedClasses(searchTerm)
+            }, 300)
+            
+            return () => clearTimeout(timer)
         }
+    }, [statusFilter, fromDate, toDate, dateErrors])
 
-        if (toDate) {
-            const toDateTime = new Date(toDate)
-            toDateTime.setHours(23, 59, 59, 999) // End of day
-            filtered = filtered.filter(classItem => {
-                const classDate = new Date(classItem.startTime)
-                return classDate <= toDateTime
-            })
-        }
-
-        setFilteredClasses(filtered)
+    const clearFilters = () => {
+        setStatusFilter('all')
+        setFromDate('')
+        setToDate('')
+        setDateErrors({})
     }
 
     const getStatusBadgeVariant = (status: string) => {
@@ -175,13 +300,13 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         }
     }
 
+    const hasActiveFilters = statusFilter !== 'all' || fromDate || toDate
+
     return (
         <div className="container mx-auto p-6 space-y-6">
             {/* Back Button */}
             <div className="flex items-center mb-8">
                 <p
-                    // variant="outline"
-                    // size="sm"
                     onClick={onBack}
                     className="text-sm text-foreground flex items-center space-x-2 cursor-pointer"
                 >
@@ -227,14 +352,18 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
             {/* Filters Row - All 4 filters in one line - Left aligned */}
             <div className="flex items-center gap-4 flex-wrap justify-start">
-                {/* Search Bar */}
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 mt-1 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
+                <div className="relative w-[300px]">
+                    <SearchBox
                         placeholder="Search by class name..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 w-[300px]"
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(s) => (
+                            <div>
+                                <div className="font-medium">{s.title}</div>
+                            </div>
+                        )}
+                        inputWidth=""
                     />
                 </div>
 
@@ -252,43 +381,47 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                     </Select>
                 </div>
 
-                {/* From Date Filter */}
-                <div className="flex items-center space-x-2">
-                    <p className='text-foreground mt-2'>From:</p>
-                    <Input
-                        type="date"
-                        placeholder="From Date"
-                        value={fromDate}
-                        onChange={(e) => setFromDate(e.target.value)}
-                        max={toDate || undefined} // From date cannot be after To date
-                        className="w-[150px]"
-                    />
+                {/* From Date Filter with Error */}
+                <div className="flex flex-col items-start space-y-1">
+                    <div className="flex items-center space-x-2">
+                        <p className='text-foreground'>From:</p>
+                        <Input
+                            type="date"
+                            placeholder="From Date"
+                            value={fromDate}
+                            onChange={(e) => handleFromDateChange(e.target.value)}
+                            max={toDate || undefined}
+                            className={`w-[150px] ${dateErrors.fromDate ? 'border-red-500' : ''}`}
+                        />
+                    </div>
+                    {dateErrors.fromDate && (
+                        <p className="text-xs text-red-500 ml-14">{dateErrors.fromDate}</p>
+                    )}
                 </div>
 
-                {/* To Date Filter */}
-                <div className="flex items-center space-x-2">
-                    <p className='text-foreground mt-2'>To:</p>
-                    <Input
-                        type="date"
-                        placeholder="To Date"
-                        value={toDate}
-                        onChange={(e) => setToDate(e.target.value)}
-                        min={fromDate || undefined} // To date cannot be before From date
-                        className="w-[150px]"
-                    />
+                {/* To Date Filter with Error */}
+                <div className="flex flex-col items-start space-y-1">
+                    <div className="flex items-center space-x-2">
+                        <p className='text-foreground'>To:</p>
+                        <Input
+                            type="date"
+                            placeholder="To Date"
+                            value={toDate}
+                            onChange={(e) => handleToDateChange(e.target.value)}
+                            min={fromDate || undefined}
+                            className={`w-[150px] ${dateErrors.toDate ? 'border-red-500' : ''}`}
+                        />
+                    </div>
+                    {dateErrors.toDate && (
+                        <p className="text-xs text-red-500 ml-8">{dateErrors.toDate}</p>
+                    )}
                 </div>
 
-                {/* Clear Filters Button */}
-                {(searchTerm || statusFilter !== 'all' || fromDate || toDate) && (
+                {hasActiveFilters && (
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                            setSearchTerm('')
-                            setStatusFilter('all')
-                            setFromDate('')
-                            setToDate('')
-                        }}
+                        onClick={clearFilters}
                         className="whitespace-nowrap mt-2"
                     >
                         Clear Filters
@@ -313,8 +446,8 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 <Card className="border-red-200">
                     <CardContent className="text-center py-8">
                         <div className="space-y-4">
-                            <p className="text-destructive">{'Student is not assigned to any batch yet'}</p>
-                            <Button onClick={fetchCompletedClasses} variant="outline">
+                            <p className="text-destructive">Student is not assigned to any batch yet</p>
+                            <Button onClick={() => fetchCompletedClasses(searchTerm)} variant="outline">
                                 Try Again
                             </Button>
                         </div>
@@ -325,10 +458,19 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
             {/* Data Table */}
             {!loading && !error && (
                 <div className="space-y-4">
-                    <DataTable
-                        columns={attendanceColumns}
-                        data={filteredClasses}
-                    />
+                    {completedClasses.length === 0 && (
+                        <Card>
+                            <CardContent className="text-center py-8">
+                                <p className="text-muted-foreground">No records found.</p>
+                            </CardContent>
+                        </Card>
+                    )}
+                    {completedClasses.length > 0 && (
+                        <DataTable
+                            columns={attendanceColumns}
+                            data={completedClasses}
+                        />
+                    )}
                 </div>
             )}
         </div>
