@@ -3,7 +3,7 @@ import { getBatchData } from '@/store/store'
 import { getStoreStudentDataNew } from '@/store/store'
 import { fetchStudentsHandler } from '@/utils/admin'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { POSITION } from '@/utils/constant'
+import { POSITION, OFFSET } from '@/utils/constant'
 
 export const useStudentData = (courseId: any) => {
     const {
@@ -14,90 +14,128 @@ export const useStudentData = (courseId: any) => {
         loading,
         setLoading,
         setOffset,
-        offset,
         totalStudents,
         setTotalStudents,
         currentPage,
         setCurrentPage,
-        limit,
+        // limit,
         setLimit,
         search,
         setSearch,
     } = getStoreStudentDataNew()
 
     const { fetchBatches, batchData } = getBatchData()
-    const prevCourseId = useRef<any>(null)
     const searchParams = useSearchParams()
-    
-    const queryLimit = useMemo(() => parseInt(searchParams.get('limit') || POSITION), [searchParams])
-    const queryPage = parseInt(searchParams.get("page") || "1")
-    const querySearch = searchParams.get("search") || ""
-    const calculatedOffset = useMemo(() => (queryPage - 1) * queryLimit, [queryPage, queryLimit])
+    const router = useRouter()
+    const prevCourseId = useRef<any>(null)
+    const limit = useMemo(() => parseInt(searchParams.get('limit') || POSITION), [searchParams])
+    const offset = useMemo(() => {
+        const page = searchParams.get('page');
+        return page ? parseInt(page) : OFFSET;
+    }, [searchParams]);
 
-    // Clear data when course changes
-    useEffect(() => {
-      if (prevCourseId.current !== null && prevCourseId.current !== courseId) {
-        setSearch('')
-        setOffset(0)
-        setCurrentPage(1)
-        setStudents([])
-        setTotalPages(0)
-        setTotalStudents(0)
-      }
-      prevCourseId.current = courseId
-    }, [courseId, setStudents, setTotalPages, setTotalStudents, setSearch, setOffset, setCurrentPage])
+    // Clear data immediately when courseId changes
+    // useEffect(() => {
+    //     if (prevCourseId.current !== null && prevCourseId.current !== courseId) {
+    //         // Course changed - force clear everything
+    //         setSearch('')
+    //         setOffset(0)
+    //         setCurrentPage(1)
+    //         setStudents([]) // Clear students data immediately
+    //         setTotalPages(0)
+    //         setTotalStudents(0)
+    //     }
+    //     prevCourseId.current = courseId
+    // }, [courseId, setStudents, setTotalPages, setTotalStudents, setSearch, setOffset, setCurrentPage])
 
-    // Fetch batches once
+    // Fetch data when courseId is ready
+    // useEffect(() => {
+    //     if (courseId !== undefined) {
+    //         // Get search from URL params
+    //         const urlSearchQuery = searchParams.get('search') || ''
+            
+    //         // Clear existing data first
+    //         setStudents([])
+    //         setTotalPages(0)
+    //         setTotalStudents(0)
+            
+    //         // Set the search state from URL
+    //         setSearch(urlSearchQuery)
+            
+    //         // Then fetch new data with search if present
+    //         fetchStudentsHandler({
+    //             courseId,
+    //             limit,
+    //             offset: 0, // Always start from 0 when initializing
+    //             searchTerm: urlSearchQuery, // Use search from URL
+    //             setLoading,
+    //             setStudents,
+    //             setTotalPages,
+    //             setTotalStudents,
+    //             setCurrentPage,
+    //             showError: false,
+    //         })
+    //     }
+    // }, [courseId, limit, searchParams, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage, setSearch])
+
+    const fetchData = useCallback(() => {
+        fetchStudentsHandler({
+            courseId,
+            limit,
+            offset,
+            searchTerm: search,
+            setLoading,
+            setStudents,
+            setTotalPages,
+            setTotalStudents,
+            setCurrentPage,
+            showError: false,
+        })
+    }, [courseId, limit, offset, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
+
     useEffect(() => {
-      fetchBatches(courseId)
+        fetchBatches(courseId)
     }, [courseId, fetchBatches])
-    
-    // Reset page on search change
-    useEffect(() => {
-      if (search !== querySearch) {
-        setCurrentPage(1)
-        setOffset(0)
-        setSearch(querySearch)
-      }
-    }, [querySearch, search, setCurrentPage, setOffset, setSearch])
 
-    // Pagination handlers
     const nextPageHandler = useCallback(() => {
-      if (currentPage < totalPages) {
-        const newOffset = offset + queryLimit
-        setOffset(newOffset)
-        setCurrentPage(currentPage + 1)
-      }
-    }, [currentPage, totalPages, offset, queryLimit, setOffset, setCurrentPage])
+        if (currentPage < totalPages) {
+            setOffset((prev) => prev + limit)
+        }
+    }, [currentPage, totalPages, limit])
 
     const previousPageHandler = useCallback(() => {
-      if (currentPage > 1) {
-        const newOffset = offset - queryLimit
-        setOffset(newOffset)
-        setCurrentPage(currentPage - 1)
-      }
-    }, [currentPage, offset, queryLimit, setOffset, setCurrentPage])
+        if (currentPage > 1) {
+            setOffset((prev) => prev - limit)
+        }
+    }, [currentPage, limit])
 
     const firstPageHandler = useCallback(() => {
-      setOffset(0)
-      setCurrentPage(1)
-    }, [setOffset, setCurrentPage])
+        setOffset(0)
+    }, [])
 
     const lastPageHandler = useCallback(() => {
-      const newOffset = (totalPages - 1) * queryLimit
-      setOffset(newOffset)
-      setCurrentPage(totalPages)
-    }, [totalPages, queryLimit, setOffset, setCurrentPage])
+        setOffset((totalPages - 1) * limit)
+    }, [totalPages, limit])
 
-    const onLimitChange = useCallback((newLimit: number) => {
-      setLimit(newLimit)
-      setOffset(0)
-      setCurrentPage(1)
-    }, [setLimit, setOffset, setCurrentPage])
+    const onLimitChange = useCallback((newLimit: any) => {
+        setLimit(Number(newLimit))
+        setOffset(0)
+    }, [])
 
+    // Function for DataTablePagination component
     const fetchStudentData = useCallback((offsetValue: number) => {
-      setOffset(offsetValue)
-    }, [setOffset])
+        fetchStudentsHandler({
+            courseId,
+            limit,
+            offset: offsetValue,
+            searchTerm: search,
+            setLoading,
+            setStudents,
+            setTotalPages,
+            setTotalStudents,
+            setCurrentPage,
+        })
+    }, [courseId, limit, search, setLoading, setStudents, setTotalPages, setTotalStudents, setCurrentPage])
 
     return {
         students,
@@ -106,7 +144,7 @@ export const useStudentData = (courseId: any) => {
         offset,
         totalStudents,
         currentPage,
-        limit: queryLimit,
+        limit,
         search,
         batchData,
         setLoading,

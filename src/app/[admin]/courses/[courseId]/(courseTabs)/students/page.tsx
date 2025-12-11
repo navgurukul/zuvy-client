@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef , useMemo} from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Image from 'next/image'
 import {
@@ -63,8 +63,13 @@ const StudentsPage = ({ params }: { params: any }) => {
         search,
         totalStudents,
         setStudents,
+        setTotalStudents,
+        setTotalPages,
+        setOffset,
+        setCurrentPage,
         fetchStudentData,
     } = useStudentData(params.courseId)
+    
     
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -83,52 +88,50 @@ const StudentsPage = ({ params }: { params: any }) => {
     // Add refs to track initialization and prevent duplicate calls
     const hasInitialized = useRef(false)
     const isFetching = useRef(false)
-
-    // Fetch data with filters
+    const filterState = useMemo(() => ({
+        enrolledDateFilter,
+        statusFilter,
+        batchFilter,
+        attendanceFilter
+    }), [enrolledDateFilter, statusFilter, batchFilter, attendanceFilter])
+    
     const fetchFilteredData = useCallback(async (customOffset?: number) => {
-        // Prevent duplicate calls
         if (isFetching.current) return
-        
+    
         try {
             isFetching.current = true
             const currentOffset = customOffset !== undefined ? customOffset : offset
+    
             let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${currentOffset}`
-            
-            if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+    
+            if (enrolledDateFilter !== 'all') {
                 const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
                 if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
             }
-            
-            if (statusFilter && statusFilter !== 'all') url += `&status=${statusFilter}`
-            if (batchFilter && batchFilter !== 'all') url += `&batch_id=${batchFilter}`
-            // Add last active filter if not 'all'
-            // if (lastActiveFilter && lastActiveFilter !== 'all') {
-            // const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-            // if (lastActiveDate) {
-            // url += `&lastActiveDate=${lastActiveDate}`
-            // }
-            // }
-            
-            // Add attendance filter if not empty
-            if (attendanceFilter && attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
-      
-            // Add search if exists
-            const urlSearchParams = new URLSearchParams(window.location.search)
-            const searchQuery = urlSearchParams.get("search")
+            if (statusFilter !== 'all') url += `&status=${statusFilter}`
+            if (batchFilter !== 'all') url += `&batch_id=${batchFilter}`
+            if (attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+    
+            const searchQuery = new URLSearchParams(window.location.search).get("search")
             if (searchQuery) url += `&searchTerm=${searchQuery}`
-            
+    
             const response = await api.get(url)
+    
             setStudents(response.data.modifiedStudentInfo || [])
+            setTotalStudents(response.data.totalStudents || 0)
+            setTotalPages(response.data.totalPages || 1)    // <-- FIXED
             setSelectedRows([])
+    
             setLoading(false)
-            
+    
         } catch (error) {
             console.error('Error fetching filtered data:', error)
             toast.error({ title: 'Error', description: 'Failed to fetch student data' })
         } finally {
-            isFetching.current = false
-        }
-    }, [params.courseId, limit, offset, enrolledDateFilter, statusFilter, batchFilter, attendanceFilter, setStudents])
+            setTimeout(() => {
+                isFetching.current = false
+             }, 100)        }
+    }, [params.courseId,limit,offset,filterState])
     // Update this helper function to handle new options
     // const convertLastActiveFilterToDate = (filter: string): string | null => {
     // const today = new Date()
@@ -209,9 +212,8 @@ const StudentsPage = ({ params }: { params: any }) => {
         if (hasInitialized.current && !isFetching.current) {
             fetchFilteredData()
         }
-    }, [enrolledDateFilter, statusFilter, batchFilter, attendanceFilter])
-
-    const fetchSuggestionsApi = useCallback(async (query: string) => {
+    }, [filterState])
+        const fetchSuggestionsApi = useCallback(async (query: string) => {
         // If query is empty, return empty suggestions and trigger default fetch
         if (!query || query.trim() === '') {
             return [];
@@ -240,41 +242,40 @@ const StudentsPage = ({ params }: { params: any }) => {
 
     // Keep fetchSearchResultsApi with current offset for proper search functionality
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        // If query is empty, fetch all data with filters
+        // If query is empty → reset search
         if (!query || query.trim() === '') {
-            // Reset to first page and fetch all data
             const urlParams = new URLSearchParams(window.location.search)
             urlParams.delete('search')
             urlParams.delete('page')
             const newUrl = `${window.location.pathname}?${urlParams.toString()}`
             window.history.replaceState({}, '', newUrl)
-            
+    
             await fetchFilteredData(0)
             return { modifiedStudentInfo: students }
         }
-        
+    
         let url = `/bootcamp/students/${params.courseId}?limit=${limit}&offset=${offset}&searchTerm=${query}`
-  
-        // Add current filters to search
-        if (enrolledDateFilter && enrolledDateFilter !== 'all') {
+    
+        if (enrolledDateFilter !== 'all') {
             const enrolledDate = convertEnrolledDateFilterToDate(enrolledDateFilter)
             if (enrolledDate) url += `&enrolledDate=${enrolledDate}`
         }
-        if (statusFilter && statusFilter !== 'all') url += `&status=${statusFilter}`
-        if (batchFilter && batchFilter !== 'all') url += `&batch_id=${batchFilter}`
-        // if (lastActiveFilter && lastActiveFilter !== 'all') {
-        // const lastActiveDate = convertLastActiveFilterToDate(lastActiveFilter)
-        // if (lastActiveDate) {
-        // url += `&lastActiveDate=${lastActiveDate}`
-        // }
-        // }
-        if (attendanceFilter && attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
-        
+        if (statusFilter !== 'all') url += `&status=${statusFilter}`
+        if (batchFilter !== 'all') url += `&batch_id=${batchFilter}`
+        if (attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+    
         const response = await api.get(url)
+    
         setStudents(response.data.modifiedStudentInfo || [])
+        setTotalStudents(response.data.totalStudents || 0)
+        setTotalPages(response.data.totalPages || 1)
+        setCurrentPage(response.data.currentPage || 1)
+        setOffset(response.data.offset || 0)
         setSelectedRows([])
+    
         return response.data
-    }, [params.courseId, limit, offset, setStudents, enrolledDateFilter, statusFilter, batchFilter, attendanceFilter, fetchFilteredData, students]);
+    
+    }, [params.courseId, limit, offset, setStudents, setTotalStudents, setTotalPages, setCurrentPage, setOffset, enrolledDateFilter, statusFilter,batchFilter, attendanceFilter,fetchFilteredData,students])
     
     const defaultFetchApi = useCallback(async () => {
         // Clear search from URL when input is cleared
