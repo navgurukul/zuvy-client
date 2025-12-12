@@ -300,7 +300,7 @@ const IDE: React.FC<IDEProps> = ({
     }, [runCodeLanguageId, runSourceCode])
 
     return (
-        <div>
+        <div className="min-h-screen">
             <div className="flex justify-end mb-2">
                 {/* <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -368,11 +368,11 @@ const IDE: React.FC<IDEProps> = ({
                 {/* <div className="font-bold text-xl">
                     <TimerDisplay remainingTime={remainingTime} />
                 </div> */}
-                <div>
+                <div className='flex gap-3'>
                     <Button
                         onClick={(e) => handleSubmit(e, 'run')}
                         size="sm"
-                        className="mr-2"
+                        className="border bg-background hover:bg-primary/10 border-primary hover:border-primary h-9 rounded-md px-3 text-black"
                         disabled={true}
                     >
                         {loading ? <Spinner /> : <Play size={20} />}
@@ -396,18 +396,31 @@ const IDE: React.FC<IDEProps> = ({
                 >
                     <ResizablePanel defaultSize={50}>
                         <div className="flex h-[90vh]">
-                            <div className="w-full max-w-12xl p-2 bg-muted text-left">
-                                <div className="p-2">
-                                    <h1 className="text-xl font-bold">
-                                        {questionDetails?.title}
-                                    </h1>
-                                    <p>{questionDetails?.description}</p>
-                                    <p className="mt-3">
-                                        <span className="font-bold">
-                                            Constraints:
-                                        </span>{' '}
-                                        {questionDetails?.constraints}
-                                    </p>
+                            <div className="w-full max-w-12xl p-4 bg-white text-left border rounded-lg shadow-sm overflow-y-auto">
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <h1 className="text-xl font-bold text-gray-900">
+                                            {questionDetails?.title}
+                                        </h1>
+                                    </div>
+
+                                    <div className="border rounded-lg overflow-hidden shadow-sm">
+                                        <div className="bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700">
+                                            Description
+                                        </div>
+                                        <div className="bg-white px-4 py-3 text-gray-700">
+                                            {questionDetails?.description}
+                                        </div>
+                                    </div>
+
+                                    <div className="border rounded-lg overflow-hidden shadow-sm">
+                                        <div className="bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700">
+                                            Constraints
+                                        </div>
+                                        <div className="bg-white px-4 py-3 text-gray-700">
+                                            {questionDetails?.constraints}
+                                        </div>
+                                    </div>
 
                                     {testCases
                                         ?.slice(0, 2)
@@ -418,80 +431,88 @@ const IDE: React.FC<IDEProps> = ({
                                             ) => (
                                                 <div
                                                     key={index}
-                                                    className="bg-gray-200 shadow-sm rounded-lg p-4 my-4"
+                                                    className="border rounded-lg overflow-hidden shadow-sm"
                                                 >
-                                                    <h2 className="text-xl font-semibold mb-2">
+                                                    <div className="bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-700">
                                                         Test Case {index + 1}
-                                                    </h2>
-
-                                                    {/* Handle both array and object inputs */}
-                                                    {Array.isArray(
-                                                        testCase.inputs
-                                                    )
-                                                        ? testCase.inputs.map(
-                                                              (
-                                                                  input: IDEInput,
-                                                                  idx: number
-                                                              ) => (
-                                                                  <p
-                                                                      key={idx}
-                                                                      className="text-gray-700"
-                                                                  >
-                                                                      <span className="font-medium">
-                                                                          Input{' '}
-                                                                          {idx +
-                                                                              1}
-                                                                          :
-                                                                      </span>{' '}
-                                                                      {formatValue(
-                                                                          input.parameterValue,
-                                                                          input.parameterType
-                                                                      )}
-                                                                  </p>
+                                                    </div>
+                                                    <div className="bg-white px-4 py-3 space-y-2 text-gray-700">
+                                                        {/* Handle both array and object inputs */}
+                                                        {Array.isArray(
+                                                            testCase.inputs
+                                                        )
+                                                            ? testCase.inputs.map(
+                                                                  (
+                                                                      input: IDEInput,
+                                                                      idx: number
+                                                                  ) => (
+                                                                      <p
+                                                                          key={
+                                                                              idx
+                                                                          }
+                                                                          className="text-gray-800"
+                                                                      >
+                                                                          <span className="font-medium">
+                                                                              Input{' '}
+                                                                              {idx +
+                                                                                  1}
+                                                                              :
+                                                                          </span>{' '}
+                                                                          {formatValue(
+                                                                              input.parameterValue,
+                                                                              input.parameterType
+                                                                          )}
+                                                                      </p>
+                                                                  )
                                                               )
-                                                          )
-                                                        : Object.entries(
-                                                              testCase.inputs
-                                                          ).map(
-                                                              (
-                                                                  [key, value],
-                                                                  idx: number
-                                                              ) => (
-                                                                  <p
-                                                                      key={key}
-                                                                      className="text-gray-700"
-                                                                  >
-                                                                      <span className="font-medium">
-                                                                          Input{' '}
-                                                                          {idx +
-                                                                              1}
-                                                                          :
-                                                                      </span>{' '}
-                                                                      {key} ={' '}
-                                                                      {formatValue(
+                                                            : Object.entries(
+                                                                  testCase.inputs
+                                                              ).map(
+                                                                  (
+                                                                      [
+                                                                          key,
                                                                           value,
-                                                                          typeof value ===
-                                                                              'number'
-                                                                              ? 'int'
-                                                                              : 'str'
-                                                                      )}
-                                                                  </p>
-                                                              )
-                                                          )}
+                                                                      ],
+                                                                      idx: number
+                                                                  ) => (
+                                                                      <p
+                                                                          key={
+                                                                              key
+                                                                          }
+                                                                          className="text-gray-800"
+                                                                      >
+                                                                          <span className="font-medium">
+                                                                              Input{' '}
+                                                                              {idx +
+                                                                                  1}
+                                                                              :
+                                                                          </span>{' '}
+                                                                          {key} ={' '}
+                                                                          {formatValue(
+                                                                              value,
+                                                                              typeof value ===
+                                                                                  'number'
+                                                                                  ? 'int'
+                                                                                  : 'str'
+                                                                          )}
+                                                                      </p>
+                                                                  )
+                                                              )}
 
-                                                    <p className="text-gray-700 mt-2">
-                                                        <span className="font-medium">
-                                                            Expected Output:
-                                                        </span>{' '}
-                                                        {formatValue(
-                                                            testCase
-                                                                .expectedOutput
-                                                                .parameterValue,
-                                                            testCase
-                                                                .expectedOutput
-                                                                .parameterType
-                                                        )}
-                                                    </p>
+                                                        <p className="text-gray-800 pt-2 border-t border-gray-100">
+                                                            <span className="font-medium">
+                                                                Expected Output:
+                                                            </span>{' '}
+                                                            {formatValue(
+                                                                testCase
+                                                                    .expectedOutput
+                                                                    .parameterValue,
+                                                                testCase
+                                                                    .expectedOutput
+                                                                    .parameterType
+                                                            )}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             )
                                         )}
@@ -504,13 +525,13 @@ const IDE: React.FC<IDEProps> = ({
                         <ResizablePanelGroup direction="vertical">
                             <ResizablePanel defaultSize={70}>
                                 <div className="flex h-full">
-                                    <div className="w-full max-w-9xl bg-muted p-2">
+                                    <div className="w-full max-w-9xl bg-white p-4 border rounded-lg shadow-sm">
                                         <form>
                                             <div>
-                                                <div className="flex justify-between p-2">
+                                                <div className="flex justify-between items-center p-2 border-b bg-gray-50 rounded-t-lg">
                                                     <div className="flex gap-2 items-center">
                                                         <Code size={20} />
-                                                        <p className="text-lg">
+                                                        <p className="text-lg font-semibold text-gray-800">
                                                             Code
                                                         </p>
                                                     </div>
@@ -525,8 +546,8 @@ const IDE: React.FC<IDEProps> = ({
                                                             )
                                                         }
                                                     >
-                                                        <SelectTrigger className="border border-secondary w-[180px]">
-                                                            <SelectValue placeholder="Select Language" />
+                                                        <SelectTrigger className="border w-[180px] bg-white">
+                                                            <SelectValue placeholder="Select language" />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {editorLanguages.map(
@@ -549,12 +570,12 @@ const IDE: React.FC<IDEProps> = ({
                                                 <Editor
                                                     height="90vh"
                                                     language={language}
-                                                    theme="vs-dark"
+                                                    theme="vs"
                                                     value={currentCode}
                                                     onChange={
                                                         handleEditorChange
                                                     }
-                                                    className="p-2"
+                                                    className="p-2 border rounded-b-lg bg-white"
                                                     defaultValue={
                                                         language ||
                                                         'Please Select a language above!'
@@ -571,14 +592,14 @@ const IDE: React.FC<IDEProps> = ({
                             <ResizableHandle withHandle />
                             <ResizablePanel className="" defaultSize={40}>
                                 <div className="flex h-full">
-                                    <div className="w-full max-w-9xl bg-muted px-2 pt-2 pb-10 mx-2">
-                                        <div className="flex justify-between p-2 bg-gray-800 border-b border-gray-700">
-                                            <p className="text-lg text-gray-300">
+                                    <div className="w-full max-w-9xl bg-white px-2 p-4 border rounded-lg shadow-sm">
+                                        <div className="flex justify-between p-3 bg-gray-50 border-b rounded-t-lg">
+                                            <p className="text-lg text-gray-800 font-semibold">
                                                 Output Window
                                             </p>
                                         </div>
 
-                                        <div className="h-full p-4 text-start text-gray-100 overflow-y-auto font-mono bg-gray-900 border border-gray-700 rounded-b-lg">
+                                        <div className="h-full p-4 text-start text-gray-800 overflow-y-auto font-mono  border border-gray-100 rounded-b-lg">
                                             {/* Loader */}
                                             {loading && (
                                                 <div className="flex justify-center items-center my-4">
@@ -598,13 +619,13 @@ const IDE: React.FC<IDEProps> = ({
                                                         ) => (
                                                             <div
                                                                 key={index}
-                                                                className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                                className="shadow-sm rounded-lg p-4 my-4 bg-gray-100 border border-gray-200"
                                                             >
                                                                 {testCase.status !==
                                                                     'Accepted' && (
                                                                     <>
                                                                         <p>
-                                                                            <span className="text-yellow-200">
+                                                                            <span className="text-gray-700 font-medium">
                                                                                 Your
                                                                                 Output:{' '}
                                                                             </span>
@@ -612,14 +633,14 @@ const IDE: React.FC<IDEProps> = ({
                                                                         </p>
 
                                                                         <p>
-                                                                            <span className="text-yellow-200">
+                                                                            <span className="text-gray-700 font-medium">
                                                                                 compileOutput:{' '}
                                                                             </span>
                                                                             {`${testCase?.compileOutput}`}
                                                                         </p>
 
                                                                         <p>
-                                                                            <span className="text-yellow-200">
+                                                                            <span className="text-gray-700 font-medium">
                                                                                 Error:{' '}
                                                                             </span>
                                                                             <span className="font-mono text-destructive">{`${
@@ -629,7 +650,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                         </p>
 
                                                                         <p>
-                                                                            <span className="text-yellow-200">
+                                                                            <span className="text-gray-700 font-medium">
                                                                                 Status:{' '}
                                                                             </span>
                                                                             <span className="font-mono text-destructive">
@@ -641,7 +662,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                         </p>
 
                                                                         <p>
-                                                                            <span className="text-yellow-200">
+                                                                            <span className="text-gray-700 font-medium">
                                                                                 Input:{' '}
                                                                             </span>
                                                                             <br />
@@ -652,7 +673,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                         </p>
 
                                                                         <p>
-                                                                            <span className="text-yellow-200">
+                                                                            <span className="text-gray-700 font-medium">
                                                                                 Expected
                                                                                 Output:{' '}
                                                                             </span>
@@ -677,20 +698,20 @@ const IDE: React.FC<IDEProps> = ({
                                                     ) => (
                                                         <div
                                                             key={index}
-                                                            className="shadow-sm rounded-lg p-4 my-4 bg-gray-800 border border-gray-700"
+                                                            className="shadow-sm rounded-lg p-4 my-4 bg-gray-100 border border-gray-200"
                                                         >
                                                             {testCase.status !==
                                                             'Accepted' ? (
                                                                 <>
-                                                                    <h2 className="text-xl font-semibold mb-2 text-gray-300">
+                                                                    <h2 className="text-xl font-semibold mb-2 text-gray-800">
                                                                         Test
                                                                         Case{' '}
                                                                         {index +
                                                                             1}
                                                                     </h2>
 
-                                                                    <p className="text-gray-300 whitespace-normal break-words">
-                                                                        <span className="text-yellow-200">
+                                                                    <p className="text-gray-800 whitespace-normal break-words">
+                                                                        <span className="font-medium">
                                                                             Your
                                                                             Output:
                                                                         </span>
@@ -698,14 +719,14 @@ const IDE: React.FC<IDEProps> = ({
                                                                     </p>
 
                                                                     <p>
-                                                                        <span className="text-yellow-200">
+                                                                        <span className="font-medium">
                                                                             compileOutput:{' '}
                                                                         </span>
                                                                         {`${testCase?.compileOutput}`}
                                                                     </p>
 
                                                                     <p>
-                                                                        <span className="text-yellow-200">
+                                                                        <span className="font-medium">
                                                                             Error:{' '}
                                                                         </span>
                                                                         {`${
@@ -715,7 +736,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                     </p>
 
                                                                     <p>
-                                                                        <span className="text-yellow-200">
+                                                                        <span className="font-medium">
                                                                             Input:{' '}
                                                                         </span>
                                                                         <br />
@@ -726,7 +747,7 @@ const IDE: React.FC<IDEProps> = ({
                                                                     </p>
 
                                                                     <p>
-                                                                        <span className="text-yellow-200">
+                                                                        <span className="font-medium">
                                                                             Expected
                                                                             Output:{' '}
                                                                         </span>
@@ -739,16 +760,16 @@ const IDE: React.FC<IDEProps> = ({
 
                                                                     <p>
                                                                         {' '}
-                                                                        <span className="text-yellow-200">
+                                                                        <span className="font-medium">
                                                                             {' '}
                                                                             Status:{' '}
                                                                         </span>
                                                                         <span
-                                                                            className={`text-gray-300 ${
+                                                                            className={`${
                                                                                 testCase.status ===
                                                                                 'Accepted'
-                                                                                    ? 'text-green-500'
-                                                                                    : 'text-red-500'
+                                                                                    ? 'text-green-600'
+                                                                                    : 'text-red-600'
                                                                             }`}
                                                                         >
                                                                             {
@@ -759,11 +780,11 @@ const IDE: React.FC<IDEProps> = ({
                                                                 </>
                                                             ) : (
                                                                 <p
-                                                                    className={`text-gray-300 ${
+                                                                    className={`${
                                                                         testCase.status ===
                                                                         'Accepted'
-                                                                            ? 'text-green-500'
-                                                                            : 'text-red-500'
+                                                                            ? 'text-green-600'
+                                                                            : 'text-red-600'
                                                                     }`}
                                                                 >
                                                                     Test Case{' '}
