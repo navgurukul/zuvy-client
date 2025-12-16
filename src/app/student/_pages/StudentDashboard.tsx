@@ -116,6 +116,9 @@ const StudentDashboard = () => {
       </div>
     );
   }
+
+  console.log('studentData:', studentProfile);
+
   return (
     <div className="mb-12">
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-6xl">
@@ -128,6 +131,47 @@ const StudentDashboard = () => {
             What will you be learning today?
           </p>
         </div>
+
+        {/* Zoe Assistant Card */}
+        <Card className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card mb-8 overflow-hidden">
+          <CardContent className="p-0">
+            <div 
+              className="flex flex-col md:flex-row gap-6 p-6 relative"
+              style={{
+                background: 'linear-gradient(135deg, #6AEDAA 0%, #E0FFF0 100%)'
+              }}
+            >
+              {/* Zoe Image */}
+              <div className="flex-shrink-0 flex items-center justify-center md:justify-start">
+                <Image
+                  src="/images/zoe-talking 1 (3).svg"
+                  alt="Zoe Assistant"
+                  width={120}
+                  height={120}
+                  className="object-contain"
+                />
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 flex flex-col justify-center text-left">
+                <h3 className="text-xl font-heading font-bold mb-2 text-gray-800">
+                  I am Zoe, your learning assistant
+                </h3>
+                <p className="text-gray-700 mb-4 md:mb-0">
+                  I will help you get job ready by practicing interviews and learning activities
+                </p>
+              </div>
+
+              {/* Button */}
+              <div className="flex items-center justify-center md:justify-end">
+                <Button onClick={() => window.open(`http://fix-caption-chunking.d1lblqaoxqw0s6.amplifyapp.com
+?studentEmail=${studentProfile?.email}`, '_blank')} className="bg-primary text-white font-semibold">
+                  Learn with zoe
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* My Courses Section */}
         <div className="mb-6">
