@@ -8,7 +8,7 @@ import Editor from '@monaco-editor/react'
 import { b64DecodeUnicode } from '@/utils/base64'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn, difficultyColor } from '@/lib/utils'
-import { FileText, ArrowLeft } from 'lucide-react'
+import { FileText, ArrowLeft, Heading6 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import {
@@ -104,10 +104,10 @@ const Page = ({ params }: PageParams) => {
                                 Back to Course Submissions
                             </Button>
                         </div>
-                        <Card className="bg-card border border-border rounded-2xl p-8 mb-8 shadow-lg">
-                            <CardContent className="p-8 space-y-8">
+                        <Card className="bg-transparent shadow-none border-none p-0">
+                            <CardContent className="px-0 py-8 space-y-8">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-2xl p-6 border border-blue-200/50 dark:border-blue-800/50">
+                                    <div className="bg-card from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 rounded-2xl p-10 border border-blue-200/50 dark:border-blue-800/50">
                                         <div className="flex items-start gap-4">
                                             <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
                                                 <svg
@@ -125,10 +125,10 @@ const Page = ({ params }: PageParams) => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2 uppercase tracking-wide">
+                                                <h6 className="text-lg font-semibold text-foreground">
                                                     Title
-                                                </h3>
-                                                <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                                                </h6>
+                                                <p className="text-sm text-muted-foreground">
                                                     {
                                                         codingSubmissiondata
                                                             ?.questionDetail
@@ -139,7 +139,7 @@ const Page = ({ params }: PageParams) => {
                                         </div>
                                     </div>
 
-                                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-2xl p-6 border border-green-200/50 dark:border-green-800/50">
+                                    <div className="bg-card from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 rounded-2xl p-10 border border-green-200/50 dark:border-green-800/50">
                                         <div className="flex items-start gap-4">
                                             <div className="p-3 bg-green-100 dark:bg-green-900/50 rounded-xl">
                                                 <svg
@@ -157,10 +157,10 @@ const Page = ({ params }: PageParams) => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <h3 className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2 uppercase tracking-wide">
+                                                <h6 className="text-lg font-semibold text-foreground">
                                                     Description
-                                                </h3>
-                                                <p className="text-green-900 dark:text-green-100 leading-relaxed">
+                                                </h6>
+                                                <p className="text-sm text-muted-foreground">
                                                     {
                                                         codingSubmissiondata
                                                             ?.questionDetail
@@ -173,7 +173,7 @@ const Page = ({ params }: PageParams) => {
                                 </div>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-2xl p-6 border border-purple-200/50 dark:border-purple-800/50">
+                                    <div className="bg-card from-purple-50 to-violet-50 dark:from-purple-950/30 dark:to-violet-950/30 rounded-2xl p-10 border border-purple-200/50 dark:border-purple-800/50">
                                         <div className="flex items-start gap-4">
                                             <div className="p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl">
                                                 <svg
@@ -191,25 +191,26 @@ const Page = ({ params }: PageParams) => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 uppercase tracking-wide">Difficulty Level</h3>
+                                                <h6 className="text-lg font-semibold text-foreground">Difficulty Level</h6>
                                                 <span className={cn(
-                                                    `inline-flex items-center px-4 py-2 rounded-full text-sm font-bold`,
+                                                    `text-sm text-muted-foreground`,
                                                     difficultyColor(
                                                         codingSubmissiondata?.questionDetail
                                                             ?.difficulty
                                                     ))}>
-                                                    <div className="w-2 h-2 rounded-full mr-2 bg-current"></div>
+                                                    <p className="text-sm text-muted-foreground">
                                                     {
                                                         codingSubmissiondata
                                                             ?.questionDetail
                                                             ?.difficulty
                                                     }
+                                                    </p>
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30 rounded-2xl p-6 border border-orange-200/50 dark:border-orange-800/50">
+                                    <div className="bg-card from-orange-50 to-red-50 dark:from-orange-950/30 dark:to-red-950/30 rounded-2xl p-10 border border-orange-200/50 dark:border-orange-800/50">
                                         <div className="flex items-start gap-4">
                                             <div className="p-3 bg-orange-100 dark:bg-orange-900/50 rounded-xl">
                                                 <svg
@@ -227,8 +228,8 @@ const Page = ({ params }: PageParams) => {
                                                 </svg>
                                             </div>
                                             <div className="flex-1 text-left">
-                                                <h3 className="text-sm font-semibold text-orange-800 dark:text-orange-300 mb-2 uppercase tracking-wide">Constraints</h3>
-                                                <p className="text-orange-900 dark:text-orange-100 text-sm leading-relaxed break-words">
+                                                <h6 className="text-lg font-semibold text-foreground">Constraints</h6>
+                                                <p className="text-sm text-muted-foreground">
                                                     {
                                                         codingSubmissiondata
                                                             ?.questionDetail
@@ -243,15 +244,7 @@ const Page = ({ params }: PageParams) => {
                         </Card>
 
                         <div className="flex flex-col md:flex-row gap-4 mb-8">
-                            <div className="w-full md:w-1/2">
-                                <TestCaseResults
-                                    testCases={
-                                        codingSubmissiondata?.TestCasesSubmission
-                                    }
-                                />
-                            </div>
-
-                            <div className="w-full md:w-1/2">
+                        <div className="w-full md:w-1/2">
                                 <div className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden">
                                     <div className="bg-gradient-to-r from-muted/30 to-muted/10 px-6 py-4 border-b border-border">
                                         <div className="flex items-center space-x-3">
@@ -287,6 +280,15 @@ const Page = ({ params }: PageParams) => {
                                     </div>
                                 </div>
                             </div>
+                            <div className="w-full md:w-1/2">
+                                <TestCaseResults
+                                    testCases={
+                                        codingSubmissiondata?.TestCasesSubmission
+                                    }
+                                />
+                            </div>
+
+                          
                         </div>
                     </MaxWidthWrapper>
                 </div>
