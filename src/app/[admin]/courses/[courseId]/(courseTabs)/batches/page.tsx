@@ -809,9 +809,9 @@ const Page = ({ params }: { params: ParamsType }) => {
                             enhancedBatchData?.map((batch: EnhancedBatch) => (
                                 <Card
                                     key={batch.id}
-                                    className="hover:shadow-lg transition-all duration-200 flex flex-col w-[380px]"
+                                    className="hover:shadow-lg transition-all duration-200 flex flex-col w-full max-w-[420px]"
                                 >
-                                    <CardHeader className="pb-3">
+                                    <CardHeader className="pb-4">
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1 text-left">
                                                 <TooltipProvider>
@@ -841,10 +841,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                         batch.status
                                                     )}`}
                                                 >
-                                                    {batch.status.replace(
-                                                        '_',
-                                                        ' '
-                                                    )}
+                                                    {batch.status.replace('_', ' ')}
                                                 </Badge>
                                             </div>
                                             <div className="flex gap-1">
@@ -880,7 +877,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                         </div>
                                     </CardHeader>
 
-                                    <CardContent className="space-y-3">
+                                    <CardContent className="space-y-4">
                                         <div className="flex items-center gap-2 text-sm">
                                             <Mail className="h-4 w-4 text-muted-foreground" />
                                             <span className="text-muted-foreground">
@@ -919,7 +916,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                         )}
                                     </CardContent>
 
-                                    <CardFooter className="pt-3">
+                                    <CardFooter className="pt-4">
                                         <Button
                                            
                                             size="sm"
