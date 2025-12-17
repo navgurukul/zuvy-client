@@ -37,7 +37,7 @@ const TestCaseResults = ({ testCases }: any) => {
                                     />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-semibold text-foreground">
+                                    <h2 className="text-left text-lg font-semibold text-foreground">
                                         Test Results
                                     </h2>
                                     <p className="text-sm text-muted-foreground">

@@ -27,6 +27,7 @@ import {
     ListItemExtension,
 } from 'remirror/extensions'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { api } from "@/utils/axios.config"
 import { Toolbar } from './Toolbar'
 import './remirror-editor.css'
 import useWindowSize from '@/hooks/useHeightWidth'
@@ -127,67 +128,60 @@ const CodeBlockHelper = () => {
 
 // Custom hook to handle paste events
 const usePasteImageHandler = () => {
-    const commands = useCommands()
-    const toastShownRef = useRef(false)
+    const commands = useCommands();
 
     useEditorEvent('paste', (event) => {
-        const clipboardData = event.clipboardData
-        if (!clipboardData) return false
+        const clipboard = event.clipboardData;
+        if (!clipboard) return false;
 
-        const items = Array.from(clipboardData.items)
-        const imageItem = items.find(item => item.type.startsWith('image/'))
+        const items = Array.from(clipboard.items);
+        const imageItems = items.filter(
+            item => item.kind === "file" && item.type.startsWith("image/")
+        );
 
-        if (imageItem) {
-            event.preventDefault()
-            
-            const file = imageItem.getAsFile()
-            if (!file) return true
+        // Agar image nahi hai → normal paste allow
+        if (imageItems.length === 0) return false;
 
-            // Process image compression asynchronously
-            const processImage = async () => {
-                try {
-                    // Show loading toast
-                    if (!toastShownRef.current) {
-                        // toast.info({
-                        //     title: 'Processing Image',
-                        //     description: 'Compressing image, please wait...',
-                        // })
-                        toastShownRef.current = true
+        event.preventDefault();
+
+        const uploadImages = async () => {
+            try {
+                for (const item of imageItems) {
+                    const file = item.getAsFile();
+                    if (!file) continue;
+
+                    const formData = new FormData();
+                    formData.append("images", file, file.name);
+
+                    const res = await api.post(
+                        "/Content/curriculum/upload-images",
+                        formData,
+                        {
+                            headers: { "Content-Type": "multipart/form-data" },
+                        }
+                    );
+
+                    const url = res?.data?.urls?.[0];
+                    if (url) {
+                        commands.insertImage({
+                            src: url,
+                            alt: "pasted image",
+                        });
                     }
-
-                    // Compress the image
-                    const compressedBase64 = await compressImage(file, 800, 0.6)
-
-                    // Insert the compressed image
-                    commands.insertImage({ src: compressedBase64 })
-
-                    // Show success toast
-                    setTimeout(() => {
-                        toast.success({
-                            title: 'Image Added',
-                            description: 'Image compressed and inserted successfully.',
-                        })
-                        toastShownRef.current = false
-                    }, 500)
-
-                } catch (error) {
-                    console.error('Failed to compress image:', error)
-                    toast.error({
-                        title: 'Error',
-                        description: 'Failed to process image. Please try again.',
-                    })
-                    toastShownRef.current = false
                 }
+            } catch (error) {
+                console.error("Paste image upload failed:", error);
             }
+        };
 
-            // Call async function without awaiting
-            processImage()
-            return true
-        }
+        uploadImages();
+        return true;
+    });
+};
 
-        return false
-    })
-}
+
+
+
 
 const EditorWithPasteHandler = () => {
     usePasteImageHandler()

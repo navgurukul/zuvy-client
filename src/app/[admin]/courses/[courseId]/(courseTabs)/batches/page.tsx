@@ -804,7 +804,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                       <BatchesSkeleton/>  
                 ) : (
                     /* Batch Cards Grid - Updated Design */
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                         {(enhancedBatchData?.length ?? 0) > 0 ? (
                             enhancedBatchData?.map((batch: EnhancedBatch) => (
                                 <Card
