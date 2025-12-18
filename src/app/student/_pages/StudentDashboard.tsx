@@ -26,7 +26,7 @@ const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const { studentData, loading, error, refetch } = useStudentData();
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
-
+  const access_token = localStorage.getItem('access_token')
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const {isStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const router = useRouter();
@@ -133,7 +133,7 @@ const StudentDashboard = () => {
         </div>
 
         {/* Zoe Assistant Card */}
-        <Card className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card mb-8 overflow-hidden">
+        <Card className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card mb-8 overflow-hidden">
           <CardContent className="p-0">
             <div 
               className="flex flex-col md:flex-row gap-6 p-6 relative"
@@ -165,7 +165,7 @@ const StudentDashboard = () => {
               {/* Button */}
               <div className="flex items-center justify-center md:justify-end">
                 <Button onClick={() => window.open(`http://fix-caption-chunking.d1lblqaoxqw0s6.amplifyapp.com
-?studentEmail=${studentProfile?.email}`, '_blank')} className="bg-primary text-white font-semibold">
+?token=${access_token}`, '_blank')} className="bg-primary text-white font-semibold">
                   Learn with zoe
                 </Button>
               </div>
