@@ -28,7 +28,7 @@ const StudentDashboard = () => {
   const { isDark } = useThemeStore()
   
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
-
+  const access_token = localStorage.getItem('access_token')
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const {isStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const router = useRouter();
@@ -251,7 +251,7 @@ const formatUpcomingItem = (item: any) => {
             What will you be learning today?
           </p>
         </div>
-        <Card  className="w-full bg-gradient-to-r from-[#6AEDAA] to-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
+        <Card  className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
           <CardContent className="p-0 relative">
             <div 
               className="absolute inset-0 w-full h-full"
@@ -289,7 +289,7 @@ const formatUpcomingItem = (item: any) => {
               {/* Button */}
               <div className="flex items-center justify-center md:justify-end flex-shrink-0">
                 <Button  onClick={() => window.open(`http://fix-caption-chunking.d1lblqaoxqw0s6.amplifyapp.com
-?studentEmail=${studentProfile?.email}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
+?token=${access_token}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
                   Learn with zoe
                 </Button>
               </div>
