@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=sentient@300,400,401,500,700,701,1&f[]=rajdhani@300,400,500,600,700,1&f[]=jet-brains-mono@300,400,401,700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -12,110 +12,84 @@
 @layer base {
   :root {
     /* Base Colors - The foundation of your interface */
-    --background: 0 0% 100%;           /* Pure white background for maximum readability */
-    --foreground: 222.2 84% 4.9%;     /* Deep charcoal for primary text - ensures excellent contrast */
+    --background: 48 30% 95%;         
+    --foreground: 0 0% 17%;    /* Deep charcoal for primary text - ensures excellent contrast */
     
-    /* Card and Surface Colors - Creates depth and hierarchy, aligned with refined primary blue hue */
-    --card: 224 30% 97%;              /* Subtle blue-tinted off-white that harmonizes with refined primary blue */
-    --card-light: 224 25% 98.5%;      /* Even more subtle card variant for minimal elevation */
-    --card-elevated: 224 40% 95.5%;   /* Slightly more pronounced card for important content */
-    --card-foreground: 222.2 84% 4.9%; /* Consistent text color across all surfaces */
+    /* Card and Surface Colors - Light Mode */
+    --card: 0 0% 100%;            
+    --card-light: 0 0% 100%;     
+    --card-elevated: 0 0% 99%;   
+    --card-foreground: 0 0% 17%; 
     
     /* Popover and Modal Colors - Maintains visual consistency */
     --popover: 0 0% 100%;             /* White background for dropdowns and overlays */
     --popover-foreground: 222.2 84% 4.9%; /* Same readable text color */
     
-    /* Primary Brand Colors - Refined, focused blue that reduces visual fatigue */
-    --primary: 224 71% 56%;           /* #4f6dcf - Refined blue that is confident and stable */
-    --primary-light: 224 71% 95%;     /* Much lighter blue for subtle backgrounds */
-    --primary-dark: 224 71% 36%;      /* Darker blue for emphasis and active states */
-    --primary-foreground: 210 20% 98%; /* Light text on primary backgrounds for accessibility */
+    /* Primary Brand Colors - Light Mode - Forest Green */
+    --primary: 122 36% 27%;
+    --primary-light: 130 38% 94%;
+    --primary-dark: 122 42% 19%;
+    --primary-foreground: 0 0% 100%;
     
-    /* Secondary Brand Colors - Warm orange-coral recalibrated to complement new primary */
-    --secondary: 25 85% 55%;          /* #f57b29 - Warm orange-coral for dynamic contrast with refined blue */
-    --secondary-light: 25 85% 95%;    /* Much lighter orange for subtle backgrounds */
-    --secondary-dark: 25 85% 35%;     /* Dark orange for strong emphasis and active states */
-    --secondary-foreground: 210 20% 98%; /* Light text maintains readability on orange backgrounds */
-    
-    /* Muted Colors - Subtle backgrounds and disabled states with variants */
-    --muted: 210 40% 96%;             /* Very light blue-gray for subtle backgrounds */
-    --muted-light: 210 40% 98%;       /* Even lighter muted for the most subtle backgrounds */
-    --muted-dark: 210 40% 90%;        /* Slightly darker muted for better definition */
-    --muted-foreground: 215.4 16.3% 46.9%; /* Medium gray for secondary text and descriptions */
-    
-    /* Accent Colors - Energizing cyan tempered to avoid visual distraction */
-    --accent: 198 80% 50%;            /* #19b2d8 - Cyan that maintains alertness without overstimulation */
-    --accent-light: 198 80% 95%;      /* Much lighter cyan for subtle backgrounds */
-    --accent-dark: 198 80% 30%;       /* Dark cyan for strong emphasis and depth */
-    --accent-foreground: 210 20% 98%; /* Light text on accent backgrounds */
-    
-    /* Destructive/Error Colors - Clear feedback without harsh alarm, with variants */
-    --destructive: 0 84.2% 60.2%;     /* #ef4444 - Clear but not aggressive red for errors */
-    --destructive-light: 0 84.2% 95%; /* Much lighter red for subtle backgrounds */
-    --destructive-dark: 0 84.2% 40.2%; /* #dc2626 - Dark red for strong error emphasis */
-    --destructive-foreground: 210 20% 98%; /* Light text on error backgrounds */
-    
-    /* Border and Outline Colors - Subtle definition without distraction */
-    --border: 214.3 31.8% 91.4%;      /* Light blue-gray borders that complement the theme */
-    --input: 214.3 31.8% 91.4%;       /* Same as border for input field consistency */
-    --ring: 224 71% 56%;              /* Refined primary blue for focus rings - maintains brand consistency */
-    
-    /* Radius Values - Modern, friendly corner rounding */
-    --radius: 0.5rem;                 /* 8px radius for a modern, approachable feel */
+    /* Secondary Brand Colors - Light Mode - Bright Teal */
+    --secondary: 146 88% 50%;
+    --secondary-light: 150 100% 94%;
+    --secondary-dark: 146 84% 39%;
+    --secondary-foreground: 0 0% 10%;
 
-    /* Success Colors - For achievements and positive feedback with variants */
-    --success: 160 84.1% 39.4%;        /* #10b981 - Green that celebrates accomplishment */
-    --success-light: 160 84.1% 95%;    /* Much lighter green for subtle backgrounds */
-    --success-dark: 160 84.1% 19.4%;   /* #065f46 - Dark green for strong success emphasis */
-    --success-foreground: 0 0% 98%;    /* Light text on success backgrounds */
-    
-    /* Warning Colors - For important notices and alerts with variants */
-    --warning: 45.4 93.4% 47.5%;       /* #f59e0b - Amber that draws attention without alarm */
-    --warning-light: 45.4 93.4% 95%;   /* Much lighter amber for subtle backgrounds */
-    --warning-dark: 45.4 93.4% 27.5%;  /* #d97706 - Dark amber for strong warning emphasis */
-    --warning-foreground: 26 83.3% 14.1%; /* Dark text on warning backgrounds */
-    
-    /* Info Colors - For helpful tips and supplementary information using new accent */
-    --info: 198 80% 50%;               /* Using our refined accent cyan for informational content */
-    --info-light: 198 80% 95%;         /* Much lighter cyan for subtle backgrounds */
-    --info-dark: 198 80% 30%;          /* Dark cyan for strong info emphasis */
-    --info-foreground: 210 20% 98%;    /* Light text on info backgrounds */
-    
-    /* Learning Progress Colors - For progress bars and completion indicators */
-    --progress-bg: 224 71% 95%;        /* Light primary background for progress containers */
-    --progress-fill: 224 71% 56%;      /* Refined primary blue for progress fill */
-    
-    /* Interactive States - Hover and active states that enhance the neural theme */
-    --hover-overlay: 224 71% 56% / 0.1;    /* 10% refined primary overlay for hover states */
-    --active-overlay: 224 71% 56% / 0.2;   /* 20% refined primary overlay for active states */
+    /* Accent Colors - Light Mode - Amber Gold */
+    --accent: 38 92% 50%;
+    --accent-light: 45 93% 89%;
+    --accent-dark: 32 95% 44%;
+    --accent-foreground: 0 0% 10%;
 
-    /* Shadow System - Material Design inspired elevation system with refined Neural Nexus blue tints */
-    --shadow-2dp: 0 1px 3px 0 rgba(79, 109, 207, 0.1), 0 1px 2px 0 rgba(79, 109, 207, 0.06);
-    --shadow-4dp: 0 2px 4px -1px rgba(79, 109, 207, 0.1), 0 1px 2px -1px rgba(79, 109, 207, 0.06);
-    --shadow-8dp: 0 4px 6px -1px rgba(79, 109, 207, 0.1), 0 2px 4px -2px rgba(79, 109, 207, 0.1);
-    --shadow-16dp: 0 10px 15px -3px rgba(79, 109, 207, 0.1), 0 4px 6px -4px rgba(79, 109, 207, 0.1);
-    --shadow-24dp: 0 20px 25px -5px rgba(79, 109, 207, 0.1), 0 8px 10px -6px rgba(79, 109, 207, 0.1);
-    --shadow-32dp: 0 25px 50px -12px rgba(79, 109, 207, 0.25);
-    
-    /* Specialized shadows for different interaction states */
-    --shadow-hover: 0 8px 25px -8px rgba(79, 109, 207, 0.15);
-    --shadow-focus: 0 0 0 2px rgba(79, 109, 207, 0.2);
-    --shadow-pressed: 0 1px 3px 0 rgba(79, 109, 207, 0.2);
-    
-    /* Colored shadows for semantic feedback */
-    --shadow-success: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -2px rgba(16, 185, 129, 0.1);
-    --shadow-warning: 0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -2px rgba(245, 158, 11, 0.1);
-    --shadow-error: 0 4px 6px -1px rgba(239, 68, 68, 0.1), 0 2px 4px -2px rgba(239, 68, 68, 0.1);
-    --shadow-info: 0 4px 6px -1px rgba(25, 178, 216, 0.1), 0 2px 4px -2px rgba(25, 178, 216, 0.1);
+    /* Muted Colors - Light Mode */
+    --muted: 0 0% 54%;
+    --muted-light: 48 23% 90%;
+    --muted-dark: 0 0% 37%;
+    --muted-foreground: 0 0% 54%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 224 71% 56%;
+    /* Semantic Colors - Light Mode */
+    --success: 88 45% 48%;
+    --success-light: 88 45% 94%;
+    --success-dark: 88 49% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-light: 45 93% 89%;
+    --warning-dark: 32 95% 44%;
+    --warning-foreground: 0 0% 10%;
+
+    --destructive: 0 63% 51%;
+    --destructive-light: 0 100% 96%;
+    --destructive-dark: 0 74% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    --info: 207 79% 46%;
+    --info-light: 210 100% 95%;
+    --info-dark: 213 86% 34%;
+    --info-foreground: 0 0% 100%;
+
+    /* Border and Input Colors - Light Mode */
+    --border: 48 23% 90%;
+    --input: 48 23% 90%;
+    --ring: 122 36% 27%;
+
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 17%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 17%;
+    --sidebar-primary: 122 36% 27%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 99%;
+    --sidebar-accent-foreground: 0 0% 17%;
+    --sidebar-border: 48 23% 90%;
+    --sidebar-ring: 122 36% 27%;
   }
 
   /* Dark Mode Configuration - Warm, comfortable dark theme */
