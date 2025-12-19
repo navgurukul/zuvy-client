@@ -1,6 +1,6 @@
 'use client'
 
-import { PlusCircle, Pencil, SquareCode, Eye } from 'lucide-react'
+import { PlusCircle, Pencil, SquareCode } from 'lucide-react'
 import React, { useEffect, useState, useRef } from 'react'
 import { cn, difficultyBgColor, difficultyColor, ellipsis } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -12,7 +12,6 @@ import useDebounce from '@/hooks/useDebounce'
 import {
     getChapterUpdateStatus,
     getCodingQuestionTags,
-    getCodingPreviewStore,
     getUser,
 } from '@/store/store'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
@@ -43,7 +42,6 @@ function CodingChallenge({
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const { setCodingPreviewContent } = getCodingPreviewStore()
     const [alertOpen, setAlertOpen] = useState(!canEdit)
 
     const chapterSchema = z.object({
@@ -263,31 +261,6 @@ useEffect(() => {
         setChapterTitle(activeChapterTitle)
     }, [activeChapterTitle])
 
-    function previewCodingChallenge() {
-        if (!selectedQuestions || selectedQuestions.length === 0) {
-            return toast.error({
-                title: 'Cannot Preview',
-                description: 'Nothing to Preview please save coding question.',
-            })
-        }
-        // Check if question is selected but not saved
-        if (!isSaved) {
-            return toast.error({
-                title: 'Cannot Preview',
-                description:
-                    'Please save the selected question before previewing.',
-            })
-        }
-        const updatedContent = {
-            ...content,
-            codingQuestionDetails: selectedQuestions,
-        }
-        setCodingPreviewContent(updatedContent)
-        router.push(
-            `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/coding/${content.topicId}/preview`
-        )
-    }
-
     if (isDataLoading) {
         return<CodingChallengeSkeleton/>
     }
@@ -336,16 +309,6 @@ useEffect(() => {
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                    <div
-                                        id="previewCodingChallenge"
-                                        onClick={previewCodingChallenge}
-                                        className="flex w-[80px] text-gray-600 hover:bg-gray-300 rounded-md p-1 cursor-pointer"
-                                    >
-                                        <Eye size={18} />
-                                        <h6 className="ml-1 text-sm">
-                                            Preview
-                                        </h6>
-                                    </div>
 
                                     {selectedQuestions?.length > 0 && (
                                         <Button
