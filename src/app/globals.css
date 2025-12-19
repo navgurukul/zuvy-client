@@ -43,11 +43,15 @@
     --accent-dark: 32 95% 44%;
     --accent-foreground: 0 0% 10%;
 
-    /* Muted Colors - Light Mode */
-    --muted: 0 0% 54%;
-    --muted-light: 48 23% 90%;
-    --muted-dark: 0 0% 37%;
-    --muted-foreground: 0 0% 54%;
+    /* Muted Colors - Subtle backgrounds and disabled states with variants */
+    --muted: 210 40% 96%;
+    /* Very light blue-gray for subtle backgrounds */
+    --muted-light: 210 40% 98%;
+    /* Even lighter muted for the most subtle backgrounds */
+    --muted-dark: 210 40% 90%;
+    /* Slightly darker muted for better definition */
+    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Medium gray for secondary text and descriptions */
 
     /* Semantic Colors - Light Mode */
     --success: 88 45% 48%;
