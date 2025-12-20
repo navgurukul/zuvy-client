@@ -439,6 +439,11 @@ const AddForm: React.FC<AddFormProps> = ({
 }, [content?.formQuestionDetails])
 
 
+console.log("canEdit", canEdit)
+console.log('isSubmitting', isSubmitting)
+console.log('form.formState.isValid', form.formState.isValid)
+console.log('isTitleChanged', isTitleChanged)
+
 
     if (isDataLoading) {
        return <FeedbackFormSkeleton/>
@@ -586,7 +591,8 @@ const AddForm: React.FC<AddFormProps> = ({
                             <Button
                                 type="button"
                                 onClick={handleSaveClick}
-                                disabled={!canEdit || isSubmitting || (!form.formState.isValid && !isTitleChanged)}
+                                // disabled={!canEdit || isSubmitting || (!form.formState.isValid && !isTitleChanged)}
+                                disabled={isSubmitting || (!form.formState.isValid)}
                                 aria-label="Save form changes"
                                 aria-busy={isSubmitting}
                                 className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90"
