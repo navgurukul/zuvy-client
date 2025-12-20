@@ -46,40 +46,44 @@ export const columns: ColumnDef<Task>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: 'name',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
-        ),
-        cell: ({ row }) => {
-            const name = row.original.name
-
-            return (
-                <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
-                        {name}
-                    </span>
-                </div>
-            )
-        },
-        enableSorting: false,
-        enableHiding: false,
+      accessorKey: 'name',
+      id: 'name',
+      header: ({ column, onSort }: any) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Student Name"
+          onSort={onSort}
+          sortField="name"
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+            <span className="max-w-[500px] truncate font-medium">
+              {row.original.name}
+            </span>
+        </div>
+      ),
+      enableHiding: false,
     },
-    {
-        accessorKey: 'emailId',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
-        ),
-        cell: ({ row }) => {
-            const email = row.original.emailId
 
-            return (
-                <div className="flex space-x-2">
-                    <span className="max-w-[500px] truncate font-medium">
-                        {email}
-                    </span>
-                </div>
-            )
-        },
+    {
+      accessorKey: 'emailId',
+      id: 'email',
+      header: ({ column, onSort }: any) => (
+        <DataTableColumnHeader
+          column={column}
+          title="Email"
+          onSort={onSort}
+          sortField="email"
+        />
+      ),
+      cell: ({ row }) => (
+        <div className="flex space-x-2">
+          <span className="max-w-[500px] truncate font-medium">
+            {row.original.emailId}
+          </span>
+        </div>
+      ),
     },
     {
         accessorKey: 'batch',

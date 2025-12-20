@@ -21,6 +21,8 @@ const PracticeProblems = ({ params }: any) => {
     const [loading, setLoading] = useState(false)
     const [selectedBatch, setSelectedBatch] = useState('All Batches')
     const [crumbData, setCrumbData] = useState<string[]>([])
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
     // Dummy batch data
     const batchOptions = [
@@ -50,8 +52,14 @@ const PracticeProblems = ({ params }: any) => {
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
 
+        const queryParams = new URLSearchParams()
+        queryParams.append('searchStudent', query)
+
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+
         const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&searchStudent=${encodeURIComponent(query)}`
+            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
         )
 
         const students = res.data.data.map((student: any) => ({
@@ -64,13 +72,18 @@ const PracticeProblems = ({ params }: any) => {
 
         setStudentStatus(students)
         setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData])
+    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection])
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
 
+        const queryParams = new URLSearchParams()
+
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+
         const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}`
+            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
         )
 
         const students = res.data.data.map((student: any) => ({
@@ -83,7 +96,7 @@ const PracticeProblems = ({ params }: any) => {
 
         setStudentStatus(students)
         setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData])
+    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -136,11 +149,17 @@ const PracticeProblems = ({ params }: any) => {
         fetchInitialData()
     }, [params.courseId, params.StudentProblemData])
 
+  // Handle sorting change
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
     useEffect(() => {
         if (matchingData) {
             defaultFetchApi()
         }
-    }, [matchingData])
+    }, [matchingData, sortField, sortDirection, defaultFetchApi])
 
     return (
         <>
@@ -217,7 +236,11 @@ const PracticeProblems = ({ params }: any) => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <DataTable data={studentStatus} columns={columns} />
+                    <DataTable 
+                        data={studentStatus} 
+                        columns={columns}
+                        onSortingChange={handleSortingChange}
+                    />
                 </CardContent>
             </Card>
         </>

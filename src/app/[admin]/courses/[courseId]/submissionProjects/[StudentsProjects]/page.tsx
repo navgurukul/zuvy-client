@@ -22,6 +22,8 @@ const Page = ({ params }: any) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [selectedBatch, setSelectedBatch] = useState('All Batches')
     const [submitStudents, setSubmitStudents] = useState<number>(0)
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
     // Dummy batch data
     const batchOptions = [
@@ -39,7 +41,7 @@ const Page = ({ params }: any) => {
 
         // try {
         const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&searchStudent=${encodeURIComponent(query)}&limit=5&offset=0`
+            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&searchStudent=${encodeURIComponent(query)}&limit=10&offset=0`
         )
         return res.data.projectSubmissionData?.projectTrackingData?.map((student: any) => ({
             id: student.id,
@@ -51,21 +53,42 @@ const Page = ({ params }: any) => {
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
+    
+        const queryParams = new URLSearchParams()
+        queryParams.append('searchStudent', query)
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
         const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&searchStudent=${encodeURIComponent(query)}&limit=100&offset=0`
+            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`
         )
+    
         const students = res.data.projectSubmissionData?.projectTrackingData || []
         setProjectStudentData(students)
-    }, [params.courseId, params.StudentsProjects])
+        setLoading(false)
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection])
+    
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
+    
+        const queryParams = new URLSearchParams()
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
         const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}`
+            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`
         )
+    
         const students = res.data.projectSubmissionData?.projectTrackingData || []
         setProjectStudentData(students)
-    }, [params.courseId, params.StudentsProjects])
+        setLoading(false)
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection])
+    
 
     const getProjectsData = useCallback(async () => {
         try {
@@ -89,10 +112,20 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
+    // Handle sorting change
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
     useEffect(() => {
         getProjectsData()
         getBootcampHandler()
     }, [getProjectsData, getBootcampHandler])
+
+    useEffect(() => {
+        defaultFetchApi()
+    }, [sortField, sortDirection, defaultFetchApi])
 
     return (
         <>
@@ -175,7 +208,11 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={projectStudentData} columns={columns} />
+                    <DataTable 
+                        data={projectStudentData} 
+                        columns={columns}
+                        onSortingChange={handleSortingChange}
+                    />
                 </CardContent>
             </Card>
         </>

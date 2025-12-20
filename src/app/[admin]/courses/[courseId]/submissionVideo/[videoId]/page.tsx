@@ -14,6 +14,10 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
 
 type Props = {}
+interface BatchFilter {
+    id: number
+    name: string
+  }
 
 const Page = ({ params }: any) => {
     const router = useRouter()
@@ -21,18 +25,27 @@ const Page = ({ params }: any) => {
     const [dataTableVideo, setDataTableVideo] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [batches, setBatches] = useState<BatchFilter[]>([])
 
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A'
-    ]
 
+    useEffect(() => {
+        if (!dataTableVideo?.length) return
+    
+        const map = new Map<number, BatchFilter>()
+    
+        dataTableVideo.forEach((student: any) => {
+            if (student.batchId && student.batchName) {
+                map.set(student.batchId, {
+                    id: student.batchId,
+                    name: student.batchName,
+                })
+            }
+        })
+    
+        setBatches(Array.from(map.values()))
+    }, [dataTableVideo])
+    
     // API functions for the hook - exactly like your pattern
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -49,29 +62,51 @@ const Page = ({ params }: any) => {
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
-
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${encodeURIComponent(query)}&limit=10&offset=0`
+    
+        const queryParams = new URLSearchParams()
+        queryParams.append('searchStudent', query)
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
         const response = await api.get(url)
-
-        const students = response.data.submittedStudents || []
-        setDataTableVideo(students)
+    
+        setDataTableVideo(response.data.submittedStudents || [])
         setVideoData(response.data.moduleVideochapter)
-
+    
         setLoading(false)
-    }, [params.videoId])
+    }, [params.videoId, selectedBatch])
+    
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
-
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}`
+    
+        const queryParams = new URLSearchParams()
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        const url = queryParams.toString()
+            ? `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
+            : `/admin/moduleChapter/students/chapter_id${params.videoId}`
+    
         const response = await api.get(url)
-
+    
         const students = response.data.submittedStudents || []
         setDataTableVideo(students)
         setVideoData(response.data.moduleVideochapter)
-
+    
         setLoading(false)
-    }, [params.videoId])
+    }, [params.videoId, selectedBatch])
+    useEffect(() => {
+        defaultFetchApi()
+    }, [selectedBatch])
+    
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -131,10 +166,12 @@ const Page = ({ params }: any) => {
                                         <SelectValue placeholder="All Batches" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Batches</SelectItem>
-                                        {batchOptions.map((batch, index) => (
-                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
-                                        ))}
+                                    <SelectItem value="all">All Batches</SelectItem>
+        {batches.map(batch => (
+            <SelectItem key={batch.id} value={batch.id.toString()}>
+                {batch.name}
+            </SelectItem>
+        ))}
                                     </SelectContent>
 
                                 </Select>
