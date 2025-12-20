@@ -170,8 +170,7 @@ const StudentDashboard = () => {
 
               {/* Button */}
               <div className="flex items-center justify-center md:justify-end flex-shrink-0">
-                <Button  onClick={() => window.open(`http://fix-caption-chunking.d1lblqaoxqw0s6.amplifyapp.com
-?token=${access_token}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
+                <Button  onClick={() => window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
                   Learn with zoe
                 </Button>
               </div>
