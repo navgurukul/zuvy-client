@@ -83,6 +83,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     const [isTitleChanged, setIsTitleChanged] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -262,7 +263,8 @@ const AddForm: React.FC<AddFormProps> = ({
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         // full-form submit: reset title-changed flag here because we're saving everything
-        setIsTitleChanged(false)
+        // setIsTitleChanged(false)
+        setIsEditing(false)
         // ✅ VALIDATION CHECK
         const validationErrors = validateQuestionsWithOptions(values.questions)
 
@@ -389,7 +391,8 @@ const AddForm: React.FC<AddFormProps> = ({
             await editChapter(moduleId, content.id, { title: titles })
             toast.success({ title: 'Success', description: 'Title updated successfully' })
             setIsChapterUpdated(!isChapterUpdated)
-            setIsTitleChanged(false)
+            // setIsTitleChanged(false)
+            setIsEditing(false)
             setIsSaved(true)
         } catch (err: any) {
             toast.error({ title: 'Failed', description: err.response?.data?.message || err.message || 'An error occurred.' })
@@ -438,11 +441,20 @@ const AddForm: React.FC<AddFormProps> = ({
     }
 }, [content?.formQuestionDetails])
 
+// useEffect(() => {
+//     if (form.formState.isValid) {
+//         setIsEditing(true)
+//     }
+// }, [form.formState.isValid])
 
-console.log("canEdit", canEdit)
+
+console.log("!canEdit", !canEdit)
 console.log('isSubmitting', isSubmitting)
-console.log('form.formState.isValid', form.formState.isValid)
-console.log('isTitleChanged', isTitleChanged)
+console.log('!isEditing', !isEditing)
+console.log('!form.formState.isValid', !form.formState.isValid)
+console.log('!isTitleChanged', !isTitleChanged)
+
+console.log('enabling save button?', !canEdit || isSubmitting || !isEditing || (!form.formState.isValid && !isTitleChanged))
 
 
     if (isDataLoading) {
@@ -483,7 +495,8 @@ console.log('isTitleChanged', isTitleChanged)
                                                 {...field}
                                                 onChange={(e) => {
                                                     setTitles(e.target.value)
-                                                    setIsTitleChanged(true)
+                                                    // setIsTitleChanged(true)
+                                                    setIsEditing(true)
                                                     field.onChange(e)
                                                 }}
                                                 placeholder="Untitled Form"
@@ -558,6 +571,7 @@ console.log('isTitleChanged', isTitleChanged)
                                     deleteQuestion={deleteQuestion}
                                     formData={questions}
                                     canEdit={canEdit}
+                                    setIsEditing={setIsEditing}
                                 />
                                 {/* ✅ ERROR MESSAGE DISPLAY */}
                                 {form.formState.errors.questions?.[index]
@@ -591,8 +605,10 @@ console.log('isTitleChanged', isTitleChanged)
                             <Button
                                 type="button"
                                 onClick={handleSaveClick}
-                                // disabled={!canEdit || isSubmitting || (!form.formState.isValid && !isTitleChanged)}
-                                disabled={isSubmitting || (!form.formState.isValid)}
+                                // disabled={!canEdit || isSubmitting || (!form.formState.isValid || isTitleChanged)  ? (!isEditing && !form.formState.isValid && !isTitleChanged) : !isEditing }
+                                // disabled={!canEdit || isSubmitting || (form.formState.isValid && !isEditing)  || (!form.formState.isValid && isEditing) }
+                                disabled={!canEdit || isSubmitting || !form.formState.isValid || !isEditing}
+                                // disabled={isSubmitting || (!form.formState.isValid)}
                                 aria-label="Save form changes"
                                 aria-busy={isSubmitting}
                                 className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90"

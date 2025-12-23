@@ -66,7 +66,8 @@ const FormSection: React.FC<FormSectionProps> = ({
     form,
     deleteQuestion,
     formData,
-    canEdit = true
+    canEdit = true,
+    setIsEditing
 }) => {
     const questionData = formData[index] || {}
     const [selectedSection, setSelectedSection] = useState(
@@ -141,6 +142,7 @@ const FormSection: React.FC<FormSectionProps> = ({
 
     const addOption = () => {
         setOptions([...options, ''])
+        setIsEditing(true)
     }
 
     const removeOption = (idx: number) => {
@@ -198,6 +200,7 @@ const FormSection: React.FC<FormSectionProps> = ({
                     onClick={(e) => {
                         e.preventDefault()
                         deleteQuestion(item.id)
+                        setIsEditing(true)
                         // deleteQuestion(index)
                     }}
                     disabled={!canEdit}
@@ -311,7 +314,10 @@ const FormSection: React.FC<FormSectionProps> = ({
                         {options.length > 2 && (
                             <button
                                 type="button"
-                                onClick={() => removeOption(optionIndex)}
+                                onClick={() => {
+                                    removeOption(optionIndex)
+                                    setIsEditing(true)
+                                }}
                                 disabled={!canEdit}
                                 style={!canEdit ? { opacity: 0.5, pointerEvents: 'none' } : {}}
                             >

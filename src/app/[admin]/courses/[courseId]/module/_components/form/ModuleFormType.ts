@@ -5,6 +5,7 @@ export type FormSectionProps = {
     deleteQuestion: any
     formData: any
     canEdit?: boolean // <-- use this for chapter/section controls
+    setIsEditing: (isEditing: boolean) => void
 }
 
 export interface FormQuestionDetail {
