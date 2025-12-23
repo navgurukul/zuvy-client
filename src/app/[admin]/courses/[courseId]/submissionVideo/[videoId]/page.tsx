@@ -26,25 +26,22 @@ const Page = ({ params }: any) => {
     const [bootcampData, setBootcampData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [batches, setBatches] = useState<BatchFilter[]>([])
-
-
-    useEffect(() => {
-        if (!dataTableVideo?.length) return
-    
-        const map = new Map<number, BatchFilter>()
-    
-        dataTableVideo.forEach((student: any) => {
-            if (student.batchId && student.batchName) {
-                map.set(student.batchId, {
-                    id: student.batchId,
-                    name: student.batchName,
-                })
-            }
-        })
-    
-        setBatches(Array.from(map.values()))
-    }, [dataTableVideo])
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    // Fetch batches from API
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
     
     // API functions for the hook - exactly like your pattern
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -71,6 +68,9 @@ const Page = ({ params }: any) => {
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+        
     
         const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
         const response = await api.get(url)
@@ -79,7 +79,7 @@ const Page = ({ params }: any) => {
         setVideoData(response.data.moduleVideochapter)
     
         setLoading(false)
-    }, [params.videoId, selectedBatch])
+    }, [params.videoId, selectedBatch,sortField, sortDirection])
     
 
     const defaultFetchApi = useCallback(async () => {
@@ -90,6 +90,9 @@ const Page = ({ params }: any) => {
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+        
     
         const url = queryParams.toString()
             ? `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
@@ -102,10 +105,10 @@ const Page = ({ params }: any) => {
         setVideoData(response.data.moduleVideochapter)
     
         setLoading(false)
-    }, [params.videoId, selectedBatch])
+    }, [params.videoId, selectedBatch,sortField, sortDirection])
     useEffect(() => {
         defaultFetchApi()
-    }, [selectedBatch])
+    }, [selectedBatch ,sortField, sortDirection, defaultFetchApi])
     
 
     const getBootcampHandler = useCallback(async () => {
@@ -120,7 +123,27 @@ const Page = ({ params }: any) => {
     useEffect(() => {
         getBootcampHandler()
     }, [getBootcampHandler])
-    
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await Promise.all([
+                    getBootcampHandler(),
+                    fetchBatches()
+                ])
+            } catch (error) {
+                console.error('Error in fetching data:', error)
+            }
+        }
+
+        fetchData()
+    }, [fetchBatches])
+
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
     return (
         <>
             <div className="flex items-center gap-4 mb-8">
@@ -167,11 +190,11 @@ const Page = ({ params }: any) => {
                                     </SelectTrigger>
                                     <SelectContent>
                                     <SelectItem value="all">All Batches</SelectItem>
-        {batches.map(batch => (
-            <SelectItem key={batch.id} value={batch.id.toString()}>
-                {batch.name}
-            </SelectItem>
-        ))}
+                                    {batches.map(batch => (
+                                        <SelectItem key={batch.id} value={batch.id.toString()}>
+                                            {batch.name}
+                                        </SelectItem>
+                                    ))}
                                     </SelectContent>
 
                                 </Select>
@@ -205,7 +228,7 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={dataTableVideo} columns={columns} />
+                    <DataTable data={dataTableVideo} columns={columns} onSortingChange={handleSortingChange}/>
                 </CardContent>
             </Card>
         </>

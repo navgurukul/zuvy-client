@@ -23,6 +23,11 @@ interface Suggestion {
     email: string;
 }
 
+interface Batch {
+    id: number
+    name: string
+}
+
 const Page = ({ params }: any) => {
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -31,8 +36,6 @@ const Page = ({ params }: any) => {
     const [dataTableLiveClass, setDataTableLiveClass] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
-    
     // Pagination states
     const position = useMemo(
         () => searchParams.get('limit') || POSITION,
@@ -43,16 +46,24 @@ const Page = ({ params }: any) => {
     const [lastPage, setLastPage] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    const [batches, setBatches] = useState<Batch[]>([])
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
 
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A'
-    ]
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
+    
 
     const crumbs = [
         {
@@ -71,74 +82,70 @@ const Page = ({ params }: any) => {
         },
     ]
 
-    // Fetch live class data with pagination and search
     const fetchLiveClassData = useCallback(async (
         searchQuery: string = '',
         currentOffset: number = 0,
-        limit: number = 10
+        limit: number = 10,
     ) => {
         try {
             setLoading(true)
-            
-            // Build URL with pagination
-            let url = `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?limit=${limit}&offset=${currentOffset}`
-            
-            // Add both name and email parameters for search - API will handle the filtering
-            if (searchQuery.trim()) {
-                url += `&name=${encodeURIComponent(searchQuery)}&email=${encodeURIComponent(searchQuery)}`
+            const queryParams = new URLSearchParams()
+            queryParams.append('limit', limit.toString())
+            queryParams.append('offset', currentOffset.toString())
+            if (selectedBatch !== 'all') {
+                console.log('Batch filter:', selectedBatch)
+                queryParams.append('batchId', selectedBatch)
             }
-
+            if (sortField) queryParams.append('orderBy', sortField)
+            if (sortDirection) queryParams.append('orderDirection', sortDirection)
+            if (searchQuery.trim()) {
+                queryParams.append('name', searchQuery)
+                queryParams.append('email', searchQuery)
+            }
+            const url = `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?${queryParams.toString()}`
             const response = await api.get(url)
-            const liveData = response.data.data?.[0] || {}
+            const apiData = response.data.data
             
-            // Map student records with additional info
-            const students = liveData.studentAttendanceRecords?.map((record: any) => ({
-                ...record,
-                startTime: liveData.startTime,
-                endTime: liveData.endTime,
-                id: record.userId
-            })) || []
-            
+            const students = apiData?.data?.map((record: any) => ({									
+            ...record,									
+            id: record.userId,									
+            name: record.user?.name,									
+            email: record.user?.email									
+            })) || []									
             setDataTableLiveClass(students)
-            setLiveClassData(liveData)
-            
-            // Calculate pagination
-            const total = students.length
-            setTotalStudents(total)
-            const pages = Math.ceil(total / limit)
-            setTotalPages(pages)
-            setLastPage(pages)
-            
-            setLoading(false)
-            return { students, liveData }
+            setTotalStudents(apiData?.totalCount || 0)
+            setTotalPages(apiData?.totalPages || 0)
+            setLastPage(apiData?.totalPages || 0)
         } catch (error) {
             console.error('Error fetching live class data:', error)
+        } finally {
             setLoading(false)
-            return { students: [], liveData: null }
         }
-    }, [params.liveClassId])
+    }, [params.liveClassId, sortField, sortDirection, selectedBatch])
+    // API functions for the SearchBox hook									
+    const fetchSuggestionsApi = useCallback(
+        async (query: string): Promise<Suggestion[]> => {
+            if (!query.trim()) return []
+            try {
+                const res = await api.get(
+                    `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?limit=5&offset=0&name=${encodeURIComponent(query)}&email=${encodeURIComponent(query)}`
+                )
+                const students = res.data.data?.data || []
+                return students
+                    .map((record: any) => ({
+                        id: record.userId,
+                        name: record.user?.name ?? '',
+                        email: record.user?.email ?? ''
+                    }))
+                    .filter((s: any) => s.name || s.email)
+            } catch (error) {
+                console.error('Suggestion API error:', error)
+                return []
+            }
+        },
+        [params.liveClassId]
+    )
 
-    // API functions for the SearchBox hook
-    const fetchSuggestionsApi = useCallback(async (query: string): Promise<Suggestion[]> => {
-        if (!query.trim()) return []
-
-        try {
-            // Use both name and email parameters 
-            const url = `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?limit=5&offset=0&name=${encodeURIComponent(query)}&email=${encodeURIComponent(query)}`
-            const response = await api.get(url)
-            
-            const liveData = response.data.data?.[0] || {}
-            
-            return liveData.studentAttendanceRecords?.map((record: any) => ({
-                id: record.userId,
-                name: record.user?.name || '',
-                email: record.user?.email || ''
-            })).filter((s: Suggestion) => s.name && s.email) || []
-        } catch (error) {
-            console.error('Error fetching suggestions:', error)
-            return []
-        }
-    }, [params.liveClassId])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         await fetchLiveClassData(query, 0, Number(position))
@@ -157,7 +164,7 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
-    // Handler for pagination
+    // Handler for pagination									
     const handlePaginationFetch = useCallback(async (newOffset: number) => {
         if (newOffset >= 0) {
             const currentSearchQuery = searchParams.get('search') || ''
@@ -166,14 +173,28 @@ const Page = ({ params }: any) => {
     }, [fetchLiveClassData, position, searchParams])
 
     useEffect(() => {
-        getBootcampHandler()
-    }, [getBootcampHandler])
+        fetchBatches()
+    }, [fetchBatches])
 
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
+    const handleBatchChange = useCallback((value: string) => {
+        setSelectedBatch(value)
+        setOffset(0)
+      }, [setOffset])
+      
     useEffect(() => {
         const currentSearchQuery = searchParams.get('search') || ''
         fetchLiveClassData(currentSearchQuery, offset, Number(position))
-    }, [offset, position, searchParams.get('search')])
-    
+    }, [offset, position, searchParams, fetchLiveClassData])
+            
+      
+    useEffect(() => {
+        getBootcampHandler()
+    }, [getBootcampHandler])
     return (
         <>
             <div className="flex items-center gap-4 mb-8">
@@ -186,7 +207,6 @@ const Page = ({ params }: any) => {
                     Back to Course Submissions
                 </Button>
             </div>
-            
             <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                 <CardHeader>
                     <CardTitle className="text-2xl text-gray-800 text-left">
@@ -214,15 +234,17 @@ const Page = ({ params }: any) => {
                             <label className="font-medium text-muted-foreground">Batch Filter</label>
                             <Select
                                 value={selectedBatch}
-                                onValueChange={setSelectedBatch}
+                                onValueChange={handleBatchChange}
                             >
                                 <SelectTrigger className="w-full mt-1">
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Batches</SelectItem>
-                                    {batchOptions.map((batch, index) => (
-                                        <SelectItem key={index} value={batch}>{batch}</SelectItem>
+                                    {batches.map(batch => (
+                                        <SelectItem key={batch.id} value={batch.id.toString()}>
+                                            {batch.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -230,7 +252,6 @@ const Page = ({ params }: any) => {
                     </div>
                 </CardContent>
             </Card>
-            
             <Card className="bg-card">
                 <CardHeader>
                     <div className="flex items-center justify-between">
@@ -257,7 +278,7 @@ const Page = ({ params }: any) => {
                 </div>
                 
                 <CardContent className="p-0">
-                    <DataTable data={dataTableLiveClass} columns={columns} />
+                    <DataTable data={dataTableLiveClass} columns={columns} onSortingChange={handleSortingChange} />
                 </CardContent>
             </Card>
 

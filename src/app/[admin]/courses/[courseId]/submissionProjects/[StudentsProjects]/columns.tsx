@@ -94,14 +94,14 @@ export const columns: ColumnDef<Task>[] = [
     },
 
     {
-        accessorKey: 'batch',
+        accessorKey: 'batchName',
         header: 'Batch',
         cell: ({ row }) => {
-            const index = row.index
+            const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="bg-black-50 text-black border-black-200">
-                        {mockBatches[index % mockBatches.length]}
+                    <Badge variant="outline" className="text-black border-black-200">
+                        {batchName}
                     </Badge>
                 </div>
             )

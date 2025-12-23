@@ -41,16 +41,19 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
             const columns = [
                 { header: 'Name', dataKey: 'name' },
                 { header: 'Email', dataKey: 'email' },
+                { header: 'Project Link', dataKey: 'projectLink' },
+
             ]
 
-            const rows = assessments.map((assessment: { name: string; email: string }) => ({
+            const rows = assessments.map((assessment: { name: string; email: string,projectLink: string}) => ({
                 name: assessment.name || 'N/A',
                 email: assessment.email || 'N/A',
+                projectLink: assessment.projectLink || 'N/A',
             }))
 
             autoTable(doc, {
                 head: [columns.map((col) => col.header)],
-                body: rows.map((row: { name: string; email: string }) => [row.name, row.email]),
+                body: rows.map((row: { name: string; email: string,projectLink: string  }) => [row.name, row.email,row.projectLink,]),
                 startY: 25,
                 margin: { horizontal: 10 },
                 styles: { overflow: 'linebreak', halign: 'center' },

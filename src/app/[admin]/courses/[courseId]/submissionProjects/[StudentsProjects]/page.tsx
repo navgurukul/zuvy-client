@@ -13,6 +13,11 @@ import { SearchBox } from '@/utils/searchBox'
 
 type Props = {}
 
+interface BatchFilter {
+    id: number
+    name: string
+}
+
 const Page = ({ params }: any) => {
     const router = useRouter()
     const [data, setData] = useState<any>()
@@ -20,21 +25,26 @@ const Page = ({ params }: any) => {
     const [projectStudentData, setProjectStudentData] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
     const [submitStudents, setSubmitStudents] = useState<number>(0)
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const [batches, setBatches] = useState<BatchFilter[]>([])
 
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A'
-    ]
-
+     // Fetch batches from API
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
+    
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -58,7 +68,9 @@ const Page = ({ params }: any) => {
         queryParams.append('searchStudent', query)
         queryParams.append('limit', '10')
         queryParams.append('offset', '0')
-    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
     
@@ -69,14 +81,16 @@ const Page = ({ params }: any) => {
         const students = res.data.projectSubmissionData?.projectTrackingData || []
         setProjectStudentData(students)
         setLoading(false)
-    }, [params.courseId, params.StudentsProjects, sortField, sortDirection])
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection,selectedBatch])
     
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
     
         const queryParams = new URLSearchParams()
-    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
     
@@ -87,7 +101,7 @@ const Page = ({ params }: any) => {
         const students = res.data.projectSubmissionData?.projectTrackingData || []
         setProjectStudentData(students)
         setLoading(false)
-    }, [params.courseId, params.StudentsProjects, sortField, sortDirection])
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection,selectedBatch])
     
 
     const getProjectsData = useCallback(async () => {
@@ -122,10 +136,12 @@ const Page = ({ params }: any) => {
         getProjectsData()
         getBootcampHandler()
     }, [getProjectsData, getBootcampHandler])
-
+    useEffect(() => {
+        fetchBatches()
+    }, [fetchBatches])
     useEffect(() => {
         defaultFetchApi()
-    }, [sortField, sortDirection, defaultFetchApi])
+    }, [sortField, sortDirection, defaultFetchApi,selectedBatch])
 
     return (
         <>
@@ -174,9 +190,11 @@ const Page = ({ params }: any) => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Batches</SelectItem>
-                                    {batchOptions.map((batch, index) => (
-                                        <SelectItem key={index} value={batch}>{batch}</SelectItem>
-                                    ))}
+                                        {batches.map(batch => (
+                                            <SelectItem key={batch.id} value={batch.id.toString()}>
+                                                {batch.name}
+                                            </SelectItem>
+                                        ))}      
                                 </SelectContent>
 
                             </Select>

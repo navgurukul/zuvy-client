@@ -9,7 +9,6 @@ import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
-const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
@@ -86,14 +85,14 @@ export const columns: ColumnDef<Task>[] = [
       ),
     },
     {
-        accessorKey: 'batch',
+        accessorKey: 'batchName',
         header: 'Batch',
         cell: ({ row }) => {
-            const index = row.index
+            const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                    <Badge variant="outline" className="bg-gray-100 border border-gray-200">
-                        {mockBatches[index % mockBatches.length]}
+                    <Badge variant="outline" className="text-black border-black-200">
+                        {batchName}
                     </Badge>
                 </div>
             )
