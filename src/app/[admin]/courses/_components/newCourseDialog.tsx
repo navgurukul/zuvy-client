@@ -260,7 +260,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             Duration (weeks) *
                         </Label>
                         <Input
-                            type="text"
+                            type="number"
                             id="duration"
                             placeholder="e.g., 12"
                             className="text-[0.95rem]"
