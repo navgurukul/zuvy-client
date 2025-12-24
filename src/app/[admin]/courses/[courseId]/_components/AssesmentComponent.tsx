@@ -57,6 +57,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" sideOffset={8}>
                                     <DropdownMenuItem
+                                        className="cursor-pointer"
                                         onClick={() => {
                                             props.onDownloadPdf()
                                             setIsOpen(false)
@@ -65,6 +66,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                                         Download PDF
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
+                                        className="cursor-pointer"
                                         onClick={() => {
                                             props.onDownloadCsv()
                                             setIsOpen(false)

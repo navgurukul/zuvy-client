@@ -13,6 +13,11 @@ import { SearchBox } from '@/utils/searchBox'
 
 type Props = {}
 
+interface BatchFilter {
+    id: number
+    name: string
+}
+
 const Page = ({ params }: any) => {
     const router = useRouter()
     const [data, setData] = useState<any>()
@@ -20,26 +25,33 @@ const Page = ({ params }: any) => {
     const [projectStudentData, setProjectStudentData] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
     const [submitStudents, setSubmitStudents] = useState<number>(0)
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const [batches, setBatches] = useState<BatchFilter[]>([])
 
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A'
-    ]
-
+     // Fetch batches from API
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
+    
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
 
         // try {
         const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&searchStudent=${encodeURIComponent(query)}&limit=5&offset=0`
+            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&searchStudent=${encodeURIComponent(query)}&limit=10&offset=0`
         )
         return res.data.projectSubmissionData?.projectTrackingData?.map((student: any) => ({
             id: student.id,
@@ -51,21 +63,46 @@ const Page = ({ params }: any) => {
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
+    
+        const queryParams = new URLSearchParams()
+        queryParams.append('searchStudent', query)
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
         const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&searchStudent=${encodeURIComponent(query)}&limit=100&offset=0`
+            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`
         )
+    
         const students = res.data.projectSubmissionData?.projectTrackingData || []
         setProjectStudentData(students)
-    }, [params.courseId, params.StudentsProjects])
+        setLoading(false)
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection,selectedBatch])
+    
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
+    
+        const queryParams = new URLSearchParams()
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
         const res = await api.get(
-            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}`
+            `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`
         )
+    
         const students = res.data.projectSubmissionData?.projectTrackingData || []
         setProjectStudentData(students)
-    }, [params.courseId, params.StudentsProjects])
+        setLoading(false)
+    }, [params.courseId, params.StudentsProjects, sortField, sortDirection,selectedBatch])
+    
 
     const getProjectsData = useCallback(async () => {
         try {
@@ -89,10 +126,22 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
+    // Handle sorting change
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
     useEffect(() => {
         getProjectsData()
         getBootcampHandler()
     }, [getProjectsData, getBootcampHandler])
+    useEffect(() => {
+        fetchBatches()
+    }, [fetchBatches])
+    useEffect(() => {
+        defaultFetchApi()
+    }, [sortField, sortDirection, defaultFetchApi,selectedBatch])
 
     return (
         <>
@@ -141,9 +190,11 @@ const Page = ({ params }: any) => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Batches</SelectItem>
-                                    {batchOptions.map((batch, index) => (
-                                        <SelectItem key={index} value={batch}>{batch}</SelectItem>
-                                    ))}
+                                        {batches.map(batch => (
+                                            <SelectItem key={batch.id} value={batch.id.toString()}>
+                                                {batch.name}
+                                            </SelectItem>
+                                        ))}      
                                 </SelectContent>
 
                             </Select>
@@ -175,7 +226,11 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={projectStudentData} columns={columns} />
+                    <DataTable 
+                        data={projectStudentData} 
+                        columns={columns}
+                        onSortingChange={handleSortingChange}
+                    />
                 </CardContent>
             </Card>
         </>
