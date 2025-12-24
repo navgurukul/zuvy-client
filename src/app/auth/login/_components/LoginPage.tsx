@@ -168,9 +168,32 @@ const handleGoogleSuccess = async (
 
                 // Handle redirects based on user role
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
+                const zoeRedirectUrl = localStorage.getItem('zoeRedirectUrl')
 
                 const userRole = response.data.user.rolesList[0]
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
+
+                // Check if zoeRedirectUrl exists and handle redirect with token
+                if (zoeRedirectUrl) {
+                    // Decode the URL-encoded zoeRedirectUrl
+                    const decodedUrl = decodeURIComponent(zoeRedirectUrl)
+                    
+                    // Ensure URL has protocol prefix
+                    const fullUrl = decodedUrl.startsWith('http://') || decodedUrl.startsWith('https://') 
+                        ? decodedUrl 
+                        : `https://${decodedUrl}`
+                    
+                    // Append the access token to the URL
+                    const separator = fullUrl.includes('?') ? '&' : '?'
+                    const redirectUrl = `${fullUrl}${separator}token=${response.data.access_token}`
+                    
+                    // Clear the stored zoeRedirectUrl
+                    localStorage.removeItem('zoeRedirectUrl')
+                    
+                    // Redirect to external URL
+                    window.location.href = redirectUrl
+                    return
+                }
 
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
@@ -211,6 +234,16 @@ const handleGoogleSuccess = async (
         // Handle existing token logic and redirects
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
+
+        console.log('redirectedUrl:', redirectedUrl)
+
+        // Check for zoeRedirectUrl parameter
+        if (urlParams.has('zoeRedirectUrl')) {
+            const zoeRedirectUrl = urlParams.get('zoeRedirectUrl')
+            if (zoeRedirectUrl) {
+                localStorage.setItem('zoeRedirectUrl', zoeRedirectUrl)
+            }
+        }
 
         if (window.location.href.includes('route')) {
             const route = urlParams.get('route')
