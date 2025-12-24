@@ -57,7 +57,7 @@ export default function useBatches(params: ParamsType) {
     const [currentStep, setCurrentStep] = useState(1)
     const [totalBatches, setTotalBatches] = useState(0);
     const [batchesPerPage, setBatchesPerPage] = useState(10); // default value
-    
+
     const [batchToDelete, setBatchToDelete] = useState<EnhancedBatch | null>(null)
 
     const getStatusColor = (status: string) => {
@@ -138,27 +138,27 @@ export default function useBatches(params: ParamsType) {
     // }, [params.courseId, setBatchData])
 
 
-const defaultFetchApi = useCallback(
-    async (offset: number = 0, limit: number = batchesPerPage) => {
-        setLoading(true);
-        try {
-            const response = await api.get(
-                `/bootcamp/batches/${params.courseId}?limit=${limit}&offset=${offset}`
-            );
+    const defaultFetchApi = useCallback(
+        async (offset: number = 0, limit: number = batchesPerPage) => {
+            setLoading(true);
+            try {
+                const response = await api.get(
+                    `/bootcamp/batches/${params.courseId}?limit=${limit}&offset=${offset}`
+                );
 
-            setBatchData(response.data?.data || []);
-            setTotalBatches(response.data?.totalBatches || 0); // ✅ store total
-            setPermissions(response.data?.permissions);
+                setBatchData(response.data?.data || []);
+                setTotalBatches(response.data?.totalBatches || 0); // ✅ store total
+                setPermissions(response.data?.permissions);
 
-            return response.data?.data || [];
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    },
-    [params.courseId, batchesPerPage,setBatchData]
-);
+                return response.data?.data || [];
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [params.courseId, batchesPerPage, setBatchData]
+    );
 
 
     const formSchema = z.object({
@@ -239,9 +239,18 @@ const defaultFetchApi = useCallback(
             setIsEditModalOpen(false)
             setEditingBatch(null)
         } catch (error: any) {
+            // Check for specific error message about cap enrollment
+            const errorMessage = error.response?.data?.message || 'Failed to update batch'
+            
+            let customMessage = errorMessage
+            if (errorMessage.includes('Students are enrolled in more than this capEnrollment') || 
+                errorMessage.includes('capEnrollment') && error.response?.status === 400) {
+                customMessage = 'Cap Enrollment cannot be less than the number of current students.'
+            }
+            
             toast.error({
                 title: 'Failed',
-                description: error.response?.data?.message || 'Failed to update batch'
+                description: customMessage
             })
             console.error('Failed to update batch', error)
         }
@@ -391,10 +400,10 @@ const defaultFetchApi = useCallback(
     }, [params.courseId, fetchCourseDetails])
 
     useEffect(() => {
-    if (courseData?.id) {
-        defaultFetchApi(); 
-    }
-}, [courseData?.id]);
+        if (courseData?.id) {
+            defaultFetchApi();
+        }
+    }, [courseData?.id]);
 
 
 
@@ -449,8 +458,8 @@ const defaultFetchApi = useCallback(
         searchQuery,
         csvFile,
         setCsvFile,
-    singleStudentData,
-    setSingleStudentData,
+        singleStudentData,
+        setSingleStudentData,
         handleSingleStudentChange,
         fetchSuggestionsApi,
         fetchSearchResultsApi,

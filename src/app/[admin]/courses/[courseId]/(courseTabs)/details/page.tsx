@@ -411,7 +411,7 @@ if (!courseData || !courseData.id) {
                                     {!isCropping && (
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                             <Button
-                                                variant="secondary"
+                                                variant="default"
                                                 size="sm"
                                                 type="button"
                                                 onClick={() =>
@@ -574,7 +574,7 @@ if (!courseData || !courseData.id) {
                                                     {!isCollaboratorCropping && (
                                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                                             <Button
-                                                                variant="secondary"
+                                                                variant="default"
                                                                 size="sm"
                                                                 type="button"
                                                                 onClick={

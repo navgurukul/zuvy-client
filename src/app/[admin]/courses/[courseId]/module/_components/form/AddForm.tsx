@@ -83,6 +83,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const [isDataLoading, setIsDataLoading] = useState(true)
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     const [isTitleChanged, setIsTitleChanged] = useState(false)
+    const [isOptionsChanged, setIsOptionsChanged] = useState(false) // Track option changes
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -161,7 +162,10 @@ const AddForm: React.FC<AddFormProps> = ({
         form.setValue('questions', [
             ...form.getValues('questions'),
             newQuestion,
-        ])
+        ], { shouldDirty: true }) // Add shouldDirty flag
+        
+        // Notify about changes
+        handleOptionChange()
     }
 
     // *************** This one is working... Left one empty input field when delete multiple choice *************
@@ -219,7 +223,10 @@ const AddForm: React.FC<AddFormProps> = ({
         const updatedQuestions = currentQuestions.filter(
             (_, i) => i !== questionIndex
         )
-        form.setValue('questions', updatedQuestions)
+        form.setValue('questions', updatedQuestions, { shouldDirty: true }) // Add shouldDirty flag
+        
+        // Notify about changes
+        handleOptionChange()
     }
 
     // ✅ CUSTOM VALIDATION FUNCTION
@@ -262,7 +269,7 @@ const AddForm: React.FC<AddFormProps> = ({
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         // full-form submit: reset title-changed flag here because we're saving everything
-        setIsTitleChanged(false)
+        setIsTitleChanged(false)        
         // ✅ VALIDATION CHECK
         const validationErrors = validateQuestionsWithOptions(values.questions)
 
@@ -364,12 +371,21 @@ const AddForm: React.FC<AddFormProps> = ({
                 `Content/createAndEditForm/${content.id}`,
                 payload
             )
+            
             toast.success({
                 title: 'Success',
                 description: 'Form Saved Successfully',
             })
+
+            // ✅ IMMEDIATE STATE RESET BEFORE FORM RESET
+            setIsTitleChanged(false)
+            setIsOptionsChanged(false)
             setIsChapterUpdated(!isChapterUpdated)
             setIsSaved(true)
+
+            // ✅ FORCE FORM STATE RESET WITH MULTIPLE APPROACHES
+            form.reset(values)
+
         } catch (error: any) {
             toast.error({
                 title: 'Failed',
@@ -388,9 +404,16 @@ const AddForm: React.FC<AddFormProps> = ({
             setIsSubmitting(true)
             await editChapter(moduleId, content.id, { title: titles })
             toast.success({ title: 'Success', description: 'Title updated successfully' })
-            setIsChapterUpdated(!isChapterUpdated)
+
+            // ✅ IMMEDIATE STATE RESET
             setIsTitleChanged(false)
+            setIsChapterUpdated(!isChapterUpdated)
             setIsSaved(true)
+
+            const currentValues = form.getValues()
+            currentValues.title = titles
+            form.reset(currentValues)
+
         } catch (err: any) {
             toast.error({ title: 'Failed', description: err.response?.data?.message || err.message || 'An error occurred.' })
         } finally {
@@ -398,16 +421,25 @@ const AddForm: React.FC<AddFormProps> = ({
         }
     }
 
+    // Create a function to handle option changes
+    const handleOptionChange = useCallback(() => {
+        setIsOptionsChanged(true)
+        // Force the form to be dirty when options change
+        form.setValue('questions', form.getValues('questions'), { shouldDirty: true })
+    }, [form])
+
+    // Update the handleSaveClick function
     const handleSaveClick = async () => {
-        // If the whole form is valid, submit full form
-        if (form.formState.isValid) {
-            // trigger form submission (this will call onSubmit)
+        console.log('Save clicked - isTitleChanged:', isTitleChanged, 'isOptionsChanged:', isOptionsChanged, 'isDirty:', form.formState.isDirty)
+        
+        // If there are any changes (title, options, or form is dirty), try to submit
+        if (isTitleChanged || isOptionsChanged || form.formState.isDirty) {
             await form.handleSubmit(onSubmit)()
             return
         }
 
-        // If form not valid but title changed, save title only
-        if (isTitleChanged) {
+        // If only title changed and form is valid, save title only
+        if (isTitleChanged && form.formState.isValid) {
             await saveTitleOnly()
             return
         }
@@ -553,6 +585,7 @@ const AddForm: React.FC<AddFormProps> = ({
                                     deleteQuestion={deleteQuestion}
                                     formData={questions}
                                     canEdit={canEdit}
+                                    onOptionChange={handleOptionChange} // Pass the option change handler
                                 />
                                 {/* ✅ ERROR MESSAGE DISPLAY */}
                                 {form.formState.errors.questions?.[index]
@@ -586,7 +619,7 @@ const AddForm: React.FC<AddFormProps> = ({
                             <Button
                                 type="button"
                                 onClick={handleSaveClick}
-                                disabled={!canEdit || isSubmitting || (!form.formState.isValid && !isTitleChanged)}
+                                disabled={!canEdit || isSubmitting || (!isTitleChanged && !isOptionsChanged && !form.formState.isDirty)}
                                 aria-label="Save form changes"
                                 aria-busy={isSubmitting}
                                 className="w-3/3 bg-primary text-primary-foreground hover:bg-primary/90"
