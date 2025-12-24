@@ -44,9 +44,15 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'name',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Student Name" 
+                onSort={onSort}
+                sortField="name"
+            />
         ),
+        id: 'name',
         cell: ({ row }) => {
             const name = row.original.name
 
@@ -58,14 +64,19 @@ export const columns: ColumnDef<Task>[] = [
                 </div>
             )
         },
-        enableSorting: false,
         enableHiding: false,
     },
     {
         accessorKey: 'email',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Email" 
+                onSort={onSort}
+                sortField="email"
+            />
         ),
+        id: 'email',
         cell: ({ row }) => {
             const email = row.original.email
 
@@ -79,15 +90,15 @@ export const columns: ColumnDef<Task>[] = [
         },
     },
     {
-        accessorKey: 'batch',
+        accessorKey: 'batchName',
         header: 'Batch',
         cell: ({ row }) => {
-            const index = row.index
+            const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                <Badge variant="outline" className="text-black border-black-200">
-                    {mockBatches[index % mockBatches.length]}
-                </Badge>
+                    <Badge variant="outline" className="text-black border-black-200">
+                        {batchName}
+                    </Badge>
                 </div>
             )
         },

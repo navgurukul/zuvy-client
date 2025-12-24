@@ -14,6 +14,10 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
 
 type Props = {}
+interface BatchFilter {
+    id: number
+    name: string
+  }
 
 const Page = ({ params }: any) => {
     const router = useRouter()
@@ -21,18 +25,24 @@ const Page = ({ params }: any) => {
     const [dataTableVideo, setDataTableVideo] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
     const [loading, setLoading] = useState<boolean>(false)
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
-
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A'
-    ]
-
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const [batches, setBatches] = useState<BatchFilter[]>([])
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    // Fetch batches from API
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
+    
     // API functions for the hook - exactly like your pattern
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -49,29 +59,57 @@ const Page = ({ params }: any) => {
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
-
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?searchStudent=${encodeURIComponent(query)}&limit=10&offset=0`
+    
+        const queryParams = new URLSearchParams()
+        queryParams.append('searchStudent', query)
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+        
+    
+        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
         const response = await api.get(url)
-
-        const students = response.data.submittedStudents || []
-        setDataTableVideo(students)
+    
+        setDataTableVideo(response.data.submittedStudents || [])
         setVideoData(response.data.moduleVideochapter)
-
+    
         setLoading(false)
-    }, [params.videoId])
+    }, [params.videoId, selectedBatch,sortField, sortDirection])
+    
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
-
-        const url = `/admin/moduleChapter/students/chapter_id${params.videoId}`
+    
+        const queryParams = new URLSearchParams()
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+        
+    
+        const url = queryParams.toString()
+            ? `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`
+            : `/admin/moduleChapter/students/chapter_id${params.videoId}`
+    
         const response = await api.get(url)
-
+    
         const students = response.data.submittedStudents || []
         setDataTableVideo(students)
         setVideoData(response.data.moduleVideochapter)
-
+    
         setLoading(false)
-    }, [params.videoId])
+    }, [params.videoId, selectedBatch,sortField, sortDirection])
+    useEffect(() => {
+        defaultFetchApi()
+    }, [selectedBatch ,sortField, sortDirection, defaultFetchApi])
+    
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -85,7 +123,27 @@ const Page = ({ params }: any) => {
     useEffect(() => {
         getBootcampHandler()
     }, [getBootcampHandler])
-    
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await Promise.all([
+                    getBootcampHandler(),
+                    fetchBatches()
+                ])
+            } catch (error) {
+                console.error('Error in fetching data:', error)
+            }
+        }
+
+        fetchData()
+    }, [fetchBatches])
+
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
     return (
         <>
             <div className="flex items-center gap-4 mb-8">
@@ -131,10 +189,12 @@ const Page = ({ params }: any) => {
                                         <SelectValue placeholder="All Batches" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Batches</SelectItem>
-                                        {batchOptions.map((batch, index) => (
-                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
-                                        ))}
+                                    <SelectItem value="all">All Batches</SelectItem>
+                                    {batches.map(batch => (
+                                        <SelectItem key={batch.id} value={batch.id.toString()}>
+                                            {batch.name}
+                                        </SelectItem>
+                                    ))}
                                     </SelectContent>
 
                                 </Select>
@@ -168,7 +228,7 @@ const Page = ({ params }: any) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={dataTableVideo} columns={columns} />
+                    <DataTable data={dataTableVideo} columns={columns} onSortingChange={handleSortingChange}/>
                 </CardContent>
             </Card>
         </>

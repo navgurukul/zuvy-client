@@ -41,9 +41,15 @@ export const columns: ColumnDef<any>[] = [
     },
     {
         accessorKey: 'name',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Student Name" 
+                onSort={onSort}
+                sortField="name"
+            />
         ),
+        id: 'name',
         cell: ({ row }) => {
             const name = row.original.user?.name || 'N/A'
 
@@ -55,14 +61,20 @@ export const columns: ColumnDef<any>[] = [
                 </div>
             )
         },
-        enableSorting: false,
+        // enableSorting: false,
         enableHiding: false,
     },
     {
         accessorKey: 'email',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader 
+                column={column} 
+                title="Email" 
+                onSort={onSort}
+                sortField="email"
+            />
         ),
+        id: 'email',
         cell: ({ row }) => {
             const email = row.original.user?.email || 'N/A'
 
@@ -76,19 +88,20 @@ export const columns: ColumnDef<any>[] = [
         },
     },
     {
-        accessorKey: 'batch',
+        id: 'batchName',
         header: 'Batch',
         cell: ({ row }) => {
-            const index = row.index
+            const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
                     <Badge variant="outline" className="text-black border-black-200">
-                        {mockBatches[index % mockBatches.length]}
+                        {batchName}
                     </Badge>
                 </div>
             )
         },
-    },
+    }
+    ,    
     {
         accessorKey: 'startTime',
         header: ({ column }) => (

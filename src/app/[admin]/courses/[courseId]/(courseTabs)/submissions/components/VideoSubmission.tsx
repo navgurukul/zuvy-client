@@ -13,6 +13,8 @@ import {
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import {VideoSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import { ellipsis } from '@/lib/utils'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
@@ -43,6 +45,61 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     if (loading) {
         return<VideoSubmissionSkeleton/>
     }
+    const handleVideoDownloadPdf = async (
+        chapterId: number,
+        chapterTitle: string
+    ) => {
+        const apiUrl = `/admin/moduleChapter/students/chapter_id${chapterId}`
+    
+        try {
+            const response = await api.get(apiUrl)
+    
+            const students = response.data?.submittedStudents || []
+            const chapterInfo = response.data?.moduleVideochapter
+    
+            console.log('Video Chapter PDF Data:', students)
+    
+            const doc = new jsPDF()
+    
+            // 🔹 Title
+            doc.setFontSize(16)
+            doc.text(
+                `Video Chapter: ${chapterInfo?.title || chapterTitle}`,
+                14,
+                18
+            )
+    
+            doc.setFontSize(12)
+            doc.text('Submitted Students List', 14, 26)
+    
+            // 🔹 Table data
+            const columns = ['Name', 'Email', 'Completed Date']
+    
+            const rows = students.map((student: any) => [
+                student.name || 'N/A',
+                student.email || 'N/A',
+                student.completedAt
+                    ? new Date(student.completedAt).toLocaleString()
+                    : 'N/A',
+            ])
+    
+            autoTable(doc, {
+                head: [columns],
+                body: rows,
+                startY: 32,
+                margin: { horizontal: 10 },
+                styles: { halign: 'center' },
+                headStyles: { fillColor: [22, 160, 133] },
+                theme: 'grid',
+            })
+    
+            // 🔹 Save PDF
+            doc.save(`${chapterInfo?.title || 'video-chapter'}.pdf`)
+        } catch (error) {
+            console.error('Video PDF Error:', error)
+        }
+    }
+    
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (
@@ -109,16 +166,15 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                     {video.completedStudents >
                                                         0 ? (
                                                             <div className="flex items-end">
-                                                            <Button
-                                                            variant="ghost"
-                                                            className="hover:text-gray-400 transition-colors"
-                                                            disabled={
-                                                                true
-                                                            }
-                                                        >
-                                                           <DownloadIcon size={18} />
-                                                        </Button>
-
+                                                           <Button
+                                                                variant="ghost"
+                                                                className="text-gray-500 hover:text-gray-700 hover:bg-transparent focus:bg-transparent active:bg-transparent"
+                                                                onClick={() =>
+                                                                    handleVideoDownloadPdf(Number(video.id), video.title)
+                                                                }
+                                                            >
+                                                                <DownloadIcon size={18} />
+                                                            </Button>
                                                         <Link
                                                             href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
                                                         >
