@@ -57,7 +57,7 @@ export default function useBatches(params: ParamsType) {
     const [currentStep, setCurrentStep] = useState(1)
     const [totalBatches, setTotalBatches] = useState(0);
     const [batchesPerPage, setBatchesPerPage] = useState(10); // default value
-    
+
     const [batchToDelete, setBatchToDelete] = useState<EnhancedBatch | null>(null)
 
     const getStatusColor = (status: string) => {
@@ -138,41 +138,61 @@ export default function useBatches(params: ParamsType) {
     // }, [params.courseId, setBatchData])
 
 
-const defaultFetchApi = useCallback(
-    async (offset: number = 0, limit: number = batchesPerPage) => {
-        setLoading(true);
-        try {
-            const response = await api.get(
-                `/bootcamp/batches/${params.courseId}?limit=${limit}&offset=${offset}`
-            );
+    const defaultFetchApi = useCallback(
+        async (offset: number = 0, limit: number = batchesPerPage) => {
+            setLoading(true);
+            try {
+                const response = await api.get(
+                    `/bootcamp/batches/${params.courseId}?limit=${limit}&offset=${offset}`
+                );
 
-            setBatchData(response.data?.data || []);
-            setTotalBatches(response.data?.totalBatches || 0); // ✅ store total
-            setPermissions(response.data?.permissions);
+                setBatchData(response.data?.data || []);
+                setTotalBatches(response.data?.totalBatches || 0); // ✅ store total
+                setPermissions(response.data?.permissions);
 
-            return response.data?.data || [];
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    },
-    [params.courseId, batchesPerPage,setBatchData]
-);
+                return response.data?.data || [];
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [params.courseId, batchesPerPage, setBatchData]
+    );
 
 
-    const formSchema = z.object({
-        name: z.string().min(3, { message: 'Batch name must be at least 3 characters.' }),
-        instructorEmail: z.string().email({ message: 'Please enter a valid email address.' }),
-        bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
-        capEnrollment: z.string().refine((capEnrollment) => {
-            const parsedValue = parseInt(capEnrollment)
-            return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
-        }, { message: 'Cap Enrollment must be a positive number between 1 and 100,000' }),
-        assignLearners: z.string(),
-    })
+    // Create dynamic form schema function that includes current students check
+    const createFormSchema = (editingBatch: EnhancedBatch | null) => {
+        return z.object({
+            name: z.string().min(3, { message: 'Batch name must be at least 3 characters.' }),
+            instructorEmail: z.string().email({ message: 'Please enter a valid email address.' }),
+            bootcampId: z.string().refine((bootcampId) => !isNaN(parseInt(bootcampId))),
+            capEnrollment: z.string()
+                .refine((capEnrollment) => {
+                    const parsedValue = parseInt(capEnrollment)
+                    return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
+                }, { message: 'Cap Enrollment must be a positive number between 1 and 100,000' })
+                .superRefine((capEnrollment, ctx) => {
+                    // Additional validation for edit mode
+                    if (editingBatch) {
+                        const parsedValue = parseInt(capEnrollment)
+                        const currentStudents = editingBatch.students_enrolled || 0
+                        
+                        if (parsedValue < currentStudents) {
+                            ctx.addIssue({
+                                code: z.ZodIssueCode.custom,
+                                message: `Cap enrollment cannot be less than the number of current students (${currentStudents}).`
+                            })
+                        }
+                    }
+                }),
+            assignLearners: z.string(),
+        })
+    }
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const formSchema = useMemo(() => createFormSchema(editingBatch), [editingBatch])
+
+    const form = useForm<z.infer<ReturnType<typeof createFormSchema>>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: '',
@@ -183,6 +203,14 @@ const defaultFetchApi = useCallback(
         },
         mode: 'onChange',
     })
+
+    // Update form validation when editingBatch changes
+    useEffect(() => {
+        if (editingBatch) {
+            // Re-validate the form with new schema
+            form.trigger('capEnrollment')
+        }
+    }, [editingBatch, form])
 
     const handleEditBatch = (batch: EnhancedBatch) => {
         setEditingBatch(batch)
@@ -195,6 +223,11 @@ const defaultFetchApi = useCallback(
         })
         setIsEditModalOpen(true)
         setCurrentStep(1)
+        
+        // Trigger validation after setting the batch
+        setTimeout(() => {
+            form.trigger('capEnrollment')
+        }, 0)
     }
 
     const handleDeleteBatch = (batch: EnhancedBatch) => {
@@ -391,10 +424,10 @@ const defaultFetchApi = useCallback(
     }, [params.courseId, fetchCourseDetails])
 
     useEffect(() => {
-    if (courseData?.id) {
-        defaultFetchApi(); 
-    }
-}, [courseData?.id]);
+        if (courseData?.id) {
+            defaultFetchApi();
+        }
+    }, [courseData?.id]);
 
 
 
@@ -449,8 +482,8 @@ const defaultFetchApi = useCallback(
         searchQuery,
         csvFile,
         setCsvFile,
-    singleStudentData,
-    setSingleStudentData,
+        singleStudentData,
+        setSingleStudentData,
         handleSingleStudentChange,
         fetchSuggestionsApi,
         fetchSearchResultsApi,
@@ -475,5 +508,4 @@ const defaultFetchApi = useCallback(
         setBatchesPerPage,
     }
 }
-
 

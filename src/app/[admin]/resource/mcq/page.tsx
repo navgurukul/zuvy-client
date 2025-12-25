@@ -43,7 +43,7 @@ import CreatTag from '../_components/creatTag'
 import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
 import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
-
+import ManageTopics from '../_components/ManageTopics'
 
 const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
     ssr: false,
@@ -117,6 +117,7 @@ const Mcqs = (props: Props) => {
     const { mcqSearch, setmcqSearch } = getMcqSearch()
     const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
+    const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
 
     // Updated URL function to create clean URLs without encoding issues
     const updateURL = useCallback((searchTerm: string, topics: PageOption[], difficulties: PageOption[]) => {
@@ -587,22 +588,13 @@ const Mcqs = (props: Props) => {
                             </h1>
                         </div>
                         <div className="flex flex-row items-center gap-2">
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <Button
-                                        variant={'outline'}
-                                        className="lg:max-w-[150px] w-full mt-5"
-                                    >
-                                        <p>Create Topic</p>
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogOverlay />
-                                <CreatTag
-                                    newTopic={newTopic}
-                                    handleNewTopicChange={handleNewTopicChange}
-                                    handleCreateTopic={handleCreateTopic}
-                                />
-                            </Dialog>
+                            <Button
+                                variant="outline"
+                                className="lg:max-w-[150px] w-full shadow-4dp mt-5"
+                                onClick={() => setIsManageTopicsOpen(true)}
+                            >
+                                <p>Manage Topics</p>
+                            </Button>                            
                             <Dialog open={isCreateMcqDialogOpen} onOpenChange={setIsCreateMcqDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button className="mt-5 bg-primary hover:bg-primary-dark shadow-4dp">
@@ -673,6 +665,15 @@ const Mcqs = (props: Props) => {
             )}
       </>
     )}
+        {/* Manage Topics Dialog */}
+        <ManageTopics
+            isOpen={isManageTopicsOpen}
+            onClose={() => setIsManageTopicsOpen(false)}
+            onTopicCreated={() => {
+                getAllTags() // Refresh the topics list
+                setIsManageTopicsOpen(false)
+            }}
+        />
     </>
     )
 }
