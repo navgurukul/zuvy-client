@@ -586,7 +586,7 @@ if (!courseData || !courseData.id) {
                                                                 }
                                                                 className='flex items-center'
                                                             >
-                                                                <Upload className="h-3 w-3" />
+                                                                <Upload className="h-4 w-4 mr-2" />
                                                                 {croppedCollaboratorImage
                                                                     ? 'Change Image'
                                                                     : 'Upload Image'}
@@ -616,7 +616,7 @@ if (!courseData || !courseData.id) {
                                                                     }
                                                                     className='flex items-center'
                                                                 >
-                                                                    <Trash2 className="h-3 w-3" />
+                                                                    <Trash2 className="h-4 w-4 mr-2" />
                                                                     Remove Image
                                                                 </Button>
                                                             )}
