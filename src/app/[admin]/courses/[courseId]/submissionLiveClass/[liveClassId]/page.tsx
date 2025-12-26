@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft,Download} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -14,6 +14,7 @@ import { SearchBox } from '@/utils/searchBox'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { getOffset } from '@/store/store'
 import { POSITION } from '@/utils/constant'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 type Props = {}
 
@@ -31,7 +32,7 @@ interface Batch {
 const Page = ({ params }: any) => {
     const router = useRouter()
     const searchParams = useSearchParams()
-    
+    const { downloadCsv } = useDownloadCsv()
     const [liveClassData, setLiveClassData] = useState<any>()
     const [dataTableLiveClass, setDataTableLiveClass] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
@@ -164,6 +165,49 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
+    const handleVideoDownloadCsv = useCallback(() => {
+        const queryParams = new URLSearchParams()
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        const currentSearchQuery = searchParams.get('search') || ''
+        if (currentSearchQuery) {
+            queryParams.append('name', currentSearchQuery)
+            queryParams.append('email', currentSearchQuery)
+        }
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        // fetch all records for CSV
+        queryParams.append('offset', '0')
+        queryParams.append('limit', '10')
+    
+        downloadCsv({
+            endpoint: `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?${queryParams.toString()}`,
+    
+            fileName: `live_class_${params.liveClassId}_${new Date().toISOString().split('T')[0]}`,
+    
+            dataPath: 'data.data',
+    
+            columns: [
+                { header: 'Student Name', key: 'user.name' },
+                { header: 'Email', key: 'user.email' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Attendance Status', key: 'status' },
+            ],
+    
+            mapData: (item: any) => ({
+                'user.name': item.user?.name || '',
+                'user.email': item.user?.email || '',
+                batchName: item.batchName || '',
+                status: item.status || '',
+            }),
+        })
+    }, [params.liveClassId,selectedBatch,searchParams,sortField,sortDirection,])
+    
     // Handler for pagination									
     const handlePaginationFetch = useCallback(async (newOffset: number) => {
         if (newOffset >= 0) {
@@ -197,7 +241,7 @@ const Page = ({ params }: any) => {
     }, [getBootcampHandler])
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 mt-6">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -258,6 +302,15 @@ const Page = ({ params }: any) => {
                         <CardTitle className="text-xl text-gray-800">
                             Student Submissions
                         </CardTitle>
+                        <Button
+                            onClick={handleVideoDownloadCsv}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            disabled={dataTableLiveClass.length === 0}
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                 </CardHeader>
 

@@ -14,9 +14,11 @@ import {
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 // import assesmentNotfound from @/public
 import {AssessmentSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 
 const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
+    const { downloadCsv } = useDownloadCsv()
     const [assesments, setAssesments] = useState<AssessmentSubmissions | null>(
         null
     )
@@ -162,75 +164,43 @@ const AssesmentSubmissionComponent = ({ courseId, searchTerm }: any) => {
         }
     }
 
-    const handleDownloadCsv = async (assessment: AssessmentSubmissions) => {
+    const handleDownloadCsv = (assessment: AssessmentSubmissions) => {
         if (!assessment) return
-
-        const apiUrl = `/admin/assessment/students/assessment_id${assessment.id}`
-
-        try {
-            const response = await api.get(apiUrl)
-            const assessments = response.data.submitedOutsourseAssessments
-
-            if (!Array.isArray(assessments) || assessments.length === 0) {
-                toast.error({
-                    title: 'Error',
-                    description: 'No data available to generate CSV.',
-                })
-                return
-            }
-
-            const headers = [
-                'Name',
-                'Email',
-                'Qualified',
-                'Percentage',
-                ...(assessment.totalCodingQuestions > 0
-                    ? ['Coding Score']
-                    : []),
-                ...(assessment.totalMcqQuestions > 0 ? ['MCQ Score'] : []),
-                'Tab Changed',
-                'Copy Pasted',
-            ]
-
-            const rows = assessments.map(
-                (student: StudentAssessmentSubmission) => [
-                    student.name || 'N/A',
-                    student.email || 'N/A',
-                    student.isPassed ? 'Yes' : 'No',
-                    `${(student.percentage || 0).toFixed(2)}%`,
-                    ...(assessment.totalCodingQuestions > 0
-                        ? [(student.codingScore || 0).toFixed(2)]
-                        : []),
-                    ...(assessment.totalMcqQuestions > 0
-                        ? [(student.mcqScore || 0).toFixed(2)]
-                        : []),
-                    student.tabChange || 0,
-                    student.copyPaste || 0,
-                ]
-            )
-
-            const csvContent = [
-                headers.join(','),
-                ...rows.map((row) => row.join(',')),
-            ].join('\n')
-
-            const blob = new Blob([csvContent], {
-                type: 'text/csv;charset=utf-8;',
-            })
-            const url = URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', `${assessment.title}-Report.csv`)
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-        } catch (error) {
-            toast.error({
-                title: 'Error',
-                description: 'Failed to download CSV. Please try again later.',
-            })
-        }
-    }
+      
+        downloadCsv({
+          endpoint: `/admin/assessment/students/assessment_id${assessment.id}`,
+          fileName: `${assessment.title}-Report`,
+      
+          dataPath: 'submitedOutsourseAssessments',
+      
+          columns: [
+            { header: 'Name', key: 'name' },
+            { header: 'Email', key: 'email' },
+            { header: 'Qualified', key: 'qualified' },
+            { header: 'Percentage', key: 'percentage' },
+            ...(assessment.totalCodingQuestions > 0
+              ? [{ header: 'Coding Score', key: 'codingScore' }]
+              : []),
+            ...(assessment.totalMcqQuestions > 0
+              ? [{ header: 'MCQ Score', key: 'mcqScore' }]
+              : []),
+            { header: 'Tab Changed', key: 'tabChange' },
+            { header: 'Copy Pasted', key: 'copyPaste' },
+          ],
+      
+          mapData: (student) => ({
+            name: student.name || 'N/A',
+            email: student.email || 'N/A',
+            qualified: student.isPassed ? 'Yes' : 'No',
+            percentage: `${(student.percentage || 0).toFixed(2)}%`,
+            codingScore: (student.codingScore ?? 0).toFixed(2),
+            mcqScore: (student.mcqScore ?? 0).toFixed(2),
+            tabChange: student.tabChange ?? 0,
+            copyPaste: student.copyPaste ?? 0,
+          }),
+        })
+      }
+      
     if(loading){
         return<AssessmentSubmissionSkeleton/>
     }

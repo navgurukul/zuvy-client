@@ -15,9 +15,11 @@ import {VideoSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_compone
 import { ellipsis } from '@/lib/utils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
+    const { downloadCsv } = useDownloadCsv()
     const [videoData, setVideoData] = useState<VideoData | null>(null)
     const [loading, setLoading] = useState(true)
 
@@ -45,61 +47,34 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     if (loading) {
         return<VideoSubmissionSkeleton/>
     }
-    const handleVideoDownloadPdf = async (
+    const handleVideoDownloadCsv = (
         chapterId: number,
         chapterTitle: string
-    ) => {
-        const apiUrl = `/admin/moduleChapter/students/chapter_id${chapterId}`
-    
-        try {
-            const response = await api.get(apiUrl)
-    
-            const students = response.data?.submittedStudents || []
-            const chapterInfo = response.data?.moduleVideochapter
-    
-            console.log('Video Chapter PDF Data:', students)
-    
-            const doc = new jsPDF()
-    
-            // 🔹 Title
-            doc.setFontSize(16)
-            doc.text(
-                `Video Chapter: ${chapterInfo?.title || chapterTitle}`,
-                14,
-                18
-            )
-    
-            doc.setFontSize(12)
-            doc.text('Submitted Students List', 14, 26)
-    
-            // 🔹 Table data
-            const columns = ['Name', 'Email', 'Completed Date']
-    
-            const rows = students.map((student: any) => [
-                student.name || 'N/A',
-                student.email || 'N/A',
-                student.completedAt
-                    ? new Date(student.completedAt).toLocaleString()
-                    : 'N/A',
-            ])
-    
-            autoTable(doc, {
-                head: [columns],
-                body: rows,
-                startY: 32,
-                margin: { horizontal: 10 },
-                styles: { halign: 'center' },
-                headStyles: { fillColor: [22, 160, 133] },
-                theme: 'grid',
-            })
-    
-            // 🔹 Save PDF
-            doc.save(`${chapterInfo?.title || 'video-chapter'}.pdf`)
-        } catch (error) {
-            console.error('Video PDF Error:', error)
-        }
-    }
-    
+      ) => {
+        if (!chapterId) return
+      
+        downloadCsv({
+          endpoint: `/admin/moduleChapter/students/chapter_id${chapterId}`,
+          fileName: chapterTitle || 'video-chapter',
+      
+          dataPath: 'submittedStudents',
+      
+          columns: [
+            { header: 'Name', key: 'name' },
+            { header: 'Email', key: 'email' },
+            { header: 'Completed Date', key: 'completedAt' },
+          ],
+      
+          mapData: (student: any) => ({
+            name: student.name || 'N/A',
+            email: student.email || 'N/A',
+            completedAt: student.completedAt
+              ? new Date(student.completedAt).toLocaleString()
+              : 'N/A',
+          }),
+        })
+      }
+      
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (
@@ -163,56 +138,67 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                     </div>
                                                 </div>
                                                 <div className="absolute top-3 right-3">
-                                                    {video.completedStudents >
-                                                        0 ? (
-                                                            <div className="flex items-end">
-                                                           <Button
-                                                                variant="ghost"
-                                                                className="text-gray-500 hover:text-gray-700 hover:bg-transparent focus:bg-transparent active:bg-transparent"
-                                                                onClick={() =>
-                                                                    handleVideoDownloadPdf(Number(video.id), video.title)
-                                                                }
-                                                            >
-                                                                <DownloadIcon size={18} />
-                                                            </Button>
+                                                    {video.completedStudents > 0 ? (
+                                                        <div className="flex items-center gap-1">
+                                                        <Button
+                                                            variant="ghost"
+                                                            className="text-gray-500 hover:text-gray-700 hover:bg-transparent focus:bg-transparent active:bg-transparent px-1"
+                                                            onClick={() =>
+                                                            handleVideoDownloadCsv(Number(video.id), video.title)
+                                                            }
+                                                        >
+                                                            <DownloadIcon size={18} />
+                                                        </Button>
                                                         <Link
                                                             href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
                                                         >
                                                             <Button
                                                             variant="ghost"
-                                                            className="flex items-center text-gray-500  hover:text-gray-700 hover:bg-transparent"
-                                                           
-                                                        >
-                                                             <Eye
-                                                                    size={
-                                                                        20
-                                                                    }
-                                                                    className=""
-                                                                />
-                                                        </Button>
-                                                               
-                                                           
-
+                                                            className="flex items-center text-gray-500 hover:text-gray-700 hover:bg-transparent px-1"
+                                                            >
+                                                            <Eye size={20} />
+                                                            </Button>
                                                         </Link>
-                                                            </div>
-
+                                                        </div>
                                                     ) : (
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="hover:text-gray-400 transition-colors"
-                                                            disabled={
-                                                                true
-                                                            }
-                                                        >
-                                                            <Eye
-                                                                size={
-                                                                    20
-                                                                }
-                                                                className="ml-1"
-                                                            />
-                                                        </Button>
+                                                        <div className="flex items-center gap-1">
+                                                        <div className="relative group inline-flex">
+                                                            <span className="pointer-events-none">
+                                                            <Button
+                                                                variant="ghost"
+                                                                disabled
+                                                                className="cursor-not-allowed px-1"
+                                                            >
+                                                                <DownloadIcon size={18} className="text-gray-300" />
+                                                            </Button>
+                                                            </span>
+
+                                                            <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
+                                                                            px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                No submissions available
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="relative group inline-flex">
+                                                            <span className="pointer-events-none">
+                                                            <Button
+                                                                variant="ghost"
+                                                                disabled
+                                                                className="cursor-not-allowed px-1"
+                                                            >
+                                                                <Eye size={20} className="text-gray-400" />
+                                                            </Button>
+                                                            </span>
+
+                                                            <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
+                                                                            px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                No submissions to view
+                                                            </div>
+                                                        </div>
+                                                        </div>
                                                     )}
                                                 </div>
+
                                                
                                                 <div className="flex items-center justify-between mt-4 text-sm">
                                                     <div className="flex items-center gap-1">

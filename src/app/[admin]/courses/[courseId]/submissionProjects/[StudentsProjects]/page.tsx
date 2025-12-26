@@ -4,12 +4,13 @@ import { useRouter } from 'next/navigation'
 import { columns } from './columns'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 type Props = {}
 
@@ -20,6 +21,7 @@ interface BatchFilter {
 
 const Page = ({ params }: any) => {
     const router = useRouter()
+    const { downloadCsv } = useDownloadCsv()
     const [data, setData] = useState<any>()
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [projectStudentData, setProjectStudentData] = useState<any[]>([])
@@ -126,6 +128,44 @@ const Page = ({ params }: any) => {
         }
     }, [params.courseId])
 
+    const handleVideoDownloadCsv = useCallback(() => {
+        const queryParams = new URLSearchParams()
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        downloadCsv({
+            endpoint: `/submission/projects/students?projectId=${params.StudentsProjects}&bootcampId=${params.courseId}&${queryParams.toString()}`,
+    
+            fileName: `project_submissions_${data?.projectData?.[0]?.title || 'project'}_${new Date()
+                .toISOString()
+                .split('T')[0]}`,
+    
+            dataPath: 'projectSubmissionData.projectTrackingData',
+    
+            columns: [
+                { header: 'Student Name', key: 'name' },
+                { header: 'Email', key: 'email' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Project Link', key: 'projectLink' },
+            ],
+    
+            mapData: (item: any) => ({
+                name: item.name || '',
+                email: item.email || '',
+                batchName: item.batchName || '',
+                projectLink: item.projectLink || '',
+
+            }),
+        })
+    }, [params.courseId,params.StudentsProjects,selectedBatch,sortField,sortDirection,data])
+    
     // Handle sorting change
     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
         setSortField(field)
@@ -145,7 +185,7 @@ const Page = ({ params }: any) => {
 
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 mt-6">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -208,6 +248,15 @@ const Page = ({ params }: any) => {
                         <CardTitle className="text-xl text-gray-800">
                             Student Submissions
                         </CardTitle>
+                        <Button
+                            onClick={handleVideoDownloadCsv}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            disabled={projectStudentData.length === 0}
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                 </CardHeader>
                 <div className="relative w-1/3 p-4">

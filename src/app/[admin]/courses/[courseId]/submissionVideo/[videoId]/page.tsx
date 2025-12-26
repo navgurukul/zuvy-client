@@ -5,13 +5,14 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 type Props = {}
 interface BatchFilter {
@@ -21,6 +22,7 @@ interface BatchFilter {
 
 const Page = ({ params }: any) => {
     const router = useRouter()
+    const { downloadCsv } = useDownloadCsv()
     const [videoData, setVideoData] = useState<any>()
     const [dataTableVideo, setDataTableVideo] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
@@ -109,7 +111,43 @@ const Page = ({ params }: any) => {
     useEffect(() => {
         defaultFetchApi()
     }, [selectedBatch ,sortField, sortDirection, defaultFetchApi])
+     
+    const handleVideoDownloadCsv = useCallback(() => {
+        const queryParams = new URLSearchParams()
     
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        downloadCsv({
+            endpoint: `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`,
+    
+            fileName: `video_submissions_${videoData?.title || 'video'}_${new Date()
+                .toISOString()
+                .split('T')[0]}`,
+    
+            dataPath: 'submittedStudents',
+    
+            columns: [
+                { header: 'Student Name', key: 'name' },
+                { header: 'Email', key: 'email' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Watched At', key: 'completedAt' },
+            ],
+    
+            mapData: (item: any) => ({
+                name: item.name || '',
+                email: item.email || '',
+                batchName: item.batchName || '',
+                completedAt: item.completedAt || '',
+            }),
+        })
+    }, [params.videoId,selectedBatch,sortField,sortDirection,videoData,])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -146,7 +184,7 @@ const Page = ({ params }: any) => {
 
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 mt-6">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -208,6 +246,15 @@ const Page = ({ params }: any) => {
                         <CardTitle className="text-xl text-gray-800">
                             Student Submissions
                         </CardTitle>
+                        <Button
+                            onClick={handleVideoDownloadCsv}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            disabled={dataTableVideo.length === 0}
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                 </CardHeader>
 

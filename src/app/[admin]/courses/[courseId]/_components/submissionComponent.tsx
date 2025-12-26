@@ -8,70 +8,32 @@ import { api } from '@/utils/axios.config'
 import { SubmissionComponentProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 const SubmissionComponent = (props: SubmissionComponentProps) => {
-    const handleDownloadPdf = async () => {
-        const apiUrl = `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`
-
-        async function fetchData() {
-            try {
-                const response = await api.get(apiUrl)
-                const assessments = response.data.data
-                const doc = new jsPDF()
-
-                // Title Styling
-                doc.setFontSize(18)
-                doc.setFont('Regular', 'normal')
-
-                doc.setFontSize(15)
-                doc.setFont('Regular', 'normal')
-                doc.text('List of Students-:', 14, 23) // Closer to the table
-
-                // Define columns for the table
-                const columns = [
-                    { header: 'Name', dataKey: 'name' },
-                    { header: 'Email', dataKey: 'email' },
-                    { header: 'Status', dataKey: 'status' },
-                ]
-
-                // Prepare rows for the table
-                const rows = assessments.map(
-                    (assessment: {
-                        name: string
-                        email: string
-                        status: string
-                    }) => ({
-                        name: assessment.name || 'N/A',
-                        email: assessment.email || 'N/A',
-                        status: assessment.status || 'N/A', // Correctly mapping status
-                    })
-                )
-
-                // Use autoTable to create the table in the PDF
-                autoTable(doc, {
-                    head: [columns.map((col) => col.header)],
-                    body: rows.map(
-                        (row: {
-                            name: string
-                            email: string
-                            status: string
-                        }) => [row.name, row.email, row.status]
-                    ), // Ensure status is used here
-                    startY: 25,
-                    margin: { horizontal: 10 },
-                    styles: { overflow: 'linebreak', halign: 'center' },
-                    headStyles: { fillColor: [22, 160, 133] },
-                    theme: 'grid',
-                })
-
-                // Save the document
-                doc.save(`${props.title}.pdf`)
-            } catch (error) {}
-        }
-
-        fetchData()
-    }
-
+    const { downloadCsv } = useDownloadCsv()
+    const handleDownloadCsv = () => {
+        if (!props.moduleId || !props.chapterId || !props.questionId) return
+        downloadCsv({
+          endpoint: `submission/practiseProblemStatus/${props.moduleId}?chapterId=${props.chapterId}&questionId=${props.questionId}`,
+          fileName: props.title || 'practice-problem',
+      
+          dataPath: 'data',
+      
+          columns: [
+            { header: 'Name', key: 'name' },
+            { header: 'Email', key: 'email' },
+            { header: 'Status', key: 'status' },
+          ],
+      
+          mapData: (item) => ({
+            name: item.name || 'N/A',
+            email: item.email || 'N/A',
+            status: item.status || 'N/A',
+          }),
+        })
+      }
+      
     const submissionPercentage =
         props.totalSubmissions > 0
             ? props.studentsSubmitted / props.totalSubmissions
@@ -101,7 +63,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                     : 'text-gray-500 hover:text-gray-700 cursor-pointer'
                             }`}
                             onClick={
-                                isDisabled ? undefined : () => handleDownloadPdf()
+                                isDisabled ? undefined : () => handleDownloadCsv()
                             }
                             aria-label="Download full report"
                             disabled={isDisabled} // Disable button
@@ -114,7 +76,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                             }`}
                         >
                             {isDisabled
-                                ? ' No submissions available.'
+                                ? ' No submissions to view'
                                 : 'Download full report'}
                         </div>
                     </div>
@@ -128,9 +90,18 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                                     </div>
                                 </Link>
                             ) : (
-                                <div className="flex items-center text-sm font-medium text-gray-400 cursor-not-allowed">
-                                    <Eye className="text-gray-400 mb-2" size={20} />
-                                </div>
+                            <div className="group relative">
+                                <button
+                                className="text-gray-400 cursor-not-allowed"
+                                onClick={(e) => e.preventDefault()}
+                                disabled
+                            >
+                                <Eye size={20} />
+                            </button>
+                            <div className="absolute right-0 bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-800 rounded group-hover:block">
+                                No submissions to view
+                            </div>
+                            </div>
                             )}
                         </div>
                     </div>
