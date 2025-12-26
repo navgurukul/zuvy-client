@@ -17,7 +17,7 @@ const ZoeFlashScreen = ({ isOpen, onClose, onStartInterview }: ZoeFlashScreenPro
         "Help us improve Zoe with your honest feedback",
     ];
 
-    const access_token = process.env.NEXT_PUBLIC_ZOE_ACCESS_TOKEN || "";
+    const access_token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
 
     const handleStartInterview = () => {
         window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank');
