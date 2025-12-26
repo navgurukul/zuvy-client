@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import StudentDashboard from './_pages/StudentDashboard';
 import ZoeFlashScreen from '../_components/ZoeFlashScreen';
-import ZoeBanner from '../_components/ZoeBanner';
 
 const Page = () => {
   const [showAnnouncement, setShowAnnouncement] = useState<boolean>(false);

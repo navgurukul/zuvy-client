@@ -57,7 +57,7 @@ function StudentLayoutContent({
     };
 
     const handleStartInterview = () => {
-        const access_token = process.env.NEXT_PUBLIC_ZOE_ACCESS_TOKEN || '';
+        const access_token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
         window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank');
     };
 
