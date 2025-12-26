@@ -28,7 +28,7 @@ const StudentDashboard = () => {
   const { isDark } = useThemeStore()
   
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
-  const access_token = localStorage.getItem('access_token')
+  const access_token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const {isStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const router = useRouter();

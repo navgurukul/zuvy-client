@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import StudentDashboard from './_pages/StudentDashboard';
-// import FlashAnnouncementDialog from '../_components/FlashAnnouncement';
-
-
+import ZoeFlashScreen from '../_components/ZoeFlashScreen';
+import ZoeBanner from '../_components/ZoeBanner';
 
 const Page = () => {
   const [showAnnouncement, setShowAnnouncement] = useState<boolean>(false);
@@ -12,10 +11,25 @@ const Page = () => {
 
   useEffect(() => {
     setIsClient(true);
-    const isLoginFirst = localStorage.getItem('isLoginFirst');
-    setShowAnnouncement(!!isLoginFirst);
+    if (typeof window !== 'undefined') {
+      const isLoginFirst = localStorage.getItem('isLoginFirst');
+      setShowAnnouncement(!!isLoginFirst);
+    }
   }, []);
 
+  const handleCloseAnnouncement = () => {
+    setShowAnnouncement(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('isLoginFirst');
+    }
+  };
+
+  const handleStartInterview = () => {
+    setShowAnnouncement(false);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('isLoginFirst');
+    }
+  };
 
   if (!isClient) {
     return (
@@ -27,7 +41,11 @@ const Page = () => {
 
   return (
     <div>
-      {/* {showAnnouncement && <FlashAnnouncementDialog />} */}
+      <ZoeFlashScreen 
+        isOpen={showAnnouncement}
+        onClose={handleCloseAnnouncement}
+        onStartInterview={handleStartInterview}
+      />
       <StudentDashboard />
     </div>
   );
