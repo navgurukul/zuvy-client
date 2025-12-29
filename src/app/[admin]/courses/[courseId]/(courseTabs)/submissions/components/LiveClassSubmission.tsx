@@ -133,16 +133,16 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                 <ArrowDownToLine size={20} className="text-gray-500" />
                             </button>
                         ) : (
-                            <div className="relative group inline-flex">
-                            <span className="pointer-events-none">
-                                <button disabled className="cursor-not-allowed">
-                                <ArrowDownToLine size={20} className="text-gray-300" />
-                                </button>
-                            </span>
+                            <div className="absolute top-2 pr-3 right-10">
+                                <div className="relative group inline-flex">
+                                    <button disabled className="cursor-not-allowed">
+                                        <ArrowDownToLine size={20} className="text-gray-400" />
+                                    </button>
 
-                            <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                No submissions available   
-                            </div>
+                                    <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                        No submissions available   
+                                    </div>
+                                </div>
                             </div>
                         )}
                         {submissions > 0 ? (
@@ -151,25 +151,24 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                             >
                                 <Button
                                     variant="ghost"
-                                    className="hover:bg-white-600 hover:text-gray-700 text-gray-500"
+                                    className="hover:bg-white-500 hover:text-gray-700 text-gray-500"
                                 >
                                     <Eye size={20} />
                                 </Button>
                             </Link>
                         ) : (
-                            <div className="relative group inline-flex">
-                                <span className="pointer-events-none">
-                                    <Button
-                                    variant="ghost"
-                                    disabled
-                                    className="cursor-not-allowed"
-                                    >
-                                    <Eye size={20} className="text-gray-400 mb-1" />
-                                    </Button>
-                                </span>
+                            <div className="absolute top-2 pr-3 right-0">
+                                <div className="relative group inline-flex">
+                                        <button
+                                            disabled
+                                            className="cursor-not-allowed"
+                                        >
+                                        <Eye size={20} className="text-gray-400" />
+                                        </button>
 
-                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                    No submissions to view
+                                    <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                        No submissions to view
+                                    </div>
                                 </div>
                             </div>
                         )}

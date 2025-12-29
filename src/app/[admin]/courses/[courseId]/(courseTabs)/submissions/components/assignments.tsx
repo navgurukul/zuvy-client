@@ -122,7 +122,6 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         <div className="absolute top-5 pr-3 right-10">
                                                             {isDisabled ? (
                                                             <div className="relative group inline-flex">
-                                                                <span className="pointer-events-none">
                                                                 <button
                                                                     disabled
                                                                     className="ml-2 cursor-not-allowed text-gray-400"
@@ -130,7 +129,6 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                                 >
                                                                     <ArrowDownToLine size={20} />
                                                                 </button>
-                                                                </span>
                                                                 <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
                                                                     No submissions available   
                                                                 </div>
@@ -150,11 +148,11 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                         <div className="absolute top-5 pr-3 right-2">
                                                             {isDisabled ? (
                                                             <div className="relative group inline-flex">
-                                                                <span className="pointer-events-none">
+                                                                <span className="cursor-not-allowed">
                                                                 <Eye size={20} className="text-gray-400 mb-1" />
                                                                 </span>
                                                                 <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                                                No submissions to view
+                                                                    No submissions to view
                                                                 </div>
                                                             </div>
                                                             ) : (

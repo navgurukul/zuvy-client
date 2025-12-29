@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, Play, Eye, DownloadIcon } from 'lucide-react'
+import { ChevronRight, Play, Eye, DownloadIcon ,ArrowDownToLine} from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
@@ -137,7 +137,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                         <h3 title={video.title} className="font-medium text-base">{ellipsis(video.title , 25)}</h3>
                                                     </div>
                                                 </div>
-                                                <div className="absolute top-3 right-3">
+                                                <div className="absolute top-3 right-2">
                                                     {video.completedStudents > 0 ? (
                                                         <div className="flex items-center gap-1">
                                                         <Button
@@ -147,7 +147,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                             handleVideoDownloadCsv(Number(video.id), video.title)
                                                             }
                                                         >
-                                                            <DownloadIcon size={18} />
+                                                            <ArrowDownToLine size={20} />
                                                         </Button>
                                                         <Link
                                                             href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
@@ -161,40 +161,34 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                         </Link>
                                                         </div>
                                                     ) : (
-                                                        <div className="flex items-center gap-1">
-                                                        <div className="relative group inline-flex">
-                                                            <span className="pointer-events-none">
-                                                            <Button
-                                                                variant="ghost"
-                                                                disabled
-                                                                className="cursor-not-allowed px-1"
-                                                            >
-                                                                <DownloadIcon size={18} className="text-gray-300" />
-                                                            </Button>
-                                                            </span>
+                                                        <div className="flex items-center gap-1 mt-2">
+                                                            <div className="relative group inline-flex">
+                                                                <button
+                                                                    disabled
+                                                                    className="cursor-not-allowed px-1 text-gray-400"
+                                                                >
+                                                                    <ArrowDownToLine size={20} className="text-gray-400" />
+                                                                </button>
 
-                                                            <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
-                                                                            px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                                                No submissions available
+                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
+                                                                                px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                    No submissions available
+                                                                </div>
                                                             </div>
-                                                        </div>
 
-                                                        <div className="relative group inline-flex">
-                                                            <span className="pointer-events-none">
-                                                            <Button
-                                                                variant="ghost"
-                                                                disabled
-                                                                className="cursor-not-allowed px-1"
-                                                            >
-                                                                <Eye size={20} className="text-gray-400" />
-                                                            </Button>
-                                                            </span>
+                                                            <div className="relative group inline-flex">
+                                                                <button
+                                                                    disabled
+                                                                    className="cursor-not-allowed px-1 text-gray-400"
+                                                                >
+                                                                    <Eye size={20} className="text-gray-400" />
+                                                                </button>
 
-                                                            <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
-                                                                            px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
-                                                                No submissions to view
+                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
+                                                                                px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                    No submissions to view
+                                                                </div>
                                                             </div>
-                                                        </div>
                                                         </div>
                                                     )}
                                                 </div>

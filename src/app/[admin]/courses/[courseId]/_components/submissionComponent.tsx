@@ -59,7 +59,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                         <button
                             className={`ml-2 ${
                                 isDisabled
-                                    ? 'text-gray-400 cursor-no-drop'
+                                    ? 'text-gray-400 cursor-not-allowed'
                                     : 'text-gray-500 hover:text-gray-700 cursor-pointer'
                             }`}
                             onClick={
@@ -70,15 +70,11 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                         >
                             <ArrowDownToLine size={20} />
                         </button>
-                        <div
-                            className={`absolute right-0 bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-800 rounded group-hover:block whitespace-nowrap ${
-                                isDisabled ? 'hidden' : 'block'
-                            }`}
-                        >
-                            {isDisabled
-                                ? ' No submissions to view'
-                                : 'Download full report'}
-                        </div>
+                        {isDisabled && (
+                            <div className="absolute right-0 bottom-full mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap hidden group-hover:block">
+                            No submissions to view
+                            </div>
+                        )}
                     </div>
                     <div className="relative group">
                             {hasSubmissions ? (
@@ -98,7 +94,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                             >
                                 <Eye size={20} />
                             </button>
-                            <div className="absolute right-0 bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-800 rounded group-hover:block">
+                            <div className="absolute right-0 bottom-full mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap hidden group-hover:block">
                                 No submissions to view
                             </div>
                             </div>

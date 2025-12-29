@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getAssesmentBackgroundColorClass } from '@/lib/utils'
-import { ChevronRight, MessageSquare, Eye, Download, DownloadIcon } from 'lucide-react'
+import { ChevronRight, MessageSquare, Eye, Download, DownloadIcon,ArrowDownToLine } from 'lucide-react'
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import moment from 'moment'
@@ -59,17 +59,16 @@ const FormComponent = ({
                     </div>
                     <h3 className="font-medium text-base">{data.title}</h3>
                 </div>
-                <div className="absolute top-2 right-1">
+                <div className="absolute top-2 right-2">
                     {data.submitStudents > 0 ? (
                         <div className="flex items-center gap-[2px]">
                             <Button
                                 variant="ghost"
-                                className="px-1 hover:bg-white-600 hover:text-gray-700 transition-colors"
+                                className="px-1 hover:bg-white-500 hover:text-gray-700 transition-colors"
                                 onClick={handleDownloadCsv}
                                 disabled={downloading}
-                                title={downloading ? 'Preparing PDF...' : 'Download status PDF'}
                             >
-                                <DownloadIcon size={18} className="" />
+                                <ArrowDownToLine size={20} className="text-gray-500" />
                             </Button>
 
                             <Link
@@ -80,7 +79,7 @@ const FormComponent = ({
                             >
                                 <Button 
                                     variant="ghost" 
-                                    className="px-1 hover:bg-white-600 hover:text-gray-700 transition-colors"
+                                    className="px-1 hover:bg-white-500 hover:text-gray-700 transition-colors"
                                     title={'View Submissions'}
                                 >
                                     <Eye size={20} className="text-gray-500" />
@@ -88,11 +87,11 @@ const FormComponent = ({
                             </Link>
                         </div>
                     ) : (
-                        <div className="flex items-center gap-[2px]">
+                        <div className="flex items-center gap-[2px] mt-2">
                         <div className="relative group">
-                            <Button variant="ghost" disabled className="px-1 cursor-not-allowed">
-                                <DownloadIcon size={20} className="text-gray-400" />
-                            </Button>
+                            <button  disabled className="px-1 cursor-not-allowed">
+                                <ArrowDownToLine size={20} className="text-gray-400" />
+                            </button>
 
                             <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
                                 No submissions available
@@ -100,9 +99,9 @@ const FormComponent = ({
                         </div>
 
                         <div className="relative group">
-                            <Button variant="ghost" disabled className="px-1 cursor-not-allowed">
+                            <button  disabled className="px-1 cursor-not-allowed">
                                 <Eye size={20} className="ml-1 text-gray-400" />
-                            </Button>
+                            </button>
 
                             <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
                                 No submissions available
