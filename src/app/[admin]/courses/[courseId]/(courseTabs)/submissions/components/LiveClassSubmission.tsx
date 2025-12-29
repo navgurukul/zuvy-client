@@ -164,7 +164,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                                     disabled
                                     className="cursor-not-allowed"
                                     >
-                                    <Eye size={20} className="text-gray-400" />
+                                    <Eye size={20} className="text-gray-400 mb-1" />
                                     </Button>
                                 </span>
 
