@@ -75,11 +75,11 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                         key={item.id}
                         className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
                     >
-                        <div className="absolute top-2 right-1 z-10 flex items-center gap-0">
+                        <div className="absolute top-2 right-1 z-10 flex items-center gap-[2px]">
                             {submissions > 0 ? (
                                 <button
                                     onClick={() => handleDownloadCsv(projectId, projectTitle)}
-                                    className="cursor-pointer text-gray-500 hover:text-gray-700"
+                                    className="cursor-pointer text-gray-500 hover:text-gray-700 px-1"
                                     title="Download Report"
                                 >
                                     <ArrowDownToLine size={20} />
@@ -87,7 +87,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                             ) : (
                                 <div className="relative group inline-flex">
                                     <span className="pointer-events-none">
-                                        <button disabled className="cursor-not-allowed text-gray-400">
+                                        <button disabled className="cursor-not-allowed text-gray-400 px-1">
                                             <ArrowDownToLine size={20} />
                                         </button>
                                     </span>
@@ -108,16 +108,13 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                                 </Link>
                             ) : (
                                 <div className="relative group inline-flex">
-                                    <span className="pointer-events-none">
                                         <Button
                                             variant="ghost"
                                             disabled
                                             className="cursor-not-allowed px-1"
                                         >
-                                            <Eye className="text-gray-400" size={20} />
+                                            <Eye className="text-gray-400 mb-1" size={20} />
                                         </Button>
-                                    </span>
-
                                     <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
                                         No submissions to view
                                     </div>

@@ -118,7 +118,7 @@ if (loading) {
                 className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ArrowLeft size={20} />
-                <p className="ml-1 inline-flex text-sm font-medium md:ml-2">
+                <p className="ml-1 inline-flex text-sm font-medium md:ml-2 whitespace-nowrap">
                     Back to Course Library
                 </p>
             </Link>

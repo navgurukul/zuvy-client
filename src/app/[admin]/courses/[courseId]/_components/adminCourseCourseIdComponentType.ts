@@ -26,7 +26,7 @@ export type AssesmentComponentProps = {
     id: number
     bootcampId: number
     qualifiedStudents: number
-    onDownloadPdf: () => void
+    // onDownloadPdf: () => void
     onDownloadCsv: () => void
 }
 
