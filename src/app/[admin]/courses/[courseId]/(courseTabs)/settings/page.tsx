@@ -141,7 +141,7 @@ const Page = ({ params }: { params: PageProps }) => {
     return (
         <div className="max-w-4xl mx-auto p-6 space-y-6">
             {/* Course Type Section */}
-            <div className="bg-card rounded-lg p-6 shadow-4dp border border-border text-start">
+            <div className="rounded-lg p-6 text-start">
                 <h1 className="font-heading text-lg font-semibold leading-none tracking-tight text-foreground mb-6">
                     Course Settings
                 </h1>
@@ -255,7 +255,7 @@ const Page = ({ params }: { params: PageProps }) => {
                         </div>
                     )}
 
-                    <div className="flex items-center justify-end pt-4">
+                    <div className="flex items-center justify-end  border-b border-border pb-8">
                         {isSaved && (
                             <Alert
                                 variant="default"
@@ -272,22 +272,19 @@ const Page = ({ params }: { params: PageProps }) => {
                         <Button
                             onClick={handleSaveSettings}
                             disabled={isSaving}
-                            className="bg-primary hover:bg-primary-dark text-primary-foreground px-6 py-2 rounded-md font-medium"
+                            className="bg-primary hover:bg-primary-dark text-primary-foreground px-6  rounded-md font-medium"
                         >
                             {isSaving ? 'Saving...' : 'Save Settings'}
                         </Button>
                     </div>
                 </div>
-            </div>
-
-            {/* Delete Course Section */}
-            <div className="bg-card rounded-lg p-6 shadow-4dp border border-border">
+            <div className=" rounded-lg py-6  ">
                 <div className="flex items-start justify-between">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <AlertTriangle className="text-destructive" />
                             <h2 className="text-xl font-semibold text-destructive">
-                                Delete Course
+                                Delete Course 
                             </h2>
                         </div>
                         <p className="text-sm text-muted-foreground text-start">
@@ -316,6 +313,9 @@ const Page = ({ params }: { params: PageProps }) => {
                     </Button>
                 </div>
             </div>
+            </div>
+
+            {/* Delete Course Section */}
 
             {/* Course Delete Modal */}
             <CourseDeleteModal

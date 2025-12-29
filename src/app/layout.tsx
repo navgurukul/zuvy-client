@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: 'Zuvy LMS',
     description: 'A gateway to affordable tech learning ',
     icons: {
-        icon: ['/favicon.ico?v=4'],
+        icon: ['/zuvyfaviconLight.ico'],
         apple: ['/apple-touch-icon.png?v=4'],
         shortcut: ['/apple-touch-icon.png'],
     },
