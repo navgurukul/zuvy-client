@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button'
 import { ChevronRight, ArrowDownToLine, FileText,Eye } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import Image from 'next/image'
 import { error } from 'console'
 import { nullable } from 'zod'
@@ -17,9 +15,11 @@ import {
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import { Badge } from '@/components/ui/badge'
 import {AssignmentSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
+    const { downloadCsv } = useDownloadCsv()
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -45,72 +45,26 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
         fetchAssignmentDataHandler()
     }, [courseId, debouncedSearch])
 
-    const handleDownloadPdf = async (id: number) => {
-        const apiUrl = `/submission/assignmentStatus?chapterId=${id}&limit=5&offset=0`
-
-        async function fetchData() {
-            try {
-                const response = await api.get(apiUrl)
-                const assessments = response.data.data
-
-                const doc = new jsPDF()
-
-
-                doc.setFontSize(18)
-                doc.setFont('Regular', 'normal')
-
-                doc.setFontSize(15)
-                doc.setFont('Regular', 'normal')
-                doc.text('List of Students-:', 14, 23) // Closer to the table
-
-                // Define columns for the table
-                const columns = [
-                    { header: 'Name', dataKey: 'name' },
-                    { header: 'Email', dataKey: 'email' },
-                    { header: 'Status', dataKey: 'status' },
-                ]
-
-                // Prepare rows for the table
-                const rows = assessments.data.map(
-                    (assessment: {
-                        name: string
-                        emailId: string
-                        status: string
-                    }) => ({
-                        name: assessment.name || 'N/A',
-                        email: assessment.emailId || 'N/A',
-                        status: assessment.status || 'N/A', // Correctly mapping status
-                    })
-                )
-
-                // Use autoTable to create the table in the PDF
-                autoTable(doc, {
-                    head: [columns.map((col) => col.header)],
-                    body: rows.map(
-                        (row: {
-                            name: string
-                            email: string
-                            status: string
-                        }) => [row.name, row.email, row.status]
-                    ), // Ensure status is used here
-                    startY: 25,
-                    margin: { horizontal: 10 },
-                    styles: { overflow: 'linebreak', halign: 'center' },
-                    headStyles: { fillColor: [22, 160, 133] },
-                    theme: 'grid',
-                })
-
-                // Save the document
-                doc.save(`${assessments.chapterName}.pdf`)
-            } catch (error) {}
-        }
-
-        fetchData()
+    const handleDownloadCsv = (id: number) => {
+        downloadCsv({
+          endpoint: `/submission/assignmentStatus?chapterId=${id}&limit=5&offset=0`,
+          fileName: 'Assignment_Status',
+          columns: [
+            { header: 'Name', key: 'name' },
+            { header: 'Email', key: 'email' },
+            { header: 'Status', key: 'status' },
+          ],
+          mapData: (assessment) => ({
+            name: assessment.name || 'N/A',
+            email: assessment.emailId || 'N/A',
+            status: assessment.status || 'N/A',
+          }),
+        })
     }
 
-if (loading) {
-  return <AssignmentSubmissionSkeleton/>
-}
+    if (loading) {
+    return <AssignmentSubmissionSkeleton/>
+    }
     return (
         <div className="">
             {assignmentData?.length > 0 ? (
@@ -163,53 +117,52 @@ if (loading) {
                                                         className="relative bg-card border border-gray-200 rounded-md p-4 hover:shadow-lg transition-shadow w-full"
                                                         key={moduleData.id}
                                                     >
-                                                        <div className="flex items-center gap-3">
-
-                                                            <div className="absolute top-5 pr-3 right-10 group">
+                                                   
+                                                   <div className="flex items-center gap-3">
+                                                        <div className="absolute top-5 pr-3 right-10">
+                                                            {isDisabled ? (
+                                                            <div className="relative group inline-flex">
                                                                 <button
-                                                                    className={`ml-2 cursor-pointer ${isDisabled
-                                                                        ? 'text-gray-400'
-                                                                        : 'text-gray-500 hover:text-gray-700'
-                                                                        }`}
-                                                                    onClick={
-                                                                        isDisabled
-                                                                            ? undefined
-                                                                            : () =>
-                                                                                handleDownloadPdf(
-                                                                                    Number(
-                                                                                        chapterId
-                                                                                    )
-                                                                                )
-                                                                    }
+                                                                    disabled
+                                                                    className="ml-2 cursor-not-allowed text-gray-400"
                                                                     aria-label="Download full report"
-                                                                    disabled={
-                                                                        isDisabled
-                                                                    } // Disable button
                                                                 >
-                                                                    <ArrowDownToLine
-                                                                        size={20}
-                                                                    />
+                                                                    <ArrowDownToLine size={20} />
                                                                 </button>
-                                                                {/* Tooltip visible on hover */}
-                                                                {!isDisabled && (
-                                                                    <div className="absolute right-0 mt-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap">
-                                                                        Download
-                                                                        full report
-                                                                    </div>
-                                                                )}
+                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                    No submissions available   
+                                                                </div>
                                                             </div>
-                                                            <div className="absolute top-5 pr-3 right-2 group">
-                                                                <Link
-                                                                    href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
-                                                                >
-                                                                    <div>
-                                                                        <Eye
-                                                                            size={20} className="text-gray-500 mb-1"
-                                                                        />
-                                                                    </div>
+                                                            ) : (
+                                                            <button
+                                                                className="ml-2 cursor-pointer text-gray-500 hover:text-gray-700"
+                                                                onClick={() => handleDownloadCsv(Number(chapterId))}
+                                                                aria-label="Download full report"
+                                                            >
+                                                                <ArrowDownToLine size={20} />
+                                                            </button>
+                                                            )}
+                                                        </div>
 
-                                                                </Link>
+                                                        {/* EYE ICON */}
+                                                        <div className="absolute top-5 pr-3 right-2">
+                                                            {isDisabled ? (
+                                                            <div className="relative group inline-flex">
+                                                                <span className="cursor-not-allowed">
+                                                                <Eye size={20} className="text-gray-400 mb-1" />
+                                                                </span>
+                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                    No submissions to view
+                                                                </div>
                                                             </div>
+                                                            ) : (
+                                                            <Link
+                                                                href={`/admin/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                            >
+                                                                <Eye size={20} className="text-gray-500 hover:text-gray-700 mb-1" />
+                                                            </Link>
+                                                            )}
+                                                        </div>
                                                         </div>
 
                                                         {/* Content */}

@@ -4,13 +4,14 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { ArrowLeft, RefreshCw,Download } from 'lucide-react'
 
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { columns } from './columns'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 interface BatchFilter {
     id: number
@@ -19,6 +20,7 @@ interface BatchFilter {
 
 const PracticeProblems = ({ params }: any) => {
     const router = useRouter()
+    const { downloadCsv } = useDownloadCsv()
     const [matchingData, setMatchingData] = useState<any>(null)
     const [bootcampData, setBootcampData] = useState<any>({})
     const [studentStatus, setStudentStatus] = useState<any[]>([])
@@ -120,6 +122,50 @@ const PracticeProblems = ({ params }: any) => {
         }
     }, [params.courseId])
 
+    const handleVideoDownloadCsv = useCallback(() => {
+        if (!matchingData) return
+    
+        const queryParams = new URLSearchParams()
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        downloadCsv({
+            endpoint: `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`,
+    
+            fileName: `practice_problem_${matchingData.moduleChapterData[0].codingQuestionDetails?.title || 'submissions'}_${new Date()
+                .toISOString()
+                .split('T')[0]}`,
+    
+            dataPath: 'data',
+    
+            columns: [
+                { header: 'Student Name', key: 'name' },
+                { header: 'Email', key: 'email' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Status', key: 'status' },
+                { header: 'Completed At', key: 'completedAt' },
+                { header: 'Attempts', key: 'noOfAttempts' },
+            ],
+    
+            mapData: (item: any) => ({
+                name: item.name || '',
+                email: item.email || '',
+                batchName: item.batchName || '',
+                status: item.status || '',
+                completedAt: item.completedAt || '',
+                noOfAttempts: item.noOfAttempts ?? '',
+            }),
+        })
+    }, [matchingData,selectedBatch,sortField,sortDirection])
+    
     useEffect(() => {
         if (bootcampData?.name && matchingData?.moduleChapterData) {
             setCrumbData([
@@ -180,7 +226,7 @@ const PracticeProblems = ({ params }: any) => {
 
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 mt-6">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -236,6 +282,15 @@ const PracticeProblems = ({ params }: any) => {
                         <CardTitle className="text-xl text-gray-800">
                             Student Submissions
                         </CardTitle>
+                        <Button
+                            onClick={handleVideoDownloadCsv}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            disabled={studentStatus.length === 0}
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                     <div className="relative w-1/3 p-4">
                         <SearchBox
