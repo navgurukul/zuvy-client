@@ -60,10 +60,10 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
             setTopics(sortedTopics)
         } catch (error) {
             console.error('Error fetching topics:', error)
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Failed to fetch topics',
-                variant: 'destructive',
+                // variant: 'destructive',
             })
         } finally {
             setLoading(false)
@@ -110,19 +110,19 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
     // Add new topic to list (not API yet)
     const handleCreateTopic = async () => {
         if (!newTopicName.trim()) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Please enter a topic name',
-                variant: 'destructive',
+                // variant: 'destructive',
             })
             return
         }
 
         if (duplicateSuggestions.length > 0) {
-            toast({
+            toast.error({
                 title: 'Error',
                 description: 'Topic already exists',
-                variant: 'destructive',
+                // variant: 'destructive',
             })
             return
         }
@@ -161,7 +161,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
             
             await api.delete(`/content/deletequestiontag/${topic.id}`)
             
-            toast({
+            toast.success({
                 title: 'Success',
                 description: `${topic.tagName} topic deleted successfully`,
             })
@@ -172,10 +172,10 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
         } catch (error: any) {
             console.error('Error deleting topic:', error)
             const errorMessage = error.response?.data?.message || 'Failed to delete topic'
-            toast({
+            toast.error({
                 title: 'Error',
                 description: errorMessage,
-                variant: 'destructive',
+                // variant: 'destructive',
             })
         } finally {
             setIsDeleting(false)
@@ -199,7 +199,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                await api.post('/Content/createTag', {
                 tagNames: newlyAddedTopics  // Send array with correct field name
             })               
-             toast({
+             toast.success({
                     title: 'Success',
                     description: `${newlyAddedTopics.length} topic${newlyAddedTopics.length > 1 ? 's' : ''} created successfully`,
                 })
@@ -212,10 +212,10 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
             } catch (error: any) {
                 console.error('Error creating topics:', error)
                 const errorMessage = error.response?.data?.message || 'Failed to create topics'
-                toast({
+                toast.error({
                     title: 'Error',
                     description: errorMessage,
-                    variant: 'destructive',
+                    // variant: 'destructive',
                 })
             } finally {
                 setIsCreating(false)
