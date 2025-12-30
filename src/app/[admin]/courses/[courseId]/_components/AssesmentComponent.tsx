@@ -3,17 +3,10 @@ import { Button } from '@/components/ui/button'
 import { ArrowDownToLine, ChevronRight, ClipboardCheck, Eye } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { AssesmentComponentProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import React, { useState } from 'react'
 
 const AssesmentComponent = (props: AssesmentComponentProps) => {
-    const [isOpen, setIsOpen] = useState(false)
     const isDisabled = props.studentsSubmitted === 0
 
     return (
@@ -32,50 +25,26 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                 {/* Dropdown / Download Button */}
                 <div className="flex items-center gap-3">
                     <div className="relative">
-                        {isDisabled ? (
-                            <div className="group relative">
-                                <button
-                                    className="ml-2 text-gray-400 cursor-not-allowed"
-                                    onClick={(e) => e.preventDefault()}
-                                >
-                                    <ArrowDownToLine size={20} />
-                                </button>
-                                <div className="absolute right-0 bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-800 rounded group-hover:block">
-                                    No submissions available
-                                </div>
+                    {isDisabled ? (
+                        <div className="group relative">
+                            <button
+                            className="ml-2 text-gray-400 cursor-not-allowed"
+                            onClick={(e) => e.preventDefault()}
+                            >
+                            <ArrowDownToLine size={20} />
+                            </button>
+                            <div className="absolute right-0 bottom-full mb-2 hidden px-2 py-1 text-xs text-white bg-gray-800 rounded group-hover:block">
+                            No submissions available
                             </div>
+                        </div>
                         ) : (
-                            <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-                                <DropdownMenuTrigger asChild>
-                                    <button
-                                        className="ml-2 text-gray-500 hover:text-gray-700"
-                                        onClick={() => setIsOpen(!isOpen)}
-                                        aria-label="Download full report"
-                                    >
-                                        <ArrowDownToLine size={20} />
-                                    </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" sideOffset={8}>
-                                    <DropdownMenuItem
-                                        className="cursor-pointer"
-                                        onClick={() => {
-                                            props.onDownloadPdf()
-                                            setIsOpen(false)
-                                        }}
-                                    >
-                                        Download PDF
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        className="cursor-pointer"
-                                        onClick={() => {
-                                            props.onDownloadCsv()
-                                            setIsOpen(false)
-                                        }}
-                                    >
-                                        Download CSV
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                        <button
+                            className="ml-2 text-gray-500 hover:text-gray-700"
+                            aria-label="Download CSV"
+                            onClick={props.onDownloadCsv}
+                        >
+                            <ArrowDownToLine size={20} />
+                        </button>
                         )}
                     </div>
                     {isDisabled ? (

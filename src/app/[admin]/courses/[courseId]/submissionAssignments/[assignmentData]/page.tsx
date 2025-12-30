@@ -7,10 +7,11 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft,Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SearchBox } from "@/utils/searchBox"
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 type Props = {}
 
@@ -23,7 +24,7 @@ const Page = ({ params }: { params: any }) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-
+    const { downloadCsv } = useDownloadCsv()
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>({})
     const [assignmentTitle, setAssignmentTitle] = useState<string>('')
@@ -165,11 +166,55 @@ const Page = ({ params }: { params: any }) => {
         setSortField(field)
         setSortDirection(direction)
     }, [])
-
+    const handleVideoDownloadCsv = useCallback(() => {
+        const queryParams = new URLSearchParams()
+    
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        const currentSearchQuery = searchParams.get('search') || ''
+        if (currentSearchQuery) {
+            queryParams.append('searchStudent', currentSearchQuery)
+        }
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        downloadCsv({
+            endpoint: `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`,
+    
+            fileName: `assignment_${assignmentTitle || 'submissions'}_${new Date()
+                .toISOString()
+                .split('T')[0]}`,
+    
+            dataPath: 'data.data',
+    
+            columns: [
+                { header: 'Student Name', key: 'name' },
+                { header: 'Email', key: 'emailId' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Submitted Status', key: 'status' },
+                { header: 'Submitted Date', key: 'submitted_date' },
+            ],
+    
+            mapData: (item: any) => ({
+                name: item.name || '',
+                emailId: item.emailId || '',
+                batchName: item.batchName || '',
+                status: item.status || '',
+                submitted_date: item.submitted_date || '',
+            }),
+        })
+    }, [params.assignmentData,selectedBatch,searchParams,sortField,sortDirection,assignmentTitle])
+    
     const totalStudents = bootcampData?.students_in_bootcamp - bootcampData?.unassigned_students
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 mt-5">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -233,6 +278,15 @@ const Page = ({ params }: { params: any }) => {
                         <CardTitle className="text-xl text-gray-800">
                             Student Submissions
                         </CardTitle>
+                        <Button
+                            onClick={handleVideoDownloadCsv}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            disabled={assignmentData.length === 0}
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                 </CardHeader>
 
