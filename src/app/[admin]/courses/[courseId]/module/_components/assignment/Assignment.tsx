@@ -445,17 +445,17 @@ const AddAssignent = ({
                 setIsLoading(true)
                 await uploadPdf(content.moduleId, content.id, formData)
                 setIsChapterUpdated(!isChapterUpdated)
-
-                setTimeout(() => {
-                    setIsPdfUploaded(true)
-                    setpdfLink('')
-                    getAssignmentContent()
-                    setIsLoading(false)
-                    toast.success({
-                        title: 'Success',
-                        description: 'PDF uploaded successfully!',
-                    })
-                }, 1000) //
+                // Instantly update state to disable Save button
+                setIsPdfUploaded(true)
+                setFile(null)
+                setpdfLink('')
+                setIsLoading(false)
+                toast.success({
+                    title: 'Success',
+                    description: 'PDF uploaded successfully!',
+                })
+                // Optionally reload assignment content if needed
+                getAssignmentContent()
             } catch (err: any) {
                 console.error(err)
                 toast.error({
@@ -942,10 +942,10 @@ const AddAssignent = ({
                                                 onClick={onFileUpload}
                                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                                 disabled={
-                                                !canEdit ||
+                                                    !canEdit ||
                                                     loading ||
                                                     !form.formState.isValid ||
-                                                    (!file && !ispdfUploaded) ||
+                                                    (ispdfUploaded && !file) ||
                                                     disabledUploadButton
                                                 }
                                             >

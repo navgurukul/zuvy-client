@@ -310,25 +310,27 @@ useEffect(() => {
 
                                 <div className="flex items-center gap-2">
 
-                                    {selectedQuestions?.length > 0 && (
-                                        <Button
-                                            type="submit"
-                                            disabled={
-                                                !canEdit ||
-                                                !form.formState.isValid ||
-                                                form.formState.isSubmitting
-                                            }
-                                            className={`bg-primary text-white ${
-                                                !canEdit ||
-                                                !form.formState.isValid ||
-                                                form.formState.isSubmitting
-                                                    ? 'opacity-50 cursor-not-allowed'
-                                                    : ''
-                                            }`}
-                                        >
-                                            Save
-                                        </Button>
-                                    )}
+                                    <Button
+                                        type="submit"
+                                        disabled={
+                                            !canEdit ||
+                                            form.formState.isSubmitting ||
+                                            selectedQuestions.length === 0 ||
+                                            !form.getValues('title') ||
+                                            !!form.formState.errors.title
+                                        }
+                                        className={`bg-primary text-white ${
+                                            !canEdit ||
+                                            form.formState.isSubmitting ||
+                                            selectedQuestions.length === 0 ||
+                                            !form.getValues('title') ||
+                                            !!form.formState.errors.title
+                                                ? 'opacity-50 cursor-not-allowed'
+                                                : ''
+                                        }`}
+                                    >
+                                        Save
+                                    </Button>
                                 </div>
                             </form>
                         </div>
