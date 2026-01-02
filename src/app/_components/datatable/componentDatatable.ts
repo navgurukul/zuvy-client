@@ -58,6 +58,7 @@ export interface DataTableProps<TData, TValue> {
     customTopBar?: React.ReactNode
     externalSorting?: SortingState
     setExternalSorting?: (sorting: SortingState) => void
+     getSelectedRowsFunction?: (fn: () => any[], table?: any) => void
 }
 
 export type StudentData = {

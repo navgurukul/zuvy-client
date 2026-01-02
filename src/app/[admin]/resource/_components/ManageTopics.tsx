@@ -398,21 +398,21 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
             <Dialog open={!!deleteConfirmTopic} onOpenChange={() => setDeleteConfirmTopic(null)}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                        <DialogTitle className="flex items-center gap-2 text-destructive">
                             <Trash2 className="w-4 h-4" />
                             Confirm Deletion
                         </DialogTitle>
                     </DialogHeader>
-                    
-                    <div className="space-y-4">
-                        <p className="text-gray-700 font-medium">
+
+                    <div className="space-y-4 text-start">
+                        <p className="text-sm text-muted">
                             Deleting topics will permanently remove them from the system.
                             If a topic is linked to any question, it can not be deleted.
                             Are you sure you want to continue?
                         </p>
                         {deleteConfirmTopic && (
-                            <div className="bg-gray-100 p-3 rounded-lg">
-                                <p className="font-medium">Topic: {deleteConfirmTopic.tagName}</p>
+                            <div className="bg-gray-100 rounded-lg">
+                                <p className="text-sm">Topic: {deleteConfirmTopic.tagName}</p>
                             </div>
                         )}
                     </div>
@@ -427,7 +427,7 @@ const ManageTopics: React.FC<ManageTopicsProps> = ({
                         <Button
                             onClick={confirmDelete}
                             disabled={isDeleting}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
                             {isDeleting ? 'Deleting...' : 'Delete'}
                         </Button>

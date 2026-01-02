@@ -79,11 +79,12 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
     <div>
         {selectedRows.length > 0 ? (
             <Button
-                className="border-2 border-red-300 flex items-center p-2 mr-[1rem] mt-[3rem]" 
+                className="border-2 border-red-300 flex p-2 " 
                 variant={'ghost'}
                 onClick={() => setDeleteModalOpen(true)}
             >
-                <Trash2 className="text-red-400 mr-2" size={17} /> Delete MCQ
+                <Trash2 className="text-destructive mr-2" size={17} /> 
+                {selectedRows.length === 1 ? 'Delete MCQ' : 'Delete MCQs'}
             </Button>
         ) : null}
         
@@ -91,8 +92,8 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
             isOpen={isDeleteModalOpen}
             onClose={() => setDeleteModalOpen(false)}
             onConfirm={deleteMcqHalderinBulk}
-            modalText={'Are You Sure you want to delete Selected Mcqs ?'}
-            buttonText="Delete Quiz Question"
+            modalText={`Are You Sure you want to delete Selected ${selectedRows.length === 1 ? 'MCQ' : 'MCQs'}?`}
+            buttonText={`Delete ${selectedRows.length === 1 ? 'MCQ' : 'MCQs'}`}
             input={false}
         />
     </div>

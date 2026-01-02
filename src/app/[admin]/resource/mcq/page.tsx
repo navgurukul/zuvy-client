@@ -44,6 +44,7 @@ import { toast } from '@/components/ui/use-toast'
 import { filteredQuizQuestions } from '@/utils/admin'
 import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
+import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
 
 const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
     ssr: false,
@@ -118,6 +119,23 @@ const Mcqs = (props: Props) => {
     const { selectedOptions, setSelectedOptions } = getSelectedMCQOptions()
     const { isEditQuizModalOpen, setIsEditModalOpen } = getEditQuizQuestion()
     const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
+    const [tableInstance, setTableInstance] = useState<any>(null)
+    const [logSelectedRowsFunction, setLogSelectedRowsFunction] = useState<(() => any[]) | null>(null)
+
+    // Function to receive the logSelectedRows function from DataTable
+    const handleGetSelectedRowsFunction = useCallback((fn: () => any[], table?: any) => {
+        setLogSelectedRowsFunction(() => fn)
+        if (table) {
+            setTableInstance(table)
+        }
+    }, [])
+
+    // Debug selected rows
+    useEffect(() => {
+        if (logSelectedRowsFunction) {
+            const selectedRows = logSelectedRowsFunction()
+        }
+    }, [logSelectedRowsFunction])
 
     // Updated URL function to create clean URLs without encoding issues
     const updateURL = useCallback((searchTerm: string, topics: PageOption[], difficulties: PageOption[]) => {
@@ -213,15 +231,18 @@ const Mcqs = (props: Props) => {
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setmcqSearch(query);
         setCurrentPage(1);
-    
+
+        updateURL(query, selectedOptions, difficulty);
+
         try {
             const apiParams: Record<string, string | number> = {
                 limit: parseInt(position),
                 offset: 0,
                 searchTerm: query.trim(),
-            };    
+            };
+
             const response = await api.get('Content/allQuizQuestions', { params: apiParams });
-    
+
             if (response && response.data) {
                 setStoreQuizData(response.data.data || []);
                 setTotalMCQQuestion(response.data.totalRows || 0);
@@ -230,14 +251,16 @@ const Mcqs = (props: Props) => {
             }
         } catch (error) {
             console.error('Error fetching search results:', error);
+            setStoreQuizData([]);
         }
-    }, [ position]);
-    
-    const defaultFetchApi = useCallback(async () => {
-        return fetchCodingQuestions(0, '')
-    }, [])
+    }, [position, selectedOptions, difficulty, updateURL, setStoreQuizData]);
 
-
+    useEffect(() => {
+        const searchQuery = searchParams.get('search') || ''
+        if (searchQuery !== mcqSearch) {
+            setmcqSearch(searchQuery)
+        }
+    }, [searchParams, mcqSearch])
 
     // Initialize filters from URL params
     useEffect(() => {
@@ -395,7 +418,7 @@ const Mcqs = (props: Props) => {
                         setTotalPages,
                         currentSearchTerm
                     )
-                setLoading(false)
+                    setLoading(false) 
                 } catch (error) {
                     console.error('Error fetching questions:', error)
                     // Set empty data on error to prevent table crashes
@@ -412,9 +435,16 @@ const Mcqs = (props: Props) => {
             setLastPage,
             setTotalPages,
             searchParams,
-            options.length, 
+            options.length,
         ]
     )
+
+    const defaultFetchApi = useCallback(async () => {
+        // Clear search from URL when defaultFetch is called
+        updateURL('', selectedOptions, difficulty);
+        setmcqSearch('');
+        return fetchCodingQuestions(0, '');
+    }, [selectedOptions, difficulty, updateURL, fetchCodingQuestions]);
 
     // Effect to fetch data when filters change
     useEffect(() => {
@@ -453,6 +483,11 @@ const Mcqs = (props: Props) => {
 
     const handleSearchChange = (value: string) => {
         setmcqSearch(value)
+        // If search is cleared manually, trigger default fetch
+        if (!value || value.trim() === '') {
+            updateURL('', selectedOptions, difficulty);
+            fetchCodingQuestions(0, '');
+        }
     }
 
     const selectedTagCount = selectedOptions.length
@@ -640,7 +675,15 @@ const Mcqs = (props: Props) => {
                                 handleOptionClick={handleTagOption}
                                 type={selectedTagCount > 1 ? 'Topics' : 'Topic'}
                             />
-                        </div>    
+                        </div>   
+                        <div className="ml-auto">
+                            {logSelectedRowsFunction && tableInstance && (
+                                <McqDeleteVaiarntComp
+                                    table={tableInstance}
+                                    logSelectedRows={logSelectedRowsFunction}
+                                />
+                            )}
+                        </div> 
                     </div>
                     
 
@@ -648,6 +691,7 @@ const Mcqs = (props: Props) => {
                         data={quizData || []} // Ensure data is never undefined
                         columns={columns}
                         mcqSide={true}
+                        getSelectedRowsFunction={handleGetSelectedRowsFunction}
                     />
 
 
