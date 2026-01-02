@@ -219,18 +219,6 @@ export const getArticlePreviewStore = create<articlePreviewStore>((set) => ({
     },
 }))
 
-type codingPreviewStore = {
-    codingPreviewContent: any
-    setCodingPreviewContent: (newValue: any) => void
-}
-
-export const getCodingPreviewStore = create<codingPreviewStore>((set) => ({
-    codingPreviewContent: null,
-    setCodingPreviewContent: (newValue: any) => {
-        set({ codingPreviewContent: newValue })
-    },
-}))
-
 type quizPreviewStore = {
     quizPreviewContent: any
     setQuizPreviewContent: (newValue: any) => void

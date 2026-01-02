@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ChevronRight, Play, Eye, DownloadIcon } from 'lucide-react'
+import { ChevronRight, Play, Eye, DownloadIcon ,ArrowDownToLine} from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
@@ -13,9 +13,13 @@ import {
 } from '@/app/[admin]/courses/[courseId]/(courseTabs)/submissions/components/courseSubmissionComponentType'
 import {VideoSubmissionSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
 import { ellipsis } from '@/lib/utils'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
+    const { downloadCsv } = useDownloadCsv()
     const [videoData, setVideoData] = useState<VideoData | null>(null)
     const [loading, setLoading] = useState(true)
 
@@ -43,6 +47,34 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     if (loading) {
         return<VideoSubmissionSkeleton/>
     }
+    const handleVideoDownloadCsv = (
+        chapterId: number,
+        chapterTitle: string
+      ) => {
+        if (!chapterId) return
+      
+        downloadCsv({
+          endpoint: `/admin/moduleChapter/students/chapter_id${chapterId}`,
+          fileName: chapterTitle || 'video-chapter',
+      
+          dataPath: 'submittedStudents',
+      
+          columns: [
+            { header: 'Name', key: 'name' },
+            { header: 'Email', key: 'email' },
+            { header: 'Completed Date', key: 'completedAt' },
+          ],
+      
+          mapData: (student: any) => ({
+            name: student.name || 'N/A',
+            email: student.email || 'N/A',
+            completedAt: student.completedAt
+              ? new Date(student.completedAt).toLocaleString()
+              : 'N/A',
+          }),
+        })
+      }
+      
     return (
         <div className="grid relative gap-8 mt-4 md:mt-8">
             {videoData && Object.hasOwn(videoData, 'message') ? (
@@ -105,58 +137,62 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                         <h3 title={video.title} className="font-medium text-base">{ellipsis(video.title , 25)}</h3>
                                                     </div>
                                                 </div>
-                                                <div className="absolute top-3 right-3">
-                                                    {video.completedStudents >
-                                                        0 ? (
-                                                            <div className="flex items-end">
-                                                            <Button
+                                                <div className="absolute top-3 right-2">
+                                                    {video.completedStudents > 0 ? (
+                                                        <div className="flex items-center gap-1">
+                                                        <Button
                                                             variant="ghost"
-                                                            className="hover:text-gray-400 transition-colors"
-                                                            disabled={
-                                                                true
+                                                            className="text-gray-500 hover:text-gray-700 hover:bg-transparent focus:bg-transparent active:bg-transparent px-1"
+                                                            onClick={() =>
+                                                            handleVideoDownloadCsv(Number(video.id), video.title)
                                                             }
                                                         >
-                                                           <DownloadIcon size={18} />
+                                                            <ArrowDownToLine size={20} />
                                                         </Button>
-
                                                         <Link
                                                             href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
                                                         >
                                                             <Button
                                                             variant="ghost"
-                                                            className="flex items-center text-gray-500  hover:text-gray-700 hover:bg-transparent"
-                                                           
-                                                        >
-                                                             <Eye
-                                                                    size={
-                                                                        20
-                                                                    }
-                                                                    className=""
-                                                                />
-                                                        </Button>
-                                                               
-                                                           
-
+                                                            className="flex items-center text-gray-500 hover:text-gray-700 hover:bg-transparent px-1"
+                                                            >
+                                                            <Eye size={20} />
+                                                            </Button>
                                                         </Link>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-1 mt-2">
+                                                            <div className="relative group inline-flex">
+                                                                <button
+                                                                    disabled
+                                                                    className="cursor-not-allowed px-1 text-gray-400"
+                                                                >
+                                                                    <ArrowDownToLine size={20} className="text-gray-400" />
+                                                                </button>
+
+                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
+                                                                                px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                    No submissions available
+                                                                </div>
                                                             </div>
 
-                                                    ) : (
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="hover:text-gray-400 transition-colors"
-                                                            disabled={
-                                                                true
-                                                            }
-                                                        >
-                                                            <Eye
-                                                                size={
-                                                                    20
-                                                                }
-                                                                className="ml-1"
-                                                            />
-                                                        </Button>
+                                                            <div className="relative group inline-flex">
+                                                                <button
+                                                                    disabled
+                                                                    className="cursor-not-allowed px-1 text-gray-400"
+                                                                >
+                                                                    <Eye size={20} className="text-gray-400" />
+                                                                </button>
+
+                                                                <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block
+                                                                                px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                                                    No submissions to view
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     )}
                                                 </div>
+
                                                
                                                 <div className="flex items-center justify-between mt-4 text-sm">
                                                     <div className="flex items-center gap-1">

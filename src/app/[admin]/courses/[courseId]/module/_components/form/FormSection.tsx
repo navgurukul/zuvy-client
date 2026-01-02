@@ -66,7 +66,8 @@ const FormSection: React.FC<FormSectionProps> = ({
     form,
     deleteQuestion,
     formData,
-    canEdit = true
+    canEdit = true,
+    onOptionChange // Add this prop
 }) => {
     const questionData = formData[index] || {}
     const [selectedSection, setSelectedSection] = useState(
@@ -125,6 +126,10 @@ const FormSection: React.FC<FormSectionProps> = ({
         )
         if (selectedType) {
             setValue(`questions.${index}.typeId`, selectedType.typeId)
+            setSelectedSection(questionType)
+            
+            // Notify parent about changes
+            onOptionChange?.()
         }
     }
 
@@ -137,10 +142,15 @@ const FormSection: React.FC<FormSectionProps> = ({
         newOptions[optionIndex] = newValue
         setOptions(newOptions)
         form.setValue(`questions.${index}.options.${optionIndex}`, newValue)
+        
+        // Call the parent's onOptionChange to notify about changes
+        onOptionChange?.()
     }
 
     const addOption = () => {
         setOptions([...options, ''])
+        // Notify parent about option change
+        onOptionChange?.()
     }
 
     const removeOption = (idx: number) => {
@@ -162,6 +172,9 @@ const FormSection: React.FC<FormSectionProps> = ({
             form.unregister(
                 `questions.${index}.options.${updatedOptions.length}`
             )
+
+            // Notify parent about option change
+            onOptionChange?.()
 
             return updatedOptions
         })
@@ -256,9 +269,12 @@ const FormSection: React.FC<FormSectionProps> = ({
                                     name={`questions.${index}.isRequired`}
                                     render={({ field }) => (
                                         <Checkbox
-                                            // checked={field.value}
                                             checked={questionData.isRequired}
-                                            onCheckedChange={field.onChange}
+                                            onCheckedChange={(checked) => {
+                                                field.onChange(checked)
+                                                // Notify parent about changes
+                                                onOptionChange?.()
+                                            }}
                                             disabled={!canEdit}
                                         />
                                     )}
@@ -270,6 +286,11 @@ const FormSection: React.FC<FormSectionProps> = ({
                                 {...field}
                                 placeholder="Type a question..."
                                 disabled={!canEdit}
+                                onChange={(e) => {
+                                    field.onChange(e)
+                                    // Notify parent about changes
+                                    onOptionChange?.()
+                                }}
                             />
                         </FormControl>
                         <FormMessage />

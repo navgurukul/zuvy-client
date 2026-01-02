@@ -47,43 +47,49 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         accessorKey: 'name',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Students Name" />
+        header: ({ column, onSort }: any) => (
+            <DataTableColumnHeader
+                column={column}
+                title="Students Name"
+                onSort={onSort}
+                sortField="name"
+            />
         ),
         cell: ({ row }) => (
             <div className="w-[150px] text-left">{row.getValue('name')}</div>
         ),
-        enableSorting: false,
         enableHiding: false,
-    },
+    }
+,    
+{
+    accessorKey: 'email',
+    header: ({ column, onSort }: any) => (
+        <DataTableColumnHeader
+            column={column}
+            title="Email"
+            onSort={onSort}
+            sortField="email"
+        />
+    ),
+    cell: ({ row }) => (
+        <div className="flex space-x-2">
+            <span className="max-w-[500px] truncate font-medium">
+                {row.getValue('email')}
+            </span>
+        </div>
+    ),
+}
+,
     {
-        accessorKey: 'email',
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Email" />
-        ),
-        cell: ({ row }) => {
-            // const label = labels.find((label) => label.value === row.original.label);
-
-            return (
-                <div className="flex space-x-2">
-                    {/* {label && <Badge variant="outline">{label.label}</Badge>} */}
-                    <span className="max-w-[500px] truncate font-medium">
-                        {row.getValue('email')}
-                    </span>
-                </div>
-            )
-        },
-    },
-    {
-        accessorKey: 'batch',
+        accessorKey: 'batchName',
         header: 'Batch',
         cell: ({ row }) => {
-            const index = row.index
+            const batchName = row.original.batchName || 'N/A'
             return (
                 <div className="flex items-center justify-start">
-                <Badge variant="outline" className="text-black border-black-200">
-                    {mockBatches[index % mockBatches.length]}
-                </Badge>
+                    <Badge variant="outline" className="text-black border-black-200">
+                        {batchName}
+                    </Badge>
                 </div>
             )
         },

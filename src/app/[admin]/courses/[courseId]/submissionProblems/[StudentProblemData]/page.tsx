@@ -4,33 +4,46 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { ArrowLeft, RefreshCw,Download } from 'lucide-react'
 
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { columns } from './columns'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
+
+interface BatchFilter {
+    id: number
+    name: string
+}
 
 const PracticeProblems = ({ params }: any) => {
     const router = useRouter()
+    const { downloadCsv } = useDownloadCsv()
     const [matchingData, setMatchingData] = useState<any>(null)
     const [bootcampData, setBootcampData] = useState<any>({})
     const [studentStatus, setStudentStatus] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState<number>(0)
     const [loading, setLoading] = useState(false)
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
     const [crumbData, setCrumbData] = useState<string[]>([])
+    const [sortField, setSortField] = useState<string>('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const [batches, setBatches] = useState<BatchFilter[]>([])
 
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A'
-    ]
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -50,8 +63,16 @@ const PracticeProblems = ({ params }: any) => {
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
 
+        const queryParams = new URLSearchParams()
+        queryParams.append('searchStudent', query)
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+
         const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&searchStudent=${encodeURIComponent(query)}`
+            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
         )
 
         const students = res.data.data.map((student: any) => ({
@@ -64,13 +85,20 @@ const PracticeProblems = ({ params }: any) => {
 
         setStudentStatus(students)
         setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData])
+    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection,selectedBatch])
 
     const defaultFetchApi = useCallback(async () => {
         setLoading(true)
 
+        const queryParams = new URLSearchParams()
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+
         const res = await api.get(
-            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}`
+            `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`
         )
 
         const students = res.data.data.map((student: any) => ({
@@ -83,7 +111,7 @@ const PracticeProblems = ({ params }: any) => {
 
         setStudentStatus(students)
         setLoading(false)
-    }, [matchingData, params.courseId, params.StudentProblemData])
+    }, [matchingData, params.courseId, params.StudentProblemData, sortField, sortDirection,selectedBatch])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -94,6 +122,50 @@ const PracticeProblems = ({ params }: any) => {
         }
     }, [params.courseId])
 
+    const handleVideoDownloadCsv = useCallback(() => {
+        if (!matchingData) return
+    
+        const queryParams = new URLSearchParams()
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        downloadCsv({
+            endpoint: `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`,
+    
+            fileName: `practice_problem_${matchingData.moduleChapterData[0].codingQuestionDetails?.title || 'submissions'}_${new Date()
+                .toISOString()
+                .split('T')[0]}`,
+    
+            dataPath: 'data',
+    
+            columns: [
+                { header: 'Student Name', key: 'name' },
+                { header: 'Email', key: 'email' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Status', key: 'status' },
+                { header: 'Completed At', key: 'completedAt' },
+                { header: 'Attempts', key: 'noOfAttempts' },
+            ],
+    
+            mapData: (item: any) => ({
+                name: item.name || '',
+                email: item.email || '',
+                batchName: item.batchName || '',
+                status: item.status || '',
+                completedAt: item.completedAt || '',
+                noOfAttempts: item.noOfAttempts ?? '',
+            }),
+        })
+    }, [matchingData,selectedBatch,sortField,sortDirection])
+    
     useEffect(() => {
         if (bootcampData?.name && matchingData?.moduleChapterData) {
             setCrumbData([
@@ -136,15 +208,25 @@ const PracticeProblems = ({ params }: any) => {
         fetchInitialData()
     }, [params.courseId, params.StudentProblemData])
 
+  // Handle sorting change
+    const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+
+    useEffect(() => {
+        fetchBatches()
+    }, [fetchBatches])
+    
     useEffect(() => {
         if (matchingData) {
             defaultFetchApi()
         }
-    }, [matchingData])
+    }, [matchingData, sortField, sortDirection, defaultFetchApi,selectedBatch])
 
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 mt-6">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -182,11 +264,13 @@ const PracticeProblems = ({ params }: any) => {
                                     <SelectValue placeholder="All Batches" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="All Batches">All Batches</SelectItem>
-                                    {batchOptions.map((batch, index) => (
-                                            <SelectItem key={index} value={batch}>{batch}</SelectItem>
-                                        ))}                                   
-                                    </SelectContent>
+                                <SelectItem value="all">All Batches</SelectItem>
+                                    {batches.map(batch => (
+                                        <SelectItem key={batch.id} value={batch.id.toString()}>
+                                            {batch.name}
+                                        </SelectItem>
+                                    ))}                                  
+                                </SelectContent>
                             </Select>
                         </div>
                         </div>
@@ -198,6 +282,15 @@ const PracticeProblems = ({ params }: any) => {
                         <CardTitle className="text-xl text-gray-800">
                             Student Submissions
                         </CardTitle>
+                        <Button
+                            onClick={handleVideoDownloadCsv}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            disabled={studentStatus.length === 0}
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                     <div className="relative w-1/3 p-4">
                         <SearchBox
@@ -217,7 +310,11 @@ const PracticeProblems = ({ params }: any) => {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <DataTable data={studentStatus} columns={columns} />
+                    <DataTable 
+                        data={studentStatus} 
+                        columns={columns}
+                        onSortingChange={handleSortingChange}
+                    />
                 </CardContent>
             </Card>
         </>

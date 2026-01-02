@@ -7,34 +7,47 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft,Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SearchBox } from "@/utils/searchBox"
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 type Props = {}
+
+interface BatchFilter {
+    id: number
+    name: string
+}
 
 const Page = ({ params }: { params: any }) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
-
+    const { downloadCsv } = useDownloadCsv()
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>({})
     const [assignmentTitle, setAssignmentTitle] = useState<string>('')
     const [submittedStudents, setSubmittedStudents] = useState<number>(0)
+    const [sortField, setSortField] = useState<string>('submittedDate')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+    const [selectedBatch, setSelectedBatch] = useState<string>('all')
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const [batches, setBatches] = useState<BatchFilter[]>([])
 
-    const [selectedBatch, setSelectedBatch] = useState('All Batches')
-
-    // Dummy batch data
-    const batchOptions = [
-        'All Batches',
-        'Full Stack Batch 2024-A',
-        'Full Stack Batch 2024-B',
-        'Data Science Batch 2024-A',
-        'UI/UX Design Batch 2024-A',
-        'Mobile Development Batch 2024-A'
-    ]
+     // Fetch batches from API
+    const fetchBatches = useCallback(async () => {
+        setIsLoadingBatches(true)
+        try {
+            const res = await api.get(`/bootcamp/batches/${params.courseId}`)
+            setBatches(res.data.data || [])
+        } catch (error) {
+            console.error('Error fetching batches:', error)
+        } finally {
+            setIsLoadingBatches(false)
+        }
+    }, [params.courseId])
+    
 
     // API functions for the hook
     const fetchSuggestionsApi = useCallback(async (query: string) => {
@@ -50,8 +63,23 @@ const Page = ({ params }: { params: any }) => {
     }, [params.assignmentData])
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
-        // try {
-        const res = await api.get(`/submission/assignmentStatus?chapterId=${params.assignmentData}&searchStudent=${encodeURIComponent(query)}`)
+        const queryParams = new URLSearchParams()
+        queryParams.append('searchStudent', query)
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) {
+            queryParams.append('orderBy', sortField)
+        }
+    
+        if (sortDirection) {
+            queryParams.append('orderDirection', sortDirection)
+        }
+    
+        const res = await api.get(
+            `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`
+        )
+    
         const assignmentData = res?.data?.data
         if (assignmentData) {
             const chapterId = assignmentData?.chapterId
@@ -64,11 +92,30 @@ const Page = ({ params }: { params: any }) => {
                 setAssignmentTitle(assignmentData.chapterName)
             }
         }
+    
         return assignmentData?.data || []
-    }, [params.assignmentData])
+    }, [params.assignmentData, sortField, sortDirection,selectedBatch])
+    
 
     const defaultFetchApi = useCallback(async () => {
-        const res = await api.get(`/submission/assignmentStatus?chapterId=${params.assignmentData}&limit=100&offset=0`)
+        const queryParams = new URLSearchParams()
+        queryParams.append('limit', '100')
+        queryParams.append('offset', '0')
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+        if (sortField) {
+            queryParams.append('orderBy', sortField)
+        }
+    
+        if (sortDirection) {
+            queryParams.append('orderDirection', sortDirection)
+        }
+    
+        const res = await api.get(
+            `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`
+        )
+    
         const assignmentData = res?.data?.data
         if (assignmentData) {
             const chapterId = assignmentData?.chapterId
@@ -78,11 +125,15 @@ const Page = ({ params }: { params: any }) => {
             setAssignmentData(assignmentData.data)
             setSubmittedStudents(assignmentData.data.length)
             setAssignmentTitle(assignmentData.chapterName)
-
         }
+    
         return assignmentData?.data || []
-    }, [params.assignmentData])
-
+    }, [params.assignmentData, sortField, sortDirection,selectedBatch])
+    
+    useEffect(() => {
+        defaultFetchApi();
+    }, [defaultFetchApi, sortField, sortDirection]);
+    
     const getBootcampHandler = useCallback(async () => {
         try {
             const res = await api.get(`/bootcamp/${params.courseId}`)
@@ -96,10 +147,74 @@ const Page = ({ params }: { params: any }) => {
         getBootcampHandler()
     }, [getBootcampHandler])
 
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                await Promise.all([
+                    getBootcampHandler(),
+                    fetchBatches()
+                ])
+            } catch (error) {
+                console.error('Error in fetching data:', error)
+            }
+        }
+
+        fetchData()
+    }, [fetchBatches])
+     // Handle sorting change
+     const handleSortingChange = useCallback((field: string, direction: 'asc' | 'desc') => {
+        setSortField(field)
+        setSortDirection(direction)
+    }, [])
+    const handleVideoDownloadCsv = useCallback(() => {
+        const queryParams = new URLSearchParams()
+    
+        queryParams.append('limit', '10')
+        queryParams.append('offset', '0')
+    
+        if (selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        const currentSearchQuery = searchParams.get('search') || ''
+        if (currentSearchQuery) {
+            queryParams.append('searchStudent', currentSearchQuery)
+        }
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        downloadCsv({
+            endpoint: `/submission/assignmentStatus?chapterId=${params.assignmentData}&${queryParams.toString()}`,
+    
+            fileName: `assignment_${assignmentTitle || 'submissions'}_${new Date()
+                .toISOString()
+                .split('T')[0]}`,
+    
+            dataPath: 'data.data',
+    
+            columns: [
+                { header: 'Student Name', key: 'name' },
+                { header: 'Email', key: 'emailId' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Submitted Status', key: 'status' },
+                { header: 'Submitted Date', key: 'submitted_date' },
+            ],
+    
+            mapData: (item: any) => ({
+                name: item.name || '',
+                emailId: item.emailId || '',
+                batchName: item.batchName || '',
+                status: item.status || '',
+                submitted_date: item.submitted_date || '',
+            }),
+        })
+    }, [params.assignmentData,selectedBatch,searchParams,sortField,sortDirection,assignmentTitle])
+    
     const totalStudents = bootcampData?.students_in_bootcamp - bootcampData?.unassigned_students
     return (
         <>
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-8 mt-5">
                 <Button
                     variant="ghost"
                     onClick={() => router.back()}
@@ -145,8 +260,10 @@ const Page = ({ params }: { params: any }) => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Batches</SelectItem>
-                                    {batchOptions.map((batch, index) => (
-                                        <SelectItem key={index} value={batch}>{batch}</SelectItem>
+                                    {batches.map(batch => (
+                                        <SelectItem key={batch.id} value={batch.id.toString()}>
+                                            {batch.name}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
 
@@ -161,6 +278,15 @@ const Page = ({ params }: { params: any }) => {
                         <CardTitle className="text-xl text-gray-800">
                             Student Submissions
                         </CardTitle>
+                        <Button
+                            onClick={handleVideoDownloadCsv}
+                            variant="outline"
+                            className="flex items-center gap-2"
+                            disabled={assignmentData.length === 0}
+                        >
+                            <Download className="h-4 w-4" />
+                            Download Report
+                        </Button>
                     </div>
                 </CardHeader>
 
@@ -181,7 +307,7 @@ const Page = ({ params }: { params: any }) => {
                     />
                 </div>
                 <CardContent className="p-0">
-                    <DataTable data={assignmentData} columns={columns} />
+                    <DataTable data={assignmentData} columns={columns} onSortingChange={handleSortingChange}/>
                 </CardContent>
             </Card>
         </>
