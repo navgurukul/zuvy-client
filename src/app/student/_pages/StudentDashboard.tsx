@@ -26,7 +26,7 @@ const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const { studentData, loading, error, refetch } = useStudentData();
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
-
+  const access_token = localStorage.getItem('access_token')
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const {isStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const router = useRouter();
@@ -133,39 +133,44 @@ const StudentDashboard = () => {
         </div>
 
         {/* Zoe Assistant Card */}
-        <Card className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card mb-8 overflow-hidden">
-          <CardContent className="p-0">
+        <Card  className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
+          <CardContent className="p-0 relative">
             <div 
-              className="flex flex-col md:flex-row gap-6 p-6 relative"
+              className="absolute inset-0 w-full h-full"
               style={{
-                background: 'linear-gradient(135deg, #6AEDAA 0%, #E0FFF0 100%)'
+                backgroundImage: 'url(/images/Rectangle\\ 5.svg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                
               }}
-            >
+            />
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 p-4 sm:p-5 md:p-6 relative z-10">
               {/* Zoe Image */}
               <div className="flex-shrink-0 flex items-center justify-center md:justify-start">
                 <Image
                   src="/images/zoe-talking 1 (3).svg"
                   alt="Zoe Assistant"
-                  width={120}
-                  height={120}
-                  className="object-contain"
+                  width={100}
+                  height={100}
+                  className="object-contain w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-[120px] lg:h-[120px]"
                 />
               </div>
 
               {/* Content */}
-              <div className="flex-1 flex flex-col justify-center text-left">
-                <h3 className="text-xl font-heading font-bold mb-2 text-gray-800">
-                  I am Zoe, your learning assistant
+              <div className="flex-1 flex flex-col justify-center text-center md:text-left">
+                <h3 className="text-lg sm:text-xl font-bold mb-2 text-gray-800 flex flex-wrap items-center justify-center md:justify-start gap-2">
+                  <span>I am Zoe, your learning assistant</span>
+                  <button className="bg-[#12EA7B] px-2 sm:px-3 py-0.5 rounded font-semibold text-xs sm:text-sm inline-flex items-center justify-center" >New</button> 
                 </h3>
-                <p className="text-gray-700 mb-4 md:mb-0">
+                <p className="text-sm sm:text-base text-gray-700 mb-4 md:mb-0">
                   I will help you get job ready by practicing interviews and learning activities
                 </p>
               </div>
 
               {/* Button */}
-              <div className="flex items-center justify-center md:justify-end">
-                <Button onClick={() => window.open(`http://fix-caption-chunking.d1lblqaoxqw0s6.amplifyapp.com
-?studentEmail=${studentProfile?.email}`, '_blank')} className="bg-primary text-white font-semibold">
+              <div className="flex items-center justify-center md:justify-end flex-shrink-0">
+                <Button  onClick={() => window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
                   Learn with zoe
                 </Button>
               </div>
