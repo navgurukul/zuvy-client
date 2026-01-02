@@ -345,7 +345,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         <DialogTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    className={`w-full text-left font-normal text-gray-600 border border-input bg-background hover:border-[rgb(81,134,114)] ${
+                                                    className={`w-full text-left font-normal text-gray-600 border border-input bg-background hover:bg-background hover:border-primary ${
                                                         !field.value &&
                                                         'text-muted-foreground'
                                                     }`}
@@ -652,7 +652,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                         {isLoading ? (
                             <Button
                                 disabled
-                                className="w-1/3 mt-3 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border"
+                                className="w-1/3 mt-3 bg-background text-primary border-primary border"
                             >
                                 <Spinner className="mr-2 text-black h-4 w-4 animate-spin" />
                                 Creating Session
@@ -661,7 +661,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                             <Button
                                 disabled={isSubmitDisabled}
                                 onClick={form.handleSubmit(onSubmit)}
-                                className="w-1/3 mt-3 bg-background text-[rgb(81,134,114)] border-[rgb(81,134,114)] border hover:bg-[rgb(81,134,114)] hover:text-white"
+                                className="w-1/3 mt-3 bg-background text-primary border-primary border hover:bg-primary hover:text-primary-foreground"
                             >
                                 Create Session
                             </Button>

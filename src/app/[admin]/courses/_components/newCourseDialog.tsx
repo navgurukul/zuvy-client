@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
+import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -26,6 +27,15 @@ import {
 } from '@/app/[admin]/courses/_components/courseComponentType'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
+const courseSchema = z.object({
+    name: z.string().min(1, 'Course name is required').max(50, 'Course name cannot exceed 50 characters'),
+    description: z.string().min(1, 'Course description is required').max(500, 'Course description cannot exceed 500 characters'),
+    duration: z.string().min(1, 'Duration is required').refine((val) => {
+        const num = parseInt(val)
+        return !isNaN(num) && num > 0
+    }, 'Duration must be a positive number'), 
+})
+
 const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     newCourseName,
     newCourseDuration,
@@ -36,6 +46,8 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     handleCreateCourse,
     isDialogOpen,
 }) => {
+    const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+
     const [collaborator, setCollaborator] = useState('')
     const [collaboratorInputType, setCollaboratorInputType] = useState<
         'text' | 'file'
@@ -55,7 +67,77 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
 
     const collaboratorFileInputRef = useRef<HTMLInputElement>(null)
 
+    // validation function 
+    const validateForm = () => {
+        const formData = {
+            name: newCourseName,
+            description: newCourseDescription,
+            duration: newCourseDuration,
+        }
+
+        const result = courseSchema.safeParse(formData)
+        
+        if (!result.success) {
+            const errors: {[key: string]: string} = {}
+            result.error.errors.forEach((error) => {
+                errors[error.path[0]] = error.message
+            })
+            setValidationErrors(errors)
+            return false
+        }
+        
+        setValidationErrors({})
+        return true
+    }
+
+    // real-time validation functions
+    const handleNameChangeWithValidation = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleNewCourseNameChange(e)
+        // Real-time validation for name
+        const result = courseSchema.shape.name.safeParse(e.target.value)
+        if (!result.success) {
+            setValidationErrors(prev => ({...prev, name: result.error.errors[0].message}))
+        } else {
+            setValidationErrors(prev => {
+                const newErrors = {...prev}
+                delete newErrors.name
+                return newErrors
+            })
+        }
+    }
+
+    const handleDescriptionChangeWithValidation = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        handleNewCourseDescriptionChange(e)
+        // Real-time validation for description
+        const result = courseSchema.shape.description.safeParse(e.target.value)
+        if (!result.success) {
+            setValidationErrors(prev => ({...prev, description: result.error.errors[0].message}))
+        } else {
+            setValidationErrors(prev => {
+                const newErrors = {...prev}
+                delete newErrors.description
+                return newErrors
+            })
+        }
+    }
+
+    const handleDurationChangeWithValidation = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleNewCourseDurationChange(e)
+        // Real-time validation for duration
+        const result = courseSchema.shape.duration.safeParse(e.target.value)
+        if (!result.success) {
+            setValidationErrors(prev => ({...prev, duration: result.error.errors[0].message}))
+        } else {
+            setValidationErrors(prev => {
+                const newErrors = {...prev}
+                delete newErrors.duration
+                return newErrors
+            })
+        }
+    }
+
     const resetForm = () => {
+        setValidationErrors({}) 
         setCollaborator('')
         setCollaboratorInputType('text')
         setIsUploading(false)
@@ -116,17 +198,25 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         }
     }
 
+    // ✅ Check if all fields are valid
+    const isFormValid = () => {
+        return (
+            newCourseName.trim() && 
+            newCourseDescription.trim() && 
+            newCourseDuration.trim() &&
+            Object.keys(validationErrors).length === 0
+        )
+    }
+
     const handleCreateCourseWithUpload = async () => {
         try {
-            if (!newCourseName.trim()) {
-                toast.info({
-                    title: 'info',
-                    description: 'Course name is required',
-                })
+            // ✅ Validate form and show errors if invalid
+            if (!validateForm()) {
+                // Don't return immediately, let the errors show
                 return
             }
 
-            let collaboratorValue = ''
+            setIsUploading(true)
 
             // if (collaboratorInputType === 'file' && croppedCollaboratorImage) {
             //     setIsUploading(true)
@@ -181,31 +271,19 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
             //     }
             // } else if (collaboratorInputType === 'text') {
             //     collaboratorValue = collaborator.trim()
-            // }
+            // }            
 
             const payload: any = {
                 name: newCourseName.trim(),
+                description: newCourseDescription.trim(),
+                duration: parseInt(newCourseDuration.trim())
             }
 
-            if (newCourseDescription.trim()) {
-                payload.description = newCourseDescription.trim()
-            }
-
-            if (collaboratorValue) {
-                payload.collaborator = collaboratorValue
-            }
-
-            if(newCourseDuration.trim()) {
-                payload.duration = parseInt(newCourseDuration.trim())
-            }
-
+            await handleCreateCourse(payload)
             resetForm()
-            handleCreateCourse(payload)
         } catch (error: any) {
-            console.error(
-                'Error creating bootcamp:',
-                error?.response?.data || error
-            )
+            console.error('Error creating course:', error?.response?.data || error)
+        } finally {
             setIsUploading(false)
         }
     }
@@ -230,14 +308,17 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             placeholder="Enter course name"
                             className="text-[0.95rem]"
                             value={newCourseName}
-                            onChange={handleNewCourseNameChange}
+                            onChange={handleNameChangeWithValidation}
                             required
                         />
+                        {validationErrors.name && (
+                            <p className="text-sm text-red-500 mt-1">{validationErrors.name}</p>
+                        )}
                     </div>
 
                     <div className="text-left ml-1">
-                        <Label
-                            htmlFor="description"
+                        <Label 
+                            htmlFor="description" 
                             className="text-[1rem]"
                         >
                             Course Description *
@@ -247,14 +328,17 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             placeholder="Enter course description"
                             className="text-[0.95rem]"
                             value={newCourseDescription}
-                            onChange={handleNewCourseDescriptionChange}
+                            onChange={handleDescriptionChangeWithValidation}
                             rows={3}
                         />
+                        {validationErrors.description && (
+                            <p className="text-sm text-red-500 mt-1">{validationErrors.description}</p>
+                        )}
                     </div>
 
                     <div className="text-left ml-1">
-                        <Label
-                            htmlFor="duration"
+                        <Label 
+                            htmlFor="duration" 
                             className="text-[1rem]"
                         >
                             Duration (weeks) *
@@ -265,9 +349,13 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             placeholder="e.g., 12"
                             className="text-[0.95rem]"
                             value={newCourseDuration}
-                            onChange={handleNewCourseDurationChange}
+                            onChange={handleDurationChangeWithValidation} // ✅ Add validation handler
+                            min="1"
                             required
                         />
+                        {validationErrors.duration && (
+                            <p className="text-sm text-red-500 mt-1">{validationErrors.duration}</p>
+                        )}
                     </div>
 
                     {/* <div className="text-left">
@@ -524,13 +612,13 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                     </Button>
                 </DialogClose>
                 <DialogClose asChild>
-                    <Button
-                        className="bg-primary"
-                        onClick={handleCreateCourseWithUpload}
-                        disabled={!newCourseName.trim() || isUploading}
-                    >
-                        {isUploading ? 'Uploading...' : 'Create Course'}
-                    </Button>
+                <Button
+                    className="bg-primary"
+                    onClick={handleCreateCourseWithUpload}
+                    disabled={!isFormValid() || isUploading} // ✅ Check all fields
+                >
+                    {isUploading ? 'Creating...' : 'Create Course'}
+                </Button>
                 </DialogClose>
             </DialogFooter>
         </DialogContent>
