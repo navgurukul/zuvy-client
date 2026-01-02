@@ -393,7 +393,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         Configure role permissions and manage system actions
                     </p>
                 </div>
-                <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                {/* <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                     <DialogTrigger asChild>
                         <Button>
                             <Plus className="w-4 h-4 mr-2" />
@@ -406,7 +406,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                             onRoleAdded={refetchRoles}
                         />
                     )}
-                </Dialog>
+                </Dialog> */}
             </div>
 
             {/* Role Selection Tabs */}
