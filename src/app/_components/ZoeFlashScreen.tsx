@@ -85,7 +85,7 @@ const ZoeFlashScreen = ({ isOpen, onClose, onStartInterview }: ZoeFlashScreenPro
                             </p>
 
                             {/* Features */}
-                            <div className="bg-secondary/50 rounded-xl p-5 mb-6">
+                            <div className="bg-gradient-to-r from-[#E0FFF0] rounded-xl p-5 mb-6">
                                 <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                                     <MessageSquare className="w-4 h-4 text-primary" />
                                     What you can do:
