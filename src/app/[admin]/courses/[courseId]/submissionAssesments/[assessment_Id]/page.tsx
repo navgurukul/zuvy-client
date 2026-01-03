@@ -3,7 +3,7 @@
 // External imports
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { ArrowLeft, RefreshCw } from 'lucide-react'
+import { ArrowLeft, RefreshCw, Download } from 'lucide-react'
 
 // Internal imports
 import { getColumns } from './column'
@@ -19,6 +19,7 @@ import { getIsReattemptApproved, getOffset } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { POSITION } from '@/utils/constant'
 import { SearchBox } from '@/utils/searchBox'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 type Props = {}
 
@@ -52,6 +53,7 @@ const Page = ({ params }: any) => {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
+    const { downloadCsv } = useDownloadCsv()
 
     const [assesmentData, setAssessmentData] = useState<any>()
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
@@ -311,6 +313,61 @@ const Page = ({ params }: any) => {
         sortDirection
     ])
 
+    const handleVideoDownloadCsv = useCallback(() => {
+        if (!params.assessment_Id) return
+    
+        const queryParams = new URLSearchParams()
+    
+        if (selectedBatch && selectedBatch !== 'all') {
+            queryParams.append('batchId', selectedBatch)
+        }
+    
+        const currentSearchQuery = searchParams.get('search') || ''
+        if (currentSearchQuery) {
+            queryParams.append('searchStudent', currentSearchQuery)
+        }
+    
+        if (sortField) queryParams.append('orderBy', sortField)
+        if (sortDirection) queryParams.append('orderDirection', sortDirection)
+    
+        queryParams.append('offset', '0')
+        queryParams.append('limit', '10')
+    
+        downloadCsv({
+            endpoint: `/admin/assessment/students/assessment_id${params.assessment_Id}?${queryParams.toString()}`,
+    
+            fileName: `assessment_${assesmentData?.title || 'submissions'}_${new Date()
+                .toISOString()
+                .split('T')[0]}`,
+    
+            dataPath: 'submitedOutsourseAssessments',
+    
+            columns: [
+                { header: 'Student Name', key: 'name' },
+                { header: 'Email', key: 'email' },
+                { header: 'Batch', key: 'batchName' },
+                { header: 'Submitted At', key: 'submittedAt' },
+                { header: 'Score', key: 'percentage' },
+                { header: 'Qualified', key: 'qualified' },
+                { header: 'Attempts', key: 'attempts' },
+                { header: 'Time Taken', key: 'timeTaken' },
+            ],
+    
+            mapData: (assessment: any) => ({
+                name: assessment.name || '',
+                email: assessment.email || '',
+                batchName: assessment.batchName || '',
+                submittedAt: assessment.submitedAt || '',
+                percentage: `${assessment.percentage || 0}%`,
+                qualified: assessment.isPassed ? 'Yes' : 'No',
+                attempts: (assessment.reattemptCount ?? 0) + 1,
+                timeTaken: `${Math.floor((assessment.timeTaken || 0) / 60)}m ${
+                    (assessment.timeTaken || 0) % 60
+                }s`,
+            }),
+        })
+    }, [params.assessment_Id,selectedBatch,searchParams,sortField,sortDirection,assesmentData])
+    
     return (
         <>
         {/* <div className="min-h-screen flex justify-center"> */}
@@ -381,6 +438,15 @@ const Page = ({ params }: any) => {
                             <CardTitle className="text-xl text-gray-800">
                                 Student Submissions
                             </CardTitle>
+                            <Button
+                                onClick={handleVideoDownloadCsv}
+                                variant="outline"
+                                className="flex items-center gap-2"
+                                disabled={dataTableAssesment.length === 0}
+                            >
+                                <Download className="h-4 w-4" />
+                                Download Report
+                            </Button>
                         </div>
                     </CardHeader>
                     <div className="relative w-1/3 p-4">
