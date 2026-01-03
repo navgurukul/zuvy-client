@@ -455,6 +455,11 @@ const AddAssignent = ({
             const formData = new FormData()
             formData.append('pdf', file, file.name)
             formData.append('title', title) 
+
+            if (deadline) {
+               formData.append('completionDate', convertToISO(deadline))
+            }
+
             try {
                 setIsLoading(true)
                 await uploadPdf(content.moduleId, content.id, formData)
@@ -954,6 +959,7 @@ const AddAssignent = ({
                                                     } else {
                                                         // If no file, but title/deadline changed, call editAssignmentContent
                                                         if (canSave) {
+                                                            const currentDeadline = form.getValues('startDate')
                                                             editAssignmentContent({
                                                                 title: titles || title,
                                                                 startDate: deadline,

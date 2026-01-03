@@ -142,6 +142,7 @@ function CodingChallenge({
         const newTitle = e.target.value
         setChapterTitle(newTitle)
         setHasTitleChanged(newTitle !== savedTitle)
+        form.setValue('title', newTitle, { shouldValidate: true })
         form.trigger('title')
     }
     useEffect(() => {
@@ -184,13 +185,14 @@ function CodingChallenge({
     }, [selectedQuestions, savedQuestions])
 
     // Disable Save button after save, re-enable if there are unsaved changes
+    // Enable save if a coding problem is selected and title is being edited
     const isSaveButtonDisabled =
         !canEdit ||
         isSubmitting ||
         selectedQuestions.length === 0 ||
-        !form.getValues('title') ||
+        !chapterTitle?.trim() ||
         !!form.formState.errors.title ||
-        isSaved;
+        (isSaved && !hasTitleChanged);
 
 
 useEffect(() => {
@@ -298,7 +300,8 @@ useEffect(() => {
                             >
                                 <div className="w-2/4 relative">
                                     <Input
-                                        {...form.register('title')}
+                                        {...form.register('title', { onChange: handleTitleChange })}
+                                        value={chapterTitle}
                                         placeholder="Untitled Coding Problem"
                                         className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground w-full"
                                         disabled={!canEdit}
