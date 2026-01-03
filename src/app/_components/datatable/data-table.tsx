@@ -25,7 +25,6 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { getIsRowSelected } from '@/store/store'
-import McqDeleteVaiarntComp from '@/app/[admin]/resource/_components/McqDeleteComponent'
 import AddLiveClasstoChapter from '@/app/[admin]/courses/[courseId]/module/_components/AddLiveClasstoChapter'
 import {
     DataTableProps,
@@ -41,8 +40,10 @@ export function DataTable<TData, TValue>({
     adminMcqSide,
     customTopBar,
     onSortingChange,
+    getSelectedRowsFunction,
 }: DataTableProps<TData, TValue> & {
     onSortingChange?: (field: string, direction: 'asc' | 'desc') => void;
+    getSelectedRowsFunction?: (fn: () => any[]) => void;
 }) {
     const [rowSelection, setRowSelection] = React.useState({})
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
@@ -92,6 +93,13 @@ export function DataTable<TData, TValue>({
         return selectedRows
     }
 
+    // Pass the logSelectedRows function to parent
+    useEffect(() => {
+    if (getSelectedRowsFunction) {
+        getSelectedRowsFunction(logSelectedRows, table)
+    }
+}, [getSelectedRowsFunction, table, rowSelection])
+
     useEffect(() => {
         // Multiple safety checks
         try {
@@ -114,16 +122,6 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className="space-y-4 relative">
-            {!assignStudents && (
-                <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[250px] ">
-                    {mcqSide && (
-                        <McqDeleteVaiarntComp
-                            table={table}
-                            logSelectedRows={logSelectedRows}
-                        />
-                    )}
-                </div>
-            )}
             {!assignStudents && (
                 <div className="flex items-center justify-between mb-2">
                     <div>{customTopBar}</div>
