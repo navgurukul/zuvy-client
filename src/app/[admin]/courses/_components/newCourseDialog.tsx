@@ -326,10 +326,11 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         <Textarea
                             id="description"
                             placeholder="Enter course description"
-                            className="text-[0.95rem]"
+                            className="text-[0.95rem] mt-2"
                             value={newCourseDescription}
                             onChange={handleDescriptionChangeWithValidation}
                             rows={3}
+                            required
                         />
                         {validationErrors.description && (
                             <p className="text-sm text-red-500 mt-1">{validationErrors.description}</p>
