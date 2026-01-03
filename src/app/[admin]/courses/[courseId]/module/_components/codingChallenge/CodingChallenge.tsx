@@ -93,6 +93,7 @@ function CodingChallenge({
     const hasLoaded = useRef(false)
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     // FORCE UPDATE: Use a key to force re-render when content changes
     const contentKey = `${content?.id}-${
@@ -107,6 +108,7 @@ function CodingChallenge({
         if (!canEdit) {
             return
         }
+        setIsSubmitting(true)
         try {
             const titleToSave =
                 data.title.trim() === '' ? savedTitle : data.title
@@ -131,6 +133,8 @@ function CodingChallenge({
                 title: 'Error',
                 description: 'Failed to save changes',
             })
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -178,6 +182,15 @@ function CodingChallenge({
     useEffect(() => {
         setIsSaved(checkIfSaved())
     }, [selectedQuestions, savedQuestions])
+
+    // Disable Save button after save, re-enable if there are unsaved changes
+    const isSaveButtonDisabled =
+        !canEdit ||
+        isSubmitting ||
+        selectedQuestions.length === 0 ||
+        !form.getValues('title') ||
+        !!form.formState.errors.title ||
+        isSaved;
 
 
 useEffect(() => {
@@ -312,24 +325,14 @@ useEffect(() => {
 
                                     <Button
                                         type="submit"
-                                        disabled={
-                                            !canEdit ||
-                                            form.formState.isSubmitting ||
-                                            selectedQuestions.length === 0 ||
-                                            !form.getValues('title') ||
-                                            !!form.formState.errors.title
-                                        }
+                                        disabled={isSaveButtonDisabled}
                                         className={`bg-primary text-white ${
-                                            !canEdit ||
-                                            form.formState.isSubmitting ||
-                                            selectedQuestions.length === 0 ||
-                                            !form.getValues('title') ||
-                                            !!form.formState.errors.title
+                                            isSaveButtonDisabled
                                                 ? 'opacity-50 cursor-not-allowed'
                                                 : ''
                                         }`}
                                     >
-                                        Save
+                                        {isSubmitting ? 'Saving...' : 'Save'}
                                     </Button>
                                 </div>
                             </form>

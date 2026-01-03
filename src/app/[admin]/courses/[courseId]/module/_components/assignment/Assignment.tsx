@@ -112,7 +112,9 @@ const AddAssignent = ({
     const [wasContentNonEmptyWhenSaved, setWasContentNonEmptyWhenSaved] = useState(false)
     const [isInitialLoad, setIsInitialLoad] = useState(true)
     const [hasChangedAfterSave, setHasChangedAfterSave] = useState(false)
+    const [canSave, setCanSave] = useState(false)
     const hasLoaded = useRef(false)
+    const lastLoadedContentId = useRef<string | number | null>(null)
 
     const { editChapter } = useEditChapter()
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
@@ -242,7 +244,11 @@ const AddAssignent = ({
            
             const contentDetails = response.data.contentDetails[0]
             const fetchedTitle = response.data.title || response.data.name || ''
-            setTitle(fetchedTitle)
+            // Only update title if content.id changed or initial load
+            if (lastLoadedContentId.current !== content.id) {
+                setTitle(fetchedTitle)
+                lastLoadedContentId.current = content.id
+            }
             
             setIsDataLoading(false)
             
@@ -306,33 +312,27 @@ const AddAssignent = ({
     // Manual save function
     const editAssignmentContent = async (data: any) => {
         if (!canEdit) return
-        
         const deadlineDate = convertToISO(data.startDate)
         try {
             setIsSaving(true)
+            setCanSave(false)
             const initialContentString = initialContent
                 ? [JSON.stringify(initialContent)]
                 : ''
             const requestBody = {
-                title: data.title,
+                title: data.title, 
                 completionDate: deadlineDate,
                 articleContent: initialContentString,
             }
-
             await editChapter(content.moduleId, content.id, requestBody)
-
+            setTitle(data.title) 
             setAssignmentUpdateOnPreview(!assignmentUpdateOnPreview)
             setIsChapterUpdated(!isChapterUpdated)
             setIsEditorSaved(true)
-
-            // Mark that user has manually saved and track if content was non-empty
             setHasUserSaved(true)
             setWasContentNonEmptyWhenSaved(!isEditorContentEmpty(initialContent))
-
-            // Update previous content hash
             setPreviousContentHash(generateContentHash(initialContent))
             setHasChangedAfterSave(false)
-
             toast.success({
                 title: 'Success',
                 description: 'Assignment Chapter Edited Successfully',
@@ -355,24 +355,41 @@ const AddAssignent = ({
         }
     }, [content?.id])
 
+    // Keep form title in sync with state
+    useEffect(() => {
+        form.setValue('title', title)
+    }, [title])
+
     // Reset isEditorSaved if PDF is uploaded or deleted
     useEffect(() => {
         if (ispdfUploaded) setIsEditorSaved(false)
     }, [ispdfUploaded])
 
-    // Update hasEditorContent whenever initialContent changes
+    // Save button logic: editor disables after save, enables only after edit; PDF disables after save, enables after file/title/deadline edit
     useEffect(() => {
-        if (!isInitialLoad && initialContent) {
-            const currentHash = generateContentHash(initialContent)
-            const hasContent = !isEditorContentEmpty(initialContent)
-            setHasEditorContent(hasContent)
+        if (defaultValue === 'editor') {
+            const hasContent = initialContent && !isEditorContentEmpty(initialContent)
+            setHasEditorContent(!!hasContent)
+            setCanSave(!!hasContent && !isSaving && hasChangedAfterSave)
+        } else if (defaultValue === 'pdf') {
+            // Only enable Save if a file is selected for upload or a PDF is already uploaded
+            setCanSave(((!!file || !!pdfLink) && hasChangedAfterSave && !isSaving) || (!!file && !isSaving))
+        } else {
+            setCanSave(false)
+        }
+    }, [initialContent, file, defaultValue, isSaving, hasChangedAfterSave, pdfLink])
 
-            // Check if content changed from last saved version
-            if (previousContentHash && currentHash !== previousContentHash) {
+    // Track editor content changes to enable Save after edit
+    useEffect(() => {
+        if (defaultValue === 'editor') {
+            const hasContent = initialContent && !isEditorContentEmpty(initialContent)
+            if (hasContent) {
                 setHasChangedAfterSave(true)
             }
         }
-    }, [initialContent, isInitialLoad, previousContentHash])
+        // Do not set for PDF mode
+        // eslint-disable-next-line
+    }, [initialContent])
 
     // Auto-save effect for content deletion
     useEffect(() => {
@@ -435,17 +452,14 @@ const AddAssignent = ({
                     description: 'Only PDF files are allowed.',
                 })
             }
-
-            // build the FormData, with the *exact* field name your backend expects*
             const formData = new FormData()
             formData.append('pdf', file, file.name)
-            formData.append('title', title)
-
+            formData.append('title', title) 
             try {
                 setIsLoading(true)
                 await uploadPdf(content.moduleId, content.id, formData)
+                setTitle(title) 
                 setIsChapterUpdated(!isChapterUpdated)
-                // Instantly update state to disable Save button
                 setIsPdfUploaded(true)
                 setFile(null)
                 setpdfLink('')
@@ -454,8 +468,8 @@ const AddAssignent = ({
                     title: 'Success',
                     description: 'PDF uploaded successfully!',
                 })
-                // Optionally reload assignment content if needed
                 getAssignmentContent()
+                setCanSave(false)
             } catch (err: any) {
                 console.error(err)
                 toast.error({
@@ -548,16 +562,14 @@ const AddAssignent = ({
                                                     <Input
                                                         {...field}
                                                         onChange={(e) => {
-                                                            setTitles(
-                                                                e.target.value
-                                                            )
+                                                            setTitles(e.target.value)
+                                                            setTitle(e.target.value)
+                                                            form.setValue('title', e.target.value) // keep form in sync
                                                             field.onChange(e)
+                                                            setHasChangedAfterSave(true)
                                                         }}
                                                         onKeyDown={(e) => {
-                                                            if (
-                                                                e.key ===
-                                                                'Enter'
-                                                            ) {
+                                                            if (e.key === 'Enter') {
                                                                 e.preventDefault()
                                                             }
                                                         }}
@@ -846,9 +858,8 @@ const AddAssignent = ({
                                                                                         field.onChange(
                                                                                             date
                                                                                         )
-                                                                                        setDeadline(
-                                                                                            date
-                                                                                        ) 
+                                                                                        setDeadline(date)
+                                                                                        setHasChangedAfterSave(true)
                                                                                     }
                                                                                 }}
                                                                                 disabled={(
@@ -925,11 +936,9 @@ const AddAssignent = ({
                                             form="myForm"
                                             disabled={
                                                 !canEdit ||
-                                                !hasEditorContent ||
+                                                !canSave ||
                                                 isSaving ||
-                                                !isValid ||
-                                                !hasChangedAfterSave
-
+                                                !isValid
                                             }
                                         >
                                             {isSaving ? 'Saving...' : 'Save'}
@@ -939,13 +948,24 @@ const AddAssignent = ({
 
                                             <Button
                                                 type="button"
-                                                onClick={onFileUpload}
+                                                onClick={() => {
+                                                    if (file) {
+                                                        onFileUpload();
+                                                    } else {
+                                                        // If no file, but title/deadline changed, call editAssignmentContent
+                                                        if (canSave) {
+                                                            editAssignmentContent({
+                                                                title: titles || title,
+                                                                startDate: deadline,
+                                                            });
+                                                        }
+                                                    }
+                                                }}
                                                 className="bg-primary text-primary-foreground hover:bg-primary/90"
                                                 disabled={
                                                     !canEdit ||
                                                     loading ||
-                                                    !form.formState.isValid ||
-                                                    (ispdfUploaded && !file) ||
+                                                    !canSave ||
                                                     disabledUploadButton
                                                 }
                                             >
