@@ -377,7 +377,7 @@ if (!courseData || !courseData.id) {
     return (
         // <div className="w-full max-w-none space-y-6">
         <div className='container mx-auto px-2 pt-2 pb-2 max-w-5xl'>
-            <h2 className="font-heading text-xl font-semibold text-left ml-1">
+            <h2 className="font-heading text-xl font-semibold text-left ml-1 mb-6">
                 General Details
             </h2>
 
@@ -423,15 +423,15 @@ if (!courseData || !courseData.id) {
                                     )}
 
                                     {!isCropping && (
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                             <Button
-                                                variant="default"
                                                 size="sm"
                                                 type="button"
                                                 onClick={() =>
                                                     fileInputRef.current?.click()
                                                 }
                                                 disabled={!Permissions?.editCourse || isImageUploading}
+                                                className='bg-background text-primary'
                                             >
                                                 <Upload className="h-4 w-4 mr-2" />
                                                 {isImageUploading
@@ -586,9 +586,8 @@ if (!courseData || !courseData.id) {
                                                     )}
 
                                                     {!isCollaboratorCropping && (
-                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                                             <Button
-                                                                variant="default"
                                                                 size="sm"
                                                                 type="button"
                                                                 onClick={
@@ -598,7 +597,7 @@ if (!courseData || !courseData.id) {
                                                                     !Permissions?.editCourse ||
                                                                     isImageUploading
                                                                 }
-                                                                className='flex items-center'
+                                                                className='bg-background text-primary'
                                                             >
                                                                 <Upload className="h-4 w-4 mr-2" />
                                                                 {croppedCollaboratorImage

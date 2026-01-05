@@ -311,7 +311,7 @@ const Header = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={handleLogoutClick}
-                            className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600 cursor-pointer"
+                            className="text-red-600 hover:bg-primary focus:text-popover cursor-pointer"
                         >
                             Logout
                         </DropdownMenuItem>

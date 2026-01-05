@@ -21,10 +21,12 @@ import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
 import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
+import { useThemeStore } from '@/store/store'
 
 
 
 function LoginPage() {
+    const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
     const { user, setUser } = getUser()
     const router = useRouter()
@@ -98,7 +100,7 @@ function LoginPage() {
                 <Image src={image} alt={name} fill className="object-cover" />
             </div>
             <div className="text-left">
-                <div className="text-primary-dark font-bold text-sm">
+                <div className="text-primary-dark font-bold text-md">
                     {name}
                 </div>
                 <div className="text-primary-dark text-sm">{role}</div>
@@ -115,7 +117,7 @@ function LoginPage() {
         description: string
     }) => (
         <div className="bg-accent-light p-3 rounded-lg text-center min-w-fit flex-shrink-0">
-            <div className="text-accent-dark font-bold text-lg">{number}</div>
+            <div className="text-accent-dark font-bold text-md">{number}</div>
             <div className="text-accent-dark text-sm">{description}</div>
         </div>
     )
@@ -264,13 +266,25 @@ const handleGoogleSuccess = async (
                         <div className="w-full max-w-md md:p-12 p-6 text-center mb-20 md:mb-20 bg-card rounded-lg shadow-8dp border">
                             {/* Logo */}
                             <div className="mb-6">
-                                <Image
-                                    src={'/zuvy-logo-horizontal.png'}
-                                    alt="Zuvy Logo"
-                                    className="mx-auto"
-                                    width={64}
-                                    height={64}
-                                />
+                                {
+                                    isDark ? (
+                                        <Image
+                                            src={'/zuvy-logo-horizontal-dark.png'}
+                                            alt="Zuvy Logo"
+                                            className="mx-auto"
+                                            width={48}  
+                                            height={48}
+                                        />
+                                    ) : (
+                                    <Image
+                                        src={'/zuvy-logo-horizontal.png'}
+                                        alt="Zuvy Logo"
+                                        className="mx-auto"
+                                        width={48}
+                                        height={48}
+                                    />
+                                    )
+                                }
                             </div>
 
                             {/* Headline */}
