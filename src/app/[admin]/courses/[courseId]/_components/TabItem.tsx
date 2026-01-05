@@ -27,7 +27,7 @@ function TabItem({ href, title, icon: Icon }: TabItemProps) {
         "mx-1 text-sm w-full py-2 font-medium rounded-sm flex items-center justify-center gap-1 transition-colors text-center",
         isActive 
           ? "bg-primary text-white" 
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          : "text-muted-foreground hover:text-foreground hover:bg-primary-light"
       )}
     >
       {Icon && <Icon className="h-4 w-4" />}
