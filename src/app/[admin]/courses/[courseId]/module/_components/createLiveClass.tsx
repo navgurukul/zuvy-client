@@ -83,8 +83,20 @@ const formSchema = z
             required_error: 'Please select a Platform.',
         }),
     })
-    .refine((data) => data.startTime <= data.endTime, {
-        message: 'Start Time cannot be after end Time',
+    .refine((data) => data.startTime < data.endTime, {
+        message: 'Start Time cannot be after or equal to end Time',
+        path: ['endTime'],
+    })
+    .refine((data) => {
+        // Ensure at least 30 minutes gap between startTime and endTime
+        if (!data.startTime || !data.endTime) return true;
+        const [startHour, startMinute] = data.startTime.split(":").map(Number);
+        const [endHour, endMinute] = data.endTime.split(":").map(Number);
+        const start = startHour * 60 + startMinute;
+        const end = endHour * 60 + endMinute;
+        return end - start >= 30;
+    }, {
+        message: 'There must be at least 30 minutes between start and end time',
         path: ['endTime'],
     })
     .refine(

@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useParams, useRouter, usePathname } from 'next/navigation'
 import { toast } from '@/components/ui/use-toast'
 import {
+    ChevronLeft,
     ArrowLeft,
     GraduationCap,
     Calendar,
@@ -115,11 +116,11 @@ if (loading) {
             {/* <Breadcrumb crumbs={crumbs} /> */}
             <Link
                 href={`/${role}/courses`}
-                className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
+                className="flex space-x-1 w-[180px] text-foreground mt-8 hover:text-primary"
             >
-                <ArrowLeft size={20} />
-                <p className="ml-1 inline-flex text-sm font-medium md:ml-2 whitespace-nowrap">
-                    Back to Course Library
+                <ChevronLeft size={20} />
+                <p className="inline-flex text-sm font-medium md:ml-2 whitespace-nowrap">
+                    Back to Course Studio
                 </p>
             </Link>
             <h1 className="font-heading text-start font-bold text-3xl text-foreground my-8">
@@ -129,7 +130,7 @@ if (loading) {
             <div className="w-full">
                 <Tabs defaultValue="generalDetails" className="w-full">
                     <div
-                        className="relative border-b-2 border-muted pr-3 flex justify-start overflow-x-auto overflow-y-hidden"
+                        className="relative border-muted pr-1 flex justify-start overflow-x-auto overflow-y-hidden"
                         style={{
                             scrollbarWidth: 'none', // Firefox
                             msOverflowStyle: 'none', // IE and Edge
@@ -169,7 +170,7 @@ if (loading) {
                                 ) : null;
                             })}
                         </TabsList>
-                        <div
+                        {/* <div
                             className="absolute top-0 right-0 h-full"
                             style={{
                                 width: '20px', // Width of the gradient hint
@@ -177,7 +178,7 @@ if (loading) {
                                     'linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 100%)',
                                 pointerEvents: 'none', // Ensure it doesn’t block clicks
                             }}
-                        />
+                        /> */}
                     </div>
                 </Tabs>
             </div>

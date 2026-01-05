@@ -1,7 +1,7 @@
 'use client';
 import Header from './_components/Header'
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, useState } from 'react';
 import { getUser, useThemeStore } from '@/store/store';
 import { useRoles } from '@/hooks/useRoles'
 import { Spinner } from '@/components/ui/spinner';
@@ -9,6 +9,7 @@ import Notfound from '../not-found';
 import UnauthorizedUser from '@/components/UnauthorizedUser';
 import { Toaster } from "@/components/ui/toaster";
 import { Inter } from "next/font/google";
+import ZoeBanner from '../_components/ZoeBanner';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,13 +46,49 @@ function StudentLayoutContent({
     const roleFromPath = pathname.split('/')[1]?.toLowerCase() || ''
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isRoleInSystem = roles?.some(r => r.name?.toLowerCase() === roleFromPath)
+    const [showZoeBanner, setShowZoeBanner] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
+    useEffect(() => {
+        setIsMounted(true);
+        if (typeof window !== 'undefined') {
+            const zoeBannerDismissed = localStorage.getItem('zoeBannerDismissed');
+            if (!zoeBannerDismissed) {
+                setShowZoeBanner(true);
+            }
+        }
+    }, []);
+
+    const handleDismissBanner = () => {
+        setShowZoeBanner(false);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('zoeBannerDismissed', 'true');
+        }
+    };
+
+    const handleStartInterview = () => {
+        const access_token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+        window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank');
+    };
+
+    const handleGiveFeedback = () => {
+        // Add your feedback form URL here
+        window.open('https://forms.fillout.com/t/2wxwRuLW7rus', '_blank');
+    };
 
     return (
         <div className="h-screen bg-background flex flex-col font-manrope">
 
             <ThemeInitializer />
-            {!hideHeader && !isOnCourseModulePage && <Header />}
+            <div className="sticky top-0 z-50">
+                <ZoeBanner 
+                    isVisible={showZoeBanner}
+                    onDismiss={handleDismissBanner}
+                    onStartInterview={handleStartInterview}
+                    onGiveFeedback={handleGiveFeedback}
+                />
+                {!hideHeader && !isOnCourseModulePage && <Header />}
+            </div>
             <main className="flex-1 overflow-y-auto ">
                 {children}
             </main>

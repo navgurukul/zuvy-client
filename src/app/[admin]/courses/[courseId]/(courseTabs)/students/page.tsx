@@ -26,6 +26,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import axios from 'axios'
 import { toast } from '@/components/ui/use-toast'
 import { SearchBox } from '@/utils/searchBox'
+import useDebounce from '@/hooks/useDebounce'
 import {
     Select,
     SelectContent,
@@ -82,18 +83,24 @@ const StudentsPage = ({ params }: { params: any }) => {
     const [enrolledDateFilter, setEnrolledDateFilter] = useState<string>('all')
     const [statusFilter, setStatusFilter] = useState<string>('all')
     const [batchFilter, setBatchFilter] = useState<string>('all')
-    const [attendanceFilter, setAttendanceFilter] = useState<string>('') 
+    const [attendanceInput, setAttendanceInput] = useState('')
     const [loading, setLoading] = useState(true)
+    
+    // Use debounce hook for attendance input
+    const debouncedAttendance = useDebounce(attendanceInput, 500)
+
     
     // Add refs to track initialization and prevent duplicate calls
     const hasInitialized = useRef(false)
     const isFetching = useRef(false)
+    
+    // Update filterState to use debouncedAttendance instead of attendanceFilter
     const filterState = useMemo(() => ({
         enrolledDateFilter,
         statusFilter,
         batchFilter,
-        attendanceFilter
-    }), [enrolledDateFilter, statusFilter, batchFilter, attendanceFilter])
+        attendanceFilter: debouncedAttendance,
+    }), [enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance])
     
     const fetchFilteredData = useCallback(async (customOffset?: number) => {
         if (isFetching.current) return
@@ -110,7 +117,11 @@ const StudentsPage = ({ params }: { params: any }) => {
             }
             if (statusFilter !== 'all') url += `&status=${statusFilter}`
             if (batchFilter !== 'all') url += `&batch_id=${batchFilter}`
-            if (attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+            
+            // Use debouncedAttendance here
+            if (debouncedAttendance.trim() !== '') {
+                url += `&attendance=${debouncedAttendance.trim()}`
+            }
     
             const searchQuery = new URLSearchParams(window.location.search).get("search")
             if (searchQuery) url += `&searchTerm=${searchQuery}`
@@ -119,7 +130,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     
             setStudents(response.data.modifiedStudentInfo || [])
             setTotalStudents(response.data.totalStudents || 0)
-            setTotalPages(response.data.totalPages || 1)    // <-- FIXED
+            setTotalPages(response.data.totalPages || 1)
             setSelectedRows([])
     
             setLoading(false)
@@ -130,9 +141,9 @@ const StudentsPage = ({ params }: { params: any }) => {
         } finally {
             setTimeout(() => {
                 isFetching.current = false
-             }, 100)        }
-    }, [params.courseId,limit,offset,filterState])
-    // Update this helper function to handle new options
+            }, 100) }
+    }, [params.courseId,limit,offset,enrolledDateFilter,statusFilter,batchFilter,debouncedAttendance,setStudents,setTotalStudents,setTotalPages])
+     // Update this helper function to handle new options
     // const convertLastActiveFilterToDate = (filter: string): string | null => {
     // const today = new Date()
     // const formatDate = (date: Date) => date.toISOString().split('T')[0] // YYYY-MM-DD format
@@ -213,7 +224,8 @@ const StudentsPage = ({ params }: { params: any }) => {
             fetchFilteredData()
         }
     }, [filterState])
-        const fetchSuggestionsApi = useCallback(async (query: string) => {
+    
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
         // If query is empty, return empty suggestions and trigger default fetch
         if (!query || query.trim() === '') {
             return [];
@@ -233,12 +245,14 @@ const StudentsPage = ({ params }: { params: any }) => {
         // url += `&lastActiveDate=${lastActiveDate}`
         // }
         // }
-        if (attendanceFilter && attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+        if (debouncedAttendance && debouncedAttendance.trim() !== '') {
+            url += `&attendance=${debouncedAttendance.trim()}`
+        }
         
         const response = await api.get(url)
         const suggestions = (response.data.modifiedStudentInfo || []).map((student: StudentData) => ({ ...student, id: student.userId }));
         return suggestions;
-    }, [params.courseId, enrolledDateFilter, statusFilter, batchFilter, attendanceFilter]);
+    }, [params.courseId, enrolledDateFilter, statusFilter, batchFilter, debouncedAttendance]);
 
     // Keep fetchSearchResultsApi with current offset for proper search functionality
     const fetchSearchResultsApi = useCallback(async (query: string) => {
@@ -262,7 +276,9 @@ const StudentsPage = ({ params }: { params: any }) => {
         }
         if (statusFilter !== 'all') url += `&status=${statusFilter}`
         if (batchFilter !== 'all') url += `&batch_id=${batchFilter}`
-        if (attendanceFilter.trim() !== '') url += `&attendance=${attendanceFilter.trim()}`
+        if (debouncedAttendance.trim() !== '') {
+            url += `&attendance=${debouncedAttendance.trim()}`
+        }
     
         const response = await api.get(url)
     
@@ -275,7 +291,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     
         return response.data
     
-    }, [params.courseId, limit, offset, setStudents, setTotalStudents, setTotalPages, setCurrentPage, setOffset, enrolledDateFilter, statusFilter,batchFilter, attendanceFilter,fetchFilteredData,students])
+    }, [params.courseId, limit, offset, setStudents, setTotalStudents, setTotalPages, setCurrentPage, setOffset, enrolledDateFilter, statusFilter,batchFilter, debouncedAttendance,fetchFilteredData,students])
     
     const defaultFetchApi = useCallback(async () => {
         // Clear search from URL when input is cleared
@@ -316,6 +332,8 @@ const StudentsPage = ({ params }: { params: any }) => {
     // Handle enrolled date filter change
     const handleEnrolledDateFilterChange = (value: string) => {
         setEnrolledDateFilter(value)
+        setOffset(0)
+        setCurrentPage(1)
         // Reset to first page when filter changes
         const urlParams = new URLSearchParams(window.location.search)
         urlParams.delete('page')
@@ -326,6 +344,8 @@ const StudentsPage = ({ params }: { params: any }) => {
     // Handle status filter change
     const handleStatusFilterChange = (value: string) => {
         setStatusFilter(value)
+        setOffset(0)
+        setCurrentPage(1)
         // Reset to first page when filter changes
         const urlParams = new URLSearchParams(window.location.search)
         urlParams.delete('page')
@@ -336,6 +356,8 @@ const StudentsPage = ({ params }: { params: any }) => {
     // add handler for batch filter change
     const handleBatchFilterChange = (value: string) => {
         setBatchFilter(value)
+        setOffset(0)
+        setCurrentPage(1)
         const urlParams = new URLSearchParams(window.location.search)
         // persist selected batch in URL under batch_id so share/bookmark works
         if (value && value !== 'all') urlParams.set('batch_id', value)
@@ -358,7 +380,7 @@ const StudentsPage = ({ params }: { params: any }) => {
     const handleAttendanceFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         if (value === '' || /^\d+$/.test(value)) {
-            setAttendanceFilter(value)
+            setAttendanceInput(value)
             const urlParams = new URLSearchParams(window.location.search)
             urlParams.delete('page')
             const newUrl = `${window.location.pathname}?${urlParams.toString()}`
@@ -551,12 +573,12 @@ const StudentsPage = ({ params }: { params: any }) => {
                         </Select>
                     </div> */}
 
-                    {/* Attendance Filter - NEW */}
+                    {/* Attendance Filter - with debouncing */}
                     <div className="w-full sm:w-[160px]">
                         <Input
                             type="text"
                             placeholder="Attendance number"
-                            value={attendanceFilter}
+                            value={attendanceInput}
                             onChange={handleAttendanceFilterChange}
                             className="text-sm w-full"
                         />
