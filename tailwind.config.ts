@@ -20,9 +20,9 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				'heading': ['Rajdhani', 'sans-serif'],
-				'body': ['Sentient', 'sans-serif'],
-				'mono': ['JetBrains Mono', 'monospace'],
+				'heading': ['Plein', 'sans-serif'],
+				'body': ['Switzer', 'sans-serif'],
+				'mono': ['Switzer', 'monospace'],
 			},
 			fontSize: {
 				// Brand typography scale - Zuvy Design System

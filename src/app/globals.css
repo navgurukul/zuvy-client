@@ -1,5 +1,5 @@
 /* Import Fontshare Fonts for Zuvy Design System */
-@import url('https://api.fontshare.com/v2/css?f[]=sentient@300,400,401,500,700,701,1&f[]=rajdhani@300,400,500,600,700,1&f[]=jet-brains-mono@300,400,401,700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=switzer@100,300,400,401,500,600,700,800&f[]=plein@400,500,700,900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,156 +9,184 @@
 @layer base {
     :root {
         /* Base Colors - Light Mode */
-        --background: 48 30% 95%;
-        --foreground: 0 0% 17%;
+        --background: 30 30% 98%;
+        --background-secondary: 0 0% 100%;
+        --foreground: 150 15% 15%;
 
         /* Card and Surface Colors - Light Mode */
         --card: 0 0% 100%;
         --card-light: 0 0% 100%;
         --card-elevated: 0 0% 99%;
-        --card-foreground: 0 0% 17%;
+        --card-foreground: 150 15% 15%;
 
         /* Primary Brand Colors - Light Mode - Forest Green */
-        --primary: 122 36% 27%;
-        --primary-light: 130 38% 94%;
-        --primary-dark: 122 42% 19%;
+        --primary: 120 37% 27%;
+        --primary-light: 130 43% 95%;
+        --primary-dark: 123 40% 20%;
         --primary-foreground: 0 0% 100%;
 
-        /* Secondary Brand Colors - Light Mode - Bright Teal */
-        --secondary: 146 88% 50%;
-        --secondary-light: 150 100% 94%;
-        --secondary-dark: 146 84% 39%;
-        --secondary-foreground: 0 0% 10%;
+        /* Secondary Brand Colors - Light Mode - Sunset Orange */
+        --secondary: 25 80% 52%;
+        --secondary-light: 25 85% 94%;
+        --secondary-dark: 25 80% 42%;
+        --secondary-foreground: 0 0% 100%;
 
-        /* Accent Colors - Light Mode - Amber Gold */
-        --accent: 38 92% 50%;
-        --accent-light: 45 93% 89%;
-        --accent-dark: 32 95% 44%;
+        /* Accent Colors - Light Mode - Bright Teal */
+        --accent: 153 91% 49%;
+        --accent-light: 153 91% 94%;
+        --accent-dark: 151 91% 39%;
         --accent-foreground: 0 0% 10%;
 
         /* Muted Colors - Light Mode */
-        --muted: 0 0% 54%;
-        --muted-light: 48 23% 90%;
-        --muted-dark: 0 0% 37%;
-        --muted-foreground: 0 0% 54%;
+        --muted: 30 20% 92%;
+        --muted-light: 30 15% 88%;
+        --muted-dark: 150 10% 28%;
+        --muted-foreground: 150 8% 50%;
+
+        /* Neutral Colors - Greys - Light Mode */
+        --grey-light: 30 15% 88%;
+        --grey: 150 8% 50%;
+        --grey-dark: 150 10% 28%;
 
         /* Semantic Colors - Light Mode */
-        --success: 88 45% 48%;
-        --success-light: 88 45% 94%;
-        --success-dark: 88 49% 36%;
+        --success: 88 48% 52%;
+        --success-light: 100 55% 96%;
+        --success-dark: 99 55% 37%;
         --success-foreground: 0 0% 100%;
 
-        --warning: 38 92% 50%;
-        --warning-light: 45 93% 89%;
+        --warning: 38 94% 50%;
+        --warning-light: 48 97% 88%;
         --warning-dark: 32 95% 44%;
         --warning-foreground: 0 0% 10%;
 
-        --destructive: 0 63% 51%;
-        --destructive-light: 0 100% 96%;
-        --destructive-dark: 0 74% 42%;
+        --destructive: 4 70% 50%;
+        --destructive-light: 0 100% 97%;
+        --destructive-dark: 0 69% 41%;
         --destructive-foreground: 0 0% 100%;
 
-        --info: 207 79% 46%;
-        --info-light: 210 100% 95%;
-        --info-dark: 213 86% 34%;
+        --info: 211 89% 48%;
+        --info-light: 207 89% 96%;
+        --info-dark: 217 100% 34%;
         --info-foreground: 0 0% 100%;
 
+        /* Text Color System - Light Mode */
+        --text-primary: 150 15% 15%;
+        --text-secondary: 150 10% 35%;
+        --text-tertiary: 150 8% 50%;
+        --text-muted: 150 6% 65%;
+        --text-accent: 120 37% 27%;
+        --text-interactive: 153 91% 35%;
+
         /* Border and Input Colors - Light Mode */
-        --border: 48 23% 90%;
-        --input: 48 23% 90%;
-        --ring: 122 36% 27%;
+        --border: 30 20% 90%;
+        --input: 30 20% 90%;
+        --ring: 120 37% 27%;
 
         /* Popover */
         --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 17%;
+        --popover-foreground: 150 15% 15%;
 
         --radius: 0.5rem;
 
         /* Sidebar */
         --sidebar-background: 0 0% 100%;
-        --sidebar-foreground: 0 0% 17%;
-        --sidebar-primary: 122 36% 27%;
+        --sidebar-foreground: 150 15% 15%;
+        --sidebar-primary: 120 37% 27%;
         --sidebar-primary-foreground: 0 0% 100%;
         --sidebar-accent: 0 0% 99%;
-        --sidebar-accent-foreground: 0 0% 17%;
-        --sidebar-border: 48 23% 90%;
-        --sidebar-ring: 122 36% 27%;
+        --sidebar-accent-foreground: 150 15% 15%;
+        --sidebar-border: 30 20% 90%;
+        --sidebar-ring: 120 37% 27%;
     }
 
     .dark {
         /* Base Colors - Dark Mode */
-        --background: 222.2 84% 4.9%;
-        --foreground: 210 20% 98%;
+        --background: 0 0% 10%;
+        --background-secondary: 0 0% 12%;
+        --foreground: 30 30% 98%;
 
         /* Card and Surface Colors - Dark Mode */
-        --card: 224 15% 7%;
-        --card-light: 224 15% 6%;
-        --card-elevated: 224 15% 8%;
-        --card-foreground: 210 20% 98%;
+        --card: 0 0% 15%;
+        --card-light: 0 0% 15%;
+        --card-elevated: 0 0% 15%;
+        --card-foreground: 30 30% 98%;
 
         /* Primary Brand Colors - Dark Mode */
-        --primary: 122 35% 36%; /* #3A7A3D - Brighter Forest Green */
-        --primary-light: 122 36% 27%; /* #2C5F2D - Subtle Green */
-        --primary-dark: 122 35% 45%; /* #4A9A4D - Bright Green Emphasis */
-        --primary-foreground: 0 0% 100%; /* #FFFFFF - White Text */
+        --primary: 125 37% 36%;
+        --primary-light: 120 37% 27%;
+        --primary-dark: 124 38% 46%;
+        --primary-foreground: 0 0% 100%;
 
         /* Secondary Brand Colors - Dark Mode */
-        --secondary: 25 90% 63%;
-        --secondary-light: 25 85% 20%;
-        --secondary-dark: 25 85% 47%;
-        --secondary-foreground: 222.2 84% 4.9%;
+        --secondary: 25 80% 52%;
+        --secondary-light: 25 80% 42%;
+        --secondary-dark: 25 85% 62%;
+        --secondary-foreground: 0 0% 100%;
 
         /* Accent Colors - Dark Mode */
-        --accent: 198 85% 58%;
-        --accent-light: 198 80% 20%;
-        --accent-dark: 198 80% 42%;
-        --accent-foreground: 222.2 84% 4.9%;
+        --accent: 153 91% 49%;
+        --accent-light: 151 91% 39%;
+        --accent-dark: 153 91% 56%;
+        --accent-foreground: 0 0% 10%;
 
         /* Muted Colors - Dark Mode */
-        --muted: 217.2 32.6% 17.5%;
-        --muted-light: 217.2 32.6% 22.5%;
-        --muted-dark: 217.2 32.6% 12.5%;
-        --muted-foreground: 215 20.2% 65.1%;
+        --muted: 0 0% 25%;
+        --muted-light: 0 0% 25%;
+        --muted-dark: 30 15% 88%;
+        --muted-foreground: 0 0% 72%;
+
+        /* Neutral Colors - Greys - Dark Mode */
+        --grey-light: 0 0% 25%;
+        --grey: 0 0% 45%;
+        --grey-dark: 30 15% 88%;
 
         /* Semantic Colors - Dark Mode */
-        --success: 160 84.1% 45%;
-        --success-light: 160 84.1% 20%;
-        --success-dark: 160 84.1% 30%;
-        --success-foreground: 222.2 84% 4.9%;
+        --success: 88 50% 53%;
+        --success-light: 88 48% 52%;
+        --success-dark: 88 50% 60%;
+        --success-foreground: 0 0% 10%;
 
-        --warning: 45.4 93.4% 55%;
-        --warning-light: 45.4 93.4% 20%;
-        --warning-dark: 45.4 93.4% 40%;
-        --warning-foreground: 222.2 84% 4.9%;
+        --warning: 38 94% 50%;
+        --warning-light: 32 95% 44%;
+        --warning-dark: 42 96% 57%;
+        --warning-foreground: 0 0% 10%;
 
-        --destructive: 0 62.8% 50%;
-        --destructive-light: 0 62.8% 20%;
-        --destructive-dark: 0 62.8% 35%;
-        --destructive-foreground: 210 20% 98%;
+        --destructive: 4 73% 60%;
+        --destructive-light: 4 70% 50%;
+        --destructive-dark: 3 100% 67%;
+        --destructive-foreground: 0 0% 100%;
 
-        --info: 198 85% 58%;
-        --info-light: 198 80% 20%;
-        --info-dark: 198 80% 42%;
-        --info-foreground: 222.2 84% 4.9%;
+        --info: 207 90% 61%;
+        --info-light: 211 89% 48%;
+        --info-dark: 207 89% 70%;
+        --info-foreground: 0 0% 100%;
+
+        /* Text Color System - Dark Mode */
+        --text-primary: 30 30% 98%;
+        --text-secondary: 30 20% 80%;
+        --text-tertiary: 30 15% 70%;
+        --text-muted: 0 0% 60%;
+        --text-accent: 125 37% 36%;
+        --text-interactive: 153 91% 49%;
 
         /* Border and Input Colors - Dark Mode */
-        --border: 217.2 32.6% 17.5%;
-        --input: 217.2 32.6% 17.5%;
-        --ring: 224 75% 65%;
+        --border: 0 0% 25%;
+        --input: 0 0% 25%;
+        --ring: 125 37% 36%;
 
         /* Popover */
-        --popover: 224 15% 7%;
-        --popover-foreground: 210 20% 98%;
+        --popover: 0 0% 15%;
+        --popover-foreground: 30 30% 98%;
 
         /* Sidebar */
-        --sidebar-background: 224 15% 7%;
-        --sidebar-foreground: 210 20% 98%;
-        --sidebar-primary: 224 75% 65%;
-        --sidebar-primary-foreground: 210 20% 98%;
-        --sidebar-accent: 224 15% 8%;
-        --sidebar-accent-foreground: 210 20% 98%;
-        --sidebar-border: 217.2 32.6% 17.5%;
-        --sidebar-ring: 224 75% 65%;
+        --sidebar-background: 0 0% 15%;
+        --sidebar-foreground: 30 30% 98%;
+        --sidebar-primary: 125 37% 36%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 0 0% 15%;
+        --sidebar-accent-foreground: 30 30% 98%;
+        --sidebar-border: 0 0% 25%;
+        --sidebar-ring: 125 37% 36%;
     }
 }
 
@@ -216,6 +244,7 @@
     p,
     span,
     div {
+        font-size: 1rem; /* 16px - body1 */
         line-height: 1.5;
     }
 
@@ -227,7 +256,7 @@
 
     /* Caption - image captions, tags */
     .text-caption {
-        font-size: 0.75rem; /* 12px */
+        font-size: 0.875rem; /* 14px */
         line-height: 1.5;
     }
 
@@ -239,6 +268,7 @@
 
     /* Button text - body1 semibold */
     button {
+        font-size: 1rem; /* 16px */
         font-weight: 600;
     }
 
@@ -264,64 +294,58 @@
         }
 
         body {
-            font-size: 0.875rem; /* 14px */
+            font-size: 1rem; /* 16px */
+        }
+
+        p,
+        span,
+        div {
+            font-size: 1rem; /* 16px */
         }
 
         .text-body2 {
-            font-size: 0.75rem; /* 12px */
+            font-size: 0.875rem; /* 14px */
         }
 
         .text-caption {
-            font-size: 0.75rem; /* 12px */
+            font-size: 0.875rem; /* 14px */
         }
 
         code {
-            font-size: 0.875rem; /* 14px */
+            font-size: 1rem; /* 16px */
+        }
+
+        button {
+            font-size: 1rem; /* 16px */
         }
     }
 }
 
-/* Custom Neural Nexus shadows */
+/* Zuvy Design System Shadows */
 @layer utilities {
-    .shadow-2dp {
-        box-shadow: 0 1px 3px 0 rgba(79, 109, 207, 0.1),
-            0 1px 2px 0 rgba(79, 109, 207, 0.06);
+    /* Soft Shadow - Subtle elevation for cards */
+    .shadow-soft {
+        box-shadow: 0 2px 8px hsl(120 37% 27% / 0.06);
     }
 
-    .shadow-4dp {
-        box-shadow: 0 2px 4px -1px rgba(79, 109, 207, 0.1),
-            0 1px 2px -1px rgba(79, 109, 207, 0.06);
+    /* Medium Shadow - Cards on hover, modals */
+    .shadow-medium {
+        box-shadow: 0 4px 16px hsl(120 37% 27% / 0.1);
     }
 
-    .shadow-8dp {
-        box-shadow: 0 4px 6px -1px rgba(79, 109, 207, 0.1),
-            0 2px 4px -2px rgba(79, 109, 207, 0.1);
+    /* Strong Shadow - Prominent elements, elevated surfaces */
+    .shadow-strong {
+        box-shadow: 0 8px 32px hsl(120 37% 27% / 0.15);
     }
 
-    .shadow-16dp {
-        box-shadow: 0 10px 15px -3px rgba(79, 109, 207, 0.1),
-            0 4px 6px -4px rgba(79, 109, 207, 0.1);
+    /* Accent Shadow - Teal accent highlights */
+    .shadow-accent {
+        box-shadow: 0 4px 16px hsl(153 91% 49% / 0.2);
     }
 
-    .shadow-24dp {
-        box-shadow: 0 20px 25px -5px rgba(79, 109, 207, 0.1),
-            0 8px 10px -6px rgba(79, 109, 207, 0.1);
-    }
-
-    .shadow-32dp {
-        box-shadow: 0 25px 50px -12px rgba(79, 109, 207, 0.25);
-    }
-
-    .shadow-hover {
-        box-shadow: 0 8px 25px -8px rgba(79, 109, 207, 0.15);
-    }
-
-    .shadow-focus {
-        box-shadow: 0 0 0 2px rgba(79, 109, 207, 0.2);
-    }
-
-    .shadow-pressed {
-        box-shadow: 0 1px 3px 0 rgba(79, 109, 207, 0.2);
+    /* Secondary Shadow - Orange secondary highlights */
+    .shadow-secondary {
+        box-shadow: 0 4px 16px hsl(25 80% 52% / 0.2);
     }
 
     /* Full-width content utilities */
