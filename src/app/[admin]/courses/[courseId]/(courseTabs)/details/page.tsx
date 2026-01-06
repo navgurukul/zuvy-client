@@ -42,14 +42,27 @@ const FormSchema = z.object({
     bootcampTopic: z.string().optional(),
     description: z
         .string()
-        .min(10, 'Please add a course description (minimum 10 characters).'),
+        .min(10, 'Please add a course description (minimum 10 characters).')
+        .max(500, 'Course description cannot exceed 500 characters.'),
     duration: z.coerce.number().min(1, 'Please enter the course duration.'),
     language: z.string().min(1, 'Please select the language.'),
     startTime: z.date({
         required_error: 'Please choose a start date for the course.',
     }),
     coverImage: z.string().optional(),
-    collaborator: z.string().max(50, 'Collaborator name cannot exceed 50 characters.').optional(),
+    collaborator: z.string().optional().refine((val) => {
+        if (!val) return true // Empty is allowed
+        
+        // If it's an image (data URL or image URL), allow any length
+        if (val.startsWith('data:image/') || val.startsWith('http')) {
+            return true
+        }
+        
+        // If it's text, enforce 50 character limit
+        return val.length <= 50
+    }, {
+        message: 'Collaborator text cannot exceed 50 characters.'
+    }),
 })
 
 function GeneralDetailsPage({ params }: { params: PageParams }) {
@@ -97,6 +110,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
             language: '',
             startTime: undefined,
         },
+        mode: 'onChange',
     })
 
     // Helper function to check if URL is image
@@ -363,7 +377,7 @@ if (!courseData || !courseData.id) {
     return (
         // <div className="w-full max-w-none space-y-6">
         <div className='container mx-auto px-2 pt-2 pb-2 max-w-5xl'>
-            <h2 className="font-heading text-xl font-semibold text-left ml-1">
+            <h2 className="font-heading text-xl font-semibold text-left ml-1 mb-6">
                 General Details
             </h2>
 
@@ -409,15 +423,15 @@ if (!courseData || !courseData.id) {
                                     )}
 
                                     {!isCropping && (
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                             <Button
-                                                variant="default"
                                                 size="sm"
                                                 type="button"
                                                 onClick={() =>
                                                     fileInputRef.current?.click()
                                                 }
                                                 disabled={!Permissions?.editCourse || isImageUploading}
+                                                className='bg-background text-primary'
                                             >
                                                 <Upload className="h-4 w-4 mr-2" />
                                                 {isImageUploading
@@ -572,9 +586,8 @@ if (!courseData || !courseData.id) {
                                                     )}
 
                                                     {!isCollaboratorCropping && (
-                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                                                             <Button
-                                                                variant="default"
                                                                 size="sm"
                                                                 type="button"
                                                                 onClick={
@@ -584,7 +597,7 @@ if (!courseData || !courseData.id) {
                                                                     !Permissions?.editCourse ||
                                                                     isImageUploading
                                                                 }
-                                                                className='flex items-center'
+                                                                className='bg-background text-primary'
                                                             >
                                                                 <Upload className="h-4 w-4 mr-2" />
                                                                 {croppedCollaboratorImage
@@ -695,8 +708,8 @@ if (!courseData || !courseData.id) {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem className="text-start">
-                                        <Label
-                                            htmlFor="name"
+                                        <Label 
+                                            htmlFor="name" 
                                             className="font-semibold"
                                         >
                                             Course Title
@@ -720,8 +733,8 @@ if (!courseData || !courseData.id) {
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem className="text-start">
-                                        <Label
-                                            htmlFor="description"
+                                        <Label 
+                                            htmlFor="description" 
                                             className="font-semibold"
                                         >
                                             Description

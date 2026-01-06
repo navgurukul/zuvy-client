@@ -8,6 +8,7 @@ import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
+import useDownloadCsv from '@/hooks/useDownloadCsv'
 
 interface ProjectsComponentProps {
     courseId: string
@@ -22,55 +23,26 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
     bootcampModules,
     totalStudents,
 }) => {
-    const handleDownloadPdf = async (projectId: string, projectTitle: string) => {
-        if (!projectId) return
+    const { downloadCsv } = useDownloadCsv()
 
-        const apiUrl = `/submission/projects/students?projectId=${projectId}&bootcampId=${courseId}`
-
-        try {
-            const response = await api.get(apiUrl)
-            const assessments = response.data?.projectSubmissionData?.projectTrackingData || []
-            const doc = new jsPDF()
-
-            doc.setFontSize(18)
-            doc.setFont('Regular', 'normal')
-            doc.setFontSize(15)
-            doc.setFont('Regular', 'normal')
-            doc.text('List of Students-:', 14, 23)
-
-            const columns = [
-                { header: 'Name', dataKey: 'name' },
-                { header: 'Email', dataKey: 'email' },
-                { header: 'Project Link', dataKey: 'projectLink' },
-
-            ]
-
-            const rows = assessments.map((assessment: { name: string; email: string,projectLink: string}) => ({
-                name: assessment.name || 'N/A',
-                email: assessment.email || 'N/A',
-                projectLink: assessment.projectLink || 'N/A',
-            }))
-
-            autoTable(doc, {
-                head: [columns.map((col) => col.header)],
-                body: rows.map((row: { name: string; email: string,projectLink: string  }) => [row.name, row.email,row.projectLink,]),
-                startY: 25,
-                margin: { horizontal: 10 },
-                styles: { overflow: 'linebreak', halign: 'center' },
-                headStyles: { fillColor: [22, 160, 133] },
-                theme: 'grid',
-            })
-
-            doc.save(`${projectTitle || 'project'}.pdf`)
-        } catch (error) {
-            console.error('Error generating PDF:', error)
-            toast({
-                title: 'Error',
-                description: 'Failed to generate PDF',
-                variant: 'destructive',
-            })
-        }
+    const handleDownloadCsv = (projectId: string, projectTitle: string) => {
+        downloadCsv({
+            endpoint: `/submission/projects/students?projectId=${projectId}&bootcampId=${courseId}`,
+            fileName: projectTitle || 'project',
+            dataPath: 'projectSubmissionData.projectTrackingData',
+            columns: [
+                { header: 'Name', key: 'name' },
+                { header: 'Email', key: 'email' },
+                { header: 'Project Link', key: 'projectLink' },
+            ],
+            mapData: (student: any) => ({
+                name: student.name || 'N/A',
+                email: student.email || 'N/A',
+                projectLink: student.projectLink || 'N/A',
+            }),
+        })
     }
+
 
     if (bootcampModules.length === 0) {
         return (
@@ -103,29 +75,50 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                         key={item.id}
                         className="relative bg-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow"
                     >
-                        <div className="absolute top-2 right-1 z-10 flex items-center gap-0">
-                            <button
-                                onClick={submissions > 0 ? () => handleDownloadPdf(projectId, projectTitle) : undefined}
-                                className={`cursor-pointer ${
-                                    submissions > 0 ? 'text-gray-500 hover:text-gray-700' : 'text-gray-400'
-                                }`}
-                                title="Download Report"
-                                disabled={submissions === 0}
-                            >
-                                <ArrowDownToLine size={20} className="" />
-                            </button>
+                        <div className="absolute top-2 right-2 z-10 flex items-center gap-[2px]">
+                            {submissions > 0 ? (
+                                <button
+                                    onClick={() => handleDownloadCsv(projectId, projectTitle)}
+                                    className="cursor-pointer text-gray-500 hover:text-gray-700 px-1"
+                                    title="Download Report"
+                                >
+                                    <ArrowDownToLine size={20} />
+                                </button>
+                            ) : (
+                                <div className="relative group inline-flex">
+                                        <button disabled className="cursor-not-allowed px-1 text-gray-400 mt-2">
+                                            <ArrowDownToLine size={20} className="text-gray-400" />
+                                        </button>
+
+                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                            No submissions available
+                                        </div>
+                                </div>
+                            )}
                             {submissions > 0 ? (
                                 <Link href={`/admin/courses/${courseId}/submissionProjects/${projectId}`}>
-                                    <Button variant={'ghost'} className="hover:bg-white-600 hover:text-gray-700 transition-colors">
+                                    <Button
+                                        variant="ghost"
+                                        className="hover:bg-white-500  px-1 hover:text-gray-700 transition-colors"
+                                    >
                                         <Eye className="text-gray-500" size={20} />
                                     </Button>
                                 </Link>
                             ) : (
-                                <Button variant={'ghost'} className="text-gray-400 text-sm" disabled>
-                                    <Eye className="text-gray-400" size={20} />
-                                </Button>
+                                <div className="relative group inline-flex">
+                                        <button
+                                            disabled
+                                            className="cursor-not-allowed px-1 mt-2"
+                                        >
+                                            <Eye className="text-gray-400" size={20} />
+                                        </button>
+                                    <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap z-50">
+                                        No submissions to view
+                                    </div>
+                                </div>
                             )}
                         </div>
+
 
                         <div className="flex flex-col w-full">
                             <div className="flex items-center gap-2">

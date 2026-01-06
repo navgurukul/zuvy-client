@@ -93,6 +93,7 @@ function CodingChallenge({
     const hasLoaded = useRef(false)
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     // FORCE UPDATE: Use a key to force re-render when content changes
     const contentKey = `${content?.id}-${
@@ -107,6 +108,7 @@ function CodingChallenge({
         if (!canEdit) {
             return
         }
+        setIsSubmitting(true)
         try {
             const titleToSave =
                 data.title.trim() === '' ? savedTitle : data.title
@@ -131,6 +133,8 @@ function CodingChallenge({
                 title: 'Error',
                 description: 'Failed to save changes',
             })
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -138,6 +142,7 @@ function CodingChallenge({
         const newTitle = e.target.value
         setChapterTitle(newTitle)
         setHasTitleChanged(newTitle !== savedTitle)
+        form.setValue('title', newTitle, { shouldValidate: true })
         form.trigger('title')
     }
     useEffect(() => {
@@ -178,6 +183,16 @@ function CodingChallenge({
     useEffect(() => {
         setIsSaved(checkIfSaved())
     }, [selectedQuestions, savedQuestions])
+
+    // Disable Save button after save, re-enable if there are unsaved changes
+    // Enable save if a coding problem is selected and title is being edited
+    const isSaveButtonDisabled =
+        !canEdit ||
+        isSubmitting ||
+        selectedQuestions.length === 0 ||
+        !chapterTitle?.trim() ||
+        !!form.formState.errors.title ||
+        (isSaved && !hasTitleChanged);
 
 
 useEffect(() => {
@@ -285,7 +300,8 @@ useEffect(() => {
                             >
                                 <div className="w-2/4 relative">
                                     <Input
-                                        {...form.register('title')}
+                                        {...form.register('title', { onChange: handleTitleChange })}
+                                        value={chapterTitle}
                                         placeholder="Untitled Coding Problem"
                                         className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground w-full"
                                         disabled={!canEdit}
@@ -310,25 +326,17 @@ useEffect(() => {
 
                                 <div className="flex items-center gap-2">
 
-                                    {selectedQuestions?.length > 0 && (
-                                        <Button
-                                            type="submit"
-                                            disabled={
-                                                !canEdit ||
-                                                !form.formState.isValid ||
-                                                form.formState.isSubmitting
-                                            }
-                                            className={`bg-primary text-white ${
-                                                !canEdit ||
-                                                !form.formState.isValid ||
-                                                form.formState.isSubmitting
-                                                    ? 'opacity-50 cursor-not-allowed'
-                                                    : ''
-                                            }`}
-                                        >
-                                            Save
-                                        </Button>
-                                    )}
+                                    <Button
+                                        type="submit"
+                                        disabled={isSaveButtonDisabled}
+                                        className={`bg-primary text-white ${
+                                            isSaveButtonDisabled
+                                                ? 'opacity-50 cursor-not-allowed'
+                                                : ''
+                                        }`}
+                                    >
+                                        {isSubmitting ? 'Saving...' : 'Save'}
+                                    </Button>
                                 </div>
                             </form>
                         </div>
