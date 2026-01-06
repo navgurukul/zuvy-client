@@ -30,10 +30,10 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 const courseSchema = z.object({
     name: z.string().min(1, 'Course name is required').max(50, 'Course name cannot exceed 50 characters'),
     description: z.string().min(1, 'Course description is required').max(500, 'Course description cannot exceed 500 characters'),
-    duration: z.string().min(1, 'Duration is required').refine((val) => {
-        const num = parseInt(val)
-        return !isNaN(num) && num > 0
-    }, 'Duration must be a positive number'), 
+    // duration: z.string().min(1, 'Duration is required').refine((val) => {
+    //     const num = parseInt(val)
+    //     return !isNaN(num) && num > 0
+    // }, 'Duration must be a positive number'), 
 })
 
 const NewCourseDialog: React.FC<newCourseDialogProps> = ({
@@ -72,7 +72,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         const formData = {
             name: newCourseName,
             description: newCourseDescription,
-            duration: newCourseDuration,
+            // duration: newCourseDuration,
         }
 
         const result = courseSchema.safeParse(formData)
@@ -121,20 +121,20 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         }
     }
 
-    const handleDurationChangeWithValidation = (e: React.ChangeEvent<HTMLInputElement>) => {
-        handleNewCourseDurationChange(e)
-        // Real-time validation for duration
-        const result = courseSchema.shape.duration.safeParse(e.target.value)
-        if (!result.success) {
-            setValidationErrors(prev => ({...prev, duration: result.error.errors[0].message}))
-        } else {
-            setValidationErrors(prev => {
-                const newErrors = {...prev}
-                delete newErrors.duration
-                return newErrors
-            })
-        }
-    }
+    // const handleDurationChangeWithValidation = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     handleNewCourseDurationChange(e)
+    //     // Real-time validation for duration
+    //     const result = courseSchema.shape.duration.safeParse(e.target.value)
+    //     if (!result.success) {
+    //         setValidationErrors(prev => ({...prev, duration: result.error.errors[0].message}))
+    //     } else {
+    //         setValidationErrors(prev => {
+    //             const newErrors = {...prev}
+    //             delete newErrors.duration
+    //             return newErrors
+    //         })
+    //     }
+    // }
 
     const resetForm = () => {
         setValidationErrors({}) 
@@ -203,7 +203,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         return (
             newCourseName.trim() && 
             newCourseDescription.trim() && 
-            newCourseDuration.trim() &&
+            // newCourseDuration.trim() &&
             Object.keys(validationErrors).length === 0
         )
     }
@@ -291,14 +291,14 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     return (
         <DialogContent className="max-w-2xl text-foreground">
             <DialogHeader className="text-left">
-                <DialogTitle className="text-left">
+                <DialogTitle className="text-left text-[21px] ml-1">
                     Create New Course
                 </DialogTitle>
             </DialogHeader>
 
             <ScrollArea className="max-h-[60vh] px-1">
-                <div className="space-y-5 py-4 pr-4">
-                    <div className="text-left ml-1">
+                <div className="space-y-5 py-4 pr-2">
+                    <div className="text-left">
                         <Label htmlFor="name" className="text-[1rem]">
                             Course Name *
                         </Label>
@@ -306,7 +306,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             type="text"
                             id="name"
                             placeholder="Enter course name"
-                            className="text-[0.95rem]"
+                            className="text-[0.95rem] ml-1 bg-background-secondary"
                             value={newCourseName}
                             onChange={handleNameChangeWithValidation}
                             required
@@ -316,7 +316,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         )}
                     </div>
 
-                    <div className="text-left ml-1">
+                    <div className="text-left">
                         <Label 
                             htmlFor="description" 
                             className="text-[1rem]"
@@ -326,7 +326,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         <Textarea
                             id="description"
                             placeholder="Enter course description"
-                            className="text-[0.95rem] mt-2"
+                            className="text-[0.95rem] mt-2 ml-1 bg-background-secondary"
                             value={newCourseDescription}
                             onChange={handleDescriptionChangeWithValidation}
                             rows={3}
@@ -337,10 +337,10 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         )}
                     </div>
 
-                    <div className="text-left ml-1">
+                    {/* <div className="text-left">
                         <Label 
                             htmlFor="duration" 
-                            className="text-[1rem]"
+                            className="text-[1rem] text-bold"
                         >
                             Duration (weeks) *
                         </Label>
@@ -348,7 +348,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                             type="number"
                             id="duration"
                             placeholder="e.g., 12"
-                            className="text-[0.95rem]"
+                            className="text-[0.95rem] ml-1 bg-background-secondary"
                             value={newCourseDuration}
                             onChange={handleDurationChangeWithValidation} // ✅ Add validation handler
                             min="1"
@@ -357,7 +357,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                         {validationErrors.duration && (
                             <p className="text-sm text-red-500 mt-1">{validationErrors.duration}</p>
                         )}
-                    </div>
+                    </div> */}
 
                     {/* <div className="text-left">
                         <Label>Collaborator:</Label>
@@ -606,9 +606,9 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                 </div>
             </ScrollArea>
 
-            <DialogFooter className="sm:justify-end">
+            <DialogFooter className="sm:justify-end gap-4">
                 <DialogClose asChild>
-                    <Button variant={"destructive"} >
+                    <Button className="text-primary border border-primary bg-grey-light hover:bg-grey-light">
                         Cancel
                     </Button>
                 </DialogClose>

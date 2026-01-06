@@ -75,7 +75,7 @@ export function SearchBox(props: SearchBoxProps) {
                   setShowSuggestions(true);
                 }
               }}
-              className={cn(inputWidth)}
+              className={cn(inputWidth, "bg-background-secondary")}
               autoComplete="off"
             />
             {searchQuery && (
