@@ -7,22 +7,44 @@ import{UseFeedbackFormProps,FeedbackFormResponse} from '@/hooks/hookType'
 
 export const formSchema = z.object({
     section: z.array(
-        z.object({
-            id: z.number(),
-            question: z.string(),
-            options: z.record(z.string(), z.string()),
-            typeId: z.number(),
-            isRequired: z.boolean(),
-            answer: z
-                .union([z.string(), z.array(z.string()), z.date()])
-                .optional(),
-        })
+        z
+            .object({
+                id: z.number(),
+                question: z.string(),
+                options: z.record(z.string(), z.string()),
+                typeId: z.number(),
+                isRequired: z.boolean(),
+                answer: z
+                    .union([z.string(), z.array(z.string()), z.date()])
+                    .optional()
+                    .nullable(),
+            })
+            .superRefine((data, ctx) => {
+                if (data.isRequired) {
+                    if (
+                        data.answer === undefined ||
+                        data.answer === null ||
+                        data.answer === ''
+                    ) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: `Question "${data.question}" is required.`,
+                            path: [`${data.id}`, 'answer'],
+                        })
+                    }
+                    if (Array.isArray(data.answer) && data.answer.length === 0) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            message: `Question "${data.question}" is required.`,
+                            path: [`${data.id}`, 'answer'],
+                        })
+                    }
+                }
+            })
     ),
 })
 
 export type FormSchema = z.infer<typeof formSchema>
-
-
 
 export const useFeedbackForm = ({
     moduleId,
@@ -122,6 +144,7 @@ export const useFeedbackForm = ({
             })
             return false
         } finally {
+            //   setTimeout(() => setLoading(false), 15000);
             setLoading(false)
         }
     }

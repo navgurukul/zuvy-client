@@ -1,4 +1,5 @@
 import { toast } from '@/components/ui/use-toast'
+import { db } from '@/lib/indexDb'
 import { api } from '@/utils/axios.config'
 // import axios from 'axios'
 
@@ -8,7 +9,6 @@ export const Logout = async () => {
     const access_token = localStorage.getItem('access_token')
 
     try {
-        // console.log('access_token', access_token)
         // const response = await axios.post(
         //     `${mainUrl}/auth/logout`,
         //     {}, // empty body
@@ -29,6 +29,7 @@ export const Logout = async () => {
 
         // Clear localStorage first
         localStorage.clear()
+        db.permissions.clear()
 
         // Delete the cookie
         document.cookie =

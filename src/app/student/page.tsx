@@ -14,6 +14,10 @@ const Page = () => {
       const isLoginFirst = localStorage.getItem('isLoginFirst');
       setShowAnnouncement(!!isLoginFirst);
     }
+    if (typeof window !== 'undefined') {
+      const isLoginFirst = localStorage.getItem('isLoginFirst');
+      setShowAnnouncement(!!isLoginFirst);
+    }
   }, []);
 
   const handleCloseAnnouncement = () => {
@@ -29,6 +33,7 @@ const Page = () => {
       localStorage.removeItem('isLoginFirst');
     }
   };
+
 
   if (!isClient) {
     return (

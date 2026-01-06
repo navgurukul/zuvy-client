@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useCallback, useRef, useEffect } from 'react'
@@ -7,6 +8,8 @@ import {
     EditorComponent,
     ThemeProvider,
     useActive,
+    useCommands,
+    useEditorEvent,
 } from '@remirror/react'
 import {
     BoldExtension,
@@ -24,17 +27,56 @@ import {
     ListItemExtension,
 } from 'remirror/extensions'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { api } from "@/utils/axios.config"
 import { Toolbar } from './Toolbar'
 import './remirror-editor.css'
 import useWindowSize from '@/hooks/useHeightWidth'
 import { useThemeStore } from '@/store/store'
+import {RemirrorTextEditorProps} from "@/components/remirror-editor/componentRemirrorType"
+import { toast } from '@/components/ui/use-toast'
 
-interface RemirrorTextEditorProps {
-    initialContent: any
-    setInitialContent: (content: any) => void
-    preview?: boolean
-    hideBorder?: boolean
-    assignmentSide?: boolean
+// Image compression utility
+const compressImage = (file: File, maxWidth = 800, quality = 0.6): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            const img = new Image()
+            img.onload = () => {
+                const canvas = document.createElement('canvas')
+                let width = img.width
+                let height = img.height
+
+                // Calculate new dimensions
+                if (width > maxWidth) {
+                    height = (height * maxWidth) / width
+                    width = maxWidth
+                }
+
+                canvas.width = width
+                canvas.height = height
+
+                const ctx = canvas.getContext('2d')
+                if (!ctx) {
+                    reject(new Error('Could not get canvas context'))
+                    return
+                }
+
+                ctx.drawImage(img, 0, 0, width, height)
+
+                // Convert to compressed base64 with lower quality
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality)
+                
+                console.log('Original size:', (e.target?.result as string).length / 1024, 'KB')
+                console.log('Compressed size:', compressedBase64.length / 1024, 'KB')
+                
+                resolve(compressedBase64)
+            }
+            img.onerror = () => reject(new Error('Failed to load image'))
+            img.src = e.target?.result as string
+        }
+        reader.onerror = () => reject(new Error('Failed to read file'))
+        reader.readAsDataURL(file)
+    })
 }
 
 // Create empty content structure
@@ -82,6 +124,68 @@ const CodeBlockHelper = () => {
             </p>
         </div>
     )
+}
+
+// Custom hook to handle paste events
+const usePasteImageHandler = () => {
+    const commands = useCommands();
+
+    useEditorEvent('paste', (event) => {
+        const clipboard = event.clipboardData;
+        if (!clipboard) return false;
+
+        const items = Array.from(clipboard.items);
+        const imageItems = items.filter(
+            item => item.kind === "file" && item.type.startsWith("image/")
+        );
+
+        // Agar image nahi hai → normal paste allow
+        if (imageItems.length === 0) return false;
+
+        event.preventDefault();
+
+        const uploadImages = async () => {
+            try {
+                for (const item of imageItems) {
+                    const file = item.getAsFile();
+                    if (!file) continue;
+
+                    const formData = new FormData();
+                    formData.append("images", file, file.name);
+
+                    const res = await api.post(
+                        "/Content/curriculum/upload-images",
+                        formData,
+                        {
+                            headers: { "Content-Type": "multipart/form-data" },
+                        }
+                    );
+
+                    const url = res?.data?.urls?.[0];
+                    if (url) {
+                        commands.insertImage({
+                            src: url,
+                            alt: "pasted image",
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Paste image upload failed:", error);
+            }
+        };
+
+        uploadImages();
+        return true;
+    });
+};
+
+
+
+
+
+const EditorWithPasteHandler = () => {
+    usePasteImageHandler()
+    return null
 }
 
 export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
@@ -210,9 +314,12 @@ export const RemirrorTextEditor: React.FC<RemirrorTextEditorProps> = ({
                     placeholder="Start typing..."
                 >
                     {!preview && (
-                        <div className="bg-white">
-                            <Toolbar />
-                        </div>
+                        <>
+                            <EditorWithPasteHandler />
+                            <div className="bg-white">
+                                <Toolbar />
+                            </div>
+                        </>
                     )}
 
                     <ScrollArea

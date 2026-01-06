@@ -53,22 +53,29 @@ export function DataTablePagination<TData>({
     }, [currentPage, position, totalStudents])
 
     return (
-        <div className="flex items-center justify-end mt-2 px-2 gap-x-2">
+        <div className="flex items-center justify-end mt-2 px-2 gap-x-2 mb-2">
             <p className="text-sm text-gray-600 font-medium">Items Per Page</p>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button className='border border-input bg-background text-gray-600 hover:border-[rgb(81,134,114)]'>
+                    <Button className='border border-input bg-background-secondary text-gray-600 hover:text-primary-foreground'>
                         {position} <ChevronDown className="ml-2" size={15} />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-full">
+                <DropdownMenuContent className="w-full" align="start">
                     <DropdownMenuLabel>Rows</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup
                         value={position}
+                        // onValueChange={(newLimit) => {
+                        //     updateURLParams(1, newLimit) 
+                        // }}
+
+
                         onValueChange={(newLimit) => {
-                            updateURLParams(1, newLimit) // reset to page 1 on page size change
+                            const newPage = Math.ceil(((currentPage - 1) * +position + 1) / +newLimit);
+                            updateURLParams(newPage, newLimit);
                         }}
+
                     >
                         {ROWS_PER_PAGE.map((rows) => (
                             <DropdownMenuRadioItem key={rows} value={rows}>

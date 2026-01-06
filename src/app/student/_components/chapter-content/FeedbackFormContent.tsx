@@ -26,8 +26,10 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFeedbackForm, formSchema } from '@/hooks/useFeedbackForm'
-import {FeedbackFormContentProps,FeedbackQuestion} from '@/app/student/_components/chapter-content/componentChapterType'
+import {FeedbackFormContentProps,FeedbackQuestion,QuestionItem} from '@/app/student/_components/chapter-content/componentChapterType'
 import useWindowSize from '@/hooks/useHeightWidth'
+import {FeedbackFormSkeleton} from "@/app/student/_components/Skeletons";
+import { toast } from '@/components/ui/use-toast'
 
 const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     chapterDetails,
@@ -64,6 +66,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             },
         })
 
+
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -80,25 +83,36 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
+            const result = formSchema.safeParse({ section: questions })
+            if (!result.success) {
+                result.error.errors.forEach((error) => {
+                    toast({
+                        title: 'Error Submitting Feedback',
+                        description: error.message,
+                        variant: 'destructive',
+                    })
+                })
+                return
+            }
+
             const formData = {
                 section: questions.map((q) => ({
-                  ...q,
-                  answer:
-                    q.typeId === 1
-                      ? (parseInt(q.answer) + 1).toString()
-                      : q.answer || null,
+                    ...q,
+                    answer:
+                        q.typeId === 1
+                            ? (parseInt(q.answer) + 1).toString()
+                            : q.answer || null,
                 })),
-              };
+            }
             await submitForm(formData)
         } catch (error) {
             console.error('Form submission error:', error)
         }
     }
 
-    if (loading) {
-        return <div>Loading...</div>
+      if (loading) {
+        return <FeedbackFormSkeleton/>;
     }
-
     const isCompleted = status === 'Completed'
 
     return (
@@ -124,13 +138,18 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
             </div>
 
             <div className="space-y-8 ">
-                {questions?.map((item, index) => (
+                {questions?.map((item:QuestionItem , index:number) => (
                     <div key={item.id} className="space-y-3">
-                        <div className="flex items-start">
+                        <div className="flex items-center">
                             <span className="mr-2 text-sm">{index + 1}.</span>
                             <span className="font-bold text-sm">
                                 {item.question}
                             </span>
+                            {item.isRequired && (
+                                <span className="text-red-500 text-xs ml-2">
+                                    (Required)
+                                </span>
+                            )}
                         </div>
 
                         {/* Radio buttons (typeId: 1) */}
@@ -236,7 +255,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                         {Object.entries(item.options).map(
                                             ([key, value]) => {
                                                 const currentAnswers =
-                                                    (item.answer as string[]) ||
+                                                    (item.answer as unknown as string[]) ||
                                                     []
                                                 return (
                                                     <div
@@ -331,7 +350,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                             setQuestions(updatedQuestions)
                                         }}
                                         placeholder="Type your answer here..."
-                                        className="min-h-[100px] resize-none mt-2 w-full"
+                                        className="min-h-[12rem] resize-none mt-2 ml-5 w-[90%]"
                                     />
                                 )}
                             </>
@@ -424,10 +443,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                                     <div className="flex items-center mt-2">
                                         <Input
                                             type="time"
-                                            value={
-                                                item.formTrackingData?.[0]
-                                                    ?.answer
-                                            }
+                                           value={item.formTrackingData?.[0]?.answer}
                                             disabled
                                             onChange={(e) => {
                                                 const updatedQuestions = [
@@ -467,7 +483,7 @@ const FeedbackFormContent: React.FC<FeedbackFormContentProps> = ({
                 ))}
             </div>
 
-            {isCompleted ? (
+            {isCompleted? (
                 <div className="mt-8 mb-6">
                     <Button
                         type="submit"

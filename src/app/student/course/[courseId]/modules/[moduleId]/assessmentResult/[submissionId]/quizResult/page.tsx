@@ -9,7 +9,8 @@ import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
 import { useQuizResults } from '@/hooks/useQuizResults'
 import { useThemeStore } from '@/store/store'
 import { Button } from '@/components/ui/button'
-
+import {MCQResult} from "@/app/student/course/[courseId]/modules/[moduleId]/assessmentResult/[submissionId]/quizResult/modulesAssessmentQuixResultType"
+import{QuizResultPageSkeleton} from "@/app/student/_components/Skeletons"
 const QuizResults = ({
     params,
 }: {
@@ -44,21 +45,8 @@ const QuizResults = ({
 
     // Show loading state
     if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10 flex items-center justify-center p-6">
-                <div className="text-center bg-card border border-border rounded-2xl p-8 shadow-16dp max-w-md w-full">
-                    <div className="relative mb-6">
-                        <div className="w-16 h-16 bg-primary/10 rounded-full mx-auto flex items-center justify-center">
-                            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                    </div>
-                    <h2 className="text-xl font-bold text-foreground mb-2">Loading Quiz Results</h2>
-                    <p className="text-muted-foreground">Fetching your performance data...</p>
-                </div>
-            </div>
-        )
+     return<QuizResultPageSkeleton/>
     }
-
     // Show error state
     if (error) {
         return (
@@ -186,7 +174,7 @@ const QuizResults = ({
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground font-medium">Points</p>
-                                 <p className="text-2xl font-bold text-foreground">{totalMarks.toFixed(2)}/{maxMarks.toFixed(0)}</p>
+                                <p className="text-2xl font-bold text-foreground">{totalMarks.toFixed(2)}/{Math.ceil(maxMarks)}</p>
                             </div>
                         </div>
                     </div>
@@ -206,7 +194,7 @@ const QuizResults = ({
 
                 {/* Questions */}
                 <div className="space-y-6">
-                    {quizResults?.mcqs.map((result: any, index: number) => (
+                    {quizResults?.mcqs.map((result: MCQResult, index: number) => (
                         <div
                             key={result.quizId}
                             className="bg-card border border-border rounded-2xl shadow-8dp hover:shadow-16dp transition-all duration-300 overflow-hidden"

@@ -1,0 +1,339 @@
+'use client'
+
+import { ColumnDef } from '@tanstack/react-table'
+import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
+import { ellipsis } from '@/lib/utils'
+import {
+    getAllQuizData,
+    getCodingQuestionTags,
+    getmcqdifficulty,
+    getOffset,
+    getPosition,
+    getSelectedMCQOptions,
+    quiz,
+} from '@/store/store'
+import { Edit, Eye, Trash2 } from 'lucide-react'
+import { difficultyColor } from '@/lib/utils'
+
+import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
+import { getDeleteQuizQuestion, getEditQuizQuestion } from '@/store/store'
+import {
+    handleQuizConfirm,
+    handleQuizDelete,
+    handleDeleteQuizModal,
+    // getAllQuizQuestion,
+    // handlerQuizQuestions,
+    filteredQuizQuestions,
+} from '@/utils/admin'
+import {
+    DELETE_QUIZ_QUESTION_CONFIRMATION,
+    OFFSET,
+    POSITION,
+} from '@/utils/constant'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog'
+import CheckboxAndDeleteHandler from '../_components/CheckBoxAndDeleteCombo'
+import { Checkbox } from '@/components/ui/checkbox'
+import PreviewMCQ from '../_components/PreviewMcq'
+import { renderQuestionPreview } from '@/utils/quizHelpers'
+
+export const columns: ColumnDef<quiz>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => {
+            return (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && 'indeterminate')
+                    }
+                    onCheckedChange={(value) =>
+                        table.toggleAllPageRowsSelected(!!value)
+                    }
+                    aria-label="Select all"
+                />
+            )
+        },
+
+        cell: ({ table, row }) => {
+            return (
+                <CheckboxAndDeleteHandler
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => {
+                        row.toggleSelected(!!value)
+                    }}
+                    aria-label="Select row"
+                />
+            )
+        },
+        enableSorting: true,
+    },
+
+    {
+        accessorKey: 'question',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Question Name"
+            />
+        ),
+
+        cell: ({ row }) => {
+            const question = row.original?.quizVariants[0]?.question
+
+            return (
+                <div
+                    className="text-left text-md p-1 w-[460px] text-sm hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis"
+                    style={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                    }}
+                >
+                    {renderQuestionPreview(question)}
+                </div>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'tagId',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="flex text-left"
+                column={column}
+                title="Topic"
+            />
+        ),
+        cell: ({ row }) => {
+            const quiz = row.original
+            const { tags } = getCodingQuestionTags() 
+            
+            // Find tag name from Tag ID
+            const tagName = tags.find(tag => tag.id === quiz.tagId)?.tagName || 'No Topic'
+
+            return (
+                <div className="flex text-left">
+                    <span className="text-foreground rounded-md text-sm font-medium">
+                        {tagName}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'difficulty',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className=""
+                column={column}
+                title="Difficulty"
+            />
+        ),
+        cell: ({ row, table }) => {
+            const difficulty = row.original.difficulty
+
+            return (
+                <p
+                    className={`flex items-center rounded-full border justify-center  ${difficultyColor(
+                        difficulty
+                    )}`}
+                >
+                    {difficulty}
+                </p>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'usage',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-center w-[100px]"
+                column={column}
+                title="Usage"
+            />
+        ),
+        cell: ({ row }) => {
+            const usage = row.original.usage
+            return (
+                <p className={` text-center font-semibold `}>
+                    {usage}
+                </p>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        accessorKey: 'createdAt',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="flex justify-center"
+                column={column}
+                title="Created"
+            />
+        ),
+        cell: ({ row }) => {
+            const quiz = row.original
+            const createdDate = quiz.createdAt
+                ? new Date(quiz.createdAt).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+                : 'N/A'
+
+            return (
+                <div className="flex items-center justify-center">
+                    <span className="text-sm text-foreground">
+                        {createdDate}
+                    </span>
+                </div>
+            )
+        },
+        enableSorting: true,
+    },
+    {
+        id: 'actions1',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title="Preview"
+            />
+        ),
+        cell: ({ row }) => {
+            const quizQuestionId = row.original.id
+            const selectedRows = row.getIsSelected()
+            const { tags, setTags } = getCodingQuestionTags()
+
+            return (
+                <div className="mr-5">
+                    <Dialog>
+                        <DialogTrigger>
+                            {!selectedRows && (
+                                <Eye 
+                                    size={18}
+                                    className="cursor-pointer" 
+                                />
+                            )}
+                        </DialogTrigger>
+                        <DialogContent className="w-full">
+                            <PreviewMCQ
+                                quizQuestionId={quizQuestionId}
+                                assesmentSide={true}
+                                tags={tags}
+                                tagId={row.original.tagId} // Add this line
+                            />
+                        </DialogContent>
+                    </Dialog>
+                </div>
+            )
+        },
+    },
+
+    {
+        id: 'actions2',
+        header: ({ column }) => (
+            <DataTableColumnHeader
+                className="text-[17px]"
+                column={column}
+                title=""
+            />
+        ),
+        cell: ({ row }) => {
+            const quizQuestionid = row.original.id
+            const { setIsEditModalOpen, setIsQuizQuestionId } =
+                getEditQuizQuestion()
+            const editQuizHandler = (id: number) => {
+                setIsEditModalOpen(true)
+                setIsQuizQuestionId(id)
+            }
+            const selectedRows = row.getIsSelected()
+
+            return (
+                <div className="flex">
+                    <div>
+                        {!selectedRows && (
+                            <Edit
+                                onClick={() => editQuizHandler(quizQuestionid)}
+                                className="cursor-pointer mr-5"
+                                size={18}
+                            />
+                        )}
+                    </div>
+                </div>
+            )
+        },
+    },
+    {
+        id: 'actions3',
+
+        cell: ({ row }) => {
+            const quizQuestion = row.original
+            const {
+                isDeleteModalOpen,
+                setDeleteModalOpen,
+                deleteQuizQuestionId,
+                setDeleteQuizQuestionId,
+            } = getDeleteQuizQuestion()
+            const { setStoreQuizData } = getAllQuizData()
+            const { selectedOptions, setSelectedOptions } =
+                getSelectedMCQOptions()
+            const {
+                mcqDifficulty: difficulty,
+                setMcqDifficulty: setDifficulty,
+            } = getmcqdifficulty()
+            const { offset, setOffset } = getOffset()
+            const { position, setPosition } = getPosition()
+            const selectedRows = row.getIsSelected()
+
+            return (
+                <div className="ml-[-30px]">
+                    {!selectedRows && (
+                        <Trash2
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteQuizModal(
+                                    setDeleteModalOpen,
+                                    setDeleteQuizQuestionId,
+                                    quizQuestion
+                                )
+                            }}
+                            className="text-destructive cursor-pointer"
+                            size={18}
+                        />
+                    )}
+                    <DeleteConfirmationModal
+                        isOpen={isDeleteModalOpen}
+                        onClose={() => setDeleteModalOpen(false)}
+                        onConfirm={() => {
+                            handleQuizConfirm(
+                                handleQuizDelete,
+                                setDeleteModalOpen,
+                                deleteQuizQuestionId,
+                                // getAllQuizQuestion,
+                                filteredQuizQuestions,
+                                setStoreQuizData,
+                                selectedOptions,
+                                difficulty,
+                                offset,
+                                position
+                            )
+                        }}
+                        modalText={DELETE_QUIZ_QUESTION_CONFIRMATION}
+                        buttonText="Delete Quiz Question"
+                        input={false}
+                    />
+                </div>
+            )
+        },
+    },
+]

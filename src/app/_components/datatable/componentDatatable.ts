@@ -1,7 +1,7 @@
 import { Column } from "@tanstack/react-table";
 import { Row } from "@tanstack/react-table";
 import { Table } from "@tanstack/react-table";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef,SortingState } from "@tanstack/react-table";
 
 
 // DataTableColumnHeader
@@ -50,12 +50,15 @@ export interface DataTableViewOptionsProps<TData> {
 
 export interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+    data: any
     setSelectedRows?: any
     mcqSide?: boolean
     assignStudents?: string
     adminMcqSide?: boolean
     customTopBar?: React.ReactNode
+    externalSorting?: SortingState
+    setExternalSorting?: (sorting: SortingState) => void
+     getSelectedRowsFunction?: (fn: () => any[], table?: any) => void
 }
 
 export type StudentData = {

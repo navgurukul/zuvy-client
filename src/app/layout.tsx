@@ -16,9 +16,9 @@ export const metadata: Metadata = {
     title: 'Zuvy LMS',
     description: 'A gateway to affordable tech learning ',
     icons: {
-      icon: '/favicon.png',
-    shortcut: '/favicon.png',
-    apple: '/favicon.png',
+        icon: ['/zuvyfaviconLight.ico'],
+        apple: ['/apple-touch-icon.png?v=4'],
+        shortcut: ['/apple-touch-icon.png'],
     },
     manifest: '/site.webmanifest',
 }
@@ -32,7 +32,7 @@ export default function RootLayout({
         <html lang="en" className="light">
             <body
                 className={cn(
-                    'min-h-screen text-center antialiased',
+                    'min-h-screen text-center font-body antialiased',
                     karla.className
                 )}
             >
