@@ -9,17 +9,23 @@ import useWindowSize from '@/hooks/useHeightWidth';
 import { getCleanFileName } from '@/utils/admin';
 import useChapterCompletion from '@/hooks/useChapterCompletion';
 import {EditorDoc,ArticleContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
+import {ArticleSkeleton} from "@/app/student/_components/Skeletons";
+
 
 const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapterComplete }) => {
   const { courseId: courseIdParam, moduleId: moduleIdParam } = useParams();
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
+
   // State management
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [pdfLink, setPdfLink] = useState('');
   const [fileName, setFileName] = useState('');
   const [viewPdf, setViewPdf] = useState(false);
+   const [loading, setLoading] = useState(true);
+ 
+
   const [initialContent, setInitialContent] = useState<{ doc: EditorDoc } | undefined>(
     chapterDetails?.articleContent === null
       ? undefined
@@ -29,6 +35,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
         : { doc: chapterDetails?.articleContent[0] }
       : undefined
   );
+
 
   // Chapter completion hook
   const { isCompleting, completeChapter } = useChapterCompletion({
@@ -86,6 +93,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ chapterDetails, onChapt
     (initialContent?.doc?.content?.[0]?.content?.[0]?.text &&
      initialContent.doc?.content[0].content[0].text !== 'No content has been added yet')
   );
+
+
+useEffect(() => {
+  if (chapterDetails) {
+    setLoading(false)
+  }
+}, [chapterDetails])
+
+    if (loading) {
+    return <ArticleSkeleton/>;
+  }
 
   return (
     <div className={` bg-gradient-to-br from-background via-card-light to-background py-8 px-2 sm:px-0`}>

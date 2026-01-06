@@ -3,7 +3,6 @@ import { useState , useEffect ,  } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Carousel,
   CarouselContent,
@@ -15,12 +14,13 @@ import { Play, RotateCcw, CheckCircle, Video, FileText, BookOpen } from "lucide-
 import Link from "next/link";
 import Image from "next/image";
 import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store';
-import StudentDashboardSkeleton from "@/app/student/_components/StudentDashboardSkeleton";
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
-import {UpcomingEvent,Bootcamp} from '@/app/student/_pages/pageStudentType'
+import {UpcomingEvent,Bootcamp,TopicItem } from '@/app/student/_pages/pageStudentType'
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
+import {formatUpcomingItem} from "@/utils/students"
+import {StudentDashboardSkeleton, CarouselSkeleton} from "@/app/student/_components/Skeletons";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -28,7 +28,7 @@ const StudentDashboard = () => {
   const { isDark } = useThemeStore()
   
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
-  const access_token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  const access_token = localStorage.getItem('access_token')
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const {isStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
   const router = useRouter();
@@ -70,7 +70,7 @@ const StudentDashboard = () => {
 
     if (bootcamp.progress === 0) {
       return (
-        <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" asChild>
+        <Button className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark  " asChild>
           <Link href={`/student/course/${bootcamp.id}`}>
             <Play className="w-4 h-4 mr-2" />
             Start Learning
@@ -99,127 +99,9 @@ const StudentDashboard = () => {
     }
   };
 
-const formatUpcomingItem = (item: any) => {
-  // Helper function to parse and normalize date strings
-  const parseDate = (dateString: any) => {
-    if (!dateString) return null;
-    
-    let parsableDateString = dateString;
-    
-    // Convert "2025-06-27 08:26:00+00" to "2025-06-27T08:26:00+00:00"
-    if (parsableDateString.includes(' ') && parsableDateString.includes('+')) {
-      parsableDateString = parsableDateString.replace(' ', 'T');
-      // Add colon to timezone if missing ("+00" becomes "+00:00")
-      if (parsableDateString.match(/[+-]\d{2}$/)) {
-        parsableDateString += ':00';
-      }
-    }
-    
-    const date = new Date(parsableDateString);
-    return isNaN(date.getTime()) ? null : date;
-  };
-
-  // Helper function to format countdown time
-  const formatCountdown = (diffTime: any, prefix = '') => {
-    const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
-
-    let timeString = '';
-    if (days > 0) {
-      timeString = `${days} day${days > 1 ? 's' : ''}${hours > 0 ? ` ${hours} hr${hours > 1 ? 's' : ''}` : ''}`;
-    } else if (hours > 0) {
-      timeString = `${hours} hour${hours > 1 ? 's' : ''}${minutes > 0 ? ` ${minutes} min${minutes > 1 ? 's' : ''}` : ''}`;
-    } else if (minutes > 0) {
-      timeString = `${minutes} minute${minutes > 1 ? 's' : ''}`;
-    } else {
-      return "Starting soon"; // Return directly without prefix for 0 minutes
-    }
-
-    return prefix ? `${prefix} ${timeString}` : timeString;
-  };
-
-  // Get the appropriate date field based on event type
-  const getStartDate = (item:any) => {
-    if (item.type?.toLowerCase() === 'live class') {
-      return parseDate(item.startTime);
-    } else {
-      return parseDate(item.startDatetime);
-    }
-  };
-
-  const getEndDate = (item:any) => {
-    if (item.type?.toLowerCase() === 'live class') {
-      return parseDate(item.endTime);
-    } else if (item.type?.toLowerCase() === 'assignment') {
-      return parseDate(item.completionDate);
-    } else {
-      return parseDate(item.endDatetime);
-    }
-  };
-
-  const startDate = getStartDate(item);
-  const endDate = getEndDate(item);
-  const now = new Date();
-
-  // If we can't parse the start date, fall back to eventDate
-  if (!startDate) {
-    const eventDate = parseDate(item.eventDate);
-    if (!eventDate) {
-      return "Date not available";
-    }
-    const diffTime = eventDate.getTime() - now.getTime();
-    if (diffTime <= 0) {
-      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event has started";
-    }
-    return formatCountdown(diffTime, "Starts in");
-  }
-
-  const startTime = startDate.getTime();
-  const currentTime = now.getTime();
-
-  // Case 1: start date and time > current date
-  if (startTime > currentTime) {
-    const diffTime = startTime - currentTime;
-    return formatCountdown(diffTime, "Starts in");
-  }
-
-  // Case 2: start date and time < current date & end date & time is not null
-  if (startTime < currentTime && endDate) {
-    const endTime = endDate.getTime();
-    if (endTime > currentTime) {
-      const diffTime = endTime - currentTime;
-      // For live class, show "Ends in" instead of "Deadline in"
-      const prefix = item.type?.toLowerCase() === 'live class' ? "Ends in" : "Deadline in";
-      return formatCountdown(diffTime, prefix);
-    } else {
-      return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event ended";
-    }
-  }
-
-  // Case 3: start date and time < current date & end date & time is null
-  if (startTime < currentTime && !endDate) {
-    // Format the start date for display
-    const options: any = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'UTC'
-    };
-    const formattedDate = startDate.toLocaleDateString('en-US', options);
-    return `Due Date: ${formattedDate}`;
-  }
-
-  // Fallback
-  return "Status unavailable";
-};
-
   if (loading) {
     return <StudentDashboardSkeleton />;
   }
-
   if (error) {
     return (
       <div className="mb-12">
@@ -237,7 +119,7 @@ const formatUpcomingItem = (item: any) => {
     );
   }
 
-
+  console.log('studentData:', studentProfile);
 
   return (
     <div className="mb-12">
@@ -251,6 +133,8 @@ const formatUpcomingItem = (item: any) => {
             What will you be learning today?
           </p>
         </div>
+
+        {/* Zoe Assistant Card */}
         <Card  className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
           <CardContent className="p-0 relative">
             <div 
@@ -296,7 +180,6 @@ const formatUpcomingItem = (item: any) => {
           </CardContent>
         </Card>
 
-
         {/* My Courses Section */}
         <div className="mb-6">
           <h2 className="text-2xl font-heading text-left font-semibold mb-6">My Courses</h2>
@@ -332,7 +215,7 @@ const formatUpcomingItem = (item: any) => {
         {/* Course Cards */}
         <div className="space-y-6 mb-12">
           {filteredBootcamps.map((bootcamp) => (
-            <Card key={bootcamp.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200">
+            <Card key={bootcamp.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card ">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* Course Image */}
@@ -411,36 +294,12 @@ const formatUpcomingItem = (item: any) => {
                 {/* Separator and Upcoming Items - Only for enrolled courses */}
                 {filter === 'enrolled' && (
                   <>
-
+                    <div className="border-t border-border mt-6 mb-6"></div>
                     {/* Upcoming Items */}
-                    {eventsLoading ? (
-                      <Carousel className="w-full group ">
-                        <CarouselContent className="-ml-2">
-                          {[1, 2 ,3].map((index) => (
-                            <CarouselItem key={index} className="pl-2 md:basis-1/3 ">
-                              <div className="w-full border rounded-lg p-3 h-full bg-primary-light animate-pulse">
-                                <div className="flex items-start gap-3">
-                                  <div className="flex-shrink-0 mt-1">
-                                    <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-start justify-between gap-2 mb-1">
-                                      <div className="h-4 bg-muted rounded animate-pulse flex-1"></div>
-                                      <div className="h-5 w-16 bg-muted rounded animate-pulse"></div>
-                                    </div>
-                                    <div className="h-3 bg-muted rounded animate-pulse w-3/4 mb-2"></div>
-                                  </div>
-                                </div>
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </Carousel>
+                    {eventsLoading? (
+                      <CarouselSkeleton />
                                          ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
                      <div>
-                      <div className="border-t border-border mt-6 mb-6"></div>
                        <Carousel className="w-full group">
                         <CarouselContent className="-ml-2">
                           {upcomingEventsData?.events
@@ -448,7 +307,6 @@ const formatUpcomingItem = (item: any) => {
                             .map((item) => {
                             const eventType = mapEventType(item.type);
                             const liveClassStatus = item.status;
-                            console.log(item)
                             return (
                               <CarouselItem key={item.id} className="pl-2 md:basis-1/3  ">
                                 <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
@@ -491,7 +349,6 @@ const formatUpcomingItem = (item: any) => {
                                                 </span>
                                               </Badge>
                                               <p>
-
                                               </p>
                                             </div>
                                           </div>
@@ -506,7 +363,6 @@ const formatUpcomingItem = (item: any) => {
 
                                           {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[14px] font-semibold mr-8 ">Join</span>}
                                           </span>
-
                                         </p>
                                       </div>
                                     </div>
@@ -516,8 +372,14 @@ const formatUpcomingItem = (item: any) => {
                             );
                           })}
                         </CarouselContent>
-                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {(upcomingEventsData?.events?.filter(
+                         (item) => item.bootcampId === bootcamp.id
+                          )?.length || 0) > 3 && (
+                      <>
+                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
+                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
+                      </>
+                    )}
                        </Carousel>
                      </div>                     
                     ) : null}
@@ -527,7 +389,7 @@ const formatUpcomingItem = (item: any) => {
             </Card>
           ))}
         </div>
-
+        
         {filteredBootcamps.length === 0 && (
           <Card className="text-center py-12 shadow-4dp">
             <CardContent>

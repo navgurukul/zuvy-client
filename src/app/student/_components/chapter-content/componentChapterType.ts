@@ -57,6 +57,11 @@ export interface CodingQuestions {
   tagName?: string;
   status: string;
 }
+export interface QuizAndAssignmentResponse {
+  data: {
+    codingProblem: CodingQuestions[];
+  };
+}
 
 export interface CodingChallengeContentProps {
   chapterDetails: {
@@ -125,6 +130,16 @@ export interface FeedbackQuestion {
   }[];
 }
 
+
+export type QuestionItem = {
+    id: number;
+    question: string;
+    options: Record<string, string>;
+    typeId: number;
+    answer?: string | string[];
+    formTrackingData?: any;
+    isRequired: boolean;
+};
 
 
 // LiveClassContent

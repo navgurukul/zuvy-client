@@ -25,7 +25,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
-import Image from 'next/image'
+import { getUserInitials } from '@/utils/common'
+import ProfileDropDown from '@/components/ProfileDropDown'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -39,25 +40,6 @@ const Header = () => {
     useEffect(() => {
         setIsClient(true)
     }, [])
-
-    // Generate user initials from name
-    const getUserInitials = (name: string | undefined): string => {
-        if (!name) return 'JD' // fallback
-
-        const words = name.trim().split(' ')
-        if (words.length >= 2) {
-            // First and last name initials
-            return (
-                words[0].charAt(0) + words[words.length - 1].charAt(0)
-            ).toUpperCase()
-        } else if (words.length === 1) {
-            // Just first name, take first two characters or duplicate first character
-            return words[0].length >= 2
-                ? (words[0].charAt(0) + words[0].charAt(1)).toUpperCase()
-                : (words[0].charAt(0) + words[0].charAt(0)).toUpperCase()
-        }
-        return 'JD' // fallback
-    }
 
     // Hide header on assessment page for security and focus
     if (pathname.includes('/studentAssessment')) {
@@ -102,13 +84,14 @@ const Header = () => {
     // Don't render theme toggle until client-side
     if (!isClient) {
         return (
-            <header className="w-full h-16 px-4 sm:px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp">
+            <header className="w-full h-16 px-4 sm:px-6 font-semibold flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50 ">
                 {/* Left - Logo and Navigation */}
                 <div className="flex items-center gap-2 sm:gap-4">
                     <div
                         className="flex items-center cursor-pointer"
                         onClick={handleLogoClick}
                     >
+                        
                         <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
                     </div>
 
@@ -144,7 +127,7 @@ const Header = () => {
                     <div className="w-9 h-9"></div>{' '}
                     {/* Placeholder for theme toggle */}
                     {/* Student Avatar with Dropdown */}
-                    <DropdownMenu>
+                    {/* <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Avatar className="h-7 w-7 sm:h-8 sm:w-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
                                 <AvatarImage
@@ -212,31 +195,33 @@ const Header = () => {
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
-                    </AlertDialog>
+                    </AlertDialog> */}
+                    <ProfileDropDown
+                        studentData={studentData}
+                        handleLogoutClick={handleLogoutClick}
+                        showLogoutDialog={showLogoutDialog}   
+                        setShowLogoutDialog={setShowLogoutDialog}
+                        handleLogout={handleLogout}
+                    />
                 </div>
             </header>
         )
     }
 
     return (
-        <header className="w-screen h-16 px-4 sm:px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp">
+        <header className="w-screen h-16 px-4 sm:px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp sticky top-0 z-50">
             {/* Left - Logo and Navigation */}
             <div className="flex items-center gap-2 sm:gap-4">
                 <div
-                    className="flex items-center cursor-pointer"
+                    className="flex items-center cursor-pointer mb-1"
                     onClick={handleLogoClick}
                 >
-                    <Image
-                        src={
-                            isDark
-                                ? '/zuvy-logo-horizontal-dark (1).png'
-                                : '/zuvy-logo-horizontal (1).png'
-                        }
-                        alt="Zuvy Logo"
-                        className="mx-auto"
-                        width={72}
-                        height={72}
-                    />
+                    {isDark ? 
+                  <img src={'/zuvy-logo-horizontal-dark.png'} alt="Zuvy" className="h-7" />
+
+                :     
+                    <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
+                }
                 </div>
 
                 {/* Course Navigation Buttons */}
@@ -295,7 +280,7 @@ const Header = () => {
                                     alt="Student"
                                 />
                             ) : (
-                                <AvatarFallback className="font-medium">
+                                <AvatarFallback className="font-medium text-white">
                                     {getUserInitials(studentData?.name)}
                                 </AvatarFallback>
                             )}
@@ -326,7 +311,7 @@ const Header = () => {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={handleLogoutClick}
-                            className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600"
+                            className="text-red-600 hover:bg-primary focus:text-popover cursor-pointer"
                         >
                             Logout
                         </DropdownMenuItem>

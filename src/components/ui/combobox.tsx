@@ -106,25 +106,25 @@ export function Combobox({
                                 value={item.value}
                                 disabled={item.value === batchChangeData.value}
                                 onSelect={(currentValue) => {
-                                    setValue(
-                                        currentValue === value
-                                            ? ''
-                                            : currentValue
-                                    )
+                                    setValue(currentValue === value ? '' : currentValue)
                                     setOpen(false)
                                     onChange(currentValue)
                                 }}
                                 aria-selected={value === item.value}
-                            >
+                                className={cn('cursor-pointer',
+                                    value === item.value && 'bg-orange-500 text-accent-foreground',
+                                    // 'data-[selected]:bg-gray-100 data-[selected]:text-black'
+                                    `data-[selected]:${value === item.value ? 'bg-orange-500' : 'bg-gray-100'} data-[selected]:${value === item.value ? 'text-accent-foreground' : 'text-black'}`,
+
+                                )}
+                                >
+                                <div className="flex items-center text-start gap-2">
                                 <Check
-                                    className={
-                                        value === item.value
-                                            ? 'opacity-100'
-                                            : 'opacity-0'
-                                    }
-                                    aria-hidden={!value === item.value}
+                                    className={value === item.value ? 'opacity-100' : 'opacity-0'}
+                                    aria-hidden={value !== item.value}
                                 />
                                 {item.label}
+                                </div>
                             </CommandItem>
                         ))}
                     </CommandGroup>

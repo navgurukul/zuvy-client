@@ -6,6 +6,46 @@ import {
 import { Check, ChevronDown } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
+function Selector({
+    options,
+    selectedOptions,
+    handleOptionClick,
+}: {
+    options: any[]
+    selectedOptions: any[]
+    handleOptionClick: (option: any) => void
+}) {
+    return (
+        <div className="space-y-2">
+            {options.map((option: any) => (
+                <div
+                    key={option.value}
+                    className={`flex items-center justify-between gap-2 p-2 hover:bg-accent hover:text-accent-foreground cursor-pointer rounded-md
+                        ${
+                            selectedOptions.some(
+                                (selected: any) =>
+                                    selected.value === option.value
+                            ) && 'bg-accent text-accent-foreground'
+                        }`}
+                    onClick={() => handleOptionClick(option)}
+                >
+                    <span>{option.label}</span>
+                    <Check
+                        className={`h-5 w-5 ${
+                            selectedOptions.some(
+                                (selected: any) =>
+                                    selected.value === option.value
+                            )
+                                ? 'opacity-100'
+                                : 'opacity-0'
+                        }`}
+                    />
+                </div>
+            ))}
+        </div>
+    )
+}
+
 export default function MultiSelector({
     selectedCount,
     options,
@@ -23,56 +63,44 @@ export default function MultiSelector({
         <>
             <Popover>
                 <PopoverTrigger asChild>
-                    <button className="flex w-full items-center text-lg justify-between rounded-md border border-[rgb(81,134,114)] px-4 py-2 text-left focus:outline-none">
-                        <span className="truncate text-[rgb(81,134,114)]">
-                            {/* {selectedOptions.length === 1 &&
-                            (selectedOptions[0].value == -1 ||
-                                selectedOptions[0].value == 'None')
-                                ? selectedOptions[0].label
-                                : selectedCount > 0
-                                ? `${selectedCount} ${type} Selected`
-                                : 'Select options'} */}
+                    <button className="flex w-full items-center text-sm justify-between rounded-md border border-border px-4 py-2 mt-2 text-left focus:outline-none">
+                        <span className="truncate text-foreground">
                             {selectedCount > 0
                                 ? selectedCount === 1
                                     ? selectedOptions[0].label
                                     : `${selectedCount} ${type} Selected`
                                 : type === 'Topic' || type === 'Topics'
-                                    ? 'All Topics'
-                                    : 'All Difficulty'}
-
+                                ? 'All Topics'
+                                : 'All Difficulty'}
                         </span>
-                        <ChevronDown className="ml-2 h-5 w-5 text-[rgb(81,134,114)]" />
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full lg:w-[250px] p-4 border border-[rgb(81,134,114)] text-[rgb(81,134,114)]">
-                    <ScrollArea
-                        className={`${(type === 'Topic' || type === 'Topics') &&
-                            'h-[300px]'
-                            } pr-4`}
-                        type="hover"
-                        style={{
-                            scrollbarWidth: 'none', // Firefox
-                            msOverflowStyle: 'none', // IE and Edge
-                        }}
-                    >
-                        <div className="space-y-2">
-                            {options.map((option: any) => (
-                                <div
-                                    key={option.value}
-                                    className="flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                                    onClick={() => handleOptionClick(option)}
-                                >
-                                    <span>{option.label}</span>
-                                    {selectedOptions.some(
-                                        (selected: any) =>
-                                            selected.value === option.value
-                                    ) && (
-                                        <Check className="h-5 w-5 text-[rgb(81,134,114)]" />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </ScrollArea>
+                <PopoverContent
+                    className={`w-full lg:w-[180px] p-2 shadow-4bp text-sm`}
+                >
+                    {type === 'Topic' || type === 'Topics' ? (
+                        <ScrollArea
+                            className={`h-[300px] pr-4`}
+                            type="hover"
+                            style={{
+                                scrollbarWidth: 'none', // Firefox
+                                msOverflowStyle: 'none', // IE and Edge
+                            }}
+                        >
+                            <Selector
+                                options={options}
+                                selectedOptions={selectedOptions}
+                                handleOptionClick={handleOptionClick}
+                            />
+                        </ScrollArea>
+                    ) : (
+                        <Selector
+                            options={options}
+                            selectedOptions={selectedOptions}
+                            handleOptionClick={handleOptionClick}
+                        />
+                    )}
                 </PopoverContent>
             </Popover>
         </>

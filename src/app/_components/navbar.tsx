@@ -1,105 +1,152 @@
 'use client'
-import Link from 'next/link'
-import Image from 'next/image'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import Sidebar from './sidebar'
-import { Bell, Menu, Search } from 'lucide-react'
-import { getUser } from '@/store/store'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { MobileNavbarRoutes } from './navbar-routes'
+import Link from 'next/link'
+import {
+    Layers,
+    Settings,
+    Database,
+} from 'lucide-react'
+import Image from 'next/image'
+import { cn } from '@/lib/utils'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { useLazyLoadedStudentData } from '@/store/store'
-import NavbarNotifications from './navbar-notifications'
+import { Button } from '@/components/ui/button'
+import { Logout } from '@/utils/logout'
+import { useThemeStore } from '@/store/store'
+import { Moon, Sun } from 'lucide-react'
+import ProfileDropDown from '@/components/ProfileDropDown'
+import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
+import { getPermissions } from '@/lib/GetPermissions'
+import { Spinner } from '@/components/ui/spinner'
+
 //Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
-    const { user, setUser } = getUser()
-    const rolesList =
-        user && (user.rolesList.length === 0 ? 'student' : user.rolesList[0])
+    const pathname = usePathname()
+    const role = pathname.split('/')[1]
+    // const role = user.rolesList[0]
+    const [permissions, setPermissions] = useState<Record<string, boolean>>({})
+    const { isDark, toggleTheme } = useThemeStore()
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false)
+    const [loading, setLoading] = useState(true);
+
+    const handleLogoutClick = () => {
+        setShowLogoutDialog(true)
+    }
+
+    const handleLogout = async () => {
+        setShowLogoutDialog(false)
+        await Logout()
+    }
+
+    const routes = [
+        {
+            name: 'Course Studio',
+            href: `/${role}/courses`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/courses` || pathname.startsWith(`/${role}/courses/`),
+        },
+        {
+            name: 'Question Bank',
+            href: `/${role}/content-bank`,
+            icon: Database,
+            active: `/${role}/content-bank`,
+        },
+        {
+            name: 'Roles and Permissions',
+            href: `/${role}/settings`,
+            icon: Settings,
+            active: `/${role}/settings`,
+        },
+    ]
+
+    useEffect(() => {
+        (async () => {
+            const perms = await getPermissions();
+            setPermissions(perms);
+        })().then(() => setLoading(false));
+    }, [permissions]);
 
     return (
-        <nav className="bg-muted fixed top-0 left-0 right-0 z-40">
-            <div className="flex items-center justify-between border-green-[#2f433a]">
-                <div className="flex items-center">
-                    <Sheet>
-                        <SheetTrigger>
-                            <div className="bg-white p-4 rounded-r-lg">
-                                <Menu />
-                            </div>
-                        </SheetTrigger>
-                        <SheetContent
-                            side="left"
-                            className="w-[280px] sm:w-[540px]"
-                        >
-                            <Sidebar />
-                        </SheetContent>
-                    </Sheet>
-                    <Link href={`/${rolesList}`} className="flex z-40 ">
-                        <Image
-                            src={'/logo.PNG'}
-                            alt="logo"
-                            // className="py-2"
-                            width={'70'}
-                            height={'70'}
-                        />
+        <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
+            <div className="flex h-16 items-center justify-between px-6">
+                <div className="flex items-center gap-8">
+                    {/* Logo and Brand */}
+                    <Link href={`/${role}/courses`} className="flex items-center space-x-3">
+                          <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
+
+                    {/* Navigation Items */}
+                    <nav className="flex items-center space-x-1">
+                        {routes.map((item) => {
+                            const Icon = item.icon
+
+                            const isActive =
+                                typeof item.active === 'function'
+                                    ? item.active(pathname)
+                                    : item.active === pathname
+
+                            // Check permissions for Question Bank and Roles and Permissions
+                            if (item.name === 'Question Bank' && !permissions.viewQuestion) {
+                                return null;
+                            }
+                            if (item.name === 'Roles and Permissions' && !permissions.viewRolesAndPermission) {
+                                return null;
+                            }
+
+                            return (
+                                <>
+                                    {item.name !== 'Question Bank' && (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={cn(
+                                                'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
+                                                isActive
+                                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                                            )}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            {loading? <Spinner />: <span className='' >{item.name}</span>}
+                                        </Link>
+                                    )}
+                                    {item.name === 'Question Bank' && permissions.viewQuestion && (
+                                        loading ? <Spinner /> : <QuestionBankDropdown/>
+                                    )}
+                                </>
+                            )
+                        })}
+                    </nav>
                 </div>
-                <div className="mr-2 px-2">
-                    <div className="sm:items-center space-x-4 hidden md:flex">
-                        {/* <Search /> */}
-                        {/* <Bell /> */}
-                        {/* {rolesList === 'student' && <NavbarNotifications />} */}
-                        <Link href="/profile">
-                            <Avatar>
-                                <AvatarImage
-                                    src={studentData?.profile_picture}
-                                    alt="user profile pic"
-                                />
-                                <AvatarFallback>
-                                    {
-                                        <Image
-                                            src="https://avatar.iran.liara.run/public/boy?username=Ash"
-                                            alt="user_profile_pic"
-                                            width={30}
-                                            height={30}
-                                        />
-                                    }
-                                </AvatarFallback>
-                            </Avatar>
-                        </Link>
-                    </div>
-                    <div className="md:hidden">
-                        <Link href="/profile">
-                            <Avatar>
-                                <AvatarImage
-                                    src={studentData?.profile_picture}
-                                />
-                                <AvatarFallback>
-                                    {
-                                        <Image
-                                            src="https://avatar.iran.liara.run/public/boy?username=Ash"
-                                            alt="user_profile_pic"
-                                            width={30}
-                                            height={30}
-                                        />
-                                    }
-                                </AvatarFallback>
-                            </Avatar>
-                        </Link>
-                        {/* <Sheet>
-                            <SheetTrigger>
-                            </SheetTrigger> */}
-                        {/* <SheetContent
-                                side="right"
-                                className="w-[280px] sm:w-[540px]"
-                            >
-                                <MobileNavbarRoutes />
-                            </SheetContent> */}
-                        {/* </Sheet> */}
-                    </div>
+
+                {/* Right - Theme Switch and Avatar with Dropdown */}
+                <div className="flex items-center gap-2 sm:gap-3 text-left">
+                    {/* <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleTheme}
+                        className="w-8 h-8 sm:w-9 sm:h-9 p-0 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                        {isDark ? (
+                            <Sun className="h-4 w-4" />
+                        ) : (
+                            <Moon className="h-4 w-4" />
+                        )}
+                    </Button> */}
+
+                    {/* Profile Avatar with Dropdown */}
+                    <ProfileDropDown
+                        studentData={studentData}
+                        handleLogoutClick={handleLogoutClick}
+                        showLogoutDialog={showLogoutDialog}
+                        setShowLogoutDialog={setShowLogoutDialog}
+                        handleLogout={handleLogout}
+                    />
                 </div>
             </div>
-            {/* </MaxWidthWrapper> */}
         </nav>
     )
 }

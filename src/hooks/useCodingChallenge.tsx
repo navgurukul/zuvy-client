@@ -18,6 +18,7 @@ const editorLanguages: CodingLanguage[] = [
     { lang: 'java', id: 96 },
     { lang: 'python', id: 100 },
     { lang: 'javascript', id: 102 },
+    { lang: 'cpp', id: 105 },
 ];
 
 const initialState: CodingChallengeState = {
@@ -127,7 +128,7 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
             }
         } catch (error) {
             // No previous submission found, this is fine
-            console.log('No previous submission found');
+            console.error('No previous submission found');
         }
     }, [questionId]);
 

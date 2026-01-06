@@ -25,20 +25,11 @@ export interface Topic {
   items: TopicItem[];
 }
 
-export interface Module {
-  id: string;
-  name: string;
-  description: string;
-   isLock: boolean;
-  progress: number;
-  topics: Topic[];
-}
-
 export interface Course {
   id: string;
   name: string;
-  modules: Module[];
 }
+
 
 
 
@@ -95,4 +86,17 @@ export interface Bootcamp {
     profilePicture: string | null;
   };
   upcomingEvents: UpcomingEvent[];
+}
+
+
+export interface Module{
+    id: number | undefined;
+    order: any;
+    name: any;
+    ChapterId: any;
+    projectId: any;
+    typeId: number;
+    isLock: boolean;
+    progress: number;
+    description: string;
 }

@@ -1,10 +1,9 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
-    SortingState,
     VisibilityState,
     flexRender,
     getCoreRowModel,
@@ -16,7 +15,6 @@ import {
     useReactTable,
 } from '@tanstack/react-table'
 
-import { DataTablePagination } from './data-table-pagination'
 import { DataTableToolbar } from './data-table-toolbar'
 import {
     Table,
@@ -26,11 +24,12 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { getBatchData, getIsRowSelected } from '@/store/store'
-import McqDeleteVaiarntComp from '@/app/admin/resource/_components/McqDeleteComponent'
-import AddLiveClasstoChapter from '@/app/admin/courses/[courseId]/module/_components/AddLiveClasstoChapter'
-import {DataTableProps,StudentData} from "@/app/_components/datatable/componentDatatable"
-
+import { getIsRowSelected } from '@/store/store'
+import AddLiveClasstoChapter from '@/app/[admin]/courses/[courseId]/module/_components/AddLiveClasstoChapter'
+import {
+    DataTableProps,
+    StudentData,
+} from '@/app/_components/datatable/componentDatatable'
 
 export function DataTable<TData, TValue>({
     columns,
@@ -40,7 +39,12 @@ export function DataTable<TData, TValue>({
     assignStudents,
     adminMcqSide,
     customTopBar,
-}: DataTableProps<TData, TValue>) {
+    onSortingChange,
+    getSelectedRowsFunction,
+}: DataTableProps<TData, TValue> & {
+    onSortingChange?: (field: string, direction: 'asc' | 'desc') => void;
+    getSelectedRowsFunction?: (fn: () => any[]) => void;
+}) {
     const [rowSelection, setRowSelection] = React.useState({})
     const { isRowUnSelected, setIsRowUnSelected } = getIsRowSelected()
 
@@ -48,54 +52,76 @@ export function DataTable<TData, TValue>({
         React.useState<VisibilityState>({})
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([])
-    const [sorting, setSorting] = React.useState<SortingState>([])
+
+    // SAFE UPDATE: Only add meta if onSortingChange is provided
+    const columnsWithMeta = useMemo(() => {
+        // If onSortingChange is not provided, return columns as-is (backward compatible)
+        if (!onSortingChange) {
+            return columns
+        }
+        // If onSortingChange is provided, add it to meta
+        return columns.map((col) => ({
+            ...col,
+            meta: {
+                ...col.meta,
+                onSort: onSortingChange,
+            },
+        }))
+    }, [columns, onSortingChange])
+
     const table = useReactTable({
         data: data,
-        columns,
+        columns: columnsWithMeta,
         state: {
-            sorting,
             columnVisibility,
             rowSelection,
             columnFilters,
         },
         enableRowSelection: true,
         onRowSelectionChange: setRowSelection,
-        onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         onColumnVisibilityChange: setColumnVisibility,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getSortedRowModel: getSortedRowModel(),
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
+        manualSorting: onSortingChange ? true : undefined, // Only enable manual sorting if callback provided
     })
+
     const logSelectedRows = () => {
         const selectedRows = table.getSelectedRowModel().rows
         return selectedRows
     }
+
+    // Pass the logSelectedRows function to parent
     useEffect(() => {
-        const selectedRows = table
-            .getSelectedRowModel()
-            .rows.map((row) => row.original)
-        setSelectedRows && setSelectedRows(selectedRows)
-    }, [table.getSelectedRowModel().rows])
+    if (getSelectedRowsFunction) {
+        getSelectedRowsFunction(logSelectedRows, table)
+    }
+}, [getSelectedRowsFunction, table, rowSelection])
+
+    useEffect(() => {
+        // Multiple safety checks
+        try {
+            const selectedRowModel = table?.getSelectedRowModel?.()
+            if (selectedRowModel?.rows?.length !== undefined) {
+                const selectedRows = selectedRowModel.rows.map((row) => row.original)
+                setSelectedRows && setSelectedRows(selectedRows)
+            }
+        } catch (error) {
+            console.warn('Error accessing selected row model:', error)
+            // Reset selected rows on error
+            setSelectedRows && setSelectedRows([])
+        }
+    }, [table?.getSelectedRowModel?.()?.rows?.length]) // More specific dependency
+
     useEffect(() => {
         table.toggleAllRowsSelected(false)
-        setIsRowUnSelected(false) // Reset the state after unselecting
+        setIsRowUnSelected(false)
     }, [isRowUnSelected])
+
     return (
         <div className="space-y-4 relative">
-            {!assignStudents && (
-                <div className="flex flex-col justify-end items-end absolute top-[-111px] right-[250px] ">
-                    {mcqSide && (
-                        <McqDeleteVaiarntComp
-                            table={table}
-                            logSelectedRows={logSelectedRows}
-                        />
-                    )}
-                </div>
-            )}
-        
             {!assignStudents && (
                 <div className="flex items-center justify-between mb-2">
                     <div>{customTopBar}</div>
@@ -104,7 +130,7 @@ export function DataTable<TData, TValue>({
                     </div>
                 </div>
             )}
-            <div className="rounded-md border text-gray-600">
+            <div className="rounded-md border">
                 <Table>
                     <TableHeader className={assignStudents && 'hidden'}>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -120,7 +146,10 @@ export function DataTable<TData, TValue>({
                                                 : flexRender(
                                                       header.column.columnDef
                                                           .header,
-                                                      header.getContext()
+                                                      {
+                                                          ...header.getContext(),
+                                                          onSort: onSortingChange,
+                                                      }
                                                   )}
                                         </TableHead>
                                     )

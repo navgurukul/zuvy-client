@@ -22,11 +22,11 @@ import { getUser, useThemeStore } from '@/store/store'
 import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 
-type Props = {}
 
-function LoginPage({}: Props) {
+
+function LoginPage() {
+    const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
-    const { isDark } = useThemeStore();
     const { user, setUser } = getUser()
     const router = useRouter()
     const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
@@ -99,7 +99,7 @@ function LoginPage({}: Props) {
                 <Image src={image} alt={name} fill className="object-cover" />
             </div>
             <div className="text-left">
-                <div className="text-primary-dark font-bold text-sm">
+                <div className="text-primary-dark font-bold text-md">
                     {name}
                 </div>
                 <div className="text-primary-dark text-sm">{role}</div>
@@ -116,7 +116,7 @@ function LoginPage({}: Props) {
         description: string
     }) => (
         <div className="bg-accent-light p-3 rounded-lg text-center min-w-fit flex-shrink-0">
-            <div className="text-accent-dark font-bold text-lg">{number}</div>
+            <div className="text-accent-dark font-bold text-md">{number}</div>
             <div className="text-accent-dark text-sm">{description}</div>
         </div>
     )
@@ -126,7 +126,7 @@ const handleGoogleSuccess = async (
         credentialResponse: CredentialResponse
     ) => {
         if (!credentialResponse.credential) {
-            toast({
+            toast.error({
                 title: 'Login Failed',
                 description: 'No credential received from Google.',
                 className:
@@ -199,17 +199,13 @@ const handleGoogleSuccess = async (
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     router.push('/student')
-                } else if (userRole === 'admin') {
-                    router.push('/admin/courses')
-                } else if (userRole === 'instructor') {
-                    router.push('/instructor')
                 } else {
-                    router.push(`/${userRole}`)
+                    router.push(`/${userRole}/courses`)
                 }
             }
         } catch (err: any) {
             console.error('Google login error:', err)
-            toast({
+            toast.error({
                 title: 'Login Error',
                 description: `${err.response?.data?.message}. Please contact zuvy support team` || 'Please try again later.',
                 className: `fixed bottom-4 left-1/2 transform -translate-x-1/2 text-start capitalize border border-destructive max-w-lg box-border`,
@@ -222,7 +218,7 @@ const handleGoogleSuccess = async (
     // Handle Google Sign-In failure
     const handleGoogleError = () => {
         console.error('Google login failed')
-        toast({
+        toast.error({
             title: 'Login Failed',
             description: 'Google authentication failed. Please try again.',
             className:
@@ -276,7 +272,7 @@ const handleGoogleSuccess = async (
         if (googleLoginButton) {
             googleLoginButton.click()
         } else {
-            toast({
+            toast.error({
                 title: 'Login Error',
                 description: 'Could not start Google login. Please try again.',
                 className:
@@ -302,13 +298,25 @@ const handleGoogleSuccess = async (
                         <div className="w-full max-w-md md:p-12 p-6 text-center mb-20 md:mb-20 bg-card rounded-lg shadow-8dp border">
                             {/* Logo */}
                             <div className="mb-6">
-                                <Image
-                                    src={isDark ? '/zuvy-logo-horizontal-dark (1).png' : '/zuvy-logo-horizontal (1).png'}
-                                    alt="Zuvy Logo"
-                                    className="mx-auto"
-                                    width={100}
-                                    height={100}
-                                />
+                                {
+                                    isDark ? (
+                                        <Image
+                                            src={'/zuvy-logo-horizontal-dark.png'}
+                                            alt="Zuvy Logo"
+                                            className="mx-auto"
+                                            width={48}  
+                                            height={48}
+                                        />
+                                    ) : (
+                                    <Image
+                                        src={'/zuvy-logo-horizontal.png'}
+                                        alt="Zuvy Logo"
+                                        className="mx-auto"
+                                        width={48}
+                                        height={48}
+                                    />
+                                    )
+                                }
                             </div>
 
                             {/* Headline */}

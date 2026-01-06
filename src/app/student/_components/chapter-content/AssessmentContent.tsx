@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Timer, AlertOctagon, Check, X, RotateCcw, XCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+
+import  {AssessmentSkeleton} from "@/app/student/_components/Skeletons"
 import {
   Dialog,
   DialogOverlay,
@@ -258,6 +260,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
       if (event.data === 'assessment_tab_closed') {
         console.warn('Assessment tab was closed before submission');
         refetch();
+        window.location.reload();
         toast({
           title: 'Assessment Tab Closed',
           description: 'You closed the assessment before submitting.',
@@ -282,15 +285,10 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     }
   }, [chapterStatus])
 
+
+
   if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="text-center py-12">
-          <h1 className="text-2xl font-heading font-bold mb-2">Loading Assessment...</h1>
-          <p className="text-muted-foreground">Fetching assessment details</p>
-        </div>
-      </div>
-    );
+       return <AssessmentSkeleton/>;
   }
 
   if (error) {
@@ -330,7 +328,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 <h5 className=" font-bold text-foreground break-words">
                   {assessmentDetails.ModuleAssessment?.title}
                 </h5>
-                <span className={`text-xs font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
+                <span className={`text-xs dark:text-white font-semibold px-4 py-1 rounded-full border ${chapterStatus === 'Pending' ? 'text-warning border-warning bg-warning-light' : 'text-success border-success bg-success-light'}`}>{chapterStatus === 'Pending' ? 'Not Attempted' : 'Completed'}</span>
               </div>
               {/* Meta Info Row */}
               <div className="flex flex-wrap gap-x-12 gap-y-2 mb-8">
@@ -463,7 +461,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                     <div className="md:text-lg text-sm space-y-2">
 
 
-                      <p className={`${isPassed ? 'text-success' : 'text-destructive'} font-semibold flex items-center gap-3`}>
+                      <p className={`${isPassed ? 'text-success' : 'text-destructive'} font-semibold flex items-center gap-3 dark:text-white`}>
                         {isPassed ? (
                           <>
                             <CheckCircle size={20} className="text-success" />
@@ -471,7 +469,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                           </>
                         ) : (
                           <>
-                            <X size={20} className="text-destructive" />
+                            <X size={20} className="text-destructive dark:text-white" />
                             You needed at least {passPercentage}% to pass
                           </>
                         )}
@@ -569,3 +567,13 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
 };
 
 export default AssessmentContent; 
+
+
+
+
+
+
+
+
+
+

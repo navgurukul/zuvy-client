@@ -712,6 +712,58 @@ export const fetchStudentsHandler = async ({
     }
 }
 
+interface FetchBatchStudentsParams {
+    courseId: string
+    batchId: string
+    limit: number
+    offset: number
+    searchTerm: string
+    setLoading: (loading: boolean) => void
+    setStudents: (students: any[]) => void
+    setTotalPages: (pages: number) => void
+    setTotalStudents: (count: number) => void
+    setCurrentPage: (page: number) => void
+    showError?: boolean
+}
+
+export const fetchBatchStudentsHandler = async ({
+    courseId,
+    batchId,
+    limit,
+    offset,
+    searchTerm,
+    setLoading,
+    setStudents,
+    setTotalPages,
+    setTotalStudents,
+    setCurrentPage,
+    showError = true,
+}: FetchBatchStudentsParams) => {
+    setLoading(true)
+    const endpoint = searchTerm
+    ? `/bootcamp/students/${courseId}?batch_id=${batchId}&searchTerm=${searchTerm}`
+    : `/bootcamp/students/${courseId}?batch_id=${batchId}&limit=${limit}&offset=${offset}`
+
+    try {
+        const res = await api.get(endpoint)
+        setStudents(res.data.modifiedStudentInfo)
+        setTotalPages(res.data.totalPages)
+        setTotalStudents(res.data.totalNumberOfStudents || res.data.totalStudentsCount)
+        setCurrentPage(res.data.currentPage)
+
+    } catch (error) {
+        if (showError) {
+            toast.error({
+                title: "Error",
+                description: "Failed to fetch students",
+            })
+        }
+    } finally {
+        setLoading(false)
+    }
+}
+
+
 export function cleanUpValues(value: string) {
     if (!value) return ''
 
@@ -1248,3 +1300,37 @@ export const getEmbedLink = (url: string) => {
 
     return ''
 }
+
+ export const hasPermissionMismatchForResource = (
+        fetchedPerms: any,
+        selectedPerms: Record<number, boolean>,
+        resourceId: number | undefined
+    ): boolean => {
+        if (!fetchedPerms || !resourceId) return false
+
+        // Normalize fetchedPerms to an array of { id, granted, resourceId }
+        const permsArray: Array<any> = Array.isArray(fetchedPerms)
+            ? fetchedPerms
+            : Object.keys(fetchedPerms).map((k) => ({ id: Number(k), granted: fetchedPerms[k] }))
+
+        const relevant = permsArray.filter((p) => p.resourceId === resourceId || p.resource_id === resourceId || !('resourceId' in p))
+
+        if (relevant.length === 0) {
+            // If no permissions are associated (fallback), compare any keys present in selectedPerms
+            return Object.keys(selectedPerms).some((k) => {
+                const id = Number(k)
+                const selected = !!selectedPerms[id]
+                const original = !!(Array.isArray(fetchedPerms) ? fetchedPerms.find((x: any) => x.id === id)?.granted : fetchedPerms[id])
+                return selected !== original
+            })
+        }
+
+        // If any permission's selected state differs from the original granted state => mismatch
+        for (const p of relevant) {
+            const id = Number(p.id)
+            const originalGranted = !!p.granted
+            const selected = !!selectedPerms[id]
+            if (selected !== originalGranted) return true
+        }
+        return false
+    }
