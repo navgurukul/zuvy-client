@@ -502,13 +502,13 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               <div className="text-success-dark text-left w-full font-medium">
                 {assessmentDetails.endDatetime ? (
                   <>
-                    <p className="font-bold text-accent text-center mb-4">
+                    <p className="font-bold text-accent text-center mb-4 dark:text-white">
                       Assessment is open. Please attempt it before end date
                     </p>
                     {/* <p className="font-semibold">{formatToIST(assessmentDetails.endDatetime)}</p> */}
                   </>
                 ) : (
-                  <p className='text-center text-accent font-semibold ' >The assessment is available now</p>
+                  <p className='text-center text-accent font-semibold dark:text-white' >The assessment is available now</p>
                 )}
                 <div className='text-center' >
                   <Button
@@ -530,7 +530,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             </div>
             )}                     {/* Closed assessment card */}
           {assessmentDetails.assessmentState?.toUpperCase() === 'CLOSED' && (
-            <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all duration-[1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+            <div className={`w-full dark:text-white max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all duration-[1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
               
@@ -548,7 +548,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             >
               <div className="flex flex-col sm:flex-row w-full items-center gap-2 sm:gap-x-3 text-foreground">
                 <Timer size={20} className="animate-pulse text-primary sm:w-6 sm:h-6" />
-                <p className="text-muted-foreground text-left">
+                <p className="text-muted-foreground text-left dark:text-white">
                   The Assessment Begins In
                 </p>
               </div>
