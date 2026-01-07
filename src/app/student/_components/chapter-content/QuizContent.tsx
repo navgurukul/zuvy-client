@@ -206,10 +206,10 @@ if (loading) {
           <Badge 
             variant="outline" 
             className={cn(
-              "px-3 py-1 text-sm font-medium border",
+              "px-3 py-1 text-sm font-medium  border",
               isCompleted 
                 ? "bg-success/10 text-success border-success/20" 
-                : "bg-muted text-muted-foreground border-border"
+                : "bg-muted text-muted-dark border-border"
             )}
           >
             {isCompleted ? 'Completed' : 'Not Completed'}

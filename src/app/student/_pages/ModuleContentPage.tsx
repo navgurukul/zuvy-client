@@ -436,7 +436,7 @@ useEffect(() => {
                             variant="ghost"
                             size="sm"
                             className={`w-full justify-start text-left h-auto p-2 text-xs break-words leading-relaxed whitespace-normal ${chapterId === item.id
-                              ? "bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
+                              ? "bg-primary-light hover:bg-primary-light dark:text-white border-l-4 border-primary text-charcoal"
                               : "hover:bg-primary-light hover:text-charcoal"
                               }`}
                             onClick={() => handleItemSelect(item.id)}
@@ -491,7 +491,7 @@ useEffect(() => {
               <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
                 <Link href={`/student/course/${courseId}`}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Course
+                  Back to Course 
                 </Link>
               </Button>
         </div>
