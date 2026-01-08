@@ -502,13 +502,13 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
               <div className="text-success-dark text-left w-full font-medium">
                 {assessmentDetails.endDatetime ? (
                   <>
-                    <p className="font-bold text-accent text-center mb-4">
+                    <p className="font-bold text-accent text-center mb-4 dark:text-white">
                       Assessment is open. Please attempt it before end date
                     </p>
                     {/* <p className="font-semibold">{formatToIST(assessmentDetails.endDatetime)}</p> */}
                   </>
                 ) : (
-                  <p className='text-center text-accent font-semibold ' >The assessment is available now</p>
+                  <p className='text-center text-accent font-semibold dark:text-white ' >The assessment is available now</p>
                 )}
                 <div className='text-center' >
                   <Button
