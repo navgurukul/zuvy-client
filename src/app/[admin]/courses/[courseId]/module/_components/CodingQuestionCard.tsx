@@ -57,48 +57,56 @@ function CodingQuestionCard({
     }, [])
 
     return (
-        <div
+       <div
             key={id}
-            className={`container mx-auto rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] overflow-hidden max-w-2xl min-h-52 mt-4 py-5`}
+            className={`container mx-auto rounded-xl shadow-[0px_1px_5px_2px_#4A4A4A14,0px_2px_1px_1px_#4A4A4A0A,0px_1px_2px_1px_#4A4A4A0F] overflow-hidden max-w-2xl min-h-52 mt-4 py-5 px-6`}
         >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div className="flex-1 min-w-0 font-bold text-gray-700 text-left text-lg sm:text-xl my-2 truncate">
+             {/* Title and Topic - Title left, Topic right */}
+            <div className="flex justify-between items-center mb-3">
+                <div className="font-bold text-gray-700 text-left text-xl">
                     {title}
                 </div>
-                <div className="flex items-center gap-4">
-                    <div
-                        className={cn(
-                            `font-semibold text-secondary my-2`,
-                            difficultyColor(difficulty)
-                        )}
-                    >
-                        {difficulty}
-                    </div>
-                    <h2 className="my-2 whitespace-nowrap text-gray-600 text-[15px]">
-                        Topic: {tagName}
-                    </h2>
+                <div className="text-gray-600 text-base whitespace-nowrap ml-4">
+                    Topic: {tagName}
                 </div>
             </div>
 
-            <div className="text-xl mt-2 text-start text-gray-600 truncate overflow-hidden whitespace-nowrap">
-                Description: {description}
+            {/* Difficulty - Left aligned with label */}
+            <div className="mb-3 text-left">
+                <span className="text-gray-600 text-base">Difficulty - </span>
+                <span
+                    className={cn(
+                        `font-semibold text-base`,
+                        difficultyColor(difficulty)
+                    )}
+                >
+                    {difficulty}
+                </span>
             </div>
-            <div className={`text-xl mt-2 text-start `}>
+
+            {/* Description - Left aligned */}
+            <div className="text-base text-left text-gray-600 mb-3">
+                {description}
+            </div>
+
+            {/* Status - Left aligned */}
+            <div className="text-base text-left text-gray-700 mb-4">
                 Status:{' '}
                 <span
                     className={cn(
-                        `font-semibold text-secondary my-2`,
+                        `font-semibold`,
                         statusColor(status)
                     )}
                 >
                     {status}
                 </span>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                {/* <div className="flex justify-between"> */}
+
+            {/* Bottom section with View Full Description and Solve Challenge */}
+            <div className="flex justify-between items-center mt-4">
                 <Dialog>
                     <DialogTrigger asChild>
-                        <p className="cursor-pointer mt-4 flex justify-start text-[rgb(81,134,114)] text-[16px] font-bold">
+                        <p className="cursor-pointer text-[rgb(81,134,114)] text-base font-semibold hover:underline">
                             View Full Description
                         </p>
                     </DialogTrigger>
@@ -111,11 +119,10 @@ function CodingQuestionCard({
                 </Dialog>
                 <div
                     onClick={() => handleSolveChallenge(id)}
-                    // className="cursor-pointer mt-4 flex justify-end text-secondary font-bold"
-                    className="cursor-pointer mt-4 flex sm:justify-start text-[rgb(81,134,114)] text-[16px] font-bold"
+                    className="cursor-pointer flex items-center text-[rgb(81,134,114)] text-base font-semibold hover:underline"
                 >
                     {isSuccess ? 'View Solution' : 'Solve Challenge'}
-                    <ChevronRight />
+                    <ChevronRight className="w-5 h-5" />
                 </div>
             </div>
         </div>

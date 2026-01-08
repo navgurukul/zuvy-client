@@ -24,20 +24,20 @@ const QuestionDescriptionModal = ({
 }: QuestionDescriptionModalProps) => {
     return (
         <DialogContent className="max-w-2xl p-6">
-            <div className="max-w-2xl p-6 ">
+            <div className="max-w-2xl p-6">
                 <DialogHeader>
-                    <DialogTitle className="text-xl text-foreground font-bold">
+                    <DialogTitle className="text-xl text-gray-900 font-bold flex items-center gap-2">
                         Coding Problem Preview
                         {tagName && (
-                            <span className="text-xs text-success bg-success-foreground rounded-[100px] ml-2 py-1 px-[8px]">
+                            <span className="text-xs text-green-700 bg-green-100 rounded-full py-1 px-3">
                                 {tagName}
                             </span>
                         )}
                         <span
                             className={cn(
-                                `text-[12px] text-success bg-success-foreground rounded-[100px] ml-2 py-1 px-[8px]`,
-                                difficultyColor(question.difficulty), // Text color
-                                difficultyBgColor(question.difficulty) // Background color
+                                `text-xs rounded-full py-1 px-3`,
+                                difficultyColor(question.difficulty),
+                                difficultyBgColor(question.difficulty)
                             )}
                         >
                             {question.difficulty}
@@ -45,42 +45,41 @@ const QuestionDescriptionModal = ({
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="p-4 space-y-6 text-left">
-                    {/* Render question description */}
+                <div className="mt-4 space-y-4 text-left">
                     <ScrollArea className="h-96 pr-4">
                         <ScrollBar orientation="vertical" />
-                        <div>
-                            <h4 className="font-semibold text-foreground text-lg">
+                        
+                        {/* Title and Description */}
+                        <div className="mb-4">
+                            <h4 className="font-semibold text-gray-900 text-base mb-2">
                                 Title and Description:
                             </h4>
-
-                            <p className="text-foreground">
-                                <span className="font-semibold text-sm">
+                            <p className="text-gray-700 text-sm ml-2">
+                                <span className="font-semibold">
                                     {question.title}:{' '}
                                 </span>
                                 {question.description}
                             </p>
                         </div>
 
-                        {/* Conditional rendering based on question type */}
                         {type === 'coding' && 'testCases' in question && (
-                            <div>
+                            <div className="space-y-4">
                                 {/* Problem Statement */}
                                 <div>
-                                    <h4 className="font-semibold text-foreground text-lg mb-1">
+                                    <h4 className="font-semibold text-gray-900 text-base mb-2">
                                         Problem Statement:
                                     </h4>
-                                    <p className="text-foreground mb-3">
+                                    <p className="text-gray-700 text-sm ml-2">
                                         {question.description}
                                     </p>
                                 </div>
 
                                 {/* Constraints */}
                                 <div>
-                                    <h4 className="font-semibold text-foreground text-lg mb-1">
+                                    <h4 className="font-semibold text-gray-900 text-base mb-2">
                                         Constraints:
                                     </h4>
-                                    <p className="text-foreground mb-3">
+                                    <p className="text-gray-700 text-sm ml-2">
                                         {question.constraints}
                                     </p>
                                 </div>
@@ -97,29 +96,27 @@ const QuestionDescriptionModal = ({
 
                                 {/* Input */}
                                 <div>
-                                    <h4 className="font-semibold text-foreground text-lg mb-3">
+                                    <h4 className="font-semibold text-gray-900 text-base">
                                         Input:{' '}
-                                        <span className="font-light text-base">
-                                            Array of integers arr and integer n
-                                            (size of array)
+                                        <span className="font-normal text-gray-700 text-sm">
+                                            Array of integers arr and integer n (size of array)
                                         </span>
                                     </h4>
                                 </div>
 
                                 {/* Output */}
                                 <div>
-                                    <h4 className="font-semibold text-foreground text-lg mb-3">
+                                    <h4 className="font-semibold text-gray-900 text-base">
                                         Output:{' '}
-                                        <span className="font-light text-base">
-                                            Minimum number of jumps to reach
-                                            destination (-1 if impossible)
+                                        <span className="font-normal text-gray-700 text-sm">
+                                            Minimum number of jumps to reach destination (-1 if impossible)
                                         </span>
                                     </h4>
                                 </div>
 
                                 {/* Test Cases */}
                                 <div>
-                                    <h4 className="font-semibold text-foreground text-lg">
+                                    <h4 className="font-semibold text-gray-900 text-base mb-2">
                                         Test Cases:
                                     </h4>
                                     {question.testCases.map(
@@ -136,139 +133,66 @@ const QuestionDescriptionModal = ({
                                         ) => (
                                             <div
                                                 key={testCase.id}
-                                                className="px-4"
+                                                className="ml-4 space-y-4 mb-6"
                                             >
-                                                <h5 className="font-semibold text-foreground text-[16px]">
+                                                <h5 className="font-semibold bg-muted/50 text-gray-900 px-4 py-2 text-sm mb-3 rounded-md">
                                                     Example {index + 1}:
                                                 </h5>
 
                                                 {/* Input */}
                                                 <div className="mb-2">
-                                                    <strong className="text-foreground text-[18px]">
+                                                    <strong className="text-sm font-medium text-muted-foreground ml-4">
                                                         Input:
                                                     </strong>
-                                                    <pre className="ml-4 bg-gray-100 p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
+                                                    <pre className="ml-4 bg-muted/30 p-2 space-y-4 rounded-md text-gray-900 text-sm whitespace-pre-wrap">
                                                         {testCase.inputs.map(
                                                             (
                                                                 input: {
                                                                     parameterType: any
                                                                     parameterValue: any
                                                                 },
-                                                                idx:
-                                                                    | Key
-                                                                    | null
-                                                                    | undefined
+                                                                idx: Key | null | undefined
                                                             ) => {
                                                                 const {
                                                                     parameterType,
                                                                     parameterValue,
                                                                 } = input
-                                                                let formattedValue =
-                                                                    ''
+                                                                let formattedValue = ''
+                                                                
                                                                 if (
-                                                                    [
-                                                                        'str',
-                                                                        'int',
-                                                                        'float',
-                                                                        'bool',
-                                                                    ].includes(
-                                                                        parameterType
-                                                                    )
+                                                                    ['str', 'int', 'float', 'bool'].includes(parameterType)
                                                                 ) {
-                                                                    formattedValue =
-                                                                        String(
-                                                                            parameterValue
-                                                                        )
-                                                                } else if (
-                                                                    parameterType ===
-                                                                    'arrayOfnum'
-                                                                ) {
-                                                                    formattedValue = `[${parameterValue.join(
-                                                                        ','
-                                                                    )}]`
-                                                                }
-                                                                // else if (parameterType === "arrayOfStr") {
-                                                                //     formattedValue = `[${parameterValue.map((item: any) => (typeof item === "string" ? `"${item}"` : item)).join(",")}]`;
-                                                                // }
-                                                                else if (
-                                                                    parameterType ===
-                                                                    'arrayOfStr'
-                                                                ) {
-                                                                    if (
-                                                                        !Array.isArray(
-                                                                            parameterValue
-                                                                        )
-                                                                    ) {
+                                                                    formattedValue = String(parameterValue)
+                                                                } else if (parameterType === 'arrayOfnum') {
+                                                                    formattedValue = `[${parameterValue.join(',')}]`
+                                                                } else if (parameterType === 'arrayOfStr') {
+                                                                    if (!Array.isArray(parameterValue)) {
                                                                         formattedValue = `[${parameterValue
-                                                                            .map(
-                                                                                (
-                                                                                    arr: any[]
-                                                                                ) =>
-                                                                                    `[${arr
-                                                                                        .map(
-                                                                                            (
-                                                                                                item: any
-                                                                                            ) =>
-                                                                                                typeof item ===
-                                                                                                'string'
-                                                                                                    ? `"${item}"`
-                                                                                                    : item
-                                                                                        )
-                                                                                        .join(
-                                                                                            ','
-                                                                                        )}]`
+                                                                            .map((arr: any[]) =>
+                                                                                `[${arr.map((item: any) =>
+                                                                                    typeof item === 'string' ? `"${item}"` : item
+                                                                                ).join(',')}]`
                                                                             )
-                                                                            .join(
-                                                                                ','
-                                                                            )}]`
+                                                                            .join(',')}]`
                                                                     }
                                                                 } else if (
-                                                                    parameterType ===
-                                                                        'jsonType' &&
-                                                                    Array.isArray(
-                                                                        parameterValue
-                                                                    ) &&
-                                                                    parameterValue.every(
-                                                                        (obj) =>
-                                                                            typeof obj ===
-                                                                            'object'
-                                                                    )
+                                                                    parameterType === 'jsonType' &&
+                                                                    Array.isArray(parameterValue) &&
+                                                                    parameterValue.every((obj) => typeof obj === 'object')
                                                                 ) {
-                                                                    formattedValue =
-                                                                        JSON.stringify(
-                                                                            parameterValue,
-                                                                            null,
-                                                                            2
-                                                                        )
+                                                                    formattedValue = JSON.stringify(parameterValue, null, 2)
                                                                 } else if (
-                                                                    parameterType ===
-                                                                        'jsonType' &&
-                                                                    typeof parameterValue ===
-                                                                        'object'
+                                                                    parameterType === 'jsonType' &&
+                                                                    typeof parameterValue === 'object'
                                                                 ) {
-                                                                    formattedValue =
-                                                                        JSON.stringify(
-                                                                            parameterValue,
-                                                                            null,
-                                                                            2
-                                                                        )
+                                                                    formattedValue = JSON.stringify(parameterValue, null, 2)
                                                                 } else {
-                                                                    formattedValue =
-                                                                        String(
-                                                                            parameterValue
-                                                                        )
+                                                                    formattedValue = String(parameterValue)
                                                                 }
 
                                                                 return (
-                                                                    <span
-                                                                        key={
-                                                                            idx
-                                                                        }
-                                                                        className="block"
-                                                                    >
-                                                                        {
-                                                                            formattedValue
-                                                                        }
+                                                                    <span key={idx} className="block">
+                                                                        {formattedValue}
                                                                     </span>
                                                                 )
                                                             }
@@ -278,106 +202,45 @@ const QuestionDescriptionModal = ({
 
                                                 {/* Output */}
                                                 <div>
-                                                    <strong className="text-foreground text-lg">
+                                                    <strong className="text-sm font-medium text-muted-foreground ml-4 mb-3">
                                                         Output:
                                                     </strong>
-                                                    <pre className="ml-4 bg-muted p-2 rounded-md text-foreground text-sm whitespace-pre-wrap">
+                                                    <pre className="ml-4 bg-muted/30 p-2 space-y-4 rounded-md text-gray-900 text-sm whitespace-pre-wrap">
                                                         {(() => {
                                                             const {
                                                                 parameterType,
                                                                 parameterValue,
-                                                            } =
-                                                                testCase.expectedOutput
-                                                            if (
-                                                                [
-                                                                    'str',
-                                                                    'int',
-                                                                    'float',
-                                                                    'bool',
-                                                                ].includes(
-                                                                    parameterType
-                                                                )
-                                                            )
-                                                                return String(
-                                                                    parameterValue
-                                                                )
-                                                            if (
-                                                                parameterType ===
-                                                                'arrayOfnum'
-                                                            )
-                                                                if (
-                                                                    Array.isArray(
-                                                                        parameterValue
-                                                                    )
-                                                                ) {
-                                                                    return `[${parameterValue.join(
-                                                                        ','
-                                                                    )}]`
+                                                            } = testCase.expectedOutput
+                                                            
+                                                            if (['str', 'int', 'float', 'bool'].includes(parameterType))
+                                                                return String(parameterValue)
+                                                            if (parameterType === 'arrayOfnum')
+                                                                if (Array.isArray(parameterValue)) {
+                                                                    return `[${parameterValue.join(',')}]`
                                                                 }
-                                                            if (
-                                                                parameterType ===
-                                                                'arrayOfStr'
-                                                            )
-                                                                if (
-                                                                    !Array.isArray(
-                                                                        parameterValue
-                                                                    )
-                                                                ) {
+                                                            if (parameterType === 'arrayOfStr')
+                                                                if (!Array.isArray(parameterValue)) {
                                                                     return `[${parameterValue
-                                                                        ?.map(
-                                                                            (
-                                                                                arr: any[]
-                                                                            ) =>
-                                                                                `[${arr
-                                                                                    .map(
-                                                                                        (
-                                                                                            item: any
-                                                                                        ) =>
-                                                                                            typeof item ===
-                                                                                            'string'
-                                                                                                ? `"${item}"`
-                                                                                                : item
-                                                                                    )
-                                                                                    .join(
-                                                                                        ','
-                                                                                    )}]`
+                                                                        ?.map((arr: any[]) =>
+                                                                            `[${arr.map((item: any) =>
+                                                                                typeof item === 'string' ? `"${item}"` : item
+                                                                            ).join(',')}]`
                                                                         )
-                                                                        .join(
-                                                                            ','
-                                                                        )}]`
+                                                                        .join(',')}]`
                                                                 }
                                                             if (
-                                                                parameterType ===
-                                                                    'jsonType' &&
-                                                                Array.isArray(
-                                                                    parameterValue
-                                                                ) &&
-                                                                parameterValue.every(
-                                                                    (obj) =>
-                                                                        typeof obj ===
-                                                                        'object'
-                                                                )
+                                                                parameterType === 'jsonType' &&
+                                                                Array.isArray(parameterValue) &&
+                                                                parameterValue.every((obj) => typeof obj === 'object')
                                                             )
-                                                                return JSON.stringify(
-                                                                    parameterValue,
-                                                                    null,
-                                                                    2
-                                                                )
+                                                                return JSON.stringify(parameterValue, null, 2)
                                                             if (
-                                                                parameterType ===
-                                                                    'jsonType' &&
-                                                                typeof parameterValue ===
-                                                                    'object'
+                                                                parameterType === 'jsonType' &&
+                                                                typeof parameterValue === 'object'
                                                             )
-                                                                return JSON.stringify(
-                                                                    parameterValue,
-                                                                    null,
-                                                                    2
-                                                                )
+                                                                return JSON.stringify(parameterValue, null, 2)
 
-                                                            return String(
-                                                                parameterValue
-                                                            )
+                                                            return String(parameterValue)
                                                         })()}
                                                     </pre>
                                                 </div>
@@ -391,7 +254,7 @@ const QuestionDescriptionModal = ({
 
                     {type === 'mcq' && 'options' in question && (
                         <div>
-                            <h4 className="font-semibold text-lg mb-2">
+                            <h4 className="font-semibold text-base mb-2">
                                 Options:
                             </h4>
                             <ul className="list-disc pl-6">
@@ -401,11 +264,7 @@ const QuestionDescriptionModal = ({
                                             | string
                                             | number
                                             | boolean
-                                            | ReactElement<
-                                                  any,
-                                                  | string
-                                                  | JSXElementConstructor<any>
-                                              >
+                                            | ReactElement<any, string | JSXElementConstructor<any>>
                                             | Iterable<ReactNode>
                                             | ReactPortal
                                             | PromiseLikeOfReactNode
@@ -422,7 +281,7 @@ const QuestionDescriptionModal = ({
 
                     {type === 'open-ended' && (
                         <div>
-                            <h4 className="font-semibold text-lg mb-2">
+                            <h4 className="font-semibold text-base mb-2">
                                 Details:
                             </h4>
                             <p>{question.description}</p>
