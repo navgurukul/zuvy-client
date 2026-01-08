@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import {
     Select,
@@ -21,8 +21,19 @@ type roleCellProps = {
 
 export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId }: roleCellProps & { userId: number; roleId: number }) => {
     const [isUpdating, setIsUpdating] = useState(false)
+    const [originalRole, setOriginalRole] = useState(role)
+
+    // Update original role when prop changes
+    useEffect(() => {
+        setOriginalRole(role)
+    }, [role])
 
     const handleRoleChange = async (newRoleName: string) => {
+        // Only save if the role actually changed
+        if (newRoleName === originalRole) {
+            return // No change, don't call API
+        }
+
         try {
             setIsUpdating(true)
             // Find the roleId from the roles array based on the selected role name
@@ -33,6 +44,9 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId }: ro
                 userId: userId,
                 roleId: selectedRole.id
             })
+
+            // Update original role after successful save
+            setOriginalRole(newRoleName)
 
             toast.success({
                 title: 'Role Updated',
@@ -50,8 +64,8 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId }: ro
     }
 
     return (
-          <Select 
-            defaultValue={role} 
+        <Select 
+            value={role} 
             onValueChange={handleRoleChange} 
             disabled={isUpdating}
         >
