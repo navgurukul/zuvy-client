@@ -9,7 +9,8 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
-import { getCompletedClasses } from '@/store/store'
+import { getCompletedClasses, getAttendancePercentage } from '@/store/store'
+import { useUserCompletedClasses } from '@/hooks/useUserCompletedClasses'
 
 interface ClassData {
     id: number
@@ -74,7 +75,9 @@ const updateAttendanceStatus = async (
     sessionId: number, 
     studentId: string, 
     status: 'present' | 'absent',
-    setCompletedClasses: (classes: ClassData[]) => void
+    // setCompletedClasses: (classes: ClassData[]) => void,
+    // setAttendancePercentage: (percentage: number) => void
+    refetchCompletedClasses: (searchTermParam: string) => void
 ) => {
     try {
         const endpoint = `/bootcamp/${courseId}/attendance/${sessionId}/mark`
@@ -86,13 +89,26 @@ const updateAttendanceStatus = async (
         
         await api.post(endpoint, payload)
 
-        const completedClassesEndpoint = `/student/bootcamp/${courseId}/completed-classes?userId=${studentId}`             
-        const response = await api.get(completedClassesEndpoint)
+        // const completedClassesEndpoint = `/student/bootcamp/${courseId}/completed-classes?userId=${studentId}`             
+        // const response = await api.get(completedClassesEndpoint)
 
-        const classes = response.data?.data?.classes || []
-        setCompletedClasses(classes)
-        
-        
+        // const classes = response.data?.data?.classes || []
+        // setCompletedClasses(classes)
+
+        // const stats = response.data?.data?.attendanceStats
+        // if (stats) {
+        //     setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
+        // } else if (classes.length > 0) {
+        //     const totalClasses = classes.length
+        //     const attendedClasses = classes.filter((c: ClassData) => c.attendanceStatus === 'present').length
+        //     const percentage = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 100) : 0
+        //     setAttendancePercentage(percentage)
+        // } else {
+        //     setAttendancePercentage(0)
+        // }
+
+        refetchCompletedClasses('')
+
         toast({
             title: 'Success',
             description: `Attendance marked as ${status}`,
@@ -127,7 +143,10 @@ const UpdateStatusCell = ({
     const [isUpdating, setIsUpdating] = useState(false)
     const [currentStatus, setCurrentStatus] = useState(classData.attendanceStatus.toLowerCase())
     const isPresent = currentStatus === 'present'
-    const { completedClasses, setCompletedClasses } = getCompletedClasses()
+    const { completedClasses, loading, error, attendancePercentage, refetchCompletedClasses } = useUserCompletedClasses({ courseId, studentId });
+    
+    // const { completedClasses, setCompletedClasses } = getCompletedClasses()
+    // const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
     
     const handleStatusToggle = async (checked: boolean) => {
         setIsUpdating(true)
@@ -142,7 +161,9 @@ const UpdateStatusCell = ({
             classData.id, 
             studentId, 
             newStatus,
-            setCompletedClasses
+            refetchCompletedClasses
+            // setCompletedClasses,
+            // setAttendancePercentage
         )
         
         if (!success) {

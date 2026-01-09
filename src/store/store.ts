@@ -1221,3 +1221,16 @@ export const getCompletedClasses = create<classCompleted>((set) => ({
         set({ completedClasses: newValue })
     },
 }))
+
+
+type attendancePercentage = {
+    attendancePercentage: number
+    setAttendancePercentage: (newValue: number) => void
+}
+
+export const getAttendancePercentage = create<attendancePercentage>((set) => ({
+    attendancePercentage: 0,
+    setAttendancePercentage: (newValue: number) => {
+        set({ attendancePercentage: newValue })
+    },
+}))

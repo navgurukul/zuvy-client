@@ -344,9 +344,25 @@ export interface UseCompletedClassesReturn {
   error: string | null;
 }
 
+export interface ClassData {
+    id: number
+    title: string
+    startTime: string
+    endTime: string
+    s3Link: string | null
+    moduleId: number | null
+    chapterId: number | null
+    attendanceStatus: string
+    duration: number
+}
 
-
-
+export interface UseUserCompletedClassesReturn {
+  completedClasses: ClassData[] | [];
+  loading: boolean;
+  error: string | null;
+  attendancePercentage: number;
+  refetchCompletedClasses: (searchTermParam: string) => void; 
+}
 
 
 // useCourseSyllabus

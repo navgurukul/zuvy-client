@@ -22,7 +22,8 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
-import { getCompletedClasses } from '@/store/store'
+import { getCompletedClasses, getAttendancePercentage } from '@/store/store'
+import { useUserCompletedClasses } from '@/hooks/useUserCompletedClasses'
 
 const dateFilterSchema = z.object({
     fromDate: z.string().optional(),
@@ -56,16 +57,18 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 }) => {
     
     // const [completedClasses, setCompletedClasses] = useState<ClassData[]>([])
-    const { completedClasses, setCompletedClasses } = getCompletedClasses()
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [attendancePercentage, setAttendancePercentage] = useState<number>(0)
+    // const { completedClasses, setCompletedClasses } = getCompletedClasses()
+    // const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
+    // const [loading, setLoading] = useState(true)
+    // const [error, setError] = useState<string | null>(null)
+    // const [attendancePercentage, setAttendancePercentage] = useState<number>(0)
     const [statusFilter, setStatusFilter] = useState('all')
     const [fromDate, setFromDate] = useState('')
     const [toDate, setToDate] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
     const [isFromCalendarOpen, setFromCalendarOpen] = useState(false)
     const [isToCalendarOpen, setToCalendarOpen] = useState(false)
+    const { completedClasses, loading, error, attendancePercentage, refetchCompletedClasses } = useUserCompletedClasses({statusFilter, courseId, studentId, fromDate, toDate, searchTerm });
     const [dateErrors, setDateErrors] = useState<{
         fromDate?: string
         toDate?: string
@@ -87,7 +90,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         courseId, 
         studentId, 
         () => {
-            fetchCompletedClasses(searchTerm)
+            refetchCompletedClasses(searchTerm)
         }
     )
 
@@ -122,9 +125,9 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         setSearchTerm(search)
 
         if (search) {
-            fetchCompletedClasses(search)
+            refetchCompletedClasses(search)
         } else {
-            fetchCompletedClasses("")
+            refetchCompletedClasses("")
         }
     }, [studentId, courseId])
 
@@ -152,63 +155,63 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         }
     }
 
-    const fetchCompletedClasses = useCallback(async (searchTermParam?: string) => {
-        try {
-            setLoading(true)
-            setError(null)
+    // const fetchCompletedClasses = useCallback(async (searchTermParam?: string) => {
+    //     try {
+    //         setLoading(true)
+    //         setError(null)
 
-            const params = new URLSearchParams({
-                userId: studentId.toString()
-            })
+    //         const params = new URLSearchParams({
+    //             userId: studentId.toString()
+    //         })
 
-            const currentSearchTerm = searchTermParam !== undefined ? searchTermParam : searchTerm
+    //         const currentSearchTerm = searchTermParam !== undefined ? searchTermParam : searchTerm
             
-            if (currentSearchTerm && currentSearchTerm.trim()) {
-                params.append('searchTerm', currentSearchTerm.trim())
-            }
+    //         if (currentSearchTerm && currentSearchTerm.trim()) {
+    //             params.append('searchTerm', currentSearchTerm.trim())
+    //         }
             
-            if (statusFilter !== 'all') {
-                params.append('attendanceStatus', statusFilter)
-            }
+    //         if (statusFilter !== 'all') {
+    //             params.append('attendanceStatus', statusFilter)
+    //         }
             
-            // Only add date filters if BOTH dates are selected and valid
-            if (fromDate && toDate && fromDate <= toDate) {
-                params.append('fromDate', fromDate)
-                params.append('toDate', toDate)
-            }
+    //         // Only add date filters if BOTH dates are selected and valid
+    //         if (fromDate && toDate && fromDate <= toDate) {
+    //             params.append('fromDate', fromDate)
+    //             params.append('toDate', toDate)
+    //         }
 
-            const endpoint = `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`             
-            const response = await api.get(endpoint)
+    //         const endpoint = `/student/bootcamp/${courseId}/completed-classes?${params.toString()}`             
+    //         const response = await api.get(endpoint)
 
-            const classes = response.data?.data?.classes || []
-            setCompletedClasses(classes)
+    //         const classes = response.data?.data?.classes || []
+    //         setCompletedClasses(classes)
 
-            const stats = response.data?.data?.attendanceStats
-            if (stats) {
-                setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
-            } else if (classes.length > 0) {
-                const totalClasses = classes.length
-                const attendedClasses = classes.filter((c: ClassData) => c.attendanceStatus === 'present').length
-                const percentage = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 100) : 0
-                setAttendancePercentage(percentage)
-            } else {
-                setAttendancePercentage(0)
-            }
+    //         const stats = response.data?.data?.attendanceStats
+    //         if (stats) {
+    //             setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
+    //         } else if (classes.length > 0) {
+    //             const totalClasses = classes.length
+    //             const attendedClasses = classes.filter((c: ClassData) => c.attendanceStatus === 'present').length
+    //             const percentage = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 100) : 0
+    //             setAttendancePercentage(percentage)
+    //         } else {
+    //             setAttendancePercentage(0)
+    //         }
 
-        } catch (error: any) {
-            console.error('API Error:', error)
+    //     } catch (error: any) {
+    //         console.error('API Error:', error)
 
-            const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch completed classes'
-            setError(errorMessage)
+    //         const errorMessage = error.response?.data?.message || error.message || 'Failed to fetch completed classes'
+    //         setError(errorMessage)
 
-            toast.error({
-                title: 'API Error',
-                description: errorMessage,            
-            })
-        } finally {
-            setLoading(false)
-        }
-    }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm])
+    //         toast.error({
+    //             title: 'API Error',
+    //             description: errorMessage,            
+    //         })
+    //     } finally {
+    //         setLoading(false)
+    //     }
+    // }, [courseId, studentId, statusFilter, fromDate, toDate, searchTerm])
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         if (!query.trim()) return []
@@ -244,13 +247,13 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setSearchTerm(query)
-        await fetchCompletedClasses(query)
-    }, [fetchCompletedClasses])
+        await refetchCompletedClasses(query)
+    }, [refetchCompletedClasses])
 
     const defaultFetchApi = useCallback(async () => {
         setSearchTerm('')
-        await fetchCompletedClasses('')
-    }, [fetchCompletedClasses])
+        await refetchCompletedClasses('')
+    }, [refetchCompletedClasses])
 
     const handleFromDateChange = (value: string) => {
         setFromDate(value)
@@ -283,7 +286,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
         
         if (shouldFetch && !loading) {
             const timer = setTimeout(() => {
-                fetchCompletedClasses(searchTerm)
+                refetchCompletedClasses(searchTerm)
             }, 300)
             
             return () => clearTimeout(timer)
@@ -518,7 +521,7 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                     <CardContent className="text-center py-8">
                         <div className="space-y-4">
                             <p className="text-destructive">Student is not assigned to any batch yet</p>
-                            <Button onClick={() => fetchCompletedClasses(searchTerm)} variant="outline">
+                            <Button onClick={() => refetchCompletedClasses(searchTerm)} variant="outline">
                                 Try Again
                             </Button>
                         </div>
