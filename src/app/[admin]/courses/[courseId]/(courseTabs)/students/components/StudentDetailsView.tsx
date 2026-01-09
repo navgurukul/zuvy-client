@@ -14,6 +14,14 @@ import { createAttendanceColumns } from './attendanceColumns'
 import { StudentDetailsViewProps, ClassData } from './courseStudentComponentType'
 import { SearchBox } from '@/utils/searchBox'
 import { z } from 'zod'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { CalendarIcon } from 'lucide-react'
+import { format } from 'date-fns'
 
 const dateFilterSchema = z.object({
     fromDate: z.string().optional(),
@@ -53,6 +61,8 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     const [fromDate, setFromDate] = useState('')
     const [toDate, setToDate] = useState('')
     const [searchTerm, setSearchTerm] = useState('')
+    const [isFromCalendarOpen, setFromCalendarOpen] = useState(false)
+    const [isToCalendarOpen, setToCalendarOpen] = useState(false)
     const [dateErrors, setDateErrors] = useState<{
         fromDate?: string
         toDate?: string
@@ -342,10 +352,14 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 </div>
 
                 {/* Right Side - Overall Attendance Percentage */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-8">
                     <div className="text-right">
+                        <p className="text-2xl font-bold text-foreground">{completedClasses?.length}</p>
+                        <p className="text-sm text-muted-foreground">Total Classes</p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-2xl font-bold text-foreground">{attendancePercentage?.toFixed(2)}%</p>
                         <p className="text-sm text-muted-foreground">Overall Attendance</p>
-                        <p className="text-2xl font-bold text-foreground">{attendancePercentage}%</p>
                     </div>
                 </div>
             </div>
@@ -385,14 +399,41 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 <div className="flex flex-col items-start space-y-1">
                     <div className="flex items-center space-x-2">
                         <p className='text-foreground'>From:</p>
-                        <Input
-                            type="date"
-                            placeholder="From Date"
-                            value={fromDate}
-                            onChange={(e) => handleFromDateChange(e.target.value)}
-                            max={toDate || undefined}
-                            className={`w-[150px] ${dateErrors.fromDate ? 'border-red-500' : ''}`}
-                        />
+                        <Popover open={isFromCalendarOpen} onOpenChange={setFromCalendarOpen}>
+                            <PopoverTrigger asChild>
+                                <div className="relative w-[150px]">
+                                <Input
+                                    value={fromDate ? format(new Date(fromDate), "dd-MM-yyyy") : ""}
+                                    placeholder="From Date"
+                                    readOnly
+                                    className={`cursor-pointer pr-10 ${
+                                    dateErrors.fromDate ? "border-red-500" : ""
+                                    }`}
+                                />
+                                <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                </div>
+                            </PopoverTrigger>
+
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                mode="single"
+                                selected={fromDate ? new Date(fromDate) : undefined}
+                                onSelect={(date) => {
+                                    if (date) {
+                                    handleFromDateChange(date.toISOString().split("T")[0])
+                                    setFromCalendarOpen(false)
+                                    }
+                                }}
+                                disabled={(date) => {
+                                    // Disable dates after `toDate`
+                                    if (toDate) {
+                                    return date > new Date(toDate)
+                                    }
+                                    return false
+                                }}
+                                />
+                            </PopoverContent>
+                        </Popover>                          
                     </div>
                     {dateErrors.fromDate && (
                         <p className="text-xs text-red-500 ml-14">{dateErrors.fromDate}</p>
@@ -403,14 +444,41 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
                 <div className="flex flex-col items-start space-y-1">
                     <div className="flex items-center space-x-2">
                         <p className='text-foreground'>To:</p>
-                        <Input
-                            type="date"
-                            placeholder="To Date"
-                            value={toDate}
-                            onChange={(e) => handleToDateChange(e.target.value)}
-                            min={fromDate || undefined}
-                            className={`w-[150px] ${dateErrors.toDate ? 'border-red-500' : ''}`}
-                        />
+                        <Popover open={isToCalendarOpen} onOpenChange={setToCalendarOpen}>
+                            <PopoverTrigger asChild>
+                                <div className="relative w-[150px]">
+                                <Input
+                                    value={toDate ? format(new Date(toDate), "dd-MM-yyyy") : ""}
+                                    placeholder="To Date"
+                                    readOnly
+                                    className={`cursor-pointer pr-10 ${
+                                    dateErrors.toDate ? "border-red-500" : ""
+                                    }`}
+                                />
+                                <CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                                </div>
+                            </PopoverTrigger>
+
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                mode="single"
+                                selected={toDate ? new Date(toDate) : undefined}
+                                onSelect={(date) => {
+                                    if (date) {
+                                    handleToDateChange(date.toISOString().split("T")[0])
+                                    setToCalendarOpen(false)
+                                    }
+                                }}
+                                disabled={(date) => {
+                                    // Disable dates after `toDate`
+                                    if (toDate) {
+                                    return date > new Date(toDate)
+                                    }
+                                    return false
+                                }}
+                                />
+                            </PopoverContent>
+                        </Popover>  
                     </div>
                     {dateErrors.toDate && (
                         <p className="text-xs text-red-500 ml-8">{dateErrors.toDate}</p>
