@@ -22,6 +22,7 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { CalendarIcon } from 'lucide-react'
 import { format } from 'date-fns'
+import { getCompletedClasses } from '@/store/store'
 
 const dateFilterSchema = z.object({
     fromDate: z.string().optional(),
@@ -53,7 +54,9 @@ const StudentDetailsView: React.FC<StudentDetailsViewProps> = ({
     studentId,
     onBack
 }) => {
-    const [completedClasses, setCompletedClasses] = useState<ClassData[]>([])
+    
+    // const [completedClasses, setCompletedClasses] = useState<ClassData[]>([])
+    const { completedClasses, setCompletedClasses } = getCompletedClasses()
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [attendancePercentage, setAttendancePercentage] = useState<number>(0)

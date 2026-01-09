@@ -9,6 +9,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
+import { getCompletedClasses } from '@/store/store'
 
 interface ClassData {
     id: number
@@ -72,7 +73,8 @@ const updateAttendanceStatus = async (
     courseId: string, 
     sessionId: number, 
     studentId: string, 
-    status: 'present' | 'absent'
+    status: 'present' | 'absent',
+    setCompletedClasses: (classes: ClassData[]) => void
 ) => {
     try {
         const endpoint = `/bootcamp/${courseId}/attendance/${sessionId}/mark`
@@ -83,6 +85,13 @@ const updateAttendanceStatus = async (
         }
         
         await api.post(endpoint, payload)
+
+        const completedClassesEndpoint = `/student/bootcamp/${courseId}/completed-classes?userId=${studentId}`             
+        const response = await api.get(completedClassesEndpoint)
+
+        const classes = response.data?.data?.classes || []
+        setCompletedClasses(classes)
+        
         
         toast({
             title: 'Success',
@@ -118,6 +127,7 @@ const UpdateStatusCell = ({
     const [isUpdating, setIsUpdating] = useState(false)
     const [currentStatus, setCurrentStatus] = useState(classData.attendanceStatus.toLowerCase())
     const isPresent = currentStatus === 'present'
+    const { completedClasses, setCompletedClasses } = getCompletedClasses()
     
     const handleStatusToggle = async (checked: boolean) => {
         setIsUpdating(true)
@@ -131,7 +141,8 @@ const UpdateStatusCell = ({
             courseId, 
             classData.id, 
             studentId, 
-            newStatus
+            newStatus,
+            setCompletedClasses
         )
         
         if (!success) {
