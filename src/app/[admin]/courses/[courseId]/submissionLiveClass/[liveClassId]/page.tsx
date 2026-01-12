@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { ArrowLeft,Download} from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
@@ -33,6 +34,7 @@ const Page = ({ params }: any) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
+    const currentTab = searchParams.get('tab') || 'live'
     const [liveClassData, setLiveClassData] = useState<any>()
     const [dataTableLiveClass, setDataTableLiveClass] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
@@ -181,10 +183,6 @@ const Page = ({ params }: any) => {
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
     
-        // fetch all records for CSV
-        queryParams.append('offset', '0')
-        queryParams.append('limit', '10')
-    
         downloadCsv({
             endpoint: `/submission/livesession/zuvy_livechapter_student_submission/${params.liveClassId}?${queryParams.toString()}`,
     
@@ -242,14 +240,15 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
+                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                    <Button
+                        variant="ghost"                  
+                        className="hover:bg-transparent hover:text-primary transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </Link>
             </div>
             <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                 <CardHeader>

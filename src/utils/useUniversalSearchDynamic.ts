@@ -36,6 +36,12 @@ import {
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const debouncedQuery = useDebounce(searchQuery, debounceTime);
     const previousQueryRef = useRef<string>("");
+    const [hasFetchedSuggestions, setHasFetchedSuggestions] = useState(false);
+
+    const NOT_FOUND_SUGGESTION: Suggestion = {
+      id: "__not_found__",
+      name: "No results found",
+    };
   
     const safeApiCall = useCallback(
       async <T,>(apiFn: () => Promise<T>, fallback: T): Promise<T> => {
@@ -76,28 +82,34 @@ import {
       })();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-  
+    
     useEffect(() => {
-      const controller = new AbortController();
       if (debouncedQuery.trim()) {
+        setHasFetchedSuggestions(false);
+  
         safeApiCall(() => fetchSuggestionsApi(debouncedQuery), [])
           .then((data) => {
-            setSuggestions(data);
-            // sirf tabhi khole jab suggestions aaye aur query manual typing se ho
-            if (data.length > 0 && debouncedQuery !== previousQueryRef.current) {
+            if (data.length === 0) {
+              setSuggestions([NOT_FOUND_SUGGESTION]);
+            } else {
+              setSuggestions(data);
+            }
+            setHasFetchedSuggestions(true);
+            // Keep dropdown open if input is focused
+            if (inputRef.current === document.activeElement) {
               setShowSuggestions(true);
             }
           });
       } else {
         setSuggestions([]);
+        setHasFetchedSuggestions(false);
         setShowSuggestions(false);
       }
-      
   
       setSelectedIndex(-1);
-      return () => controller.abort();
     }, [debouncedQuery, fetchSuggestionsApi, safeApiCall]);
   
+    
     const filteredSuggestions = useMemo(
       () => suggestions.slice(0, maxSuggestions),
       [suggestions, maxSuggestions]
@@ -226,5 +238,6 @@ import {
       setSelectedIndex,
       setShowSuggestions,
       setSearchQuery,
+      hasFetchedSuggestions, 
     };
   }

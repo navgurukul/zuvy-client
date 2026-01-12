@@ -7,7 +7,13 @@ import { Edit, Trash2 } from 'lucide-react'
 import DeleteUser from './_components/DeleteUser'
 import { ChangeUserRole } from './_components/ChangeUserRole'
 import { formatDate } from '@/lib/utils'
-
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+  } from '@/components/ui/tooltip'
+  
 export interface User {
     createdAt: any
     id: number
@@ -28,21 +34,67 @@ export const createColumns = (
     onDelete: (userId: number) => void
 ): ColumnDef<User>[] => [
     {
-        accessorKey: 'name',
-        header: 'Name',
-        cell: ({ row }) => (
-            <div className="font-medium text-left text-gray-900">
-                {row.getValue('name')}
-            </div>
-        ),
-    },
+      accessorKey: 'name',
+      header: 'Name',
+      cell: ({ row }) => {
+        const name = row.original.name
+        const limit = 20
+    
+        return (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="max-w-[180px] cursor-pointer text-left text-gray-900">
+                  {name.length > limit
+                    ? name.substring(0, limit) + '...'
+                    : name}
+                </div>
+              </TooltipTrigger>
+    
+              {name.length > limit && (
+                <TooltipContent side="top" align="start">
+                  <p className="text-sm max-w-xs break-words">
+                    {name}
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        )
+      },
+    }
+    ,
     {
-        accessorKey: 'email',
-        header: 'Email',
-        cell: ({ row }) => (
-            <div className="text-left text-gray-600">{row.getValue('email')}</div>
-        ),
-    },
+      accessorKey: 'email',
+      header: 'Email',
+      cell: ({ row }) => {
+        const email = row.original.email
+        const limit = 35
+    
+        return (
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="max-w-[220px] cursor-pointer text-left text-gray-600">
+                  {email.length > limit
+                    ? email.substring(0, limit) + '...'
+                    : email}
+                </div>
+              </TooltipTrigger>
+    
+              {email.length > limit && (
+                <TooltipContent side="top" align="start">
+                  <p className="text-sm max-w-xs break-all">
+                    {email}
+                  </p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        )
+      },
+    }
+    ,
     {
         accessorKey: 'roleName',
         header: 'Role',

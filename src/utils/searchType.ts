@@ -28,6 +28,7 @@ export interface Suggestion {
     setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
     setShowSuggestions: React.Dispatch<React.SetStateAction<boolean>>;
     setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+    hasFetchedSuggestions: boolean;
   }
  
 
