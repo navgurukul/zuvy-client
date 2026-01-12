@@ -1197,3 +1197,40 @@ export const useVideoStore = create<VideoProgressState>()(
         }
     )
 )
+
+export interface ClassData {
+    id: number
+    title: string
+    startTime: string
+    endTime: string
+    s3Link: string | null
+    moduleId: number | null
+    chapterId: number | null
+    attendanceStatus: string
+    duration: number
+}
+
+type classCompleted = {
+    completedClasses: ClassData[]
+    setCompletedClasses: (newValue: ClassData[]) => void
+}
+
+export const getCompletedClasses = create<classCompleted>((set) => ({
+    completedClasses: [],
+    setCompletedClasses: (newValue: ClassData[]) => {
+        set({ completedClasses: newValue })
+    },
+}))
+
+
+type attendancePercentage = {
+    attendancePercentage: number
+    setAttendancePercentage: (newValue: number) => void
+}
+
+export const getAttendancePercentage = create<attendancePercentage>((set) => ({
+    attendancePercentage: 0,
+    setAttendancePercentage: (newValue: number) => {
+        set({ attendancePercentage: newValue })
+    },
+}))

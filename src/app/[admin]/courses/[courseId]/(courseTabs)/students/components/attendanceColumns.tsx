@@ -9,6 +9,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Switch } from '@/components/ui/switch'
 import { useState } from 'react'
+import { getAttendancePercentage, getCompletedClasses } from '@/store/store'
 
 interface ClassData {
     id: number
@@ -72,7 +73,9 @@ const updateAttendanceStatus = async (
     courseId: string, 
     sessionId: number, 
     studentId: string, 
-    status: 'present' | 'absent'
+    status: 'present' | 'absent',
+    setCompletedClasses: (classes: ClassData[]) => void,
+    setAttendancePercentage: (percentage: number) => void
 ) => {
     try {
         const endpoint = `/bootcamp/${courseId}/attendance/${sessionId}/mark`
@@ -83,6 +86,24 @@ const updateAttendanceStatus = async (
         }
         
         await api.post(endpoint, payload)
+
+        const completedClassesEndpoint = `/student/bootcamp/${courseId}/completed-classes?userId=${studentId}`             
+        const response = await api.get(completedClassesEndpoint)
+
+        const classes = response.data?.data?.classes || []
+        setCompletedClasses(classes)
+        
+        const stats = response.data?.data?.attendanceStats
+        if (stats) {
+            setAttendancePercentage(Math.round(stats.attendancePercentage || 0))
+        } else if (classes.length > 0) {
+            const totalClasses = classes.length
+            const attendedClasses = classes.filter((c: ClassData) => c.attendanceStatus === 'present').length
+            const percentage = totalClasses > 0 ? Math.round((attendedClasses / totalClasses) * 100) : 0
+            setAttendancePercentage(percentage)
+        } else {
+            setAttendancePercentage(0)
+        }
         
         toast({
             title: 'Success',
@@ -118,6 +139,8 @@ const UpdateStatusCell = ({
     const [isUpdating, setIsUpdating] = useState(false)
     const [currentStatus, setCurrentStatus] = useState(classData.attendanceStatus.toLowerCase())
     const isPresent = currentStatus === 'present'
+    const { completedClasses, setCompletedClasses } = getCompletedClasses()
+    const { attendancePercentage, setAttendancePercentage } = getAttendancePercentage()
     
     const handleStatusToggle = async (checked: boolean) => {
         setIsUpdating(true)
@@ -131,7 +154,9 @@ const UpdateStatusCell = ({
             courseId, 
             classData.id, 
             studentId, 
-            newStatus
+            newStatus,
+            setCompletedClasses,
+            setAttendancePercentage
         )
         
         if (!success) {
