@@ -431,7 +431,7 @@ if (!courseData || !courseData.id) {
                                                     fileInputRef.current?.click()
                                                 }
                                                 disabled={!Permissions?.editCourse || isImageUploading}
-                                                className='bg-background text-primary'
+                                                className='bg-background text-primary hover:bg-background hover:text-primary'
                                             >
                                                 <Upload className="h-4 w-4 mr-2" />
                                                 {isImageUploading
@@ -597,7 +597,7 @@ if (!courseData || !courseData.id) {
                                                                     !Permissions?.editCourse ||
                                                                     isImageUploading
                                                                 }
-                                                                className='bg-background text-primary'
+                                                                className='bg-background text-primary hover:bg-background hover:text-primary'
                                                             >
                                                                 <Upload className="h-4 w-4 mr-2" />
                                                                 {croppedCollaboratorImage

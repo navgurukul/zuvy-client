@@ -113,13 +113,19 @@ const SettingsPage: React.FC = () => {
         }
     }
 
+    const refreshData = useCallback(() => {
+        // Refetch your users data
+        refetchUsers(offset)
+    }, [refetchUsers, offset])
+
     // Create columns with the fetched roles and callbacks
     const columns = createColumns(
         roles,
         rolesLoading,
         handleRoleChange,
         handleEdit,
-        handleDelete
+        handleDelete,
+        refreshData
     )
 
     const handleCloseModal = () => {

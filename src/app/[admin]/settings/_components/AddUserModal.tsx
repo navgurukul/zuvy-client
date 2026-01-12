@@ -109,6 +109,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         name: '',
         email: '',
     })
+    // Store original values to track changes
+    const [originalUser, setOriginalUser] = useState<{ name: string; email: string; roleId: number | null }>({
+        name: '',
+        email: '',
+        roleId: null,
+    })
 
     // Fetch fresh user data when entering edit mode
     useEffect(() => {
@@ -118,19 +124,39 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 try {
                     const response = await api.get(`/users/getUser/${user.id}`)
                     setFreshUserData(response.data)
+                    const fetchedName = response.data.name || ''
+                    const fetchedEmail = response.data.email || ''
+                    const fetchedRoleId = response.data.roleId || null
+                    
                     setNewUser({
-                        name: response.data.name || '',
-                        email: response.data.email || '',
+                        name: fetchedName,
+                        email: fetchedEmail,
                     })
-                    setPendingUserRole(response.data.roleId || null)
+                    setPendingUserRole(fetchedRoleId)
+                    // Store original values
+                    setOriginalUser({
+                        name: fetchedName,
+                        email: fetchedEmail,
+                        roleId: fetchedRoleId,
+                    })
                 } catch (error) {
                     // Fallback to passed user data if fetch fails
                     console.error('Error fetching fresh user data:', error)
+                    const fallbackName = user.name || ''
+                    const fallbackEmail = user.email || ''
+                    const fallbackRoleId = user.roleId || null
+                    
                     setNewUser({
-                        name: user.name || '',
-                        email: user.email || '',
+                        name: fallbackName,
+                        email: fallbackEmail,
                     })
-                    setPendingUserRole(user.roleId || null)
+                    setPendingUserRole(fallbackRoleId)
+                    // Store original values
+                    setOriginalUser({
+                        name: fallbackName,
+                        email: fallbackEmail,
+                        roleId: fallbackRoleId,
+                    })
                 } finally {
                     setIsFetchingFreshData(false)
                 }
@@ -145,6 +171,11 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             })
             setPendingUserRole(null)
             setFreshUserData(null)
+            setOriginalUser({
+                name: '',
+                email: '',
+                roleId: null,
+            })
         }
     }, [isEditMode, user?.id, isOpen])
 
@@ -153,10 +184,22 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
         setNewUser((prev) => ({ ...prev, [name]: value }))
     }
 
-    const canSubmit =
+    // Check if form is valid (for add mode)
+    const isFormValid =
         newUser.name.trim().length > 0 &&
         newUser.email.trim().length > 0 &&
         !!pendingUserRole
+
+    // Check if there are changes (for edit mode)
+    const hasChanges = isEditMode && (
+        newUser.name.trim() !== originalUser.name.trim() ||
+        newUser.email.trim() !== originalUser.email.trim() ||
+        pendingUserRole !== originalUser.roleId
+    )
+
+    // In edit mode, button should be enabled only if there are changes
+    // In add mode, button should be enabled if form is valid
+    const canSubmit = isEditMode ? hasChanges : isFormValid
 
      const iconList = [
         User,
@@ -248,6 +291,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 setFreshUserData({
                     ...freshUserData,
                     ...payload,
+                })
+                // Update original values after successful save
+                setOriginalUser({
+                    name: payload.name,
+                    email: payload.email,
+                    roleId: payload.roleId,
                 })
                 toast.success({
                     title: 'User updated successfully',
