@@ -17,9 +17,10 @@ type roleCellProps = {
   role: string;
   roles: any; 
   rolesLoading: boolean;
+  onRoleUpdate?: () => void;
 };
 
-export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId }: roleCellProps & { userId: number; roleId: number }) => {
+export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId, onRoleUpdate }: roleCellProps & { userId: number; roleId: number }) => {
     const [isUpdating, setIsUpdating] = useState(false)
     const [originalRole, setOriginalRole] = useState(role)
 
@@ -47,6 +48,7 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId }: ro
 
             // Update original role after successful save
             setOriginalRole(newRoleName)
+            onRoleUpdate?.()
 
             toast.success({
                 title: 'Role Updated',

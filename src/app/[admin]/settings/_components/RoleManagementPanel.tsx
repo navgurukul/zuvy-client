@@ -632,11 +632,12 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                         size="sm"
                                         onClick={handleAssignPermissions}
                                         className="text-xs bg-accent text-white"
-                                        disabled={!(hasPermissionMismatchForResource(
-                                            fetchedPermissions,
-                                            selectedPermissions,
-                                            selectedAction
-                                        ))}
+                                        disabled={!hasUnsavedChanges || assigning}
+                                        // disabled={!(hasPermissionMismatchForResource(
+                                        //     fetchedPermissions,
+                                        //     selectedPermissions,
+                                        //     selectedAction
+                                        // ))}
                                     >
                                         Save Changes
                                     </Button>
