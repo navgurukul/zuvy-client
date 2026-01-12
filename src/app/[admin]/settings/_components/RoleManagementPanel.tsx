@@ -383,7 +383,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 </DialogContent>
             </Dialog>
 
-            {/* Page Header */}
+            {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
                     <h2 className="text-lg text-start font-semibold text-gray-900">
