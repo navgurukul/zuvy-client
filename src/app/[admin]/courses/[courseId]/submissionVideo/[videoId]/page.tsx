@@ -2,11 +2,12 @@
 
 // External imports
 import React, { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter,useSearchParams } from 'next/navigation'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { columns } from './column'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
@@ -22,7 +23,9 @@ interface BatchFilter {
 
 const Page = ({ params }: any) => {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
+    const currentTab = searchParams.get('tab') || 'video'
     const [videoData, setVideoData] = useState<any>()
     const [dataTableVideo, setDataTableVideo] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>()
@@ -121,9 +124,6 @@ const Page = ({ params }: any) => {
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
     
-        queryParams.append('limit', '10')
-        queryParams.append('offset', '0')
-    
         downloadCsv({
             endpoint: `/admin/moduleChapter/students/chapter_id${params.videoId}?${queryParams.toString()}`,
     
@@ -185,14 +185,15 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
+                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                    <Button
+                        variant="ghost"              
+                        className="hover:bg-transparent hover:text-primary transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </Link>
             </div>
 
             {/* Assessment Info Card */}

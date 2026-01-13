@@ -13,6 +13,7 @@ import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
 import { getIsReattemptApproved, getOffset } from '@/store/store'
@@ -54,7 +55,6 @@ const Page = ({ params }: any) => {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
-
     const [assesmentData, setAssessmentData] = useState<any>()
     const [dataTableAssesment, setDataTableAssessments] = useState<any>([])
     const [bootcampData, setBootcampData] = useState<any>()
@@ -329,10 +329,7 @@ const Page = ({ params }: any) => {
     
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
-        queryParams.append('offset', '0')
-        queryParams.append('limit', '10')
-    
+
         downloadCsv({
             endpoint: `/admin/assessment/students/assessment_id${params.assessment_Id}?${queryParams.toString()}`,
     
@@ -370,18 +367,17 @@ const Page = ({ params }: any) => {
     
     return (
         <>
-        {/* <div className="min-h-screen flex justify-center"> */}
             <MaxWidthWrapper className="">
-                {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
-                    <Button
-                        variant="ghost"
-                        onClick={() => router.back()}
-                        className="hover:bg-transparent hover:text-primary transition-colors"
-                    >
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Course Submissions
-                    </Button>
+                    <Link href={`/admin/courses/${params.courseId}/submissions`}>
+                        <Button
+                            variant="ghost"
+                            className="hover:bg-transparent hover:text-primary transition-colors"
+                        >
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Back to Course Submissions
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Assessment Info Card */}
@@ -481,7 +477,6 @@ const Page = ({ params }: any) => {
                     />
                 </div>
             </MaxWidthWrapper>
-            {/* </div> */}
         </>
     )
 }
