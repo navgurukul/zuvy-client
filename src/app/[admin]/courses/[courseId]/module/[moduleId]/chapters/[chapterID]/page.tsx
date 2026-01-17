@@ -218,7 +218,7 @@ export default function Page({
                         <LiveClass
                             chapterData={currentChapter}
                             content={chapterContent}
-                            // fetchChapterContent={fetchChapterContent}
+                            fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
                             courseId={courseId}
                             canEdit={canEditChapter}

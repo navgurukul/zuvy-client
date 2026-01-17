@@ -4,6 +4,7 @@ export type LiveClassProps = {
     moduleId: any
     courseId: any
     canEdit?: boolean
+    fetchChapterContent: () => void
 }
 
 export interface SessionDetail{

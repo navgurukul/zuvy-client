@@ -8,9 +8,11 @@ import { Spinner } from '@/components/ui/spinner'
 import { DeleteConfirmationModalProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
+    topicId,
     isOpen,
     onClose,
     onConfirm,
+    onDeleteChapterWithSession,
     modalTitle,
     modalText,
     buttonText,
@@ -107,7 +109,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     </Dialog.Title>
                                     <div className="mt-2">
                                         <p className="text-sm text-gray-700 my-2 ">
-                                            {modalText}
+                                            {topicId === 8 ? "Do you want to delete the chaper or delete the session too ?" :  modalText}
                                         </p>
                                         <div className="text-sm flex gap-x-2 text-black font-semibold my-2 mb-2">
                                             <p className="text-black font-normal">
@@ -134,7 +136,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                 )}
                             </div>
                             <div className="mt-5 sm:mt-6 flex justify-end gap-2">
-                                <Button
+                              {topicId!== 8 && <Button
                                     variant={'outline'}
                                     type="button"
                                     className=" p-2 inline-flex justify-center rounded-md border shadow-sm px-4 text-base font-medium  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
@@ -144,21 +146,35 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     {modalTitle
                                         ? 'Keep the Question'
                                         : 'Cancel'}
-                                </Button>
+                                </Button>}
                                 {loading ? (
                                     <Button variant={'destructive'} disabled>
                                         <Spinner className="mr-2 h-12 animate-spin w-1/3" />
                                         Deleting Session
                                     </Button>
                                 ) : (
+                                    <>
                                     <Button
-                                        variant={'destructive'}
+                                        variant={topicId === 8 ? "secondary" : "destructive"}
                                         type="button"
                                         className="shadow-4dp p-2 inline-flex justify-center rounded-md border border-transparent px-4 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive sm:text-sm"
                                         onClick={handleConfirm}
                                     >
                                         {buttonText}
                                     </Button>
+                                    {topicId === 8 && (
+                                         <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        className="shadow-4dp p-2 inline-flex justify-center rounded-md border border-transparent px-4 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive sm:text-sm"
+                                        onClick={() => onDeleteChapterWithSession()}
+                                    >
+                                        {"Delete Both"}
+                                    </Button>
+                                    )}
+                                     
+
+                                    </>
                                 )}
                             </div>
                         </div>
