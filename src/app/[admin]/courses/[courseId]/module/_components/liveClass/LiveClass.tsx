@@ -240,7 +240,7 @@ const LiveClass = ({
             
             // console.log('Payload:', payload)
             
-            const sessionId =  session.meetingId
+            const sessionId =  session.id
             await api.put(`/classes/sessions/${sessionId}`, payload)
             // fetchChapterContent()
             
