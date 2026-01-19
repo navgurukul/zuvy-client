@@ -10,7 +10,7 @@ import { getBatchData, getCourseData, getStoreStudentData, getDeleteStudentStore
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
-import { createColumns } from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/columns'
+import { createColumns } from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/batches/columns'
 import {
     StudentData,
     BatchSuggestion,
@@ -18,7 +18,7 @@ import {
     ParamsType,
     EnhancedBatch,
     PermissionsType,
-} from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+} from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
 
 export default function useBatches(params: ParamsType) {
     const router = useRouter()

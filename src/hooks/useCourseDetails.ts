@@ -6,7 +6,7 @@ import {
     CourseDetailsFormData,
     UpdateCourseResponse,
     ImageUploadResponse,
-} from '@/app/[admin]/courses/[courseId]/(courseTabs)/details/courseDetailType'
+} from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/details/courseDetailType'
 
 export const useCourseDetails = () => {
     const [isLoading, setIsLoading] = useState(false)

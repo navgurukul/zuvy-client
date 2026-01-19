@@ -11,11 +11,11 @@ import { getUser, getDeleteStudentStore, getStoreStudentData } from '@/store/sto
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { POSITION } from '@/utils/constant'
-import { useStudentData } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
-import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
-import type { StudentDataPage } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
-import { PermissionsType } from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
-import { createColumns } from '@/app/[admin]/courses/[courseId]/batch/[batchId]/columns'
+import { useStudentData } from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
+import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/[organization]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
+import type { StudentDataPage } from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
+import { PermissionsType } from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+import { createColumns } from '@/app/[admin]/[organization]/courses/[courseId]/batch/[batchId]/columns'
 
 export default function useBatchDetail(params: { courseId: string; batchId: string }) {
     const router = useRouter()

@@ -34,7 +34,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
+import DeleteConfirmationModal from '../../[organization]/courses/[courseId]/_components/deleteModal'
 import RemirrorForForm from '@/app/[admin]/resource/_components/RemirrorForForm'
 import {
     Tag,

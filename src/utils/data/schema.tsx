@@ -74,3 +74,19 @@ export const openEndedQuestionSchema = z.object({
     marks: z.string().transform((val) => parseInt(val, 10)),
     usage: z.number(),
 })
+
+export const orgSchema = z.object({
+    name: z.string(),
+    managementType: z.string(),
+    poc: z.object({
+        name: z.string(),
+        email: z.string(),
+    }),
+    assignee: z.object({
+        name: z.string(),
+        email: z.string(),
+    }),
+    createdAt: z.number(),
+})
+
+export type Org = z.infer<typeof orgSchema>

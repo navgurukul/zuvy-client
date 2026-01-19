@@ -29,7 +29,7 @@ import { POSITION, OFFSET } from '@/utils/constant'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {McqSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import {McqSkeleton} from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 
 import { 
     Dialog, 
