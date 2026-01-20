@@ -14,6 +14,7 @@ import {
     TooltipTrigger,
   } from '@/components/ui/tooltip'
   import { Org } from '@/utils/data/schema'
+  import Link from 'next/link'
   
 // export interface User {
 //     createdAt: any
@@ -47,11 +48,11 @@ export const createColumns = (management: any[]): ColumnDef<Org>[] => [
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="max-w-[180px] cursor-pointer text-left text-gray-900">
+                <Link href={`/admin/${name}/courses`} className="max-w-[180px] cursor-pointer text-left text-gray-900">
                   {name.length > limit
                     ? name.substring(0, limit) + '...'
                     : name}
-                </div>
+                </Link>
               </TooltipTrigger>
     
               {name.length > limit && (

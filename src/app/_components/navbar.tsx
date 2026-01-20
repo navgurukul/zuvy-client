@@ -19,12 +19,15 @@ import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 import { getPermissions } from '@/lib/GetPermissions'
 import { Spinner } from '@/components/ui/spinner'
+import OrganizationDropdown from './organizationDropdown'
 
 //Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    const orgName = pathname.split('/')[2]
+    const superAdmin = true
     // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
@@ -40,7 +43,23 @@ const Navbar = () => {
         await Logout()
     }
 
-    const routes = [
+    const superAdminRoutes = [
+        {
+            name: 'Organizations',
+            href: `/${role}/organizations`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
+        },
+        {
+            name: 'Question Bank',
+            href: `/${role}/content-bank`,
+            icon: Database,
+            active: `/${role}/content-bank`,
+        }
+    ]
+
+    const adminRoutes = [
         {
             name: 'Course Studio',
             href: `/${role}/courses`,
@@ -62,6 +81,8 @@ const Navbar = () => {
         },
     ]
 
+    const routes = superAdmin && !pathname.includes("course") ? superAdminRoutes : superAdmin && pathname.includes("course") ? adminRoutes : adminRoutes;
+
     useEffect(() => {
         (async () => {
             const perms = await getPermissions();
@@ -77,6 +98,8 @@ const Navbar = () => {
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
+
+                    <OrganizationDropdown orgName={orgName} />
 
                     {/* Navigation Items */}
                     <nav className="flex items-center space-x-1">

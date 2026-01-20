@@ -14,6 +14,7 @@ import { Description } from '@radix-ui/react-toast';
 interface Organization {
     id: string;
     name: string;
+    code: string;
     managementType: 'Self Managed' | 'Zuvy Managed';
     poc: {
         name: string;
@@ -30,6 +31,7 @@ const mockOrganizations: Organization[] = [
     {
         id: '1',
         name: 'Amazon Future Engineer',
+        code: 'AF',
         managementType: 'Self Managed',
         poc: { name: 'John Doe', email: 'john.doe@amazon.com' },
         assignee: { name: 'Alex Kumar', email: 'alex.kumar@zuvy.com' },
@@ -38,6 +40,7 @@ const mockOrganizations: Organization[] = [
     {
         id: '2',
         name: 'Microsoft',
+        code: 'M',
         managementType: 'Zuvy Managed',
         poc: { name: 'Sarah Smith', email: 'sarah.smith@microsoft.com' },
         assignee: { name: 'Alex Kumar', email: 'alex.kumar@zuvy.com' },
@@ -46,6 +49,7 @@ const mockOrganizations: Organization[] = [
     {
         id: '3',
         name: 'Global Solutions Inc',
+        code: 'GS',
         managementType: 'Self Managed',
         poc: { name: 'Michael Johnson', email: 'michael@globalsolutions.com' },
         assignee: { name: 'Priya Sharma', email: 'priya.sharma@zuvy.com' },
@@ -53,15 +57,8 @@ const mockOrganizations: Organization[] = [
     },
     {
         id: '4',
-        name: 'Amazon Future Engineer',
-        managementType: 'Zuvy Managed',
-        poc: { name: 'Emily Brown', email: 'emily.brown@amazon.com' },
-        assignee: { name: 'Priya Sharma', email: 'priya.sharma@zuvy.com' },
-        createdAt: '2024-04-05',
-    },
-    {
-        id: '5',
         name: 'Enterprise Solutions',
+        code: 'ES',
         managementType: 'Self Managed',
         poc: { name: 'David Wilson', email: 'david.wilson@enterprisesol.com' },
         assignee: { name: 'Priya Sharma', email: 'priya.sharma@zuvy.com' },
