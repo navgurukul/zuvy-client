@@ -26,16 +26,33 @@ import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { getModuleData, getChapterDataState } from '@/store/store'
 
-const liveClassSchema = z.object({
-    title: z.string().min(1, 'Title is required'),
-    description: z.string().min(1, 'Description is required'),
-    date: z.string().min(1, 'Date is required'),
-    startTime: z.string().min(1, 'Start time is required'),
-    endTime: z.string().min(1, 'End time is required'),
-    batch: z.string().min(1, 'Batch is required'),
-    secondaryBatch: z.string().optional(),
-    meetingPlatform: z.string(),
-})
+const liveClassSchema = z
+    .object({
+        title: z.string().min(1, 'Title is required'),
+        description: z.string().min(1, 'Description is required'),
+        date: z.string().min(1, 'Date is required'),
+        startTime: z.string().min(1, 'Start time is required'),
+        endTime: z.string().min(1, 'End time is required'),
+        batch: z.string().min(1, 'Batch is required'),
+        secondaryBatch: z.string().optional(),
+        meetingPlatform: z.string(),
+    })
+    .refine((data) => data.startTime < data.endTime, {
+        message: 'Start Time cannot be after or equal to end Time',
+        path: ['endTime'],
+    })
+    .refine((data) => {
+        // Ensure at least 30 minutes gap between startTime and endTime
+        if (!data.startTime || !data.endTime) return true
+        const [startHour, startMinute] = data.startTime.split(':').map(Number)
+        const [endHour, endMinute] = data.endTime.split(':').map(Number)
+        const start = startHour * 60 + startMinute
+        const end = endHour * 60 + endMinute
+        return end - start >= 30
+    }, {
+        message: 'There must be at least 30 minutes between start and end time',
+        path: ['endTime'],
+    })
 
 type LiveClassFormData = z.infer<typeof liveClassSchema>
 
@@ -190,6 +207,17 @@ const LiveClass = ({
                 return <Clock className="w-3 h-3" />
         }
     }
+
+    // Watch startTime and endTime for real-time validation
+    const startTime = form.watch('startTime')
+    const endTime = form.watch('endTime')
+
+    // Trigger validation when times change
+    React.useEffect(() => {
+        if (startTime && endTime) {
+            form.trigger(['startTime', 'endTime'])
+        }
+    }, [startTime, endTime, form])
 
     useEffect(() => {
 
