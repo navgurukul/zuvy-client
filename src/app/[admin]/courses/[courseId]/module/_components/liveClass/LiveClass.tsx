@@ -274,6 +274,15 @@ const LiveClass = ({
 
     const onSubmit = async (data: LiveClassFormData) => {
         if (!canEditFields) return
+                    // Capitalize title - convert to title case
+                    const capitalizeTitle = (str: string) => {
+                        return str
+                            .toLowerCase()
+                            .split(' ')
+                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                            .join(' ')
+                    }
+
         try {
             // Use the same date formatting logic as createLiveClass
             const combineDateTime = (date: Date, time: string) => {
@@ -288,9 +297,12 @@ const LiveClass = ({
             const startDateTime = combineDateTime(dateObj, data.startTime)
             const endDateTime = combineDateTime(dateObj, data.endTime)
             
+                        // Capitalize the title before sending
+                        const capitalizedTitle = capitalizeTitle(data.title)
+            
             // Generate payload in the required format
             const payload = {
-                title: data.title,
+                title: capitalizedTitle,
                 description: data.description,
                 startDateTime: startDateTime,
                 endDateTime: endDateTime,
@@ -305,10 +317,10 @@ const LiveClass = ({
             await api.put(`/classes/sessions/${sessionId}`, payload)
             
             // Update both moduleData and chapterData in store to reflect title change in sidebar
-            if (data.title !== content?.title) {
+            if (capitalizedTitle !== content?.title) {
                 const updatedData = moduleData.map((chapter: any) => 
                     chapter.chapterId === chapterId 
-                        ? { ...chapter, chapterTitle: data.title }
+                        ? { ...chapter, chapterTitle: capitalizedTitle }
                         : chapter
                 )
                 setModuleData(updatedData)
@@ -358,7 +370,7 @@ const LiveClass = ({
         )
     }
     return (
-        <div className="w-3/4 mx-auto py-6 h-full flex flex-col">
+        <div className="w-4/5 mx-auto py-6 h-full flex flex-col">
             {!canEdit && (
                 <PermissionAlert
                     alertOpen={alertOpen}
