@@ -58,6 +58,7 @@ export default function Page({
         useState(false)
 
     const fetchChapterContent = useCallback(
+        
         async (chapterId: number, topicId: number) => {
             try {
                 const response = await api.get(
@@ -222,6 +223,8 @@ export default function Page({
                             moduleId={moduleID}
                             courseId={courseId}
                             canEdit={canEditChapter}
+                            chapterId={chapter_id}
+                            topicId={topicId}
                         />
                     )
                 default:

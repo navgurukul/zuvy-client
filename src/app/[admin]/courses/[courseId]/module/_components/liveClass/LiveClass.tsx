@@ -24,6 +24,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { getModuleData, getChapterDataState } from '@/store/store'
 
 const liveClassSchema = z.object({
     title: z.string().min(1, 'Title is required'),
@@ -39,18 +40,22 @@ const liveClassSchema = z.object({
 type LiveClassFormData = z.infer<typeof liveClassSchema>
 
 const LiveClass = ({
-    chapterData,
+    // chapterData,
     content,
     fetchChapterContent,
     moduleId,
     courseId,
     canEdit = true,
+    chapterId,
+    topicId,
 }: LiveClassProps) => {
     const session = content?.sessionDetails?.[0]
     const [isLoading, setIsLoading] = useState(true)
     const [alertOpen, setAlertOpen] = useState(false)
     const [batchData, setBatchData] = useState<any[]>([])
-    const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
+        const { moduleData, setModuleData } = getModuleData()    
+        const { chapterData, setChapterData } = getChapterDataState()    
+        const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
     const canEditFields = canEdit && isUpcoming
 
     const form = useForm<LiveClassFormData>({
@@ -242,9 +247,23 @@ const LiveClass = ({
             
             const sessionId =  session.id
             await api.put(`/classes/sessions/${sessionId}`, payload)
-            // fetchChapterContent()
             
-            // form.reset(data)
+            // Update both moduleData and chapterData in store to reflect title change in sidebar
+            if (data.title !== content?.title) {
+                const updatedData = moduleData.map((chapter: any) => 
+                    chapter.chapterId === chapterId 
+                        ? { ...chapter, chapterTitle: data.title }
+                        : chapter
+                )
+                setModuleData(updatedData)
+                setChapterData(updatedData)
+            }
+            
+            // Fetch updated content
+            if (chapterId && topicId) {
+                await fetchChapterContent(chapterId, topicId)
+            }
+            
             toast.success({ title: 'Live class updated successfully' })
         } catch (err) {
             console.error('Failed to update live class', err)
@@ -281,8 +300,6 @@ const LiveClass = ({
             </div>
         )
     }
-
-
     return (
         <div className="w-3/4 mx-auto py-6 h-full flex flex-col">
             {!canEdit && (
@@ -290,8 +307,7 @@ const LiveClass = ({
                     alertOpen={alertOpen}
                     setAlertOpen={setAlertOpen}
                 />
-            )}
-            
+            )}          
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="bg-background rounded-lg flex flex-col h-[600px] overflow-hidden">
                 {/* Scrollable Content */}
@@ -336,7 +352,7 @@ const LiveClass = ({
                     />
 
                     {/* Description Textarea */}
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="description"
                         render={({ field }) => (
@@ -356,7 +372,7 @@ const LiveClass = ({
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    /> */}
 
                     {/* Date, Start Time, End Time Row */}
                     <div className="grid grid-cols-3 gap-4">
