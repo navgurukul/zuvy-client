@@ -64,7 +64,7 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
         orgName.toLowerCase() === org.name.toLowerCase()
     );
     const [isOpen, setIsOpen] = useState(false);
-    const [selected, setSelected] = useState(filteredSelectedOrg[0]);
+    const [selected, setSelected] = useState(filteredSelectedOrg[0] || organizations[0]);
     const [searchTerm, setSearchTerm] = useState('');
 
     const filtered = organizations.filter(org =>
