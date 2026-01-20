@@ -28,7 +28,7 @@ import { getModuleData, getChapterDataState } from '@/store/store'
 
 const liveClassSchema = z
     .object({
-        title: z.string().min(1, 'Title is required'),
+        title: z.string().min(1, 'Title is required').max(50, 'Title must not exceed 50 characters'),
         description: z.string().min(1, 'Description is required'),
         date: z.string().min(1, 'Date is required'),
         startTime: z.string().min(1, 'Start time is required'),
@@ -70,6 +70,7 @@ const LiveClass = ({
     const [isLoading, setIsLoading] = useState(true)
     const [alertOpen, setAlertOpen] = useState(false)
     const [batchData, setBatchData] = useState<any[]>([])
+    const [recordingLink, setRecordingLink] = useState<string | null>(null)
         const { moduleData, setModuleData } = getModuleData()    
         const { chapterData, setChapterData } = getChapterDataState()    
         const isUpcoming = session?.status?.toLowerCase() === 'upcoming'
@@ -219,6 +220,33 @@ const LiveClass = ({
         }
     }, [startTime, endTime, form])
 
+    // Fetch recording link from analytics API for completed sessions
+    useEffect(() => {
+        const fetchRecordingLink = async () => {
+            if (session?.status?.toLowerCase() === 'completed' && session?.id) {
+                try {
+                    const res = await api.get(`/classes/analytics/${session.id}`)
+                    const analyticsS3Link = res.data?.data?.session?.s3link
+                    const analyticsRecordingLink = res.data?.data?.session?.recordingLink
+                    const analyticsYoutubeLink = res.data?.data?.session?.youtubeLink
+                    
+                    // Set recording link if available
+                    if (analyticsS3Link && analyticsS3Link !== 'not found') {
+                        setRecordingLink(analyticsS3Link)
+                    } else if (analyticsRecordingLink) {
+                        setRecordingLink(analyticsRecordingLink)
+                    } else if (analyticsYoutubeLink) {
+                        setRecordingLink(analyticsYoutubeLink)
+                    }
+                } catch (error) {
+                    console.error('Error fetching recording link:', error)
+                }
+            }
+        }
+
+        fetchRecordingLink()
+    }, [session?.id, session?.status])
+
     useEffect(() => {
 
         getBatchDataNew(courseId).then((data) => {
@@ -313,7 +341,8 @@ const LiveClass = ({
        return <RecordingSkeletons/>
     }
 
-    console.log('batchData:', batchData)
+    console.log('Session Data:', session)
+    console.log('Recording Links - s3link:', session?.s3link, 'recordingLink:', session?.recordingLink, 'youtubeLink:', session?.youtubeLink)
 
     if (!content || !session) {
         return (
@@ -345,14 +374,43 @@ const LiveClass = ({
                         <h2 className="text-2xl font-semibold text-foreground">
                             {content.title}
                         </h2>
-                        <Badge
-                            className={`${getStatusColor(
-                                session.status
-                            )} font-medium px-3 py-1 text-sm`}
-                        >
-                            {session.status.charAt(0).toUpperCase() +
-                                session.status.slice(1)}
-                        </Badge>
+                        <div className="flex items-center gap-3">
+                            <Badge
+                                className={`${getStatusColor(
+                                    session.status
+                                )} font-medium px-3 py-1 text-sm`}
+                            >
+                                {session.status.charAt(0).toUpperCase() +
+                                    session.status.slice(1)}
+                            </Badge>
+                            {/* Download Attendance Button for Completed Classes */}
+                            {session.status.toLowerCase() === 'completed' && (
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                className="font-medium"
+                                                onClick={handleDownloadAttendance}
+                                                disabled={
+                                                    !canEdit ||
+                                                    !session?.s3link ||
+                                                    session?.s3link === 'not found'
+                                                }
+                                            >
+                                                Download Attendance
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p className="text-sm">
+                                                {!session?.s3link || session?.s3link === 'not found' 
+                                                    ? 'No attendance report available' 
+                                                    : 'Click to download attendance report'}
+                                            </p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            )}
+                        </div>
                     </div>
 
                     {/* Form Fields */}
@@ -363,45 +421,29 @@ const LiveClass = ({
                         name="title"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-sm font-medium text-foreground block text-left">
-                                    Title
-                                </FormLabel>
+                                <div className="flex items-center justify-between">
+                                    <FormLabel className="text-sm font-medium text-foreground block text-left">
+                                        Title
+                                    </FormLabel>
+                                </div>
                                 <FormControl>
                                     <Input
                                         {...field}
                                         placeholder="Advanced Event Handling"
                                         disabled={!canEditFields}
+                                        maxLength={50}
                                         className="bg-muted/50 border-input"
                                     />
                                 </FormControl>
+                                {field.value?.length >= 50 && (
+                                    <p className="text-sm text-red-600 font-medium text-left">
+                                        You can enter up to 100 characters only.
+                                    </p>
+                                )}
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-
-                    {/* Description Textarea */}
-                    {/* <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel className="text-sm font-medium text-foreground block text-left">
-                                    Description
-                                </FormLabel>
-                                <FormControl>
-                                    <Textarea
-                                        {...field}
-                                        placeholder="Enter live class description"
-                                        disabled={!canEditFields}
-                                        rows={4}
-                                        className="bg-muted/50 border-input resize-none"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
-
                     {/* Date, Start Time, End Time Row */}
                     <div className="grid grid-cols-3 gap-4">
                         <FormField
@@ -437,7 +479,11 @@ const LiveClass = ({
                                                         field.onChange(format(date, "yyyy-MM-dd"))
                                                     }
                                                 }}
-                                                disabled={!canEditFields}
+                                                disabled={(date) => {    
+                                                    const today = new Date()
+                                                    today.setHours(0, 0, 0, 0)
+                                                    return date < today
+                                                }}
                                                 initialFocus
                                             />
                                         </PopoverContent>
@@ -446,7 +492,6 @@ const LiveClass = ({
                                 </FormItem>
                             )}
                         />
-
                         <FormField
                             control={form.control}
                             name="startTime"
@@ -586,7 +631,7 @@ const LiveClass = ({
                     />
 
                     {/* Zoom Integration Info Box */}
-                    {form.watch('meetingPlatform') === 'zoom' && (
+                    {form.watch('meetingPlatform') === 'zoom' && isUpcoming && (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3">
                             <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                             <div className="space-y-1">
@@ -601,55 +646,47 @@ const LiveClass = ({
                     )}
                 </div>
 
-                {/* Download Attendance Button for Completed Classes */}
-                {session.status.toLowerCase() === 'completed' && (
-                    <div className="pt-4 border-t">
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        className="font-medium"
-                                        onClick={handleDownloadAttendance}
-                                        disabled={
-                                            !canEdit ||
-                                            !session?.s3link ||
-                                            session?.s3link === 'not found'
-                                        }
-                                    >
-                                        Download Attendance
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p className="text-sm">
-                                        {!session?.s3link || session?.s3link === 'not found' 
-                                            ? 'No attendance report available' 
-                                            : 'Click to download attendance report'}
-                                    </p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
-                )}
-
                 {/* Recording or Meeting Link Section */}
-                {session.status.toLowerCase() === 'completed' &&
-                session.s3link &&
-                session.s3link !== 'not found' ? (
-                    <div className="space-y-3 pt-4 border-t">
-                        <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-                            <Video className="w-4 h-4" />
-                            Meeting Recording
-                        </h4>
-                        <div className="bg-foreground/5 rounded-lg overflow-hidden">
-                            <iframe
-                                src={getEmbedLink(session.s3link)}
-                                className="w-full h-80 border-0"
-                                allowFullScreen
-                                title={`Recording: ${session.title}`}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            />
+                {session.status.toLowerCase() === 'completed' ? (
+                    (session.s3link && session.s3link !== 'not found') || 
+                    session.recordingLink || 
+                    session.youtubeLink ||
+                    recordingLink ? (
+                        <div className="space-y-3 pt-4 border-t">
+                            <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
+                                <Video className="w-4 h-4" />
+                                Meeting Recording
+                            </h4>
+                            <div className="bg-foreground/5 rounded-lg overflow-hidden">
+                                <iframe
+                                    src={getEmbedLink(
+                                        recordingLink ||
+                                        (session.s3link && session.s3link !== 'not found' 
+                                            ? session.s3link 
+                                            : session.recordingLink || session.youtubeLink)
+                                    )}
+                                    className="w-full h-80 border-0"
+                                    allowFullScreen
+                                    title={`Recording: ${session.title}`}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                />
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="pt-4 border-t">
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex gap-3">
+                                <Info className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                                <div className="space-y-1">
+                                    <h4 className="font-medium text-left text-yellow-900 text-sm">
+                                        Recording Processing
+                                    </h4>
+                                    <p className="text-sm text-yellow-700">
+                                        The recording is being processed and will be available shortly. Please refresh the page after some time.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )
                 ) : session.status.toLowerCase() === 'ongoing' ? (
                     <div className="pt-4 border-t">
                         <Button
