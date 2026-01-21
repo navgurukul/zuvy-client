@@ -171,7 +171,7 @@ export default function useBatches(params: ParamsType) {
                 .refine((capEnrollment) => {
                     const parsedValue = parseInt(capEnrollment)
                     return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
-                }, { message: 'Cap Enrollment must be a positive number between 1 and 100,000' })
+                }, { message: 'Cap Enrollment must be a positive number from 1 to 100000' })
                 .superRefine((capEnrollment, ctx) => {
                     // Additional validation for edit mode
                     if (editingBatch) {
