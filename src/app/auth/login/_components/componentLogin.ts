@@ -19,6 +19,7 @@ export interface User {
   name: string;
   email: string;
   rolesList: string[]; 
+  hasfilled: boolean;
 }
 
 export interface AuthResponse {
