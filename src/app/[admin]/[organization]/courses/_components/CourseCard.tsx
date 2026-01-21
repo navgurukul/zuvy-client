@@ -4,6 +4,7 @@ import { CourseCardProps } from '@/app/[admin]/[organization]/courses/[courseId]
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
+import { Badge } from '@/components/ui/badge'
 
 const CourseCard = ({
     course,

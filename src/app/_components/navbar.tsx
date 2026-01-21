@@ -150,11 +150,17 @@ const Navbar = () => {
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
 
                     {/* Role Badge */}
-                    {studentData?.rolesList?.[0] && (
+                    {/* {studentData?.rolesList?.[0] && (
                         <div className="hidden sm:flex items-center px-4 py-1 bg-violet-50 text-violet-700 border-violet-200 rounded-full text-sm font-medium border border-primary/20">
                             <span className="capitalize">{studentData.rolesList[0]}</span>
                         </div>
-                    )}
+                    )} */}
+                    <Badge
+                        // variant="yellow"
+                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200"
+                    >
+                        {role}
+                    </Badge>
 
                     {/* Setting Tab - Only for Admin and POC */}
                     {(studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
