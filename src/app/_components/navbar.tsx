@@ -161,13 +161,6 @@ const Navbar = () => {
                         )}
                     </Button> */}
 
-                    <Badge
-                        // variant="yellow"
-                        className="mb-3"
-                    >
-                        {role}
-                    </Badge>
-
                     {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown
                         studentData={studentData}
