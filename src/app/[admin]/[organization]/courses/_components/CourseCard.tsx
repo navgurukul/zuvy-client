@@ -38,6 +38,13 @@ const CourseCard = ({
                     <h3 className="font-semibold font-body text-start text-lg leading-tight line-clamp-2 transition-colors flex-1">
                         {course.name}
                     </h3>
+                    
+                    {/* Organization Code Badge */}
+                    {/* {(course as any).organizationCode && ( */}
+                        <div className="flex items-center px-2 bg-primary/10 text-primary rounded-full font-medium border border-primary/20 shrink-0">
+                            <span className='text-[14px]'>AFE</span>
+                        </div>
+                    {/* )} */}
                 </div>
             </CardContent>
 

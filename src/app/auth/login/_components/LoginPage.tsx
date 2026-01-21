@@ -171,13 +171,19 @@ const handleGoogleSuccess = async (
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
                 const userRole = response.data.user.rolesList[0]
+                const hasFilled = response.data.user.hasfilled
+
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     router.push('/student')
+                } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
+                    // Redirect admin/poc to settings if hasfilled is false
+                    router.push(`/${userRole}/setting`)
                 } else {
+                    // Default redirect for other roles or when hasfilled is true
                     router.push(`/${userRole}/courses`)
                 }
             }
