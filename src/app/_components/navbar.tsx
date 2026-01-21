@@ -20,6 +20,7 @@ import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 import { getPermissions } from '@/lib/GetPermissions'
 import { Spinner } from '@/components/ui/spinner'
 import OrganizationDropdown from './organizationDropdown'
+import { Badge } from '@/components/ui/badge'
 
 //Test
 const Navbar = () => {
@@ -93,7 +94,7 @@ const Navbar = () => {
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
             <div className="flex h-16 items-center justify-between px-6">
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
@@ -159,6 +160,13 @@ const Navbar = () => {
                             <Moon className="h-4 w-4" />
                         )}
                     </Button> */}
+
+                    <Badge
+                        // variant="yellow"
+                        className="mb-3"
+                    >
+                        {role}
+                    </Badge>
 
                     {/* Profile Avatar with Dropdown */}
                     <ProfileDropDown
