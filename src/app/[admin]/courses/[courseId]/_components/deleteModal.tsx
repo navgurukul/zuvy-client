@@ -46,14 +46,14 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                 input
             ) {
                 setError(null)
-                onConfirm()
+                onConfirm?.()
             } else if (!input) {
-                onConfirm()
+                onConfirm?.()
             } else {
                 setError('Batch name does not match')
             }
         } else {
-            onConfirm()
+            onConfirm?.()
         }
     }
 
@@ -65,7 +65,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
             <Dialog
                 as="div"
                 className="fixed z-[60] inset-0 overflow-y-auto"
-                onClose={onClose}
+                onClose={() => onClose?.()}
             >
                 <div className="flex items-center justify-start min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                     <Transition.Child
@@ -179,7 +179,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         className="px-6 py-2 text-sm font-medium bg-red-600 hover:bg-red-700"
                                         onClick={() => {
                                             if (topicId === 8 && deleteWithSession) {
-                                                onDeleteChapterWithSession()
+                                                onDeleteChapterWithSession?.()
                                             } else {
                                                 handleConfirm()
                                             }

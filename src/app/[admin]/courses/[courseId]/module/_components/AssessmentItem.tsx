@@ -110,11 +110,12 @@ function AssessmentItem({
                 onConfirm={() => {
                     handleDeleteChapter()
                     setDeleteModalOpen(false)
-                }}
+                } }
                 modalText={DELETE_CHAPTER_CONFIRMATION}
                 buttonText="Delete Chapter"
-                input={false}
-            />
+                input={false} topicId={0} onDeleteChapterWithSession={function (): void {
+                    throw new Error('Function not implemented.')
+                } }            />
         </div>
     )
 }

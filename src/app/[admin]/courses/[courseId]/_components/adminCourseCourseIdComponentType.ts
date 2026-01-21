@@ -109,15 +109,15 @@ export type CurricullamCardProps = {
 
 // DeleteConfirmationModal.tsx
 export interface DeleteConfirmationModalProps {
-    topicId: number
-    isOpen: boolean
-    onClose: () => void
-    onDeleteChapterWithSession: () => void
-    onConfirm: () => void
+    topicId?: number
+    isOpen?: boolean
+    onClose?: () => void
+    onDeleteChapterWithSession?: () => void
+    onConfirm?: () => void
     modalTitle?: string
     modalText?: string
     buttonText?: string
-    input: boolean
+    input?: boolean
     modalText2?: string
     instructorInfo?: any
     loading?: boolean
