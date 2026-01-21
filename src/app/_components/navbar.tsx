@@ -20,6 +20,7 @@ import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 import { getPermissions } from '@/lib/GetPermissions'
 import { Spinner } from '@/components/ui/spinner'
 import OrganizationDropdown from './organizationDropdown'
+import { Badge } from '@/components/ui/badge'
 
 //Test
 const Navbar = () => {
@@ -93,7 +94,7 @@ const Navbar = () => {
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
             <div className="flex h-16 items-center justify-between px-6">
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
@@ -149,11 +150,17 @@ const Navbar = () => {
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
 
                     {/* Role Badge */}
-                    {studentData?.rolesList?.[0] && (
+                    {/* {studentData?.rolesList?.[0] && (
                         <div className="hidden sm:flex items-center px-4 py-1 bg-violet-50 text-violet-700 border-violet-200 rounded-full text-sm font-medium border border-primary/20">
                             <span className="capitalize">{studentData.rolesList[0]}</span>
                         </div>
-                    )}
+                    )} */}
+                    <Badge
+                        // variant="yellow"
+                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200"
+                    >
+                        {role}
+                    </Badge>
 
                     {/* Setting Tab - Only for Admin and POC */}
                     {(studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (

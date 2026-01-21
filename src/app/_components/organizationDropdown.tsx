@@ -92,7 +92,7 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50"
+                className="w-full flex items-center justify-between px-4 py-3 hover:bg-white border-none border-gray-200 rounded-lg hover:bg-gray-50"
             >
                 <div className="flex items-center gap-3">
                     <div className={`${getBackgroundColor(selected.code)} text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
