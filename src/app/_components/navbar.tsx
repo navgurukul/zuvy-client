@@ -147,6 +147,14 @@ const Navbar = () => {
 
                 {/* Right - Theme Switch and Avatar with Dropdown */}
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
+
+                    {/* Role Badge */}
+                    {studentData?.rolesList?.[0] && (
+                        <div className="hidden sm:flex items-center px-4 py-1 bg-violet-50 text-violet-700 border-violet-200 rounded-full text-sm font-medium border border-primary/20">
+                            <span className="capitalize">{studentData.rolesList[0]}</span>
+                        </div>
+                    )}
+
                     {/* Setting Tab - Only for Admin and POC */}
                     {(studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
                         <Link
@@ -161,13 +169,6 @@ const Navbar = () => {
                             <Settings className="h-4 w-4" />
                             <span>Setting</span>
                         </Link>
-                    )}
-
-                    {/* Role Badge */}
-                    {studentData?.rolesList?.[0] && (
-                        <div className="hidden sm:flex items-center px-2 bg-violet-50 text-violet-700 border-violet-200 rounded-full text-sm font-medium border border-primary/20">
-                            <span className="capitalize">{studentData.rolesList[0]}</span>
-                        </div>
                     )}
                     
                     {/* <Button

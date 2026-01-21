@@ -40,11 +40,11 @@ const CourseCard = ({
                     </h3>
                     
                     {/* Organization Code Badge */}
-                    {(course as any).organizationCode && (
+                    {/* {(course as any).organizationCode && ( */}
                         <div className="flex items-center px-2 bg-primary/10 text-primary rounded-full font-medium border border-primary/20 shrink-0">
-                            <span className='text-[14px]'>{(course as any).organizationCode}</span>
+                            <span className='text-[14px]'>AFE</span>
                         </div>
-                    )}
+                    {/* )} */}
                 </div>
             </CardContent>
 
