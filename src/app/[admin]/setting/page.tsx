@@ -134,29 +134,32 @@ export default function AdminSettingPage() {
                     {/* Left Side - Dark Branding Section (33%) */}
                     <div className="hidden lg:flex bg-[#1A1A1A] text-white flex-col justify-start p-12 pt-20">
                         <div className="space-y-8">
-                            <div className="space-y-3">
+                            <div className="space-y-3 text-left">
                                 <h1 className="text-5xl font-semibold leading-tight">
-                                    You've been invited to set up the workspace for{' '}
-                                    <span className="font-bold text-emerald-500">Amazon Future Engineer</span>{' '}
-                                    on <span className="font-bold text-emerald-500">Zuvy</span>
+                                  You&apos;ve been invited to set up the workspace for
                                 </h1>
+                                <h2 className="text-5xl font-bold leading-tight">
+                                    <span className='text-5xl font-bold text-emerald-500'>Amazon Future Engineer </span>
+                                    on <span className='text-5xl font-bold text-emerald-500'>Zuvy</span>
+                                </h2>
+                                 
                                 <p className="text-lg text-slate-300">
-                                    Manage your student's learning journey.
+                                    Manage your student&apos;s  learning journey.
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     {/* Right Side - Form Section (67%) */}
-                    <div className="flex flex-col bg-background lg:col-span-2 h-screen overflow-y-auto">
-                        <div className="flex-1 flex flex-col py-12 px-6 lg:px-16 xl:px-24">
+                    <div className="flex flex-col bg-background lg:col-span-2">
+                        <div className="flex-1 flex flex-col py-8 px-6 lg:px-12 xl:px-16">
                             <div className="flex flex-col items-start w-full max-w-4xl mx-auto">
-                                <div className="space-y-8 flex flex-col w-full">
+                                <div className="space-y-6 flex flex-col w-full">
                                     {/* Organization Section */}
                                     <div className="space-y-4">
                                         {/* Organization Name */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="orgName" className="text-sm font-semibold text-foreground">
+                                            <Label htmlFor="orgName" className="text-sm font-semibold text-foreground text-left block">
                                                 Organization Name
                                             </Label>
                                             <Input
@@ -167,21 +170,21 @@ export default function AdminSettingPage() {
                                                 placeholder="Enter your organization name"
                                                 className="h-11 text-base"
                                             />
-                                            <p className="text-sm text-muted-foreground">
+                                            <p className="text-sm text-muted-foreground text-left">
                                                 This is how your organization will appear in the platform
                                             </p>
                                         </div>
 
                                         {/* Logo Upload */}
                                         <div className="space-y-2">
-                                            <Label className="text-sm font-semibold text-foreground">
+                                            <Label className="text-sm font-semibold text-foreground text-left block">
                                                 Organization Logo
                                             </Label>
                                             <div
                                                 onClick={() => !logoPreview && fileInputRef.current?.click()}
                                                 onDragOver={handleDragOver}
                                                 onDrop={handleDrop}
-                                                className={`w-full h-56 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer gap-4 ${
+                                                className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer gap-4 ${
                                                     logoPreview
                                                         ? 'border-border bg-background'
                                                         : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
@@ -195,7 +198,7 @@ export default function AdminSettingPage() {
                                                     />
                                                 ) : (
                                                     <>
-                                                        <Cloud className="h-14 w-14 text-slate-400" />
+                                                        <Cloud className="h-12 w-12 text-slate-400" />
                                                         <div className="text-center px-4">
                                                             <p className="text-base font-semibold text-slate-700">
                                                                 Upload your organization logo
@@ -241,16 +244,16 @@ export default function AdminSettingPage() {
                                     </div>
 
                                     {/* Profile Section */}
-                                    <div className="space-y-5 border-t border-border pt-8">
+                                    <div className="space-y-4 border-t border-border pt-6">
                                         <div className="flex items-center gap-2">
-                                            <h2 className="text-2xl font-bold text-foreground">Your profile</h2>
+                                            <h2 className="text-2xl font-bold text-foreground text-left">Your profile</h2>
                                         </div>
 
                                         {/* Form Fields */}
-                                        <div className="space-y-5">
+                                        <div className="space-y-4">
                                             {/* Display Name */}
                                             <div className="space-y-2">
-                                                <Label htmlFor="displayName" className="text-sm font-semibold text-foreground">
+                                                <Label htmlFor="displayName" className="text-sm font-semibold text-foreground text-left block">
                                                     Name
                                                 </Label>
                                                 <Input
@@ -264,10 +267,10 @@ export default function AdminSettingPage() {
                                             </div>
 
                                             {/* Two Column Layout for Email and Role */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {/* Email (Non-editable) */}
                                                 <div className="space-y-2">
-                                                    <Label className="text-sm font-semibold text-foreground">Email</Label>
+                                                    <Label className="text-sm font-semibold text-foreground text-left block">Email</Label>
                                                     <div className="px-3 py-3 bg-[#E8E7DC] text-base text-slate-600 rounded-lg border border-[#E8E7DC] h-11 flex items-center">
                                                         {email}
                                                     </div>
@@ -275,7 +278,7 @@ export default function AdminSettingPage() {
 
                                                 {/* Role (Non-editable) */}
                                                 <div className="space-y-2">
-                                                    <Label className="text-sm font-semibold text-foreground">Role</Label>
+                                                    <Label className="text-sm font-semibold text-foreground text-left block">Role</Label>
                                                     <div className="px-3 py-3 bg-[#E8E7DC] text-base text-slate-600 rounded-lg border border-[#E8E7DC] h-11 flex items-center">
                                                         {role}
                                                     </div>
@@ -285,7 +288,7 @@ export default function AdminSettingPage() {
                                     </div>
 
                                     {/* Action Button */}
-                                    <div className="pt-6 flex-shrink-0 flex flex-col items-start gap-4">
+                                    <div className="pt-4 flex-shrink-0 flex flex-col items-start gap-4">
                                         <Button
                                             onClick={handleCompleteSetup}
                                             disabled={isSubmitting}
@@ -309,14 +312,14 @@ export default function AdminSettingPage() {
                     <div className="lg:hidden bg-[#1A1A1A] text-white p-8 order-first space-y-8">
                         <div className="space-y-3">
                             <h1 className="text-3xl font-bold leading-tight">
-                                You've been invited to set up the workspace
+                                You&apos;ve been invited to set up the workspace
                             </h1>
                             <p className="text-base text-slate-300">
                                 For <span className="font-semibold text-emerald-400">Amazon Future Engineer</span> on{' '}
                                 <span className="font-semibold text-emerald-400">Zuvy</span>
                             </p>
                             <p className="text-base text-slate-300">
-                                Manage your student's learning journey.
+                                Manage your student&apos;s  learning journey.
                             </p>
                         </div>
                     </div>
