@@ -444,7 +444,7 @@ const LiveClass = ({
                                         placeholder="Advanced Event Handling"
                                         disabled={!canEditFields}
                                         maxLength={50}
-                                        className="bg-muted/50 border-input"
+                                        className="bg-card border-input"
                                     />
                                 </FormControl>
                                 {field.value?.length >= 50 && (
@@ -473,7 +473,7 @@ const LiveClass = ({
                                                     variant="outline"
                                                     disabled={!canEditFields}
                                                     className={cn(
-                                                        "w-full justify-start text-left font-normal bg-muted/50 border-input",
+                                                        "w-full justify-start text-left font-normal bg-card border-input",
                                                         !field.value && "text-muted-foreground"
                                                     )}
                                                 >
@@ -517,7 +517,7 @@ const LiveClass = ({
                                             {...field}
                                             type="time"
                                             disabled={!canEditFields}
-                                            className="bg-muted/50 border-input"
+                                            className="bg-card border-input"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -538,7 +538,7 @@ const LiveClass = ({
                                             {...field}
                                             type="time"
                                             disabled={!canEditFields}
-                                            className="bg-muted/50 border-input"
+                                            className="bg-card border-input"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -563,7 +563,7 @@ const LiveClass = ({
                                         disabled={!canEditFields}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="bg-muted/50 border-input">
+                                            <SelectTrigger className="bg-card border-input">
                                                 <SelectValue placeholder="Select batch" />
                                             </SelectTrigger>
                                         </FormControl>
@@ -594,7 +594,7 @@ const LiveClass = ({
                                         disabled={!canEditFields}
                                     >
                                         <FormControl>
-                                            <SelectTrigger className="bg-muted/50 border-input">
+                                            <SelectTrigger className="bg-card border-input">
                                                 <SelectValue placeholder="Select secondary batch" />
                                             </SelectTrigger>
                                         </FormControl>
@@ -612,7 +612,6 @@ const LiveClass = ({
                             )}
                         />
                     </div>
-
                     {/* Meeting Platform Radio Buttons */}
                     <FormField
                         control={form.control}
