@@ -10,7 +10,7 @@ import { getBatchData, getCourseData, getStoreStudentData, getDeleteStudentStore
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { fetchStudentData } from '@/utils/students'
-import { createColumns } from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/columns'
+import { createColumns } from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/batches/columns'
 import {
     StudentData,
     BatchSuggestion,
@@ -18,7 +18,7 @@ import {
     ParamsType,
     EnhancedBatch,
     PermissionsType,
-} from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+} from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
 
 export default function useBatches(params: ParamsType) {
     const router = useRouter()
@@ -171,7 +171,7 @@ export default function useBatches(params: ParamsType) {
                 .refine((capEnrollment) => {
                     const parsedValue = parseInt(capEnrollment)
                     return !isNaN(parsedValue) && parsedValue > 0 && parsedValue <= 100000
-                }, { message: 'Cap Enrollment must be a positive number between 1 and 100,000' })
+                }, { message: 'Cap Enrollment must be a positive number from 1 to 100000' })
                 .superRefine((capEnrollment, ctx) => {
                     // Additional validation for edit mode
                     if (editingBatch) {

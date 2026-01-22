@@ -19,12 +19,16 @@ import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 import { getPermissions } from '@/lib/GetPermissions'
 import { Spinner } from '@/components/ui/spinner'
+import OrganizationDropdown from './organizationDropdown'
+import { Badge } from '@/components/ui/badge'
 
 //Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    const orgName = pathname.split('/')[2]
+    const superAdmin = true
     // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
@@ -40,7 +44,23 @@ const Navbar = () => {
         await Logout()
     }
 
-    const routes = [
+    const superAdminRoutes = [
+        {
+            name: 'Organizations',
+            href: `/${role}/organizations`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
+        },
+        {
+            name: 'Question Bank',
+            href: `/${role}/content-bank`,
+            icon: Database,
+            active: `/${role}/content-bank`,
+        }
+    ]
+
+    const adminRoutes = [
         {
             name: 'Course Studio',
             href: `/${role}/courses`,
@@ -62,6 +82,8 @@ const Navbar = () => {
         },
     ]
 
+    const routes = superAdmin && !pathname.includes("course") ? superAdminRoutes : superAdmin && pathname.includes("course") ? adminRoutes : adminRoutes;
+
     useEffect(() => {
         (async () => {
             const perms = await getPermissions();
@@ -72,11 +94,13 @@ const Navbar = () => {
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
             <div className="flex h-16 items-center justify-between px-6">
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
+
+                    <OrganizationDropdown orgName={orgName} />
 
                     {/* Navigation Items */}
                     <nav className="flex items-center space-x-1">
@@ -124,6 +148,36 @@ const Navbar = () => {
 
                 {/* Right - Theme Switch and Avatar with Dropdown */}
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
+
+                    {/* Role Badge */}
+                    {/* {studentData?.rolesList?.[0] && (
+                        <div className="hidden sm:flex items-center px-4 py-1 bg-violet-50 text-violet-700 border-violet-200 rounded-full text-sm font-medium border border-primary/20">
+                            <span className="capitalize">{studentData.rolesList[0]}</span>
+                        </div>
+                    )} */}
+                    <Badge
+                        // variant="yellow"
+                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200"
+                    >
+                        {role}
+                    </Badge>
+
+                    {/* Setting Tab - Only for Admin and POC */}
+                    {(studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
+                        <Link
+                            href={`/${role}/setting`}
+                            className={cn(
+                                'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
+                                pathname === `/${role}/setting`
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                            )}
+                        >
+                            <Settings className="h-4 w-4" />
+                            <span>Setting</span>
+                        </Link>
+                    )}
+                    
                     {/* <Button
                         variant="ghost"
                         size="sm"
