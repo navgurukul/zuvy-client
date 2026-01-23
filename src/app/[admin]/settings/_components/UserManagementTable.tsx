@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
+import { Search } from 'lucide-react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -144,19 +145,22 @@ export function UserManagementTable<TData extends User, TValue>({
         <div className="space-y-4">
             {/* Search and Filter Bar */}
             <div className="flex gap-4 mb-6">
-                <SearchBox
-                    placeholder="Search by name or email..."
-                    fetchSuggestionsApi={fetchSuggestionsApi}
-                    fetchSearchResultsApi={fetchSearchResultsApi}
-                    defaultFetchApi={defaultFetchApi}
-                    getSuggestionLabel={(user) => (
-                        <div>
-                            <div className="font-medium">{user.name}</div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
-                        </div>
-                    )}
-                    inputWidth="w-80"
-                />
+                <div className="relative [&_input]:pl-10">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
+                    <SearchBox
+                        placeholder="Search by name or email..."
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(user) => (
+                            <div>
+                                <div className="font-medium">{user.name}</div>
+                                <div className="text-sm text-gray-500">{user.email}</div>
+                            </div>
+                        )}
+                        inputWidth="w-80"
+                    />
+                </div>
 
                 <div className="mt-2">
                     <Select

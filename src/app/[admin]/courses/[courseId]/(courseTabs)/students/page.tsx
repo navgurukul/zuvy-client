@@ -9,6 +9,7 @@ import {
     Plus,
     FileSpreadsheet,
     UserPlus,
+    Search,
 } from 'lucide-react'
 import { getUser, getBatchData } from '@/store/store'
 import { Button } from '@/components/ui/button'
@@ -412,7 +413,8 @@ const StudentsPage = ({ params }: { params: any }) => {
             </div>
             <div>
                 <div className="flex flex-col md:flex-row justify-between items-center gap-y-4">
-                    <div className="relative w-full md:w-1/2 lg:w-1/4">
+                    <div className="relative w-full md:w-1/2 lg:w-1/4 [&_input]:pl-10">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                         <SearchBox
                             placeholder="Search students..."
                             fetchSuggestionsApi={fetchSuggestionsApi}
