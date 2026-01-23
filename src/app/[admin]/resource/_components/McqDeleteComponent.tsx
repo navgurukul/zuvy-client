@@ -98,6 +98,7 @@ const McqDeleteVaiarntComp = ({ logSelectedRows, table }: Props) => {
         />
     </div>
 )
+
 }
 
 export default McqDeleteVaiarntComp

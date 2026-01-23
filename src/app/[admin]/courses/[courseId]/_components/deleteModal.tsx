@@ -8,9 +8,11 @@ import { Spinner } from '@/components/ui/spinner'
 import { DeleteConfirmationModalProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
+    topicId,
     isOpen,
     onClose,
     onConfirm,
+    onDeleteChapterWithSession,
     modalTitle,
     modalText,
     buttonText,
@@ -21,10 +23,12 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }) => {
     const [inputValue, setInputValue] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
+    const [deleteWithSession, setDeleteWithSession] = useState<boolean>(false)
     useEffect(() => {
         if (!isOpen) {
             setInputValue('')
             setError(null)
+            setDeleteWithSession(false)
         }
     }, [isOpen])
 
@@ -42,14 +46,14 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                 input
             ) {
                 setError(null)
-                onConfirm()
+                onConfirm?.()
             } else if (!input) {
-                onConfirm()
+                onConfirm?.()
             } else {
                 setError('Batch name does not match')
             }
         } else {
-            onConfirm()
+            onConfirm?.()
         }
     }
 
@@ -61,7 +65,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
             <Dialog
                 as="div"
                 className="fixed z-[60] inset-0 overflow-y-auto"
-                onClose={onClose}
+                onClose={() => onClose?.()}
             >
                 <div className="flex items-center justify-start min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                     <Transition.Child
@@ -98,23 +102,26 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                 <div className="mt-3 text-start m:mt-5">
                                     <Dialog.Title
                                         as="h3"
-                                        className="text-lg leading-6 my-3 font-medium text-gray-900"
+                                        className="text-lg leading-6 font-semibold text-gray-900 flex items-center gap-2"
                                     >
+                                        
                                         {input
                                             ? 'Delete Batch'
                                             : modalTitle ||
                                               'Permanent Deletion'}
                                     </Dialog.Title>
-                                    <div className="mt-2">
-                                        <p className="text-sm text-gray-700 my-2 ">
+                                    <div className="mt-3">
+                                        <p className="text-sm text-gray-600 leading-relaxed">
                                             {modalText}
                                         </p>
-                                        <div className="text-sm flex gap-x-2 text-black font-semibold my-2 mb-2">
-                                            <p className="text-black font-normal">
-                                                {modalText2}
-                                            </p>
-                                            {instructorInfo?.name}
-                                        </div>
+                                        {(modalText2 || instructorInfo?.name) && (
+                                            <div className="text-sm flex gap-x-2 text-black font-semibold mt-3">
+                                                <p className="text-gray-600 font-normal">
+                                                    {modalText2}
+                                                </p>
+                                                {instructorInfo?.name}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 {input && (
@@ -132,12 +139,27 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         }
                                     </div>
                                 )}
+                                {topicId === 8 && (
+                                    <div className="flex items-start gap-2 mt-6 p-3 rounded-md hover:bg-gray-50 transition-colors">
+                                        <input
+                                            type="checkbox"
+                                            id="deleteWithSession"
+                                            checked={deleteWithSession}
+                                            onChange={(e) => setDeleteWithSession(e.target.checked)}
+                                            className="mt-0.5 h-4 w-4 rounded  text-red-600 focus:ring-red-500 cursor-pointer"
+                                        />
+                                        <label htmlFor="deleteWithSession" className="flex flex-col cursor-pointer">
+                                            <span className="text-sm font-semibold text-gray-900">Delete live class from system</span>
+                                            <span className="text-xs text-gray-500 mt-0.5">It will not be available anymore</span>
+                                        </label>
+                                    </div>
+                                )}
                             </div>
-                            <div className="mt-5 sm:mt-6 flex justify-end gap-2">
-                                <Button
+                            <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-3">
+                              <Button
                                     variant={'outline'}
                                     type="button"
-                                    className=" p-2 inline-flex justify-center rounded-md border shadow-sm px-4 text-base font-medium  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                                    className="px-6 py-2 text-sm font-medium"
                                     onClick={onClose}
                                     disabled={loading}
                                 >
@@ -146,16 +168,22 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         : 'Cancel'}
                                 </Button>
                                 {loading ? (
-                                    <Button variant={'destructive'} disabled>
-                                        <Spinner className="mr-2 h-12 animate-spin w-1/3" />
-                                        Deleting Session
+                                    <Button variant={'destructive'} disabled className="px-6 py-2">
+                                        <Spinner className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
                                     </Button>
                                 ) : (
                                     <Button
                                         variant={'destructive'}
                                         type="button"
-                                        className="shadow-4dp p-2 inline-flex justify-center rounded-md border border-transparent px-4 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive sm:text-sm"
-                                        onClick={handleConfirm}
+                                        className="px-6 py-2 text-sm font-medium bg-red-600 hover:bg-red-700"
+                                        onClick={() => {
+                                            if (topicId === 8 && deleteWithSession) {
+                                                onDeleteChapterWithSession?.()
+                                            } else {
+                                                handleConfirm()
+                                            }
+                                        }}
                                     >
                                         {buttonText}
                                     </Button>
@@ -170,3 +198,5 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 }
 
 export default DeleteConfirmationModal
+
+

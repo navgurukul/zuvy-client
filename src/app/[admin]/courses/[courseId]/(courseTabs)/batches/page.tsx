@@ -984,6 +984,8 @@ const Page = ({ params }: { params: ParamsType }) => {
                     input={true}
                     buttonText="Delete Batch"
                     instructorInfo={batchToDelete}
+                    topicId={0}
+                    onDeleteChapterWithSession={() => {}}
                 />
                 <DataTablePagination
                     totalStudents={totalBatches}
@@ -994,8 +996,6 @@ const Page = ({ params }: { params: ParamsType }) => {
             </div>
         )
     }
-
     return null
 }
-
 export default Page
