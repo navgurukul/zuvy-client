@@ -33,49 +33,50 @@ function CourseLayout() {
     const { courseData, Permissions } = getCourseData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    const orgName = pathname.split('/')[2]
     const [loading, setLoading] = useState(true)
 
     const courseMenu = [
         {
             title: 'General Details',
             value: 'generalDetails',
-            href: `/${role}/courses/${courseData?.id}/details`,
+            href: `/${role}/${orgName}/courses/${courseData?.id}/details`,
             icon: Info,
         },
         {
             title: 'Curriculum',
             value: 'curriculum',
-            href: `/${role}/courses/${courseData?.id}/curriculum`,
+            href: `/${role}/${orgName}/courses/${courseData?.id}/curriculum`,
             icon: BookOpen,
         },
         {
             title: 'Students',
             value: 'students',
-            href: `/${role}/courses/${courseData?.id}/students`,
+            href: `/${role}/${orgName}/courses/${courseData?.id}/students`,
             icon: GraduationCap,
         },
         {
             title: 'Batches',
             value: 'batches',
-            href: `/${role}/courses/${courseData?.id}/batches`,
+            href: `/${role}/${orgName}/courses/${courseData?.id}/batches`,
             icon: Users,
         },
         {
             title: 'Sessions',
             value: 'sessions',
-            href: `/${role}/courses/${courseData?.id}/sessions`,
+            href: `/${role}/${orgName}/courses/${courseData?.id}/sessions`,
             icon: Calendar,
         },
         {
             title: 'Submissions',
             value: 'submissions',
-            href: `/${role}/courses/${courseData?.id}/submissions`,
+            href: `/${role}/${orgName}/courses/${courseData?.id}/submissions`,
             icon: FileText,
         },
         {
             title: 'Settings',
             value: 'settings',
-            href: `/${role}/courses/${courseData?.id}/settings`,
+            href: `/${role}/${orgName}/courses/${courseData?.id}/settings`,
             icon: Settings,
         },
     ]
@@ -115,7 +116,7 @@ if (loading) {
         <div className="pl-6 pr-3">
             {/* <Breadcrumb crumbs={crumbs} /> */}
             <Link
-                href={`/${role}/courses`}
+                href={`/${role}/${orgName}/courses`}
                 className="flex space-x-1 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ChevronLeft size={20} />

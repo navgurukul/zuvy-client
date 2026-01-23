@@ -49,9 +49,11 @@ export const createColumns = (management: any[]): ColumnDef<Org>[] => [
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link href={`/admin/${name}/courses`} className="max-w-[180px] cursor-pointer text-left text-gray-900">
-                  {name.length > limit
-                    ? name.substring(0, limit) + '...'
-                    : name}
+                  <p className='text-start'>
+                    {name.length > limit
+                      ? name.substring(0, limit) + '...'
+                      : name}
+                  </p>
                 </Link>
               </TooltipTrigger>
     

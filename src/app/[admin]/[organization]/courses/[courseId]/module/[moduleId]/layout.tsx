@@ -11,6 +11,7 @@ import { getUser } from '@/store/store'
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { courseId, moduleId, projectID } = useParams()
     const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
     const adminAssessmentPreviewRoute = pathname?.includes('/preview')
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const { permissions, loading } = useModuleChapters(moduleID)
@@ -30,7 +31,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex h-screen flex-col bg-card">
                     <div className="px-6 pt-4">
                         <Link
-                            href={`/${userRole}/courses/${courseId}/curriculum`}
+                            href={`/${userRole}/${orgName}/courses/${courseId}/curriculum`}
                             className="flex w-[180px] items-center space-x-2 text-foreground hover:text-primary"
                         >
                             <ArrowLeft size={20} />
