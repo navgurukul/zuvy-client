@@ -604,11 +604,13 @@ const EditMcqForm = ({
                                 </Tooltip>
                             </TooltipProvider>
                             <DeleteConfirmationModal
+                                topicId={0}
                                 isOpen={isDeleteModalOpen}
                                 onClose={() => setDeleteModalOpen(false)}
                                 onConfirm={() =>
                                     handleRemoveVariant(activeVariantIndex)
                                 }
+                                onDeleteChapterWithSession={() => {}}
                                 modalText="Any changes to the question text or the answer choices will be lost. Are you sure?"
                                 modalText2=""
                                 input={false}

@@ -113,6 +113,47 @@ function ChapterItem({
         }
     }
 
+      const handleDeleteChapterWithSession = async () => {
+        try {
+            console.log('Deleting chapter with session:', chapterId)
+            // /Content/chapterDetailsById/6226?bootcampId=718&moduleId=810&topicId=8
+
+            const response = await api.get(`/Content/chapterDetailsById/${chapterId}?bootcampId=${courseId}&moduleId=${moduleId}&topicId=8`)
+            const sessionId = response.data.sessionDetails[0].id;
+            console.log(sessionId)
+
+
+            const res = await api.delete(
+                `/classes/sessions/${sessionId}?deleteChapter=true`
+            )
+            
+            toast.success({
+                title: res.data.title,
+                description: res.data.message,
+            })
+            
+            fetchChapters()
+            
+            // Navigate to appropriate chapter after deletion
+            const shouldNavigate = chapterId === activeChapter
+            if (shouldNavigate && chapterData.length > 1) {
+                const targetChapter = chapterData[0].chapterId === chapterId
+                    ? chapterData[1].chapterId
+                    : chapterData[0].chapterId
+                    
+                router.push(
+                    `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${targetChapter}`
+                )
+            }
+        } catch (error: any) {
+            console.error('Error deleting chapter:', error)
+            toast.error({
+                title: error.data?.title || 'Error',
+                description: error.data?.message || 'Failed to delete chapter',
+            })
+        }
+    }
+
     const handleDeleteClick = (e: React.MouseEvent) => {
         if (!isDragging) {
             e.stopPropagation()
@@ -125,6 +166,7 @@ function ChapterItem({
         e.stopPropagation()
         dragControls.start(e)
     }
+
 
     return (
         <Reorder.Item
@@ -186,12 +228,18 @@ function ChapterItem({
                     </div>
                 </div>
                 <DeleteConfirmationModal
+                    topicId={topicId}
                     isOpen={isDeleteModalOpen}
                     onClose={() => setDeleteModalOpen(false)}
                     onConfirm={() => {
                         handleDeleteChapter()
+                       
                         setDeleteModalOpen(false)
                     }}
+                    onDeleteChapterWithSession={() => {
+                        handleDeleteChapterWithSession()
+                        setDeleteModalOpen(false)
+                    } }
                     modalText={DELETE_CHAPTER_CONFIRMATION}
                     buttonText="Delete Chapter"
                     input={false}
