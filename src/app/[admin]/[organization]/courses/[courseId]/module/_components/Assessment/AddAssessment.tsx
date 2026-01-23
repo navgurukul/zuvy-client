@@ -17,7 +17,7 @@ import SelectedQuestions from '@/app/[admin]/[organization]/courses/[courseId]/m
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore, getUser } from '@/store/store'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
 import PermissionAlert from '@/app/_components/PermissionAlert'
@@ -56,6 +56,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [alertOpen, setAlertOpen] = useState(!canEdit);
     const [open, setOpen] = useState(true); // initially true when !canEdit
     const searchParams = useSearchParams()
+    const { organization } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const initialTab = searchParams.get('tab') || ''
@@ -177,7 +178,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
         router.push(
-            `/${userRole}/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
+            `/${userRole}/${organization}/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
         )
     }
 

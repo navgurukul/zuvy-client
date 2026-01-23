@@ -57,7 +57,7 @@ function ChapterItem({
     showBorderFlash,
     canDeleteChapter = true,
 }: ChapterItems) {
-    const { courseId } = useParams()
+    const { courseId, organization } = useParams()
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -76,7 +76,7 @@ function ChapterItem({
         setActiveChapter(chapterId)
         setTopicId(topicId)
         router.push(
-            `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+            `/${userRole}/${organization}/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
         )
     }
 
