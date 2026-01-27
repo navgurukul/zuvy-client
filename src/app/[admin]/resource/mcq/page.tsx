@@ -1,7 +1,7 @@
 'use client'
 // External imports
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft,Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 // Internal imports
@@ -641,7 +641,9 @@ const Mcqs = (props: Props) => {
                     </div>
                  
                     <div className="flex items-center gap-4 mb-6">
-                        <div>
+                        
+                         <div className="relative [&_input]:pl-10">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                             <SearchBox
                                 placeholder="Search for Question"
                                 fetchSuggestionsApi={fetchSuggestionsApi}

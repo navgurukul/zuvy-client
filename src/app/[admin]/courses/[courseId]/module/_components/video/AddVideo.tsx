@@ -352,7 +352,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
                                         <FormControl>
                                             <Textarea
                                                 {...field}
-                                                className="px-3 py-2 border rounded-md "
+                                                className="px-3 py-2 border rounded-md bg-card"
                                                 placeholder="Type your Description here."
                                                 disabled={!canEdit}
                                             />

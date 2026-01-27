@@ -57,6 +57,7 @@ import {
     Upload,
     UserPlus,
     Trash2,
+    Search,
 } from 'lucide-react'
 import {
     StudentData,
@@ -783,7 +784,8 @@ const Page = ({ params }: { params: ParamsType }) => {
                     {renderModal(false)}
                 </div>
                 <div className="flex flex-col lg:flex-row justify-between items-center mb-8">
-                <div className="relative w-full lg:max-w-[500px]">
+                <div className="relative w-full lg:max-w-[500px] [&_input]:pl-10">
+                     <Search className="absolute left-3 top-1/2 -translate-y-1/3 h-4 w-4 text-muted-foreground z-10 pointer-events-none" />
                             <SearchBox
                                 placeholder="Search batches..."
                                 fetchSuggestionsApi={fetchSuggestionsApi}

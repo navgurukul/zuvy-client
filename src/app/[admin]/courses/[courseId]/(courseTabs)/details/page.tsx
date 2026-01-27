@@ -743,7 +743,7 @@ if (!courseData || !courseData.id) {
                                             <Textarea
                                                 id="description"
                                                 placeholder="Enter course description"
-                                                className="min-h-[120px]"
+                                                className="min-h-[120px] bg-card"
                                                 {...field}
                                                 disabled={!Permissions?.editCourse}
                                             />
