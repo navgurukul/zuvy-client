@@ -34,17 +34,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import RemirrorForForm from '@/app/[admin]/resource/_components/RemirrorForForm'
 import {
     Tag,
@@ -90,7 +80,8 @@ const EditMcqForm = ({
         id: quizQuestionId,
     })
     const [isVariantAdded, setIsVariantAdded] = useState<boolean>(false)
-    const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     const [showTagName, setShowTagName] = useState<boolean>(false)
     const [activeVariantIndex, setActiveVariantIndex] = useState<number>(0)
@@ -169,7 +160,7 @@ const EditMcqForm = ({
                     title: 'Success',
                     description: res.data.message,
                 })
-                setIsDeleteAlertOpen(false)
+                setDeleteModalOpen(false)
                 refetch()
             })
             .catch((error) => {
@@ -410,14 +401,16 @@ const EditMcqForm = ({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContentWithScrollArea>
-                                            {tags.map((tag) => (
-                                                <SelectItem
-                                                    key={tag.id}
-                                                    value={tag.tagName}
-                                                >
-                                                    {tag.tagName}
-                                                </SelectItem>
-                                            ))}
+                                            {tags
+                                                .filter((tag) => tag.id !== -1) // Filter out "All Topics"
+                                                .map((tag) => (
+                                                    <SelectItem
+                                                        key={tag.id}
+                                                        value={tag.tagName}
+                                                    >
+                                                        {tag.tagName}
+                                                    </SelectItem>
+                                                ))}
                                         </SelectContentWithScrollArea>
                                     </Select>
                                 </div>
@@ -593,37 +586,41 @@ const EditMcqForm = ({
                 </div>
                 <div className="flex flex-row justify-between items-end w-full ml-[195px]">
                     {activeVariantIndex > 0 && (
-                        <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
-                            <AlertDialogTrigger asChild>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="text-red-500 border-red-500 hover:bg-red-50 hover:text-red-600"
-                                >
-                                    Remove Variant
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Variant</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Any changes to the question text or the answer choices will be lost. Are you sure?
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                        onClick={async () => {
-                                            await handleRemoveVariant(activeVariantIndex)
-                                            setIsDeleteAlertOpen(false)
-                                        }}
-                                        className="bg-destructive hover:bg-destructive/90"
-                                    >
-                                        Delete Variant
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        <>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            onClick={() =>
+                                                setDeleteModalOpen(true)
+                                            }
+                                            type="button"
+                                            className="mt-3 ml-5 text-red-500 bg-white cursor-pointer"
+                                        >
+                                            Remove Variant
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Delete Variant</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                            <DeleteConfirmationModal
+                                topicId={0}
+                                isOpen={isDeleteModalOpen}
+                                onClose={() => setDeleteModalOpen(false)}
+                                onConfirm={() =>
+                                    handleRemoveVariant(activeVariantIndex)
+                                }
+                                onDeleteChapterWithSession={() => {}}
+                                modalText="Any changes to the question text or the answer choices will be lost. Are you sure?"
+                                modalText2=""
+                                input={false}
+                                buttonText="Delete Variant"
+                                instructorInfo={''}
+                                loading={loading}
+                            />
+                        </>
                     )}
                     <Button
                         className="bg-primary hover:bg-primary-dark"

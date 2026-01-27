@@ -627,6 +627,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                         variant="link"
                                                         disabled={!isEventReady}
                                                         className="text-primary p-0 h-auto"
+                                                        onClick={() => window.open(item.hangoutLink, '_blank')}
                                                     >
                                                         {isEventReady
                                                             ? getEventActionText(
