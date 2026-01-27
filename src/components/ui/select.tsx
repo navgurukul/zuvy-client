@@ -116,13 +116,26 @@ const SelectContentWithScrollArea = React.forwardRef<
             position={position}
             {...props}
         >
-            <ScrollArea className="h-[200px]" type="always">
+            <ScrollArea 
+                className="h-[200px]" 
+                type="always"
+                // Add these props to enable wheel and touch scrolling
+                style={{ 
+                    overflowY: 'auto',
+                    WebkitOverflowScrolling: 'touch' // For iOS smooth scrolling
+                }}
+            >
                 <SelectPrimitive.Viewport
                     className={cn(
                         'p-1',
                         position === 'popper' &&
                             'w-full min-w-[var(--radix-select-trigger-width)]'
                     )}
+                    // Add wheel event handling
+                    onWheel={(e) => {
+                        e.stopPropagation();
+                        // Let the ScrollArea handle the wheel event
+                    }}
                 >
                     {children}
                 </SelectPrimitive.Viewport>

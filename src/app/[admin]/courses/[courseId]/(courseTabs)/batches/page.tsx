@@ -397,7 +397,8 @@ const Page = ({ params }: { params: ParamsType }) => {
                             <DialogTitle className="text-xl font-semibold">
                                 Create New Batch
                             </DialogTitle>
-                            <DialogDescription>
+                        </DialogHeader>
+                            <DialogDescription className="text-start">
                                 {assignStudents === 'manually'
                                     ? 'Choose how you want to add students to this batch'
                                     : `Unassigned Students in Records: ${courseData?.unassigned_students}`}
@@ -405,7 +406,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                             <Form {...form}>
                                 <form
                                     onSubmit={form.handleSubmit(onSubmit)}
-                                    className="space-y-8"
+                                    className="space-y-8 text-start"
                                 >
                                     {assignStudents === 'manually' ? (
                                         <div className="space-y-6">
@@ -612,7 +613,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                 {assignLearners === 'all' ? (
                                                     // <DialogClose asChild>
                                                     <Button
-                                                        className="w-1/2"
+                                                        className="w-1/4"
                                                         type="submit"
                                                         disabled={
                                                             !form.formState
@@ -659,7 +660,6 @@ const Page = ({ params }: { params: ParamsType }) => {
                                     )}
                                 </form>
                             </Form>
-                        </DialogHeader>
                     </DialogContent>
                 </Dialog>
             )
@@ -688,13 +688,14 @@ const Page = ({ params }: { params: ParamsType }) => {
                     <DialogTitle className="text-xl font-semibold">
                         Edit Batch - {editingBatch?.name}
                     </DialogTitle>
-                    <DialogDescription>
+                </DialogHeader>
+                    <DialogDescription className="text-start">
                         Update batch details and instructor information.
                     </DialogDescription>
                     <Form {...form}>
                         <form
                             onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-8"
+                            className="space-y-8 text-start"
                         >
                             <FormField
                                 control={form.control}
@@ -763,7 +764,6 @@ const Page = ({ params }: { params: ParamsType }) => {
                             </div>
                         </form>
                     </Form>
-                </DialogHeader>
             </DialogContent>
         </Dialog>
     )
