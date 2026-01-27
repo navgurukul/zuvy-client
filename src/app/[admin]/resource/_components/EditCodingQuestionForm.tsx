@@ -591,11 +591,55 @@ export default function EditCodingQuestionForm() {
         }
     }, [])
 
+    const handleButtonClick = async () => {
+        // Force form validation trigger
+        const isValid = await form.trigger()
+
+        if (!isValid) {
+            setActiveTab('details')
+            return
+        }
+
+        // Additional manual validation
+        const values = form.getValues()
+        if (
+            !values.title?.trim() ||
+            !values.problemStatement?.trim() ||
+            !values.constraints?.trim() ||
+            !values.difficulty ||
+            values.topics <= 0
+        ) {
+            setActiveTab('details')
+            return
+        }
+
+        // Check if all test cases have valid inputs and outputs
+        const hasEmptyValues = testCases.some(
+            (testCase) => {
+                const hasEmptyInputs = testCase.inputs.some(
+                    (input) => !input.value.trim()
+                )
+                const hasEmptyOutput = !testCase.output.value.trim()
+                return hasEmptyInputs || hasEmptyOutput
+            }
+        )
+
+        if (hasEmptyValues) {
+            setActiveTab('testcases')
+            return
+        }
+
+        // If all validations pass, call handleEditSubmit
+        await handleEditSubmit(values)
+    }
+
+    // Update the handleEditSubmit function to remove redundant validations
     const handleEditSubmit = async (values: z.infer<typeof formSchema>) => {
         let hasErrors = showSyntaxErrors(testCases)
 
         // If there are validation errors, return early and don't submit
         if (hasErrors) {
+            setActiveTab('testcases')
             return
         }
 
@@ -807,7 +851,10 @@ export default function EditCodingQuestionForm() {
 
             <Form {...form}>
                 <form
-                    onSubmit={form.handleSubmit(handleEditSubmit)}
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        handleButtonClick() // Call our custom handler
+                    }}
                     className="w-full flex flex-col gap-4"
                 >
                     <Tabs
@@ -977,14 +1024,16 @@ export default function EditCodingQuestionForm() {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContentWithScrollArea>
-                                                {tags.map((tag: any) => (
-                                                    <SelectItem
-                                                        key={tag.id}
-                                                        value={tag?.tagName}
-                                                    >
-                                                        {tag?.tagName}
-                                                    </SelectItem>
-                                                ))}
+                                                {tags
+                                                    .filter((tag: any) => tag.id !== -1) // Filter out "All Topics"
+                                                    .map((tag: any) => (
+                                                        <SelectItem
+                                                            key={tag.id}
+                                                            value={tag?.tagName}
+                                                        >
+                                                            {tag?.tagName}
+                                                        </SelectItem>
+                                                    ))}
                                             </SelectContentWithScrollArea>
                                         </Select>
                                         <FormMessage />
@@ -1332,10 +1381,12 @@ export default function EditCodingQuestionForm() {
                                         Cancel
                                     </Button>
                                     <Button
-                                        type="submit"
+                                        type="button" // Change from "submit" to "button"
+                                        onClick={handleButtonClick} // Add onClick handler
+                                        disabled={loading}
                                         className="bg-primary hover:bg-primary-dark"
                                     >
-                                        Update Question
+                                        {loading ? 'Updating...' : 'Update Question'}
                                     </Button>
                                 </div>
                             </div>
