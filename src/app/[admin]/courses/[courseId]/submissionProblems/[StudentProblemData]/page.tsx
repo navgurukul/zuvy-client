@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ArrowLeft, RefreshCw,Download } from 'lucide-react'
-
+import Link from 'next/link'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { columns } from './columns'
@@ -20,7 +20,9 @@ interface BatchFilter {
 
 const PracticeProblems = ({ params }: any) => {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
+    const currentTab = searchParams.get('tab') || 'practice'
     const [matchingData, setMatchingData] = useState<any>(null)
     const [bootcampData, setBootcampData] = useState<any>({})
     const [studentStatus, setStudentStatus] = useState<any[]>([])
@@ -133,10 +135,7 @@ const PracticeProblems = ({ params }: any) => {
     
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
-    
-        queryParams.append('limit', '10')
-        queryParams.append('offset', '0')
-    
+            
         downloadCsv({
             endpoint: `/submission/practiseProblemStatus/${matchingData.id}?chapterId=${matchingData.moduleChapterData[0].id}&questionId=${matchingData.moduleChapterData[0].codingQuestionDetails.id}&${queryParams.toString()}`,
     
@@ -227,14 +226,15 @@ const PracticeProblems = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
+                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                    <Button
+                        variant="ghost"                   
+                        className="hover:bg-transparent hover:text-primary transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </Link>
             </div>
             <Card className="mb-8 border border-gray-200 shadow-sm bg-card">
                 <CardHeader>

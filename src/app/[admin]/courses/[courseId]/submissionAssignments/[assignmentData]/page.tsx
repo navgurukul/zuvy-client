@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { ArrowLeft,Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SearchBox } from "@/utils/searchBox"
 import useDownloadCsv from '@/hooks/useDownloadCsv'
@@ -25,6 +26,7 @@ const Page = ({ params }: { params: any }) => {
     const pathname = usePathname()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
+    const currentTab = searchParams.get('tab') || 'assignments'
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [bootcampData, setBootcampData] = useState<any>({})
     const [assignmentTitle, setAssignmentTitle] = useState<string>('')
@@ -169,9 +171,6 @@ const Page = ({ params }: { params: any }) => {
     const handleVideoDownloadCsv = useCallback(() => {
         const queryParams = new URLSearchParams()
     
-        queryParams.append('limit', '10')
-        queryParams.append('offset', '0')
-    
         if (selectedBatch !== 'all') {
             queryParams.append('batchId', selectedBatch)
         }
@@ -215,14 +214,15 @@ const Page = ({ params }: { params: any }) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-5">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
+                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                    <Button
+                        variant="ghost"
+                        className="hover:bg-transparent hover:text-primary transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </Link>
             </div>
 
             {/* Assessment Info Card */}

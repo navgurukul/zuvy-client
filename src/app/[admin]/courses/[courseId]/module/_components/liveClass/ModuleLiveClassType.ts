@@ -4,7 +4,11 @@ export type LiveClassProps = {
     moduleId: any
     courseId: any
     canEdit?: boolean
+    chapterId: number
+    topicId: number
+    fetchChapterContent: (chapterId: number, topicId: number) => Promise<any>
 }
+
 
 export interface SessionDetail{
     id: number;

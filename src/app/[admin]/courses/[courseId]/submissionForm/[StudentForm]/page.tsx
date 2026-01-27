@@ -13,6 +13,7 @@ import {
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { ArrowLeft, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
@@ -48,6 +49,7 @@ const Page = ({ params }: any) => {
     const router = useRouter()
     const searchParams = useSearchParams()
     const moduleId = searchParams.get('moduleId')
+    const currentTab = searchParams.get('tab') || 'form'
     const { downloadCsv } = useDownloadCsv()
     const [studentStatus, setStudentStatus] = useState<any>()
     const [chapterDetails, setChapterDetails] = useState<any>()
@@ -296,9 +298,6 @@ const Page = ({ params }: any) => {
         if (sortField) queryParams.append('orderBy', sortField)
         if (sortDirection) queryParams.append('orderDirection', sortDirection)
     
-        queryParams.append('limit', '10')
-        queryParams.append('offset', '0')
-    
         downloadCsv({
             endpoint: `/submission/formsStatus/${params.courseId}/${moduleId}?chapterId=${params.StudentForm}&${queryParams.toString()}`,
     
@@ -385,14 +384,15 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Button
-                    variant="ghost"
-                    onClick={() => router.back()}
-                    className="hover:bg-transparent hover:text-primary transition-colors"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Course Submissions
-                </Button>
+                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                    <Button
+                        variant="ghost"
+                        className="hover:bg-transparent hover:text-primary transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Course Submissions
+                    </Button>
+                </Link>
             </div>
 
             {overallStats.isInitialized ? (

@@ -507,16 +507,15 @@ const BatchesInfo = ({
                                         </div>
                                         <DeleteConfirmationModal
                                             isOpen={isDeleteModalOpen}
-                                            onClose={() =>
-                                                setDeleteModalOpen(false)
-                                            }
+                                            onClose={() => setDeleteModalOpen(false)}
                                             onConfirm={batchDeleteHandler}
                                             modalText="Type the batch name to confirm deletion"
                                             modalText2="Batch Name"
                                             input={true}
                                             buttonText="Delete Batch"
-                                            instructorInfo={instructorsInfo}
-                                        />
+                                            instructorInfo={instructorsInfo} topicId={0} onDeleteChapterWithSession={function (): void {
+                                                throw new Error('Function not implemented.')
+                                            } }                                        />
                                     </>
                                 )}
                                 <Dialog

@@ -211,7 +211,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
           <div className="flex flex-col items-end space-y-2">
             <Badge 
               variant={isCompleted ? "secondary" : "outline"}
-              className={`${isCompleted ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left  ${isMobile ? 'text-xs' : 'text-sm'}`}
+              className={`${isCompleted ? 'bg-green-100 text-green-800 hover:text-white' : 'bg-gray-100 text-gray-600'} px-3 py-1 text-left ${isMobile ? 'text-xs' : 'text-sm'}`}
             >
               {getSubmissionStatus()}
             </Badge>

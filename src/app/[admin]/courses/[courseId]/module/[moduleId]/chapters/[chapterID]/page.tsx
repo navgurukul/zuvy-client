@@ -58,6 +58,7 @@ export default function Page({
         useState(false)
 
     const fetchChapterContent = useCallback(
+        
         async (chapterId: number, topicId: number) => {
             try {
                 const response = await api.get(
@@ -218,10 +219,12 @@ export default function Page({
                         <LiveClass
                             chapterData={currentChapter}
                             content={chapterContent}
-                            // fetchChapterContent={fetchChapterContent}
+                            fetchChapterContent={fetchChapterContent}
                             moduleId={moduleID}
                             courseId={courseId}
                             canEdit={canEditChapter}
+                            chapterId={chapter_id}
+                            topicId={topicId}
                         />
                     )
                 default:
