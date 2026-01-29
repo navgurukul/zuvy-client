@@ -2,7 +2,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Save, AlertTriangle, ChevronDown, Info, GraduationCap, BookOpen } from 'lucide-react'
+import { Save, AlertTriangle, ChevronDown, Info, GraduationCap, BookOpen, Users, UserCheck, 
+    FileText, Settings, List, Code, MessageSquare  } from 'lucide-react'
 import { useRbacResources } from '@/hooks/useRbacResources'
 import { useRbacPermissions } from '@/hooks/useRbacPermissions'
 import { useRoles } from '@/hooks/useRoles'
@@ -106,6 +107,20 @@ const PERMISSION_TIERS: Record<PermissionTier, {
         backgroundColor: 'bg-success-light',
         dotColorClass: 'bg-success',
     },
+}
+const RESOURCE_ICONS: Record<string, React.ReactNode> = {
+    // Course Studio children
+    'general details': <Info className="h-4 w-4" />,
+    'curriculum': <BookOpen className="h-4 w-4" />,
+    'student': <Users className="h-4 w-4" />,
+    'batch': <UserCheck className="h-4 w-4" />,
+    'submission': <FileText className="h-4 w-4" />,
+    'setting': <Settings className="h-4 w-4" />,
+    
+    // Content Bank children
+    'mcqs': <List className="h-4 w-4" />,
+    'coding questions': <Code className="h-4 w-4" />,
+    'open ended': <MessageSquare className="h-4 w-4" />,
 }
 
 // Helper function to determine permission level from permissions
@@ -271,8 +286,41 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         [resources]
     )
 
+    // Group resources by main module
+    const groupedResources = useMemo(() => {
+        const groups: Record<string, { id: string; children: RoleAction[] }> = {}
+        
+        roleActions.forEach(action => {
+            let mainModule = 'Course Studio'
+            
+            const title = (action.title || '').toLowerCase()
+            const description = (action.description || '').toLowerCase()
+            
+            // Determine main module based on title and description
+            if (title.includes('mcq') || 
+                title.includes('question') || 
+                title.includes('coding') ||
+                description.includes('content bank') ||
+                description.includes('mcq') ||
+                description.includes('question')) {
+                mainModule = 'Content Bank'
+            }
+            
+            if (!groups[mainModule]) {
+                groups[mainModule] = {
+                    id: mainModule.toLowerCase().replace(/\s+/g, '-'),
+                    children: []
+                }
+            }
+            
+            groups[mainModule].children.push(action)
+        })
+        
+        return groups
+    }, [roleActions])
+
     // Handle permission level change
-    const handlePermissionChange = (resourceId: number, tier: PermissionTier) => {
+    const handlePermissionChange = (resourceId: number, tier: PermissionTier, isParent: boolean = false) => {
         const tierToLevel: Record<PermissionTier, PermissionLevel> = {
             0: 'No access',
             1: 'Viewer',
@@ -283,34 +331,63 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         
         const level = tierToLevel[tier]
         const levelPermissions = PERMISSION_LEVELS[level]
-        const permissions = permissionsData[resourceId] || []
         
-        const newPerms: Record<number, boolean> = {}
-        
-        permissions.forEach((perm: any) => {
-            const permName = (perm.name || '').toLowerCase()
-            if (permName.includes('view') || permName.includes('read')) {
-                newPerms[perm.id] = levelPermissions.view
-            } else if (permName.includes('create') || permName.includes('add')) {
-                newPerms[perm.id] = levelPermissions.create
-            } else if (permName.includes('edit') || permName.includes('update')) {
-                newPerms[perm.id] = levelPermissions.edit
-            } else if (permName.includes('delete') || permName.includes('remove')) {
-                newPerms[perm.id] = levelPermissions.delete
-            } else {
-                newPerms[perm.id] = resourcePermissions[resourceId]?.[perm.id] || false
-            }
-        })
+        // Function to update permissions for a single resource
+        const updateResourcePermissions = (resId: number) => {
+            const permissions = permissionsData[resId] || []
+            const newPerms: Record<number, boolean> = {}
+            
+            permissions.forEach((perm: any) => {
+                const permName = (perm.name || '').toLowerCase()
+                if (permName.includes('view') || permName.includes('read')) {
+                    newPerms[perm.id] = levelPermissions.view
+                } else if (permName.includes('create') || permName.includes('add')) {
+                    newPerms[perm.id] = levelPermissions.create
+                } else if (permName.includes('edit') || permName.includes('update')) {
+                    newPerms[perm.id] = levelPermissions.edit
+                } else if (permName.includes('delete') || permName.includes('remove')) {
+                    newPerms[perm.id] = levelPermissions.delete
+                } else {
+                    newPerms[perm.id] = resourcePermissions[resId]?.[perm.id] || false
+                }
+            })
+            
+            return newPerms
+        }
 
-        setResourcePermissions((prev) => ({
-            ...prev,
-            [resourceId]: newPerms,
-        }))
-        
-        setPermissionLevels((prev) => ({
-            ...prev,
-            [resourceId]: level,
-        }))
+        // If this is a parent module click, update all children
+        if (isParent) {
+            const newResourcePermissions: Record<number, Record<number, boolean>> = { ...resourcePermissions }
+            const newPermissionLevels: Record<number, PermissionLevel> = { ...permissionLevels }
+            
+            // Find the module containing this resource
+            for (const [moduleName, module] of Object.entries(groupedResources)) {
+                if (module.children.some(child => child.id === resourceId)) {
+                    // Update all children in this module
+                    module.children.forEach(child => {
+                        newResourcePermissions[child.id] = updateResourcePermissions(child.id)
+                        newPermissionLevels[child.id] = level
+                    })
+                    break
+                }
+            }
+            
+            setResourcePermissions(newResourcePermissions)
+            setPermissionLevels(newPermissionLevels)
+        } else {
+            // Single resource update
+            const newPerms = updateResourcePermissions(resourceId)
+            
+            setResourcePermissions((prev) => ({
+                ...prev,
+                [resourceId]: newPerms,
+            }))
+            
+            setPermissionLevels((prev) => ({
+                ...prev,
+                [resourceId]: level,
+            }))
+        }
     }
 
     // Handle navigation with unsaved changes check
@@ -468,39 +545,6 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     // Check if Admin role (cannot modify)
     const isAdminRole = selectedRole?.toLowerCase() === 'admin'
 
-    // Group resources by main module
-    const groupedResources = useMemo(() => {
-        const groups: Record<string, { id: string; children: RoleAction[] }> = {}
-        
-        roleActions.forEach(action => {
-            let mainModule = 'Course Studio'
-            
-            const title = (action.title || '').toLowerCase()
-            const description = (action.description || '').toLowerCase()
-            
-            // Determine main module based on title and description
-            if (title.includes('mcq') || 
-                title.includes('question') || 
-                title.includes('coding') ||
-                description.includes('content bank') ||
-                description.includes('mcq') ||
-                description.includes('question')) {
-                mainModule = 'Content Bank'
-            }
-            
-            if (!groups[mainModule]) {
-                groups[mainModule] = {
-                    id: mainModule.toLowerCase().replace(/\s+/g, '-'),
-                    children: []
-                }
-            }
-            
-            groups[mainModule].children.push(action)
-        })
-        
-        return groups
-    }, [roleActions])
-
     const toggleModuleExpansion = (moduleId: string) => {
         setExpandedModules((prev) => {
             const next = new Set(prev)
@@ -513,8 +557,35 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         })
     }
 
-    const renderPermissionButtons = (resourceId: number, isChild: boolean = false) => {
-        const currentLevel = permissionLevels[resourceId] || 'No access'
+    // Get parent permission level by checking all children
+    const getParentPermissionLevel = (moduleChildren: RoleAction[]): PermissionLevel => {
+        if (moduleChildren.length === 0) return 'No access'
+        
+        // Get the first child's permission level
+        const firstChildLevel = permissionLevels[moduleChildren[0].id] || 'No access'
+        
+        // Check if all children have the same permission level
+        const allSame = moduleChildren.every(child => {
+            const childLevel = permissionLevels[child.id] || 'No access'
+            return childLevel === firstChildLevel
+        })
+        
+        // If all children have the same level, return that level
+        // Otherwise return 'No access' as default (you could also show a mixed state)
+        return allSame ? firstChildLevel : 'No access'
+    }
+
+    const renderPermissionButtons = (resourceId: number, isChild: boolean = false, moduleChildren?: RoleAction[]) => {
+        let currentLevel: PermissionLevel
+        
+        if (!isChild && moduleChildren) {
+            // For parent rows, calculate the level based on all children
+            currentLevel = getParentPermissionLevel(moduleChildren)
+        } else {
+            // For child rows, use the stored level
+            currentLevel = permissionLevels[resourceId] || 'No access'
+        }
+        
         const currentTier = permissionLevelToTier(currentLevel)
 
         return (
@@ -531,7 +602,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 key={tier.tier}
                                 onClick={() => {
                                     if (!isAdminRole) {
-                                        handlePermissionChange(resourceId, tier.tier)
+                                        handlePermissionChange(resourceId, tier.tier, !isChild)
                                     }
                                 }}
                                 disabled={isAdminRole}
@@ -745,30 +816,42 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                             {moduleName}
                                                         </span>
                                                     </div>
-                                                    {renderPermissionButtons(module.children[0]?.id || 0, false)}
+                                                    {renderPermissionButtons(module.children[0]?.id || 0, false, module.children)}
                                                 </div>
 
                                                 {/* Child Rows */}
-                                                {isExpanded && module.children.map((child) => (
-                                                    <div key={child.id} className="bg-white">
-                                                        <div 
-                                                            className="flex gap-2 items-center justify-between px-6 py-3 border-b border-border last:border-b-0"
-                                                            onMouseEnter={() => setHoveredRowId(child.id)}
-                                                            onMouseLeave={() => setHoveredRowId(null)}
-                                                        >
-                                                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                                <div className="w-5 flex-shrink-0" />
-                                                                <div className="flex-shrink-0 text-muted-foreground">
-                                                                    <Info className="h-4 w-4" />
+                                                {isExpanded && (() => {
+                                                    const parentId = module.children[0]?.id || 0
+                                                    const parentLevel = permissionLevels[parentId] || 'No access'
+
+                                                    return module.children.map((child) => (
+                                                        <div key={child.id} className="bg-white">
+                                                            <div 
+                                                                className="flex gap-2 items-center justify-between px-6 py-3 border-b border-border last:border-b-0"
+                                                                onMouseEnter={() => setHoveredRowId(child.id)}
+                                                                onMouseLeave={() => setHoveredRowId(null)}
+                                                            >
+                                                                <div className="flex items-center gap-3 min-w-0 flex-1">
+                                                                    <div className="w-5 flex-shrink-0" />
+                                                                   <div className="flex-shrink-0 text-muted-foreground">
+                                                                        {RESOURCE_ICONS[child.title.toLowerCase()] || <Info className="h-4 w-4" />}
+                                                                    </div>
+                                                                    <span className="text-sm text-gray-300 font-normal text-foreground truncate">
+                                                                        {child.title}
+                                                                    </span>
                                                                 </div>
-                                                                <span className="text-sm font-normal text-foreground truncate">
-                                                                    {child.title}
-                                                                </span>
+
+                                                                {parentLevel === 'No access' ? (
+                                                                    <div className="flex items-center text-gray-200 justify-end text-xs text-muted-foreground italic" style={{ width: '620px' }}>
+                                                                        Enable Parent Access to configure
+                                                                    </div>
+                                                                ) : (
+                                                                    renderPermissionButtons(child.id, true)
+                                                                )}
                                                             </div>
-                                                            {renderPermissionButtons(child.id, true)}
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    ))
+                                                })()}
                                             </React.Fragment>
                                         )
                                     })}
