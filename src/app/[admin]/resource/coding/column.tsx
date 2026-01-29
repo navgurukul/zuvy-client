@@ -6,7 +6,7 @@ import { CodingQuestion } from '@/utils/data/schema'
 import { Edit, Trash2, Eye } from 'lucide-react'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { DELETE_CODING_QUESTION_CONFIRMATION } from '@/utils/constant'
-import DeleteConfirmationModal from '@/app/[admin]/courses/[courseId]/_components/deleteModal'
+import DeleteConfirmationModal from '@/app/[admin]/[organization]/courses/[courseId]/_components/deleteModal'
 import {
     getDeleteCodingQuestion,
     getEditCodingQuestionDialogs,
@@ -26,7 +26,8 @@ import {
     handleEditCodingQuestion,
     filteredCodingQuestions,
 } from '@/utils/admin'
-import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
+import QuestionDescriptionModal from '../../[organization]/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
+// import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
 export const columns: ColumnDef<CodingQuestion>[] = [
     {

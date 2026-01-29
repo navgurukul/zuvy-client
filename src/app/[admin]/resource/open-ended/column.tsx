@@ -22,7 +22,7 @@ import {
     handleDeleteModal,
     handleEditOpenEndedQuestion,
 } from '@/utils/admin'
-import DeleteConfirmationModal from '@/app/[admin]/courses/[courseId]/_components/deleteModal'
+import DeleteConfirmationModal from '@/app/[admin]/[organization]/courses/[courseId]/_components/deleteModal'
 import { DELETE_OPEN_ENDED_QUESTION_CONFIRMATION } from '@/utils/constant'
 import { cn, difficultyColor } from '@/lib/utils'
 import {

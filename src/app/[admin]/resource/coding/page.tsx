@@ -54,7 +54,7 @@ import {
 } from '@/app/[admin]/resource/coding/adminResourceCodinType'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
-import {CodingProblemsSkeleton} from '@/app/[admin]/courses/[courseId]/_components/adminSkeleton'
+import {CodingProblemsSkeleton} from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 
 const CodingProblems = () => {
     const router = useRouter()
