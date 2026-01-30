@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Save, AlertTriangle, ChevronDown, Info, GraduationCap, BookOpen, Users, UserCheck, 
-    FileText, Settings, List, Code, MessageSquare, Lock } from 'lucide-react'
+    FileText, Settings, List, Code, MessageSquare } from 'lucide-react'
 import { useRbacResources } from '@/hooks/useRbacResources'
 import { useRbacPermissions } from '@/hooks/useRbacPermissions'
 import { useRoles } from '@/hooks/useRoles'
@@ -872,9 +872,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                                 onMouseLeave={() => setHoveredRowId(null)}
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                                    <div className="w-5 flex-shrink-0 flex items-center justify-center">
-                                                                        {parentLevel === 'No access' ? null : <Lock className="h-4 w-4 text-muted-foreground/60" />}
-                                                                    </div>
+                                                                    <div className="w-5 flex-shrink-0" />
                                                                    <div className={cn('flex-shrink-0', showDisabledMessage ? 'text-muted-foreground/50' : 'text-muted-foreground')}>
                                                                         {RESOURCE_ICONS[child.title.toLowerCase()] || <Info className="h-4 w-4" />}
                                                                     </div>
