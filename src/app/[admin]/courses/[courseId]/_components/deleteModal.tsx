@@ -77,7 +77,10 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <Dialog.Overlay className="fixed inset-0 bg-gray-100 bg-opacity-10 transition-opacity" />
+                        <Dialog.Overlay 
+                        className="fixed inset-0 bg-gray-900/40  transition-opacity"
+
+                        />
                     </Transition.Child>
 
                     {/* This element is to trick the browser into centering the modal contents. */}
@@ -97,9 +100,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                         leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                         leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                     >
-                        <div className="w-[500px]  inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle  sm:p-6">
-                            <div className="my-7 mx-5 ">
-                                <div className="mt-3 text-start m:mt-5">
+                        <div className="w-[500px]  inline-block align-bottom bg-white rounded-lg p-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle  sm:p-6">
+                            <div className="">
+                                <div className="mt-0 text-start m:mt-5">
                                     <Dialog.Title
                                         as="h3"
                                         className="text-lg leading-6 font-semibold text-gray-900 flex items-center gap-2"
@@ -110,8 +113,8 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                             : modalTitle ||
                                               'Permanent Deletion'}
                                     </Dialog.Title>
-                                    <div className="mt-3">
-                                        <p className="text-sm text-gray-600 leading-relaxed">
+                                    <div className="mt-3 border-t border-gray-200">
+                                        <p className="text-base text-gray-700 leading-relaxed mt-5">
                                             {modalText}
                                         </p>
                                         {(modalText2 || instructorInfo?.name) && (
@@ -140,7 +143,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     </div>
                                 )}
                                 {topicId === 8 && (
-                                    <div className="flex items-start gap-2 mt-6 p-3 rounded-md hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-start gap-2 mt-6 px-0 py-3 rounded-md hover:bg-gray-50 transition-colors">
                                         <input
                                             type="checkbox"
                                             id="deleteWithSession"
@@ -155,7 +158,37 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                     </div>
                                 )}
                             </div>
-                            <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-3">
+                            <div className="mt-6 pt-4  flex justify-start gap-3">
+                            {loading ? (
+                                    <Button variant={'destructive'} disabled className="px-6 py-2">
+                                        <Spinner className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant={'destructive'}
+                                        type="button"
+                                        disabled={loading || (topicId === 8 && !deleteWithSession)}
+                                        className={`
+                                          px-6 py-2 text-sm font-medium
+                                          transition-colors
+                                          ${
+                                            loading || (topicId === 8 && !deleteWithSession)
+                                              ? 'bg-gray-300 text-gray-600 cursor-not-allowed hover:bg-gray-300'
+                                              : 'bg-red-600 text-white hover:bg-red-700'
+                                          }
+                                        `}
+                                        onClick={() => {
+                                          if (topicId === 8 && deleteWithSession) {
+                                            onDeleteChapterWithSession?.()
+                                          } else {
+                                            handleConfirm()
+                                          }
+                                        }}
+                                    >
+                                        {buttonText}
+                                    </Button>
+                                )}
                               <Button
                                     variant={'outline'}
                                     type="button"
@@ -167,27 +200,6 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                                         ? 'Keep the Question'
                                         : 'Cancel'}
                                 </Button>
-                                {loading ? (
-                                    <Button variant={'destructive'} disabled className="px-6 py-2">
-                                        <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                                        Deleting...
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant={'destructive'}
-                                        type="button"
-                                        className="px-6 py-2 text-sm font-medium bg-red-600 hover:bg-red-700"
-                                        onClick={() => {
-                                            if (topicId === 8 && deleteWithSession) {
-                                                onDeleteChapterWithSession?.()
-                                            } else {
-                                                handleConfirm()
-                                            }
-                                        }}
-                                    >
-                                        {buttonText}
-                                    </Button>
-                                )}
                             </div>
                         </div>
                     </Transition.Child>
