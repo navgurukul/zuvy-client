@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Save, AlertTriangle, ChevronDown, Info, GraduationCap, BookOpen, Users, UserCheck, 
-    FileText, Settings, List, Code, MessageSquare  } from 'lucide-react'
+    FileText, Settings, List, Code, MessageSquare, Lock } from 'lucide-react'
 import { useRbacResources } from '@/hooks/useRbacResources'
 import { useRbacPermissions } from '@/hooks/useRbacPermissions'
 import { useRoles } from '@/hooks/useRoles'
@@ -575,7 +575,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
         return allSame ? firstChildLevel : 'No access'
     }
 
-    const renderPermissionButtons = (resourceId: number, isChild: boolean = false, moduleChildren?: RoleAction[]) => {
+    const renderPermissionButtons = (resourceId: number, isChild: boolean = false, moduleChildren?: RoleAction[], maxAllowedTier?: PermissionTier) => {
         let currentLevel: PermissionLevel
         
         if (!isChild && moduleChildren) {
@@ -594,6 +594,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                     .sort((a, b) => a.tier - b.tier)
                     .map((tier) => {
                         const isActive = currentTier === tier.tier
+                        const isDisabledByParent = isChild && typeof maxAllowedTier === 'number' && tier.tier > maxAllowedTier
                         // Show label for: parent rows (always), active buttons (always), or when row is hovered
                         const showLabel = !isChild || isActive || hoveredRowId === resourceId
                         
@@ -602,16 +603,19 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 key={tier.tier}
                                 onClick={() => {
                                     if (!isAdminRole) {
-                                        handlePermissionChange(resourceId, tier.tier, !isChild)
+                                        // Prevent clicks for tiers higher than parent's allowed tier
+                                        if (!isDisabledByParent) {
+                                            handlePermissionChange(resourceId, tier.tier, !isChild)
+                                        }
                                     }
                                 }}
-                                disabled={isAdminRole}
+                                disabled={isAdminRole || isDisabledByParent}
                                 className={cn(
                                     'transition-all duration-200 rounded-md',
                                     'h-10 flex items-center justify-center flex-1',
                                     'text-xs font-semibold uppercase',
                                     'min-w-0 relative group',
-                                    isAdminRole ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                                    (isAdminRole || isDisabledByParent) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
                                     isActive
                                         ? cn(
                                             'border-2',
@@ -823,6 +827,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                 {isExpanded && (() => {
                                                     const parentId = module.children[0]?.id || 0
                                                     const parentLevel = permissionLevels[parentId] || 'No access'
+                                                    const isParentNoAccess = parentLevel === 'No access'
 
                                                     return module.children.map((child) => (
                                                         <div key={child.id} className="bg-white">
@@ -832,21 +837,23 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                                 onMouseLeave={() => setHoveredRowId(null)}
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                                                                    <div className="w-5 flex-shrink-0" />
-                                                                   <div className="flex-shrink-0 text-muted-foreground">
+                                                                    <div className="w-5 flex-shrink-0 flex items-center justify-center">
+                                                                        {isParentNoAccess ? null : <Lock className="h-4 w-4 text-muted-foreground/60" />}
+                                                                    </div>
+                                                                   <div className={cn('flex-shrink-0', isParentNoAccess ? 'text-muted-foreground/50' : 'text-muted-foreground')}>
                                                                         {RESOURCE_ICONS[child.title.toLowerCase()] || <Info className="h-4 w-4" />}
                                                                     </div>
-                                                                    <span className="text-sm text-gray-300 font-normal text-foreground truncate">
+                                                                    <span className={cn('text-sm font-normal truncate', isParentNoAccess ? 'text-muted-foreground' : 'text-foreground')}>
                                                                         {child.title}
                                                                     </span>
                                                                 </div>
 
-                                                                {parentLevel === 'No access' ? (
-                                                                    <div className="flex items-center text-gray-200 justify-end text-xs text-muted-foreground italic" style={{ width: '620px' }}>
+                                                                {isParentNoAccess ? (
+                                                                    <div className="flex items-center justify-end text-sm text-muted-foreground italic" style={{ width: '620px' }}>
                                                                         Enable Parent Access to configure
                                                                     </div>
                                                                 ) : (
-                                                                    renderPermissionButtons(child.id, true)
+                                                                    renderPermissionButtons(child.id, true, undefined, permissionLevelToTier(parentLevel))
                                                                 )}
                                                             </div>
                                                         </div>
