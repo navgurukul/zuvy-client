@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Save, AlertTriangle, ChevronDown, Info, GraduationCap, BookOpen, Users, UserCheck, 
-    FileText, Settings, List, Code, MessageSquare  } from 'lucide-react'
+    FileText, Settings, List, Code, MessageSquare } from 'lucide-react'
 import { useRbacResources } from '@/hooks/useRbacResources'
 import { useRbacPermissions } from '@/hooks/useRbacPermissions'
 import { useRoles } from '@/hooks/useRoles'
@@ -196,6 +196,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     
     // Track hovered row for showing labels on hover
     const [hoveredRowId, setHoveredRowId] = useState<number | null>(null)
+    
+    // Track modules where parent was explicitly set to No Access
+    const [parentLockedModules, setParentLockedModules] = useState<Set<string>>(new Set())
 
     // Fetch permissions for all resources when role changes
     useEffect(() => {
@@ -368,6 +371,22 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                         newResourcePermissions[child.id] = updateResourcePermissions(child.id)
                         newPermissionLevels[child.id] = level
                     })
+                    // If parent explicitly set to No access, mark module as locked
+                    if (level === 'No access') {
+                        setParentLockedModules((prev) => {
+                            const next = new Set(prev)
+                            next.add(module.id)
+                            return next
+                        })
+                    } else {
+                        // ensure module is not locked when parent given other tiers
+                        setParentLockedModules((prev) => {
+                            if (!prev.has(module.id)) return prev
+                            const next = new Set(prev)
+                            next.delete(module.id)
+                            return next
+                        })
+                    }
                     break
                 }
             }
@@ -387,6 +406,19 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                 ...prev,
                 [resourceId]: level,
             }))
+            // If a child is changed, ensure parent lock is not set (child overrides)
+            // Find the module containing this resource and remove lock if present
+            for (const [moduleName, module] of Object.entries(groupedResources)) {
+                if (module.children.some(child => child.id === resourceId)) {
+                    setParentLockedModules((prev) => {
+                        if (!prev.has(module.id)) return prev
+                        const next = new Set(prev)
+                        next.delete(module.id)
+                        return next
+                    })
+                    break
+                }
+            }
         }
     }
 
@@ -558,24 +590,27 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
     }
 
     // Get parent permission level by checking all children
+    // Use the highest tier among children so parent reflects any elevated child access
     const getParentPermissionLevel = (moduleChildren: RoleAction[]): PermissionLevel => {
         if (moduleChildren.length === 0) return 'No access'
-        
-        // Get the first child's permission level
-        const firstChildLevel = permissionLevels[moduleChildren[0].id] || 'No access'
-        
-        // Check if all children have the same permission level
-        const allSame = moduleChildren.every(child => {
-            const childLevel = permissionLevels[child.id] || 'No access'
-            return childLevel === firstChildLevel
+
+        let maxTier: PermissionTier = 0
+
+        moduleChildren.forEach(child => {
+            const lvl = permissionLevels[child.id] || 'No access'
+            const tier = permissionLevelToTier(lvl)
+            if (tier > maxTier) maxTier = tier
         })
-        
-        // If all children have the same level, return that level
-        // Otherwise return 'No access' as default (you could also show a mixed state)
-        return allSame ? firstChildLevel : 'No access'
+
+        // Map back to PermissionLevel
+        const tierToLevel: Record<PermissionTier, PermissionLevel> = {
+            0: 'No access', 1: 'Viewer', 2: 'Editor', 3: 'Creator', 4: 'Manager',
+        }
+
+        return tierToLevel[maxTier]
     }
 
-    const renderPermissionButtons = (resourceId: number, isChild: boolean = false, moduleChildren?: RoleAction[]) => {
+    const renderPermissionButtons = (resourceId: number, isChild: boolean = false, moduleChildren?: RoleAction[], maxAllowedTier?: PermissionTier) => {
         let currentLevel: PermissionLevel
         
         if (!isChild && moduleChildren) {
@@ -594,6 +629,7 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                     .sort((a, b) => a.tier - b.tier)
                     .map((tier) => {
                         const isActive = currentTier === tier.tier
+                        const isDisabledByParent = isChild && typeof maxAllowedTier === 'number' && tier.tier > maxAllowedTier
                         // Show label for: parent rows (always), active buttons (always), or when row is hovered
                         const showLabel = !isChild || isActive || hoveredRowId === resourceId
                         
@@ -602,16 +638,19 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                 key={tier.tier}
                                 onClick={() => {
                                     if (!isAdminRole) {
-                                        handlePermissionChange(resourceId, tier.tier, !isChild)
+                                        // Prevent clicks for tiers higher than parent's allowed tier
+                                        if (!isDisabledByParent) {
+                                            handlePermissionChange(resourceId, tier.tier, !isChild)
+                                        }
                                     }
                                 }}
-                                disabled={isAdminRole}
+                                disabled={isAdminRole || isDisabledByParent}
                                 className={cn(
                                     'transition-all duration-200 rounded-md',
                                     'h-10 flex items-center justify-center flex-1',
                                     'text-xs font-semibold uppercase',
                                     'min-w-0 relative group',
-                                    isAdminRole ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+                                    (isAdminRole || isDisabledByParent) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
                                     isActive
                                         ? cn(
                                             'border-2',
@@ -821,8 +860,9 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
 
                                                 {/* Child Rows */}
                                                 {isExpanded && (() => {
-                                                    const parentId = module.children[0]?.id || 0
-                                                    const parentLevel = permissionLevels[parentId] || 'No access'
+                                                    const parentLevel = getParentPermissionLevel(module.children)
+                                                    const isParentLocked = parentLockedModules.has(module.id)
+                                                    const showDisabledMessage = isParentLocked && parentLevel === 'No access'
 
                                                     return module.children.map((child) => (
                                                         <div key={child.id} className="bg-white">
@@ -833,20 +873,20 @@ const RoleManagementPanel: React.FC<RoleManagementPanelProps> = ({
                                                             >
                                                                 <div className="flex items-center gap-3 min-w-0 flex-1">
                                                                     <div className="w-5 flex-shrink-0" />
-                                                                   <div className="flex-shrink-0 text-muted-foreground">
+                                                                   <div className={cn('flex-shrink-0', showDisabledMessage ? 'text-muted-foreground/50' : 'text-muted-foreground')}>
                                                                         {RESOURCE_ICONS[child.title.toLowerCase()] || <Info className="h-4 w-4" />}
                                                                     </div>
-                                                                    <span className="text-sm text-gray-300 font-normal text-foreground truncate">
+                                                                    <span className={cn('text-sm font-normal truncate', showDisabledMessage ? 'text-muted-foreground' : 'text-foreground')}>
                                                                         {child.title}
                                                                     </span>
                                                                 </div>
 
-                                                                {parentLevel === 'No access' ? (
-                                                                    <div className="flex items-center text-gray-200 justify-end text-xs text-muted-foreground italic" style={{ width: '620px' }}>
+                                                                {showDisabledMessage ? (
+                                                                    <div className="flex items-center justify-end text-sm text-muted-foreground italic" style={{ width: '620px' }}>
                                                                         Enable Parent Access to configure
                                                                     </div>
                                                                 ) : (
-                                                                    renderPermissionButtons(child.id, true)
+                                                                    renderPermissionButtons(child.id, true, undefined, permissionLevelToTier(parentLevel))
                                                                 )}
                                                             </div>
                                                         </div>
