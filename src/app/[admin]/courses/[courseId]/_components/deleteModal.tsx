@@ -5,6 +5,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
+import { AlertTriangle, X } from 'lucide-react'
 import { DeleteConfirmationModalProps } from '@/app/[admin]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
@@ -57,152 +58,151 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
         }
     }
 
-    useEffect(() => {
-        setInputValue('')
-    }, [isOpen])
     return (
         <Transition.Root show={isOpen} as={Fragment}>
             <Dialog
                 as="div"
-                className="fixed z-[60] inset-0 overflow-y-auto"
+                className="relative z-50"
                 onClose={() => onClose?.()}
             >
-                <div className="flex items-center justify-start min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                    <Transition.Child
-                        as={Fragment}
-                        enter="ease-out duration-300"
-                        enterFrom="opacity-0"
-                        enterTo="opacity-100"
-                        leave="ease-in duration-200"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                    >
-                        <Dialog.Overlay 
-                        className="fixed inset-0 bg-gray-900/40  transition-opacity"
+                <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                >
+                    <div className="fixed inset-0 bg-white/30 backdrop-blur-sm transition-opacity" />
 
-                        />
-                    </Transition.Child>
+                </Transition.Child>
 
-                    {/* This element is to trick the browser into centering the modal contents. */}
-                    <span
-                        className="hidden sm:inline-block sm:align-middle sm:h-screen"
-                        aria-hidden="true"
-                    >
-                        &#8203;
-                    </span>
-
-                    <Transition.Child
-                        as={Fragment}
-                        enter="ease-out duration-300"
-                        enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                        enterTo="opacity-100 translate-y-0 sm:scale-100"
-                        leave="ease-in duration-200"
-                        leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                        leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    >
-                        <div className="w-[500px]  inline-block align-bottom bg-white rounded-lg p-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle  sm:p-6">
-                            <div className="">
-                                <div className="mt-0 text-start m:mt-5">
-                                    <Dialog.Title
-                                        as="h3"
-                                        className="text-lg leading-6 font-semibold text-gray-900 flex items-center gap-2"
-                                    >
-                                        
-                                        {input
-                                            ? 'Delete Batch'
-                                            : modalTitle ||
-                                              'Permanent Deletion'}
-                                    </Dialog.Title>
-                                    <div className="mt-3 border-t border-gray-200">
-                                        <p className="text-base text-gray-700 leading-relaxed mt-5">
-                                            {modalText}
-                                        </p>
-                                        {(modalText2 || instructorInfo?.name) && (
-                                            <div className="text-sm flex gap-x-2 text-black font-semibold mt-3">
-                                                <p className="text-gray-600 font-normal">
-                                                    {modalText2}
-                                                </p>
-                                                {instructorInfo?.name}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                {input && (
-                                    <div>
-                                        <Input
-                                            placeholder="Type Batch Name"
-                                            className="p-3"
-                                            onChange={handleInputChange}
-                                            value={inputValue}
-                                        />
-                                        {
-                                            <p style={{ color: 'red' }}>
-                                                {error}
-                                            </p>
-                                        }
-                                    </div>
-                                )}
-                                {topicId === 8 && (
-                                    <div className="flex items-start gap-2 mt-6 px-0 py-3 rounded-md hover:bg-gray-50 transition-colors">
-                                        <input
-                                            type="checkbox"
-                                            id="deleteWithSession"
-                                            checked={deleteWithSession}
-                                            onChange={(e) => setDeleteWithSession(e.target.checked)}
-                                            className="mt-0.5 h-4 w-4 rounded  text-red-600 focus:ring-red-500 cursor-pointer"
-                                        />
-                                        <label htmlFor="deleteWithSession" className="flex flex-col cursor-pointer">
-                                            <span className="text-sm font-semibold text-gray-900">Delete live class from system</span>
-                                            <span className="text-xs text-gray-500 mt-0.5">It will not be available anymore</span>
-                                        </label>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="mt-6 pt-4  flex justify-start gap-3">
-                            {loading ? (
-                                    <Button variant={'destructive'} disabled className="px-6 py-2">
-                                        <Spinner className="mr-2 h-4 w-4 animate-spin" />
-                                        Deleting...
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        variant={'destructive'}
-                                        type="button"
-                                        disabled={loading || (topicId === 8 && !deleteWithSession)}
-                                        className={`
-                                          px-6 py-2 text-sm font-medium
-                                          transition-colors
-                                          ${
-                                            loading || (topicId === 8 && !deleteWithSession)
-                                              ? 'bg-gray-300 text-gray-600 cursor-not-allowed hover:bg-gray-300'
-                                              : 'bg-red-600 text-white hover:bg-red-700'
-                                          }
-                                        `}
-                                        onClick={() => {
-                                          if (topicId === 8 && deleteWithSession) {
-                                            onDeleteChapterWithSession?.()
-                                          } else {
-                                            handleConfirm()
-                                          }
-                                        }}
-                                    >
-                                        {buttonText}
-                                    </Button>
-                                )}
-                              <Button
-                                    variant={'outline'}
-                                    type="button"
-                                    className="px-6 py-2 text-sm font-medium"
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                        <Transition.Child
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                            enterTo="opacity-100 translate-y-0 sm:scale-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                            leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                        >
+                            <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left   shadow-[0_10px_25px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.05)] transition-all">
+                                {/* Close button */}
+                                <button
                                     onClick={onClose}
+                                    className="absolute right-4 top-6 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none disabled:pointer-events-none"
+
                                     disabled={loading}
                                 >
-                                    {modalTitle
-                                        ? 'Keep the Question'
-                                        : 'Cancel'}
-                                </Button>
-                            </div>
-                        </div>
-                    </Transition.Child>
+                                    <X className="h-4 w-4" />
+                                    <span className="sr-only">Close</span>
+                                </button>
+
+                                {/* Dialog Header */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex-shrink-0">
+                                            <AlertTriangle className="h-6 w-6 text-destructive" />
+                                        </div>
+                                        <Dialog.Title
+                                            as="h3"
+                                            className="text-lg font-semibold text-gray-900"
+                                        >
+                                            {input ? 'Delete Batch' : modalTitle || 'Permanent Deletion'}
+                                        </Dialog.Title>
+                                    </div>
+                                    
+                                    <p className="text-sm text-muted-foreground">
+                                        {modalText}
+                                    </p>
+
+                                    {(modalText2 || instructorInfo?.name) && (
+                                        <div className="text-sm flex gap-x-2 text-black font-semibold mt-3">
+                                            <p className="text-gray-600 font-normal">
+                                                {modalText2}
+                                            </p>
+                                            {instructorInfo?.name}
+                                        </div>
+                                    )}
+
+                                    {input && (
+                                        <div className="mt-4">
+                                            <Input
+                                                placeholder="Type Batch Name"
+                                                className="p-3"
+                                                onChange={handleInputChange}
+                                                value={inputValue}
+                                            />
+                                            {error && (
+                                                <p className="text-red-600 text-sm mt-2">
+                                                    {error}
+                                                </p>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Live Class System Deletion Checkbox */}
+                                    {topicId === 8 && (
+                                        <div className="mt-2 pt-4 border-t">
+                                            <label className="flex items-start space-x-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={deleteWithSession}
+                                                    onChange={(e) => setDeleteWithSession(e.target.checked)}
+                                                    className="mt-1 h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500 cursor-pointer"
+                                                />
+                                                <div>
+                                                    <span className="text-sm font-medium text-foreground block">
+                                                        Delete live class from system
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        It will not be available anymore
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="mt-6 flex justify-end gap-2 sm:gap-3">
+                                    <Button
+                                        variant="outline"
+                                        onClick={onClose}
+                                        className="flex-1 sm:flex-initial"
+                                        disabled={loading}
+                                    >
+                                        {modalTitle ? 'Keep the Question' : 'Cancel'}
+                                    </Button>
+                                    {loading ? (
+                                        <Button 
+                                            variant="destructive" 
+                                            disabled 
+                                            className="flex-1 sm:flex-initial"
+                                        >
+                                            <Spinner className="mr-2 h-4 w-4 animate-spin" />
+                                            Deleting...
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="destructive"
+                                            onClick={() => {
+                                                if (topicId === 8 && deleteWithSession) {
+                                                    onDeleteChapterWithSession?.()
+                                                } else {
+                                                    handleConfirm()
+                                                }
+                                            }}
+                                            className="flex-1 sm:flex-initial"
+                                        >
+                                            {buttonText || 'Delete'}
+                                        </Button>
+                                    )}
+                                </div>
+                            </Dialog.Panel>
+                        </Transition.Child>
+                    </div>
                 </div>
             </Dialog>
         </Transition.Root>
