@@ -69,11 +69,15 @@ const OpenEndedQuestions = ({
                                             View Full Description
                                         </p>
                                     </DialogTrigger>
+                                    <DialogOverlay />
+
                                     <DialogContent>
-                                        <PreviewOpenEnded
-                                            question={question}
-                                            tag={tag}
-                                        />
+                                        <div className="flex-1 overflow-y-auto px-6 py-4">
+                                            <PreviewOpenEnded
+                                                question={question}
+                                                tag={tag}
+                                            />
+                                        </div>
                                     </DialogContent>
                                 </Dialog>
                             </div>

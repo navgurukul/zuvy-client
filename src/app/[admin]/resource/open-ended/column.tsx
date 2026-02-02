@@ -45,9 +45,12 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             const openEndedQuestion = row.original
 
             return (
-                <div className="text-left text-md p-1 w-[550px] text-sm hover:bg-slate-200 rounded-lg transition ease-in-out delay-150 overflow-hidden text-ellipsis">
-                    {openEndedQuestion.question}
+                <div className="w-[550px] p-1">
+                    <p className="text-sm text-left line-clamp-2 text-foreground">
+                        {openEndedQuestion.question}
+                    </p>
                 </div>
+
             )
         },
         enableSorting: true,
@@ -126,16 +129,19 @@ export const columns: ColumnDef<OpenEndedQuestion>[] = [
             const question = row.original
             return (
                 <div className="mr-5 flex justify-end">
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <button>
-                                <Eye size={18} className="cursor-pointer" />
-                            </button>
-                        </DialogTrigger>
-                        <DialogContent className="w-full">
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <button>
+                            <Eye size={18} className="cursor-pointer" />
+                        </button>
+                    </DialogTrigger>
+
+                    <DialogContent className="w-[600px] max-w-[90vw] max-h-[80vh] p-0 flex flex-col">
+                        <div className="flex-1 overflow-y-auto px-6 py-4">
                             <PreviewOpenEnded question={question} />
-                        </DialogContent>
-                    </Dialog>
+                        </div>
+                    </DialogContent>
+                </Dialog>
                 </div>
             )
         },
