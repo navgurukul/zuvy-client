@@ -622,21 +622,36 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                     </p>
                                                 </div>
                                                 <div className="flex justify-end">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="link"
-                                                        disabled={!isEventReady}
-                                                        className="text-primary p-0 h-auto"
-                                                        onClick={() => window.open(item.hangoutLink, '_blank')}
-                                                    >
-                                                        {isEventReady
-                                                            ? getEventActionText(
-                                                                  item.type
-                                                              )
-                                                            : getTimeRemaining(
-                                                                  item.eventDate
-                                                              )}
-                                                    </Button>
+                                                    {eventType === 'Live Class' ? (
+                                                        <Button
+                                                            size="sm"
+                                                            variant="link"
+                                                            disabled={!isEventReady}
+                                                            className="text-primary p-0 h-auto"
+                                                            onClick={() => window.open(item.hangoutLink, '_blank')}
+                                                        >
+                                                            {isEventReady
+                                                                ? getEventActionText(
+                                                                      item.type
+                                                                  )
+                                                                : getTimeRemaining(
+                                                                      item.eventDate
+                                                                  )}
+                                                        </Button>
+                                                    ) : (
+                                                        <Link
+                                                            href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                                                            className="text-primary text-sm font-medium hover:underline"
+                                                        >
+                                                            {isEventReady
+                                                                ? getEventActionText(
+                                                                      item.type
+                                                                  )
+                                                                : getTimeRemaining(
+                                                                      item.eventDate
+                                                                  )}
+                                                        </Link>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -685,14 +700,24 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                           </p>
                         </div>
                         <div className="flex justify-end">
-                          <Button
-                            size="sm"
-                            variant="link"
-                            disabled={!isEventReady}
-                            className="text-primary p-0 h-auto"
-                          >
-                            {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
-                          </Button>
+                          {eventType === 'Live Class' ? (
+                            <Button
+                              size="sm"
+                              variant="link"
+                              disabled={!isEventReady}
+                              className="text-primary p-0 h-auto"
+                              onClick={() => window.open(item.hangoutLink, '_blank')}
+                            >
+                              {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
+                            </Button>
+                          ) : (
+                            <Link
+                              href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                              className="text-primary text-sm font-medium hover:underline"
+                            >
+                              {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>
