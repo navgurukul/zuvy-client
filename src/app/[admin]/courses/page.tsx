@@ -279,7 +279,7 @@ const defaultFetchApi = useCallback(
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
                             {/* Search Box with Custom Hook */}
                             <div className="relative w-full sm:w-[500px] lg:w-[450px] mb-8 [&_input]:pl-10">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/3 h-4 w-4 text-muted-foreground z-10" />
+                                  {/* <Search className="absolute left-3 top-1/2 -translate-y-1/3 h-4 w-4 text-muted-foreground z-10" /> */}
                                 <SearchBox
                                     placeholder="Search courses..."
                                     fetchSuggestionsApi={fetchSuggestionsApi}
@@ -295,12 +295,6 @@ const defaultFetchApi = useCallback(
                                     
                                 />
                             </div>
-
-
-
-
-
-
 
                             {/* Filter Dropdown */}
                             {/* <div className="mt-2">

@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useSearchWithSuggestions } from "@/utils/useUniversalSearchDynamic";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Suggestion,SearchBoxProps } from "@/utils/searchType";
 
@@ -62,6 +62,7 @@ export function SearchBox(props: SearchBoxProps) {
       <Popover open={showSuggestions && filteredSuggestions.length > 0}>
         <PopoverTrigger asChild>
           <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10"/>
             <Input
               ref={inputRef}
               placeholder={placeholder}
