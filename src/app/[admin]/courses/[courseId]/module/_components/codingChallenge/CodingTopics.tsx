@@ -100,11 +100,10 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
             <div className="w-[70%]">
                 <div className="relative w-full">
                     {/* Search Icon */}
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                         type="text"
                         placeholder="Search By Name"
-                        className="bg-white w-full pl-10 pr-10" // pl-10 for left padding (space for icon)
+                        className="bg-white w-full pl-10 pr-10" 
                         value={searchTerm}
                         onChange={handleSearchChange}
                         disabled={!canEdit}

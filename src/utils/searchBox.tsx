@@ -62,7 +62,7 @@ export function SearchBox(props: SearchBoxProps) {
       <Popover open={showSuggestions && filteredSuggestions.length > 0}>
         <PopoverTrigger asChild>
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10"/>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10"/>                 
             <Input
               ref={inputRef}
               placeholder={placeholder}
