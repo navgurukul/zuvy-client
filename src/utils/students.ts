@@ -636,7 +636,7 @@ export const formatUpcomingItem = (item: any) => {
     const endTime = endDate.getTime();
     if (endTime > currentTime) {
       const diffTime = endTime - currentTime;
-      return formatCountdown(diffTime, "Deadline in");
+      return formatCountdown(diffTime, "Ends in");
     } else {
       return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event ended";
     }
