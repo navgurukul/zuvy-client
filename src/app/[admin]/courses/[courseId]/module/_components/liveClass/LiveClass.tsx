@@ -381,11 +381,28 @@ const LiveClass = ({
                 <form onSubmit={form.handleSubmit(onSubmit)} className="bg-background rounded-lg flex flex-col h-[600px] overflow-hidden">
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {/* Header with title and status badge */}
-                    <div className="flex items-start justify-between border-b pb-4">
-                        <h2 className="text-2xl font-semibold text-foreground">
-                            {content.title}
-                        </h2>
+                    {/* Header with editable title and status badge */}
+                    <div className="flex items-center justify-between gap-4 pb-4">
+                        <div className="flex-1 pr-4">
+                            <FormField
+                                control={form.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="Untitled live class"
+                                                disabled={!canEditFields}
+                                                maxLength={50}
+                                                className="w-full text-2xl font-semibold text-foreground bg-white rounded-md px-3 py-2 focus-visible:ring-0"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <div className="flex items-center gap-3">
                             <Badge
                                 className={`${getStatusColor(
@@ -427,35 +444,7 @@ const LiveClass = ({
 
                     {/* Form Fields */}
                     <div className="space-y-6">
-                    {/* Title Input */}
-                    <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                            <FormItem>
-                                <div className="flex items-center justify-between">
-                                    <FormLabel className="text-sm font-medium text-foreground block text-left">
-                                        Title
-                                    </FormLabel>
-                                </div>
-                                <FormControl>
-                                    <Input
-                                        {...field}
-                                        placeholder="Advanced Event Handling"
-                                        disabled={!canEditFields}
-                                        maxLength={50}
-                                        className="bg-card border-input"
-                                    />
-                                </FormControl>
-                                {field.value?.length >= 50 && (
-                                    <p className="text-sm text-red-600 font-medium text-left">
-                                        You can enter up to 100 characters only.
-                                    </p>
-                                )}
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {/* Title input moved to header */}
                     {/* Date, Start Time, End Time Row */}
                     <div className="grid grid-cols-3 gap-4">
                         <FormField

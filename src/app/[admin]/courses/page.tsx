@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
     Plus,
+    Search,
 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -277,7 +278,7 @@ const defaultFetchApi = useCallback(
 
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
                             {/* Search Box with Custom Hook */}
-                            <div className="relative w-full sm:w-[500px] lg:w-[450px] mb-8">
+                            <div className="relative w-full sm:w-[500px] lg:w-[450px] mb-8 [&_input]:pl-10">
                                 <SearchBox
                                     placeholder="Search courses..."
                                     fetchSuggestionsApi={fetchSuggestionsApi}
@@ -290,8 +291,10 @@ const defaultFetchApi = useCallback(
                                     )}
                                     getSuggestionValue={(s) => s.name}
                                     inputWidth="w-full"
+                                    
                                 />
                             </div>
+
                             {/* Filter Dropdown */}
                             {/* <div className="mt-2">
                                 <Select

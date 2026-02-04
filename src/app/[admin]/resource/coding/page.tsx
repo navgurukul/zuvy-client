@@ -510,7 +510,7 @@ const CodingProblems = () => {
                             </div>
 
                             <div className="flex items-center gap-4 mb-6">
-                                <div>
+                                <div className="relative [&_input]:pl-10">
                                     <SearchBox
                                         placeholder="Search..."
                                         fetchSuggestionsApi={
