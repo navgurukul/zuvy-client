@@ -10,6 +10,7 @@ import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from '@/app/[admin]/[organization]/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
 import ApproveReattempt from '@/app/[admin]/[organization]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
+import usePathname from 'next/navigation'
 
 interface ColumnContext {
     courseId: string;
@@ -222,13 +223,15 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const { userId, id, title, submitedAt } = row.original;
             // Use context values instead of row.original
             const { courseId, assessment_Id } = context;
+            const pathname = window.location.pathname
+            const orgName = pathname.split('/')[2]
 
             return (
                 <div className="flex items-center gap-3">
                     <Link
                         href={
                             submitedAt
-                                ? `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                                ? `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
                                 : '#'
                         }
                         className={

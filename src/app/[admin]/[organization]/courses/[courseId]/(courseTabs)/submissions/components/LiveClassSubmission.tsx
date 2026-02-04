@@ -9,6 +9,7 @@ import Image from 'next/image'
 import moment from 'moment'
 import {LiveClassSubmissionSkeleton} from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { usePathname } from 'next/navigation'
 
 
 interface LiveClassSubmissionsProps {
@@ -24,6 +25,9 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
     const [liveClassData, setLiveClassData] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
     const [loading, setLoading] = useState(true)
+
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const getLiveClassData = useCallback(async () => {
         try {
@@ -147,7 +151,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                         )}
                         {submissions > 0 ? (
                             <Link
-                                href={`/admin/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
+                                href={`/admin/${orgName}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
                             >
                                 <Button
                                     variant="ghost"
