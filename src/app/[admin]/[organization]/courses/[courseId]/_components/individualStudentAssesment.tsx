@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { use } from 'react'
 import Link from 'next/link'
 import { Eye, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
