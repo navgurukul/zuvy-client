@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
+import { Search } from 'lucide-react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -61,6 +62,48 @@ export function UserManagementTable<TData extends User, TValue>({
 
     // Use search data if searching, otherwise use prop data
     const displayData = isSearching ? searchData : propData
+
+    // Function to update user in search data
+    const updateUserInSearchData = useCallback((updatedUser: TData) => {
+        if (isSearching) {
+            setSearchData(prevData => 
+                prevData.map(user => 
+                    user.userId === updatedUser.userId ? updatedUser : user
+                )
+            )
+        }
+    }, [isSearching])
+
+    // Function to remove user from search data
+    const removeUserFromSearchData = useCallback((userId: string) => {
+        if (isSearching) {
+            setSearchData(prevData => 
+                prevData.filter(user => String((user as User).userId) !== userId)
+            )
+        }
+    }, [isSearching])
+
+    // Function to add user to search data
+    const addUserToSearchData = useCallback((newUser: TData) => {
+        if (isSearching) {
+            setSearchData(prevData => [...prevData, newUser])
+        }
+    }, [isSearching])
+
+    // Sync search data when prop data changes (for updates from external sources)
+    useEffect(() => {
+        if (isSearching && propData) {
+            // Update search data to reflect changes in prop data
+            setSearchData(prevSearchData => {
+                return prevSearchData.map(searchUser => {
+                    const updatedUser = propData.find(propUser => 
+                        (propUser as User).userId === (searchUser as User).userId
+                    );
+                    return updatedUser || searchUser;
+                });
+            });
+        }
+    }, [propData, isSearching]);
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
@@ -144,19 +187,21 @@ export function UserManagementTable<TData extends User, TValue>({
         <div className="space-y-4">
             {/* Search and Filter Bar */}
             <div className="flex gap-4 mb-6">
-                <SearchBox
-                    placeholder="Search by name or email..."
-                    fetchSuggestionsApi={fetchSuggestionsApi}
-                    fetchSearchResultsApi={fetchSearchResultsApi}
-                    defaultFetchApi={defaultFetchApi}
-                    getSuggestionLabel={(user) => (
-                        <div>
-                            <div className="font-medium">{user.name}</div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
-                        </div>
-                    )}
-                    inputWidth="w-80"
-                />
+                <div className="relative [&_input]:pl-10">
+                    <SearchBox
+                        placeholder="Search by name or email..."
+                        fetchSuggestionsApi={fetchSuggestionsApi}
+                        fetchSearchResultsApi={fetchSearchResultsApi}
+                        defaultFetchApi={defaultFetchApi}
+                        getSuggestionLabel={(user) => (
+                            <div>
+                                <div className="font-medium">{user.name}</div>
+                                <div className="text-sm text-gray-500">{user.email}</div>
+                            </div>
+                        )}
+                        inputWidth="w-80"
+                    />
+                </div>
 
                 <div className="mt-2">
                     <Select

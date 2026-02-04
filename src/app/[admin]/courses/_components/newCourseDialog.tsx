@@ -616,7 +616,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                 <Button
                     className="bg-primary"
                     onClick={handleCreateCourseWithUpload}
-                    disabled={!isFormValid() || isUploading} // ✅ Check all fields
+                    disabled={!isFormValid() || isUploading} 
                 >
                     {isUploading ? 'Creating...' : 'Create Course'}
                 </Button>
