@@ -41,6 +41,8 @@ import {
     const NOT_FOUND_SUGGESTION: Suggestion = {
       id: "__not_found__",
       name: "No results found",
+      question: "No results found",
+      title:"No results found",
     };
   
     const safeApiCall = useCallback(
