@@ -28,7 +28,7 @@ import { getModuleData, getChapterDataState } from '@/store/store'
 
 const liveClassSchema = z
     .object({
-        title: z.string().min(1, 'Title is required').max(50, 'Title must not exceed 50 characters'),
+        title: z.string().min(1, 'Title is required').max(100, 'Title must not exceed 100 characters'),
         description: z.string().min(1, 'Description is required'),
         date: z.string().min(1, 'Date is required'),
         startTime: z.string().min(1, 'Start time is required'),
