@@ -9,9 +9,13 @@ import { SubmissionComponentProps } from '@/app/[admin]/[organization]/courses/[
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { usePathname } from 'next/navigation'
 
 const SubmissionComponent = (props: SubmissionComponentProps) => {
     const { downloadCsv } = useDownloadCsv()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+
     const handleDownloadCsv = () => {
         if (!props.moduleId || !props.chapterId || !props.questionId) return
         downloadCsv({
@@ -79,7 +83,7 @@ const SubmissionComponent = (props: SubmissionComponentProps) => {
                     <div className="relative group">
                             {hasSubmissions ? (
                                 <Link
-                                    href={`/admin/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
+                                    href={`/admin/${orgName}/courses/${props.courseId}/submissionProblems/${props.moduleId}?praticeProblems=${props.id}`}
                                 >
                                     <div>
                                         <Eye className="text-gray-500 mb-2 hover:text-gray-700" size={20} />

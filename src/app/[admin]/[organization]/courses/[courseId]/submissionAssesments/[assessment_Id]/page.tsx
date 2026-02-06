@@ -75,6 +75,7 @@ const Page = ({ params }: any) => {
     const [lastPage, setLastPage] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
+    const orgName = pathname.split('/')[2]
 
     // Create columns with context
     const columns = useMemo(() => getColumns({
@@ -369,7 +370,7 @@ const Page = ({ params }: any) => {
         <>
             <MaxWidthWrapper className="">
                 <div className="flex items-center gap-4 mb-8">
-                    <Link href={`/admin/courses/${params.courseId}/submissions`}>
+                    <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions`}>
                         <Button
                             variant="ghost"
                             className="hover:bg-transparent hover:text-primary transition-colors"
