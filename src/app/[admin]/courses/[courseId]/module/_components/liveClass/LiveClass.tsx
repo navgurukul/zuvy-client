@@ -28,7 +28,7 @@ import { getModuleData, getChapterDataState } from '@/store/store'
 
 const liveClassSchema = z
     .object({
-        title: z.string().min(1, 'Title is required').max(50, 'Title must not exceed 50 characters'),
+        title: z.string().min(1, 'Title is required').max(100, 'Title must not exceed 100 characters'),
         description: z.string().min(1, 'Description is required'),
         date: z.string().min(1, 'Date is required'),
         startTime: z.string().min(1, 'Start time is required'),
@@ -381,28 +381,11 @@ const LiveClass = ({
                 <form onSubmit={form.handleSubmit(onSubmit)} className="bg-background rounded-lg flex flex-col h-[600px] overflow-hidden">
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {/* Header with editable title and status badge */}
-                    <div className="flex items-center justify-between gap-4 pb-4">
-                        <div className="flex-1 pr-4">
-                            <FormField
-                                control={form.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                placeholder="Untitled live class"
-                                                disabled={!canEditFields}
-                                                maxLength={50}
-                                                className="w-full text-2xl font-semibold text-foreground bg-white rounded-md px-3 py-2 focus-visible:ring-0"
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+                    {/* Header with title and status badge */}
+                    <div className="flex items-start justify-between border-b pb-4">
+                        <h2 className="text-2xl font-semibold text-foreground">
+                            {content.title}
+                        </h2>
                         <div className="flex items-center gap-3">
                             <Badge
                                 className={`${getStatusColor(
@@ -444,7 +427,35 @@ const LiveClass = ({
 
                     {/* Form Fields */}
                     <div className="space-y-6">
-                    {/* Title input moved to header */}
+                    {/* Title Input */}
+                    <FormField
+                        control={form.control}
+                        name="title"
+                        render={({ field }) => (
+                            <FormItem>
+                                <div className="flex items-center justify-between">
+                                    <FormLabel className="text-sm font-medium text-foreground block text-left">
+                                        Title
+                                    </FormLabel>
+                                </div>
+                                <FormControl>
+                                    <Input
+                                        {...field}
+                                        placeholder="Advanced Event Handling"
+                                        disabled={!canEditFields}
+                                        maxLength={100}
+                                        className="bg-card border-input"
+                                    />
+                                </FormControl>
+                                {field.value?.length >= 100 && (
+                                    <p className="text-sm text-red-600 font-medium text-left">
+                                        You can enter up to 100 characters only.
+                                    </p>
+                                )}
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     {/* Date, Start Time, End Time Row */}
                     <div className="grid grid-cols-3 gap-4">
                         <FormField
