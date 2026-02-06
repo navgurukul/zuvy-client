@@ -182,9 +182,12 @@ const handleGoogleSuccess = async (
                 } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
                     // Redirect admin/poc to settings if hasfilled is false
                     router.push(`/${userRole}/setting`)
+                } else if (userRole === 'super admin') {
+                    router.push('/superAdmin/organization') // Change it when integrating APIs
                 } else {
+                    console.log('userRole', userRole)
                     // Default redirect for other roles or when hasfilled is true
-                    router.push(`/${userRole}/courses`)
+                    router.push(`/${userRole}/Microsoft/courses`) // Change it when integrating APIs
                 }
             }
         } catch (err: any) {
@@ -210,14 +213,21 @@ const handleGoogleSuccess = async (
         })
     }
 
+
     useEffect(() => {
         // Handle existing token logic and redirects
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
 
+        console.log('Initial redirectedUrl from localStorage:', redirectedUrl)
+        console.log('Current URL:', window.location.href)
         if (window.location.href.includes('route')) {
+        // if (window.location.href) {
+            console.log('URL has route param')
             const route = urlParams.get('route')
+            console.log('Route param from URL:', route)
             redirectedUrl = route ?? ''
+            console.log('redirectedUrl from route param:', redirectedUrl)
             localStorage.setItem('redirectedUrl', redirectedUrl)
             setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
         }
