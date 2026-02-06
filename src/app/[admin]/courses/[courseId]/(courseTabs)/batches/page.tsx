@@ -860,7 +860,7 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
                                                 )}
-                                                {permissions.editBatch && (
+                                                {permissions.deleteBatch && (
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"

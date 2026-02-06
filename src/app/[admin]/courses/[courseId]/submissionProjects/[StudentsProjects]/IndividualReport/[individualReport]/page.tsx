@@ -189,20 +189,21 @@ const Page = ({ params }: PageParams) => {
                                 Project Link
                             </h3>
                             <div className="bg-card border border-border rounded-lg p-6 md:p-8">
-                                <div className="flex items-center space-x-3 p-4 bg-muted/20 rounded-lg">
-                                    <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" />
-                                    <Link
-                                        href={`${indiviDualStudentData?.projectSubmissionDetails?.projectTrackingData[0].projectLink}`}
-                                        className="text-primary text-left hover:underline font-semibold break-all text-base"
-                                        target="_blank"
-                                    >
-                                        {
-                                            indiviDualStudentData
-                                                ?.projectSubmissionDetails
-                                                ?.projectTrackingData[0]
-                                                .projectLink
-                                        }
-                                    </Link>
+                                <div className="space-y-3">
+                                    {normalizeLinks(
+                                        indiviDualStudentData?.projectSubmissionDetails?.projectTrackingData[0]?.projectLink
+                                    ).map((link, index) => (
+                                        <div key={`${link}-${index}`} className="flex items-center space-x-3 p-4 bg-muted/20 rounded-lg">
+                                            <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                                            <Link
+                                                href={link}
+                                                className="text-primary text-left hover:underline font-semibold break-all text-base"
+                                                target="_blank"
+                                            >
+                                                {link}
+                                            </Link>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -213,6 +214,17 @@ const Page = ({ params }: PageParams) => {
     }
 
     return null
+}
+
+const normalizeLinks = (links?: string | string[]): string[] => {
+    if (!links) return []
+    if (Array.isArray(links)) {
+        return links.map((link) => link.trim()).filter(Boolean)
+    }
+    return links
+        .split(/\r?\n+/)
+        .map((link) => link.trim())
+        .filter(Boolean)
 }
 
 export default Page

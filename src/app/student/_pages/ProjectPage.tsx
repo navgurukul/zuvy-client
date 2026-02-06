@@ -37,11 +37,10 @@ const ProjectPage = () => {
   const courseId = params.courseId;
   
   const [projectState, setProjectState] = useState<ProjectState>({
-    submissionLink: '',
+    submissionLinks: [''],
     isSubmitted: false
   });
   
-  const [showFullDescription, setShowFullDescription] = useState(false);
   const [initialContent, setInitialContent] = useState<any>(undefined);
 
   // Fetch project data using the custom hook
@@ -62,7 +61,7 @@ const ProjectPage = () => {
     if (project) {
       // Initialize state based on project status
       setProjectState({
-        submissionLink: '', // Initialize empty as we don't have submission data yet
+        submissionLinks: [''], // Initialize empty as we don't have submission data yet
         isSubmitted: status === 'Completed',
         submittedAt: status === 'Completed' ? new Date() : undefined
       });
@@ -127,52 +126,52 @@ const ProjectPage = () => {
     projectDescription = project.instruction?.description || 'No description available';
   }
 
-  const isDescriptionLong = projectDescription.split('\n').length > 15 || projectDescription.length > 800;
-  const displayDescription = showFullDescription || !isDescriptionLong 
-    ? projectDescription 
-    : projectDescription.slice(0, 400) + '...';
-
-  const handleSubmissionChange = (value: string) => {
+  const handleSubmissionChange = (index: number, value: string) => {
     setProjectState(prev => ({
       ...prev,
-      submissionLink: value,
-      validationError: undefined
+      submissionLinks: prev.submissionLinks.map((link, i) => (i === index ? value : link)),
+      validationError: undefined,
+      validationErrors: prev.validationErrors?.map((err, i) => (i === index ? undefined : err))
     }));
   };
 
   const handleSubmit = async () => {
-    if (!projectState.submissionLink.trim()) {
+    const trimmedLinks = projectState.submissionLinks.map((link) => link.trim());
+    const nonEmptyLinks = trimmedLinks.filter(Boolean);
+
+    if (nonEmptyLinks.length === 0) {
       setProjectState(prev => ({
         ...prev,
-        validationError: 'Please provide a submission link'
+        validationError: 'Please provide at least one submission link',
+        validationErrors: prev.submissionLinks.map((link) =>
+          link.trim().length === 0 ? 'Please provide a link' : undefined
+        )
       }));
       return;
     }
 
-    // Validate URL format
-    try {
-      const url = new URL(projectState.submissionLink);
-      const isGitHub = url.hostname.includes('github.com');
-      const isGoogleDrive = url.hostname.includes('drive.google.com');
-      
-      if (!isGitHub && !isGoogleDrive) {
-        setProjectState(prev => ({
-          ...prev,
-          validationError: 'Please provide a valid GitHub or Google Drive link'
-        }));
-        return;
+    const validationErrors = projectState.submissionLinks.map((link) => {
+      if (!link.trim()) return undefined;
+      try {
+        new URL(link.trim());
+        return undefined;
+      } catch {
+        return 'Please provide a valid URL';
       }
-    } catch {
+    });
+
+    if (validationErrors.some(Boolean)) {
       setProjectState(prev => ({
         ...prev,
-        validationError: 'Please provide a valid URL'
+        validationError: 'Please fix the invalid link(s) below',
+        validationErrors
       }));
       return;
     }
 
     // Submit project using the hook
     const success = await submitProject(
-      projectState.submissionLink,
+      nonEmptyLinks,
       projectId || '',
       moduleId || '',
       courseId as string
@@ -206,7 +205,9 @@ const ProjectPage = () => {
       ...prev,
       isSubmitted: false,
       submittedAt: undefined,
-      validationError: undefined
+      validationError: undefined,
+      validationErrors: undefined,
+      submissionLinks: ['']
     }));
   };
 
@@ -314,14 +315,53 @@ const ProjectPage = () => {
                 <div className="space-y-4">
                   <div className="space-y-2 w-full">
                     <p className="text-left  text-md text-muted-foreground" >Submission Link</p>
-                    <Input
-                      id="submission-link"
-                      type="url"
-                      placeholder="https://github.com/your-username/project-repo or https://drive.google.com/..."
-                      value={projectState.submissionLink}
-                      onChange={(e) => handleSubmissionChange(e.target.value)}
-                      className={projectState.validationError ? "border-destructive" : ""}
-                    />
+                    <div className="space-y-3">
+                      {projectState.submissionLinks.map((link, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <Input
+                            id={`submission-link-${index}`}
+                            type="url"
+                            placeholder="https://github.com/your-username/project-repo or any valid URL"
+                            value={link}
+                            onChange={(e) => handleSubmissionChange(index, e.target.value)}
+                            className={projectState.validationErrors?.[index] ? "border-destructive" : ""}
+                          />
+                          {projectState.submissionLinks.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="shrink-0"
+                              onClick={() =>
+                                setProjectState(prev => ({
+                                  ...prev,
+                                  submissionLinks: prev.submissionLinks.filter((_, i) => i !== index),
+                                  validationErrors: prev.validationErrors?.filter((_, i) => i !== index),
+                                }))
+                              }
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                      <div className="flex justify-start">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() =>
+                            setProjectState(prev => ({
+                              ...prev,
+                              submissionLinks: [...prev.submissionLinks, ''],
+                              validationErrors: prev.validationErrors
+                                ? [...prev.validationErrors, undefined]
+                                : undefined,
+                            }))
+                          }
+                        >
+                          Add another link
+                        </Button>
+                      </div>
+                    </div>
                     {projectState.validationError && (
                       <Alert variant="destructive">
                         <AlertCircle className="h-4 w-4" />
@@ -329,7 +369,7 @@ const ProjectPage = () => {
                       </Alert>
                     )}
                     <p className="text-sm text-left text-muted-foreground">
-                      Provide a link to your project repository (GitHub, GitLab, etc.) or Google Drive link.
+                      Provide one or more links to your project (GitHub, GitLab, Drive, or any valid URL).
                     </p>
                   </div>
                   <div className="flex justify-center">
@@ -357,16 +397,20 @@ const ProjectPage = () => {
                       <div className="space-y-4">
                         <div>
                           <Label className="text-base">Your Submission</Label>
-                          <div className="flex items-center space-x-2 p-3 bg-muted rounded-lg mt-2">
-                            <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                            <a
-                              href={project?.projectTrackingData[0]?.projectLink}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary text-left hover:underline font-medium flex-1"
-                            >
-                              {project?.projectTrackingData[0]?.projectLink } 
-                            </a>
+                          <div className="space-y-2 mt-2">
+                            {normalizeLinks(project?.projectTrackingData[0]?.projectLink).map((link, index) => (
+                              <div key={`${link}-${index}`} className="flex items-center space-x-2 p-3 bg-muted rounded-lg">
+                                <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                                <a
+                                  href={link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary text-left hover:underline font-medium flex-1 break-all"
+                                >
+                                  {link}
+                                </a>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </div>
@@ -411,6 +455,17 @@ const extractTextFromContent = (content: ParagraphContentItem[]): string => {
   });
   
   return text.trim();
+};
+
+const normalizeLinks = (links?: string | string[]): string[] => {
+  if (!links) return [];
+  if (Array.isArray(links)) {
+    return links.map((link) => link.trim()).filter(Boolean);
+  }
+  return links
+    .split(/\r?\n+/)
+    .map((link) => link.trim())
+    .filter(Boolean);
 };
 
 export default ProjectPage;

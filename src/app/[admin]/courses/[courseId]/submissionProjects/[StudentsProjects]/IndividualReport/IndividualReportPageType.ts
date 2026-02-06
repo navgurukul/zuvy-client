@@ -36,7 +36,7 @@ export interface UserDetails {
 }
 
 export interface ProjectTrackingData {
-  projectLink:string;
+  projectLink: string | string[];
   userDetails: UserDetails;
   updatedAt:string
 }
