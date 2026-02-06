@@ -34,6 +34,8 @@ const PracticeProblems = ({ params }: any) => {
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [batches, setBatches] = useState<BatchFilter[]>([])
+    const pathname = usePathname();
+    const orgName = pathname.split('/')[2];
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -226,7 +228,7 @@ const PracticeProblems = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                   
                         className="hover:bg-transparent hover:text-primary transition-colors"

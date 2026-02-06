@@ -8,6 +8,7 @@ import { Task } from '@/utils/data/schema'
 
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
+import usePathname from 'next/navigation'
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
 export const columns: ColumnDef<Task>[] = [
@@ -112,10 +113,13 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             // const label = labels.find((label) => label.value === row.original.label);
 
+            const pathname = window.location.pathname
+            const orgName = pathname.split('/')[2]
+
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/admin/courses/${row.original.bootcampId}/submissionProjects/${row.original.projectId}/IndividualReport/${row.original.userId}`}
+                        href={`/admin/${orgName}/courses/${row.original.bootcampId}/submissionProjects/${row.original.projectId}/IndividualReport/${row.original.userId}`}
                         className="max-w-[500px] text-primary font-medium flex items-center"
                     >
                         <FileText size={16} />

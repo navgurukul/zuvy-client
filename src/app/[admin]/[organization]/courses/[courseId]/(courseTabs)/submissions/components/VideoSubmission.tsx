@@ -7,6 +7,7 @@ import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
+import { usePathname } from 'next/navigation'
 import {
     VideoSubmissions,
     VideoData,
@@ -22,6 +23,11 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const { downloadCsv } = useDownloadCsv()
     const [videoData, setVideoData] = useState<VideoData | null>(null)
     const [loading, setLoading] = useState(true)
+
+    // Add pathname extraction like CourseLayout
+    const pathname = usePathname()
+    const role = pathname.split('/')[1]
+    const orgName = pathname.split('/')[2]
 
     const getVideoSubmission = useCallback(async () => {
         try {
@@ -150,7 +156,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                             <ArrowDownToLine size={20} />
                                                         </Button>
                                                         <Link
-                                                            href={`/admin/courses/${courseId}/submissionVideo/${video.id}`}
+                                                            href={`/admin/${orgName}/courses/${courseId}/submissionVideo/${video.id}`}
                                                         >
                                                             <Button
                                                             variant="ghost"

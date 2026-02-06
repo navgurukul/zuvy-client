@@ -63,6 +63,8 @@ const Page = ({ params }: any) => {
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     // Separate state for overall statistics (NEVER changes during search)
     const [overallStats, setOverallStats] = useState({
@@ -384,7 +386,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"

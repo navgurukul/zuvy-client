@@ -36,6 +36,7 @@ const Page = ({ params }: { params: any }) => {
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [batches, setBatches] = useState<BatchFilter[]>([])
+    const orgName = pathname.split('/')[2]
 
      // Fetch batches from API
     const fetchBatches = useCallback(async () => {
@@ -214,7 +215,7 @@ const Page = ({ params }: { params: any }) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-5">
-                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"
