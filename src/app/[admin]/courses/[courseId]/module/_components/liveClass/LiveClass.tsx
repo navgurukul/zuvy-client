@@ -443,11 +443,11 @@ const LiveClass = ({
                                         {...field}
                                         placeholder="Advanced Event Handling"
                                         disabled={!canEditFields}
-                                        maxLength={50}
+                                        maxLength={100}
                                         className="bg-card border-input"
                                     />
                                 </FormControl>
-                                {field.value?.length >= 50 && (
+                                {field.value?.length >= 100 && (
                                     <p className="text-sm text-red-600 font-medium text-left">
                                         You can enter up to 100 characters only.
                                     </p>
