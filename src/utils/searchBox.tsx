@@ -77,7 +77,7 @@ export function SearchBox(props: SearchBoxProps) {
                   setShowSuggestions(true);
                 }
               }}
-              className={cn(inputWidth, "bg-background-secondary")}
+              className={cn(inputWidth, "bg-background-secondary pl-9")}
               autoComplete="off"
             />
             {searchQuery && (
@@ -102,7 +102,7 @@ export function SearchBox(props: SearchBoxProps) {
             }
           }}
         >
-       <div
+          <div
             ref={suggestionsRef}
             className="bg-white border border-border rounded-md shadow-lg overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
           >
@@ -126,7 +126,7 @@ export function SearchBox(props: SearchBoxProps) {
                   suggestion.id !== "__not_found__" && setSelectedIndex(index)
                 }
               >
-                  {getSuggestionLabel(suggestion)}
+                {getSuggestionLabel(suggestion)}
               </div>
             ))}
 
