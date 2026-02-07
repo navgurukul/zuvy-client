@@ -151,13 +151,9 @@ const ProjectPage = () => {
     }
 
     const validationErrors = projectState.submissionLinks.map((link) => {
-      if (!link.trim()) return undefined;
-      try {
-        new URL(link.trim());
-        return undefined;
-      } catch {
-        return 'Please provide a valid URL';
-      }
+      const trimmedLink = link.trim();
+      if (!trimmedLink) return undefined;
+      return isValidUrl(trimmedLink) ? undefined : 'Please provide a valid URL';
     });
 
     if (validationErrors.some(Boolean)) {
@@ -212,6 +208,10 @@ const ProjectPage = () => {
   };
 
   const isDueDatePassed = new Date() > new Date(project.deadline);
+  const trimmedLinks = projectState.submissionLinks.map((link) => link.trim());
+  const hasEmptyLink = trimmedLinks.some((link) => link.length === 0);
+  const hasInvalidLink = trimmedLinks.some((link) => link.length > 0 && !isValidUrl(link));
+  const isSubmitDisabled = isDueDatePassed || isSubmitting || hasEmptyLink || hasInvalidLink;
 
   return (
     <div className="min-h-screen font-semibold bg-background">
@@ -317,30 +317,35 @@ const ProjectPage = () => {
                     <p className="text-left  text-md text-muted-foreground" >Submission Link</p>
                     <div className="space-y-3">
                       {projectState.submissionLinks.map((link, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <Input
-                            id={`submission-link-${index}`}
-                            type="url"
-                            placeholder="https://github.com/your-username/project-repo or any valid URL"
-                            value={link}
-                            onChange={(e) => handleSubmissionChange(index, e.target.value)}
-                            className={projectState.validationErrors?.[index] ? "border-destructive" : ""}
-                          />
-                          {projectState.submissionLinks.length > 1 && (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="shrink-0"
-                              onClick={() =>
-                                setProjectState(prev => ({
-                                  ...prev,
-                                  submissionLinks: prev.submissionLinks.filter((_, i) => i !== index),
-                                  validationErrors: prev.validationErrors?.filter((_, i) => i !== index),
-                                }))
-                              }
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
+                        <div key={index} className="space-y-1">
+                          <div className="flex items-start gap-2">
+                            <Input
+                              id={`submission-link-${index}`}
+                              type="url"
+                              placeholder="https://github.com/your-username/project-repo or any valid URL"
+                              value={link}
+                              onChange={(e) => handleSubmissionChange(index, e.target.value)}
+                              className={projectState.validationErrors?.[index] || (link.trim().length > 0 && !isValidUrl(link.trim())) ? "border-destructive" : ""}
+                            />
+                            {projectState.submissionLinks.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="shrink-0 mt-2"
+                                onClick={() =>
+                                  setProjectState(prev => ({
+                                    ...prev,
+                                    submissionLinks: prev.submissionLinks.filter((_, i) => i !== index),
+                                    validationErrors: prev.validationErrors?.filter((_, i) => i !== index),
+                                  }))
+                                }
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                          {link.trim().length > 0 && !isValidUrl(link.trim()) && (
+                            <p className="text-sm text-destructive">Please provide a valid URL</p>
                           )}
                         </div>
                       ))}
@@ -377,7 +382,7 @@ const ProjectPage = () => {
                       onClick={handleSubmit}
                       className="w-auto font-semibold bg-primary text-white hover:bg-primary/80"
 
-                      disabled={isDueDatePassed || isSubmitting}
+                      disabled={isSubmitDisabled}
                     >
                       {isSubmitting ? 'Submitting...' : 'Submit Project'}
                     </Button>
@@ -466,6 +471,23 @@ const normalizeLinks = (links?: string | string[]): string[] => {
     .split(/\r?\n+/)
     .map((link) => link.trim())
     .filter(Boolean);
+};
+
+const isValidUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    if (!url.hostname) return false;
+    if (url.hostname === 'localhost') return true;
+    if (url.hostname.endsWith('.')) return false;
+    const hostnameParts = url.hostname.split('.');
+    if (hostnameParts.length < 2) return false;
+    const tld = hostnameParts[hostnameParts.length - 1];
+    if (!/^[a-zA-Z]{2,}$/.test(tld)) return false;
+    return hostnameParts.every((part) => /^[a-zA-Z0-9-]+$/.test(part) && part.length > 0);
+  } catch {
+    return false;
+  }
 };
 
 export default ProjectPage;
