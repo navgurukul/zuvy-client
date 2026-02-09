@@ -28,6 +28,7 @@ const Navbar = () => {
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const orgName = pathname.split('/')[2]
+    const inOrg = pathname.split('/')[2] !== 'organizations' && pathname.split('/')[2] !== 'resource'
     const superAdmin = true
     // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
@@ -82,7 +83,9 @@ const Navbar = () => {
         },
     ]
 
-    const routes = superAdmin && !pathname.includes("course") ? superAdminRoutes : superAdmin && pathname.includes("course") ? adminRoutes : adminRoutes;
+    // const routes = superAdmin && !pathname.includes("course") ? superAdminRoutes : superAdmin && pathname.includes("course") ? adminRoutes : adminRoutes;
+
+    const routes = inOrg ? adminRoutes : superAdminRoutes;
 
     useEffect(() => {
         (async () => {
@@ -164,7 +167,7 @@ const Navbar = () => {
 
                     {/* Setting Tab - Only for Admin and POC */}
                     {/* {studentData?.rolesList?.[0] === 'poc' && ( */}
-                    {(studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
+                    {inOrg && (studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
                         <Link
                             href={`/${role}/${orgName}/setting`}
                             className={cn(
