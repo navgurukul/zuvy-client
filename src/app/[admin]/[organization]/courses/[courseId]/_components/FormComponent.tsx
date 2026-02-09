@@ -12,6 +12,7 @@ import { api } from '@/utils/axios.config'
 import { FormComponentProps } from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import { FeedbackSubmissionSkeleton } from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { usePathname } from 'next/navigation'
 
 
 const FormComponent = ({
@@ -23,6 +24,8 @@ const FormComponent = ({
 }: FormComponentProps) => {
     const { downloadCsv } = useDownloadCsv()
     const [downloading, setDownloading] = useState(false)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const handleDownloadCsv = () => {
         if (!bootcampId || !moduleId || !data?.id) return
@@ -73,7 +76,7 @@ const FormComponent = ({
 
                             <Link
                                 href={{
-                                pathname: `/admin/courses/${bootcampId}/submissionForm/${data.id}`,
+                                pathname: `/admin/${orgName}/courses/${bootcampId}/submissionForm/${data.id}`,
                                 query: { moduleId: moduleId, },
                                 }}
                             >

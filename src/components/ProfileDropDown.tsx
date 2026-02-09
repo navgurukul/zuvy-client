@@ -73,7 +73,7 @@ const ProfileDropDown = ({
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         onClick={handleLogoutClick}
-                        className="text-red-600 hover:bg-primary hover:text-primary hover:text-red-600 cursor-pointer"
+                        className="text-red-600 hover:bg-primary hover:!text-primary-foreground cursor-pointer"
                     >
                         {/* <LogOut className="mr-2 h-4 w-4" /> */}
                         <span>Logout</span>

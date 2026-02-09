@@ -16,6 +16,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { getOffset } from '@/store/store'
 import { POSITION } from '@/utils/constant'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { usePathname } from 'next/navigation'
 
 type Props = {}
 
@@ -54,6 +55,8 @@ const Page = ({ params }: any) => {
     const [batches, setBatches] = useState<Batch[]>([])
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -240,7 +243,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/admin/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                  
                         className="hover:bg-transparent hover:text-primary transition-colors"

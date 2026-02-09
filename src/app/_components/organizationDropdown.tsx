@@ -1,8 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
-import Link from 'next/link'
+import { ChevronDown, Check, Search } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface Organization {
     id: string;
@@ -60,6 +71,9 @@ const organizations: Organization[] = [
 ];
 
 export default function OrganizationDropdown({orgName}: {orgName: string}) {
+    const pathname = usePathname();
+    const role = pathname.split('/')[1]; // Extract role from pathname
+    
     const filteredSelectedOrg = organizations.filter(org =>
         orgName.toLowerCase() === org.name.toLowerCase()
     );
@@ -88,37 +102,48 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
     };
 
     return (
-        // <div className="relative w-full max-w-xs">
-        <div className="relative">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-white border-none border-gray-200 rounded-lg hover:bg-gray-50"
-            >
-                <div className="flex items-center gap-3">
-                    <div className={`${getBackgroundColor(selected.code)} text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
-                        {selected.code}
+        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+            <DropdownMenuTrigger asChild>
+                <Button
+                    variant="ghost"
+                    className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 border-none"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className={`${getBackgroundColor(selected.code)} text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
+                            {selected.code}
+                        </div>
+                        <span className="text-gray-900 font-medium">{selected.name}</span>
                     </div>
-                    <span className="text-gray-900 font-medium">{selected.name}</span>
+                    <ChevronDown size={20} className="text-gray-400" />
+                </Button>
+            </DropdownMenuTrigger>
+            
+            <DropdownMenuContent 
+                className="w-72 p-0" 
+                align="start"
+                side="bottom"
+            >
+                {/* Search Input */}
+                <div className="p-3 border-b">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                            placeholder="Search by name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 border-0 focus:ring-0 focus-visible:ring-0"
+                        />
+                    </div>
                 </div>
-                <ChevronDown size={20} className="text-gray-400" />
-            </button>
 
-            {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <input
-                        type="text"
-                        placeholder="Search by name..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full px-4 py-3 border-b border-gray-200 focus:outline-none text-sm"
-                    />
-
-                    <div className="py-2">
-                        <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
-                            Switch Organization
-                        </p>
-
-                        {filtered.map(org => (
+                {/* Organizations List */}
+                <div className="py-2">
+                    <DropdownMenuLabel className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                        Switch Organization
+                    </DropdownMenuLabel>
+                    
+                    {filtered.map(org => (
+                        <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50">
                             <Link
                                 key={org.id}
                                 href={`/admin/${org.name}/courses`}
@@ -139,17 +164,23 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                                     <Check size={18} className="text-green-600" />
                                 )}
                             </Link>
-                        ))}
-                    </div>
+                        </DropdownMenuItem>
+                    ))}
+                </div>
 
-                    <button
+                <DropdownMenuSeparator />
+                
+                {/* Back to all orgs */}
+                <DropdownMenuItem className="px-0 py-0 focus:bg-gray-50">
+                    <Link
+                        href={`/${role}/organizations`}
                         onClick={() => setIsOpen(false)}
-                        className="w-full px-4 py-3 border-t border-gray-200 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm"
+                        className="w-full px-4 py-3 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm"
                     >
                         ← Back to all orgs
-                    </button>
-                </div>
-            )}
-        </div>
+                    </Link>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }

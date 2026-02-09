@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { use } from 'react'
 import Link from 'next/link'
 import { Eye, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,6 +10,7 @@ import {
     difficultyColor,
     getAssesmentBackgroundColorClass,
 } from '@/lib/utils'
+import { usePathname } from 'next/navigation';
 
 type Props = {}
 
@@ -27,22 +30,25 @@ const IndividualStudentAssesment = ({
 }: any) => {
     const { courseId, assessment_Id, IndividualReport, report } = params
     const color = getAssesmentBackgroundColorClass(25, 5)
+    const pathname = usePathname();
+    const orgName = pathname.split('/')[2];
+
     const renderQuestion = () => {
         switch (type) {
             case 'openEndedSubmission':
                 return {
                     title: 'Open Ended Question',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
+                    link: `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
                 }
             case 'quizSubmission':
                 return {
                     title: 'Quiz assessment',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
+                    link: `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
                 }
             case 'codingSubmission':
                 return {
                     title: 'Coding Questions',
-                    link: `/admin/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
+                    link: `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
                 }
             default:
                 return {

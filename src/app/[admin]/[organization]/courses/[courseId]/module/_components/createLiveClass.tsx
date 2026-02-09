@@ -43,7 +43,7 @@ import {
 import { cn } from '@/lib/utils'
 import { Spinner } from '@/components/ui/spinner'
 import { api } from '@/utils/axios.config'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, usePathname } from 'next/navigation'
 // Removed conflicting imported type CreateSessionDialogProps (local type declared below)
 
 const formSchema = z
@@ -150,6 +150,8 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     const router = useRouter()
     const [isCalendarOpen, setCalendarOpen] = useState(false)
     const [bootcampData, setBootcampData] = useState<any>([])
+    const pathName = usePathname();
+    const orgName = pathName.split('/')[2];
     // Reusable select styling helper
     const baseSelectClass =
         'w-full border border-input rounded-md px-3 py-2 bg-background text-gray-600 focus:outline-none focus:ring-2 focus:ring-[rgb(81,134,114)] focus:border-[rgb(81,134,114)] disabled:opacity-50 disabled:cursor-not-allowed'
@@ -267,7 +269,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
             const latestChapter = chapters[chapters.length - 1]
             if (latestChapter) {
                 router.push(
-                    `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
+                    `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${latestChapter.chapterId}`
                 )
             }
             toast.success({
