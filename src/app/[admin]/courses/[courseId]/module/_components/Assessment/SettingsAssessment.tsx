@@ -694,6 +694,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
                                             content?.startDatetime
                                         }
                                         initialEndDate={content?.endDatetime}
+                                        hasExistingEndDate={!!content?.endDatetime} 
                                     />
                                 </DialogContent>
                             </Dialog>
