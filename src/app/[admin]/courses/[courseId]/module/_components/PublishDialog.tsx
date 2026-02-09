@@ -240,6 +240,14 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
             return
         }
 
+        let endDateTimeIso: string | null | undefined = undefined
+
+        if (endDate && endTime) {
+            endDateTimeIso = combineDateTime(endDate, endTime).toISOString()
+        } else if (hasExistingEndDate) {
+            endDateTimeIso = null
+        }
+
         const scheduleData: PublishData = {
             action: 'schedule',
             publishDateTime:
@@ -250,10 +258,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                 startDate && startTime
                     ? combineDateTime(startDate, startTime).toISOString()
                     : undefined,
-            endDateTime:
-                endDate && endTime
-                    ? combineDateTime(endDate, endTime).toISOString()
-                    : undefined,
+            endDateTime: endDateTimeIso,
         }
         onSave(scheduleData)
         // setIsOpen(false); // Close dialog on successful save
@@ -400,19 +405,41 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                             error: errors.startTime,
                         },
                         {
-                            label: 'Assessment End Date and Time',
+                            label: 'End Date and Time (Optional)',
                             date: endDate,
                             setDate: setEndDate,
                             time: endTime,
                             setTime: setEndTime,
                             error: errors.endTime,
+                            showClear: true,
                         },
                     ].map(
-                        ({ label, date, setDate, time, setTime, error }, i) => (
+                        ({ label, date, setDate, time, setTime, error, showClear }, i) => (
                             <div key={i} className="space-y-1">
-                                <label className="text-sm text-[#6E6E6E] font-medium block">
-                                    {label}
-                                </label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="text-sm text-[#6E6E6E] font-medium block">
+                                        {label}
+                                    </label>
+                                    {showClear && time && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                                setDate(null)
+                                                setTime('')
+                                                setErrors((prev) => ({
+                                                    ...prev,
+                                                    endTime: undefined,
+                                                }))
+                                            }}
+                                            className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 h-auto py-1 px-2 font-medium"
+                                        >
+                                            <X className="h-3 w-3 mr-1" />
+                                            Clear End Date
+                                        </Button>
+                                    )}
+                                </div>
                                 <div className="flex items-center gap-4">
                                     {' '}
                                     {/* Changed items-start to items-center */}
@@ -504,7 +531,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     )}
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
                                 Cancel
                             </Button>
                         </DialogClose>
@@ -525,7 +552,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     <div className="space-y-1">
                         <div className="flex items-center justify-between mb-2">
                             <label className="text-sm font-medium block text-gray-600">
-                                Assessment End Date and Time (Optional)
+                                End Date and Time (Optional)
                             </label>
                             {/*Clear button only shows when time is set */}
                             {endNowTime && (
@@ -557,12 +584,12 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                     onOpenChange={setEndNowCalendarOpen}
                                 >
                                     <DialogTrigger asChild>
-                                        <Button className="w-full text-left font-normal border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 justify-start">
+                                        <Button className="w-full text-left font-normal border border-input bg-background hover:border-[rgb(81,134,114)] hover:text-white text-gray-600 justify-start">
                                             {/*Only show date if it's actually set */}
                                             {endNowDate ? (
                                                 format(endNowDate, 'dd/MM/yyyy')
                                             ) : (
-                                                <span className="text-muted-foreground">
+                                                <span className="text-muted-foreground group-hover:text-white">
                                                     DD/MM/YYYY
                                                 </span>
                                             )}
@@ -618,7 +645,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     </div>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
                                 Cancel
                             </Button>
                         </DialogClose>
@@ -647,7 +674,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     </p>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
                                 Cancel
                             </Button>
                         </DialogClose>
