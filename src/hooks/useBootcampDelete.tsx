@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { UseBootcampDeleteReturn } from './hookType'
@@ -8,6 +8,8 @@ const useBootcampDelete = (): UseBootcampDeleteReturn => {
     const [isDeleting, setIsDeleting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const deleteBootcamp = async (bootcampId: string): Promise<void> => {
         if (!bootcampId) {
@@ -26,8 +28,8 @@ const useBootcampDelete = (): UseBootcampDeleteReturn => {
             })
 
             // Navigate to courses page after successful deletion
-            router.push('/admin/courses')
-            
+            router.push(`/admin/${orgName}/courses`)
+
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || 
                                error.data?.message || 
