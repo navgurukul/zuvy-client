@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation' // Add usePathname
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
 import { getUser } from '@/store/store'
 
@@ -25,6 +25,9 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const router = useRouter()
+    
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     return (
         <>
@@ -39,7 +42,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
                     <DropdownMenuItem 
                         onClick={() => {
                             setDropdownOpen(false)
-                            router.push(`/${userRole}/courses/${bootcampId}/${userId}`)
+                            router.push(`/${userRole}/${orgName}/courses/${bootcampId}/${userId}`)
                         }}
                         className="focus:text-blue-600"
                     >

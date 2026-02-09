@@ -15,7 +15,7 @@ import { Spinner } from '@/components/ui/spinner'
 import EditModuleDialog from '../../_components/EditModuleDialog'
 import { X } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, usePathname } from 'next/navigation'
 import axios from 'axios'
 import {
     CurriculumItem,
@@ -65,6 +65,8 @@ function Page() {
     const [draggedModuleId, setDraggedModuleId] = useState<number | null>(null)
     const [isDragging, setIsDragging] = useState(false)
     const [hasOrderChanged, setHasOrderChanged] = useState(false)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     // New states for border flash functionality
     const [flashingModuleId, setFlashingModuleId] = useState<number | null>(
@@ -377,7 +379,7 @@ function Page() {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/${userRole}/courses`)
+                    router.push(`/${userRole}/${orgName}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:
@@ -580,7 +582,7 @@ function Page() {
                     This course has been deleted.
                 </p>
                 <Button
-                    onClick={() => router.push(`/${userRole}/courses`)}
+                    onClick={() => router.push(`/${userRole}/${orgName}/courses`)}
                     className="mt-6 bg-secondary"
                 >
                     Back to Courses

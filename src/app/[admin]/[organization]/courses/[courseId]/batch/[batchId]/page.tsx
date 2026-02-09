@@ -109,11 +109,12 @@ const BatchesInfo = ({
 
     const pathname = usePathname()
     const role = pathname.split('/')[1]
+    const orgName = pathname.split('/')[2]
 
     return (
         <>
             <Link
-                href={`/${role}/courses/${params.courseId}/batches`}
+                href={`/${role}/${orgName}/courses/${params.courseId}/batches`}
                 className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ArrowLeft size={20} />
