@@ -63,10 +63,10 @@ const Navbar = () => {
     const adminRoutes = [
         {
             name: 'Course Studio',
-            href: `/${role}/courses`,
+            href: `/${role}/${orgName}/courses`,
             icon: Layers,
             active: (pathname: string) =>
-                pathname === `/${role}/courses` || pathname.startsWith(`/${role}/courses/`),
+                pathname === `/${role}/${orgName}/courses` || pathname.startsWith(`/${role}/${orgName}/courses/`),
         },
         {
             name: 'Question Bank',

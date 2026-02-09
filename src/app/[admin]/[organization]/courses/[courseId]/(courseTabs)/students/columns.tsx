@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, useParams, usePathname } from 'next/navigation'
 
 import { ColumnDef } from '@tanstack/react-table'
 
@@ -26,7 +26,9 @@ const StudentNameCell = ({ row }: { row: any }) => {
     const { studentData, setStudentData } = getStudentData()
     const router = useRouter()
     const params = useParams()
-    
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+
     const handleSingleStudent = (
         e: React.ChangeEvent<HTMLInputElement>
     ) => {
@@ -35,7 +37,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     }
     
     const handleStudentClick = () => {
-        router.push(`/${userRole}/courses/${params.courseId}/${userId}`)
+        router.push(`/${userRole}/${orgName}/courses/${params.courseId}/${userId}`)
     }
     
     return (

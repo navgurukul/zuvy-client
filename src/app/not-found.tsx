@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
         const { user } = getUser()
         const role = user.rolesList[0]
+        const orgName = user?.orgName
 
     return (
         <main className="grid min-h-screen place-items-center px-6 py-20 sm:py-32 lg:px-6 ">
@@ -23,7 +24,7 @@ const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
                     <Link
-                        href={role === 'student' ? '/student':`/${role}/courses`}
+                        href={role === 'student' ? '/student':`/${role}/${orgName}/courses`}
                         className={buttonVariants({ variant: 'outline' })}
                     >
                         Home

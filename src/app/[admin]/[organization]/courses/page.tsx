@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import {
     Plus,
 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
@@ -63,6 +63,8 @@ const Courses: React.FC = () => {
     const [newCourseName, setNewCourseName] = useState<string>('')
     const [newCourseDuration, setNewCourseDuration] = useState<string>('')
     const [newCourseDescription, setNewCourseDescription] = useState<string>('')
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -162,7 +164,7 @@ const defaultFetchApi = useCallback(
                 setNewCourseDescription('')
                 await refetchBootcamps(offset) // same page refresh
                 await refetchAllCourses() // refresh suggestions
-                router.push(`/${userRole}/courses/${data.bootcamp.id}/details`)
+                router.push(`/${userRole}/${orgName}/courses/${data.bootcamp.id}/details`)
             } catch (error: any) {
                 toast.error({
                     title: error?.data?.status || 'Error',

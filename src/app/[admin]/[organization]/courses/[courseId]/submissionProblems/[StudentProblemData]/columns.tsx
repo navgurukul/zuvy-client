@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { Badge } from '@/components/ui/badge'
-
+import { usePathname } from 'next/navigation'
 import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
@@ -121,11 +121,13 @@ export const columns: ColumnDef<Task>[] = [
         id: 'actions',
         cell: ({ row }) => {
             const { bootcampId, userId, questionId, moduleId } = row.original
+            const pathname = window.location.pathname
+            const orgName = pathname.split('/')[2]
 
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/admin/courses/${bootcampId}/submissionProblems/individualCodingSubbmission/${userId}?questionId=${questionId}&moduleId=${moduleId}`}
+                        href={`/admin/${orgName}/courses/${bootcampId}/submissionProblems/individualCodingSubbmission/${userId}?questionId=${questionId}&moduleId=${moduleId}`}
                         className="max-w-[500px] text-secondary font-medium flex items-center"
                     >
                         <FileText size={16} />
