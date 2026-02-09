@@ -76,9 +76,9 @@ const Navbar = () => {
         },
         {
             name: 'Roles and Permissions',
-            href: `/${role}/settings`,
+            href: `/${role}/${orgName}/settings`,
             icon: Settings,
-            active: `/${role}/settings`,
+            active: `/${role}/${orgName}/settings`,
         },
     ]
 
@@ -163,12 +163,13 @@ const Navbar = () => {
                     </Badge>
 
                     {/* Setting Tab - Only for Admin and POC */}
+                    {/* {studentData?.rolesList?.[0] === 'poc' && ( */}
                     {(studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
                         <Link
-                            href={`/${role}/setting`}
+                            href={`/${role}/${orgName}/setting`}
                             className={cn(
                                 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
-                                pathname === `/${role}/setting`
+                                pathname === `/${role}/${orgName}/setting`
                                     ? 'bg-primary text-primary-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
                             )}
