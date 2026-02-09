@@ -467,18 +467,15 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
             const updatedContent = await fetchChapterContent(chapterID, topicId)
             setCurrentAssessmentStatus(updatedContent?.currentState)
 
-            toast({
+            toast.success({
                 title: 'Assessment Updated Successfully',
                 description: 'Assessment has been updated successfully',
             })
         } catch (error) {
             console.error(error)
-            toast({
+            toast.error({
                 title: 'Error Updating Assessment',
                 description: 'There was an error updating the assessment.',
-                variant: 'destructive',
-                className:
-                    'fixed bottom-4 right-4 text-start capitalize border border-destructive max-w-sm px-6 py-5 box-border z-50',
             })
         }
     }
