@@ -8,7 +8,7 @@ import {
     DialogOverlay,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import PreviewMCQ from '@/app/[admin]/resource/_components/PreviewMcq'
+import PreviewMCQ from '../../../../../resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
 import {
     MCQQuestion,

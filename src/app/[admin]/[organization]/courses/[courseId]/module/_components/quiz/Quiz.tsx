@@ -10,7 +10,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import QuizModal from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/quiz/QuizModal'
 import { api } from '@/utils/axios.config'
-import { PageTag } from '@/app/[admin]/resource/mcq/adminResourceMcqType'
+import { PageTag } from '../../../../../resource/mcq/adminResourceMcqType'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizQuestion } from '@/utils/admin'
 import {

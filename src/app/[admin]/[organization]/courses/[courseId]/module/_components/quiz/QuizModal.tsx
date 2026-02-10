@@ -14,7 +14,7 @@ import {
     DialogOverlay,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import PreviewMCQ from '@/app/[admin]/resource/_components/PreviewMcq'
+import PreviewMCQ from '../../../../../resource/_components/PreviewMcq'
 import { isCodeQuestion, renderQuestionPreview } from '@/utils/quizHelpers'
 import { Tag } from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 type Props = {}

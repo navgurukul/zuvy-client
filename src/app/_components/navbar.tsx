@@ -28,8 +28,8 @@ const Navbar = () => {
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const orgName = pathname.split('/')[2]
-    const inOrg = pathname.split('/')[2] !== 'organizations' && pathname.split('/')[2] !== 'resource'
-    const superAdmin = true
+    const inOrg = pathname.split('/')[2] !== 'organizations'
+    const superAdmin = false
     // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
@@ -53,12 +53,6 @@ const Navbar = () => {
             active: (pathname: string) =>
                 pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
         },
-        {
-            name: 'Question Bank',
-            href: `/${role}/content-bank`,
-            icon: Database,
-            active: `/${role}/content-bank`,
-        }
     ]
 
     const adminRoutes = [
@@ -80,6 +74,13 @@ const Navbar = () => {
             href: `/${role}/${orgName}/settings`,
             icon: Settings,
             active: `/${role}/${orgName}/settings`,
+        },
+        {
+            name: 'All Organizations',
+            href: `/${role}/organizations`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
         },
     ]
 
@@ -123,8 +124,30 @@ const Navbar = () => {
                                 return null;
                             }
 
+                            // const superAdminOnly = item.name === 'All Organizations' 
+                            // console.log('superAdmin', superAdmin)
+                            // console.log('superAdmin && item.name === All Organizations', superAdmin && item.name === 'All Organizations')
+                            // console.log('superAdmin && item.name !== All Organizations', superAdmin && item.name !== 'All Organizations')
+                            // console.log('superAdmin && item.name === All Organizations || item.name !== Question Bank', superAdmin && item.name === 'All Organizations' || item.name !== 'Question Bank')
+
                             return (
                                 <>
+                                    {/* {superAdmin && item.name === 'All Organizations' && (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={cn(
+                                                'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
+                                                isActive
+                                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                                            )}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            {loading? <Spinner />: <span className='' >{item.name}</span>}
+                                        </Link>
+                                    )} */}
+                                    {/* {(superAdmin && item.name !== 'All Organizations' ) || item.name !== 'Question Bank' && ( */}
                                     {item.name !== 'Question Bank' && (
                                         <Link
                                             key={item.name}

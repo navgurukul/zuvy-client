@@ -29,7 +29,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
 import { columns } from './column'
-import NewOpenEndedQuestionForm from '@/app/[admin]/resource/_components/NewOpenEndedQuestionForm'
+import NewOpenEndedQuestionForm from '../_components/NewOpenEndedQuestionForm'
 import {
     getCodingQuestionTags,
     getopenEndedQuestionstate,
@@ -54,7 +54,7 @@ import {
     OpenEndedQuestionType,
     OpenPageTag,
     OpenOption,
-} from '@/app/[admin]/resource/open-ended/adminResourceOpenType'
+} from './adminResourceOpenType'
 import { SearchBox } from '@/utils/searchBox'
 import {OpenEndedQuestionsSkeleton} from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 

@@ -41,7 +41,7 @@ import {
     RequestBodyType,
     QuizQuestions,
     EditQuizQuestionProps,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 type Props = {}
 

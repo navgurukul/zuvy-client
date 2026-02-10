@@ -19,7 +19,7 @@ import AIQuestionDeleteModal from './AIQuestionDeleteModal'
 import {
     QuestionCardProps,
     Tag,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 export const AIQuestionCard = ({
     questionId,

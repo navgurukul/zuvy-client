@@ -8,7 +8,7 @@ import {
     DialogBoxProps,
     PreviewBoxQuizVariantData,
     PreviewBoxQuizVariant,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 export default function DialogBox({
     show,

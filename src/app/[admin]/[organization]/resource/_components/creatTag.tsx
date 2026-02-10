@@ -13,7 +13,7 @@ import {
 import styles from './cources.module.css'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { newTopicDialogProps } from '@/app/[admin]/resource/_components/adminResourceComponentType'
+import { newTopicDialogProps } from './adminResourceComponentType'
 
 const CreatTag: React.FC<newTopicDialogProps> = ({
     newTopic,

@@ -34,12 +34,12 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip'
-import DeleteConfirmationModal from '../../[organization]/courses/[courseId]/_components/deleteModal'
-import RemirrorForForm from '@/app/[admin]/resource/_components/RemirrorForForm'
+import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
+import RemirrorForForm from './RemirrorForForm'
 import {
     Tag,
     QuizDataType,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 type Props = {}
 
