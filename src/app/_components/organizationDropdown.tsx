@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronDown, Check, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -22,10 +22,7 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
     const role = pathname.split('/')[1]; // Extract role from pathname
     const { user } = getUser();
     const userId = user?.id ? parseInt(user.id) : null;
-    
-    // Fetch organizations using the hook
-    const { organizations, loading, error } = useOrganizationsByUser(userId);
-    
+    const { organizations, loading, error } = useOrganizationsByUser(userId);   
     const filteredSelectedOrg = organizations.filter(org =>
         orgName.toLowerCase() === org.displayName.toLowerCase()
     );
@@ -37,6 +34,10 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
         org.displayName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    useEffect(() => {
+        setSelected(filteredSelectedOrg[0] || organizations[0]);
+    }, [loading, organizations]);
+
     const handleSelect = (org: Organization) => {
         setSelected(org);
         setIsOpen(false);
@@ -45,18 +46,15 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
 
     // Generate code from displayName (first 1-2 letters)
     const getCodeFromName = (displayName: string) => {
-        const words = displayName.split(' ');
-        if (words.length > 1) {
-            return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+        try{
+                const words = displayName.split(' ');
+            if (words.length > 1) {
+                return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+            }
+            return displayName.substring(0, 2).toUpperCase();
+        } catch (e) {
+            return '??';
         }
-        return displayName.substring(0, 2).toUpperCase();
-    };
-
-    const getBackgroundColor = (code: string) => {
-        const colors: { [key: string]: string } = {
-            'NG': 'bg-orange-500',
-        };
-        return colors[code] || 'bg-orange-500';
     };
 
     return (
@@ -69,7 +67,7 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                     <div className="flex items-center gap-3">
                         {selected ? (
                             <>
-                                <div className={`${getBackgroundColor(getCodeFromName(selected.displayName))} text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
+                                <div className={`bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
                                     {getCodeFromName(selected.displayName)}
                                 </div>
                                 <span className="text-gray-900 font-medium">{selected.displayName}</span>
@@ -118,14 +116,14 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                             <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50">
                                 <Link
                                     key={org.id}
-                                    href={`/admin/${org.displayName}/courses`}
+                                    href={`/${role}/${org.displayName}/courses`}
                                     onClick={() => handleSelect(org)}
                                     className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${
                                         selected?.id === org.id ? 'bg-green-50' : ''
                                     }`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`${getBackgroundColor(getCodeFromName(org.displayName))} text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
+                                        <div className={`bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
                                             {getCodeFromName(org.displayName)}
                                         </div>
                                         <span className={selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}>
