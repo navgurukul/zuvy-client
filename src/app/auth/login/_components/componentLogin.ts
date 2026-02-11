@@ -20,6 +20,8 @@ export interface User {
   email: string;
   rolesList: string[]; 
   hasfilled: boolean;
+  orgName: string;
+  orgId: number;
 }
 
 export interface AuthResponse {

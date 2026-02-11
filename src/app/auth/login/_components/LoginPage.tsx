@@ -171,6 +171,7 @@ const handleGoogleSuccess = async (
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
                 const userRole = response.data.user.rolesList[0]
+                const organization = response.data.user.orgName || null
                 const hasFilled = response.data.user.hasfilled
 
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
@@ -185,9 +186,8 @@ const handleGoogleSuccess = async (
                 } else if (userRole === 'super admin') {
                     router.push('/superAdmin/organization') // Change it when integrating APIs
                 } else {
-                    console.log('userRole', userRole)
                     // Default redirect for other roles or when hasfilled is true
-                    router.push(`/${userRole}/Microsoft/courses`) // Change it when integrating APIs
+                    router.push(`/${userRole}/${organization}/courses`) 
                 }
             }
         } catch (err: any) {

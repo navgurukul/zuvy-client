@@ -29,7 +29,7 @@ const Navbar = () => {
     const role = pathname.split('/')[1]
     const orgName = pathname.split('/')[2]
     const inOrg = pathname.split('/')[2] !== 'organizations'
-    const superAdmin = false
+    const superAdmin = true
     // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
@@ -147,8 +147,8 @@ const Navbar = () => {
                                             {loading? <Spinner />: <span className='' >{item.name}</span>}
                                         </Link>
                                     )} */}
-                                    {/* {(superAdmin && item.name !== 'All Organizations' ) || item.name !== 'Question Bank' && ( */}
-                                    {item.name !== 'Question Bank' && (
+                                    {/* {item.name !== 'Question Bank' && ( */}
+                                    {(!superAdmin && item.name === 'All Organizations' ) || item.name !== 'Question Bank' && (
                                         <Link
                                             key={item.name}
                                             href={item.href}
