@@ -184,9 +184,12 @@ const handleGoogleSuccess = async (
                 } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
                     // Redirect admin/poc to settings if hasfilled is false
                     router.push(`/${userRole}/setting`)
-                } else {
+                } else if (userRole === 'admin') {  // Change it to super_admin after integration
+                    router.push(`/${userRole}/organizations`)
+                }
+                else {
                     // Default redirect for other roles or when hasfilled is true
-                    router.push(`/${userRole}/${orgName}/courses`)
+                    router.push(`/${userRole}/Microsoft/courses`)
                 }
             }
         } catch (err: any) {
