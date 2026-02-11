@@ -1,4 +1,4 @@
-;`use client`
+'use client'
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { format, addDays, parseISO } from 'date-fns'
@@ -33,10 +33,10 @@ const parseIsoToDateAndTime = (isoString?: string | null) => {
             }
         } catch (e) {
             // Invalid date string
-            return { date: new Date(), time: '' }
+            return { date: null, time: '' } //Return null instead of new Date()
         }
     }
-    return { date: new Date(), time: '' } // Default if no string provided
+    return { date: null, time: '' } //Return null instead of new Date()
 }
 
 const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
@@ -45,23 +45,24 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
     initialPublishDate, // Destructured
     initialStartDate, // Destructured
     initialEndDate, // Destructured
+    hasExistingEndDate,
 }) => {
     // const [isOpen, setIsOpen] = useState(false); // No longer needed, parent controls visibility
     const [tab, setTab] = useState<'schedule' | 'now' | 'draft'>('schedule') // Added 'draft'
 
     // Initialize state with props or defaults
-    const [publishDate, setPublishDate] = useState<Date>(
-        parseIsoToDateAndTime(initialPublishDate).date
+    const [publishDate, setPublishDate] = useState<Date | null>(
+        parseIsoToDateAndTime(initialPublishDate).date || new Date() 
     )
-    const [startDate, setStartDate] = useState<Date>(
-        parseIsoToDateAndTime(initialStartDate).date
+    const [startDate, setStartDate] = useState<Date | null>(
+        parseIsoToDateAndTime(initialStartDate).date || new Date() 
     )
-    const [endDate, setEndDate] = useState<Date>(
+    const [endDate, setEndDate] = useState<Date | null>(
         parseIsoToDateAndTime(initialEndDate).date
     )
-    const [endNowDate, setEndNowDate] = useState<Date>(
+    const [endNowDate, setEndNowDate] = useState<Date | null>(
         parseIsoToDateAndTime(initialEndDate).date
-    ) // Also use initialEndDate for this
+    )
 
     const [publishTime, setPublishTime] = useState(
         parseIsoToDateAndTime(initialPublishDate).time
@@ -92,17 +93,17 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
     // Effect to update states if initial props change after mount (e.g. parent re-renders with new data)
     useEffect(() => {
         const pub = parseIsoToDateAndTime(initialPublishDate)
-        setPublishDate(pub.date)
+        setPublishDate(pub.date || new Date())
         setPublishTime(pub.time)
 
         const start = parseIsoToDateAndTime(initialStartDate)
-        setStartDate(start.date)
+        setStartDate(start.date || new Date())
         setStartTime(start.time)
 
         const end = parseIsoToDateAndTime(initialEndDate)
         setEndDate(end.date)
         setEndTime(end.time)
-        setEndNowDate(end.date) // Keep endNowDate in sync with initialEndDate too
+        setEndNowDate(end.date)
         setEndNowTime(end.time)
     }, [initialPublishDate, initialStartDate, initialEndDate])
 
@@ -202,9 +203,9 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
         )
     }
 
-    const validateNowEndTime = (date: Date, time: string) => {
+    const validateNowEndTime = (date: Date | null, time: string) => {
         const now = new Date()
-        const endDateTime = time ? combineDateTime(date, time) : null
+        const endDateTime = time && date ? combineDateTime(date, time) : null
         if (!time) {
             // If time is cleared, remove the error
             setErrors((prev) => ({ ...prev, endNowTime: undefined }))
@@ -239,6 +240,14 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
             return
         }
 
+        let endDateTimeIso: string | null | undefined = undefined
+
+        if (endDate && endTime) {
+            endDateTimeIso = combineDateTime(endDate, endTime).toISOString()
+        } else if (hasExistingEndDate) {
+            endDateTimeIso = null
+        }
+
         const scheduleData: PublishData = {
             action: 'schedule',
             publishDateTime:
@@ -249,10 +258,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                 startDate && startTime
                     ? combineDateTime(startDate, startTime).toISOString()
                     : undefined,
-            endDateTime:
-                endDate && endTime
-                    ? combineDateTime(endDate, endTime).toISOString()
-                    : undefined,
+            endDateTime: endDateTimeIso,
         }
         onSave(scheduleData)
         // setIsOpen(false); // Close dialog on successful save
@@ -262,9 +268,9 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
         setErrors({}) // Clear previous errors
         const nowUtcIso = new Date().toISOString()
         let isValid = true
-        let endDateTimeIso: string | undefined = undefined
+        let endDateTimeIso: string | null | undefined = undefined
 
-        if (endNowTime) {
+        if (endNowTime && endNowDate) {
             // End time is optional for publish now
             if (!validateNowEndTime(endNowDate, endNowTime)) {
                 isValid = false
@@ -275,6 +281,8 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     endNowTime
                 ).toISOString()
             }
+        } else if (hasExistingEndDate) {
+            endDateTimeIso = null
         }
 
         if (!isValid) return
@@ -397,19 +405,41 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                             error: errors.startTime,
                         },
                         {
-                            label: 'Assessment End Date and Time',
+                            label: 'End Date and Time (Optional)',
                             date: endDate,
                             setDate: setEndDate,
                             time: endTime,
                             setTime: setEndTime,
                             error: errors.endTime,
+                            showClear: true,
                         },
                     ].map(
-                        ({ label, date, setDate, time, setTime, error }, i) => (
+                        ({ label, date, setDate, time, setTime, error, showClear }, i) => (
                             <div key={i} className="space-y-1">
-                                <label className="text-sm text-[#6E6E6E] font-medium block">
-                                    {label}
-                                </label>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="text-sm text-[#6E6E6E] font-medium block">
+                                        {label}
+                                    </label>
+                                    {showClear && time && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => {
+                                                setDate(null)
+                                                setTime('')
+                                                setErrors((prev) => ({
+                                                    ...prev,
+                                                    endTime: undefined,
+                                                }))
+                                            }}
+                                            className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 h-auto py-1 px-2 font-medium"
+                                        >
+                                            <X className="h-3 w-3 mr-1" />
+                                            Clear End Date
+                                        </Button>
+                                    )}
+                                </div>
                                 <div className="flex items-center gap-4">
                                     {' '}
                                     {/* Changed items-start to items-center */}
@@ -430,6 +460,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                         >
                                             <DialogTrigger asChild>
                                                 <Button variant='default' className="border border-input bg-background hover:border-[rgb(81,134,114)] hover:text-white text-gray-600 w-full justify-start text-left font-normal">
+                                                    {/* CHANGED: Only show date if it's actually set */}
                                                     {date ? (
                                                         format(
                                                             date,
@@ -446,21 +477,20 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                             <DialogContent className="w-auto">
                                                 <Calendar
                                                     mode="single"
-                                                    selected={date}
+                                                    selected={date || undefined} 
                                                     onSelect={(selected) => {
-                                                        setDate(
-                                                            selected ||
-                                                                new Date()
-                                                        )
-                                                        setScheduleCalendarOpen(
-                                                            (prev) => {
-                                                                const newState =
-                                                                    [...prev]
-                                                                newState[i] =
-                                                                    false
-                                                                return newState
-                                                            }
-                                                        )
+                                                        if (selected) {
+                                                            setDate(selected)
+                                                            setScheduleCalendarOpen(
+                                                                (prev) => {
+                                                                    const newState =
+                                                                        [...prev]
+                                                                    newState[i] =
+                                                                        false
+                                                                    return newState
+                                                                }
+                                                            )
+                                                        }
                                                     }}
                                                     disabled={disablePastDates}
                                                     initialFocus
@@ -475,9 +505,13 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                             type="time"
                                             className="w-full flex flex-col "
                                             value={time}
-                                            onChange={(e) =>
+                                            onChange={(e) => {
                                                 setTime(e.target.value)
-                                            }
+                                                //Auto-set date when time is selected
+                                                if (e.target.value && !date) {
+                                                    setDate(new Date())
+                                                }
+                                            }}
                                         />
                                         {error && (
                                             <p className="text-xs text-red-500 leading-snug absolute">
@@ -497,7 +531,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     )}
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
                                 Cancel
                             </Button>
                         </DialogClose>
@@ -516,9 +550,31 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                         End date and time are optional.
                     </p>
                     <div className="space-y-1">
-                        <label className="text-sm font-medium block text-gray-600">
-                            Assessment End Date and Time (Optional)
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="text-sm font-medium block text-gray-600">
+                                End Date and Time (Optional)
+                            </label>
+                            {/*Clear button only shows when time is set */}
+                            {endNowTime && (
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                        setEndNowDate(null) // Set to null
+                                        setEndNowTime('')
+                                        setErrors((prev) => ({
+                                            ...prev,
+                                            endNowTime: undefined,
+                                        }))
+                                    }}
+                                    className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 h-auto py-1 px-2 font-medium"
+                                >
+                                    <X className="h-3 w-3 mr-1" />
+                                    Clear End Date
+                                </Button>
+                            )}
+                        </div>
                         <div className="flex justify-start items-center gap-4">
                             {' '}
                             {/* Changed items-start to items-center */}
@@ -528,11 +584,12 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                     onOpenChange={setEndNowCalendarOpen}
                                 >
                                     <DialogTrigger asChild>
-                                        <Button className="w-full text-left font-normal border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
+                                        <Button className="w-full text-left font-normal border border-input bg-background hover:border-[rgb(81,134,114)] hover:text-white text-gray-600 justify-start">
+                                            {/*Only show date if it's actually set */}
                                             {endNowDate ? (
                                                 format(endNowDate, 'dd/MM/yyyy')
                                             ) : (
-                                                <span className="text-muted-foreground">
+                                                <span className="text-muted-foreground group-hover:text-white">
                                                     DD/MM/YYYY
                                                 </span>
                                             )}
@@ -542,12 +599,12 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                     <DialogContent className="w-auto p-4">
                                         <Calendar
                                             mode="single"
-                                            selected={endNowDate}
+                                            selected={endNowDate || undefined} 
                                             onSelect={(selectedDate) => {
-                                                setEndNowDate(
-                                                    selectedDate || new Date()
-                                                )
-                                                setEndNowCalendarOpen(false)
+                                                if (selectedDate) {
+                                                    setEndNowDate(selectedDate)
+                                                    setEndNowCalendarOpen(false)
+                                                }
                                             }}
                                             disabled={disablePastDates}
                                             initialFocus
@@ -562,9 +619,13 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                                     value={endNowTime}
                                     onChange={(e) => {
                                         setEndNowTime(e.target.value)
+                                        //Auto-set current date when time is selected
+                                        if (e.target.value && !endNowDate) {
+                                            setEndNowDate(new Date())
+                                        }
                                         if (e.target.value)
                                             validateNowEndTime(
-                                                endNowDate,
+                                                endNowDate || new Date(),
                                                 e.target.value
                                             )
                                         else
@@ -584,7 +645,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     </div>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
                                 Cancel
                             </Button>
                         </DialogClose>
@@ -613,7 +674,7 @@ const PublishAssessmentDialog: React.FC<PublishAssessmentDialogs> = ({
                     </p>
                     <div className="flex justify-end gap-2 pt-4">
                         <DialogClose asChild>
-                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600">
+                            <Button className="border border-input bg-background hover:border-[rgb(81,134,114)] text-gray-600 hover:text-white">
                                 Cancel
                             </Button>
                         </DialogClose>
