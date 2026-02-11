@@ -91,7 +91,7 @@ function CourseLayout() {
                     .getState()
                     .fetchCourseDetails(parseInt(courseID))
                 if (!success) {
-                    router.push(`/${userRole}/courses`)
+                    router.push(`/${userRole}/${orgName}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:

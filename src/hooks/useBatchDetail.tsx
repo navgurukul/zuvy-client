@@ -23,6 +23,8 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const location = usePathname()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
@@ -102,14 +104,14 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
             } catch (error: any) {
                 if (axios.isAxiosError(error)) {
                     if (error?.response?.data.message === 'Bootcamp not found!') {
-                        router.push(`/${userRole}/courses`)
+                        router.push(`/${userRole}/${orgName}/courses`)
                         toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
                     }
                 }
                 console.error('Error fetching batches', error)
             }
         },
-        [router, userRole]
+        [router, userRole, orgName]
     )
 
     useEffect(() => {
@@ -147,7 +149,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
             await api.delete(`/batch/${params.batchId}`)
             toast.success({ title: 'Batch Deleted Successfully' })
             setDeleteModalOpen(false)
-            router.push(`/${userRole}/courses/${params.courseId}/batches`)
+            router.push(`/${userRole}/${orgName}/courses/${params.courseId}/batches`)
         } catch (error) {
             toast.error({ title: 'Batch not Deleted' })
         }

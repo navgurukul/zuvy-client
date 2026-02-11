@@ -3,7 +3,7 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { api } from '@/utils/axios.config'
 import { OFFSET, POSITION } from '@/utils/constant'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, usePathname } from 'next/navigation'
 import { existingClassColumns } from './existingLiveClassesColumn'
 import { getUser, getIsRowSelected } from '@/store/store'
 import { Table } from '@/components/ui/table'
@@ -35,6 +35,8 @@ const ExistingLiveClass = ({
     const [offset, setOffset] = useState<number>(OFFSET)
     const [currentPage, setCurrentPage] = useState(1)
     const [classes, setClasses] = useState([])
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     // Main fetch function
     async function getAllClasses() {
@@ -86,7 +88,7 @@ const ExistingLiveClass = ({
         const latestChapter = chapters[chapters.length - 1]
         if (latestChapter) {
             router.push(
-                `/${userRole}/courses/${param.courseId}/module/${param.moduleId}/chapters/${latestChapter.chapterId}`
+                `/${userRole}/${orgName}/courses/${param.courseId}/module/${param.moduleId}/chapters/${latestChapter.chapterId}`
             )
         }
         setOpen(false)

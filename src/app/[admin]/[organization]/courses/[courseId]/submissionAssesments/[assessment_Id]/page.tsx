@@ -221,17 +221,17 @@ const Page = ({ params }: any) => {
     const crumbs = [
         {
             crumb: 'My Courses',
-            href: `/admin/courses`,
+            href: `/admin/${orgName}/courses`,
             isLast: false,
         },
         {
             crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
+            href: `/admin/${orgName}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
             crumb: 'Submission - Assesments',
-            href: `/admin/courses/${params.courseId}/submissions`,
+            href: `/admin/${orgName}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {

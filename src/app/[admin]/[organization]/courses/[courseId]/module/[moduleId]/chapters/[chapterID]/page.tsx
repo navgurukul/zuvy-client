@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState, useRef } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import { api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
 import AddVideo from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/video/AddVideo'
@@ -54,6 +54,8 @@ export default function Page({
     const [key, setKey] = useState(0)
     const [contentLoading, setContentLoading] = useState(true)
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
     const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
         useState(false)
 
@@ -97,7 +99,7 @@ export default function Page({
             if (moduleData.length > 0) {
                 const firstChapterId = moduleData[0].chapterId
                 router.replace(
-                    `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
+                    `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
                 )
             }
             setActiveChapter(0)
