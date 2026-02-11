@@ -442,44 +442,50 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
         if (!canSubmit) return
 
         const payload = {
-            orgName: '',
-            name: newUser.name.trim(),
-            email: newUser.email.trim(),
-            roleId: pendingUserRole,
-            assigneeName: newUser.assigneeName.trim(),
-            assigneeEmail: newUser.assigneeEmail.trim(),
+            title: newUser.orgName.trim(),
+            displayName: newUser.orgName.trim(),
+            isManagedByZuvy: Boolean(pendingUserRole), // adjust if backend logic differs
+            logoUrl: '', // optional for now
+            pocName: newUser.name.trim(),
+            pocEmail: newUser.email.trim(),
+            zuvyPocName: newUser.assigneeName.trim(),
+            zuvyPocEmail: newUser.assigneeEmail.trim(),
         }
 
         try {
-            const response = await api.post('/users/addUsers', payload)
-            if(response.status === 201) {
+            const response = await api.post('/org/create', payload)
+
+            if (response.data?.status === 'success') {
                 toast.success({
-                    title: 'User added successfully',
-                    description: 'The new user has been added.',
+                    title: 'Organisation created',
+                    description: response.data.message,
                 })
             }
-        } catch (error:any) {
+        } catch (error: any) {
             toast.error({
-                title: 'Error adding user',
-                description: error?.response?.data?.message || 'There was an issue adding the new user.',
+                title: 'Error creating organisation',
+                description:
+                    error?.response?.data?.message ||
+                    'There was an issue creating the organisation.',
             })
-            console.error('Error adding user:', error)
+            console.error('Create org error:', error)
             return
-        }
-
-        // Reset form
-        setNewUser({
-            orgName: '',
-            name: '',
-            email: '',
-            assigneeName: '',
-            assigneeEmail: '',
-        })
-        setPendingUserRole(null)
-        setFreshUserData(null)
-        refetchUsers && refetchUsers()
-        onClose && onClose()
     }
+
+    // Reset form
+    setNewUser({
+        orgName: '',
+        name: '',
+        email: '',
+        assigneeName: '',
+        assigneeEmail: '',
+    })
+    setPendingUserRole(null)
+
+    refetchUsers && refetchUsers()
+    onClose && onClose()
+}
+
 
     const handleEditUser = async () => {
         if (!canSubmit) return
@@ -655,7 +661,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                         disabled={!canSubmit || isFetchingFreshData}
                         onClick={handleSubmit}
                     >
-                        {isEditMode ? 'Save Change' : 'Add User'}
+                        {isEditMode ? 'Save Change' : 'Add Organisation'}
                     </Button>
                 </DialogClose>
             </DialogFooter>
