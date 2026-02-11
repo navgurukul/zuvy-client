@@ -271,7 +271,7 @@ export default function OrganizationsPage() {
                             {currentSearchQuery ? (
                                 <>
                                     <p className="text-gray-600 mb-4">
-                                        No organizations found for "{currentSearchQuery}"
+                                        {`No organizations found for "${currentSearchQuery}"`}
                                     </p>
                                     <Button onClick={clearSearch} variant="outline">
                                         Clear Search
