@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input'
 // import '@\app\_components\editor\Tiptap.css'
 import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import { getChapterUpdateStatus, getArticlePreviewStore, getUser } from '@/store/store'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
@@ -84,6 +84,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const { getChapterDetails, loading: chapterLoading } = useGetChapterDetails()
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     const [hasChangedAfterSave, setHasChangedAfterSave] = useState(false)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const hasLoaded = useRef(false)
 
@@ -387,7 +389,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             }
             setArticlePreviewContent(content)
             router.push(
-                `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
+                `/${userRole}/${orgName}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview`
             )
         }
     }
@@ -396,7 +398,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
         if (ispdfUploaded) {
             setArticlePreviewContent(content)
             router.push(
-                `/${userRole}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
+                `/${userRole}/${orgName}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/article/${content.topicId}/preview?pdf=true`
             )
         } else {
             return toast.error({

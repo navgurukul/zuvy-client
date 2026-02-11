@@ -1,6 +1,6 @@
 'use client'
 import { api } from '@/utils/axios.config'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import TestCaseResults from '../../../submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/[CodingSolution]/TestCases'
@@ -27,6 +27,8 @@ const Page = ({ params }: PageParams) => {
 
     const questionId = searchQuery.get('questionId')
     const moduleId = searchQuery.get('moduleId')
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -43,22 +45,22 @@ const Page = ({ params }: PageParams) => {
         () => [
             {
                 crumb: 'My Courses',
-                href: `/admin/courses`,
+                href: `/admin/${orgName}/courses`,
                 isLast: false,
             },
             {
                 crumb: parsedCrumbData[0],
-                href: `/admin/courses/${params.courseId}/submissions`,
+                href: `/admin/${orgName}/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
             // {
             //     crumb: 'Submission - Practice Problems',
-            //     href: `/admin/courses/${params.courseId}/submissions`,
+            //     href: `/admin/${orgName}/courses/${params.courseId}/submissions`,
             //     isLast: false,
             // },
             {
                 crumb: parsedCrumbData[1],
-                href: `/admin/courses/${params.courseId}/submissionProblems/${moduleId}`,
+                href: `/admin/${orgName}/courses/${params.courseId}/submissionProblems/${moduleId}`,
                 isLast: false,
             },
             {

@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { difficultyColor, cn, difficultyBgColor } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import {
     PriviewTag,
     Params,
@@ -24,6 +24,8 @@ function AllQuestions({ params }: { params: Params }) {
         useState<any>([])
     const [allTags, setAllTags] = useState<PriviewTag[]>([])
     const router = useRouter()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     useEffect(() => {
         fetchPreviewData(
@@ -50,19 +52,19 @@ function AllQuestions({ params }: { params: Params }) {
 
     function solveCodingQuestion(codingQuestionId: any) {
         router.push(
-            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`
+            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`
         )
     }
 
     function attemptQuizPreview() {
         router.push(
-            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`
+            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`
         )
     }
 
     function attemptOpenEndedPreview() {
         router.push(
-            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`
+            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`
         )
     }
 

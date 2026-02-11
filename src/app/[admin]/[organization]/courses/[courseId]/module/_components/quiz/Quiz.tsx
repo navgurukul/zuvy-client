@@ -21,7 +21,7 @@ import {
     getChapterDataState,
 } from '@/store/store'
 import { ArrowUpRightSquare, Pencil, FileQuestion } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter,usePathname } from 'next/navigation'
 import {
     QuizProps,
     ChapterDetailsResponse,
@@ -62,6 +62,8 @@ function Quiz(props: QuizProps) {
     const { setQuizPreviewContent } = getQuizPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
     const [savedQuestions, setSavedQuestions] = useState<QuizDataLibrary[]>([])
@@ -372,7 +374,7 @@ function Quiz(props: QuizProps) {
             quizQuestionDetails: addQuestion,
         })
         router.push(
-            `/${userRole}/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+            `/${userRole}/${orgName}/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
         )
     }
 

@@ -4,8 +4,12 @@ import React from 'react'
 import AssesmentComponent from './AssesmentComponent'
 import { Button } from '@/components/ui/button'
 import { ModuleProps } from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
+import { usePathname } from 'next/navigation'
 
 const Assesments = (props: ModuleProps) => {
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+
     return (
         <div className="w-full">
             <section className="bg-white dark:bg-gray-900">
@@ -14,7 +18,7 @@ const Assesments = (props: ModuleProps) => {
                         {props.moduleAssessments.map((module) => (
                             <Link
                                 key={module.id}
-                                href={`/admin/courses/${props.courseId}/submissions/${module.id}`}
+                                href={`/admin/${orgName}/courses/${props.courseId}/submissions/${module.id}`}
                                 className=""
                             >
                                 {/* <AssesmentComponent

@@ -12,7 +12,7 @@ import { getAssessmentPreviewStore } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { api } from '@/utils/axios.config'
 import { AlertOctagon, ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
@@ -23,6 +23,8 @@ import {
 const PreviewAssessment = ({ params }: { params: Params }) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
     const { assessmentPreviewContent, setAssessmentPreviewContent } =
         getAssessmentPreviewStore()
 
@@ -40,7 +42,7 @@ const PreviewAssessment = ({ params }: { params: Params }) => {
 
     function startPreviewAssessment() {
         router.push(
-            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions`
+            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions`
         )
     }
 
@@ -57,7 +59,7 @@ const PreviewAssessment = ({ params }: { params: Params }) => {
             <div className="relative flex flex-col items-center justify-center px-4 py-8 mt-20">
                 {/* "Go Back" button placed at the far left */}
                 <Link
-                    href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
+                    href={`/admin/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                     className="absolute left-0 top-0 flex items-center space-x-2 p-4"
                 >
                     {' '}
