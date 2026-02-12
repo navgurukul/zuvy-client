@@ -1,23 +1,83 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Cloud } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
+import { getUser } from '@/store/store'
 import { useRouter } from 'next/navigation'
+import useOrgSettings, {
+    OrgResponse,
+    OrgUpdatePayload,
+} from '@/hooks/useOrgSettings'
+
 
 export default function AdminSettingPage() {
     const router = useRouter()
-    const [orgName, setOrgName] = useState('Amazon Future Engineer')
-    const [displayName, setDisplayName] = useState('Jane Doe')
-    const [email] = useState('jane.doe@amazon.com')
-    const [role] = useState('Org Admin')
+    const { user } = getUser()
+    const { fetchOrgById, uploadOrgLogo, completeOrgSetup, updateOrgById } =
+        useOrgSettings()
+    const [orgName, setOrgName] = useState('')
+    const [displayName, setDisplayName] = useState('')
+    const [email, setEmail] = useState('')
+    const [role, setRole] = useState('Org Admin')
     const [logoFile, setLogoFile] = useState<File | null>(null)
     const [logoPreview, setLogoPreview] = useState<string | null>(null)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
+    const [orgData, setOrgData] = useState<OrgResponse | null>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const orgId = useMemo(
+        () =>
+            user?.orgId ??
+            user?.organizationId ??
+            user?.org?.id ??
+            user?.organization?.id,
+        [user]
+    )
+    const isOrgVerified = orgData?.isVerified ?? false
+
+    useEffect(() => {
+        const fetchOrg = async () => {
+            setRole((user?.rolesList?.[0] || 'Org Admin').toUpperCase())
+            setEmail(user?.email || '')
+            setDisplayName(user?.name || '')
+
+            if (!orgId) {
+                toast({
+                    title: 'Error',
+                    description: 'Organization id not found in user data.',
+                    variant: 'destructive',
+                })
+                setIsLoading(false)
+                return
+            }
+
+            try {
+                const data: OrgResponse = await fetchOrgById(orgId)
+                setOrgData(data)
+                setOrgName(data.title || '')
+                setDisplayName(data.pocName || user?.name || '')
+                setEmail(data.pocEmail || user?.email || '')
+                setLogoPreview(data.logoUrl || null)
+            } catch (error: any) {
+                console.error('Failed to fetch org details:', error)
+                toast({
+                    title: 'Error',
+                    description:
+                        error?.response?.data?.message ||
+                        'Failed to fetch organization details.',
+                    variant: 'destructive',
+                })
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchOrg()
+    }, [fetchOrgById, orgId, user?.email, user?.name, user?.rolesList])
 
     const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -102,19 +162,101 @@ export default function AdminSettingPage() {
         if (!displayName.trim()) {
             toast({
                 title: 'Error',
-                description: 'Display name is required',
+                description: 'Name is required',
                 variant: 'destructive',
             })
             return
         }
-
+        if (!orgId) {
+            toast({
+                title: 'Error',
+                description: 'Organization id not found. Please re-login.',
+                variant: 'destructive',
+            })
+            return
+        }
         setIsSubmitting(true)
 
         try {
+            let nextLogoUrl: string | null = orgData?.logoUrl || null
+
+            if (logoFile) {
+                const uploadedLogoUrl = await uploadOrgLogo(logoFile)
+                if (!uploadedLogoUrl) {
+                    toast({
+                        title: 'Error',
+                        description: 'Logo uploaded but no URL returned.',
+                        variant: 'destructive',
+                    })
+                    setIsSubmitting(false)
+                    return
+                }
+
+                nextLogoUrl = uploadedLogoUrl
+            } else if (!logoPreview) {
+                nextLogoUrl = null
+            }
+
+            const payload: OrgUpdatePayload = {}
+
+            if (orgName.trim() !== (orgData?.title || '').trim()) {
+                payload.title = orgName.trim()
+            }
+            if (displayName.trim() !== (orgData?.pocName || '').trim()) {
+                payload.pocName = displayName.trim()
+            }
+            if (email.trim() !== (orgData?.pocEmail || '').trim()) {
+                payload.pocEmail = email.trim()
+            }
+            if (nextLogoUrl !== (orgData?.logoUrl || null)) {
+                payload.logoUrl = nextLogoUrl
+            }
+
+            if (Object.keys(payload).length === 0) {
+                toast({
+                    title: 'No changes',
+                    description: 'Nothing to update.',
+                })
+                setIsSubmitting(false)
+                return
+            }
+
+            if (isOrgVerified) {
+                await updateOrgById(orgId, payload)
+            } else {
+                await completeOrgSetup(orgId, payload)
+            }
+
             toast({
                 title: 'Success',
                 description: 'Workspace setup completed successfully!',
             })
+            setLogoFile(null)
+            setOrgData((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          title: (payload.title as string) ?? prev.title,
+                          pocName: (payload.pocName as string) ?? prev.pocName,
+                          pocEmail:
+                              (payload.pocEmail as string) ?? prev.pocEmail,
+                          logoUrl:
+                              payload.logoUrl !== undefined
+                                  ? payload.logoUrl
+                                  : prev.logoUrl,
+                      }
+                    : prev
+            )
+
+            if (!isOrgVerified) {
+                const userRole = (user?.rolesList?.[0] || 'admin').toLowerCase()
+                const targetOrg = (user?.orgName || orgName || '').trim()
+                if (targetOrg) {
+                    router.push(`/${userRole}/${targetOrg}/courses`)
+                } else {
+                    router.push(`/${userRole}/courses`)
+                }
+            }
         } catch (error) {
             console.error('Setup error:', error)
             toast({
@@ -127,34 +269,80 @@ export default function AdminSettingPage() {
         }
     }
 
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <p className="text-muted-foreground">Loading organization details...</p>
+            </div>
+        )
+    }
+
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <div className="flex-1 flex">
-                <div className="grid grid-cols-1 lg:grid-cols-3 flex-1 w-full">
-                    {/* Left Side - Dark Branding Section (33%) */}
-                    <div className="hidden lg:flex bg-[#1A1A1A] text-white flex-col justify-start p-12 pt-20">
-                        <div className="space-y-8">
-                            <div className="space-y-3 text-left">
-                                <h1 className="text-5xl font-semibold leading-tight">
-                                  You&apos;ve been invited to set up the workspace for
-                                </h1>
-                                <h2 className="text-5xl font-bold leading-tight">
-                                    <span className='text-5xl font-bold text-emerald-500'>Amazon Future Engineer </span>
-                                    on <span className='text-5xl font-bold text-emerald-500'>Zuvy</span>
-                                </h2>
-                                 
-                                <p className="text-lg text-slate-300">
-                                    Manage your student&apos;s  learning journey.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                <div
+                    className={`grid w-full flex-1 ${
+                        isOrgVerified ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'
+                    }`}
+                >
+                    {!isOrgVerified && (
+                        <>
+                            <div className="hidden lg:flex bg-[#1A1A1A] text-white flex-col justify-start p-12 pt-20">
+                                <div className="space-y-8">
+                                    <div className="space-y-3 text-left">
+                                        <h1 className="text-5xl font-semibold leading-tight">
+                                            You&apos;ve been invited to set up
+                                            the workspace for
+                                        </h1>
+                                        <h2 className="text-5xl font-bold leading-tight">
+                                            <span className="text-5xl font-bold text-emerald-500">
+                                                {orgName || 'your organization'}{' '}
+                                            </span>
+                                            on{' '}
+                                            <span className="text-5xl font-bold text-emerald-500">
+                                                Zuvy
+                                            </span>
+                                        </h2>
 
-                    {/* Right Side - Form Section (67%) */}
-                    <div className="flex flex-col bg-background lg:col-span-2">
-                        <div className="flex-1 flex flex-col py-8 px-6 lg:px-12 xl:px-16">
-                            <div className="flex flex-col items-start w-full max-w-4xl mx-auto">
-                                <div className="space-y-6 flex flex-col w-full">
+                                        <p className="text-lg text-slate-300">
+                                            Manage your student&apos;s learning
+                                            journey.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="lg:hidden bg-[#1A1A1A] text-white p-8 order-first space-y-8">
+                                <div className="space-y-3">
+                                    <h1 className="text-3xl font-bold leading-tight">
+                                        You&apos;ve been invited to set up the
+                                        workspace
+                                    </h1>
+                                    <p className="text-base text-slate-300">
+                                        For{' '}
+                                        <span className="font-semibold text-emerald-400">
+                                            {orgName || 'your organization'}
+                                        </span>{' '}
+                                        on{' '}
+                                        <span className="font-semibold text-emerald-400">
+                                            Zuvy
+                                        </span>
+                                    </p>
+                                    <p className="text-base text-slate-300">
+                                        Manage your student&apos;s learning
+                                        journey.
+                                    </p>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    <div
+                        className={`w-full mx-auto py-8 px-6 lg:px-12 xl:px-16 ${
+                            isOrgVerified ? 'max-w-4xl' : 'lg:col-span-2'
+                        }`}
+                    >
+                        <div className="space-y-6 flex flex-col w-full">
                                     {/* Organization Section */}
                                     <div className="space-y-4">
                                         {/* Organization Name */}
@@ -169,6 +357,7 @@ export default function AdminSettingPage() {
                                                 onChange={(e) => setOrgName(e.target.value)}
                                                 placeholder="Enter your organization name"
                                                 className="h-11 text-base"
+                                                disabled={!isOrgVerified}
                                             />
                                             <p className="text-sm text-muted-foreground text-left">
                                                 This is how your organization will appear in the platform
@@ -248,6 +437,11 @@ export default function AdminSettingPage() {
                                         <div className="flex items-center gap-2">
                                             <h2 className="text-2xl font-bold text-foreground text-left">Your profile</h2>
                                         </div>
+                                        {!isOrgVerified && (
+                                            <p className="text-sm text-muted-foreground text-left">
+                                                Setup pending verification. Only logo and POC name can be updated.
+                                            </p>
+                                        )}
 
                                         {/* Form Fields */}
                                         <div className="space-y-4">
@@ -271,9 +465,14 @@ export default function AdminSettingPage() {
                                                 {/* Email (Non-editable) */}
                                                 <div className="space-y-2">
                                                     <Label className="text-sm font-semibold text-foreground text-left block">Email</Label>
-                                                    <div className="px-3 py-3 bg-[#E8E7DC] text-base text-slate-600 rounded-lg border border-[#E8E7DC] h-11 flex items-center">
-                                                        {email}
-                                                    </div>
+                                                    <Input
+                                                        type="email"
+                                                        value={email}
+                                                        onChange={(e) => setEmail(e.target.value)}
+                                                        placeholder="Enter email"
+                                                        className="h-11 text-base"
+                                                        disabled={!isOrgVerified}
+                                                    />
                                                 </div>
 
                                                 {/* Role (Non-editable) */}
@@ -294,7 +493,11 @@ export default function AdminSettingPage() {
                                             disabled={isSubmitting}
                                             className="h-11 px-8 text-base font-semibold"
                                         >
-                                            {isSubmitting ? 'Saving...' : 'Complete Profile and Proceed'}
+                                            {isSubmitting
+                                                ? 'Saving...'
+                                                : isOrgVerified
+                                                  ? 'Save Changes'
+                                                  : 'Complete Profile and Proceed'}
                                         </Button>
                                         <p className="text-sm text-muted-foreground">
                                             Need help?{' '}
@@ -303,24 +506,6 @@ export default function AdminSettingPage() {
                                             </a>
                                         </p>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Mobile - Left Side Content */}
-                    <div className="lg:hidden bg-[#1A1A1A] text-white p-8 order-first space-y-8">
-                        <div className="space-y-3">
-                            <h1 className="text-3xl font-bold leading-tight">
-                                You&apos;ve been invited to set up the workspace
-                            </h1>
-                            <p className="text-base text-slate-300">
-                                For <span className="font-semibold text-emerald-400">Amazon Future Engineer</span> on{' '}
-                                <span className="font-semibold text-emerald-400">Zuvy</span>
-                            </p>
-                            <p className="text-base text-slate-300">
-                                Manage your student&apos;s  learning journey.
-                            </p>
                         </div>
                     </div>
                 </div>
