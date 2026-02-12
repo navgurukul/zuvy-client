@@ -1,74 +1,31 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
 import { DataTable } from '@/app/_components/datatable/data-table';
-// import type { User } from './columns'
+import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination';
 import { createColumns } from './columns'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import AddOrganization from './_components/AddOrganization';
-import { Description } from '@radix-ui/react-toast';
 import { DeleteModalDialog } from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/students/components/deleteModal'
-
-
-interface Organization {
-    id: string;
-    name: string;
-    code: string;
-    managementType: 'Self Managed' | 'Zuvy Managed';
-    poc: {
-        name: string;
-        email: string;
-    };
-    assignee?: {
-        name: string;
-        email: string;
-    };
-    createdAt: string;
-}
-
-const mockOrganizations: Organization[] = [
-    {
-        id: '1',
-        name: 'Amazon Future Engineer',
-        code: 'AF',
-        managementType: 'Self Managed',
-        poc: { name: 'John Doe', email: 'john.doe@amazon.com' },
-        assignee: { name: 'Alex Kumar', email: 'alex.kumar@zuvy.com' },
-        createdAt: '2024-01-15',
-    },
-    {
-        id: '2',
-        name: 'Microsoft',
-        code: 'M',
-        managementType: 'Zuvy Managed',
-        poc: { name: 'Sarah Smith', email: 'sarah.smith@microsoft.com' },
-        assignee: { name: 'Alex Kumar', email: 'alex.kumar@zuvy.com' },
-        createdAt: '2024-02-20',
-    },
-    {
-        id: '3',
-        name: 'Global Solutions Inc',
-        code: 'GS',
-        managementType: 'Self Managed',
-        poc: { name: 'Michael Johnson', email: 'michael@globalsolutions.com' },
-        assignee: { name: 'Priya Sharma', email: 'priya.sharma@zuvy.com' },
-        createdAt: '2024-03-10',
-    },
-    {
-        id: '4',
-        name: 'Enterprise Solutions',
-        code: 'ES',
-        managementType: 'Self Managed',
-        poc: { name: 'David Wilson', email: 'david.wilson@enterprisesol.com' },
-        assignee: { name: 'Priya Sharma', email: 'priya.sharma@zuvy.com' },
-        createdAt: '2024-05-12',
-    },
-];
+import { useOrganizations, Organization } from '@/hooks/useOrganizations'
+import { Skeleton } from '@/components/ui/skeleton'
+import { SearchBox } from '@/utils/searchBox'
+import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
+import { api } from '@/utils/axios.config'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 export default function OrganizationsPage() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    
+    // Get page and limit from URL
+    const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
+    const limit = useMemo(() => parseInt(searchParams.get('limit') || '10'), [searchParams])
+    
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('')
     const [filterType, setFilterType] = useState('All Types');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
@@ -79,11 +36,97 @@ export default function OrganizationsPage() {
         organizationName: ''
     })
 
-    const filtered = mockOrganizations.filter((org) =>
-        org.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Pass page and limit to hook
+    const { organizations, loading, error, totalCount, totalPages, refetchOrganizations, fetchOrganizations } = useOrganizations({
+        limit: limit,
+        page: currentPage,
+        auto: false
+    })
 
-    const management = [{name : 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform'}, {name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform'}]
+    // Function to update URL params
+    const updateURLParams = (page: number, newLimit?: number) => {
+        const newParams = new URLSearchParams(searchParams.toString())
+        newParams.set('page', String(page))
+        newParams.set('limit', String(newLimit || limit))
+        router.push(`?${newParams.toString()}`)
+    }
+
+    // Search API functions for SearchBox
+    const fetchSuggestionsApi = useCallback(async (query: string) => {
+        try {
+            const queryParams = new URLSearchParams()
+            queryParams.append('search', query)
+            queryParams.append('limit', '10')
+            
+            const response = await api.get(`/org/getAllOrgs?${queryParams.toString()}`)
+            return response.data.data || []
+        } catch (error) {
+            console.error('Error fetching suggestions:', error)
+            return []
+        }
+    }, [])
+
+    const fetchSearchResultsApi = useCallback(async (query: string) => {
+        console.log("SEARCH API CALLED", { query });
+        setCurrentSearchQuery(query);
+        updateURLParams(1); // Reset to page 1 on search
+        await fetchOrganizations(query, 1); // Fetch page 1
+        return [];
+    }, [fetchOrganizations, updateURLParams])
+
+    const defaultFetchApi = useCallback(async () => {
+        setCurrentSearchQuery('');
+        updateURLParams(1); // Reset to page 1
+        await fetchOrganizations('', 1); // Fetch page 1
+        return [];
+    }, [fetchOrganizations, updateURLParams])
+
+    const { clearSearch } = useSearchWithSuggestions({
+        fetchSuggestionsApi,
+        fetchSearchResultsApi,
+        defaultFetchApi,
+    })
+
+    // Fetch when page or limit changes
+    useEffect(() => {
+        fetchOrganizations(currentSearchQuery, currentPage)
+    }, [currentPage, limit, fetchOrganizations])
+
+    // Transform API data to match your existing interface
+    const transformedOrganizations = useMemo(() => {
+        return organizations.map(org => ({
+            id: org.id.toString(),
+            name: org.displayName || org.title,
+            code: org.title.substring(0, 2).toUpperCase(),
+            managementType: org.isManagedByZuvy ? 'Zuvy Managed' : 'Self Managed' as 'Self Managed' | 'Zuvy Managed',
+            poc: {
+                name: org.pocName,
+                email: org.pocEmail
+            },
+            assignee: {
+                name: org.zuvyPocName,
+                email: org.zuvyPocEmail
+            },
+            createdAt: new Date(org.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            }),
+            isVerified: org.isVerified,
+            logoUrl: org.logoUrl
+        }))
+    }, [organizations])
+
+    // Filter by management type
+    const filteredOrganizations = useMemo(() => {
+        if (filterType === 'All Types') return transformedOrganizations
+        return transformedOrganizations.filter(org => org.managementType === filterType)
+    }, [transformedOrganizations, filterType])
+
+    const management = [
+        {name: 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform'}, 
+        {name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform'}
+    ]
 
     const handleEdit = (org: any) => {
         setEditingOrg(org)
@@ -103,22 +146,52 @@ export default function OrganizationsPage() {
 
     const handleCloseModal = () => {
         setIsAddModalOpen(false)
-        setEditingOrg(null) // Reset editing org
+        setEditingOrg(null)
         setIsEditMode(false)
+        fetchOrganizations(currentSearchQuery, currentPage)
     }
 
     const handleCloseDeleteModal = () => {
         setDeleteModal({ isOpen: false, organizationId: '', organizationName: '' })
+        fetchOrganizations(currentSearchQuery, currentPage)
     }
 
-    // const columns = createColumns(
-    //     roles,
-    //     rolesLoading,
-    //     handleRoleChange,
-    //     handleEdit,
-    //     handleDelete,
-    //     refreshData
-    // )
+    // Pagination handler - this is required by DataTablePagination component
+    const fetchStudentData = (offset: number) => {
+        // The pagination component handles URL updates automatically
+        // We just need this function to exist for the component interface
+    }
+
+    // Loading skeleton component
+    const LoadingSkeleton = () => (
+        <div className="space-y-4">
+            {[...Array(5)].map((_, index) => (
+                <div key={index} className="flex space-x-4 p-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                        <Skeleton className="h-4 w-1/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-24" />
+                </div>
+            ))}
+        </div>
+    )
+
+    // Error component
+    if (error) {
+        return (
+            <div className="p-8">
+                <div className="text-center">
+                    <p className="text-red-600 mb-4">Error loading organizations: {error}</p>
+                    <Button onClick={() => fetchOrganizations('', currentPage)}>
+                        Try Again
+                    </Button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="p-8">
@@ -126,27 +199,24 @@ export default function OrganizationsPage() {
                 <div className="flex justify-between items-start mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2 text-start">
-                            Organisations ({mockOrganizations.length})
+                            Organisations ({loading ? '...' : totalCount})
                         </h1>
                         <p className="text-gray-600">Manage organisations onboarded on the platform</p>
                     </div>
-                    {/* <button className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-md flex items-center gap-2">
-                        <Plus size={20} />
-                        Add Organisation
-                    </button> */}
 
-                    {/* Add Delete Modal using existing component */}
+                    {/* Delete Modal */}
                     <DeleteModalDialog
                         title="Confirm Delete"
                         description={`Are you sure you want to delete the organisation "${deleteModal.organizationName}"? This action cannot be undone.`}
-                        userId={deleteModal.organizationId ? [Number(deleteModal.organizationId)] : []} // convert to number[] to match interface
-                        bootcampId={0} // Not needed for organization, but required by interface
+                        userId={deleteModal.organizationId ? [Number(deleteModal.organizationId)] : []}
+                        bootcampId={0}
                         isOpen={deleteModal.isOpen}
                         onClose={handleCloseDeleteModal}
-                        setSelectedRows={() => {}} // Not needed but required by interface
+                        setSelectedRows={() => {}}
                     />
 
-                     <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+                    {/* Add Organization Dialog */}
+                    <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                         <DialogTrigger asChild>
                             <Button onClick={() => { setIsEditMode(false)}} >
                                 <Plus className="w-4 h-4 mr-2" />
@@ -154,25 +224,11 @@ export default function OrganizationsPage() {
                             </Button>
                         </DialogTrigger>
                         {isAddModalOpen && (
-                            // <AddUserModal 
-                            //     isEditMode={isEditMode}
-                            //     user={user}
-                            //     isOpen={isAddModalOpen}
-                            //     refetchUsers={() => {
-                            //         refetchUsers(offset)
-                            //         handleCloseModal()
-                            //     }} 
-                            //     onClose={handleCloseModal}
-                            // />
                             <AddOrganization  
                                 isEditMode={isEditMode}
                                 management={management}
-                                user={editingOrg} // Pass the editing organization
+                                user={editingOrg}
                                 isOpen={isAddModalOpen}
-                                // refetchUsers={() => {
-                                //     refetchUsers(offset)
-                                //     handleCloseModal()
-                                // }} 
                                 onClose={handleCloseModal}
                             />
                         )}
@@ -180,14 +236,20 @@ export default function OrganizationsPage() {
                 </div>
 
                 <div className="flex gap-4 mb-6">
+                    {/* Replace the old search input with SearchBox */}
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-                        <input
-                            type="text"
+                        <SearchBox
                             placeholder="Search organisations..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
+                            fetchSuggestionsApi={fetchSuggestionsApi}
+                            fetchSearchResultsApi={fetchSearchResultsApi}
+                            defaultFetchApi={defaultFetchApi}
+                            getSuggestionLabel={(org) => (
+                                <div className="capitalize font-medium text-foreground">
+                                    {org.displayName || org.title}
+                                </div>
+                            )}
+                            getSuggestionValue={(org) => org.displayName || org.title}
+                            inputWidth="w-full"
                         />
                     </div>
                     <select
@@ -201,10 +263,41 @@ export default function OrganizationsPage() {
                     </select>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={mockOrganizations}
-                />
+                {loading ? (
+                    <LoadingSkeleton />
+                ) : totalCount === 0 ? (
+                    <div className="flex justify-center items-center min-h-[60vh]">
+                        <div className="text-center">
+                            {currentSearchQuery ? (
+                                <>
+                                    <p className="text-gray-600 mb-4">
+                                        {`No organizations found for "${currentSearchQuery}"`}
+                                    </p>
+                                    <Button onClick={clearSearch} variant="outline">
+                                        Clear Search
+                                    </Button>
+                                </>
+                            ) : (
+                                <p className="text-gray-600">No organizations found</p>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <DataTable
+                            columns={columns}
+                            data={filteredOrganizations}
+                        />
+                        
+                        {/* ADD Pagination Component */}
+                        <DataTablePagination
+                            totalStudents={totalCount}
+                            lastPage={totalPages}
+                            pages={totalPages}
+                            fetchStudentData={fetchStudentData}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );

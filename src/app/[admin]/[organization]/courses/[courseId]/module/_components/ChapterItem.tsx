@@ -17,7 +17,7 @@ import DeleteConfirmationModal from '../../_components/deleteModal'
 import { useState } from 'react'
 import { DELETE_CHAPTER_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, usePathname } from 'next/navigation'
 import { Reorder, useDragControls } from 'framer-motion'
 import { ChapterItems } from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/ModuleComponentType'
 import { LucideIcon } from 'lucide-react'
@@ -64,6 +64,8 @@ function ChapterItem({
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const { setTopicId } = getTopicId()
     const dragControls = useDragControls()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     const isActive = activeChapter === chapterId
     const activeChapterClasses = isActive
@@ -101,7 +103,7 @@ function ChapterItem({
                     : chapterData[0].chapterId
                     
                 router.push(
-                    `/${userRole}/courses/${courseId}/module/${moduleId}/chapters/${targetChapter}`
+                    `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/chapters/${targetChapter}`
                 )
             }
         } catch (error: any) {

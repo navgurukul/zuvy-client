@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { getUser } from '@/store/store'
 import { Link } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
     PriviewEditorDoc,
@@ -29,6 +29,8 @@ const PreviewAssignment = ({ params }: { params: Params }) => {
 
     const timestamp = assignmentPreviewContent?.completionDate
     const date = new Date(timestamp)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     // Improved date formatting function with better error handling
     const formatDeadlineDate = (timestamp?: string) => {
@@ -125,7 +127,7 @@ const PreviewAssignment = ({ params }: { params: Params }) => {
 
     const goBack = () => {
         router.push(
-            `/${userRole}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`
+            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`
         )
     }
 
