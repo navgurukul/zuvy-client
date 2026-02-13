@@ -51,8 +51,8 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
 
     const debouncedSearch = useDebounce(params.search, 500)
 
-    // Remove params.limit from dependencies to prevent recreation
-    const fetchOrganizations = useCallback(async (searchTerm?: string, page?: number, limit?: number) => {
+    // Update fetchOrganizations to accept filter parameter
+    const fetchOrganizations = useCallback(async (searchTerm?: string, page?: number, limit?: number, filterType?: string) => {
         try {
             setLoading(true)
             setError(null)
@@ -61,6 +61,7 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
             if (searchTerm) queryParams.append('search', searchTerm)
             if (limit) queryParams.append('limit', limit.toString())
             if (page) queryParams.append('page', page.toString())
+            if (filterType) queryParams.append('filterType', filterType) // Add filter parameter
 
             const url = `/org/getAllOrgs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
             
@@ -87,8 +88,8 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
         }
     }, []) // Empty dependency array
 
-    const refetchOrganizations = useCallback((searchTerm?: string, page?: number, limit?: number) => {
-        fetchOrganizations(searchTerm, page, limit)
+    const refetchOrganizations = useCallback((searchTerm?: string, page?: number, limit?: number, filterType?: string) => {
+        fetchOrganizations(searchTerm, page, limit, filterType)
     }, [fetchOrganizations])
 
     // Only run auto fetch once with initial params
@@ -96,7 +97,7 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
         if (params.auto !== false) {
             fetchOrganizations(debouncedSearch, params.page, params.limit)
         }
-    }, [debouncedSearch]) // Remove extra dependencies
+    }, [debouncedSearch])
 
     return {
         organizations,

@@ -11,6 +11,7 @@ import { cn, difficultyColor } from '@/lib/utils'
 import { FileText, ArrowLeft, Heading6 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { getUser } from '@/store/store'
 import {
     PageParams,
     CodingSubmission,
@@ -29,6 +30,8 @@ const Page = ({ params }: PageParams) => {
     const moduleId = searchQuery.get('moduleId')
     const pathname = usePathname()
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -45,22 +48,22 @@ const Page = ({ params }: PageParams) => {
         () => [
             {
                 crumb: 'My Courses',
-                href: `/admin/${orgName}/courses`,
+                href: `/${userRole}/${orgName}/courses`,
                 isLast: false,
             },
             {
                 crumb: parsedCrumbData[0],
-                href: `/admin/${orgName}/courses/${params.courseId}/submissions`,
+                href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
             // {
             //     crumb: 'Submission - Practice Problems',
-            //     href: `/admin/${orgName}/courses/${params.courseId}/submissions`,
+            //     href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
             //     isLast: false,
             // },
             {
                 crumb: parsedCrumbData[1],
-                href: `/admin/${orgName}/courses/${params.courseId}/submissionProblems/${moduleId}`,
+                href: `/${userRole}/${orgName}/courses/${params.courseId}/submissionProblems/${moduleId}`,
                 isLast: false,
             },
             {

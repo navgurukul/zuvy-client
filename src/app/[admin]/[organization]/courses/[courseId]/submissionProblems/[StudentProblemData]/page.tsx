@@ -12,6 +12,7 @@ import { columns } from './columns'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { getUser } from '@/store/store'
 
 interface BatchFilter {
     id: number
@@ -36,6 +37,8 @@ const PracticeProblems = ({ params }: any) => {
     const [batches, setBatches] = useState<BatchFilter[]>([])
     const pathname = usePathname();
     const orgName = pathname.split('/')[2];
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -228,7 +231,7 @@ const PracticeProblems = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                   
                         className="hover:bg-transparent hover:text-primary transition-colors"

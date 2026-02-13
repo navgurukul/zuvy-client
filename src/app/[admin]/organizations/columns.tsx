@@ -15,6 +15,7 @@ import {
   } from '@/components/ui/tooltip'
   import { Org } from '@/utils/data/schema'
   import Link from 'next/link'
+  import { getUser } from '@/store/store'
   
 // export interface User {
 //     createdAt: any
@@ -47,12 +48,14 @@ export const createColumns = (
       cell: ({ row }) => {
         const name = row.original.name
         const limit = 20
+        const { user } = getUser()
+        const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     
         return (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link href={`/admin/${name}/courses`} className="max-w-[180px] cursor-pointer text-left text-gray-900">
+                <Link href={`/${userRole}/${name}/courses`} className="max-w-[180px] cursor-pointer text-left text-gray-900">
                   <p className='text-start'>
                     {name.length > limit
                       ? name.substring(0, limit) + '...'

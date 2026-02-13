@@ -11,6 +11,7 @@ import DownloadReport from '@/app/[admin]/[organization]/courses/[courseId]/subm
 import ApproveReattempt from '@/app/[admin]/[organization]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
 import usePathname from 'next/navigation'
+import { getUser } from '@/store/store'
 
 interface ColumnContext {
     courseId: string;
@@ -225,13 +226,15 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const { courseId, assessment_Id } = context;
             const pathname = window.location.pathname
             const orgName = pathname.split('/')[2]
+            const { user } = getUser()
+            const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
             return (
                 <div className="flex items-center gap-3">
                     <Link
                         href={
                             submitedAt
-                                ? `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                                ? `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
                                 : '#'
                         }
                         className={

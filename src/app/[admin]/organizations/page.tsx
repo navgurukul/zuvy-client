@@ -15,6 +15,13 @@ import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { api } from '@/utils/axios.config'
 import { useSearchParams, useRouter } from 'next/navigation'
+import MultiSelector from '@/components/ui/multi-selector'
+
+// Add interface for filter options
+interface FilterOption {
+    value: string
+    label: string
+}
 
 export default function OrganizationsPage() {
     const router = useRouter()
@@ -24,9 +31,7 @@ export default function OrganizationsPage() {
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
     const limit = useMemo(() => parseInt(searchParams.get('limit') || '10'), [searchParams])
     
-    const [searchTerm, setSearchTerm] = useState('');
     const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('')
-    const [filterType, setFilterType] = useState('All Types');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
     const [editingOrg, setEditingOrg] = useState<any>(null)
@@ -36,27 +41,96 @@ export default function OrganizationsPage() {
         organizationName: ''
     })
 
-    // Pass page and limit to hook
-    const { organizations, loading, error, totalCount, totalPages, refetchOrganizations, fetchOrganizations } = useOrganizations({
+    // Add filter state for management type
+    const [managementTypeFilter, setManagementTypeFilter] = useState<FilterOption[]>([
+        { value: 'all', label: 'All Types' }
+    ])
+    const [urlInitialized, setUrlInitialized] = useState(false)
+
+    // Management type options
+    const managementTypeOptions: FilterOption[] = [
+        { value: 'all', label: 'All Types' },
+        { value: 'self_manage', label: 'Self Managed' },
+        { value: 'zuvy_manage', label: 'Zuvy Managed' }
+    ]
+
+    // Build filter query for API
+    const getFilterQuery = () => {
+        const filters = managementTypeFilter.filter(f => f.value !== 'all')
+        return filters.length > 0 ? filters.map(f => f.value).join(',') : ''
+    }
+
+    // Pass page, limit, and filter to hook
+    const { organizations, loading, error, totalCount, totalPages, fetchOrganizations } = useOrganizations({
         limit: limit,
         page: currentPage,
         auto: false
     })
 
     // Function to update URL params
-    const updateURLParams = (page: number, newLimit?: number) => {
+    const updateURLParams = useCallback((page: number, newLimit?: number, filters?: string) => {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(newLimit || limit))
-        router.push(`?${newParams.toString()}`)
-    }
+        
+        if (filters) {
+            newParams.set('filterType', filters)
+        } else {
+            newParams.delete('filterType')
+        }
+        
+        router.replace(`?${newParams.toString()}`)
+    }, [searchParams, router, limit])
 
-    // Search API functions for SearchBox
+    // Initialize from URL
+    const initializeFromURL = useCallback(() => {
+        if (urlInitialized) return
+
+        const urlFilter = searchParams.get('filterType')
+        
+        if (urlFilter) {
+            const filterValues = urlFilter.split(',')
+            const matchedOptions = filterValues
+                .map(val => managementTypeOptions.find(opt => opt.value === val))
+                .filter(Boolean) as FilterOption[]
+
+            if (matchedOptions.length > 0) {
+                setManagementTypeFilter(matchedOptions)
+            } else {
+                setManagementTypeFilter([{ value: 'all', label: 'All Types' }])
+            }
+        } else {
+            setManagementTypeFilter([{ value: 'all', label: 'All Types' }])
+        }
+
+        setUrlInitialized(true)
+    }, [urlInitialized, searchParams, managementTypeOptions])
+
+    // Initialize from URL on mount
+    useEffect(() => {
+        initializeFromURL()
+    }, [initializeFromURL])
+
+    // Update URL when filters change
+    useEffect(() => {
+        if (!urlInitialized) return
+
+        const filterQuery = getFilterQuery()
+        updateURLParams(currentPage, limit, filterQuery)
+    }, [managementTypeFilter, urlInitialized, updateURLParams, currentPage, limit])
+
+    // Search API functions for SearchBox - ADD FILTER TO SUGGESTIONS
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
             const queryParams = new URLSearchParams()
             queryParams.append('search', query)
             queryParams.append('limit', '10')
+            
+            // ADD CURRENT FILTER TO SUGGESTIONS API CALL
+            const currentFilter = getFilterQuery()
+            if (currentFilter) {
+                queryParams.append('filterType', currentFilter)
+            }
             
             const response = await api.get(`/org/getAllOrgs?${queryParams.toString()}`)
             return response.data.data || []
@@ -64,22 +138,22 @@ export default function OrganizationsPage() {
             console.error('Error fetching suggestions:', error)
             return []
         }
-    }, [])
+    }, [managementTypeFilter]) // ADD managementTypeFilter as dependency
 
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         console.log("SEARCH API CALLED", { query });
         setCurrentSearchQuery(query);
-        updateURLParams(1); // Reset to page 1 on search
-        await fetchOrganizations(query, 1); // Fetch page 1
+        updateURLParams(1, limit, getFilterQuery());
+        await fetchOrganizations(query, 1, limit, getFilterQuery());
         return [];
-    }, [fetchOrganizations, updateURLParams])
+    }, [fetchOrganizations, limit, updateURLParams, managementTypeFilter])
 
     const defaultFetchApi = useCallback(async () => {
         setCurrentSearchQuery('');
-        updateURLParams(1); // Reset to page 1
-        await fetchOrganizations('', 1); // Fetch page 1
+        updateURLParams(1, limit, getFilterQuery());
+        await fetchOrganizations('', 1, limit, getFilterQuery());
         return [];
-    }, [fetchOrganizations, updateURLParams])
+    }, [fetchOrganizations, limit, updateURLParams, managementTypeFilter])
 
     const { clearSearch } = useSearchWithSuggestions({
         fetchSuggestionsApi,
@@ -87,10 +161,28 @@ export default function OrganizationsPage() {
         defaultFetchApi,
     })
 
-    // Fetch when page or limit changes
+    // Handle management type filter
+    const handleManagementTypeFilter = (option: FilterOption) => {
+        if (option.value === 'all') {
+            setManagementTypeFilter([option])
+        } else {
+            if (managementTypeFilter.some(item => item.value === 'all')) {
+                setManagementTypeFilter([option])
+            } else if (managementTypeFilter.some(item => item.value === option.value)) {
+                setManagementTypeFilter(managementTypeFilter.filter(item => item.value !== option.value))
+            } else {
+                setManagementTypeFilter([...managementTypeFilter, option])
+            }
+        }
+    }
+
+    // Fetch data when URL params change
     useEffect(() => {
-        fetchOrganizations(currentSearchQuery, currentPage)
-    }, [currentPage, limit, fetchOrganizations])
+        if (!urlInitialized) return
+
+        const filterQuery = getFilterQuery()
+        fetchOrganizations(currentSearchQuery, currentPage, limit, filterQuery)
+    }, [currentPage, limit, urlInitialized, managementTypeFilter, fetchOrganizations])
 
     // Transform API data to match your existing interface
     const transformedOrganizations = useMemo(() => {
@@ -117,12 +209,6 @@ export default function OrganizationsPage() {
         }))
     }, [organizations])
 
-    // Filter by management type
-    const filteredOrganizations = useMemo(() => {
-        if (filterType === 'All Types') return transformedOrganizations
-        return transformedOrganizations.filter(org => org.managementType === filterType)
-    }, [transformedOrganizations, filterType])
-
     const management = [
         {name: 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform'}, 
         {name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform'}
@@ -148,18 +234,19 @@ export default function OrganizationsPage() {
         setIsAddModalOpen(false)
         setEditingOrg(null)
         setIsEditMode(false)
-        fetchOrganizations(currentSearchQuery, currentPage)
+        const filterQuery = getFilterQuery()
+        fetchOrganizations(currentSearchQuery, currentPage, limit, filterQuery)
     }
 
     const handleCloseDeleteModal = () => {
         setDeleteModal({ isOpen: false, organizationId: '', organizationName: '' })
-        fetchOrganizations(currentSearchQuery, currentPage)
+        const filterQuery = getFilterQuery()
+        fetchOrganizations(currentSearchQuery, currentPage, limit, filterQuery)
     }
 
-    // Pagination handler - this is required by DataTablePagination component
+    // Pagination handler
     const fetchStudentData = (offset: number) => {
         // The pagination component handles URL updates automatically
-        // We just need this function to exist for the component interface
     }
 
     // Loading skeleton component
@@ -185,7 +272,7 @@ export default function OrganizationsPage() {
             <div className="p-8">
                 <div className="text-center">
                     <p className="text-red-600 mb-4">Error loading organizations: {error}</p>
-                    <Button onClick={() => fetchOrganizations('', currentPage)}>
+                    <Button onClick={() => fetchOrganizations('', currentPage, limit, getFilterQuery())}>
                         Try Again
                     </Button>
                 </div>
@@ -236,7 +323,7 @@ export default function OrganizationsPage() {
                 </div>
 
                 <div className="flex gap-4 mb-6">
-                    {/* Replace the old search input with SearchBox */}
+                    {/* SearchBox */}
                     <div className="flex-1 relative">
                         <SearchBox
                             placeholder="Search organisations..."
@@ -252,15 +339,19 @@ export default function OrganizationsPage() {
                             inputWidth="w-full"
                         />
                     </div>
-                    <select
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
-                    >
-                        <option>All Types</option>
-                        <option>Self Managed</option>
-                        <option>Zuvy Managed</option>
-                    </select>
+                    
+                    {/* MultiSelector for Management Type Filter */}
+                    <div className="w-[200px] flex-shrink-0">
+                        <MultiSelector
+                            selectedCount={
+                                managementTypeFilter.filter(f => f.value !== 'all').length
+                            }
+                            options={managementTypeOptions}
+                            selectedOptions={managementTypeFilter}
+                            handleOptionClick={handleManagementTypeFilter}
+                            type="Management Type"
+                        />
+                    </div>
                 </div>
 
                 {loading ? (
@@ -286,10 +377,9 @@ export default function OrganizationsPage() {
                     <>
                         <DataTable
                             columns={columns}
-                            data={filteredOrganizations}
+                            data={transformedOrganizations}
                         />
                         
-                        {/* ADD Pagination Component */}
                         <DataTablePagination
                             totalStudents={totalCount}
                             lastPage={totalPages}
