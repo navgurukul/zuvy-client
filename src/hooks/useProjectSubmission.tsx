@@ -6,11 +6,12 @@ const useProjectSubmission = (): UseProjectSubmissionReturn => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const submitProject = async (projectLink: string, projectId: string, moduleId: string, courseId: string): Promise<boolean> => {
+  const submitProject = async (projectLinks: string[], projectId: string, moduleId: string, courseId: string): Promise<boolean> => {
     setIsSubmitting(true);
     setError(null);
 
     try {
+      const projectLink = projectLinks.join('\n');
       const response = await api.post<ProjectSubmissionResponse>(`/tracking/updateProject/${projectId}?moduleId=${moduleId}&bootcampId=${courseId}`, {
         projectLink
       });

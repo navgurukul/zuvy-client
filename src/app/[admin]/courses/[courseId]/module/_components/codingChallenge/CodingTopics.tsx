@@ -11,7 +11,7 @@ import {
     CodingTopicsProps,
     CodingTopicsTag,
 } from '@/app/[admin]/courses/[courseId]/module/_components/codingChallenge/ModuleCodingChallangeComponentType'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
 const difficulties = ['Any Difficulty', 'Easy', 'Medium', 'Hard']
 
@@ -97,18 +97,26 @@ const CodingTopics: React.FC<CodingTopicsProps> = ({
     return (
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mb-5">
             {/* Search Bar */}
-            <div className="w-[70%]">
+            <div className="w-[50%]">
                 <div className="relative w-full">
-                    {/* Search Icon */}
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
                     <Input
                         type="text"
                         placeholder="Search By Name"
-                        className="bg-white w-full pl-10 pr-10" // pl-10 for left padding (space for icon)
+                        className="bg-white w-full pl-9 pr-10"
                         value={searchTerm}
-                        onChange={handleSearchChange}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         disabled={!canEdit}
                     />
+                    {searchTerm && (
+                        <button
+                            type="button"
+                            onClick={() => setSearchTerm("")}
+                            className="absolute inset-y-0 right-0 pr-2 flex items-center text-gray-400 hover:text-gray-600"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
                 </div>
             </div>
 
