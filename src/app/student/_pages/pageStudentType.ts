@@ -35,10 +35,11 @@ export interface Course {
 
 // ProjectPage
 export interface ProjectState {
-  submissionLink: string;
+  submissionLinks: string[];
   isSubmitted: boolean;
   submittedAt?: Date;
   validationError?: string;
+  validationErrors?: Array<string | undefined>;
 }
 export interface TextContentItem {
   type: 'text';

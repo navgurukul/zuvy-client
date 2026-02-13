@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ArrowDownToLine, ChevronRight, FileText, CheckSquare, Code, MessageSquare, ClipboardCheck, BookOpen, Play, Video, Eye } from 'lucide-react'
+import { ArrowDownToLine, ChevronRight, FileText, CheckSquare, Code, MessageSquare, ClipboardCheck, BookOpen, Play, Video, Eye, Search } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { api } from '@/utils/axios.config'
 import Link from 'next/link'
@@ -432,7 +432,8 @@ const Page = ({ params }: { params: any }) => {
                         {/* Search Box */}
                         <div className="flex flex-col lg:flex-row justify-between mt-6">
                             <div className="relative w-full mr-2">
-                                <div className="relative w-full lg:w-1/3">
+                                {/* <div className="relative w-full lg:w-1/3"> */}
+                                 <div className="relative w-full lg:max-w-[500px] [&_input]:pl-10">
                                     <SearchBox
                                         placeholder={`${activeTab === 'practice'
                                             ? 'Search for practice problems by name'

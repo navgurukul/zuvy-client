@@ -124,9 +124,9 @@ export interface questionDetails{
 
 // PublicDialog
 export type PublishData = {
-    publishDateTime?: string | null; 
-    startDateTime?: string | null;  
-    endDateTime?: string | null;     
+    publishDateTime?: string | null|undefined; 
+    startDateTime?: string | null|undefined;  
+    endDateTime?: string | null|undefined;     
     action: 'schedule' | 'publishNow' | 'moveToDraft'; 
   };
   
@@ -135,7 +135,8 @@ export type PublishAssessmentDialogs = {
     currentAssessmentStatus?: string; 
     initialPublishDate?: string | null;    
     initialStartDate?: string | null;      
-    initialEndDate?: string | null;        
+    initialEndDate?: string | null;  
+    hasExistingEndDate?: boolean
 };
 
 // TimerDisplay
