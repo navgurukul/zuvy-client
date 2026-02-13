@@ -10,7 +10,7 @@ import moment from 'moment'
 import {LiveClassSubmissionSkeleton} from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { usePathname } from 'next/navigation'
-
+import { getUser } from '@/store/store'
 
 interface LiveClassSubmissionsProps {
     courseId: string
@@ -28,6 +28,8 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
 
     const pathname = usePathname()
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const getLiveClassData = useCallback(async () => {
         try {
@@ -151,7 +153,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                         )}
                         {submissions > 0 ? (
                             <Link
-                                href={`/admin/${orgName}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
+                                href={`/${userRole}/${orgName}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
                             >
                                 <Button
                                     variant="ghost"

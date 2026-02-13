@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getUser } from '@/store/store';
 
 interface Organization {
     id: string;
@@ -80,6 +81,8 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState(filteredSelectedOrg[0] || organizations[0]);
     const [searchTerm, setSearchTerm] = useState('');
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const filtered = organizations.filter(org =>
         org.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -146,7 +149,7 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                         <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50">
                             <Link
                                 key={org.id}
-                                href={`/admin/${org.name}/courses`}
+                                href={`/${userRole}/${org.name}/courses`}
                                 onClick={() => handleSelect(org)}
                                 className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${
                                     selected.id === org.id ? 'bg-green-50' : ''

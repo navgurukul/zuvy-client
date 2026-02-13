@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import usePathname from 'next/navigation'
+import { getUser } from '@/store/store'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -122,11 +123,13 @@ export const columns: ColumnDef<Task>[] = [
 
             const pathname = window.location.pathname
             const orgName = pathname.split('/')[2]
+            const { user } = getUser()
+            const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/admin/${orgName}/courses/${bootcampId}/submissionAssignments/${chapterId}/individualStatus/${id}`}
+                        href={`/${userRole}/${orgName}/courses/${bootcampId}/submissionAssignments/${chapterId}/individualStatus/${id}`}
                         className="max-w-[500px] text-primary font-medium flex items-center"
                     >
                         <FileText size={16} />
