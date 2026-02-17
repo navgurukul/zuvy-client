@@ -523,7 +523,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
-            <div className="px-5 flex-1 overflow-y-auto space-y-2 pr-2">
+            <div className="max-w-4xl mx-auto py-6">
                 {!canEdit && (
                     <PermissionAlert
                         alertOpen={alertOpen}

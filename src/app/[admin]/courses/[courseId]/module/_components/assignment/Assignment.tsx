@@ -539,7 +539,7 @@ const AddAssignent = ({
     }
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">
-            <div className="px-5">
+            <div className="max-w-4xl mx-auto py-6">
                 <>
                     {!canEdit && ( 
                         <PermissionAlert
