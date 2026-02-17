@@ -532,10 +532,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 )}
                 <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                     <div className="w-full ">
-                        {/* <div className="flex justify-between items-center"> */}
-                        {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
-                        {/* <p className="text-2xl font-bold">{title}</p> */}
-                        
                         <Form {...form}>
                             <form
                                 id="myForm"
