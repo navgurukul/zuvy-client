@@ -746,9 +746,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                 </Form> */}
                                     {defaultValue === 'editor' && (
                                         <div className="mt-2 text-start">
-                                            {/* <p className="flex text-left text-lg mt-6 mb-2">
-                                            Description
-                                        </p> */}
                                             <RemirrorTextEditor
                                                 initialContent={initialContent}
                                                 setInitialContent={
