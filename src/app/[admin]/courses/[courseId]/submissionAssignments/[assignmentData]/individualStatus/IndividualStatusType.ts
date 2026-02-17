@@ -25,7 +25,7 @@ export interface IndividualStudentData {
     email: string;
   };
    studentAssignmentStatus?: {
-      projectUrl?: string;
+      projectUrl?: string | string[];
     };
   completedAt:any
   status?:string
