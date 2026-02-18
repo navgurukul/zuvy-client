@@ -139,10 +139,10 @@ const Page = ({ params }: { params: PageProps }) => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-4xl mx-auto space-y-6">
             {/* Course Type Section */}
-            <div className="rounded-lg p-6 text-start">
-                <h1 className="font-heading text-lg font-semibold leading-none tracking-tight text-foreground mb-6">
+            <div className="rounded-lg p-2 text-start">
+                <h1 className="font-heading text-xl font-semibold mb-6">
                     Course Settings
                 </h1>
 

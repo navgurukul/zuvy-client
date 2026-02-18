@@ -488,7 +488,7 @@ const AddForm: React.FC<AddFormProps> = ({
                 )}
                 <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                 <div className="w-full flex justify-start align-middle items-center relative pt-4 mb-6">
-                    <p className="text-2xl font-bold">Create Feedback Form</p>
+                    <p className="text-lg font-semibold">Create Feedback Form</p>
                 </div>
                 <Form {...form}>
                     <form

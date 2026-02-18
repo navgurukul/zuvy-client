@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import RemirrorTextEditor from "@/components/remirror-editor/RemirrorTextEditor";
 import useAssignmentDetails from '@/hooks/useAssignmentDetails';
@@ -16,24 +13,9 @@ import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import useWindowSize from '@/hooks/useHeightWidth';
+import { X } from 'lucide-react';
 import {AssignmentContentProps,EditorDoc} from '@/app/student/_components/chapter-content/componentChapterType'
 import {AssignmentSkeleton} from "@/app/student/_components/Skeletons";
-
-const FormSchema = z.object({
-  link: z
-    .string()
-    .url({ message: 'Please enter a valid URL.' })
-    .refine(
-      (url) =>
-        url.startsWith('https://github.com') ||
-        url.startsWith('https://drive.google.com') ||
-        url.startsWith('https://docs.google.com/document') ||
-        url.startsWith('https://docs.google.com/spreadsheets'),
-      {
-        message: 'Only links from Google Drive, GitHub, Google Docs, or Google Sheets are allowed.',
-      }
-    ),
-});
 
 
 const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, onChapterComplete }) => {
@@ -50,6 +32,9 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   const isSmallScreen = width < 1366;
   const [resourceLink, setResourceLink] = useState('');
   const [viewResource, setViewResource] = useState(false);
+  const [submissionLinks, setSubmissionLinks] = useState<string[]>(['']);
+  const [validationError, setValidationError] = useState<string | undefined>();
+  const [validationErrors, setValidationErrors] = useState<(string | undefined)[] | undefined>(undefined);
 
   const { isCompleting, completeChapter } = useChapterCompletion({
     courseId: courseId as string,
@@ -61,17 +46,12 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     },
   });
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: { link: '' },
-    mode: 'onChange',
-  });
-
   useEffect(() => {
     if (assignmentData?.assignmentTracking?.[0]?.projectUrl) {
-      form.setValue('link', assignmentData.assignmentTracking[0].projectUrl);
+      const links = normalizeLinks(assignmentData.assignmentTracking[0].projectUrl);
+      setSubmissionLinks(links.length > 0 ? links : ['']);
     }
-  }, [assignmentData, form]);
+  }, [assignmentData]);
 
   useEffect(() => {
     if (chapterDetails.articleContent) {
@@ -108,7 +88,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     }
   }, [chapterDetails.links]);
 
-  // Update local state when assignment data changes
+  // Update local state when assignment data changes (e.g. after refetch)
   useEffect(() => {
     if (assignmentData) {
       setLocalIsCompleted(assignmentData.status === 'Completed');
@@ -120,13 +100,52 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
   const submittedAt = localSubmittedAt || assignmentData?.assignmentTracking?.[0]?.createdAt;
   const isCompleted = localIsCompleted || assignmentData?.status === 'Completed';
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
+  const handleSubmissionChange = (index: number, value: string) => {
+    setSubmissionLinks((prev) => prev.map((link, i) => (i === index ? value : link)));
+    setValidationError(undefined);
+    setValidationErrors((prev) => prev?.map((err, i) => (i === index ? undefined : err)));
+  };
+
+  const handleAddLink = () => {
+    setSubmissionLinks((prev) => [...prev, '']);
+    setValidationErrors((prev) => (prev ? [...prev, undefined] : undefined));
+  };
+
+  const handleRemoveLink = (index: number) => {
+    setSubmissionLinks((prev) => prev.filter((_, i) => i !== index));
+    setValidationErrors((prev) => prev?.filter((_, i) => i !== index));
+  };
+
+  async function onSubmit() {
+    const trimmedLinks = submissionLinks.map((link) => link.trim());
+    const nonEmptyLinks = trimmedLinks.filter(Boolean);
+
+    if (nonEmptyLinks.length === 0) {
+      setValidationError('Please provide at least one submission link');
+      setValidationErrors(
+        submissionLinks.map((link) => (link.trim().length === 0 ? 'Please provide a link' : undefined))
+      );
+      return;
+    }
+
+    const invalidErrors = submissionLinks.map((link) => {
+      const trimmedLink = link.trim();
+      if (!trimmedLink) return undefined;
+      return isValidUrl(trimmedLink) ? undefined : 'Please provide a valid URL';
+    });
+
+    if (invalidErrors.some(Boolean)) {
+      setValidationError('Please fix the invalid link(s) below');
+      setValidationErrors(invalidErrors);
+      return;
+    }
+
     setIsSubmitting(true);
     const today = new Date();
     const isoString = today.toISOString().split('.')[0] + 'Z';
     const submissionBody = {
       submitAssignment: { 
-        projectUrl: data.link,
+        projectUrl: nonEmptyLinks.join('\n'),
         timeLimit: isoString,
       },
     };
@@ -140,6 +159,9 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
       await completeChapter();
       
       setLocalSubmittedAt(isoString);
+      setSubmissionLinks(nonEmptyLinks);
+      setValidationError(undefined);
+      setValidationErrors(undefined);
       refetchAssignmentDetails();
 
     } catch (err: any) {
@@ -169,6 +191,11 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
       day: 'numeric',
     });
   };
+
+  const trimmedLinks = submissionLinks.map((link) => link.trim());
+  const hasEmptyLink = trimmedLinks.some((link) => link.length === 0);
+  const hasInvalidLink = trimmedLinks.some((link) => link.length > 0 && !isValidUrl(link));
+  const isSubmitDisabled = isSubmitting || isCompleting || hasEmptyLink || hasInvalidLink;
 
   if (loading) {
     // return (
@@ -259,40 +286,77 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
           <h2 className={`font-semibold text-foreground mb-4 text-left ${isMobile ? 'text-lg' : isSmallScreen ? 'text-xl' : 'text-xl'}`}>
             Make a Submission
           </h2>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="link"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input 
-                        placeholder="Paste your assignment link (Google Drive, GitHub, etc.)" 
-                        {...field} 
+          <div className="space-y-4">
+            <div className="space-y-2 w-full">
+              <p className="text-left text-md text-muted-foreground">Submission Links</p>
+              <div className="space-y-3">
+                {submissionLinks.map((link, index) => (
+                  <div key={index} className="space-y-1">
+                    <div className="flex items-start gap-2">
+                      <Input
+                        id={`assignment-submission-link-${index}`}
+                        type="url"
+                        placeholder="https://github.com/your-username/repo or any valid URL"
+                        value={link}
+                        onChange={(e) => handleSubmissionChange(index, e.target.value)}
                         disabled={isCompleted || isSubmitting || isCompleting}
-                        className={`text-base text-left ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'}`}
+                        className={`text-base text-left ${isMobile ? 'h-10 text-sm' : isSmallScreen ? 'h-11' : 'h-12'} ${validationErrors?.[index] || (link.trim().length > 0 && !isValidUrl(link.trim())) ? "border-destructive" : ""}`}
                       />
-                    </FormControl>
-                    <FormMessage className="text-left" />
-                  </FormItem>
+                      {!isCompleted && submissionLinks.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="shrink-0 mt-3 px-3"
+                          onClick={() => handleRemoveLink(index)}
+                          disabled={isSubmitting || isCompleting}
+                          aria-label={`Remove link ${index + 1}`}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    {link.trim().length > 0 && !isValidUrl(link.trim()) && (
+                      <p className="text-sm text-destructive">Please provide a valid URL</p>
+                    )}
+                  </div>
+                ))}
+                {!isCompleted && (
+                  <div className="flex justify-start">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleAddLink}
+                      disabled={isSubmitting || isCompleting}
+                    >
+                      Add another link
+                    </Button>
+                  </div>
                 )}
-              />
-              
-              {!isCompleted && (
-                <div className="flex justify-start">
-                  <Button 
-                    type="submit" 
-                    disabled={isSubmitting || isCompleting || !form.formState.isValid}
-                    className={`px-4 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover `}
-                  >
-                    {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
-                  </Button>
-                </div>
+              </div>
+              {validationError && (
+                <Alert variant="destructive">
+                  <AlertDescription>{validationError}</AlertDescription>
+                </Alert>
               )}
-            </form>
-          </Form>
+              {!isCompleted && (
+                <p className="text-sm text-left text-muted-foreground">
+                  Provide one or more links to your assignment (GitHub, GitLab, Drive, or any valid URL).
+                </p>
+              )}
+            </div>
+            {!isCompleted && (
+              <div className="flex justify-start">
+                <Button
+                  type="button"
+                  onClick={onSubmit}
+                  disabled={isSubmitDisabled}
+                  className={`px-4 py-2 text-left bg-primary hover:bg-primary-dark text-primary-foreground shadow-hover `}
+                >
+                  {isSubmitting || isCompleting ? 'Submitting...' : 'Submit Assignment'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
        </ScrollArea>
@@ -301,3 +365,31 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
 };
 
 export default AssignmentContent; 
+
+const normalizeLinks = (links?: string | string[]): string[] => {
+  if (!links) return [];
+  if (Array.isArray(links)) {
+    return links.map((link) => link.trim()).filter(Boolean);
+  }
+  return links
+    .split(/\r?\n+/)
+    .map((link) => link.trim())
+    .filter(Boolean);
+};
+
+const isValidUrl = (value: string): boolean => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    if (!url.hostname) return false;
+    if (url.hostname === 'localhost') return true;
+    if (url.hostname.endsWith('.')) return false;
+    const hostnameParts = url.hostname.split('.');
+    if (hostnameParts.length < 2) return false;
+    const tld = hostnameParts[hostnameParts.length - 1];
+    if (!/^[a-zA-Z]{2,}$/.test(tld)) return false;
+    return hostnameParts.every((part) => /^[a-zA-Z0-9-]+$/.test(part) && part.length > 0);
+  } catch {
+    return false;
+  }
+};

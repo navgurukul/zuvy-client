@@ -539,7 +539,7 @@ const AddAssignent = ({
     }
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">
-            <div className="px-5">
+            <div className="max-w-4xl mx-auto py-6">
                 <>
                     {!canEdit && ( 
                         <PermissionAlert
@@ -579,7 +579,7 @@ const AddAssignent = ({
                                                             }
                                                         }}
                                                         placeholder="Untitled Assignment"
-                                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                        className="text-lg font-semibold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                                         disabled={!canEdit}
                                                         // autoFocus
                                                     />

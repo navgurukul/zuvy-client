@@ -144,7 +144,7 @@ export interface UseAssessmentDetailsResponse {
 // UseAssignmentDetailsReturn
 export interface AssignmentTracking {
   id: number;
-  projectUrl: string;
+  projectUrl: string | string[];
   timeLimit: string;
   createdAt: string;
   updatedAt: string;

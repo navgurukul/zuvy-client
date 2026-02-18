@@ -395,7 +395,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
                             <Input
                                 {...form.register('title')}
                                 placeholder="Untitled Assessment"
-                                className="text-2xl font-bold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
+                                className="text-lg font-semibold border-none p-0 focus-visible:ring-0 placeholder:text-foreground w-full"
                             />
                             {form.formState.errors.title && (
                                 <p className="text-destructive text-sm mt-1">
