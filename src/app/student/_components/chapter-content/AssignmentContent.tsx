@@ -88,7 +88,7 @@ const AssignmentContent: React.FC<AssignmentContentProps> = ({ chapterDetails, o
     }
   }, [chapterDetails.links]);
 
-  // Update local state when assignment data changes
+  // Update local state when assignment data changes (e.g. after refetch)
   useEffect(() => {
     if (assignmentData) {
       setLocalIsCompleted(assignmentData.status === 'Completed');
