@@ -63,11 +63,32 @@ const Navbar = () => {
     ]
 
     useEffect(() => {
-        (async () => {
-            const perms = await getPermissions();
-            setPermissions(perms);
-        })().then(() => setLoading(false));
-    }, [permissions]);
+        let isMounted = true;
+        
+        const loadPermissions = async () => {
+            try {
+                const perms = await getPermissions();
+                if (isMounted && Object.keys(perms).length > 0) {
+                    setPermissions(perms);
+                    setLoading(false);
+                } else if (isMounted && Object.keys(perms).length === 0) {
+                    // Retry after a short delay if permissions are not yet available
+                    setTimeout(loadPermissions, 100);
+                }
+            } catch (error) {
+                console.error('Error loading permissions:', error);
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+        
+        loadPermissions();
+        
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
