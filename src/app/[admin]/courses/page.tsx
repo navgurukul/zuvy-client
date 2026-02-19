@@ -68,7 +68,7 @@ const Courses: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // === Hooks ===
-    const { allCourses, refetchAllCourses } = useAllCourses(true)
+    const { allCourses, refetchAllCourses, loading: coursesLoading } = useAllCourses(true)
     const { courses, loading, totalBootcamps, totalPages, refetchBootcamps } =
         useBootcamps({
             limit: position,
@@ -217,7 +217,7 @@ const defaultFetchApi = useCallback(
             const perms = await getPermissions()
             setPermissions(perms)
         })()
-    }, [])
+    }, [coursesLoading])
 
     return (
         <>
