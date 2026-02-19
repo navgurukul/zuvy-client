@@ -426,7 +426,7 @@ import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
 import { ArrowUpRightSquare, CalendarIcon, Eye, ArrowLeft } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -458,7 +458,9 @@ export default function Project() {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [lastSavedContent, setLastSavedContent] = useState<string>('')
     const [lastSavedTitle, setLastSavedTitle] = useState('')
+    const [lastSavedDeadline, setLastSavedDeadline] = useState('')
     const [hasUserSavedBefore, setHasUserSavedBefore] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
 
     const crumbs = [
         {
@@ -497,6 +499,18 @@ export default function Project() {
         },
         mode: 'onChange',
     })
+    const watchedStartDate = useWatch({
+        control: form.control,
+        name: 'startDate',
+    })
+
+    const getDateKey = (date?: Date | null) => {
+        if (!date || isNaN(date.getTime())) return ''
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
 
     const fetchProjectDetails = async () => {
         try {
@@ -531,6 +545,7 @@ export default function Project() {
 
             // Ensure Calendar sees the updated date
             if (selectedDate) form.setValue('startDate', selectedDate)
+            setLastSavedDeadline(getDateKey(selectedDate))
         } catch (err) {
             console.error(err)
         }
@@ -548,9 +563,18 @@ export default function Project() {
             : ''
         const titleChanged = title !== lastSavedTitle
         const contentChanged = currentContent !== lastSavedContent
+        const deadlineChanged =
+            getDateKey(watchedStartDate) !== lastSavedDeadline
 
-        setHasUnsavedChanges(titleChanged || contentChanged)
-    }, [title, initialContent, lastSavedTitle, lastSavedContent])
+        setHasUnsavedChanges(titleChanged || contentChanged || deadlineChanged)
+    }, [
+        title,
+        initialContent,
+        watchedStartDate,
+        lastSavedTitle,
+        lastSavedContent,
+        lastSavedDeadline,
+    ])
 
     async function editProject(data: any) {
         function convertToISO(date: Date): string {
@@ -564,6 +588,7 @@ export default function Project() {
         const deadlineDate = convertToISO(data.startDate)
 
         try {
+            setIsSaving(true)
             const initialContentString = initialContent
                 ? JSON.stringify(initialContent)
                 : ''
@@ -577,6 +602,7 @@ export default function Project() {
             // Update last saved states
             setLastSavedTitle(title)
             setLastSavedContent(initialContentString)
+            setLastSavedDeadline(getDateKey(data.startDate))
             setHasUnsavedChanges(false)
             setHasUserSavedBefore(true)
             toast.success({
@@ -589,6 +615,8 @@ export default function Project() {
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
+        } finally {
+            setIsSaving(false)
         }
     }
 
@@ -816,10 +844,10 @@ export default function Project() {
                 </div>
                 <div className="flex justify-end my-5">
                     <Button type="submit" form="myForm"
-                        disabled={isContentEmpty()}
-                        className={isContentEmpty() ? 'opacity-50 cursor-not-allowed' : ''}
+                        disabled={isContentEmpty() || !hasUnsavedChanges || isSaving}
+                        className={isContentEmpty() || !hasUnsavedChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''}
                     >
-                        Save
+                        {isSaving ? 'Saving...' : 'Save'}
                     </Button>
                 </div>
             </div>
