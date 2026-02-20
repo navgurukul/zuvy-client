@@ -228,7 +228,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
     onSubmit,
   }: {
     disabled: boolean;
-    onSubmit: () => void;
+    onSubmit: (typeOfsubmission?: "studentSubmit" | "auto-submit") => void | Promise<void>;
   }) {
     return (
       <div className="flex justify-center">
@@ -260,7 +260,7 @@ export function TopBar({ remainingTime }: { remainingTime: number }) {
               </AlertDialogCancel>
               <AlertDialogAction
                 className="bg-destructive hover:bg-destructive-dark text-destructive-foreground"
-                onClick={onSubmit}
+                onClick={() => onSubmit("studentSubmit")}
               >
                 Submit
               </AlertDialogAction>
