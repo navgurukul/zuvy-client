@@ -379,17 +379,19 @@ const AddAssignent = ({
         }
     }, [initialContent, file, defaultValue, isSaving, hasChangedAfterSave, pdfLink])
 
-    // Track editor content changes to enable Save after edit
+    // Track editor content changes based on comparison with last saved content
     useEffect(() => {
-        if (defaultValue === 'editor') {
-            const hasContent = initialContent && !isEditorContentEmpty(initialContent)
-            if (hasContent) {
-                setHasChangedAfterSave(true)
-            }
+        if (defaultValue !== 'editor') return
+
+        const hasContent = initialContent && !isEditorContentEmpty(initialContent)
+        if (!hasContent || !previousContentHash) {
+            setHasChangedAfterSave(false)
+            return
         }
-        // Do not set for PDF mode
-        // eslint-disable-next-line
-    }, [initialContent])
+
+        const currentHash = generateContentHash(initialContent)
+        setHasChangedAfterSave(currentHash !== previousContentHash)
+    }, [initialContent, previousContentHash, defaultValue])
 
     // Auto-save effect for content deletion
     useEffect(() => {
