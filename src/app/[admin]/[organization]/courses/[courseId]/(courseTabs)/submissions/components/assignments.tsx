@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import {AssignmentSubmissionSkeleton} from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { usePathname } from 'next/navigation'
+import { getUser } from '@/store/store'
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
@@ -26,6 +27,8 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     const [loading, setLoading] = useState(true)
     const pathname = usePathname()
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     useEffect(() => {
         const fetchAssignmentDataHandler = async () => {
@@ -160,7 +163,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             </div>
                                                             ) : (
                                                             <Link
-                                                                href={`/admin/${orgName}/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                                href={`/${userRole}/${orgName}/courses/${courseId}/submissionAssignments/${moduleData.id}`}
                                                             >
                                                                 <Eye size={20} className="text-gray-500 hover:text-gray-700 mb-1" />
                                                             </Link>

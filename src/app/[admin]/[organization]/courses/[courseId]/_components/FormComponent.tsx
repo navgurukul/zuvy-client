@@ -13,7 +13,7 @@ import { FormComponentProps } from '@/app/[admin]/[organization]/courses/[course
 import { FeedbackSubmissionSkeleton } from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { usePathname } from 'next/navigation'
-
+import { getUser } from '@/store/store'
 
 const FormComponent = ({
     bootcampId,
@@ -26,6 +26,8 @@ const FormComponent = ({
     const [downloading, setDownloading] = useState(false)
     const pathname = usePathname()
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const handleDownloadCsv = () => {
         if (!bootcampId || !moduleId || !data?.id) return
@@ -76,7 +78,7 @@ const FormComponent = ({
 
                             <Link
                                 href={{
-                                pathname: `/admin/${orgName}/courses/${bootcampId}/submissionForm/${data.id}`,
+                                pathname: `/${userRole}/${orgName}/courses/${bootcampId}/submissionForm/${data.id}`,
                                 query: { moduleId: moduleId, },
                                 }}
                             >

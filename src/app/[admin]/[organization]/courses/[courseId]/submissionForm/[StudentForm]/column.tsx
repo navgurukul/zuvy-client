@@ -9,6 +9,7 @@ import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import usePathname from 'next/navigation'
+import { getUser } from '@/store/store'
 
 export const columns: ColumnDef<Task>[] = [
     {
@@ -135,6 +136,8 @@ export const columns: ColumnDef<Task>[] = [
             const isSubmitted = row.original.status !== 'Submitted'
             const pathname = window.location.pathname
             const orgName = pathname.split('/')[2]
+            const { user } = getUser()
+            const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
             return (
                 <div className="flex space-x-2">
                     <Button
@@ -143,7 +146,7 @@ export const columns: ColumnDef<Task>[] = [
                         disabled={isSubmitted}
                     >
                         <Link
-                            href={`/admin/${orgName}/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
+                            href={`/${userRole}/${orgName}/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
                             className="max-w-[500px] text-primary font-medium flex items-center"
                         >
                             <FileText size={16} />

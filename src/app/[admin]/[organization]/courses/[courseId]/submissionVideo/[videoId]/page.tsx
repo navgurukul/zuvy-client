@@ -15,6 +15,7 @@ import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { usePathname } from 'next/navigation'
+import { getUser } from '@/store/store'
 
 type Props = {}
 interface BatchFilter {
@@ -38,6 +39,8 @@ const Page = ({ params }: any) => {
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
     const pathname = usePathname()
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     // Fetch batches from API
     const fetchBatches = useCallback(async () => {
@@ -189,7 +192,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"              
                         className="hover:bg-transparent hover:text-primary transition-colors"
