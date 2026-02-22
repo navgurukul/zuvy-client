@@ -11,6 +11,7 @@ import {
     getAssesmentBackgroundColorClass,
 } from '@/lib/utils'
 import { usePathname } from 'next/navigation';
+import { getUser } from '@/store/store'
 
 type Props = {}
 
@@ -32,23 +33,25 @@ const IndividualStudentAssesment = ({
     const color = getAssesmentBackgroundColorClass(25, 5)
     const pathname = usePathname();
     const orgName = pathname.split('/')[2];
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const renderQuestion = () => {
         switch (type) {
             case 'openEndedSubmission':
                 return {
                     title: 'Open Ended Question',
-                    link: `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
+                    link: `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
                 }
             case 'quizSubmission':
                 return {
                     title: 'Quiz assessment',
-                    link: `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
+                    link: `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
                 }
             case 'codingSubmission':
                 return {
                     title: 'Coding Questions',
-                    link: `/admin/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
+                    link: `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
                 }
             default:
                 return {

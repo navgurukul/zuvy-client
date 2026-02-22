@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { SearchBox } from "@/utils/searchBox"
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { getUser } from '@/store/store'
 
 type Props = {}
 
@@ -37,6 +38,8 @@ const Page = ({ params }: { params: any }) => {
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [batches, setBatches] = useState<BatchFilter[]>([])
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
      // Fetch batches from API
     const fetchBatches = useCallback(async () => {
@@ -215,7 +218,7 @@ const Page = ({ params }: { params: any }) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-5">
-                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"
