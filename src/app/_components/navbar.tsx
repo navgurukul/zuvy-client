@@ -27,8 +27,9 @@ const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
-    const orgName = pathname.split('/')[2]
-    const inOrg = pathname.split('/')[2] !== 'organizations'
+    const orgId = pathname.split('/')[3]
+    // const inOrg = pathname.split('/')[2] !== 'organizations'
+    const inOrg = pathname.split('/').length > 3
     const superAdmin = true
     // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
@@ -58,10 +59,10 @@ const Navbar = () => {
     const adminRoutes = [
         {
             name: 'Course Studio',
-            href: `/${role}/${orgName}/courses`,
+            href: `/${role}/organizations/${orgId}/courses`,
             icon: Layers,
             active: (pathname: string) =>
-                pathname === `/${role}/${orgName}/courses` || pathname.startsWith(`/${role}/${orgName}/courses/`),
+                pathname === `/${role}/organizations/${orgId}/courses` || pathname.startsWith(`/${role}/organizations/${orgId}/courses/`),
         },
         {
             name: 'Question Bank',
@@ -71,9 +72,9 @@ const Navbar = () => {
         },
         {
             name: 'Roles and Permissions',
-            href: `/${role}/${orgName}/settings`,
+            href: `/${role}/organizations/${orgId}/settings`,
             icon: Settings,
-            active: `/${role}/${orgName}/settings`,
+            active: `/${role}/organizations/${orgId}/settings`,
         },
         {
             name: 'All Organizations',
@@ -104,7 +105,7 @@ const Navbar = () => {
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
 
-                    <OrganizationDropdown orgName={orgName} />
+                    <OrganizationDropdown orgId={orgId} />
 
                     {/* Navigation Items */}
                     <nav className="flex items-center space-x-1">
@@ -192,10 +193,10 @@ const Navbar = () => {
                     {/* {studentData?.rolesList?.[0] === 'poc' && ( */}
                     {inOrg && (studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
                         <Link
-                            href={`/${role}/${orgName}/setting`}
+                            href={`/${role}/organizations/${orgId}/setting`}
                             className={cn(
                                 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
-                                pathname === `/${role}/${orgName}/setting`
+                                pathname === `/${role}/organizations/${orgId}/setting`
                                     ? 'bg-primary text-primary-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
                             )}

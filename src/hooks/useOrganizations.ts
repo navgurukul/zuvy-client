@@ -8,7 +8,7 @@ import useDebounce from '@/hooks/useDebounce'
 export interface Organization {
     id: number
     title: string
-    displayName: string
+    code: string
     isManagedByZuvy: boolean
     logoUrl: string
     pocName: string

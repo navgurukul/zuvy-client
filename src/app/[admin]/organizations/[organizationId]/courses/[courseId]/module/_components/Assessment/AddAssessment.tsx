@@ -56,7 +56,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const [alertOpen, setAlertOpen] = useState(!canEdit);
     const [open, setOpen] = useState(true); // initially true when !canEdit
     const searchParams = useSearchParams()
-    const { organization } = useParams()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const initialTab = searchParams.get('tab') || ''
@@ -180,7 +180,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const handleSettingsButtonClick = () => {
         setQuestionType('settings')
         router.push(
-            `/${userRole}/${organization}/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
+            `/${userRole}/organizations/${organizationId}/courses/${content.bootcampId}/module/${content.moduleId}/chapters/${content.chapterId}?tab=setting`
         )
     }
 

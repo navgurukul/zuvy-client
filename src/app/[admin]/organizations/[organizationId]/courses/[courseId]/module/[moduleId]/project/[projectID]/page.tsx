@@ -51,7 +51,7 @@ export default function Project() {
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { setProjectPreviewContent } = getProjectPreviewStore()
     // const [showPreview, setShowPreview] = useState<boolean>(false)
-    const { organization, courseId, moduleId, projectID } = useParams()
+    const { organizationId, courseId, moduleId, projectID } = useParams()
     const [initialContent, setInitialContent] = useState<RemirrorJSON | null>(
         null
     )
@@ -225,7 +225,7 @@ export default function Project() {
         if (projectData) {
             setProjectPreviewContent(projectData)
             router.push(
-                `/${userRole}/${organization}/courses/${courseId}/module/${moduleId}/project/${projectID}/preview`
+                `/${userRole}/organizations/${organizationId}/courses/${courseId}/module/${moduleId}/project/${projectID}/preview`
             )
         }
     }
@@ -273,7 +273,7 @@ export default function Project() {
             {/* <BreadcrumbComponent crumbs={crumbs} /> */}
             <div className="flex flex-col mt-10 lg:mx-44 mx-10">
                 <Link
-                    href={`/${userRole}/${organization}/courses/${courseId}/curriculum`}
+                    href={`/${userRole}/organizations/${organizationId}/courses/${courseId}/curriculum`}
                     className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
                 >
                     <ArrowLeft size={20} />

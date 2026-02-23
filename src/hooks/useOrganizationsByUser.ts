@@ -4,12 +4,25 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/utils/axios.config'
 
 export interface Organization {
+    // id: number
+    // title: string
+    // code: string
+    // logoUrl: string | null
+    // isVerified: boolean
+    // joinedAt: string
     id: number
     title: string
-    displayName: string
-    logoUrl: string | null
+    code: string
+    isManagedByZuvy: boolean
+    logoUrl: string
+    pocName: string
+    pocEmail: string
+    zuvyPocName: string
+    zuvyPocEmail: string
     isVerified: boolean
-    joinedAt: string
+    createdAt: string
+    updatedAt: string
+    version: string | null
 }
 
 export interface OrganizationsResponse {

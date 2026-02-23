@@ -67,7 +67,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
 }) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const { organization, courseId, moduleId, chapterID } = useParams()
+    const { organizationId, courseId, moduleId, chapterID } = useParams()
     const codingMax = selectedCodingQuesIds.length
     const mcqMax = selectedQuizQuesIds.length
     const [codingWeightageDisabled, setCodingWeightageDisabled] =
@@ -610,7 +610,7 @@ const SettingsAssessment: React.FC<SettingsAssessmentProps> = ({
     const backToAssessment = () => {
         setQuestionType('coding')
         router.push(
-            `/${userRole}/${organization}/courses/${courseId}/module/${moduleId}/chapters/${chapterID}`
+            `/${userRole}/organizations/${organizationId}/courses/${courseId}/module/${moduleId}/chapters/${chapterID}`
         )
     }
 

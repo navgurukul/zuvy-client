@@ -40,7 +40,7 @@ function ChapterModal({
     const { setTopicId } = getTopicId()
     const router = useRouter()
     const { user } = getUser()
-    const { organization } = useParams()
+    const { organizationId } = useParams()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const [classType, setClassType] = useState('createLiveClass')
     const [liveDialogOpen, setLiveDialogOpen] = useState(false)
@@ -57,7 +57,7 @@ function ChapterModal({
             .then((res) => {
                 const data = res?.data?.module[0]
                 router.push(
-                    `/${userRole}/${organization}/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
+                    `/${userRole}/organizations/${organizationId}/courses/${courseId}/module/${data.moduleId}/chapters/${data.id}`
                 )
                 toast.success({
                     title: res?.data?.module[0]?.title,

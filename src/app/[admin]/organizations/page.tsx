@@ -188,7 +188,7 @@ export default function OrganizationsPage() {
     const transformedOrganizations = useMemo(() => {
         return organizations.map(org => ({
             id: org.id.toString(),
-            name: org.displayName || org.title,
+            name: org.title,
             code: org.title.substring(0, 2).toUpperCase(),
             managementType: org.isManagedByZuvy ? 'Zuvy Managed' : 'Self Managed' as 'Self Managed' | 'Zuvy Managed',
             poc: {

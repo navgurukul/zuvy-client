@@ -5,35 +5,46 @@ import { ChevronDown, Check, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useOrganizationsByUser, Organization } from '@/hooks/useOrganizationsByUser';
+import { useOrganizationsByUser } from '@/hooks/useOrganizationsByUser';
+import { useOrganizations, Organization } from '@/hooks/useOrganizations';
 import { getUser } from '@/store/store';
 
-export default function OrganizationDropdown({orgName}: {orgName: string}) {
+export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const pathname = usePathname();
     const role = pathname.split('/')[1]; // Extract role from pathname
     const { user } = getUser();
     const userId = user?.id ? parseInt(user.id) : null;
-    const { organizations, loading, error } = useOrganizationsByUser(userId);   
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+
+    // Always call both hooks (Rules of Hooks), pick result based on role
+    const byUser = useOrganizationsByUser(isSuperAdmin ? null : userId);
+    const allOrgs = useOrganizations({ auto: isSuperAdmin });
+
+    const { organizations, loading, error } = isSuperAdmin ? allOrgs : byUser;
+
+
     const filteredSelectedOrg = organizations.filter(org =>
-        orgName.toLowerCase() === org.displayName.toLowerCase()
+        org.id === parseInt(orgId)
+        // orgName.toLowerCase() === org.displayName.toLowerCase()
     );
     const [isOpen, setIsOpen] = useState(false);
     const [selected, setSelected] = useState(filteredSelectedOrg[0] || organizations[0]);
     const [searchTerm, setSearchTerm] = useState('');
-    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
-    const filtered = organizations.filter(org =>
-        org.displayName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // const filtered = organizations.filter(org =>
+    //     org.title.toLowerCase().includes(searchTerm.toLowerCase())
+    // );
+
 
     useEffect(() => {
         setSelected(filteredSelectedOrg[0] || organizations[0]);
@@ -45,17 +56,13 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
         setSearchTerm('');
     };
 
-    // Generate code from displayName (first 1-2 letters)
-    const getCodeFromName = (displayName: string) => {
-        try{
-                const words = displayName.split(' ');
-            if (words.length > 1) {
-                return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
-            }
-            return displayName.substring(0, 2).toUpperCase();
-        } catch (e) {
-            return '??';
+    const getInitials = (org: Organization) => {
+        const name = org.title || org.code || '';
+        const words = name.split(' ');
+        if (words.length > 1) {
+            return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
         }
+        return name.substring(0, 2).toUpperCase();
     };
 
     return (
@@ -68,27 +75,29 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                     <div className="flex items-center gap-3">
                         {selected ? (
                             <>
-                                <div className={`bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
-                                    {/* {getCodeFromName(selected.displayName)} */}
-                                    {selected.displayName}
+                                <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                    {/* {getInitials(selected)} */}
+                                    {selected.code}
                                 </div>
-                                <span className="text-gray-900 font-medium">{selected.title}</span>
+                                <span className="text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                    {selected.title}
+                                </span>
                             </>
                         ) : (
                             <span className="text-gray-500">Loading...</span>
                         )}
                     </div>
-                    <ChevronDown size={20} className="text-gray-400" />
+                    <ChevronDown size={20} className="text-gray-400 ml-1" />
                 </Button>
             </DropdownMenuTrigger>
-            
-            <DropdownMenuContent 
-                className="w-72 p-0" 
+
+            <DropdownMenuContent
+                className="w-72 p-0 h-[29rem] flex flex-col"
                 align="start"
                 side="bottom"
             >
                 {/* Search Input */}
-                <div className="p-3 border-b">
+                <div className="flex-none p-3 border-b">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                         <Input
@@ -102,58 +111,61 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                 </div>
 
                 {/* Organizations List */}
-                <div className="py-2">
+                <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
                     <DropdownMenuLabel className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
                         Switch Organization
                     </DropdownMenuLabel>
-                    
+
                     {loading ? (
                         <div className="px-4 py-3 text-gray-500 text-sm">Loading organizations...</div>
                     ) : error ? (
                         <div className="px-4 py-3 text-red-500 text-sm">Failed to load organizations</div>
-                    ) : filtered.length === 0 ? (
+                    ) : organizations.length === 0 ? (
                         <div className="px-4 py-3 text-gray-500 text-sm">No organizations found</div>
                     ) : (
-                        filtered.map(org => (
-                            <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50">
-                                <Link
-                                    key={org.id}
-                                    href={`/${role}/${org.displayName}/courses`}
-                                    onClick={() => handleSelect(org)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${
-                                        selected?.id === org.id ? 'bg-green-50' : ''
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
-                                            {/* {getCodeFromName(org.displayName)} */}
-                                            {org.displayName}
+                        organizations
+                            .filter(org => org.title.toLowerCase().includes(searchTerm.toLowerCase()))
+                            .map(org => (
+                                <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50 cursor-pointer">
+                                    <Link
+                                        key={org.id}
+                                        href={`/${role}/organizations/${org.id}/courses`}
+                                        onClick={() => handleSelect(org)}
+                                        className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                                {/* {getInitials(org)} */}
+                                                {org.code}
+                                            </div>
+                                            <span className={`text-sm ${selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
+                                                {org.title}
+                                            </span>
                                         </div>
-                                        <span className={selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}>
-                                            {org.title}
-                                        </span>
-                                    </div>
-                                    {selected?.id === org.id && (
-                                        <Check size={18} className="text-green-600" />
-                                    )}
-                                </Link>
-                            </DropdownMenuItem>
-                        ))
+                                        {selected?.id === org.id && (
+                                            <Check size={16} className="text-green-600 ml-2" />
+                                        )}
+                                    </Link>
+                                </DropdownMenuItem>
+                            ))
                     )}
                 </div>
 
-                <DropdownMenuSeparator />
-                
-                {/* Back to all orgs */}
-                <DropdownMenuItem className="px-0 py-0 focus:bg-gray-50">
-                    <Link
-                        href={`/${role}/organizations`}
-                        onClick={() => setIsOpen(false)}
-                        className="w-full px-4 py-3 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm"
-                    >
-                        ← Back to all orgs
-                    </Link>
-                </DropdownMenuItem>
+                <DropdownMenuSeparator className="m-0" />
+
+                {/* Back to all orgs - Fixed at bottom */}
+                <div className="flex-none p-1">
+                    <DropdownMenuItem className="px-0 py-0 focus:bg-gray-50 cursor-pointer rounded-md">
+                        <Link
+                            href={`/${role}/organizations`}
+                            onClick={() => setIsOpen(false)}
+                            className="w-full px-4 py-3 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium"
+                        >
+                            ← Back to all orgs
+                        </Link>
+                    </DropdownMenuItem>
+                </div>
             </DropdownMenuContent>
         </DropdownMenu>
     );
