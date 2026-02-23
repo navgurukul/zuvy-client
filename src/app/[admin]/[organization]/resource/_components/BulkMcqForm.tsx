@@ -11,7 +11,7 @@ import { toast } from '@/components/ui/use-toast'
 import { useState } from 'react'
 import DropzoneforMcq from './DropzoneforMcq'
 import { api } from '@/utils/axios.config'
-import { BulkMcqProps } from '@/app/[admin]/resource/_components/adminResourceComponentType'
+import { BulkMcqProps } from './adminResourceComponentType'
 
 // type Props = {
 //     setIsMcqModalOpen: any

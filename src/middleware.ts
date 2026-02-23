@@ -8,6 +8,7 @@ export function middleware(request: NextRequest) {
 
     const path = request.nextUrl.href
     const redirectedUrl = request.cookies.get('redirectedUrl')?.value ?? null
+    console.log('redirectedUrl cookie:', redirectedUrl)
     const userData = request.cookies.get('secure_typeuser')?.value ?? 'false'
     let user = 'false'
     try {
@@ -17,7 +18,7 @@ export function middleware(request: NextRequest) {
     }
     const matcher = ['/', '/student', '/admin', '/instructor']
     const decodedUrl = redirectedUrl ? atob(redirectedUrl) : null
-     const pathname = request.nextUrl.pathname
+    const pathname = request.nextUrl.pathname
     const roles = ['student', 'admin', 'instructor']
     const orgName = pathname.split('/')[2]
 
@@ -30,11 +31,15 @@ export function middleware(request: NextRequest) {
 
        if (isProtectedRoute) {
         const hasCoursePath =
-          path.includes('/student/course') ||
-          path.includes('/admin/course') ||
-          path.includes('/instructor/course')
+            pathname.startsWith('/student/') ||
+            pathname.startsWith('/admin/') ||
+            pathname.startsWith('/super_admin/') ||
+            pathname.startsWith('/instructor/')
+        //   path.includes('/student/course') ||
+        //   path.includes('/admin/course') ||
+        //   path.includes('/instructor/course')
 
-         const redirectUrl = new URL('/', request.url)
+        const redirectUrl = new URL('/', request.url)
 
        // if course path present, add route param
        if (hasCoursePath) {

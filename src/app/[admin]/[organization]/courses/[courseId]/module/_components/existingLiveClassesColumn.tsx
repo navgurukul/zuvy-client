@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { DataTableColumnHeader } from '@/app/_components/datatable/data-table-column-header'
 import { cn } from '@/lib/utils'
-import CheckboxAndDeleteHandler from '@/app/[admin]/resource/_components/CheckBoxAndDeleteCombo'
+import CheckboxAndDeleteHandler from '../../../../resource/_components/CheckBoxAndDeleteCombo'
 import { Checkbox } from '@/components/ui/checkbox'
 
 export const existingClassColumns: ColumnDef<any>[] = [

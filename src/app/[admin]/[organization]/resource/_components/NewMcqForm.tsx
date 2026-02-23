@@ -28,7 +28,7 @@ import { useState } from 'react'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { X } from 'lucide-react'
-import RemirrorForForm from '@/app/[admin]/resource/_components/RemirrorForForm'
+import RemirrorForForm from './RemirrorForForm'
 import {
     Tooltip,
     TooltipContent,
@@ -38,7 +38,7 @@ import {
 import {
     NewMcqFormProps,
     TransformedMCQ,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 const formSchema = z.object({
     difficulty: z.enum(['Easy', 'Medium', 'Hard']),

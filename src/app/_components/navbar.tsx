@@ -28,6 +28,7 @@ const Navbar = () => {
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const orgName = pathname.split('/')[2]
+    const inOrg = pathname.split('/')[2] !== 'organizations'
     const superAdmin = true
     // const role = user.rolesList[0]
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
@@ -52,12 +53,6 @@ const Navbar = () => {
             active: (pathname: string) =>
                 pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
         },
-        {
-            name: 'Question Bank',
-            href: `/${role}/content-bank`,
-            icon: Database,
-            active: `/${role}/content-bank`,
-        }
     ]
 
     const adminRoutes = [
@@ -76,13 +71,22 @@ const Navbar = () => {
         },
         {
             name: 'Roles and Permissions',
-            href: `/${role}/settings`,
+            href: `/${role}/${orgName}/settings`,
             icon: Settings,
-            active: `/${role}/settings`,
+            active: `/${role}/${orgName}/settings`,
+        },
+        {
+            name: 'All Organizations',
+            href: `/${role}/organizations`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
         },
     ]
 
-    const routes = superAdmin && !pathname.includes("course") ? superAdminRoutes : superAdmin && pathname.includes("course") ? adminRoutes : adminRoutes;
+    // const routes = superAdmin && !pathname.includes("course") ? superAdminRoutes : superAdmin && pathname.includes("course") ? adminRoutes : adminRoutes;
+
+    const routes = inOrg ? adminRoutes : superAdminRoutes;
 
     useEffect(() => {
         (async () => {
@@ -120,9 +124,31 @@ const Navbar = () => {
                                 return null;
                             }
 
+                            // const superAdminOnly = item.name === 'All Organizations' 
+                            // console.log('superAdmin', superAdmin)
+                            // console.log('superAdmin && item.name === All Organizations', superAdmin && item.name === 'All Organizations')
+                            // console.log('superAdmin && item.name !== All Organizations', superAdmin && item.name !== 'All Organizations')
+                            // console.log('superAdmin && item.name === All Organizations || item.name !== Question Bank', superAdmin && item.name === 'All Organizations' || item.name !== 'Question Bank')
+
                             return (
                                 <>
-                                    {item.name !== 'Question Bank' && (
+                                    {/* {superAdmin && item.name === 'All Organizations' && (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={cn(
+                                                'flex items-center space-x-2 px-4 py-2 rounded-lg text-[0.95rem] font-medium transition-all duration-200',
+                                                isActive
+                                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                                            )}
+                                        >
+                                            <Icon className="h-4 w-4" />
+                                            {loading? <Spinner />: <span className='' >{item.name}</span>}
+                                        </Link>
+                                    )} */}
+                                    {/* {item.name !== 'Question Bank' && ( */}
+                                    {(!superAdmin && item.name === 'All Organizations' ) || item.name !== 'Question Bank' && (
                                         <Link
                                             key={item.name}
                                             href={item.href}
@@ -163,12 +189,13 @@ const Navbar = () => {
                     </Badge>
 
                     {/* Setting Tab - Only for Admin and POC */}
-                    {(studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
+                    {/* {studentData?.rolesList?.[0] === 'poc' && ( */}
+                    {inOrg && (studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
                         <Link
-                            href={`/${role}/setting`}
+                            href={`/${role}/${orgName}/setting`}
                             className={cn(
                                 'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
-                                pathname === `/${role}/setting`
+                                pathname === `/${role}/${orgName}/setting`
                                     ? 'bg-primary text-primary-foreground shadow-sm'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
                             )}

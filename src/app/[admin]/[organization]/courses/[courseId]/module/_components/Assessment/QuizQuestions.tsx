@@ -10,7 +10,7 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import QuestionDescriptionModal from './QuestionDescriptionModal'
-import PreviewMCQ from '@/app/[admin]/resource/_components/PreviewMcq'
+import PreviewMCQ from '../../../../../resource/_components/PreviewMcq'
 import { renderQuestionPreview } from '@/utils/quizHelpers'
 import { MCQQuestion } from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/quiz/ModuleQuizType'
 import {

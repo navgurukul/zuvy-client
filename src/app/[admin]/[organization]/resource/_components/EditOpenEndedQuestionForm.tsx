@@ -28,7 +28,7 @@ import { getEditOpenEndedDialogs, getCodingQuestionTags } from '@/store/store'
 import {
     OpenEndedQuestion,
     Tag,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 type Props = {}
 

@@ -24,8 +24,8 @@ import {
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Separator } from '@/components/ui/separator'
 import { DataTable } from '@/app/_components/datatable/data-table'
-import { columns } from '@/app/[admin]/resource/coding/column'
-import NewCodingProblemForm from '@/app/[admin]/resource/_components/NewCodingProblemForm'
+import { columns } from './column'
+import NewCodingProblemForm from '../_components/NewCodingProblemForm'
 import { api } from '@/utils/axios.config'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { POSITION, OFFSET } from '@/utils/constant'
@@ -51,7 +51,7 @@ import {
     Tag,
     SearchSuggestion,
     Option,
-} from '@/app/[admin]/resource/coding/adminResourceCodinType'
+} from './adminResourceCodinType'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { SearchBox } from '@/utils/searchBox'
 import {CodingProblemsSkeleton} from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'

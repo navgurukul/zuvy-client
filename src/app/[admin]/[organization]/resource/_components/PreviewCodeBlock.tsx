@@ -11,7 +11,7 @@ import html from 'highlight.js/lib/languages/xml'
 // load all languages with "all" or common languages with "common"
 import { all, createLowlight } from 'lowlight'
 import React from 'react'
-import { MyEditorProps } from '@/app/[admin]/resource/_components/adminResourceComponentType'
+import { MyEditorProps } from './adminResourceComponentType'
 
 // create a lowlight instance with all languages loaded
 const lowlight = createLowlight(all)

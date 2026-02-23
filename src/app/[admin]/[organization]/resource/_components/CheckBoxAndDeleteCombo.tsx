@@ -1,4 +1,4 @@
-import { CheckboxProps } from '@/app/[admin]/resource/_components/adminResourceComponentType'
+import { CheckboxProps } from './adminResourceComponentType'
 
 const CheckboxAndDeleteHandler: React.FC<CheckboxProps> = ({
     checked,

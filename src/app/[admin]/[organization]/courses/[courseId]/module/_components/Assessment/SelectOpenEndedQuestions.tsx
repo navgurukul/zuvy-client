@@ -8,7 +8,7 @@ import {
     DialogOverlay,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import PreviewOpenEnded from '@/app/[admin]/resource/_components/PreviewOpenEnded'
+import PreviewOpenEnded from '../../../../../resource/_components/PreviewOpenEnded'
 import {
     selectedOpenEndedQuestionsProps,
     Tag,

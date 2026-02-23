@@ -15,7 +15,7 @@ import {
 import { Edit, Eye, Trash2 } from 'lucide-react'
 import { difficultyColor } from '@/lib/utils'
 
-import DeleteConfirmationModal from '../../[organization]/courses/[courseId]/_components/deleteModal'
+import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import { getDeleteQuizQuestion, getEditQuizQuestion } from '@/store/store'
 import {
     handleQuizConfirm,

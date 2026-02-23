@@ -42,7 +42,7 @@ import LottieLoader from '@/components/ui/lottie-loader'
 import {
     NewMcqRequestBodyType,
     NewMcqProblemFormProps,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 type Props = {}
 

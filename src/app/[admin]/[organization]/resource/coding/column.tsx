@@ -26,7 +26,7 @@ import {
     handleEditCodingQuestion,
     filteredCodingQuestions,
 } from '@/utils/admin'
-import QuestionDescriptionModal from '../../[organization]/courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
+import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 // import QuestionDescriptionModal from '../../courses/[courseId]/module/_components/Assessment/QuestionDescriptionModal'
 
 export const columns: ColumnDef<CodingQuestion>[] = [

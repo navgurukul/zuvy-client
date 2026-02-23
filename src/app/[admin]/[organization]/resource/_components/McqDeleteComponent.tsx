@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { Trash2 } from 'lucide-react'
 import React, { useState } from 'react'
-import DeleteConfirmationModal from '../../[organization]/courses/[courseId]/_components/deleteModal'
+import DeleteConfirmationModal from '../../courses/[courseId]/_components/deleteModal'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import { getAllQuizData, getOffset, getPosition } from '@/store/store'

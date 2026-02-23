@@ -10,7 +10,7 @@ import {
     PreviewMcqProps,
     Tags,
     QuizVariant,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 const PreviewMCQ = ({
     quizQuestionId,

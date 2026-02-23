@@ -29,7 +29,7 @@ import { useCreateOpenEndedQuestion } from '@/hooks/useCreateOpenEndedQuestion'
 import {
     NewOpenEndedQuestionFormProps,
     Tags,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 const formSchema = z.object({
     questionDescription: z.string().min(5, {

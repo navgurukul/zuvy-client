@@ -9,7 +9,7 @@ import {
     OpenEndedQuestionProps,
     Tags,
     Question,
-} from '@/app/[admin]/resource/_components/adminResourceComponentType'
+} from './adminResourceComponentType'
 
 const PreviewOpenEnded = ({ question, tag }: OpenEndedQuestionProps) => {
     const { tags } = getCodingQuestionTags()
