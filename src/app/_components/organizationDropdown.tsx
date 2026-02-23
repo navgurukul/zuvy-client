@@ -69,9 +69,10 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                         {selected ? (
                             <>
                                 <div className={`bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
-                                    {getCodeFromName(selected.displayName)}
+                                    {/* {getCodeFromName(selected.displayName)} */}
+                                    {selected.displayName}
                                 </div>
-                                <span className="text-gray-900 font-medium">{selected.displayName}</span>
+                                <span className="text-gray-900 font-medium">{selected.title}</span>
                             </>
                         ) : (
                             <span className="text-gray-500">Loading...</span>
@@ -125,10 +126,11 @@ export default function OrganizationDropdown({orgName}: {orgName: string}) {
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className={`bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold`}>
-                                            {getCodeFromName(org.displayName)}
+                                            {/* {getCodeFromName(org.displayName)} */}
+                                            {org.displayName}
                                         </div>
                                         <span className={selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}>
-                                            {org.displayName}
+                                            {org.title}
                                         </span>
                                     </div>
                                     {selected?.id === org.id && (
