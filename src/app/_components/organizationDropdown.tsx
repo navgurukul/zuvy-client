@@ -64,10 +64,6 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
         return name.substring(0, 2).toUpperCase();
     };
 
-    console.log('Organizations:', organizations);
-
-    console.log('Selected Organization:', selected);
-
     return (
         <>
             {

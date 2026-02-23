@@ -17,6 +17,7 @@ import { OFFSET, POSITION } from '@/utils/constant'
 import { createColumns } from './columns'
 import { useRoles } from '@/hooks/useRoles'
 import { useUser } from '@/hooks/useSingleUser'
+import { getUser } from '@/store/store'
 
 const SettingsPage: React.FC = () => {
     const pathname = usePathname()
@@ -29,8 +30,8 @@ const SettingsPage: React.FC = () => {
     const [isEditMode, setIsEditMode] = useState(false)
     const { roles, loading: rolesLoading } = useRoles()
     const [isSearching, setIsSearching] = useState(false)
-    const [selectedRoleId, setSelectedRoleId] = useState<string>('all') 
-    
+    const [selectedRoleId, setSelectedRoleId] = useState<string>('all')
+
     // Set the first role as selected once roles are loaded
     useEffect(() => {
         if (roles.length > 0 && !selectedRole) {
@@ -52,18 +53,20 @@ const SettingsPage: React.FC = () => {
         totalRows,
         totalPages,
         refetchUsers,
-    } = useAllUsers({ 
-        initialFetch: true, 
-        limit: position, 
-        searchTerm: '', 
+    } = useAllUsers({
+        initialFetch: true,
+        limit: position,
+        searchTerm: '',
         offset,
         roleId: selectedRoleId === 'all' ? undefined : selectedRoleId
     })
     const {
-      user,
+        user: editingUser,
         loading: userLoading,
-        error,
+        error: userFetchError,
     } = useUser(editingUserId)
+
+    const { user } = getUser()
 
     useEffect(() => {
         if (initialTab) setActiveTab(initialTab)
@@ -73,9 +76,8 @@ const SettingsPage: React.FC = () => {
         (newTab: string) => {
             const params = new URLSearchParams(searchParams.toString())
             params.set('tab', newTab)
-            const newURL = `${window.location.pathname}${
-                params.toString() ? '?' + params.toString() : ''
-            }`
+            const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''
+                }`
             router.replace(newURL, { scroll: false })
         },
         [router]
@@ -96,7 +98,7 @@ const SettingsPage: React.FC = () => {
         // Pehle modal ko open karo, fir editingUserId set karo
         setIsAddModalOpen(true)
         setIsEditMode(true)
-        setEditingUserId(userId) 
+        setEditingUserId(userId)
     }
 
     const handleDelete = async (userId: number) => {
@@ -146,11 +148,10 @@ const SettingsPage: React.FC = () => {
             <div className="flex gap-1 mb-2">
                 <Button
                     onClick={() => handleTabChange('users')}
-                    className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors ${
-                        activeTab === 'users'
+                    className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors ${activeTab === 'users'
                             ? 'bg-primary text-primary-foreground'
                             : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
-                    }`}
+                        }`}
                 >
                     <Users className="w-4 h-4" />
                     Users
@@ -158,10 +159,9 @@ const SettingsPage: React.FC = () => {
                 <Button
                     onClick={() => handleTabChange('roles')}
                     className={`flex items-center gap-2 px-4 py-2 text-[1rem] rounded-lg font-medium transition-colors
-                        ${
-                            activeTab === 'roles'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                        ${activeTab === 'roles'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-gray-100'
                         }
                     `}
                 >
@@ -191,20 +191,21 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                                 <DialogTrigger asChild>
-                                    <Button onClick={() => { setIsEditMode(false)}} >
+                                    <Button onClick={() => { setIsEditMode(false) }} >
                                         <Plus className="w-4 h-4 mr-2" />
                                         Add User
                                     </Button>
                                 </DialogTrigger>
                                 {isAddModalOpen && (
-                                    <AddUserModal 
+                                    <AddUserModal
                                         isEditMode={isEditMode}
-                                        user={user}
+                                        user={editingUser}
+                                        orgId={user?.orgId || ''}
                                         isOpen={isAddModalOpen}
                                         refetchUsers={() => {
                                             refetchUsers(offset)
                                             handleCloseModal()
-                                        }} 
+                                        }}
                                         onClose={handleCloseModal}
                                     />
                                 )}

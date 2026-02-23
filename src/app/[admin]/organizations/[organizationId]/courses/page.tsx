@@ -33,6 +33,7 @@ import { useCreateBootcamp } from '@/hooks/useCreateBootcamp'
 import { SearchBox } from '@/utils/searchBox'
 import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import {CoursesSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { useParams } from 'next/navigation'
 
 const statusOptions = [
     { value: 'all', label: 'All Status' },
@@ -47,8 +48,11 @@ const Courses: React.FC = () => {
     // misc
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { organizationId } = useParams()
     const { studentData } = useStudentData()
     const userRole = studentData?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : studentData?.orgId 
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
 
     // pagination & layout
@@ -81,7 +85,7 @@ const Courses: React.FC = () => {
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         const response = await api.get(
-            `/bootcamp?limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
+            `/bootcamp?organization_id=${orgId}&limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
         );
         return response.data.data;
     }, []);

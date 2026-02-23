@@ -32,6 +32,8 @@ import { SearchBox } from '@/utils/searchBox'
 import { api } from '@/utils/axios.config'
 import type { User } from '../columns'
 import { DataTable } from '@/app/_components/datatable/data-table'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 interface UserManagementTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -48,6 +50,11 @@ export function UserManagementTable<TData extends User, TValue>({
     roleId = 'all',
     onRoleIdChange,
 }: UserManagementTableProps<TData, TValue>) {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -65,7 +72,7 @@ export function UserManagementTable<TData extends User, TValue>({
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
             const response = await api.get(
-                `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
+                `/users/get/all/users?orgId=${orgId}&searchTerm=${encodeURIComponent(query)}`
             )
             const suggestions = (response.data.data || []).map((user: User) => ({
                 ...user,
@@ -87,7 +94,7 @@ export function UserManagementTable<TData extends User, TValue>({
         
         try {
             const response = await api.get(
-                `/users/get/all/users?searchTerm=${encodeURIComponent(query)}`
+                `/users/get/all/users?orgId=${orgId}&searchTerm=${encodeURIComponent(query)}`
             )
 
             setSearchData(response.data.data || [])

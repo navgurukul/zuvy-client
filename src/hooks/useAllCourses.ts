@@ -7,8 +7,15 @@ import type {
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import { coursePermissions } from './hookType'
 import { db } from '@/lib/indexDb'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 export function useAllCourses(initialFetch = true) {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [allCourses, setAllCourses] = useState<Course[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
@@ -18,7 +25,7 @@ export function useAllCourses(initialFetch = true) {
             setLoading(true)
             const res = await api.get<CoursesResponse>(
                 // '/bootcamp?limit=10&offset=0'
-                 '/bootcamp'
+                 `/bootcamp?organization_id=${orgId}`
             )
             setAllCourses(res.data.data)
             

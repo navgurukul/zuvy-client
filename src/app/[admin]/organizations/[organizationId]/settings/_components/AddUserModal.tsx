@@ -39,6 +39,7 @@ import {
 type AddUserModalProps = {
   isEditMode: boolean;
   user?: any | null;
+  orgId?: string;
   refetchUsers?: () => void;
   selectedId?: number; 
   onClose?: () => void;
@@ -97,6 +98,7 @@ const RoleCard: React.FC<RoleCardProps> = ({
 const AddUserModal: React.FC<AddUserModalProps> = ({ 
     isEditMode, 
     user, 
+    orgId,
     refetchUsers, 
     onClose,
     isOpen = false,
@@ -245,6 +247,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             name: newUser.name.trim(),
             email: newUser.email.trim(),
             roleId: pendingUserRole,
+            orgId: user?.orgId,
         }
 
         try {
@@ -282,6 +285,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             name: newUser.name.trim(),
             email: newUser.email.trim(),
             roleId: pendingUserRole,
+            orgId: orgId,
         }
 
         try {
