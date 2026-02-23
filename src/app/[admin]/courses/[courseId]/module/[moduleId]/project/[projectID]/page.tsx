@@ -490,12 +490,9 @@ export default function Project() {
 
     const form = useForm({
         resolver: zodResolver(formSchema),
-        values: {
-            title: title,
-            startDate: setHours(
-                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
-                0
-            ),
+        defaultValues: {
+            title: '',
+            startDate: new Date(),
         },
         mode: 'onChange',
     })
@@ -528,14 +525,12 @@ export default function Project() {
             setLastSavedContent(JSON.stringify(parsedContent))
             let selectedDate: Date | undefined = undefined
             if (project.deadline) {
-                const deadlineDate = new Date(project.deadline)
-                selectedDate = new Date(
-                    Date.UTC(
-                        deadlineDate.getFullYear(),
-                        deadlineDate.getMonth(),
-                        deadlineDate.getDate()
-                    )
-                )
+                const isoDate = new Date(project.deadline)
+                const year = isoDate.getUTCFullYear()
+                const month = isoDate.getUTCMonth()
+                const day = isoDate.getUTCDate()
+
+                selectedDate = new Date(year, month, day)
             }
             // Reset form with API data
             form.reset({
@@ -555,6 +550,13 @@ export default function Project() {
             fetchProjectDetails()
         }
     }, [projectID])
+
+    useEffect(() => {
+        // Sync form field value with title state after API loads
+        if (title && title !== '') {
+            form.setValue('title', title)
+        }
+    }, [title, form])
 
     // Check for unsaved changes
     useEffect(() => {
@@ -581,8 +583,14 @@ export default function Project() {
             if (!date || isNaN(date.getTime())) {
                 throw new Error('Invalid date')
             }
-            // directly convert to ISO string (UTC)
-            return date.toISOString()
+            // Create a UTC date with the local date values
+            const utcDate = new Date(Date.UTC(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+                0, 0, 0, 0
+            ))
+            return utcDate.toISOString()
         }
 
         const deadlineDate = convertToISO(data.startDate)
@@ -749,11 +757,12 @@ export default function Project() {
                                                 <Input
                                                     placeholder="Untitled Article"
                                                     className="p-0 text-2xl w-2/5 text-left font-semibold outline-none border-none focus-visible:ring-0 capitalize"
-                                                    {...field}
-                                                    {...form.register('title')}
-                                                    onChange={(e) =>
+                                                    value={field.value || ''}
+                                                    onChange={(e) => {
+                                                        field.onChange(e.target.value)
                                                         setTitle(e.target.value)
-                                                    }
+                                                    }}
+                                                    onBlur={field.onBlur}
                                                 />
                                                 <div
                                                     id="previewProject"
