@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { getArticlePreviewStore } from '@/store/store'
+import { getArticlePreviewStore, getUser } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import {
     PageEditorDoc,
     PageParams,
@@ -23,6 +23,10 @@ const PreviewArticle = ({ params }: { params: PageParams }) => {
         getArticlePreviewStore()
 
     const [link, setlink] = useState('')
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     useEffect(() => {
         fetchPreviewData(params, setArticlePreviewContent)
@@ -69,7 +73,7 @@ const PreviewArticle = ({ params }: { params: PageParams }) => {
                     {/* Left Section: Go Back Button */}
                     <div className="w-1/4 flex flex-col">
                         <Link
-                            href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
+                            href={`/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                             className="flex items-center space-x-2"
                         >
                             <ArrowLeft size={20} />
@@ -106,7 +110,7 @@ const PreviewArticle = ({ params }: { params: PageParams }) => {
             ) : (
                 <div className="flex flex-col items-start w-full h-full justify-center">
                     <Link
-                        href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
+                        href={`/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                         className="flex items-center mt-10 my-3"
                     >
                         <ArrowLeft size={20} />

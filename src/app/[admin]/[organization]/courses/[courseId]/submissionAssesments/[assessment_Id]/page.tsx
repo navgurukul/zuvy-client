@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { Skeleton } from '@/components/ui/skeleton'
-import { getIsReattemptApproved, getOffset } from '@/store/store'
+import { getIsReattemptApproved, getOffset, getUser } from '@/store/store'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { POSITION } from '@/utils/constant'
 import { SearchBox } from '@/utils/searchBox'
@@ -76,6 +76,8 @@ const Page = ({ params }: any) => {
     const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     // Create columns with context
     const columns = useMemo(() => getColumns({
@@ -221,17 +223,17 @@ const Page = ({ params }: any) => {
     const crumbs = [
         {
             crumb: 'My Courses',
-            href: `/admin/courses`,
+            href: `/${userRole}/${orgName}/courses`,
             isLast: false,
         },
         {
             crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
             crumb: 'Submission - Assesments',
-            href: `/admin/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
@@ -370,7 +372,7 @@ const Page = ({ params }: any) => {
         <>
             <MaxWidthWrapper className="">
                 <div className="flex items-center gap-4 mb-8">
-                    <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions`}>
+                    <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions`}>
                         <Button
                             variant="ghost"
                             className="hover:bg-transparent hover:text-primary transition-colors"

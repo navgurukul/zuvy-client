@@ -6,7 +6,7 @@ declare global {
     }
 }
 import React, { useEffect, useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { setCookie } from 'cookies-next'
 import {
     GoogleLogin,
@@ -31,6 +31,8 @@ function LoginPage() {
     const { user, setUser } = getUser()
     const router = useRouter()
     const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
 
     // Social proof data
     const socialProofData = [
@@ -184,7 +186,8 @@ const handleGoogleSuccess = async (
                     // Redirect admin/poc to settings if hasfilled is false
                     router.push(`/${userRole}/setting`)
                 } else if (userRole === 'super admin') {
-                    router.push('/superAdmin/organization') // Change it when integrating APIs
+                    // router.push('/superAdmin/organization') // Change it when integrating APIs
+                     router.push(`/${userRole}/organizations`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
                     router.push(`/${userRole}/${organization}/courses`) 

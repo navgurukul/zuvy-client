@@ -13,7 +13,7 @@ import { DataTable } from '@/app/_components/datatable/data-table'
 import { api } from '@/utils/axios.config'
 import { SearchBox } from '@/utils/searchBox'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
-import { getOffset } from '@/store/store'
+import { getOffset, getUser } from '@/store/store'
 import { POSITION } from '@/utils/constant'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
 import { usePathname } from 'next/navigation'
@@ -57,6 +57,8 @@ const Page = ({ params }: any) => {
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const pathname = usePathname()
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -74,12 +76,12 @@ const Page = ({ params }: any) => {
     const crumbs = [
         {
             crumb: 'My Courses',
-            href: `/admin/courses`,
+            href: `/${userRole}/${orgName}/courses`,
             isLast: false,
         },
         {
             crumb: bootcampData?.name,
-            href: `/admin/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
@@ -243,7 +245,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/admin/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                  
                         className="hover:bg-transparent hover:text-primary transition-colors"

@@ -221,19 +221,24 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { getQuizPreviewStore } from '@/store/store'
+import { getQuizPreviewStore, getUser } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { addClassToCodeTags } from '@/utils/admin'
 import { Button } from '@/components/ui/button'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
+import { usePathname } from 'next/navigation'
 import {
     Params,
     TopicCodingQuestion,
 } from '@/app/[admin]/[organization]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType'
 const PreviewQuiz = ({ params }: { params: Params }) => {
     const { quizPreviewContent, setQuizPreviewContent } = getQuizPreviewStore()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     useEffect(() => {
         fetchPreviewData(params, setQuizPreviewContent)
@@ -250,7 +255,7 @@ const PreviewQuiz = ({ params }: { params: Params }) => {
 
             {/* Go Back Button - Fixed positioning */}
             <Link
-                href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
+                href={`/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                 className="fixed left-4 top-16 flex items-center space-x-2 p-2 z-40"
             >
                 {' '}

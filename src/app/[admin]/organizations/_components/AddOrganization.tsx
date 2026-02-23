@@ -214,13 +214,13 @@ import {
 } from 'lucide-react'
 
 type AddUserModalProps = {
-  isEditMode: boolean;
-  management: any[];
-  user?: any | null;
-  refetchUsers?: () => void;
-  selectedId?: number; 
-  onClose?: () => void;
-  isOpen?: boolean;
+    isEditMode: boolean;
+    management: any[];
+    user?: any | null;
+    refetchUsers?: () => void;
+    selectedId?: number;
+    onClose?: () => void;
+    isOpen?: boolean;
 };
 
 type NewUser = {
@@ -252,19 +252,17 @@ const RoleCard: React.FC<RoleCardProps> = ({
         <button
             type="button"
             onClick={() => onSelect && onSelect(id)}
-            className={`w-full text-left border rounded-lg p-4 transition-colors ${
-                selected
+            className={`w-full text-left border rounded-lg p-4 transition-colors ${selected
                     ? 'border-primary bg-primary-light'
                     : 'border-gray-200 hover:border-gray-300'
-            }`}
+                }`}
         >
             <div className="flex items-start gap-3">
                 <div
-                    className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
-                        selected
+                    className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${selected
                             ? 'bg-blue-100 text-primary'
                             : 'bg-gray-100 text-foreground'
-                    }`}
+                        }`}
                 >
                     {icon}
                 </div>
@@ -280,11 +278,11 @@ const RoleCard: React.FC<RoleCardProps> = ({
 }
 
 
-const AddOrganization: React.FC<AddUserModalProps> = ({ 
-    isEditMode, 
+const AddOrganization: React.FC<AddUserModalProps> = ({
+    isEditMode,
     management,
-    user, 
-    refetchUsers, 
+    user,
+    refetchUsers,
     onClose,
     isOpen = false,
 }) => {
@@ -317,7 +315,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                     const fetchedName = response.data.name || ''
                     const fetchedEmail = response.data.email || ''
                     const fetchedRoleId = response.data.roleId || null
-                    
+
                     setNewUser({
                         orgName: '',
                         name: fetchedName,
@@ -338,8 +336,8 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                     const fallbackName = user.name || ''
                     const fallbackEmail = user.email || ''
                     const fallbackRoleId = user.roleId || null
-                    
-                   setNewUser({
+
+                    setNewUser({
                         orgName: '',
                         name: fallbackName,
                         email: fallbackEmail,
@@ -385,10 +383,27 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     }
 
     // Check if form is valid (for add mode)
+    const isZuvyManaged =
+        management.find((m) => m.id === pendingUserRole)?.name === 'Zuvy Managed'
+
+    useEffect(() => {
+        if (!isZuvyManaged) {
+            setNewUser((prev) => ({
+                ...prev,
+                assigneeName: '',
+                assigneeEmail: '',
+            }))
+        }
+    }, [isZuvyManaged])
+
     const isFormValid =
+        newUser.orgName.trim().length > 0 &&
         newUser.name.trim().length > 0 &&
         newUser.email.trim().length > 0 &&
-        !!pendingUserRole
+        !!pendingUserRole &&
+        (!isZuvyManaged ||
+            (newUser.assigneeName.trim().length > 0 &&
+                newUser.assigneeEmail.trim().length > 0))
 
     // Check if there are changes (for edit mode)
     const hasChanges = isEditMode && (
@@ -401,7 +416,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     // In add mode, button should be enabled if form is valid
     const canSubmit = isEditMode ? hasChanges : isFormValid
 
-     const iconList = [
+    const iconList = [
         User,
         Briefcase,
         Users,
@@ -429,7 +444,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
             case 'instructor':
                 return <GraduationCap className="w-5 h-5" />
             default:
-                 // Get icon sequentially from the list based on role name
+                // Get icon sequentially from the list based on role name
                 const roleIndex = role
                     .split('')
                     .reduce((acc, char) => acc + char.charCodeAt(0), 0)
@@ -440,30 +455,40 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
     const handleAddUser = async () => {
         if (!canSubmit) return
+        const selectedManagement = management.find(
+            (m) => m.id === pendingUserRole
+        )
+
+        const isManagedByZuvy = selectedManagement?.name === 'Zuvy Managed'
 
         const payload = {
-            orgName: '',
-            name: newUser.name.trim(),
-            email: newUser.email.trim(),
-            roleId: pendingUserRole,
-            assigneeName: newUser.assigneeName.trim(),
-            assigneeEmail: newUser.assigneeEmail.trim(),
+            title: newUser.orgName.trim(),
+            displayName: newUser.orgName.trim(),
+            logoUrl: '',
+            pocName: newUser.name.trim(),
+            pocEmail: newUser.email.trim(),
+            isManagedByZuvy,
+            zuvyPocName: isManagedByZuvy ? newUser.assigneeName.trim() : null,
+            zuvyPocEmail: isManagedByZuvy ? newUser.assigneeEmail.trim() : null,
         }
 
         try {
-            const response = await api.post('/users/addUsers', payload)
-            if(response.status === 201) {
+            const response = await api.post('/org/create', payload)
+
+            if (response.data?.status === 'success') {
                 toast.success({
-                    title: 'User added successfully',
-                    description: 'The new user has been added.',
+                    title: 'Organisation created',
+                    description: response.data.message,
                 })
             }
-        } catch (error:any) {
+        } catch (error: any) {
             toast.error({
-                title: 'Error adding user',
-                description: error?.response?.data?.message || 'There was an issue adding the new user.',
+                title: 'Error creating organisation',
+                description:
+                    error?.response?.data?.message ||
+                    'There was an issue creating the organisation.',
             })
-            console.error('Error adding user:', error)
+            console.error('Create org error:', error)
             return
         }
 
@@ -476,10 +501,11 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
             assigneeEmail: '',
         })
         setPendingUserRole(null)
-        setFreshUserData(null)
+
         refetchUsers && refetchUsers()
         onClose && onClose()
     }
+
 
     const handleEditUser = async () => {
         if (!canSubmit) return
@@ -492,7 +518,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
         try {
             const response = await api.put(`/users/updateUser/${user.id}`, payload)
-            if(response.status === 200) {
+            if (response.status === 200) {
                 // Update the cached fresh data immediately
                 setFreshUserData({
                     ...freshUserData,
@@ -509,7 +535,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                     description: 'The user details have been updated.',
                 })
             }
-        } catch (error:any) {
+        } catch (error: any) {
             toast.error({
                 title: 'Error updating user',
                 description: error?.response?.data?.message || 'There was an issue updating the user details.',
@@ -609,37 +635,38 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                 />
                             </div>
                         </div>
-                        <Label className="block text-sm font-medium text-gray-900 my-4 text-start">
-                            Zuvy Assignee
-                        </Label>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="text-left">
-                                <p className="text-[14px]">
-                                    Assignee Name *
-                                </p>
-                                <Input
-                                    id="name"
-                                    name="assigneeName"
-                                    value={newUser.assigneeName}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter full name"
-                                    className="mt-2"
-                                />
-                            </div>
-                            <div className="text-left">
-                                <p className="text-[14px]">
-                                    Email Id *
-                                </p>
-                                <Input
-                                    id="email"
-                                    name="assigneeEmail"
-                                    value={newUser.assigneeEmail}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter email address"
-                                    className="mt-2"
-                                />
-                            </div>
-                        </div>
+                        {isZuvyManaged && (
+                            <>
+                                <Label className="block text-sm font-medium text-gray-900 my-4 text-start">
+                                    Zuvy Assignee
+                                </Label>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div className="text-left">
+                                        <p className="text-[14px]">Assignee Name *</p>
+                                        <Input
+                                            name="assigneeName"
+                                            value={newUser.assigneeName}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter full name"
+                                            className="mt-2"
+                                        />
+                                    </div>
+
+                                    <div className="text-left">
+                                        <p className="text-[14px]">Email Id *</p>
+                                        <Input
+                                            name="assigneeEmail"
+                                            value={newUser.assigneeEmail}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter email address"
+                                            className="mt-2"
+                                        />
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
                     </div>
                 </div>
             )}
@@ -655,7 +682,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                         disabled={!canSubmit || isFetchingFreshData}
                         onClick={handleSubmit}
                     >
-                        {isEditMode ? 'Save Change' : 'Add User'}
+                        {isEditMode ? 'Save Change' : 'Add Organisation'}
                     </Button>
                 </DialogClose>
             </DialogFooter>

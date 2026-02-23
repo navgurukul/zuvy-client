@@ -1,6 +1,6 @@
 'use client'
 import { api } from '@/utils/axios.config'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import TestCaseResults from '../../../submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/[CodingSolution]/TestCases'
@@ -11,6 +11,7 @@ import { cn, difficultyColor } from '@/lib/utils'
 import { FileText, ArrowLeft, Heading6 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { getUser } from '@/store/store'
 import {
     PageParams,
     CodingSubmission,
@@ -27,6 +28,10 @@ const Page = ({ params }: PageParams) => {
 
     const questionId = searchQuery.get('questionId')
     const moduleId = searchQuery.get('moduleId')
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -43,22 +48,22 @@ const Page = ({ params }: PageParams) => {
         () => [
             {
                 crumb: 'My Courses',
-                href: `/admin/courses`,
+                href: `/${userRole}/${orgName}/courses`,
                 isLast: false,
             },
             {
                 crumb: parsedCrumbData[0],
-                href: `/admin/courses/${params.courseId}/submissions`,
+                href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
             // {
             //     crumb: 'Submission - Practice Problems',
-            //     href: `/admin/courses/${params.courseId}/submissions`,
+            //     href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
             //     isLast: false,
             // },
             {
                 crumb: parsedCrumbData[1],
-                href: `/admin/courses/${params.courseId}/submissionProblems/${moduleId}`,
+                href: `/${userRole}/${orgName}/courses/${params.courseId}/submissionProblems/${moduleId}`,
                 isLast: false,
             },
             {

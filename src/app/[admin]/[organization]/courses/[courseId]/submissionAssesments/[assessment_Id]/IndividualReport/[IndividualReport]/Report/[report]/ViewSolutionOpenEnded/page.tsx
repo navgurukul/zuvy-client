@@ -5,9 +5,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { api } from '@/utils/axios.config'
 import { difficultyColor } from '@/lib/utils'
 import { toast } from '@/components/ui/use-toast'
-import { getProctoringDataStore } from '@/store/store'
+import { getProctoringDataStore, getUser } from '@/store/store'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import type { PageAssessmentData, PageSubmissionData, BootcampData } from './ViewSolutionPageType'
+import { usePathname } from 'next/navigation'
 
 type SubmissionData = {
     id: number
@@ -55,32 +56,36 @@ const Page = ({ params }: { params: paramsType }) => {
     const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [assesmentData, setAssesmentData] = useState<PageSubmissionData | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const crumbs = [
         {
             crumb: 'My Courses',
-            href: `/admin/courses`,
+            href: `/${userRole}/${orgName}/courses`,
             isLast: false,
         },
         {
             crumb: bootcampData?.name,
 
-            href: `/admin/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
             crumb: 'Submission - Assesments',
-            href: `/admin/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
             crumb: assesmentData?.title,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
+            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
             isLast: false,
         },
         {
             crumb: proctoringData?.user?.name,
-            href: `/admin/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
+            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
         {

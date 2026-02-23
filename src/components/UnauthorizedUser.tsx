@@ -2,10 +2,12 @@
 
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleFromPath?: string }) => {
     const router = useRouter()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
     return (
         <div className="flex flex-col items-center pt-24">
             {/* Set a smaller max width for the main container */}
@@ -25,7 +27,7 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
                         {`The page is meant to be viewed by Zuvy ${roleFromPath}. You do
                         not have ${roleFromPath} access to access this page`}
                     </p>
-                    <Button onClick={() => router.push(`/${userRole}/courses`)}>
+                    <Button onClick={() => router.push(`/${userRole}/${orgName}/courses`)}>
                         Return to Dashboard
                     </Button>
                 </div>

@@ -17,7 +17,7 @@ import SelectedQuestions from '@/app/[admin]/[organization]/courses/[courseId]/m
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import useDebounce from '@/hooks/useDebounce'
 import { getAssessmentPreviewStore, getUser } from '@/store/store'
-import { useRouter, useSearchParams, useParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams, usePathname } from 'next/navigation'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/components/ui/use-toast'
 import PermissionAlert from '@/app/_components/PermissionAlert'
@@ -61,6 +61,8 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const initialTab = searchParams.get('tab') || ''
     const [isDataLoading, setIsDataLoading] = useState(true)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
 
@@ -190,7 +192,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         ) {
             setAssessmentPreviewContent(content)
             router.push(
-                `/${userRole}/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
+                `/${userRole}/${orgName}/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
         } else {
             toast.error({

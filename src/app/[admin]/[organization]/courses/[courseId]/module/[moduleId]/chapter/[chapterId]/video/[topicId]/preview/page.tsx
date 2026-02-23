@@ -2,14 +2,20 @@
 
 import React, { useEffect } from 'react'
 import ReactPlayer from 'react-player'
-import { getVideoPreviewStore } from '@/store/store'
+import { getVideoPreviewStore, getUser } from '@/store/store'
 import { fetchPreviewData } from '@/utils/admin'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Params } from '@/app/[admin]/[organization]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType'
+import { usePathname } from 'next/navigation'
+
 const PreviewVideo = ({ params }: { params: Params }) => {
     const { videoPreviewContent, setVideoPreviewContent } =
         getVideoPreviewStore()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     useEffect(() => {
         fetchPreviewData(params, setVideoPreviewContent)
@@ -26,7 +32,7 @@ const PreviewVideo = ({ params }: { params: Params }) => {
 
             {/* Back link */}
             <Link
-                href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
+                href={`/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                 className="absolute left-4 top-14 flex items-center space-x-2 z-50"
             >
                 <ArrowLeft size={20} />

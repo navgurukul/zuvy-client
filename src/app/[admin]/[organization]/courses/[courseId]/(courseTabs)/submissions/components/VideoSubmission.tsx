@@ -17,6 +17,7 @@ import { ellipsis } from '@/lib/utils'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
+import { getUser } from '@/store/store'
 
 
 const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
@@ -28,6 +29,8 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
     const pathname = usePathname()
     const role = pathname.split('/')[1]
     const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     const getVideoSubmission = useCallback(async () => {
         try {
@@ -156,7 +159,7 @@ const VideoSubmission = ({ courseId, debouncedSearch }: any) => {
                                                             <ArrowDownToLine size={20} />
                                                         </Button>
                                                         <Link
-                                                            href={`/admin/${orgName}/courses/${courseId}/submissionVideo/${video.id}`}
+                                                            href={`/${userRole}/${orgName}/courses/${courseId}/submissionVideo/${video.id}`}
                                                         >
                                                             <Button
                                                             variant="ghost"

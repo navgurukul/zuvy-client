@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useCallback, useRef , useMemo} from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import {
     ArrowLeft,
@@ -85,6 +85,8 @@ const StudentsPage = ({ params }: { params: any }) => {
     const [batchFilter, setBatchFilter] = useState<string>('all')
     const [attendanceInput, setAttendanceInput] = useState('')
     const [loading, setLoading] = useState(true)
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
     
     // Use debounce hook for attendance input
     const debouncedAttendance = useDebounce(attendanceInput, 500)
@@ -319,13 +321,13 @@ const StudentsPage = ({ params }: { params: any }) => {
         } catch (error: any) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/${userRole}/courses`)
+                    router.push(`/${userRole}/${orgName}/courses`)
                     toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
                 }
             }
             console.error(error)
         }
-    }, [params.courseId, limit, offset, setStudents, router, userRole])
+    }, [params.courseId, limit, offset, setStudents, router, userRole, orgName])
 
     const userIds = selectedRows.map((item: any) => item.userId)
 

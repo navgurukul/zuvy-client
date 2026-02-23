@@ -11,12 +11,18 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { usePathname } from 'next/navigation'
+import { getUser } from '@/store/store'
 import {
     Params,
     QuestionItem,
 } from '@/app/[admin]/[organization]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType'
 const PreviewForm = ({ params }: { params: Params }) => {
     const { formPreviewContent, setFormPreviewContent } = getFormPreviewStore()
+    const pathname = usePathname()
+    const orgName = pathname.split('/')[2]
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
     useEffect(() => {
         fetchPreviewData(params, setFormPreviewContent)
@@ -33,7 +39,7 @@ const PreviewForm = ({ params }: { params: Params }) => {
             <div className="relative flex flex-col items-center justify-center px-4 py-8 mt-20">
                 {/* Left Section: Go Back Button */}
                 <Link
-                    href={`/admin/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
+                    href={`/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                     className="absolute left-0 top-0 flex items-center space-x-2 p-4"
                 >
                     {' '}
