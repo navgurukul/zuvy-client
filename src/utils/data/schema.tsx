@@ -76,6 +76,7 @@ export const openEndedQuestionSchema = z.object({
 })
 
 export const orgSchema = z.object({
+    id: z.string().optional(),
     name: z.string(),
     managementType: z.string(),
     poc: z.object({

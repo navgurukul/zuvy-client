@@ -1,7 +1,7 @@
 'use client'
 import { useCallback, useState } from 'react'
 import { api } from '@/utils/axios.config'
-import type { CourseData } from '@/app/[admin]/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+import type { CourseData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 
 type CreateResponse = {
     status: string
