@@ -4,7 +4,7 @@ import { api } from '@/utils/axios.config'
 import type {
     Course,
     CoursesResponse,
-} from '@/app/[admin]/[organization]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+} from '@/app/[admin]/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 import { coursePermissions } from './hookType'
 import { db } from '@/lib/indexDb'
 

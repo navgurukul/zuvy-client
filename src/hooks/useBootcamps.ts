@@ -75,7 +75,7 @@ import { api } from '@/utils/axios.config'
 import type {
     Course,
     CoursesResponse,
-} from '@/app/[admin]/[organization]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+} from '@/app/[admin]/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 
 type UseBootcampsArgs = {
     limit: number | string
