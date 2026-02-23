@@ -426,7 +426,7 @@ import { Button } from '@/components/ui/button'
 import { api } from '@/utils/axios.config'
 import { ArrowUpRightSquare, CalendarIcon, Eye, ArrowLeft } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { toast } from '@/components/ui/use-toast'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -458,7 +458,9 @@ export default function Project() {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [lastSavedContent, setLastSavedContent] = useState<string>('')
     const [lastSavedTitle, setLastSavedTitle] = useState('')
+    const [lastSavedDeadline, setLastSavedDeadline] = useState('')
     const [hasUserSavedBefore, setHasUserSavedBefore] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
 
     const crumbs = [
         {
@@ -488,15 +490,24 @@ export default function Project() {
 
     const form = useForm({
         resolver: zodResolver(formSchema),
-        values: {
-            title: title,
-            startDate: setHours(
-                setMinutes(setSeconds(setMilliseconds(new Date(), 0), 0), 0),
-                0
-            ),
+        defaultValues: {
+            title: '',
+            startDate: new Date(),
         },
         mode: 'onChange',
     })
+    const watchedStartDate = useWatch({
+        control: form.control,
+        name: 'startDate',
+    })
+
+    const getDateKey = (date?: Date | null) => {
+        if (!date || isNaN(date.getTime())) return ''
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
 
     const fetchProjectDetails = async () => {
         try {
@@ -514,14 +525,12 @@ export default function Project() {
             setLastSavedContent(JSON.stringify(parsedContent))
             let selectedDate: Date | undefined = undefined
             if (project.deadline) {
-                const deadlineDate = new Date(project.deadline)
-                selectedDate = new Date(
-                    Date.UTC(
-                        deadlineDate.getFullYear(),
-                        deadlineDate.getMonth(),
-                        deadlineDate.getDate()
-                    )
-                )
+                const isoDate = new Date(project.deadline)
+                const year = isoDate.getUTCFullYear()
+                const month = isoDate.getUTCMonth()
+                const day = isoDate.getUTCDate()
+
+                selectedDate = new Date(year, month, day)
             }
             // Reset form with API data
             form.reset({
@@ -531,6 +540,7 @@ export default function Project() {
 
             // Ensure Calendar sees the updated date
             if (selectedDate) form.setValue('startDate', selectedDate)
+            setLastSavedDeadline(getDateKey(selectedDate))
         } catch (err) {
             console.error(err)
         }
@@ -541,6 +551,13 @@ export default function Project() {
         }
     }, [projectID])
 
+    useEffect(() => {
+        // Sync form field value with title state after API loads
+        if (title && title !== '') {
+            form.setValue('title', title)
+        }
+    }, [title, form])
+
     // Check for unsaved changes
     useEffect(() => {
         const currentContent = initialContent
@@ -548,22 +565,38 @@ export default function Project() {
             : ''
         const titleChanged = title !== lastSavedTitle
         const contentChanged = currentContent !== lastSavedContent
+        const deadlineChanged =
+            getDateKey(watchedStartDate) !== lastSavedDeadline
 
-        setHasUnsavedChanges(titleChanged || contentChanged)
-    }, [title, initialContent, lastSavedTitle, lastSavedContent])
+        setHasUnsavedChanges(titleChanged || contentChanged || deadlineChanged)
+    }, [
+        title,
+        initialContent,
+        watchedStartDate,
+        lastSavedTitle,
+        lastSavedContent,
+        lastSavedDeadline,
+    ])
 
     async function editProject(data: any) {
         function convertToISO(date: Date): string {
             if (!date || isNaN(date.getTime())) {
                 throw new Error('Invalid date')
             }
-            // directly convert to ISO string (UTC)
-            return date.toISOString()
+            // Create a UTC date with the local date values
+            const utcDate = new Date(Date.UTC(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+                0, 0, 0, 0
+            ))
+            return utcDate.toISOString()
         }
 
         const deadlineDate = convertToISO(data.startDate)
 
         try {
+            setIsSaving(true)
             const initialContentString = initialContent
                 ? JSON.stringify(initialContent)
                 : ''
@@ -577,6 +610,7 @@ export default function Project() {
             // Update last saved states
             setLastSavedTitle(title)
             setLastSavedContent(initialContentString)
+            setLastSavedDeadline(getDateKey(data.startDate))
             setHasUnsavedChanges(false)
             setHasUserSavedBefore(true)
             toast.success({
@@ -589,6 +623,8 @@ export default function Project() {
                 description:
                     error.response?.data?.message || 'An error occurred.',
             })
+        } finally {
+            setIsSaving(false)
         }
     }
 
@@ -721,11 +757,12 @@ export default function Project() {
                                                 <Input
                                                     placeholder="Untitled Article"
                                                     className="p-0 text-2xl w-2/5 text-left font-semibold outline-none border-none focus-visible:ring-0 capitalize"
-                                                    {...field}
-                                                    {...form.register('title')}
-                                                    onChange={(e) =>
+                                                    value={field.value || ''}
+                                                    onChange={(e) => {
+                                                        field.onChange(e.target.value)
                                                         setTitle(e.target.value)
-                                                    }
+                                                    }}
+                                                    onBlur={field.onBlur}
                                                 />
                                                 <div
                                                     id="previewProject"
@@ -816,10 +853,10 @@ export default function Project() {
                 </div>
                 <div className="flex justify-end my-5">
                     <Button type="submit" form="myForm"
-                        disabled={isContentEmpty()}
-                        className={isContentEmpty() ? 'opacity-50 cursor-not-allowed' : ''}
+                        disabled={isContentEmpty() || !hasUnsavedChanges || isSaving}
+                        className={isContentEmpty() || !hasUnsavedChanges || isSaving ? 'opacity-50 cursor-not-allowed' : ''}
                     >
-                        Save
+                        {isSaving ? 'Saving...' : 'Save'}
                     </Button>
                 </div>
             </div>
