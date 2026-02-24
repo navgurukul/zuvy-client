@@ -9,7 +9,7 @@ import { api } from '@/utils/axios.config'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
 interface ProjectsComponentProps {
@@ -26,10 +26,11 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
     totalStudents,
 }) => {
     const { downloadCsv } = useDownloadCsv()
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const handleDownloadCsv = (projectId: string, projectTitle: string) => {
         downloadCsv({
@@ -102,7 +103,7 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
                                 </div>
                             )}
                             {submissions > 0 ? (
-                                <Link href={`/${userRole}/${orgName}/courses/${courseId}/submissionProjects/${projectId}`}>
+                                <Link href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionProjects/${projectId}`}>
                                     <Button
                                         variant="ghost"
                                         className="hover:bg-white-500  px-1 hover:text-gray-700 transition-colors"

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { getUser } from '@/store/store'
 import { Link } from 'lucide-react'
 import { Input } from '@/components/ui/input'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import {
     PriviewEditorDoc,
@@ -18,8 +18,11 @@ import {
 const PreviewAssignment = ({ params }: { params: Params }) => {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const isPdfPreview = searchParams.get('pdf') === 'true'
     const { assignmentPreviewContent, setAssignmentPreviewContent } =
         getAssignmentPreviewStore()
@@ -29,8 +32,6 @@ const PreviewAssignment = ({ params }: { params: Params }) => {
 
     const timestamp = assignmentPreviewContent?.completionDate
     const date = new Date(timestamp)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     // Improved date formatting function with better error handling
     const formatDeadlineDate = (timestamp?: string) => {
@@ -127,7 +128,7 @@ const PreviewAssignment = ({ params }: { params: Params }) => {
 
     const goBack = () => {
         router.push(
-            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`
+            `/${userRole}/organizations/${orgId}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`
         )
     }
 

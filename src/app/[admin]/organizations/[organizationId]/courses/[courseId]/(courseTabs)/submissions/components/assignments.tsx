@@ -16,19 +16,20 @@ import {
 import { Badge } from '@/components/ui/badge'
 import {AssignmentSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
 
 const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
     const { downloadCsv } = useDownloadCsv()
+    const { organizationId } = useParams()
     const [assignmentData, setAssignmentData] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
     const [loading, setLoading] = useState(true)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     useEffect(() => {
         const fetchAssignmentDataHandler = async () => {
@@ -163,7 +164,7 @@ const Assignments = ({ courseId, debouncedSearch }: AssignmentProps) => {
                                                             </div>
                                                             ) : (
                                                             <Link
-                                                                href={`/${userRole}/${orgName}/courses/${courseId}/submissionAssignments/${moduleData.id}`}
+                                                                href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssignments/${moduleData.id}`}
                                                             >
                                                                 <Eye size={20} className="text-gray-500 hover:text-gray-700 mb-1" />
                                                             </Link>

@@ -21,7 +21,7 @@ import {
     getChapterDataState,
 } from '@/store/store'
 import { ArrowUpRightSquare, Pencil, FileQuestion } from 'lucide-react'
-import { useRouter,usePathname } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import {
     QuizProps,
     ChapterDetailsResponse,
@@ -48,8 +48,11 @@ function Quiz(props: QuizProps) {
     const canEdit = props.canEdit ?? true
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     const router = useRouter()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [tags, setTags] = useState<PageTag[]>([])
     const [isOpen, setIsOpen] = useState(false)
     const [addQuestion, setAddQuestion] = useState<QuizDataLibrary[]>([])
@@ -62,8 +65,6 @@ function Quiz(props: QuizProps) {
     const { setQuizPreviewContent } = getQuizPreviewStore()
     const [isDataLoading, setIsDataLoading] = useState(true)
     const hasLoaded = useRef(false)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     const [isSaved, setIsSaved] = useState<boolean>(true)
     const [savedQuestions, setSavedQuestions] = useState<QuizDataLibrary[]>([])
@@ -374,7 +375,7 @@ function Quiz(props: QuizProps) {
             quizQuestionDetails: addQuestion,
         })
         router.push(
-            `/${userRole}/${orgName}/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
+            `/${userRole}/organizations/${orgId}/courses/${props.courseId}/module/${props.moduleId}/chapter/${props.chapterId}/quiz/${props.content.topicId}/preview`
         )
     }
 

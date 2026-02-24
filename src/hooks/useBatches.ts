@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -22,10 +22,12 @@ import {
 
 export default function useBatches(params: ParamsType) {
     const router = useRouter()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const pathname = usePathname()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const orgName = pathname.split('/')[2]
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const { students } = { students: [] as StudentData[] } // placeholder if needed
 
@@ -283,7 +285,7 @@ export default function useBatches(params: ParamsType) {
     }
 
     const handleViewStudents = (batchId: string | number, batchName: string) => {
-        router.push(`/${userRole}/${orgName}/courses/${params.courseId}/batch/${batchId}`)
+        router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/batch/${batchId}`)
     }
 
     const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

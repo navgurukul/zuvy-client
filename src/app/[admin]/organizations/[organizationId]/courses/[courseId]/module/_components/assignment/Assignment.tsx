@@ -38,7 +38,7 @@ import {
     getAssignmentPreviewStore,
     getUser,
 } from '@/store/store'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
@@ -84,8 +84,11 @@ const AddAssignent = ({
     })
 
     const router = useRouter()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [title, setTitle] = useState('')
     const [deadline, setDeadline] = useState<any>()
     const [titles, setTitles] = useState('')
@@ -115,8 +118,6 @@ const AddAssignent = ({
     const [canSave, setCanSave] = useState(false)
     const hasLoaded = useRef(false)
     const lastLoadedContentId = useRef<string | number | null>(null)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     const { editChapter } = useEditChapter()
     const { uploadPdf, loading: uploadLoading } = useUploadPdf()
@@ -440,7 +441,7 @@ const AddAssignent = ({
             }
             setAssignmentPreviewContent(content)
             router.push(
-                `/${userRole}/${orgName}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
+                `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview`
             )
         }
     }
@@ -495,7 +496,7 @@ const AddAssignent = ({
         if (ispdfUploaded) {
             setAssignmentPreviewContent(content)
             router.push(
-                `/${userRole}/${orgName}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
+                `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/assignment/${content.topicId}/preview?pdf=true`
             )
         } else {
             toast.error({

@@ -2,7 +2,7 @@
 
 // External imports
 import React, { useCallback, useEffect, useState, useMemo } from 'react'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname, useParams } from 'next/navigation'
 import { ArrowLeft, RefreshCw, Download } from 'lucide-react'
 
 // Internal imports
@@ -75,9 +75,11 @@ const Page = ({ params }: any) => {
     const [lastPage, setLastPage] = useState(0)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalStudents, setTotalStudents] = useState(0)
-    const orgName = pathname.split('/')[2]
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     // Create columns with context
     const columns = useMemo(() => getColumns({
@@ -223,17 +225,17 @@ const Page = ({ params }: any) => {
     const crumbs = [
         {
             crumb: 'My Courses',
-            href: `/${userRole}/${orgName}/courses`,
+            href: `/${userRole}/organizations/${orgId}/courses`,
             isLast: false,
         },
         {
             crumb: bootcampData?.name,
-            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
             crumb: 'Submission - Assesments',
-            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
@@ -372,7 +374,7 @@ const Page = ({ params }: any) => {
         <>
             <MaxWidthWrapper className="">
                 <div className="flex items-center gap-4 mb-8">
-                    <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions`}>
+                    <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`}>
                         <Button
                             variant="ghost"
                             className="hover:bg-transparent hover:text-primary transition-colors"

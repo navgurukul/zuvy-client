@@ -9,7 +9,7 @@ import Image from 'next/image'
 import moment from 'moment'
 import {LiveClassSubmissionSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
 interface LiveClassSubmissionsProps {
@@ -22,14 +22,14 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
     debouncedSearch,
 }) => {
     const { downloadCsv } = useDownloadCsv()
+    const { organizationId } = useParams()
     const [liveClassData, setLiveClassData] = useState<any[]>([])
     const [totalStudents, setTotalStudents] = useState(0)
     const [loading, setLoading] = useState(true)
-
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const getLiveClassData = useCallback(async () => {
         try {
@@ -153,7 +153,7 @@ const LiveClassSubmissions: React.FC<LiveClassSubmissionsProps> = ({
                         )}
                         {submissions > 0 ? (
                             <Link
-                                href={`/${userRole}/${orgName}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
+                                href={`/${userRole}/organizations/${orgId}/courses/${courseId}/submissionLiveClass/${liveClass.id}`}
                             >
                                 <Button
                                     variant="ghost"

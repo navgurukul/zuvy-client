@@ -19,15 +19,16 @@ import useBootcampSettings from '@/hooks/useBootcampSettings'
 import useBootcampDelete from '@/hooks/useBootcampDelete'
 import { PageProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/settings/courseSettingType'
 import {SettingsSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 const Page = ({ params }: { params: PageProps }) => {
     const router = useRouter()
+    const { organizationId } = useParams()
     const { courseData } = getCourseData()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     // Use the custom hooks
     const { bootcampSettings, loading, error, updateError, updateSettings } =
@@ -124,7 +125,7 @@ const Page = ({ params }: { params: PageProps }) => {
             <div className="flex justify-center items-center h-screen">
                 <div className="text-center">
                     <p className="text-destructive mb-4">{error}</p>
-                    <Button onClick={() => router.push(`/${userRole}/${orgName}/courses`)}>
+                    <Button onClick={() => router.push(`/${userRole}/organizations/${orgId}/courses`)}>
                         Back to Courses
                     </Button>
                 </div>

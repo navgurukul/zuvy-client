@@ -4,14 +4,15 @@ import React from 'react'
 import AssesmentComponent from './AssesmentComponent'
 import { Button } from '@/components/ui/button'
 import { ModuleProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
 const Assesments = (props: ModuleProps) => {
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     return (
         <div className="w-full">
@@ -21,7 +22,7 @@ const Assesments = (props: ModuleProps) => {
                         {props.moduleAssessments.map((module) => (
                             <Link
                                 key={module.id}
-                                href={`/${userRole}/${orgName}/courses/${props.courseId}/submissions/${module.id}`}
+                                href={`/${userRole}/organizations/${orgId}/courses/${props.courseId}/submissions/${module.id}`}
                                 className=""
                             >
                                 {/* <AssesmentComponent

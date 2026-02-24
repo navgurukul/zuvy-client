@@ -12,7 +12,7 @@ import { api } from '@/utils/axios.config'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import { SearchBox } from '@/utils/searchBox'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
 type Props = {}
@@ -38,10 +38,11 @@ const Page = ({ params }: any) => {
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [batches, setBatches] = useState<BatchFilter[]>([])
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
      // Fetch batches from API
     const fetchBatches = useCallback(async () => {
@@ -192,7 +193,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                 
                         className="hover:bg-transparent hover:text-primary transition-colors"

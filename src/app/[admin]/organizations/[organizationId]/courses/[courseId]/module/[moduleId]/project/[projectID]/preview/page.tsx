@@ -7,23 +7,23 @@ import { ArrowLeft } from 'lucide-react'
 import { getUser } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { useParams, usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import RemirrorTextEditor from '@/components/remirror-editor/RemirrorTextEditor'
 
 const ProjectPreview = () => {
     const router = useRouter()
+    const { organizationId, courseId, moduleId, projectID } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const { courseId, moduleId, projectID } = useParams()
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const { projectPreviewContent, setProjectPreviewContent } =
         getProjectPreviewStore()
     const [initialContent, setInitialContent] = useState()
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     const goBack = () => {
         router.push(
-            `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/project/${projectID}`
+            `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/project/${projectID}`
         )
     }
 

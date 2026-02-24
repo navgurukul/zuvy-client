@@ -5,15 +5,16 @@ import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { AssesmentComponentProps } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminCourseCourseIdComponentType'
 import React, { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
 const AssesmentComponent = (props: AssesmentComponentProps) => {
     const isDisabled = props.studentsSubmitted === 0
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     return (
         <div className="bg-card border border-gray-200 rounded-md p-3 hover:shadow-lg transition-shadow w-full mb-4">
@@ -68,7 +69,7 @@ const AssesmentComponent = (props: AssesmentComponentProps) => {
                         </div>
                     ) : (
                         <Link
-                            href={`/${userRole}/${orgName}/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
+                            href={`/${userRole}/organizations/${orgId}/courses/${props.bootcampId}/submissionAssesments/${props.id}`}
                             className="text-gray-500 hover:text-gray-700 mb-2"
                         >
                             <Eye size={20} />

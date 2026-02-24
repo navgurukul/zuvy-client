@@ -10,7 +10,7 @@ import {
     difficultyColor,
     getAssesmentBackgroundColorClass,
 } from '@/lib/utils'
-import { usePathname } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { getUser } from '@/store/store'
 
 type Props = {}
@@ -30,28 +30,29 @@ const IndividualStudentAssesment = ({
     attemptedOpenEndedQuestions,
 }: any) => {
     const { courseId, assessment_Id, IndividualReport, report } = params
+    const { organizationId } = useParams()
     const color = getAssesmentBackgroundColorClass(25, 5)
-    const pathname = usePathname();
-    const orgName = pathname.split('/')[2];
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const renderQuestion = () => {
         switch (type) {
             case 'openEndedSubmission':
                 return {
                     title: 'Open Ended Question',
-                    link: `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
+                    link: `/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionOpenEnded`,
                 }
             case 'quizSubmission':
                 return {
                     title: 'Quiz assessment',
-                    link: `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
+                    link: `/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionQuizQuestion`,
                 }
             case 'codingSubmission':
                 return {
                     title: 'Coding Questions',
-                    link: `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
+                    link: `/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${IndividualReport}/Report/${report}/ViewSolutionCodingQuestion/${codingOutsourseId}?id=${data?.questionId}`,
                 }
             default:
                 return {

@@ -14,7 +14,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
 import ClassCardSkeleton from '../../_components/classCardSkeleton'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import { useRouter, useSearchParams, usePathname, useParams } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import axios from 'axios'
 import {
     State,
@@ -51,8 +51,6 @@ function Page({ params }: ParamsType) {
     const [checkopenSessionForm, setOpenSessionForm] = useState(true)
     const [modulesData, setModulesData] = useState<any>([])
     const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('') // Track current search
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     // Core API function that handles all data fetching
     const fetchClassesData = useCallback(
@@ -239,7 +237,7 @@ function Page({ params }: ParamsType) {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/${userRole}/${orgName}/courses`)
+                    router.push(`/${userRole}/organizations/${orgId}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:

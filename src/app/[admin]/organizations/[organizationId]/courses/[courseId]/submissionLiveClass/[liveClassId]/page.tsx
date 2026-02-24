@@ -16,7 +16,7 @@ import { DataTablePagination } from '@/app/_components/datatable/data-table-pagi
 import { getOffset, getUser } from '@/store/store'
 import { POSITION } from '@/utils/constant'
 import useDownloadCsv from '@/hooks/useDownloadCsv'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 type Props = {}
 
@@ -55,10 +55,11 @@ const Page = ({ params }: any) => {
     const [batches, setBatches] = useState<Batch[]>([])
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -76,12 +77,12 @@ const Page = ({ params }: any) => {
     const crumbs = [
         {
             crumb: 'My Courses',
-            href: `/${userRole}/${orgName}/courses`,
+            href: `/${userRole}/organizations/${orgId}/courses`,
             isLast: false,
         },
         {
             crumb: bootcampData?.name,
-            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
@@ -245,7 +246,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                  
                         className="hover:bg-transparent hover:text-primary transition-colors"

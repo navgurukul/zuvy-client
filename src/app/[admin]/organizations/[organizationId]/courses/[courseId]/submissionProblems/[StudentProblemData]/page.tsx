@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { ArrowLeft, RefreshCw,Download } from 'lucide-react'
 import Link from 'next/link'
 import { DataTable } from '@/app/_components/datatable/data-table'
@@ -35,10 +35,11 @@ const PracticeProblems = ({ params }: any) => {
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [batches, setBatches] = useState<BatchFilter[]>([])
-    const pathname = usePathname();
-    const orgName = pathname.split('/')[2];
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const fetchBatches = useCallback(async () => {
         setIsLoadingBatches(true)
@@ -231,7 +232,7 @@ const PracticeProblems = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                   
                         className="hover:bg-transparent hover:text-primary transition-colors"

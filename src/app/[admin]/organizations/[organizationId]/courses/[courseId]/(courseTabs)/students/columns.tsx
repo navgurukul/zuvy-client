@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useRouter, useParams, usePathname } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 
 import { ColumnDef } from '@tanstack/react-table'
 
@@ -20,14 +20,15 @@ import ActionCell from './actionCell'
 // Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
     const { userId } = row.original
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const { isStudent, setIsStudent } = getEditStudent()
     const { studentData, setStudentData } = getStudentData()
     const router = useRouter()
     const params = useParams()
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     const handleSingleStudent = (
         e: React.ChangeEvent<HTMLInputElement>
@@ -37,7 +38,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     }
     
     const handleStudentClick = () => {
-        router.push(`/${userRole}/${orgName}/courses/${params.courseId}/${userId}`)
+        router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/${userId}`)
     }
     
     return (
