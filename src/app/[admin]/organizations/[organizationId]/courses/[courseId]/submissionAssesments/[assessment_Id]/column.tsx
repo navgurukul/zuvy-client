@@ -225,16 +225,18 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             // Use context values instead of row.original
             const { courseId, assessment_Id } = context;
             const pathname = window.location.pathname
-            const orgName = pathname.split('/')[2]
+            const organizationId = pathname.split('/')[3]
             const { user } = getUser()
             const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+            const isSuperAdmin = userRole === 'super_admin';
+            const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
             return (
                 <div className="flex items-center gap-3">
                     <Link
                         href={
                             submitedAt
-                                ? `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                                ? `/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
                                 : '#'
                         }
                         className={

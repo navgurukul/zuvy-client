@@ -123,14 +123,16 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             const { bootcampId, userId, questionId, moduleId } = row.original
             const pathname = window.location.pathname
-            const orgName = pathname.split('/')[2]
+            const organizationId = pathname.split('/')[3]
             const { user } = getUser()
             const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+            const isSuperAdmin = userRole === 'super_admin';
+            const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/${userRole}/${orgName}/courses/${bootcampId}/submissionProblems/individualCodingSubbmission/${userId}?questionId=${questionId}&moduleId=${moduleId}`}
+                        href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionProblems/individualCodingSubbmission/${userId}?questionId=${questionId}&moduleId=${moduleId}`}
                         className="max-w-[500px] text-secondary font-medium flex items-center"
                     >
                         <FileText size={16} />

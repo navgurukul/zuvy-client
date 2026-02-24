@@ -122,14 +122,16 @@ export const columns: ColumnDef<Task>[] = [
             const { bootcampId, chapterId, id } = row.original
 
             const pathname = window.location.pathname
-            const orgName = pathname.split('/')[2]
+            const organizationId = pathname.split('/')[3]
             const { user } = getUser()
             const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+            const isSuperAdmin = userRole === 'super_admin';
+            const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/${userRole}/${orgName}/courses/${bootcampId}/submissionAssignments/${chapterId}/individualStatus/${id}`}
+                        href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionAssignments/${chapterId}/individualStatus/${id}`}
                         className="max-w-[500px] text-primary font-medium flex items-center"
                     >
                         <FileText size={16} />
