@@ -14,7 +14,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { toast } from '@/components/ui/use-toast'
 import ClassCardSkeleton from '../../_components/classCardSkeleton'
 import { useCourseExistenceCheck } from '@/hooks/useCourseExistenceCheck'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname, useParams } from 'next/navigation'
 import axios from 'axios'
 import {
     State,
@@ -25,10 +25,13 @@ import {
 import { SearchBox } from '@/utils/searchBox'
 
 function Page({ params }: ParamsType) {
+    const { organizationId } = useParams()
     const router = useRouter()
     const searchParams = useSearchParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [classes, setClasses] = useState<CourseClassItem[]>([])
     const [students, setStudents] = useState<number>(0)
     const { setbatchValueData } = setStoreBatchValue()

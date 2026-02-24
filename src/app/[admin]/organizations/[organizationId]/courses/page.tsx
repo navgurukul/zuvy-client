@@ -67,8 +67,6 @@ const Courses: React.FC = () => {
     const [newCourseName, setNewCourseName] = useState<string>('')
     const [newCourseDuration, setNewCourseDuration] = useState<string>('')
     const [newCourseDescription, setNewCourseDescription] = useState<string>('')
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -168,7 +166,7 @@ const defaultFetchApi = useCallback(
                 setNewCourseDescription('')
                 await refetchBootcamps(offset) // same page refresh
                 await refetchAllCourses() // refresh suggestions
-                router.push(`/${userRole}/${orgName}/courses/${data.bootcamp.id}/details`)
+                router.push(`/${userRole}/organizations/${orgId}/courses/${data.bootcamp.id}/details`)
             } catch (error: any) {
                 toast.error({
                     title: error?.data?.status || 'Error',
