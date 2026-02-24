@@ -413,10 +413,10 @@ export default function AdminSettingPage() {
                                                         Change Logo
                                                     </Button>
                                                     <Button
-                                                        variant="ghost"
+                                                        variant="outline"
                                                         size="sm"
                                                         onClick={handleRemoveLogo}
-                                                        className="text-destructive flex-1"
+                                                        className="text-destructive flex-1 hover:bg-destructive/100 hover:text-destructive-foreground"
                                                     >
                                                         Remove
                                                     </Button>

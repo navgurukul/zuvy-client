@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/utils/axios.config'
+import useDebounce from '@/hooks/useDebounce'
 
 export interface Organization {
     // id: number
@@ -32,19 +33,23 @@ export interface OrganizationsResponse {
     data: Organization[]
 }
 
-export function useOrganizationsByUser(userId: number | null) {
+export function useOrganizationsByUser(userId: number | null, search?: string) {
     const [organizations, setOrganizations] = useState<Organization[]>([])
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<unknown>(null)
+    const debouncedSearch = useDebounce(search, 500)
 
-    const fetchOrganizations = useCallback(async (userId: number) => {
+    const fetchOrganizations = useCallback(async (userId: number, searchTerm?: string) => {
         try {
             if (!userId) return
 
             setLoading(true)
             setError(null)
-            const res = await api.get<OrganizationsResponse>(`/org/getOrgByUserId/${userId}`)
-            
+            const queryParams = new URLSearchParams()
+            if (searchTerm) queryParams.append('search', searchTerm)
+            const url = `/org/getOrgByUserId/${userId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+            const res = await api.get<OrganizationsResponse>(url)
+
             // Get the organizations data from the response
             const organizationsData = res?.data?.data || []
             setOrganizations(organizationsData)
@@ -55,16 +60,16 @@ export function useOrganizationsByUser(userId: number | null) {
         } finally {
             setLoading(false)
         }
-    }, []) 
+    }, [])
 
     useEffect(() => {
         if (userId) {
-            fetchOrganizations(userId)
+            fetchOrganizations(userId, debouncedSearch)
         } else {
             setOrganizations([])
             setLoading(false)
         }
-    }, [userId, fetchOrganizations])
+    }, [userId, fetchOrganizations, debouncedSearch])
 
     return {
         organizations,

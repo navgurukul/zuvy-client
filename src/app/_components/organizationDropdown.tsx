@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ChevronDown, Check, Search, Divide } from 'lucide-react';
+import { ChevronDown, Check, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -26,28 +26,24 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
 
+    const [isOpen, setIsOpen] = useState(false);
+    const [selected, setSelected] = useState<Organization | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
     // Always call both hooks (Rules of Hooks), pick result based on role
-    const byUser = useOrganizationsByUser(isSuperAdmin ? null : userId);
-    const allOrgs = useOrganizations({ auto: isSuperAdmin });
+    const byUser = useOrganizationsByUser(isSuperAdmin ? null : userId, searchTerm);
+    const allOrgs = useOrganizations({ auto: isSuperAdmin, search: searchTerm });
 
     const { organizations, loading, error } = isSuperAdmin ? allOrgs : byUser;
 
-
-    const filteredSelectedOrg = organizations.filter(org =>
-        org.id === parseInt(orgId)
-    );
-    const [isOpen, setIsOpen] = useState(false);
-    const [selected, setSelected] = useState(filteredSelectedOrg[0] || organizations[0]);
-    const [searchTerm, setSearchTerm] = useState('');
-
-    // const filtered = organizations.filter(org =>
-    //     org.title.toLowerCase().includes(searchTerm.toLowerCase())
-    // );
-
-
     useEffect(() => {
-        setSelected(filteredSelectedOrg[0] || organizations[0]);
-    }, [loading, organizations]);
+        const found = organizations.find(org => org.id === parseInt(orgId));
+        if (found) {
+            setSelected(found);
+        } else if (!selected && organizations.length > 0 && !searchTerm) {
+            setSelected(organizations[0]);
+        }
+    }, [loading, organizations, orgId]);
 
     const handleSelect = (org: Organization) => {
         setSelected(org);
@@ -64,10 +60,33 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
         return name.substring(0, 2).toUpperCase();
     };
 
+    const shouldShowDropdown = isSuperAdmin || organizations.length > 1 || searchTerm !== '';
+
     return (
         <>
             {
-                organizations.length > 1 && !loading && !error ? (
+                !shouldShowDropdown ? (
+                    <Button
+                        variant="ghost"
+                        className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 border-none"
+                    >
+                        <div className="flex items-center gap-3">
+                            {selected ? (
+                                <>
+                                    <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                        {/* {getInitials(selected)} */}
+                                        {selected.code}
+                                    </div>
+                                    <span className="text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                                        {selected.title}
+                                    </span>
+                                </>
+                            ) : (
+                                <span className="text-gray-500">Loading...</span>
+                            )}
+                        </div>
+                    </Button>
+                ) : (
                     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
                         <DropdownMenuTrigger asChild>
                             <Button
@@ -100,14 +119,14 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                         >
                             {/* Search Input */}
                             <div className="flex-none p-3 border-b">
-                                <div className="relative">
+                                <div className="relative" onPointerDown={(e) => e.stopPropagation()}>
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                     <Input
                                         placeholder="Search by name..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
+                                        onKeyDown={(e) => e.stopPropagation()}
                                         className="pl-10 border-0 focus:ring-0 focus-visible:ring-0"
-                                        disabled={loading}
                                     />
                                 </div>
                             </div>
@@ -126,7 +145,6 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                                     <div className="px-4 py-3 text-gray-500 text-sm">No organizations found</div>
                                 ) : (
                                     organizations
-                                        .filter(org => org.title.toLowerCase().includes(searchTerm.toLowerCase()))
                                         .map(org => (
                                             <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50 cursor-pointer">
                                                 <Link
@@ -170,27 +188,6 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                             </div>
                         </DropdownMenuContent>
                     </DropdownMenu>
-                ) : (
-                    <Button
-                        variant="ghost"
-                        className="w-auto flex items-center justify-between px-4 py-3 h-auto hover:bg-gray-50 border-none"
-                    >
-                        <div className="flex items-center gap-3">
-                            {selected ? (
-                                <>
-                                    <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
-                                        {/* {getInitials(selected)} */}
-                                        {selected.code}
-                                    </div>
-                                    <span className="text-gray-900 font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
-                                        {selected.title}
-                                    </span>
-                                </>
-                            ) : (
-                                <span className="text-gray-500">Loading...</span>
-                            )}
-                        </div>
-                    </Button>
                 )
             }
 
