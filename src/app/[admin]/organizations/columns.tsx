@@ -47,6 +47,7 @@ export const createColumns = (
       header: 'Organisation',
       cell: ({ row }) => {
         const name = row.original.name
+        const organizationId = row.original.id
         const limit = 20
         const { user } = getUser()
         const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -55,7 +56,7 @@ export const createColumns = (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link href={`/${userRole}/${name}/courses`} className="max-w-[180px] cursor-pointer text-left text-gray-900">
+                <Link href={`/${userRole}/organizations/${organizationId}/courses`} className="max-w-[180px] cursor-pointer text-left text-gray-900">
                   <p className='text-start'>
                     {name.length > limit
                       ? name.substring(0, limit) + '...'

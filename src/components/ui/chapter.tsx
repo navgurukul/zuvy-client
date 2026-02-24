@@ -4,11 +4,11 @@ import { api } from '@/utils/axios.config'
 import { useParams, useRouter } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Reorder } from 'framer-motion'
-import ChapterItem from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/ChapterItem'
+import ChapterItem from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ChapterItem'
 import { toast } from '@/components/ui/use-toast'
 import { Dialog, DialogContent, DialogOverlay, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import ChapterModal from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/ChapterModal'
+import ChapterModal from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/ChapterModal'
 import {
     getChapterContentState,
     getChapterDataState,
@@ -22,7 +22,7 @@ import {
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { useModuleChapters } from '@/hooks/useModuleChapters'
-import { ModuleContentSkeletons } from '@/app/[admin]/[organization]/courses/[courseId]/_components/adminSkeleton'
+import { ModuleContentSkeletons } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 type Chapter = {
     chapterId: number
@@ -36,7 +36,7 @@ function Chapter() {
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const { organization, courseId, moduleId, chapterID } = useParams()
+    const { organizationId, courseId, moduleId, chapterID } = useParams()
     
     const chapter_id = Array.isArray(chapterID) ? Number(chapterID[0]) : Number(chapterID)
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
@@ -99,7 +99,7 @@ function Chapter() {
             await refetch()
         } catch (error) {
             console.error('Error fetching chapters:', error)
-            router.replace(`/${userRole}/${organization}/courses/${courseId}/curriculum`)
+            router.replace(`/${userRole}/organizations/${organizationId}/courses/${courseId}/curriculum`)
             toast.info({
                 title: 'Caution',
                 description: 'The Module has been deleted by another Admin',
@@ -305,7 +305,7 @@ function Chapter() {
     return (
         <div className="flex flex-col h-screen pb-20 bg-card pl-4 pt-2">
             <Link
-                href={`/${userRole}/${organization}/courses/${courseId}/curriculum`}
+                href={`/${userRole}/organizations/${organizationId}/courses/${courseId}/curriculum`}
                 className="flex space-x-2 w-[180px] text-foreground mt-3 mb-6 hover:text-primary"
             >
                 <ArrowLeft size={20} />

@@ -8,7 +8,7 @@ import { createColumns } from './columns'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import AddOrganization from './_components/AddOrganization';
-import { DeleteModalDialog } from '@/app/[admin]/[organization]/courses/[courseId]/(courseTabs)/students/components/deleteModal'
+import { DeleteModalDialog } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/deleteModal'
 import { useOrganizations, Organization } from '@/hooks/useOrganizations'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
@@ -188,7 +188,7 @@ export default function OrganizationsPage() {
     const transformedOrganizations = useMemo(() => {
         return organizations.map(org => ({
             id: org.id.toString(),
-            name: org.displayName || org.title,
+            name: org.title,
             code: org.title.substring(0, 2).toUpperCase(),
             managementType: org.isManagedByZuvy ? 'Zuvy Managed' : 'Self Managed' as 'Self Managed' | 'Zuvy Managed',
             poc: {

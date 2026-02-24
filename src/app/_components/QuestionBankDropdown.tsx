@@ -15,12 +15,12 @@ import { useState } from 'react'
 const QuestionBankDropdown = () => {
     const pathname = usePathname()
     const role = pathname.split('/')[1]
-    const { organization } = useParams()
+    const { organizationId } = useParams()
     const [open, setOpen] = useState(false)
 
     const isActive =
-        pathname === `/${role}/${organization}/resource/` ||
-        pathname.startsWith(`/${role}/${organization}/resource/`)
+        pathname === `/${role}/organizations/${organizationId}/resource/` ||
+        pathname.startsWith(`/${role}/organizations/${organizationId}/resource/`)
 
     return (
         <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
@@ -47,10 +47,10 @@ const QuestionBankDropdown = () => {
 
                 <DropdownMenuContent className="w-40">
                     <Link
-                        href={`/${role}/${organization}/resource/coding`}
+                        href={`/${role}/organizations/${organizationId}/resource/coding`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === `/${role}/${organization}/resource/coding`
+                            pathname === `/${role}/organizations/${organizationId}/resource/coding`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}
@@ -58,10 +58,10 @@ const QuestionBankDropdown = () => {
                         Coding Problems
                     </Link>
                     <Link
-                        href={`/${role}/${organization}/resource/mcq`}
+                        href={`/${role}/organizations/${organizationId}/resource/mcq`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === `/${role}/${organization}/resource/mcq`
+                            pathname === `/${role}/organizations/${organizationId}/resource/mcq`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}
@@ -69,10 +69,10 @@ const QuestionBankDropdown = () => {
                         MCQ
                     </Link>
                     <Link
-                        href={`/${role}/${organization}/resource/open-ended`}
+                        href={`/${role}/organizations/${organizationId}/resource/open-ended`}
                         className={cn(
                             'block w-full px-3 py-2 rounded text-sm text-left',
-                            pathname === `/${role}/${organization}/resource/open-ended`
+                            pathname === `/${role}/organizations/${organizationId}/resource/open-ended`
                                 ? 'bg-gray-300 text-black'
                                 : 'text-black hover:bg-gray-100'
                         )}

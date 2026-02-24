@@ -25,7 +25,7 @@ import {
     TableRow,
 } from '@/components/ui/table'
 import { getIsRowSelected } from '@/store/store'
-import AddLiveClasstoChapter from '@/app/[admin]/[organization]/courses/[courseId]/module/_components/AddLiveClasstoChapter'
+import AddLiveClasstoChapter from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/AddLiveClasstoChapter'
 import {
     DataTableProps,
     StudentData,
