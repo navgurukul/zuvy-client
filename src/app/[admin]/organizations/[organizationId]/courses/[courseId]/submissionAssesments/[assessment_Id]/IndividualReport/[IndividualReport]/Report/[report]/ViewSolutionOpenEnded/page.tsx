@@ -8,7 +8,7 @@ import { toast } from '@/components/ui/use-toast'
 import { getProctoringDataStore, getUser } from '@/store/store'
 import BreadcrumbComponent from '@/app/_components/breadcrumbCmponent'
 import type { PageAssessmentData, PageSubmissionData, BootcampData } from './ViewSolutionPageType'
-import { usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 
 type SubmissionData = {
     id: number
@@ -47,6 +47,7 @@ export type paramsType = {
 }
 
 const Page = ({ params }: { params: paramsType }) => {
+    const { organizationId } = useParams()
     const { proctoringData, fetchProctoringData } = getProctoringDataStore()
     const [openEndedQuestionDetails, setOpenEndedQuestionsDetails] = useState<
         PageAssessmentData[]
@@ -56,36 +57,36 @@ const Page = ({ params }: { params: paramsType }) => {
     const [bootcampData, setBootcampData] = useState<BootcampData | null>(null)
     const [assesmentData, setAssesmentData] = useState<PageSubmissionData | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const crumbs = [
         {
             crumb: 'My Courses',
-            href: `/${userRole}/${orgName}/courses`,
+            href: `/${userRole}/organizations/${orgId}/courses`,
             isLast: false,
         },
         {
             crumb: bootcampData?.name,
 
-            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
             crumb: 'Submission - Assesments',
-            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
+            href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`,
             isLast: false,
         },
         {
             crumb: assesmentData?.title,
-            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
+            href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}`,
             isLast: false,
         },
         {
             crumb: proctoringData?.user?.name,
-            href: `/${userRole}/${orgName}/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
+            href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissionAssesments/${params.assessment_Id}/IndividualReport/${params.IndividualReport}/Report/${params.report}`,
             isLast: false,
         },
         {

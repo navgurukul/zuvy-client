@@ -3,7 +3,7 @@ import { GripVertical, Trash2, Edit, FolderOpen } from 'lucide-react'
 import React, { useState } from 'react'
 import DeleteConfirmationModal from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/deleteModal'
 import { api } from '@/utils/axios.config'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 import { DELETE_MODULE_CONFIRMATION } from '@/utils/constant'
 import { toast } from '@/components/ui/use-toast'
 import { Reorder, useDragControls } from 'framer-motion'
@@ -40,10 +40,11 @@ const CurricullumCard = (props: CurricullamCardProps) => {
 
     const router = useRouter()
     const dragControls = useDragControls()
+    const { organizationId } = useParams()
     const { user } = getUser()
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [isDragging, setIsDragging] = useState(false)
     const [originalOrder, setOriginalOrder] = useState(order)
 
@@ -81,11 +82,11 @@ const CurricullumCard = (props: CurricullamCardProps) => {
     const handleModuleRoute = () => {
         if (typeId === 1) {
             router.push(
-                `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
+                `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/chapters/${chapterId}`
             )
         } else if (typeId === 2) {
             router.push(
-                `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/project/${projectId}`
+                `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/project/${projectId}`
             )
         }
     }

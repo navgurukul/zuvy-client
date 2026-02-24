@@ -23,8 +23,11 @@ const ExistingLiveClass = ({
     fetchingChapters,
     onClose,
 }: ExistingLiveClassProps) => {
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [position, setPosition] = useState(POSITION)
     const [selectedRows, setSelectedRows] = useState<any[]>([])
     const [open, setOpen] = useState(false)
@@ -35,8 +38,6 @@ const ExistingLiveClass = ({
     const [offset, setOffset] = useState<number>(OFFSET)
     const [currentPage, setCurrentPage] = useState(1)
     const [classes, setClasses] = useState([])
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     // Main fetch function
     async function getAllClasses() {
@@ -88,7 +89,7 @@ const ExistingLiveClass = ({
         const latestChapter = chapters[chapters.length - 1]
         if (latestChapter) {
             router.push(
-                `/${userRole}/${orgName}/courses/${param.courseId}/module/${param.moduleId}/chapters/${latestChapter.chapterId}`
+                `/${userRole}/organizations/${orgId}/courses/${param.courseId}/module/${param.moduleId}/chapters/${latestChapter.chapterId}`
             )
         }
         setOpen(false)

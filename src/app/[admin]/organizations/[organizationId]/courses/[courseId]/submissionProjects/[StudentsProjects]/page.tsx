@@ -1,6 +1,6 @@
 'use client'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useRouter ,useSearchParams} from 'next/navigation'
+import { useParams ,useSearchParams} from 'next/navigation'
 import { columns } from './columns'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -23,7 +23,7 @@ interface BatchFilter {
 }
 
 const Page = ({ params }: any) => {
-    const router = useRouter()
+    const { organizationId } = useParams()
     const searchParams = useSearchParams()
     const { downloadCsv } = useDownloadCsv()
     const currentTab = searchParams.get('tab') || 'projects'
@@ -38,10 +38,10 @@ const Page = ({ params }: any) => {
     const [selectedBatch, setSelectedBatch] = useState<string>('all')
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [batches, setBatches] = useState<BatchFilter[]>([])
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
      // Fetch batches from API
     const fetchBatches = useCallback(async () => {
@@ -192,7 +192,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"                 
                         className="hover:bg-transparent hover:text-primary transition-colors"

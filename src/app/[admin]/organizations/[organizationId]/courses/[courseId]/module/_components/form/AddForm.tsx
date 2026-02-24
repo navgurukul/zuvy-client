@@ -22,7 +22,7 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { getChapterUpdateStatus, getFormPreviewStore, getUser } from '@/store/store'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import useEditChapter from '@/hooks/useEditChapter'
 // import useResponsiveHeight from '@/hooks/useResponsiveHeight'
 import {
@@ -72,6 +72,7 @@ const AddForm: React.FC<AddFormProps> = ({
     canEdit = true // default: editable if not specified
 }) => {
     const router = useRouter()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
@@ -84,8 +85,7 @@ const AddForm: React.FC<AddFormProps> = ({
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     const [isTitleChanged, setIsTitleChanged] = useState(false)
     const [isOptionsChanged, setIsOptionsChanged] = useState(false) // Track option changes
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+
     // const heightClass = useResponsiveHeight()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -461,7 +461,7 @@ const AddForm: React.FC<AddFormProps> = ({
         if (content) {
             setFormPreviewContent(content)
             router.push(
-                `/${userRole}/${orgName}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/form/${content.topicId}/preview`
+                `/${userRole}/organizations/${organizationId}/courses/${courseId}/module/${content.moduleId}/chapter/${content.id}/form/${content.topicId}/preview`
             )
         }
     }

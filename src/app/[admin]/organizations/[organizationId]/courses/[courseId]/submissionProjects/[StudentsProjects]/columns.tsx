@@ -8,7 +8,7 @@ import { Task } from '@/utils/data/schema'
 
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
-import usePathname from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 const mockBatches = ['Batch A', 'Batch B', 'Batch C']
 
@@ -114,15 +114,16 @@ export const columns: ColumnDef<Task>[] = [
         cell: ({ row }) => {
             // const label = labels.find((label) => label.value === row.original.label);
 
-            const pathname = window.location.pathname
-            const orgName = pathname.split('/')[2]
+            const { organizationId } = useParams()
             const { user } = getUser()
             const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+            const isSuperAdmin = userRole === 'super_admin';
+            const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/${userRole}/${orgName}/courses/${row.original.bootcampId}/submissionProjects/${row.original.projectId}/IndividualReport/${row.original.userId}`}
+                        href={`/${userRole}/organizations/${orgId}/courses/${row.original.bootcampId}/submissionProjects/${row.original.projectId}/IndividualReport/${row.original.userId}`}
                         className="max-w-[500px] text-primary font-medium flex items-center"
                     >
                         <FileText size={16} />

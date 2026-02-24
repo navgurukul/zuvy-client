@@ -21,7 +21,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { ArrowUpRightSquare, X, Pencil, Eye, Video } from 'lucide-react'
 import PreviewVideo from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/_components/video/PreviewVideo'
 import { getChapterUpdateStatus, getVideoPreviewStore, getUser } from '@/store/store'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import {
     AddVideoProps,
     EditChapterResponse,
@@ -65,6 +65,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
 }) => {
     // const heightClass = useResponsiveHeight()
     const router = useRouter()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -77,8 +78,6 @@ const AddVideo: React.FC<AddVideoProps> = ({
    const { editChapter, loading: editChapterLoading } = useEditChapter()
     const [alertOpen, setAlertOpen] = useState(!canEdit)
     const hasLoaded = useRef(false)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -200,7 +199,7 @@ const AddVideo: React.FC<AddVideoProps> = ({
         if (content?.contentDetails[0]?.links) {
             setVideoPreviewContent(content)
             router.push(
-                `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/chapter/${content.id}/video/${content.topicId}/preview`
+                `/${userRole}/organizations/${organizationId}/courses/${courseId}/module/${moduleId}/chapter/${content.id}/video/${content.topicId}/preview`
             )
         } else {
             toast.info({

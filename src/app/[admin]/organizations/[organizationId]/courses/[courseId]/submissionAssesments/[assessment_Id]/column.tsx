@@ -10,8 +10,8 @@ import { calculateTimeTaken, getSubmissionDate } from '@/utils/admin'
 import DownloadReport from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/_components/DownloadReport'
 import ApproveReattempt from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionAssesments/[assessment_Id]/ApproveReattempt'
 import Link from 'next/link'
-import usePathname from 'next/navigation'
 import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 interface ColumnContext {
     courseId: string;
@@ -223,18 +223,19 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
         cell: ({ row }) => {
             const { userId, id, title, submitedAt } = row.original;
             // Use context values instead of row.original
+            const { organizationId } = useParams()
             const { courseId, assessment_Id } = context;
-            const pathname = window.location.pathname
-            const orgName = pathname.split('/')[2]
             const { user } = getUser()
             const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+            const isSuperAdmin = userRole === 'super_admin';
+            const orgId = isSuperAdmin ? organizationId : user?.orgId
 
             return (
                 <div className="flex items-center gap-3">
                     <Link
                         href={
                             submitedAt
-                                ? `/${userRole}/${orgName}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                                ? `/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
                                 : '#'
                         }
                         className={

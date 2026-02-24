@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
-
+import { useRouter, useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/components/ui/use-toast'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -24,10 +23,11 @@ import { usePathname } from 'next/navigation'
 const Page = ({ params }: { params: PageProps }) => {
     const router = useRouter()
     const { courseData } = getCourseData()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     // Use the custom hooks
     const { bootcampSettings, loading, error, updateError, updateSettings } =
@@ -124,7 +124,7 @@ const Page = ({ params }: { params: PageProps }) => {
             <div className="flex justify-center items-center h-screen">
                 <div className="text-center">
                     <p className="text-destructive mb-4">{error}</p>
-                    <Button onClick={() => router.push(`/${userRole}/${orgName}/courses`)}>
+                    <Button onClick={() => router.push(`/${userRole}/organizations/${orgId}/courses`)}>
                         Back to Courses
                     </Button>
                 </div>

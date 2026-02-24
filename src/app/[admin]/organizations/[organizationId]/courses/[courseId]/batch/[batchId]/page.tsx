@@ -44,6 +44,7 @@ import { ComboboxStudent } from '../../(courseTabs)/students/components/combobox
 import AlertDialogDemo from '../../(courseTabs)/students/components/deleteModalNew'
 // student data hook and constants are used inside the logic hook
 import { SearchBox } from '@/utils/searchBox'
+import { getUser } from '@/store/store'
 
 const BatchesInfo = ({
     params,
@@ -107,14 +108,17 @@ const BatchesInfo = ({
         userIds,
     } = useBatchDetail(params)
 
+    const { organizationId } = useParams()
+    const { user } = getUser()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
-    const orgName = pathname.split('/')[2]
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     return (
         <>
             <Link
-                href={`/${role}/${orgName}/courses/${params.courseId}/batches`}
+                href={`/${role}/organizations/${orgId}/courses/${params.courseId}/batches`}
                 className="flex space-x-2 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ArrowLeft size={20} />

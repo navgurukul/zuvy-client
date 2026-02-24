@@ -28,10 +28,11 @@ import {CurriculumSkeleton} from '@/app/[admin]/organizations/[organizationId]/c
 
 function Page() {
     const router = useRouter()
-    const params = useParams()
-    const courseId = params.courseId
+    const { organizationId, courseId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [isCourseDeleted, setIsCourseDeleted] = useState(false)
     const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
     const [originalCurriculum, setOriginalCurriculum] = useState<
@@ -65,8 +66,6 @@ function Page() {
     const [draggedModuleId, setDraggedModuleId] = useState<number | null>(null)
     const [isDragging, setIsDragging] = useState(false)
     const [hasOrderChanged, setHasOrderChanged] = useState(false)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     // New states for border flash functionality
     const [flashingModuleId, setFlashingModuleId] = useState<number | null>(
@@ -379,7 +378,7 @@ function Page() {
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/${userRole}/${orgName}/courses`)
+                    router.push(`/${userRole}/organizations/${orgId}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:
@@ -582,7 +581,7 @@ function Page() {
                     This course has been deleted.
                 </p>
                 <Button
-                    onClick={() => router.push(`/${userRole}/${orgName}/courses`)}
+                    onClick={() => router.push(`/${userRole}/organizations/${orgId}/courses`)}
                     className="mt-6 bg-secondary"
                 >
                     Back to Courses

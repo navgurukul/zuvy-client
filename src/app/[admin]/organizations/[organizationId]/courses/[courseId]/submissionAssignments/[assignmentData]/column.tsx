@@ -8,7 +8,7 @@ import { Task } from '@/utils/data/schema'
 import Link from 'next/link'
 import { FileText } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import usePathname from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
 export const columns: ColumnDef<Task>[] = [
@@ -119,17 +119,17 @@ export const columns: ColumnDef<Task>[] = [
     {
         id: 'actions',
         cell: ({ row }) => {
+            const { organizationId } = useParams()
             const { bootcampId, chapterId, id } = row.original
-
-            const pathname = window.location.pathname
-            const orgName = pathname.split('/')[2]
             const { user } = getUser()
             const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+            const isSuperAdmin = userRole === 'super_admin';
+            const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
             return (
                 <div className="flex space-x-2">
                     <Link
-                        href={`/${userRole}/${orgName}/courses/${bootcampId}/submissionAssignments/${chapterId}/individualStatus/${id}`}
+                        href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionAssignments/${chapterId}/individualStatus/${id}`}
                         className="max-w-[500px] text-primary font-medium flex items-center"
                     >
                         <FileText size={16} />

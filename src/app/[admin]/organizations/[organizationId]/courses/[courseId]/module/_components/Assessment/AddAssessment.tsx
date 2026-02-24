@@ -59,10 +59,10 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const initialTab = searchParams.get('tab') || ''
     const [isDataLoading, setIsDataLoading] = useState(true)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const [searchQuestionsInAssessment, setSearchQuestionsInAssessment] =
         useState<string>('')
 
@@ -192,7 +192,7 @@ const AddAssessment: React.FC<AddAssessmentProps> = ({
         ) {
             setAssessmentPreviewContent(content)
             router.push(
-                `/${userRole}/${orgName}/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
+                `/${userRole}/organizations/${orgId}/courses/${content.bootcampId}/module/${content.moduleId}/chapter/${content.chapterId}/assessment/${topicId}/preview`
             )
         } else {
             toast.error({

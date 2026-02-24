@@ -1,6 +1,6 @@
 'use client'
 import { api } from '@/utils/axios.config'
-import { useSearchParams, usePathname } from 'next/navigation'
+import { useSearchParams, useParams, useRouter } from 'next/navigation'
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import TestCaseResults from '../../../submissionAssesments/[assessment_Id]/IndividualReport/[IndividualReport]/Report/[report]/ViewSolutionCodingQuestion/[CodingSolution]/TestCases'
@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn, difficultyColor } from '@/lib/utils'
 import { FileText, ArrowLeft, Heading6 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/navigation'
 import { getUser } from '@/store/store'
 import {
     PageParams,
@@ -20,6 +19,7 @@ import {
 
 const Page = ({ params }: PageParams) => {
     const router = useRouter()
+    const { organizationId } = useParams()
     const [codingSubmissiondata, setCodingSubmissiondata] =
         useState<CodingSubmission | null>(null)
     const [decodedString, setDecodedString] = useState<string>('')
@@ -28,10 +28,10 @@ const Page = ({ params }: PageParams) => {
 
     const questionId = searchQuery.get('questionId')
     const moduleId = searchQuery.get('moduleId')
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -48,22 +48,22 @@ const Page = ({ params }: PageParams) => {
         () => [
             {
                 crumb: 'My Courses',
-                href: `/${userRole}/${orgName}/courses`,
+                href: `/${userRole}/organizations/${orgId}/courses`,
                 isLast: false,
             },
             {
                 crumb: parsedCrumbData[0],
-                href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
+                href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`,
                 isLast: false,
             },
             // {
             //     crumb: 'Submission - Practice Problems',
-            //     href: `/${userRole}/${orgName}/courses/${params.courseId}/submissions`,
+            //     href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions`,
             //     isLast: false,
             // },
             {
                 crumb: parsedCrumbData[1],
-                href: `/${userRole}/${orgName}/courses/${params.courseId}/submissionProblems/${moduleId}`,
+                href: `/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissionProblems/${moduleId}`,
                 isLast: false,
             },
             {

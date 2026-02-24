@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge'
 
 //Test
 const Navbar = () => {
+    // const { organizationId } = useParams()
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]

@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useCallback, useRef , useMemo} from 'react'
-import { useSearchParams, useRouter, usePathname } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname, useParams } from 'next/navigation'
 import Image from 'next/image'
 import {
     ArrowLeft,
@@ -54,6 +54,7 @@ type StudentDataState = Student[]
 const StudentsPage = ({ params }: { params: any }) => {
     const searchParams = useSearchParams()
     const router = useRouter()
+    const { organizationId } = useParams()
 
     const {
         students,
@@ -74,6 +75,8 @@ const StudentsPage = ({ params }: { params: any }) => {
     
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const { batchData } = getBatchData()
     const [selectedRows, setSelectedRows] = useState<StudentData[]>([])
     const [studentData, setStudentData] = useState<StudentDataState | any>({})
@@ -85,8 +88,6 @@ const StudentsPage = ({ params }: { params: any }) => {
     const [batchFilter, setBatchFilter] = useState<string>('all')
     const [attendanceInput, setAttendanceInput] = useState('')
     const [loading, setLoading] = useState(true)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     
     // Use debounce hook for attendance input
     const debouncedAttendance = useDebounce(attendanceInput, 500)
@@ -321,13 +322,13 @@ const StudentsPage = ({ params }: { params: any }) => {
         } catch (error: any) {
             if (axios.isAxiosError(error)) {
                 if (error?.response?.data.message === 'Bootcamp not found!') {
-                    router.push(`/${userRole}/${orgName}/courses`)
+                    router.push(`/${userRole}/organizations/${orgId}/courses`)
                     toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
                 }
             }
             console.error(error)
         }
-    }, [params.courseId, limit, offset, setStudents, router, userRole, orgName])
+    }, [params.courseId, limit, offset, setStudents, router, userRole, orgId])
 
     const userIds = selectedRows.map((item: any) => item.userId)
 

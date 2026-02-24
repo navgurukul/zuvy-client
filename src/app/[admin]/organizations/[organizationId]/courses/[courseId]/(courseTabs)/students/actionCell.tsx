@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation' // Add usePathname
+import { useRouter, usePathname, useParams } from 'next/navigation' // Add usePathname
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
 import { getUser } from '@/store/store'
 
@@ -18,16 +18,16 @@ import DeleteModalDialog from './components/deleteModal'
 import { ActionCellProps } from './studentComponentTypes'
 
 const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const { userId, bootcampId, name, email, status, batchId } = student
     const [dropdownOpen, setDropdownOpen] = useState(false)
     const [editModalOpen, setEditModalOpen] = useState(false)
     const [deleteModalOpen, setDeleteModalOpen] = useState(false)
     const router = useRouter()
-    
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     return (
         <>
@@ -42,7 +42,7 @@ const ActionCell: React.FC<ActionCellProps> = ({ student }) => {
                     <DropdownMenuItem 
                         onClick={() => {
                             setDropdownOpen(false)
-                            router.push(`/${userRole}/${orgName}/courses/${bootcampId}/${userId}`)
+                            router.push(`/${userRole}/organizations/${orgId}/courses/${bootcampId}/${userId}`)
                         }}
                         className="focus:text-blue-600"
                     >

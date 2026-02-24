@@ -6,7 +6,7 @@ declare global {
     }
 }
 import React, { useEffect, useState, useRef } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { setCookie } from 'cookies-next'
 import {
     GoogleLogin,
@@ -23,16 +23,12 @@ import Image from 'next/image'
 import {DecodedGoogleToken,AuthResponse} from "@/app/auth/login/_components/componentLogin"
 import { useThemeStore } from '@/store/store'
 
-
-
 function LoginPage() {
     const { isDark, toggleTheme } = useThemeStore()
     const [loading, setLoading] = useState(false)
     const { user, setUser } = getUser()
     const router = useRouter()
     const googleLoginWrapperRef = useRef<HTMLDivElement>(null)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     // Social proof data
     const socialProofData = [
@@ -173,7 +169,7 @@ const handleGoogleSuccess = async (
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
                 const userRole = response.data.user.rolesList[0]
-                const organization = response.data.user.orgName || null
+                const organizationId = response.data.user.orgId || null
                 const hasFilled = response.data.user.hasfilled
 
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
@@ -184,13 +180,12 @@ const handleGoogleSuccess = async (
                     router.push('/student')
                 } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
                     // Redirect admin/poc to settings if hasfilled is false
-                    router.push(`/${userRole}/setting`)
+                    router.push(`/${userRole}/organizations/${organizationId}/setting`)
                 } else if (userRole === 'super_admin') {
-                    // router.push('/superAdmin/organization') // Change it when integrating APIs
                      router.push(`/${userRole}/organizations`)
                 } else {
                     // Default redirect for other roles or when hasfilled is true
-                    router.push(`/${userRole}/organizations/${organization}/courses`) 
+                    router.push(`/${userRole}/organizations/${organizationId}/courses`) 
                 }
             }
         } catch (err: any) {

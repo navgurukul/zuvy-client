@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
     const decodedUrl = redirectedUrl ? atob(redirectedUrl) : null
     const pathname = request.nextUrl.pathname
     const roles = ['student', 'admin', 'instructor']
-    const orgName = pathname.split('/')[2]
+    const orgId = pathname.split('/')[3]
 
    if (user === 'false') {
       
@@ -64,7 +64,7 @@ export function middleware(request: NextRequest) {
 
             // special case: admin visiting another role’s page
             if (user === 'admin') {
-                return NextResponse.redirect(new URL(`/admin/${orgName}/courses`, request.url))
+                return NextResponse.redirect(new URL(`/admin/organizations/${orgId}/courses`, request.url))
             }
 
             return response
@@ -107,7 +107,7 @@ export function middleware(request: NextRequest) {
                 request.nextUrl.pathname === '/' ||
                 request.nextUrl.pathname === `/${user}`
             ) {
-                return NextResponse.redirect(new URL(`/${user}/${orgName}/courses`, request.url))
+                return NextResponse.redirect(new URL(`/${user}/organizations/${orgId}/courses`, request.url))
             }
         }
     }

@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/use-toast'
-import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 import { OFFSET, POSITION } from '@/utils/constant'
 import {
@@ -47,7 +47,7 @@ interface Batch {
 }
 
 const Page = ({ params }: any) => {
-    const router = useRouter()
+    const { organizationId } = useParams()
     const searchParams = useSearchParams()
     const moduleId = searchParams.get('moduleId')
     const currentTab = searchParams.get('tab') || 'form'
@@ -64,10 +64,10 @@ const Page = ({ params }: any) => {
     const [isLoadingBatches, setIsLoadingBatches] = useState(false)
     const [sortField, setSortField] = useState<string>('name')
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     // Separate state for overall statistics (NEVER changes during search)
     const [overallStats, setOverallStats] = useState({
@@ -389,7 +389,7 @@ const Page = ({ params }: any) => {
     return (
         <>
             <div className="flex items-center gap-4 mb-8 mt-6">
-                <Link href={`/${userRole}/${orgName}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
+                <Link href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/submissions?tab=${currentTab}`}>
                     <Button
                         variant="ghost"
                         className="hover:bg-transparent hover:text-primary transition-colors"

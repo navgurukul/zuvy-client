@@ -228,17 +228,18 @@ import Link from 'next/link'
 import { addClassToCodeTags } from '@/utils/admin'
 import { Button } from '@/components/ui/button'
 import { RemirrorForm } from '@/components/remirror-editor/RemirrorForm'
-import { usePathname } from 'next/navigation'
+import { usePathname, useParams } from 'next/navigation'
 import {
     Params,
     TopicCodingQuestion,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assignment/[topicId]/preview/TopicIdPageType'
 const PreviewQuiz = ({ params }: { params: Params }) => {
     const { quizPreviewContent, setQuizPreviewContent } = getQuizPreviewStore()
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     useEffect(() => {
         fetchPreviewData(params, setQuizPreviewContent)
@@ -255,7 +256,7 @@ const PreviewQuiz = ({ params }: { params: Params }) => {
 
             {/* Go Back Button - Fixed positioning */}
             <Link
-                href={`/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
+                href={`/${userRole}/organizations/${orgId}/courses/${params.courseId}/module/${params.moduleId}/chapters/${params.chapterId}`}
                 className="fixed left-4 top-16 flex items-center space-x-2 p-2 z-40"
             >
                 {' '}

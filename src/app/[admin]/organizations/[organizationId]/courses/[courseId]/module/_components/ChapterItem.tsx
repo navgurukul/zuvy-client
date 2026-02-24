@@ -57,15 +57,15 @@ function ChapterItem({
     showBorderFlash,
     canDeleteChapter = true,
 }: ChapterItems) {
-    const { courseId, organizationId } = useParams()
+    const { organizationId, courseId } = useParams()
     const router = useRouter()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [isDeleteModalOpen, setDeleteModalOpen] = useState(false)
     const { setTopicId } = getTopicId()
     const dragControls = useDragControls()
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     const isActive = activeChapter === chapterId
     const activeChapterClasses = isActive
@@ -103,7 +103,7 @@ function ChapterItem({
                     : chapterData[0].chapterId
                     
                 router.push(
-                    `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/chapters/${targetChapter}`
+                    `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/chapters/${targetChapter}`
                 )
             }
         } catch (error: any) {

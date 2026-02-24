@@ -27,56 +27,57 @@ import {CourseLayoutSkeleton} from '@/app/[admin]/organizations/[organizationId]
 
 function CourseLayout() {
     const router = useRouter()
-    const { courseId } = useParams()
+    const { courseId, organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const { courseData, Permissions } = getCourseData()
     const pathname = usePathname()
     const role = pathname.split('/')[1]
-    const orgName = pathname.split('/')[2]
     const [loading, setLoading] = useState(true)
 
     const courseMenu = [
         {
             title: 'General Details',
             value: 'generalDetails',
-            href: `/${role}/${orgName}/courses/${courseData?.id}/details`,
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/details`,
             icon: Info,
         },
         {
             title: 'Curriculum',
             value: 'curriculum',
-            href: `/${role}/${orgName}/courses/${courseData?.id}/curriculum`,
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/curriculum`,
             icon: BookOpen,
         },
         {
             title: 'Students',
             value: 'students',
-            href: `/${role}/${orgName}/courses/${courseData?.id}/students`,
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/students`,
             icon: GraduationCap,
         },
         {
             title: 'Batches',
             value: 'batches',
-            href: `/${role}/${orgName}/courses/${courseData?.id}/batches`,
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/batches`,
             icon: Users,
         },
         {
             title: 'Sessions',
             value: 'sessions',
-            href: `/${role}/${orgName}/courses/${courseData?.id}/sessions`,
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/sessions`,
             icon: Calendar,
         },
         {
             title: 'Submissions',
             value: 'submissions',
-            href: `/${role}/${orgName}/courses/${courseData?.id}/submissions`,
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/submissions`,
             icon: FileText,
         },
         {
             title: 'Settings',
             value: 'settings',
-            href: `/${role}/${orgName}/courses/${courseData?.id}/settings`,
+            href: `/${role}/organizations/${orgId}/courses/${courseData?.id}/settings`,
             icon: Settings,
         },
     ]
@@ -91,7 +92,7 @@ function CourseLayout() {
                     .getState()
                     .fetchCourseDetails(parseInt(courseID))
                 if (!success) {
-                    router.push(`/${userRole}/${orgName}/courses`)
+                    router.push(`/${userRole}/organizations/${orgId}/courses`)
                     toast.info({
                         title: 'Caution',
                         description:
@@ -116,7 +117,7 @@ if (loading) {
         <div className="pl-6 pr-3">
             {/* <Breadcrumb crumbs={crumbs} /> */}
             <Link
-                href={`/${role}/${orgName}/courses`}
+                href={`/${role}/organizations/${orgId}/courses`}
                 className="flex space-x-1 w-[180px] text-foreground mt-8 hover:text-primary"
             >
                 <ChevronLeft size={20} />

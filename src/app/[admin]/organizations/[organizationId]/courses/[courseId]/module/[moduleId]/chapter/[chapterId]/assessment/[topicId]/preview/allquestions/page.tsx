@@ -9,23 +9,24 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { difficultyColor, cn, difficultyBgColor } from '@/lib/utils'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 import {
     PriviewTag,
     Params,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/chapter/[chapterId]/assessment/[topicId]/preview/allquestions/PreviewPageType'
 
 function AllQuestions({ params }: { params: Params }) {
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [assessmentPreviewContent, setAssessmentPreviewContent] =
         useState<any>([])
     const [assessmentPreviewCodingContent, setAssessmentPreviewCodingContent] =
         useState<any>([])
     const [allTags, setAllTags] = useState<PriviewTag[]>([])
     const router = useRouter()
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
 
     useEffect(() => {
         fetchPreviewData(
@@ -52,19 +53,19 @@ function AllQuestions({ params }: { params: Params }) {
 
     function solveCodingQuestion(codingQuestionId: any) {
         router.push(
-            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`
+            `/${userRole}/organizations/${orgId}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/coding/${codingQuestionId}`
         )
     }
 
     function attemptQuizPreview() {
         router.push(
-            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`
+            `/${userRole}/organizations/${orgId}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/mcq`
         )
     }
 
     function attemptOpenEndedPreview() {
         router.push(
-            `/${userRole}/${orgName}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`
+            `/${userRole}/organizations/${orgId}/courses/${params.courseId}/module/${params.moduleId}/chapter/${params.chapterId}/assessment/${params.topicId}/preview/allquestions/openended`
         )
     }
 

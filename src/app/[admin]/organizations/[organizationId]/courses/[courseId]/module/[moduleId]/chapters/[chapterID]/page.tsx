@@ -35,7 +35,9 @@ export default function Page({
     const heightClass = useResponsiveHeight()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const { courseId, moduleId, chapterID } = useParams()
+    const { organizationId, courseId, moduleId, chapterID } = useParams()
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
@@ -54,8 +56,6 @@ export default function Page({
     const [key, setKey] = useState(0)
     const [contentLoading, setContentLoading] = useState(true)
     const [articleUpdateOnPreview, setArticleUpdateOnPreview] = useState(false)
-    const pathname = usePathname()
-    const orgName = pathname.split('/')[2]
     const [assignmentUpdateOnPreview, setAssignmentUpdateOnPreview] =
         useState(false)
 
@@ -99,7 +99,7 @@ export default function Page({
             if (moduleData.length > 0) {
                 const firstChapterId = moduleData[0].chapterId
                 router.replace(
-                    `/${userRole}/${orgName}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
+                    `/${userRole}/organizations/${orgId}/courses/${courseId}/module/${moduleId}/chapters/${firstChapterId}`
                 )
             }
             setActiveChapter(0)
