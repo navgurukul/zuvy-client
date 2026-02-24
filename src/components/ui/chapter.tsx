@@ -37,11 +37,11 @@ function Chapter() {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { organizationId, courseId, moduleId, chapterID } = useParams()
-    
+
     const chapter_id = Array.isArray(chapterID) ? Number(chapterID[0]) : Number(chapterID)
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const courseID = Array.isArray(courseId) ? parseInt(courseId[0]) : parseInt(courseId)
-    
+
     const { chapterData, setChapterData } = getChapterDataState()
     const { chapterContent, setChapterContent } = getChapterContentState()
     const { setModuleData } = getModuleData()
@@ -49,13 +49,13 @@ function Chapter() {
     const { setModuleName } = getCurrentModuleName((state) => state)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const { courseData, fetchCourseDetails } = getCourseData()
-    
+
     const [activeChapter, setActiveChapter] = useState(chapter_id)
     const [open, setOpen] = useState(false)
     const [originalChapterData, setOriginalChapterData] = useState<any[]>([])
     const [flashingChapterId, setFlashingChapterId] = useState<number | null>(null)
     const [isDragging, setIsDragging] = useState(false)
-    
+
     const scrollAreaRef = useRef<HTMLDivElement | null>(null)
     const activeChapterRef = useRef<HTMLDivElement | null>(null)
     const isChapterClickedRef = useRef(false)
@@ -105,7 +105,7 @@ function Chapter() {
                 description: 'The Module has been deleted by another Admin',
             })
         }
-    }, [refetch, router, userRole, courseId])
+    }, [refetch, router, userRole, courseId, organizationId])
 
     // Handle chapter updates
     useEffect(() => {
@@ -134,7 +134,7 @@ function Chapter() {
 
         setChapterData(moduleChapters)
         setModuleData(moduleChapters)
-        
+
         const clickedChapter = moduleChapters.find(
             (item: any) => item.chapterId === chapter_id
         )
@@ -171,6 +171,58 @@ function Chapter() {
         }
     }, [activeChapter])
 
+    // Update chapter order via API
+    const updateChapterOrder = useCallback(
+        async (chapterId: number, newPosition: number) => {
+            const originalPosition =
+                originalChapterData.findIndex((c) => c.chapterId === chapterId) + 1
+
+            if (originalPosition === newPosition) {
+                return // No change, skip API call
+            }
+
+            try {
+                await api.put(
+                    `/Content/editChapterOfModule/${moduleId}?chapterId=${chapterId}`,
+                    { newOrder: newPosition }
+                )
+
+                toast.success({
+                    title: 'Success',
+                    description: 'Chapter order updated successfully',
+                })
+
+                triggerBorderFlash(chapterId)
+
+                // Update reference data
+                const updatedOriginalData = chapterData.map((item, index) => ({
+                    ...item,
+                    order: index + 1,
+                }))
+                setOriginalChapterData(updatedOriginalData)
+                lastOrderRef.current = chapterData.map((c) => c.chapterId)
+            } catch (error: any) {
+                console.error('Reorder error:', error)
+
+                toast.error({
+                    title: 'Failed',
+                    description:
+                        error.response?.data?.message ||
+                        'Failed to update chapter order',
+                })
+
+                setChapterData([...originalChapterData])
+            }
+        },
+        [
+            originalChapterData,
+            moduleId,
+            triggerBorderFlash,
+            chapterData,
+            setChapterData,
+        ]
+    )
+
     // Drag handlers
     const handleReorderWithDebounce = useCallback(
         (newOrderChapters: any[]) => {
@@ -198,8 +250,9 @@ function Chapter() {
                 }, 300)
             }
         },
-        [originalChapterData]
+        [originalChapterData, setChapterData, updateChapterOrder]
     )
+
 
     const handleDragStart = (chapterId: number) => {
         draggedChapterRef.current = chapterId
@@ -210,7 +263,7 @@ function Chapter() {
     const handleDragEnd = (newOrderChapters: any[]) => {
         isDragActiveRef.current = false
         setIsDragging(false)
-        
+
         const draggedId = draggedChapterRef.current
         if (!draggedId) return
 
@@ -230,50 +283,7 @@ function Chapter() {
         draggedChapterRef.current = null
     }
 
-    // Update chapter order via API
-    const updateChapterOrder = async (
-        chapterId: number,
-        newPosition: number
-    ) => {
-        const originalPosition =
-            originalChapterData.findIndex((c) => c.chapterId === chapterId) + 1
-        
-        if (originalPosition === newPosition) {
-            return // No change, skip API call
-        }
 
-        try {
-            await api.put(
-                `/Content/editChapterOfModule/${moduleId}?chapterId=${chapterId}`,
-                { newOrder: newPosition }
-            )
-
-            toast.success({
-                title: 'Success',
-                description: 'Chapter order updated successfully',
-            })
-
-            triggerBorderFlash(chapterId)
-
-            // Update reference data
-            const updatedOriginalData = chapterData.map((item, index) => ({
-                ...item,
-                order: index + 1,
-            }))
-            setOriginalChapterData(updatedOriginalData)
-            lastOrderRef.current = chapterData.map((c) => c.chapterId)
-        } catch (error: any) {
-            console.error('Reorder error:', error)
-
-            toast.error({
-                title: 'Failed',
-                description:
-                    error.response?.data?.message || 'Failed to update chapter order',
-            })
-
-            setChapterData([...originalChapterData])
-        }
-    }
 
     // Cleanup timeouts on unmount
     useEffect(() => {
@@ -313,14 +323,14 @@ function Chapter() {
                     Back to Curriculum
                 </p>
             </Link>
-            
+
             <h1 className="font-heading text-start font-bold text-lg text-foreground">
                 Module Content
             </h1>
             <p className="font-heading text-start font-bold text-sm text-muted-foreground mb-4">
                 {fetchedModuleName}
             </p>
-            
+
             <div className="flex flex-col overflow-hidden">
                 {canCreateChapter && (
                     <div className="flex">
@@ -350,7 +360,7 @@ function Chapter() {
                         </Dialog>
                     </div>
                 )}
-                
+
                 <ScrollArea
                     ref={scrollAreaRef}
                     className="h-screen pr-4 w-full mr-16 mt-2"

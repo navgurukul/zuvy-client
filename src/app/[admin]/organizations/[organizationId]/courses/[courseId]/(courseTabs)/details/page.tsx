@@ -28,11 +28,12 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
+import Image from 'next/image'
 import OptimizedImageWithFallback from '@/components/ImageWithFallback'
 import { LANGUAGES } from '@/utils/constant'
 import { useCourseDetails } from '@/hooks/useCourseDetails'
 import { PageParams } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/details/courseDetailType'
-import {GeneralDetailsSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { GeneralDetailsSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 
 const FormSchema = z.object({
     name: z
@@ -52,12 +53,12 @@ const FormSchema = z.object({
     coverImage: z.string().optional(),
     collaborator: z.string().optional().refine((val) => {
         if (!val) return true // Empty is allowed
-        
+
         // If it's an image (data URL or image URL), allow any length
         if (val.startsWith('data:image/') || val.startsWith('http')) {
             return true
         }
-        
+
         // If it's text, enforce 50 character limit
         return val.length <= 50
     }, {
@@ -177,7 +178,7 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
                 description: courseData.description || '',
                 coverImage: courseData.coverImage || '',
                 collaborator: courseData.collaborator || '',
-                duration: Number(courseData.duration)  || 0,
+                duration: Number(courseData.duration) || 0,
                 language: courseData.language || '',
                 startTime: courseData.startTime
                     ? new Date(courseData.startTime)
@@ -241,11 +242,11 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
         const formDataToSubmit = buildFormData()
 
         const success = await updateCourseDetails(
-            formDataToSubmit, 
+            formDataToSubmit,
             croppedImage,
             collaboratorType === 'image' ? croppedCollaboratorImage : null
         )
-        
+
         if (!success) {
             return
         }
@@ -351,29 +352,29 @@ function GeneralDetailsPage({ params }: { params: PageParams }) {
 
         const numValue = parseInt(value, 10)
         if (isNaN(numValue)) {
-        toast({
-            title: 'Invalid Input',
-            description: 'Please enter a valid numeric duration.',
-            variant: 'destructive',
-        })
-        return '' // Previous value return karo
+            toast({
+                title: 'Invalid Input',
+                description: 'Please enter a valid numeric duration.',
+                variant: 'destructive',
+            })
+            return '' // Previous value return karo
+        }
+
+        if (numValue <= 0) {
+            toast({
+                title: 'Invalid Value',
+                description: 'Duration must be greater than 0',
+                variant: 'destructive',
+            })
+            return '' // Previous value return karo
+        }
+
+        return numValue
     }
-    
-    if (numValue <= 0) {
-        toast({
-            title: 'Invalid Value',
-            description: 'Duration must be greater than 0',
-            variant: 'destructive',
-        })
-        return '' // Previous value return karo
+
+    if (!courseData || !courseData.id) {
+        return <GeneralDetailsSkeleton />
     }
-    
-    return numValue
-    }
-    
-if (!courseData || !courseData.id) {
-    return <GeneralDetailsSkeleton />
-}
     return (
         // <div className="w-full max-w-none space-y-6">
         <div className='container mx-auto px-2 pt-2 pb-2 max-w-5xl'>
@@ -407,11 +408,14 @@ if (!courseData || !courseData.id) {
                                             />
                                         </div>
                                     ) : croppedImage ? (
-                                        <img
-                                            src={croppedImage}
-                                            alt="Course preview"
-                                            className="h-full w-full object-cover"
-                                        />
+                                        <div className="h-full w-full relative">
+                                            <Image
+                                                src={croppedImage}
+                                                alt="Course preview"
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
                                     ) : (
                                         <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
                                             <OptimizedImageWithFallback
@@ -512,17 +516,16 @@ if (!courseData || !courseData.id) {
                                                         disabled={
                                                             !canSwitchToText() &&
                                                             collaboratorType !==
-                                                                'text'
+                                                            'text'
                                                         }
                                                     />
                                                     <Label
-                                                        className={`text-sm font-medium cursor-pointer ${
-                                                            !canSwitchToText() &&
+                                                        className={`text-sm font-medium cursor-pointer ${!canSwitchToText() &&
                                                             collaboratorType !==
-                                                                'text'
-                                                                ? 'text-gray-400 cursor-not-allowed'
-                                                                : ''
-                                                        }`}
+                                                            'text'
+                                                            ? 'text-gray-400 cursor-not-allowed'
+                                                            : ''
+                                                            }`}
                                                     >
                                                         Text
                                                     </Label>
@@ -533,7 +536,7 @@ if (!courseData || !courseData.id) {
                                                         disabled={
                                                             !canSwitchToImage() &&
                                                             collaboratorType !==
-                                                                'image'
+                                                            'image'
                                                         }
                                                     />
                                                     <Label className="text-sm font-medium cursor-pointer">
@@ -547,7 +550,7 @@ if (!courseData || !courseData.id) {
                                             <>
                                                 <div className="aspect-video w-full overflow-hidden rounded-lg border bg-muted relative group">
                                                     {isCollaboratorCropping &&
-                                                    collaboratorImage ? (
+                                                        collaboratorImage ? (
                                                         <div key={collaboratorImage} className="w-full h-full">
                                                             <Cropper
                                                                 src={collaboratorImage}
@@ -562,13 +565,16 @@ if (!courseData || !courseData.id) {
                                                             />
                                                         </div>
                                                     ) : croppedCollaboratorImage ? (
-                                                        <img
-                                                            src={
-                                                                croppedCollaboratorImage
-                                                            }
-                                                            alt="Collaborator Preview"
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                        <div className="w-full h-full relative">
+                                                            <Image
+                                                                src={
+                                                                    croppedCollaboratorImage
+                                                                }
+                                                                alt="Collaborator Preview"
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
                                                     ) : (
                                                         <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-primary-light to-primary">
                                                             <OptimizedImageWithFallback
@@ -708,8 +714,8 @@ if (!courseData || !courseData.id) {
                                 name="name"
                                 render={({ field }) => (
                                     <FormItem className="text-start">
-                                        <Label 
-                                            htmlFor="name" 
+                                        <Label
+                                            htmlFor="name"
                                             className="font-semibold"
                                         >
                                             Course Title
@@ -733,8 +739,8 @@ if (!courseData || !courseData.id) {
                                 name="description"
                                 render={({ field }) => (
                                     <FormItem className="text-start">
-                                        <Label 
-                                            htmlFor="description" 
+                                        <Label
+                                            htmlFor="description"
                                             className="font-semibold"
                                         >
                                             Description
@@ -820,9 +826,9 @@ if (!courseData || !courseData.id) {
                                                                 value={
                                                                     field.value
                                                                         ? format(
-                                                                              field.value,
-                                                                              'dd-MM-yyyy'
-                                                                          )
+                                                                            field.value,
+                                                                            'dd-MM-yyyy'
+                                                                        )
                                                                         : ''
                                                                 }
                                                                 disabled={!Permissions?.editCourse}

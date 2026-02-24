@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,7 @@ import MCQQuiz from "./MCQQuiz";
 import OpenEndedQuestions from "./OpenEndedQuestions";
 import ViolationModal from "./ViolationModal";
 
-import{AssessmentInstructionsProps,ViolationType} from '@/app/student/_components/componentStudentType'
+import { AssessmentInstructionsProps, ViolationType } from '@/app/student/_components/componentStudentType'
 
 const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: AssessmentInstructionsProps) => {
   const [timeLeft, setTimeLeft] = useState(7200); // 2 hours in seconds
@@ -25,6 +25,35 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
     openended: false
   });
 
+  const handleAutoSubmit = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const handleViolation = useCallback((type: ViolationType['type']) => {
+    const existingViolation = violations.find(v => v.type === type);
+    let updatedViolations;
+
+    if (existingViolation) {
+      updatedViolations = violations.map(v =>
+        v.type === type ? { ...v, count: v.count + 1 } : v
+      );
+    } else {
+      updatedViolations = [...violations, { type, count: 1 }];
+    }
+
+    setViolations(updatedViolations);
+
+    const totalViolations = updatedViolations.reduce((sum, v) => sum + v.count, 0);
+    const currentTypeViolation = updatedViolations.find(v => v.type === type);
+
+    if (totalViolations >= 3) {
+      handleAutoSubmit();
+    } else {
+      setCurrentViolation(currentTypeViolation!);
+      setShowViolationModal(true);
+    }
+  }, [violations, handleAutoSubmit]);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -37,7 +66,7 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [handleAutoSubmit]);
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -68,36 +97,9 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
       document.removeEventListener('paste', handleCopyPaste);
     };
-  }, [currentView]);
+  }, [currentView, handleViolation]);
 
-  const handleViolation = (type: ViolationType['type']) => {
-    const existingViolation = violations.find(v => v.type === type);
-    let updatedViolations;
-    
-    if (existingViolation) {
-      updatedViolations = violations.map(v => 
-        v.type === type ? { ...v, count: v.count + 1 } : v
-      );
-    } else {
-      updatedViolations = [...violations, { type, count: 1 }];
-    }
-    
-    setViolations(updatedViolations);
-    
-    const totalViolations = updatedViolations.reduce((sum, v) => sum + v.count, 0);
-    const currentTypeViolation = updatedViolations.find(v => v.type === type);
-    
-    if (totalViolations >= 3) {
-      handleAutoSubmit();
-    } else {
-      setCurrentViolation(currentTypeViolation!);
-      setShowViolationModal(true);
-    }
-  };
 
-  const handleAutoSubmit = () => {
-    onClose();
-  };
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -176,7 +178,7 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
         onClose={() => setShowViolationModal(false)}
         violation={currentViolation}
       />
-      
+
       <header className="w-full flex items-center justify-between p-4 border-b">
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="w-5 h-5" />
@@ -220,8 +222,8 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="text-primary  p-0 h-auto"
                       onClick={() => {
                         setSelectedChallengeIndex(index);
@@ -251,8 +253,8 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <Button 
-                      variant="link" 
+                    <Button
+                      variant="link"
                       className="text-primary p-0 h-auto"
                       onClick={() => {
                         setSelectedQuizIndex(index);
@@ -276,8 +278,8 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
                   <Badge variant="outline">2 questions</Badge>
                 </div>
                 <div className="flex justify-end">
-                  <Button 
-                    variant="link" 
+                  <Button
+                    variant="link"
                     className="text-primary p-0 h-auto"
                     onClick={() => setCurrentView('openended')}
                   >
@@ -289,8 +291,8 @@ const AssessmentInstructions = ({ assessmentTitle, duration, onClose }: Assessme
           </div>
 
           <div className="flex justify-center pt-8">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               disabled={!canSubmitAssessment}
               onClick={onClose}
             >

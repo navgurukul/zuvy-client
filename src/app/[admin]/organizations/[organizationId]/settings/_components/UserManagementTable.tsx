@@ -54,7 +54,7 @@ export function UserManagementTable<TData extends User, TValue>({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -62,7 +62,7 @@ export function UserManagementTable<TData extends User, TValue>({
     const [searchData, setSearchData] = useState<TData[]>([])
     const [isSearching, setIsSearching] = useState(false)
     const [loading, setLoading] = useState(false)
-    
+
     // Fetch roles from API
     const { roles, loading: rolesLoading } = useRoles()
 
@@ -84,14 +84,14 @@ export function UserManagementTable<TData extends User, TValue>({
             console.error('Error fetching suggestions:', error)
             return []
         }
-    }, [])
+    }, [orgId])
 
     // Fetch search results with filters applied
     const fetchSearchResultsApi = useCallback(async (query: string) => {
         setLoading(true)
         setIsSearching(true)
         onSearchChange?.(true)
-        
+
         try {
             const response = await api.get(
                 `/users/get/all/users?orgId=${orgId}&searchTerm=${encodeURIComponent(query)}`
@@ -105,7 +105,7 @@ export function UserManagementTable<TData extends User, TValue>({
         } finally {
             setLoading(false)
         }
-    }, [onSearchChange])
+    }, [onSearchChange, orgId])
 
     // Default fetch - clear search and show parent data
     const defaultFetchApi = useCallback(async () => {

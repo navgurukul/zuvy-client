@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/utils/axios.config';
-import{UseProjectDetailsReturn,ProjectDetailsResponse,ProjectData} from '@/hooks/hookType'
+import { UseProjectDetailsReturn, ProjectDetailsResponse, ProjectData } from '@/hooks/hookType'
 
 
 const useProjectDetails = (projectId: string, moduleId: string): UseProjectDetailsReturn => {
@@ -13,7 +13,7 @@ const useProjectDetails = (projectId: string, moduleId: string): UseProjectDetai
   const [isRefetching, setIsRefetching] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async (isRefetch = false) => {
+  const fetchData = useCallback(async (isRefetch = false) => {
     if (!projectId || !moduleId) {
       setError('Project ID and Module ID are required');
       setLoading(false);
@@ -28,9 +28,9 @@ const useProjectDetails = (projectId: string, moduleId: string): UseProjectDetai
         setLoading(true);
       }
       setError(null);
-      
+
       const response = await api.get<ProjectDetailsResponse>(`/tracking/getProjectDetailsWithStatus/${projectId}/${moduleId}`);
-      
+
       if (response.data.isSuccess) {
         setProjectData(response.data.data.projectData);
         setModuleIdData(response.data.data.moduleId);
@@ -50,11 +50,11 @@ const useProjectDetails = (projectId: string, moduleId: string): UseProjectDetai
         setLoading(false);
       }
     }
-  };
+  }, [projectId, moduleId]);
 
   useEffect(() => {
     fetchData();
-  }, [projectId, moduleId]);
+  }, [fetchData]);
 
   const refetch = async (): Promise<void> => {
     await fetchData(true);

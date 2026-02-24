@@ -27,6 +27,7 @@ import { Logout } from '@/utils/logout'
 import { useThemeStore, useLazyLoadedStudentData } from '@/store/store'
 import { getUserInitials } from '@/utils/common'
 import ProfileDropDown from '@/components/ProfileDropDown'
+import Image from 'next/image'
 
 const Header = () => {
     const { isDark, toggleTheme } = useThemeStore()
@@ -91,8 +92,8 @@ const Header = () => {
                         className="flex items-center cursor-pointer"
                         onClick={handleLogoClick}
                     >
-                        
-                        <img src={'/logo.PNG'} alt="Zuvy" className="h-12" />
+
+                        <Image src={'/logo.PNG'} alt="Zuvy" width={48} height={48} className="h-12 w-auto" />
                     </div>
 
                     {/* Course Navigation Buttons */}
@@ -110,11 +111,10 @@ const Header = () => {
                                 variant="link"
                                 size="sm"
                                 onClick={handleSyllabusClick}
-                                className={` text-xs font-semibold sm:text-sm ${
-                                    isOnCourseSyllabus()
+                                className={` text-xs font-semibold sm:text-sm ${isOnCourseSyllabus()
                                         ? 'text-primary font-semibold'
                                         : 'text-foreground hover:text-primary'
-                                }`}
+                                    }`}
                             >
                                 Course Syllabus
                             </Button>
@@ -199,7 +199,7 @@ const Header = () => {
                     <ProfileDropDown
                         studentData={studentData}
                         handleLogoutClick={handleLogoutClick}
-                        showLogoutDialog={showLogoutDialog}   
+                        showLogoutDialog={showLogoutDialog}
                         setShowLogoutDialog={setShowLogoutDialog}
                         handleLogout={handleLogout}
                     />
@@ -216,12 +216,12 @@ const Header = () => {
                     className="flex items-center cursor-pointer mb-1"
                     onClick={handleLogoClick}
                 >
-                    {isDark ? 
-                  <img src={'/zuvy-logo-horizontal-dark.png'} alt="Zuvy" className="h-7" />
+                    {isDark ?
+                        <Image src={'/zuvy-logo-horizontal-dark.png'} alt="Zuvy" width={112} height={28} className="h-7 w-auto" />
 
-                :     
-                    <img src={'/zuvy-logo-horizontal.png'} alt="Zuvy" className="h-7" />
-                }
+                        :
+                        <Image src={'/zuvy-logo-horizontal.png'} alt="Zuvy" width={112} height={28} className="h-7 w-auto" />
+                    }
                 </div>
 
                 {/* Course Navigation Buttons */}
@@ -239,11 +239,10 @@ const Header = () => {
                             variant="link"
                             size="sm"
                             onClick={handleSyllabusClick}
-                            className={`text-xs sm:text-sm font-semibold ${
-                                isOnCourseSyllabus()
+                            className={`text-xs sm:text-sm font-semibold ${isOnCourseSyllabus()
                                     ? 'text-primary font-medium'
                                     : 'text-foreground hover:underline hover:text-primary'
-                            }`}
+                                }`}
                         >
                             Course Syllabus
                         </Button>

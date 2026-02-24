@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Cropper from 'react-cropper'
 import 'cropperjs/dist/cropper.css'
 import { z } from 'zod'
+import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -46,7 +47,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     handleCreateCourse,
     isDialogOpen,
 }) => {
-    const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
+    const [validationErrors, setValidationErrors] = useState<{ [key: string]: string }>({})
 
     const [collaborator, setCollaborator] = useState('')
     const [collaboratorInputType, setCollaboratorInputType] = useState<
@@ -76,16 +77,16 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         }
 
         const result = courseSchema.safeParse(formData)
-        
+
         if (!result.success) {
-            const errors: {[key: string]: string} = {}
+            const errors: { [key: string]: string } = {}
             result.error.errors.forEach((error) => {
                 errors[error.path[0]] = error.message
             })
             setValidationErrors(errors)
             return false
         }
-        
+
         setValidationErrors({})
         return true
     }
@@ -96,10 +97,10 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         // Real-time validation for name
         const result = courseSchema.shape.name.safeParse(e.target.value)
         if (!result.success) {
-            setValidationErrors(prev => ({...prev, name: result.error.errors[0].message}))
+            setValidationErrors(prev => ({ ...prev, name: result.error.errors[0].message }))
         } else {
             setValidationErrors(prev => {
-                const newErrors = {...prev}
+                const newErrors = { ...prev }
                 delete newErrors.name
                 return newErrors
             })
@@ -111,10 +112,10 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
         // Real-time validation for description
         const result = courseSchema.shape.description.safeParse(e.target.value)
         if (!result.success) {
-            setValidationErrors(prev => ({...prev, description: result.error.errors[0].message}))
+            setValidationErrors(prev => ({ ...prev, description: result.error.errors[0].message }))
         } else {
             setValidationErrors(prev => {
-                const newErrors = {...prev}
+                const newErrors = { ...prev }
                 delete newErrors.description
                 return newErrors
             })
@@ -137,7 +138,7 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     // }
 
     const resetForm = () => {
-        setValidationErrors({}) 
+        setValidationErrors({})
         setCollaborator('')
         setCollaboratorInputType('text')
         setIsUploading(false)
@@ -201,8 +202,8 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     // ✅ Check if all fields are valid
     const isFormValid = () => {
         return (
-            newCourseName.trim() && 
-            newCourseDescription.trim() && 
+            newCourseName.trim() &&
+            newCourseDescription.trim() &&
             // newCourseDuration.trim() &&
             Object.keys(validationErrors).length === 0
         )
@@ -317,8 +318,8 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                     </div>
 
                     <div className="text-left">
-                        <Label 
-                            htmlFor="description" 
+                        <Label
+                            htmlFor="description"
                             className="text-[1rem]"
                         >
                             Course Description *
@@ -418,17 +419,14 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                                 {croppedCollaboratorImage &&
                                     !isCollaboratorCropping && (
                                         <div className="mb-3">
-                                            <div className="w-full border rounded-md overflow-hidden">
-                                                <img
+                                            <div className="w-full border rounded-md overflow-hidden relative min-h-[120px] max-h-[250px]">
+                                                <Image
                                                     src={
                                                         croppedCollaboratorImage
                                                     }
                                                     alt="Collaborator"
-                                                    className="w-full h-auto object-contain"
-                                                    style={{
-                                                        minHeight: '120px',
-                                                        maxHeight: '250px',
-                                                    }}
+                                                    fill
+                                                    className="object-contain"
                                                 />
                                             </div>
                                         </div>
@@ -613,13 +611,13 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
                     </Button>
                 </DialogClose>
                 <DialogClose asChild>
-                <Button
-                    className="bg-primary"
-                    onClick={handleCreateCourseWithUpload}
-                    disabled={!isFormValid() || isUploading} // ✅ Check all fields
-                >
-                    {isUploading ? 'Creating...' : 'Create Course'}
-                </Button>
+                    <Button
+                        className="bg-primary"
+                        onClick={handleCreateCourseWithUpload}
+                        disabled={!isFormValid() || isUploading} // ✅ Check all fields
+                    >
+                        {isUploading ? 'Creating...' : 'Create Course'}
+                    </Button>
                 </DialogClose>
             </DialogFooter>
         </DialogContent>

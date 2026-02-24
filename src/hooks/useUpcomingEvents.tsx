@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-import{UpcomingEventsData,UseUpcomingEventsReturn,CompletedClassesResponse} from '@/hooks/hookType'
+import { UpcomingEventsData, UseUpcomingEventsReturn, CompletedClassesResponse } from '@/hooks/hookType'
 
 
 
@@ -14,10 +14,10 @@ export const useUpcomingEvents = (courseId?: string): UseUpcomingEventsReturn =>
       try {
         setLoading(true);
         setError(null);
-        if(courseId) {
-          
+        if (courseId) {
+
           const response = await api.get<CompletedClassesResponse>(`/student/UpcomingEvents?bootcampId=${courseId}`);
-          
+
           if (response.data && response.data.isSuccess) {
             setUpcomingEventsData(response.data.data);
           } else {
@@ -26,7 +26,7 @@ export const useUpcomingEvents = (courseId?: string): UseUpcomingEventsReturn =>
           }
         } else {
           const response = await api.get('/student/UpcomingEvents');
-          
+
           if (response.data && response.data.isSuccess) {
             setUpcomingEventsData(response.data.data);
           } else {
@@ -34,7 +34,7 @@ export const useUpcomingEvents = (courseId?: string): UseUpcomingEventsReturn =>
             setError(response.data.message || 'Failed to fetch upcoming events');
           }
         }
-        
+
       } catch (err: any) {
         console.error('Error fetching upcoming events:', err);
         setError(err.response?.data?.message || 'Failed to fetch upcoming events');
@@ -45,7 +45,7 @@ export const useUpcomingEvents = (courseId?: string): UseUpcomingEventsReturn =>
     };
 
     fetchUpcomingEvents();
-  }, []);
+  }, [courseId]);
 
   return { upcomingEventsData, loading, error };
 }; 

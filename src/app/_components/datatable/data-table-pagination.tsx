@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,7 +14,7 @@ import {
 
 import { ROWS_PER_PAGE, POSITION } from '@/utils/constant'
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
-import {DataTablePaginationProps} from "@/app/_components/datatable/componentDatatable"
+import { DataTablePaginationProps } from "@/app/_components/datatable/componentDatatable"
 
 export function DataTablePagination<TData>({
     totalStudents,
@@ -28,12 +28,12 @@ export function DataTablePagination<TData>({
     const position = useMemo(() => searchParams.get('limit') || POSITION, [searchParams])
     const offset = useMemo(() => (currentPage - 1) * +position, [currentPage, position])
 
-    const updateURLParams = (page: number, limit: string = position) => {
+    const updateURLParams = useCallback((page: number, limit: string = position) => {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(limit))
         router.push(`?${newParams.toString()}`)
-    }
+    }, [searchParams, router, position])
 
     const prevPageHandler = () => updateURLParams(currentPage - 1)
     const nextPageHandler = () => updateURLParams(currentPage + 1)
@@ -50,7 +50,7 @@ export function DataTablePagination<TData>({
         } else {
             fetchStudentData(offset)
         }
-    }, [currentPage, position, totalStudents])
+    }, [currentPage, position, totalStudents, fetchStudentData, offset, updateURLParams])
 
     return (
         <div className="flex items-center justify-end mt-2 px-2 gap-x-2 mb-2">

@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react'
 import { api } from '@/utils/axios.config'
 import { getCodingQuestionTags } from '@/store/store'
-import{Props, Tag,QuizApiResponse  } from '@/hooks/hookType'
+import { Props, Tag, QuizApiResponse } from '@/hooks/hookType'
 
 const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
     const [quizData, setQuizData] = useState<any>(null)
@@ -23,7 +23,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
 
             // Find the tag name based on the `tagId`
             const matchingTag = newTags.find(
-                (tag:  Tag ) => tag.id === quiz.tagId
+                (tag: Tag) => tag.id === quiz.tagId
             )
             setTagName(matchingTag ? matchingTag.tagId : null)
         } catch (error: any) {
@@ -31,7 +31,7 @@ const useGetMCQs = ({ id, tags: tag, assesmentSide }: Props) => {
                 error?.response?.data?.message || 'Error fetching quiz data'
             )
         }
-    }, [id, tags])
+    }, [id, newTags])
 
     useEffect(() => {
         if (id) {

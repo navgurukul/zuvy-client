@@ -36,14 +36,33 @@ import {
     Megaphone,
 } from 'lucide-react'
 
+const iconList = [
+    User,
+    Briefcase,
+    Users,
+    Code,
+    Palette,
+    Headphones,
+    CheckCircle,
+    Edit,
+    Eye,
+    UserCircle,
+    BarChart,
+    Award,
+    CalendarCheck,
+    DollarSign,
+    TrendingUp,
+    Megaphone,
+]
+
 type AddUserModalProps = {
-  isEditMode: boolean;
-  user?: any | null;
-  orgId?: string;
-  refetchUsers?: () => void;
-  selectedId?: number; 
-  onClose?: () => void;
-  isOpen?: boolean;
+    isEditMode: boolean;
+    user?: any | null;
+    orgId?: string;
+    refetchUsers?: () => void;
+    selectedId?: number;
+    onClose?: () => void;
+    isOpen?: boolean;
 };
 
 type RoleCardProps = {
@@ -67,19 +86,17 @@ const RoleCard: React.FC<RoleCardProps> = ({
         <button
             type="button"
             onClick={() => onSelect && onSelect(id)}
-            className={`w-full text-left border rounded-lg p-4 transition-colors ${
-                selected
+            className={`w-full text-left border rounded-lg p-4 transition-colors ${selected
                     ? 'border-primary bg-primary-light'
                     : 'border-gray-200 hover:border-gray-300'
-            }`}
+                }`}
         >
             <div className="flex items-start gap-3">
                 <div
-                    className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${
-                        selected
+                    className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${selected
                             ? 'bg-blue-100 text-primary'
                             : 'bg-gray-100 text-foreground'
-                    }`}
+                        }`}
                 >
                     {icon}
                 </div>
@@ -95,11 +112,11 @@ const RoleCard: React.FC<RoleCardProps> = ({
 }
 
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ 
-    isEditMode, 
-    user, 
+const AddUserModal: React.FC<AddUserModalProps> = ({
+    isEditMode,
+    user,
     orgId,
-    refetchUsers, 
+    refetchUsers,
     onClose,
     isOpen = false,
 }) => {
@@ -129,7 +146,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     const fetchedName = response.data.name || ''
                     const fetchedEmail = response.data.email || ''
                     const fetchedRoleId = response.data.roleId || null
-                    
+
                     setNewUser({
                         name: fetchedName,
                         email: fetchedEmail,
@@ -147,7 +164,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     const fallbackName = user.name || ''
                     const fallbackEmail = user.email || ''
                     const fallbackRoleId = user.roleId || null
-                    
+
                     setNewUser({
                         name: fallbackName,
                         email: fallbackEmail,
@@ -179,7 +196,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 roleId: null,
             })
         }
-    }, [isEditMode, user?.id, isOpen])
+    }, [isEditMode, user?.id, user?.name, user?.email, user?.roleId, isOpen])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -203,24 +220,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
     // In add mode, button should be enabled if form is valid
     const canSubmit = isEditMode ? hasChanges : isFormValid
 
-     const iconList = [
-        User,
-        Briefcase,
-        Users,
-        Code,
-        Palette,
-        Headphones,
-        CheckCircle,
-        Edit,
-        Eye,
-        UserCircle,
-        BarChart,
-        Award,
-        CalendarCheck,
-        DollarSign,
-        TrendingUp,
-        Megaphone,
-    ]
+
 
     const getRoleIcon = useCallback((role: string) => {
         switch (role.toLowerCase()) {
@@ -231,7 +231,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             case 'instructor':
                 return <GraduationCap className="w-5 h-5" />
             default:
-                 // Get icon sequentially from the list based on role name
+                // Get icon sequentially from the list based on role name
                 const roleIndex = role
                     .split('')
                     .reduce((acc, char) => acc + char.charCodeAt(0), 0)
@@ -252,13 +252,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
         try {
             const response = await api.post('/users/addUsers', payload)
-            if(response.status === 201) {
+            if (response.status === 201) {
                 toast.success({
                     title: 'User added successfully',
                     description: 'The new user has been added.',
                 })
             }
-        } catch (error:any) {
+        } catch (error: any) {
             toast.error({
                 title: 'Error adding user',
                 description: error?.response?.data?.message || 'There was an issue adding the new user.',
@@ -290,7 +290,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
 
         try {
             const response = await api.put(`/users/updateUser/${user.id}`, payload)
-            if(response.status === 200) {
+            if (response.status === 200) {
                 // Update the cached fresh data immediately
                 setFreshUserData({
                     ...freshUserData,
@@ -307,7 +307,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                     description: 'The user details have been updated.',
                 })
             }
-        } catch (error:any) {
+        } catch (error: any) {
             toast.error({
                 title: 'Error updating user',
                 description: error?.response?.data?.message || 'There was an issue updating the user details.',

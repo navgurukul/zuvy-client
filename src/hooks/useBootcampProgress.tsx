@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from "@/utils/axios.config";
-import{BootcampProgressResponse} from '@/hooks/hookType'
+import { BootcampProgressResponse } from '@/hooks/hookType'
 
 export const useBootcampProgress = (courseId: string) => {
   const [progressData, setProgressData] = useState<BootcampProgressResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBootcampProgress = async () => {
+  const fetchBootcampProgress = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -19,7 +19,7 @@ export const useBootcampProgress = (courseId: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
 
   const refetch = () => {
     fetchBootcampProgress();
@@ -29,7 +29,7 @@ export const useBootcampProgress = (courseId: string) => {
     if (courseId) {
       fetchBootcampProgress();
     }
-  }, [courseId]);
+  }, [courseId, fetchBootcampProgress]);
 
   return {
     progressData,

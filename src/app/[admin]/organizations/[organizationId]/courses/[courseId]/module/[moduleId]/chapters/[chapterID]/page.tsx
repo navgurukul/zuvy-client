@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState, useRef } from 'react'
+import Image from 'next/image'
 import { useParams, usePathname } from 'next/navigation'
 import { api } from '@/utils/axios.config'
 import { getUser } from '@/store/store'
@@ -37,7 +38,7 @@ export default function Page({
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const { organizationId, courseId, moduleId, chapterID } = useParams()
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const moduleID = Array.isArray(moduleId) ? moduleId[0] : moduleId
     const chapter_id = Array.isArray(chapterID)
         ? Number(chapterID[0])
@@ -136,7 +137,7 @@ export default function Page({
                             fetchChapterContent={fetchChapterContent}
                             canEdit={canEditChapter} setIsChapterLoading={function (value: boolean): void {
                                 throw new Error('Function not implemented.')
-                            } } isChapterLoading={false}                        />
+                            }} isChapterLoading={false} />
                     )
                 case 2:
                     return (
@@ -243,11 +244,14 @@ export default function Page({
                     ) : (
                         <div className="flex flex-col items-center justify-center min-h-[80vh] relative">
                             <div className="absolute left-1/2 -translate-x-1/2 md:left-[380px] md:translate-x-0">
-                                <img
-                                    src="/images/undraw.svg"
-                                    alt="Create Chapter"
-                                    className="lg:w-[280px] lg:h-[280px] md:w-[320px] md:h-[320px] object-contain mb-3 opacity-80"
-                                />
+                                <div className="lg:w-[280px] lg:h-[280px] md:w-[320px] md:h-[320px] relative mb-3 opacity-80">
+                                    <Image
+                                        src="/images/undraw.svg"
+                                        alt="Create Chapter"
+                                        fill
+                                        className="object-contain"
+                                    />
+                                </div>
                                 <p className="absolute text-lg text-center lg:left-[45px]">
                                     Create New Chapter
                                 </p>

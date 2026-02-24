@@ -13,7 +13,7 @@ import { api } from '@/utils/axios.config'
 import Editor from '@monaco-editor/react'
 import { ArrowLeft } from 'lucide-react'
 import { useRouter, usePathname, useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { Spinner } from '@/components/ui/spinner'
 import { formatValue } from "@/utils/students"
@@ -228,7 +228,7 @@ const IDE: React.FC<IDEProps> = ({
         setCurrentCode(value)
     }
 
-    const getQuestionDetails = async () => {
+    const getQuestionDetails = useCallback(async () => {
         try {
             await api
                 .get(`codingPlatform/get-coding-question/${params.editor}`)
@@ -244,17 +244,17 @@ const IDE: React.FC<IDEProps> = ({
         } catch (error: any) {
             console.error('Error fetching courses:', error)
         }
-    }
+    }, [params.editor]);
 
     useEffect(() => {
         getQuestionDetails()
-    }, [language])
+    }, [getQuestionDetails, language])
 
     useEffect(() => {
         if (templates?.[language]?.template) {
             setCurrentCode(b64DecodeUnicode(templates?.[language]?.template))
         }
-    }, [language])
+    }, [language, templates])
 
 
     useEffect(() => {
@@ -268,7 +268,7 @@ const IDE: React.FC<IDEProps> = ({
                 setCurrentCode(b64DecodeUnicode(runSourceCode))
             }
         }
-    }, [runCodeLanguageId, runSourceCode])
+    }, [runCodeLanguageId, runSourceCode, editorLanguages])
 
     useEffect(() => {
         const getActions = async () => {
@@ -279,7 +279,7 @@ const IDE: React.FC<IDEProps> = ({
             }
         }
         getActions()
-    }, [])
+    }, [assessmentSubmitId, getCodingSubmissionsData, params.editor, selectedCodingOutsourseId, setCodingSubmissionAction])
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-background via-primary-light/5 to-accent-light/10">
@@ -679,13 +679,13 @@ const IDE: React.FC<IDEProps> = ({
                                                             </div>
                                                             <div className="mt-2 pl-4 border-l-2 border-gray-200 dark:border-gray-700 ml-1">
                                                                 <div className="grid grid-cols-[max-content,1fr] gap-x-2 gap-y-1">
-                                                                    {testCase?.stdIn && index < 2 &&  (
+                                                                    {testCase?.stdIn && index < 2 && (
                                                                         <>
                                                                             <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Input:</span>
                                                                             <pre className="whitespace-pre-wrap break-all">{testCase.stdIn}</pre>
                                                                         </>
                                                                     )}
-                                                                    {testCase?.expectedOutput  && index < 2 && (
+                                                                    {testCase?.expectedOutput && index < 2 && (
                                                                         <>
                                                                             <span className="font-semibold text-gray-600 dark:text-gray-400 justify-self-end">Expected:</span>
                                                                             <pre className="whitespace-pre-wrap break-all">{testCase.expectedOutput}</pre>

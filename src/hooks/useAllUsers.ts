@@ -41,12 +41,12 @@ export function useAllUsers({
     limit,
     searchTerm,
     offset,
-    roleId}: UseAllUsersArgs) {
+    roleId }: UseAllUsersArgs) {
     const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const [users, setUsers] = useState<User[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
@@ -90,12 +90,12 @@ export function useAllUsers({
                 setLoading(false)
             }
         },
-        [roleId, stableLimit]
+        [orgId, stableLimit, roleId]
     )
 
     useEffect(() => {
         if (initialFetch) getAllUsers(offset)
-    }, [initialFetch, getAllUsers, offset, searchTerm, stableLimit, roleId])
+    }, [initialFetch, getAllUsers, offset])
 
     return {
         users,

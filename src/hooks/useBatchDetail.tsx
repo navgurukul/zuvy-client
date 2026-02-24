@@ -24,7 +24,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
 
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
@@ -164,7 +164,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
                     try {
                         const response = await api.get(`/bootcamp/students/${params.courseId}?batch_id=${params.batchId}`)
                         setStudentData(response.data.modifiedStudentInfo)
-                    } catch (error) {}
+                    } catch (error) { }
                 }
                 fetchBatchesInfo()
                 fetchInstructorInfo(params.batchId)
@@ -195,7 +195,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
                 setLoading(false)
             })
         },
-        [params, position, setStoreStudentData, setStudents, setLastPage, setPages, setTotalStudents, debouncedValue]
+        [params.courseId, params.batchId, position, setStoreStudentData, setStudents, setLastPage, setPages, setTotalStudents, debouncedValue]
     )
 
     useEffect(() => {

@@ -15,7 +15,7 @@ export function useAllCourses(initialFetch = true) {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const [allCourses, setAllCourses] = useState<Course[]>([])
     const [loading, setLoading] = useState<boolean>(!!initialFetch)
     const [error, setError] = useState<unknown>(null)
@@ -25,10 +25,10 @@ export function useAllCourses(initialFetch = true) {
             setLoading(true)
             const res = await api.get<CoursesResponse>(
                 // '/bootcamp?limit=10&offset=0'
-                 `/bootcamp?organization_id=${orgId}`
+                `/bootcamp?organization_id=${orgId}`
             )
             setAllCourses(res.data.data)
-            
+
             // Save permissions to IndexedDB
             const newPermissions = res.data.permissions;
             const existing = await db.permissions.toArray()
@@ -43,7 +43,7 @@ export function useAllCourses(initialFetch = true) {
                 )
                 await db.permissions.bulkPut(entries)
             }
-            
+
             setError(null)
         } catch (err) {
             setError(err)
@@ -52,7 +52,7 @@ export function useAllCourses(initialFetch = true) {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [orgId])
 
     useEffect(() => {
         if (initialFetch) getAllCourses()

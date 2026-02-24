@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/utils/axios.config';
-import{UseCourseSyllabusReturn,ApiResponses,CourseSyllabusData} from '@/hooks/hookType'
+import { UseCourseSyllabusReturn, ApiResponses, CourseSyllabusData } from '@/hooks/hookType'
 
 const useCourseSyllabus = (courseId: string | string[] | undefined): UseCourseSyllabusReturn => {
   const [syllabusData, setSyllabusData] = useState<CourseSyllabusData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSyllabus = async () => {
+  const fetchSyllabus = useCallback(async () => {
     if (!courseId) {
       setError('Course ID is required');
       setLoading(false);
@@ -17,9 +17,9 @@ const useCourseSyllabus = (courseId: string | string[] | undefined): UseCourseSy
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await api.get<ApiResponses>(`/student/syllabus/${courseId}`);
-      
+
       if (response.data.isSuccess) {
         setSyllabusData(response.data.data);
       } else {
@@ -32,11 +32,11 @@ const useCourseSyllabus = (courseId: string | string[] | undefined): UseCourseSy
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
 
   useEffect(() => {
     fetchSyllabus();
-  }, [courseId]);
+  }, [fetchSyllabus]);
 
   const refetch = () => {
     fetchSyllabus();

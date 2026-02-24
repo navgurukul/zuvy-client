@@ -38,7 +38,7 @@ import { BookOpenText } from 'lucide-react'
 import useEditChapter from '@/hooks/useEditChapter'
 import useUploadPdf from '@/hooks/useUploadPdf'
 import useGetChapterDetails from '@/hooks/useGetChapterDetails'
-import {ArticleSkeletons} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { ArticleSkeletons } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import PermissionAlert from '@/app/_components/PermissionAlert'
 
 const AddArticle: React.FC<AddArticleProps> = ({
@@ -54,11 +54,11 @@ const AddArticle: React.FC<AddArticleProps> = ({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const [disabledUploadButton, setIsdisabledUploadButton] = useState(false)
     // state - FIXED: Use single title state for both modes
     const [title, setTitle] = useState('')
-    const [isDataLoading, setIsDataLoading] = useState(true) 
+    const [isDataLoading, setIsDataLoading] = useState(true)
     const { isChapterUpdated, setIsChapterUpdated } = getChapterUpdateStatus()
     const [defaultValue, setDefaultValue] = useState('editor')
     const [file, setFile] = useState<any>(null)
@@ -108,10 +108,10 @@ const AddArticle: React.FC<AddArticleProps> = ({
     // NEW: Function to check if editor content is empty
     const isEditorContentEmpty = (content: any): boolean => {
         if (!content) return true
-        
+
         // Handle content with or without doc wrapper
         const docContent = content.doc?.content || content.content
-        
+
         if (!docContent || docContent.length === 0) return true
 
         // Check if only empty paragraphs
@@ -129,7 +129,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             if (item.type !== 'paragraph') {
                 return true
             }
-            
+
             // Check paragraph content
             if (item.type === 'paragraph' && item.content) {
                 return item.content.some((textItem: any) => {
@@ -208,7 +208,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 setpdfLink(link)
                 setDefaultValue('pdf')
                 setIsPdfUploaded(true)
-                setIsEditorSaved(false) 
+                setIsEditorSaved(false)
             } else {
                 setpdfLink(null)
                 setDefaultValue('editor')
@@ -245,7 +245,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             // NEW: Set initial content states
             setHasEditorContent(!isEditorContentEmpty(parsedContent ? { doc: parsedContent } : undefined))
             setPreviousContentHash(generateContentHash(parsedContent))
-            
+
         } catch (error) {
             console.error('Error fetching article content:', error)
         } finally {
@@ -304,7 +304,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
             hasFetched.current = true
             getArticleContent()
         }
-    }, [content?.id]) 
+    }, [content?.id])
 
 
     // Reset isEditorSaved if PDF is uploaded or deleted
@@ -340,8 +340,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 setHasChangedAfterSave(true)
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [title, originalTitle, isInitialLoad])
+    }, [title, originalTitle, isInitialLoad, form.formState.isValid])
 
     // Auto-save effect for content deletion
     useEffect(() => {
@@ -538,7 +537,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                         {/* <div className="flex justify-between items-center"> */}
                         {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
                         {/* <p className="text-2xl font-bold">{title}</p> */}
-                        
+
                         <Form {...form}>
                             <form
                                 id="myForm"
@@ -566,7 +565,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                         }}
                                                         placeholder={
                                                             defaultValue ===
-                                                            'editor'
+                                                                'editor'
                                                                 ? 'Untitled Article'
                                                                 : 'Untitled PDF'
                                                         }
@@ -770,7 +769,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                             <UploadArticle
                                                 loading={loading}
                                                 file={file}
-                                                setFile={(newFile:any) => {
+                                                setFile={(newFile: any) => {
                                                     setFile(newFile)
                                                     setHasNewPdfToSave(!!newFile)
                                                 }}
@@ -800,8 +799,8 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                     className="bg-primary text-primary-foreground hover:bg-primary/90"
                                     disabled={
                                         !canEdit ||
-                                        isSaving || 
-                                        !form.formState.isValid || 
+                                        isSaving ||
+                                        !form.formState.isValid ||
                                         !hasEditorContent ||
                                         !hasChangedAfterSave
                                     }

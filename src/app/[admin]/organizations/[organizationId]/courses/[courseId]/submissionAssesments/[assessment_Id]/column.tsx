@@ -18,6 +18,60 @@ interface ColumnContext {
     assessment_Id: string;
 }
 
+const ActionCell = ({ row, context }: { row: any, context: ColumnContext }) => {
+    const { userId, id, title, submitedAt } = row.original;
+    const { organizationId } = useParams()
+    const { courseId, assessment_Id } = context;
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
+
+    return (
+        <div className="flex items-center gap-3">
+            <Link
+                href={
+                    submitedAt
+                        ? `/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
+                        : '#'
+                }
+                className={
+                    submitedAt
+                        ? 'text-black hover:text-blue-600'
+                        : 'opacity-50 cursor-not-allowed'
+                }
+            >
+                <Eye className="h-4 w-4" />
+            </Link>
+
+            {/* Download Icon */}
+            <DownloadReport
+                userInfo={{
+                    userId: String(userId),
+                    id: String(id),
+                    title: title ?? ''
+                }}
+                submitedAt={submitedAt}
+            />
+
+            {/* Re-attempt Icon */}
+            <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                onClick={() => {
+                    // Optional: handle re-attempt logic or open a modal
+                }}
+            >
+                {/* <RefreshCw className="h-4 w-4" /> */}
+            </Button>
+
+            {/* Approve Re-Attempt Button */}
+            <ApproveReattempt data={row.original} />
+        </div>
+    );
+};
+
 export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     {
         accessorKey: 'student',
@@ -38,20 +92,20 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             )
         },
     },
-{
-    accessorKey: 'batchName',
-    header: () => <div className="text-left w-full">Batch</div>,
-    cell: ({ row }) => {
-        const batchName = row.original.batchName || 'N/A'
-        return (
-            <div className="text-left w-full">
-                <Badge variant="outline" className="text-black border-black">
-                    {batchName}
-                </Badge>
-            </div>
-        )
+    {
+        accessorKey: 'batchName',
+        header: () => <div className="text-left w-full">Batch</div>,
+        cell: ({ row }) => {
+            const batchName = row.original.batchName || 'N/A'
+            return (
+                <div className="text-left w-full">
+                    <Badge variant="outline" className="text-black border-black">
+                        {batchName}
+                    </Badge>
+                </div>
+            )
+        },
     },
-},
     {
         accessorKey: 'startedAt',
         cell: ({ row }) => {
@@ -61,29 +115,29 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                     <span className="max-w-[500px] truncate font-medium text-black">
                         {startedAt
                             ? (() => {
-                                  const date = new Date(startedAt)
-                                  const year = date
-                                      .getFullYear()
-                                      .toString()
-                                      .slice(-2)
-                                  const day = date
-                                      .getDate()
-                                      .toString()
-                                      .padStart(2, '0')
-                                  const month = (date.getMonth() + 1)
-                                      .toString()
-                                      .padStart(2, '0')
-                                  const hour = date
-                                      .getHours()
-                                      .toString()
-                                      .padStart(2, '0')
-                                  const minute = date
-                                      .getMinutes()
-                                      .toString()
-                                      .padStart(2, '0')
+                                const date = new Date(startedAt)
+                                const year = date
+                                    .getFullYear()
+                                    .toString()
+                                    .slice(-2)
+                                const day = date
+                                    .getDate()
+                                    .toString()
+                                    .padStart(2, '0')
+                                const month = (date.getMonth() + 1)
+                                    .toString()
+                                    .padStart(2, '0')
+                                const hour = date
+                                    .getHours()
+                                    .toString()
+                                    .padStart(2, '0')
+                                const minute = date
+                                    .getMinutes()
+                                    .toString()
+                                    .padStart(2, '0')
 
-                                  return `${day}/${month}/${year}, ${hour}:${minute}`
-                              })()
+                                return `${day}/${month}/${year}, ${hour}:${minute}`
+                            })()
                             : 'N/A'}
                     </span>
                 </div>
@@ -93,9 +147,9 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     {
         accessorKey: 'submitedAt',
         header: ({ column, onSort }: any) => (
-            <DataTableColumnHeader 
-                column={column} 
-                title="Submitted At" 
+            <DataTableColumnHeader
+                column={column}
+                title="Submitted At"
                 onSort={onSort}
                 sortField="submittedDate"
             />
@@ -109,29 +163,29 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
                         {/* {submitedAt ? new Date(submitedAt).toLocaleString() : 'N/A'} */}
                         {submitedAt
                             ? (() => {
-                                  const date = new Date(submitedAt)
-                                  const year = date
-                                      .getFullYear()
-                                      .toString()
-                                      .slice(-2)
-                                  const day = date
-                                      .getDate()
-                                      .toString()
-                                      .padStart(2, '0')
-                                  const month = (date.getMonth() + 1)
-                                      .toString()
-                                      .padStart(2, '0')
-                                  const hour = date
-                                      .getHours()
-                                      .toString()
-                                      .padStart(2, '0')
-                                  const minute = date
-                                      .getMinutes()
-                                      .toString()
-                                      .padStart(2, '0')
+                                const date = new Date(submitedAt)
+                                const year = date
+                                    .getFullYear()
+                                    .toString()
+                                    .slice(-2)
+                                const day = date
+                                    .getDate()
+                                    .toString()
+                                    .padStart(2, '0')
+                                const month = (date.getMonth() + 1)
+                                    .toString()
+                                    .padStart(2, '0')
+                                const hour = date
+                                    .getHours()
+                                    .toString()
+                                    .padStart(2, '0')
+                                const minute = date
+                                    .getMinutes()
+                                    .toString()
+                                    .padStart(2, '0')
 
-                                  return `${day}/${month}/${year}, ${hour}:${minute}`
-                              })()
+                                return `${day}/${month}/${year}, ${hour}:${minute}`
+                            })()
                             : 'N/A'}
                     </span>
                 </div>
@@ -162,9 +216,9 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     {
         accessorKey: 'percentage',
         header: ({ column, onSort }: any) => (
-            <DataTableColumnHeader 
-                column={column} 
-                title="Score" 
+            <DataTableColumnHeader
+                column={column}
+                title="Score"
                 onSort={onSort}
                 sortField="percentage"
             />
@@ -174,9 +228,8 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const isPassed = row.original.isPassed
             return (
                 <span
-                    className={`font-semibold ${
-                        isPassed ? 'text-green-600' : 'text-red-600'
-                    }`}
+                    className={`font-semibold ${isPassed ? 'text-green-600' : 'text-red-600'
+                        }`}
                 >
                     {score}%
                 </span>
@@ -190,10 +243,9 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
             const isPassed = row.original.isPassed
             return (
                 <div className="flex items-center gap-2">
-                    <div 
-                         className={` ${
-                            isPassed ? 'bg-green-500' : 'bg-red-500'
-                        }`} 
+                    <div
+                        className={` ${isPassed ? 'bg-green-500' : 'bg-red-500'
+                            }`}
                     />
                     <Badge
                         variant="outline"
@@ -220,60 +272,7 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
     {
         id: 'actions',
         header: 'Actions',
-        cell: ({ row }) => {
-            const { userId, id, title, submitedAt } = row.original;
-            // Use context values instead of row.original
-            const { organizationId } = useParams()
-            const { courseId, assessment_Id } = context;
-            const { user } = getUser()
-            const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-            const isSuperAdmin = userRole === 'super_admin';
-            const orgId = isSuperAdmin ? organizationId : user?.orgId
-
-            return (
-                <div className="flex items-center gap-3">
-                    <Link
-                        href={
-                            submitedAt
-                                ? `/${userRole}/organizations/${orgId}/courses/${courseId}/submissionAssesments/${assessment_Id}/IndividualReport/${userId}/Report/${id}`
-                                : '#'
-                        }
-                        className={
-                            submitedAt
-                                ? 'text-black hover:text-blue-600'
-                                : 'opacity-50 cursor-not-allowed'
-                        }
-                    >
-                        <Eye className="h-4 w-4" />
-                    </Link>
-
-                    {/* Download Icon */}
-                    <DownloadReport
-                        userInfo={{
-                            userId: String(userId),
-                            id: String(id),
-                            title: title ?? ''
-                        }}
-                        submitedAt={submitedAt}
-                    />
-                    
-                    {/* Re-attempt Icon */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-                        onClick={() => {
-                            // Optional: handle re-attempt logic or open a modal
-                        }}
-                    >
-                        {/* <RefreshCw className="h-4 w-4" /> */}
-                    </Button>
-
-                    {/* Approve Re-Attempt Button */}
-                    <ApproveReattempt data={row.original} />
-                </div>
-            );
-        },
+        cell: (props) => <ActionCell {...props} context={context} />,
     },
 ]
 

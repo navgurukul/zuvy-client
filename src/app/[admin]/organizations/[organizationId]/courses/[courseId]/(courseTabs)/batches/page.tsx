@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useMemo,useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
@@ -71,7 +71,7 @@ import { SearchBox } from '@/utils/searchBox'
 import DeleteConfirmationModal from '../../_components/deleteModal'
 import Dropzone from '../../_components/dropzone'
 import AddStudentOptions from '../../_components/AddStudentOptions'
-import {BatchesSkeleton} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
+import { BatchesSkeleton } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/_components/adminSkeleton'
 import { DataTablePagination } from '@/app/_components/datatable/data-table-pagination'
 
 const Page = ({ params }: { params: ParamsType }) => {
@@ -140,7 +140,7 @@ const Page = ({ params }: { params: ParamsType }) => {
     useEffect(() => {
         setBatchesPerPage(position);   // update hook limit when URL changes
     }, [position, setBatchesPerPage]);
-    
+
     // Local UI-only value derived from the form provided by the hook
     const capEnrollmentValue = form.watch('capEnrollment')
 
@@ -263,10 +263,10 @@ const Page = ({ params }: { params: ParamsType }) => {
                         </div>
                         {(!singleStudentData.name.trim() ||
                             !singleStudentData.email.trim()) && (
-                            <p className="text-sm text-red-500">
-                                Both name and email are required
-                            </p>
-                        )}
+                                <p className="text-sm text-red-500">
+                                    Both name and email are required
+                                </p>
+                            )}
                     </div>
                 )
 
@@ -595,14 +595,12 @@ const Page = ({ params }: { params: ParamsType }) => {
 
                                             {assignLearners === 'all' && (
                                                 <FormDescription>
-                                                    {`${
-                                                        courseData?.unassigned_students
-                                                    } ${
-                                                        courseData?.unassigned_students ===
-                                                        1
+                                                    {`${courseData?.unassigned_students
+                                                        } ${courseData?.unassigned_students ===
+                                                            1
                                                             ? ' student'
                                                             : ' students'
-                                                    } will be added to
+                                                        } will be added to
                                                 this batch (Maximum current availability)`}
                                                 </FormDescription>
                                             )}
@@ -783,25 +781,25 @@ const Page = ({ params }: { params: ParamsType }) => {
                     {renderModal(false)}
                 </div>
                 <div className="flex flex-col lg:flex-row justify-between items-center mb-8">
-                <div className="relative w-full lg:max-w-[500px]">
-                            <SearchBox
-                                placeholder="Search batches..."
-                                fetchSuggestionsApi={fetchSuggestionsApi}
-                                fetchSearchResultsApi={fetchSearchResultsApi}
-                                defaultFetchApi={defaultFetchApi}
-                                getSuggestionLabel={(s) => (
-                                    <div>
-                                        <div className="font-medium">
-                                            {s.name}
-                                        </div>
+                    <div className="relative w-full lg:max-w-[500px]">
+                        <SearchBox
+                            placeholder="Search batches..."
+                            fetchSuggestionsApi={fetchSuggestionsApi}
+                            fetchSearchResultsApi={fetchSearchResultsApi}
+                            defaultFetchApi={defaultFetchApi}
+                            getSuggestionLabel={(s) => (
+                                <div>
+                                    <div className="font-medium">
+                                        {s.name}
                                     </div>
-                                )}
-                                inputWidth="relative lg:w-[400px] w-full"
-                            />
-                        </div>
+                                </div>
+                            )}
+                            inputWidth="relative lg:w-[400px] w-full"
+                        />
                     </div>
+                </div>
                 {loading ? (
-                      <BatchesSkeleton/>  
+                    <BatchesSkeleton />
                 ) : (
                     /* Batch Cards Grid - Updated Design */
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -821,18 +819,18 @@ const Page = ({ params }: { params: ParamsType }) => {
                                                                 {batch.name
                                                                     .length > 25
                                                                     ? batch.name.substring(
-                                                                          0,
-                                                                          25
-                                                                      ) + '...'
+                                                                        0,
+                                                                        25
+                                                                    ) + '...'
                                                                     : batch.name}
                                                             </CardTitle>
                                                         </TooltipTrigger>
                                                         {batch.name.length >
                                                             25 && (
-                                                            <TooltipContent>
-                                                                {batch.name}
-                                                            </TooltipContent>
-                                                        )}
+                                                                <TooltipContent>
+                                                                    {batch.name}
+                                                                </TooltipContent>
+                                                            )}
                                                     </Tooltip>
                                                 </TooltipProvider>
                                                 <Badge
@@ -918,7 +916,7 @@ const Page = ({ params }: { params: ParamsType }) => {
 
                                     <CardFooter className="pt-4">
                                         <Button
-                                           
+
                                             size="sm"
                                             onClick={() =>
                                                 handleViewStudents(

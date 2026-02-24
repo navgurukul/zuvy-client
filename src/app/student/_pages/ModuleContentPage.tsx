@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,10 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { List, ArrowLeft, ChevronDown, ChevronRight, Check, Video, Play, FileText, BookOpen, User, Circle } from "lucide-react";
 import ModuleSidebar from "@/app/student/_components/MobileSideBar";
 import ModuleContentRenderer from "@/app/student/_components/ModuleContentRenderer";
-import {ModuleContentSkeleton} from "@/app/student/_components/Skeletons";
+import { ModuleContentSkeleton } from "@/app/student/_components/Skeletons";
 import useAllChaptersWithStatus from "@/hooks/useAllChaptersWithStatus";
 import Header from "../_components/Header";
-import {TopicItem,Topic} from '@/app/student/_pages/pageStudentType'
+import { TopicItem, Topic } from '@/app/student/_pages/pageStudentType'
 
 const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId: string }) => {
   const router = useRouter();
@@ -24,7 +24,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<string[]>([]);
-  
+
 
 
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -34,39 +34,7 @@ const ModuleContentPage = ({ courseId, moduleId }: { courseId: string, moduleId:
 
 
 
-useEffect(() => {
-  if (enhancedModule) {
-    setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
-  }
-}, [trackingData, moduleDetails, loading, error]);
-
-
-
-
-
-  useEffect(() => {
-    if (chapterId && !hasScrolledRef.current) {
-      const targetEl = itemRefs.current[chapterId];
-      if (targetEl) {
-        targetEl.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-        hasScrolledRef.current = true;  
-      }
-    }
-  }, [chapterId, expandedTopics]);
-
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Get the module data early for use in effects
-  const transformTrackingDataToModule = () => {
+  const transformTrackingDataToModule = useCallback(() => {
     if (!trackingData.length || !moduleDetails.length) return null;
 
     const moduleDetail = moduleDetails[0];
@@ -131,9 +99,39 @@ useEffect(() => {
       description: moduleDetail.description,
       topics: [singleTopic]
     };
-  };
+  }, [trackingData, moduleDetails]);
 
-  const enhancedModule = transformTrackingDataToModule();
+  const enhancedModule = useMemo(() => transformTrackingDataToModule(), [transformTrackingDataToModule]);
+
+  useEffect(() => {
+    if (enhancedModule) {
+      setExpandedTopics(enhancedModule.topics.map(topic => topic.id));
+    }
+  }, [enhancedModule]);
+
+  useEffect(() => {
+    if (chapterId && !hasScrolledRef.current) {
+      const targetEl = itemRefs.current[chapterId];
+      if (targetEl) {
+        targetEl.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+        hasScrolledRef.current = true;
+      }
+    }
+  }, [chapterId, expandedTopics]);
+
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Get the module data early for use in effects
+
 
   // Set default chapter if none is in the URL
   useEffect(() => {
@@ -211,7 +209,7 @@ useEffect(() => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl text-primary font-heading font-bold mb-2">Module Not Found</h1>
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground"  asChild>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
             <Link href={`/student/course/${courseId}`}>Back to Course</Link>
           </Button>
         </div>
@@ -353,7 +351,7 @@ useEffect(() => {
     );
   };
 
-  const getItemDetails = (item:TopicItem) => {
+  const getItemDetails = (item: TopicItem) => {
     if (item.type === 'live-class') {
       return 'Live Class';
     }
@@ -461,7 +459,7 @@ useEffect(() => {
                                                   item.title}
                                 </div>
                                 <div className="text-xs font-md text-muted-foreground">
-                                  {getItemDetails(item)}  
+                                  {getItemDetails(item)}
                                 </div>
                               </div>
                               {item.status === 'completed' && (
@@ -488,12 +486,12 @@ useEffect(() => {
         {isMobile && <Header />}
         <div className="flex w-full flex-start" >
 
-              <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
-                <Link href={`/student/course/${courseId}`}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Course
-                </Link>
-              </Button>
+          <Button variant="link" size="sm" asChild className="font-semibold text-foreground hover:text-foreground hover:no-underline">
+            <Link href={`/student/course/${courseId}`}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Course
+            </Link>
+          </Button>
         </div>
         <div className="flex-1 overflow-hidden">
           <div className={`h-full  ${isMobile ? 'p-2.5' : 'p-10'}`}>
@@ -501,7 +499,7 @@ useEffect(() => {
               selectedItemData={selectedItemData}
               onChapterComplete={refetch} getAssessmentData={function (itemId: string) {
                 throw new Error("Function not implemented.");
-              } }            />
+              }} />
           </div>
         </div>
       </div>

@@ -15,7 +15,7 @@ import { api } from "@/utils/axios.config";
 
 import { toast } from "@/components/ui/use-toast";
 import { usePathname, useRouter } from "next/navigation";
-import { getAssessmentStore,  } from "@/store/store";
+import { getAssessmentStore, } from "@/store/store";
 import { AlertProvider } from "./ProctoringAlerts";
 
 import PreventBackNavigation from "./PreventBackNavigation";
@@ -84,6 +84,42 @@ function Page({ params }: PageParams) {
     setIsFullScreen(true);
   }, []);
 
+  const navigateToChapter = useCallback(
+    (bootcampId: any, moduleId: any, chId: any) => {
+      router.push(`/student/course/${bootcampId}/modules/${moduleId}?chapterId=${chId}`);
+    },
+    [router]
+  );
+
+  const completeChapter = useCallback(() => {
+    if (!chapterId) return;
+    api.post(`tracking/updateChapterStatus/${params.viewcourses}/${params.moduleID}?chapterId=${chapterId}`).catch(() => { });
+  }, [chapterId, params.moduleID, params.viewcourses]);
+
+  const submitAssessment = useCallback(async () => {
+    setDisableSubmit(true);
+    if (!assessmentSubmitId) return;
+    try {
+      const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
+      await api.patch(`/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`, {
+        tabChange,
+        copyPaste,
+        fullScreenExit,
+        eyeMomentCount,
+        typeOfsubmission: "studentSubmit",
+      });
+      toast.success({ title: "Assessment Submitted", description: "Your assessment has been submitted successfully" });
+      completeChapter();
+      navigateToChapter(assessmentData?.bootcampId, assessmentData?.moduleId, assessmentData?.chapterId);
+      const channel = new BroadcastChannel("assessment_channel");
+      channel.postMessage("assessment_submitted");
+      channel.close();
+      setTimeout(() => window.close(), 2000);
+    } catch (e) {
+      console.error(e);
+    }
+  }, [assessmentData?.bootcampId, assessmentData?.chapterId, assessmentData?.moduleId, assessmentSubmitId, completeChapter, navigateToChapter]);
+
   const startTimer = useCallback((endTime: number) => {
     if (intervalIdRef.current) clearInterval(intervalIdRef.current);
     intervalIdRef.current = window.setInterval(() => {
@@ -101,19 +137,7 @@ function Page({ params }: PageParams) {
         }
       }
     }, 1000);
-  }, []);
-
-  const navigateToChapter = useCallback(
-    (bootcampId: any, moduleId: any, chId: any) => {
-      router.push(`/student/course/${bootcampId}/modules/${moduleId}?chapterId=${chId}`);
-    },
-    [router]
-  );
-
-  const completeChapter = useCallback(() => {
-    if (!chapterId) return;
-    api.post(`tracking/updateChapterStatus/${params.viewcourses}/${params.moduleID}?chapterId=${chapterId}`).catch(() => {});
-  }, [chapterId, params.moduleID, params.viewcourses]);
+  }, [submitAssessment]);
 
   // -------- data fetchers --------
   const getAssessmentData = useCallback(async (isNewStart: boolean = false) => {
@@ -232,7 +256,7 @@ function Page({ params }: PageParams) {
         intervalIdRef.current = null;
       }
     };
-  }, [assessmentData, assessmentSubmitId, isCurrentPageSubmitAssessment, isFullScreenProctorOn, isTabProctorOn, startTimer, startedAt]);
+  }, [assessmentData, assessmentSubmitId, isCurrentPageSubmitAssessment, isFullScreenProctorOn, isTabProctorOn, startTimer, startedAt, submitAssessment]);
 
   useEffect(() => {
     const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
@@ -255,29 +279,7 @@ function Page({ params }: PageParams) {
     updateProctoringData(assessmentSubmitId, tabChange, copyPaste + 1, fullScreenExit, eyeMomentCount);
   }, [assessmentSubmitId, isCopyPasteProctorOn]);
 
-  const submitAssessment = useCallback(async () => {
-    setDisableSubmit(true);
-    if (!assessmentSubmitId) return;
-    try {
-      const { tabChange, copyPaste, fullScreenExit, eyeMomentCount } = await getProctoringData(assessmentSubmitId);
-      await api.patch(`/submission/assessment/submit?assessmentSubmissionId=${assessmentSubmitId}`, {
-        tabChange,
-        copyPaste,
-        fullScreenExit,
-        eyeMomentCount,
-        typeOfsubmission: "studentSubmit",
-      });
-      toast.success({ title: "Assessment Submitted", description: "Your assessment has been submitted successfully" });
-      completeChapter();
-      navigateToChapter(assessmentData?.bootcampId, assessmentData?.moduleId, assessmentData?.chapterId);
-      const channel = new BroadcastChannel("assessment_channel");
-      channel.postMessage("assessment_submitted");
-      channel.close();
-      setTimeout(() => window.close(), 2000);
-    } catch (e) {
-      console.error(e);
-    }
-  }, [assessmentData?.bootcampId, assessmentData?.chapterId, assessmentData?.moduleId, assessmentSubmitId, completeChapter, navigateToChapter]);
+
 
   const handleSolveChallenge = useCallback(
     async (type: QType, id?: number, codingQuestion?: CodingQuestion) => {

@@ -43,7 +43,7 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
         } else if (!selected && organizations.length > 0 && !searchTerm) {
             setSelected(organizations[0]);
         }
-    }, [loading, organizations, orgId]);
+    }, [loading, organizations, orgId, selected, searchTerm]);
 
     const handleSelect = (org: Organization) => {
         setSelected(org);

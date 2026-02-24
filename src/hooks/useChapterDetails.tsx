@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/utils/axios.config';
-import{ChapterDetails,UseChapterDetailsResponse,ChapterDetailsResponse} from '@/hooks/hookType'
+import { ChapterDetails, UseChapterDetailsResponse, ChapterDetailsResponse } from '@/hooks/hookType'
 
 const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse => {
   const [chapterDetails, setChapterDetails] = useState<ChapterDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchChapterDetails = async () => {
+  const fetchChapterDetails = useCallback(async () => {
     if (!chapterId) {
       setChapterDetails(null);
       setLoading(false);
@@ -17,7 +17,7 @@ const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await api.get<ChapterDetailsResponse>(`/tracking/getChapterDetailsWithStatus/${chapterId}`);
       if (response.data.status === 'success') {
         setChapterDetails(response.data.trackingData);
@@ -31,11 +31,11 @@ const useChapterDetails = (chapterId: string | null): UseChapterDetailsResponse 
     } finally {
       setLoading(false);
     }
-  };
+  }, [chapterId]);
 
   useEffect(() => {
     fetchChapterDetails();
-  }, [chapterId]);
+  }, [fetchChapterDetails]);
 
   const refetch = () => {
     fetchChapterDetails();

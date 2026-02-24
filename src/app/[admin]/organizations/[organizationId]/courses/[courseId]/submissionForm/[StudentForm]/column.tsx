@@ -11,47 +11,75 @@ import { FileText } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { getUser } from '@/store/store'
 
+const ImageCell = ({ row }: { row: any }) => {
+    const profilePicture = row.original.profilePicture
+    return (
+        <div className="flex items-center">
+            {profilePicture ? (
+                <Image
+                    src={profilePicture}
+                    alt="profilePic"
+                    height={10}
+                    width={30}
+                    className="rounded-[100%] ml-2"
+                />
+            ) : (
+                <Image
+                    src={'https://avatar.iran.liara.run/public/boy?username=Ash'}
+                    alt="profilePic"
+                    height={35}
+                    width={35}
+                    className="rounded-[50%] ml-2"
+                />
+            )}
+        </div>
+    )
+}
+
+const ActionCell = ({ row }: { row: any }) => {
+    const { organizationId } = useParams()
+    const { bootcampId, moduleId, userId, chapterId } = row.original
+    const isSubmitted = row.original.status !== 'Submitted'
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin'
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
+
+    return (
+        <div className="flex space-x-2">
+            <Button
+                variant={'ghost'}
+                className="text-lg font-bold hover:bg-muted/30"
+                disabled={isSubmitted}
+            >
+                <Link
+                    href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
+                    className="max-w-[500px] text-primary font-medium flex items-center"
+                >
+                    <FileText size={16} />
+                    <p className="text-[15px]"> View Report</p>
+                </Link>
+            </Button>
+        </div>
+    )
+}
+
 export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'profilePicture',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Profile Picture" />
         ),
-        cell: ({ row }) => {
-            const student = row.original
-            const profilePicture = student.profilePicture
-            const ImageContainer = () => {
-                return profilePicture ? (
-                    <Image
-                        src={profilePicture}
-                        alt="profilePic"
-                        height={10}
-                        width={30}
-                        className="rounded-[100%] ml-2"
-                    />
-                ) : (
-                    <Image
-                        src={
-                            'https://avatar.iran.liara.run/public/boy?username=Ash'
-                        }
-                        alt="profilePic"
-                        height={35}
-                        width={35}
-                        className="rounded-[50%] ml-2"
-                    />
-                )
-            }
-            return <div className="flex items-center">{ImageContainer()}</div>
-        },
+        cell: ImageCell,
         enableSorting: false,
         enableHiding: false,
     },
     {
         accessorKey: 'name',
         header: ({ column, onSort }: any) => (
-            <DataTableColumnHeader 
-                column={column} 
-                title="Student Name" 
+            <DataTableColumnHeader
+                column={column}
+                title="Student Name"
                 onSort={onSort}
                 sortField="name"
             />
@@ -73,9 +101,9 @@ export const columns: ColumnDef<Task>[] = [
     {
         accessorKey: 'email',
         header: ({ column, onSort }: any) => (
-            <DataTableColumnHeader 
-                column={column} 
-                title="Email" 
+            <DataTableColumnHeader
+                column={column}
+                title="Email"
                 onSort={onSort}
                 sortField="email"
             />
@@ -107,7 +135,7 @@ export const columns: ColumnDef<Task>[] = [
             )
         },
     },
-   
+
     {
         accessorKey: 'Status',
         header: ({ column }) => (
@@ -131,31 +159,6 @@ export const columns: ColumnDef<Task>[] = [
     },
     {
         id: 'actions',
-        cell: ({ row }) => {
-            const { organizationId } = useParams()
-            const { bootcampId, moduleId, userId, chapterId } = row.original
-            const isSubmitted = row.original.status !== 'Submitted'
-            const { user } = getUser()
-            const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-            const isSuperAdmin = userRole === 'super_admin';
-            const orgId = isSuperAdmin ? organizationId : user?.orgId 
-            return (
-                <div className="flex space-x-2">
-                    <Button
-                        variant={'ghost'}
-                        className="text-lg font-bold  hover:bg-muted/30"
-                        disabled={isSubmitted}
-                    >
-                        <Link
-                            href={`/${userRole}/organizations/${orgId}/courses/${bootcampId}/submissionForm/${moduleId}/IndividualReport/${userId}/Report/${chapterId}`}
-                            className="max-w-[500px] text-primary font-medium flex items-center"
-                        >
-                            <FileText size={16} />
-                            <p className="text-[15px]"> View Report</p>
-                        </Link>
-                    </Button>
-                </div>
-            )
-        },
+        cell: ActionCell,
     },
 ]

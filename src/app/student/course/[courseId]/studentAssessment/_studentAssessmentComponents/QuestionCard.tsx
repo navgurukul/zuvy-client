@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn, difficultyColor } from '@/lib/utils'
 import { ChevronRight, CheckCircle, Play, Award } from 'lucide-react'
 import { api } from '@/utils/axios.config'
 import { ellipsis } from '@/lib/utils'
 import { useCodingSubmissionStore } from '@/store/store'
-import {QuestionCardProps,Tag}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+import { QuestionCardProps, Tag } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 
 const QuestionCard = ({
     id,
@@ -26,7 +26,7 @@ const QuestionCard = ({
 }: QuestionCardProps) => {
     // const [tag, setTag] = useState<Tag>()
     const [action, setAction] = useState<string | null>(null)
-    const { setCodingSubmissionAction} = useCodingSubmissionStore()
+    const { setCodingSubmissionAction } = useCodingSubmissionStore()
     // async function getAllTags() {
     //     const response = await api.get('/content/allTags')
     //     if (response) {
@@ -51,11 +51,11 @@ const QuestionCard = ({
         }
     }
 
-    async function getCodingSubmissionsData(
+    const getCodingSubmissionsData = useCallback(async (
         codingOutsourseId: any,
         assessmentSubmissionId: any,
         questionId: any
-    ) {
+    ) => {
         try {
             const res = await api.get(
                 `codingPlatform/submissions/questionId=${questionId}?assessmentSubmissionId=${assessmentSubmissionId}&codingOutsourseId=${codingOutsourseId}`
@@ -68,13 +68,13 @@ const QuestionCard = ({
             console.error('Error fetching coding submissions data:', error)
             return null
         }
-    }
+    }, [setCodingSubmissionAction, setIsCodingSubmitted]);
 
     useEffect(() => {
         if (codingOutsourseId && assessmentSubmitId && id) {
             getCodingSubmissionsData(codingOutsourseId, assessmentSubmitId, id)
         }
-    }, [codingOutsourseId, assessmentSubmitId, id])
+    }, [codingOutsourseId, assessmentSubmitId, id, getCodingSubmissionsData])
 
     return (
         <div className="bg-card  rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
@@ -98,20 +98,19 @@ const QuestionCard = ({
                         </span>
                         {title !== 'Open-Ended Questions' && (
                             <span className="text-sm font-semibold dark:bg-gray-600  px-1 rounded-lg text-gray-900 dark:text-white">
-                                {`${
-                                    codingQuestions
+                                {`${codingQuestions
                                         ? Math.trunc(
-                                              Number(
-                                                  codingQuestionMarks(description)
-                                              )
-                                          )
+                                            Number(
+                                                codingQuestionMarks(description)
+                                            )
+                                        )
                                         : weightage
-                                } marks`}
+                                    } marks`}
                             </span>
                         )}
                     </div>
                 </div>
-                
+
                 {/* Action Button Section */}
                 <div className="flex justify-end items-center mt-6">
                     {action === 'submit' ? (
@@ -132,7 +131,7 @@ const QuestionCard = ({
                                 //     className="flex items-center  space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 text-sm"
                                 // >
                                 // </Button>
-                                    <span onClick={() => onSolveChallenge(id)} className="text-primary font-semibold cursor-pointer text-sm font-medium ">Solve Challenge</span>
+                                <span onClick={() => onSolveChallenge(id)} className="text-primary font-semibold cursor-pointer text-sm font-medium ">Solve Challenge</span>
                             )}
                         </>
                     )}

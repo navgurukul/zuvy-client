@@ -15,9 +15,8 @@ import { AlertDialogDemo } from './components/deleteModalNew'
 import { Checkbox } from '@/components/ui/checkbox'
 import EditModal from './components/editModal'
 import { Input } from '@/components/ui/input'
-import ActionCell from './actionCell' 
+import ActionCell from './actionCell'
 
-// Create a separate component for the student name cell that can use hooks
 const StudentNameCell = ({ row }: { row: any }) => {
     const router = useRouter()
     const { organizationId, courseId } = useParams()
@@ -25,7 +24,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const { isStudent, setIsStudent } = getEditStudent()
     const { studentData, setStudentData } = getStudentData()
 
@@ -35,11 +34,11 @@ const StudentNameCell = ({ row }: { row: any }) => {
         const { name, value } = e.target
         setStudentData({ ...studentData, [name]: value })
     }
-    
+
     const handleStudentClick = () => {
         router.push(`/${userRole}/organizations/${orgId}/courses/${courseId}/${userId}`)
     }
-    
+
     return (
         <>
             {isStudent === userId ? (
@@ -50,7 +49,7 @@ const StudentNameCell = ({ row }: { row: any }) => {
                     onChange={handleSingleStudent}
                 />
             ) : (
-                <div 
+                <div
                     className="w-[150px] text-left text-gray-800 cursor-pointer hover:text-blue-600 hover:underline"
                     onClick={handleStudentClick}
                 >
@@ -58,6 +57,61 @@ const StudentNameCell = ({ row }: { row: any }) => {
                 </div>
             )}
         </>
+    )
+}
+
+const EmailCell = ({ row }: { row: any }) => {
+    const { userId } = row.original
+    const { isStudent, setIsStudent } = getEditStudent()
+    const { studentData, setStudentData } = getStudentData()
+    const handleSingleStudent = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const { name, value } = e.target
+        setStudentData({ ...studentData, [name]: value })
+    }
+
+    return (
+        <>
+            {isStudent === userId ? (
+                <Input
+                    id="email"
+                    name="email"
+                    value={studentData.email}
+                    onChange={handleSingleStudent}
+                />
+            ) : (
+                <div className="flex space-x-2">
+                    <span className="max-w-[500px] truncate font-medium text-gray-800">
+                        {row.getValue('email')}
+                    </span>
+                </div>
+            )}
+        </>
+    )
+}
+
+const BatchCell = ({ row }: { row: any }) => {
+    const { batchName, userId, bootcampId, batchId } = row.original
+    const { batchData } = getBatchData()
+    const newBatchData = batchData?.map((data) => {
+        return {
+            value: data.id,
+            label: data.name,
+        }
+    })
+
+    return (
+        <div className="flex text-gray-800">
+            <ComboboxStudent
+                batchData={newBatchData || []}
+                batchName={batchName}
+                userId={userId}
+                bootcampId={bootcampId}
+                batchId={batchId}
+                fetchStudentData={undefined}
+            />
+        </div>
     )
 }
 
@@ -107,65 +161,14 @@ export const columns: ColumnDef<Task>[] = [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Email" />
         ),
-        cell: ({ row }) => {
-            const { userId } = row.original
-            const { isStudent, setIsStudent } = getEditStudent()
-            const { studentData, setStudentData } = getStudentData()
-            const handleSingleStudent = (
-                e: React.ChangeEvent<HTMLInputElement>
-            ) => {
-                const { name, value } = e.target
-                setStudentData({ ...studentData, [name]: value })
-            }
-
-            return (
-                <>
-                    {isStudent === userId ? (
-                        <Input
-                            id="email"
-                            name="email"
-                            value={studentData.email}
-                            onChange={handleSingleStudent}
-                        />
-                    ) : (
-                        <div className="flex space-x-2">
-                            <span className="max-w-[500px] truncate font-medium text-gray-800">
-                                {row.getValue('email')}
-                            </span>
-                        </div>
-                    )}
-                </>
-            )
-        },
+        cell: ({ row }) => <EmailCell row={row} />,
     },
     {
         accessorKey: 'batchName',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Batch" />
         ),
-        cell: ({ row }) => {
-            const { batchName, userId, bootcampId, batchId } = row.original
-            const { batchData } = getBatchData()
-            const newBatchData = batchData?.map((data) => {
-                return {
-                    value: data.id,
-                    label: data.name,
-                }
-            })
-
-            return (
-                <div className="flex text-gray-800">
-                    <ComboboxStudent
-                        batchData={newBatchData || []}
-                        batchName={batchName}
-                        userId={userId}
-                        bootcampId={bootcampId}
-                        batchId={batchId}
-                        fetchStudentData={undefined}
-                    />
-                </div>
-            )
-        },
+        cell: ({ row }) => <BatchCell row={row} />,
     },
     {
         accessorKey: 'enrolledDate',
@@ -208,12 +211,6 @@ export const columns: ColumnDef<Task>[] = [
             const progress = Math.max(0, Math.min(100, row.original.progress))
             return (
                 <div className="flex flex-grow justify-center min-w-[70px]">
-                    {/* <div className="h-2 w-full rounded-full progress-bg">
-                        <div
-                            className="h-2 rounded-full progress-fill"
-                            style={{ width: `${progress}%` }}
-                        />
-                    </div> */}
                     <div className="text-sm text-gray-800">{progress}%</div>
                 </div>
             )
@@ -273,60 +270,6 @@ export const columns: ColumnDef<Task>[] = [
         },
         enableSorting: true,
     },
-    // {
-    //     accessorKey: 'lastActiveDate',
-    //     header: ({ column }) => (
-    //         <DataTableColumnHeader column={column} title="Last Active" />
-    //     ),
-    //     cell: ({ row }) => {
-    //         const lastActive = row.original.lastActiveDate
-
-    //         const formatDate = (dateString: string | null) => {
-    //             if (!dateString) return 'Never'
-
-    //             const date = new Date(dateString)
-    //             const now = new Date()
-    //             // const diffTime = Math.abs(now.getTime() - date.getTime())
-    //             const diffTime = now.getTime() - date.getTime()
-    //             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-
-    //             if (diffDays === 0) return 'Today'
-    //             if (diffDays === 1) return 'Yesterday'
-    //             if (diffDays <= 7) return `${diffDays} days ago`
-    //             if (diffDays <= 30)
-    //                 return `${Math.floor(diffDays / 7)} weeks ago`
-
-    //             return date.toLocaleDateString('en-US', {
-    //                 month: 'short',
-    //                 day: 'numeric',
-    //                 year:
-    //                     date.getFullYear() !== now.getFullYear()
-    //                         ? 'numeric'
-    //                         : undefined,
-    //             })
-    //         }
-
-    //         const formattedDate = formatDate(lastActive ?? null)
-    //         const isRecent =
-    //             lastActive &&
-    //             new Date(lastActive) >
-    //                 new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-
-    //         return (
-    //             <div className="flex items-center space-x-2 text-foreground">
-    //                 <span
-    //                     className={`text-sm ${
-    //                         isRecent ? 'text-success' : 'text-gray-600'
-    //                     }`}
-    //                 >
-    //                     {formattedDate}
-    //                 </span>
-    //             </div>
-    //         )
-    //     },
-    //     enableSorting: true,
-    // },
-
     {
         accessorKey: 'status',
         header: ({ column }) => (
@@ -334,7 +277,7 @@ export const columns: ColumnDef<Task>[] = [
         ),
         cell: ({ row }) => {
             const studentStatus = row.original.status || 'active'
-            
+
             const getStatusConfig = (status: string) => {
                 switch (status.toLowerCase()) {
                     case 'active':

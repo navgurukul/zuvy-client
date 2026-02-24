@@ -14,7 +14,7 @@ import {
 import Link from 'next/link'
 import { api } from '@/utils/axios.config'
 import { useRouter, useParams } from 'next/navigation'
-import {CourseCardProps,ChapterTrackingResponse} from "@/app/_components/componentType"
+import { CourseCardProps, ChapterTrackingResponse } from "@/app/_components/componentType"
 
 function CourseCard({
     param,
@@ -30,7 +30,7 @@ function CourseCard({
     quizCount,
     typeId,
     projectId,
-}:CourseCardProps) {
+}: CourseCardProps) {
     const router = useRouter()
     const { viewcourses, moduleID } = useParams()
     const [chapterId, setChapterId] = useState<any>()
@@ -46,7 +46,7 @@ function CourseCard({
         } catch (error) {
             console.error(error)
         }
-    }, [])
+    }, [id])
 
     useEffect(() => {
         if (id) {
@@ -70,15 +70,14 @@ function CourseCard({
         <div
             key={id}
             onClick={handleModuleRoute}
-            className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row cursor-pointer ${
-                typeId === 1
+            className={`bg-gradient-to-bl my-3 p-3 rounded-xl flex flex-col md:flex-row cursor-pointer ${typeId === 1
                     ? !isLock
                         ? 'from-blue-50 to-violet-50'
                         : 'from-blue-50 to-violet-50 pointer-events-none opacity-50'
                     : isLock
-                    ? 'bg-yellow/30'
-                    : 'bg-yellow/50'
-            }`}
+                        ? 'bg-yellow/30'
+                        : 'bg-yellow/50'
+                }`}
         >
             <div className="flex flex-col justify-between w-full p-5">
                 <div className="flex-grow text-start">
@@ -116,14 +115,12 @@ function CourseCard({
                         />
                         <span>
                             {timeAllotedInWeeks < 1
-                                ? `${timeAllotedInDays} ${
-                                      timeAllotedInDays === 1 ? 'day' : 'days'
-                                  }`
-                                : `${timeAllotedInWeeks} ${
-                                      timeAllotedInWeeks === 1
-                                          ? 'week'
-                                          : 'weeks'
-                                  }`}
+                                ? `${timeAllotedInDays} ${timeAllotedInDays === 1 ? 'day' : 'days'
+                                }`
+                                : `${timeAllotedInWeeks} ${timeAllotedInWeeks === 1
+                                    ? 'week'
+                                    : 'weeks'
+                                }`}
                         </span>
                     </div>
                     {articlesCount > 0 && (

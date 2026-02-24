@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Timer, AlertOctagon, Check, X, RotateCcw, XCircle } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
-import  {AssessmentSkeleton} from "@/app/student/_components/Skeletons"
+import { AssessmentSkeleton } from "@/app/student/_components/Skeletons"
 import {
   Dialog,
   DialogOverlay,
@@ -21,7 +21,7 @@ import useAssessmentDetails from "@/hooks/useAssessmentDetails";
 import useChapterDetails from "@/hooks/useChapterDetails";
 import { api } from '@/utils/axios.config';
 import { formatTimeLimit, calculateCountdown, startPolling, stopPolling } from '@/lib/utils';
-import {AssessmentContentProps} from '@/app/student/_components/chapter-content/componentChapterType'
+import { AssessmentContentProps } from '@/app/student/_components/chapter-content/componentChapterType'
 
 
 function formatToIST(dateString: string | undefined) {
@@ -96,7 +96,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   const submissionId = assessmentDetails?.submitedOutsourseAssessments?.[0]?.id;
 
   // Assessment state transitions handler
-  const handleAssessmentStateTransitions = () => {
+  const handleAssessmentStateTransitions = useCallback(() => {
     if (!assessmentDetails) return;
 
     const state = assessmentDetails.assessmentState?.toUpperCase();
@@ -160,7 +160,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
     }
 
     return stopPollingWithRef;
-  };
+  }, [assessmentDetails, refetch]);
   // Handle assessment start
   const handleStartAssessment = () => {
     setIsStartingAssessment(true);
@@ -276,8 +276,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   // Assessment state transitions effect
   useEffect(() => {
     const cleanup = handleAssessmentStateTransitions();
-    return cleanup;
-  }, [assessmentDetails]);
+    return typeof cleanup === 'function' ? cleanup : undefined;
+  }, [handleAssessmentStateTransitions]);
 
   useEffect(() => {
     if (chapterStatus === 'Completed') {
@@ -288,7 +288,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
 
 
   if (loading) {
-       return <AssessmentSkeleton/>;
+    return <AssessmentSkeleton />;
   }
 
   if (error) {
@@ -404,8 +404,8 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
                 <Dialog open={reattemptDialogOpen} onOpenChange={setReattemptDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="mt-4 bg-warning hover:bg-warning/50 text-black font-semibold">
-                    <RotateCcw className=" h-3.5 mx-2" />
-                    Request Re-Attempt</Button>
+                      <RotateCcw className=" h-3.5 mx-2" />
+                      Request Re-Attempt</Button>
                   </DialogTrigger>
                   <DialogOverlay />                  <DialogContent className="mx-4 sm:mx-0 max-w-md sm:max-w-lg">
                     <DialogHeader>                      <DialogTitle className="text-base sm:text-lg font-bold text-foreground">
@@ -533,7 +533,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
             <div className={`w-full max-w-lg sm:max-w-xl lg:max-w-4xl py-8 flex justify-center items-center gap-x-2 rounded-lg bg-destructive-light border border-destructive px-4 sm:px-6 py-3 font-medium text-destructive-dark text-center transition-all duration-[1500ms] ease-in-out text-sm sm:text-base shadow-error ${showClosedCard ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
               }`}
             >
-              
+
               <div className='flex flex-col items-center space-y-5' >
                 <span className=" text-destructive flex items-center gap-x-2 font-semibold"><XCircle size={20} className='text-destructive' />Assessment expired and cannot be submitted.</span>
                 <span className='text-destructive font-medium text-sm'>End Date: {formatToIST(assessmentDetails.endDatetime)}</span>
@@ -566,7 +566,7 @@ const AssessmentContent: React.FC<AssessmentContentProps> = ({ chapterDetails, o
   );
 };
 
-export default AssessmentContent; 
+export default AssessmentContent;
 
 
 

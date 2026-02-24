@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-import {AlertContextType,AlertProps}from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
+import { AlertContextType, AlertProps } from '@/app/student/course/[courseId]/studentAssessment/_studentAssessmentComponents/projectStudentAssessmentUtilsType'
 const AlertContext = createContext<AlertContextType | null>(null);
 
 // Custom Alert Icon Component
@@ -19,74 +19,73 @@ const AlertIcon = () => (
   </div>
 );
 
-export const AlertProvider = ({ 
-  children, 
+export const AlertProvider = ({
+  children,
   requestFullScreen,
-  setIsFullScreen ,
-}: { 
+  setIsFullScreen,
+}: {
   children: React.ReactNode;
   requestFullScreen: (element: Element) => void;
   setIsFullScreen: (isFullScreen: boolean) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [alertContent, setAlertContent] = useState<AlertProps | null>(null);
- 
-  const showAlert = (props: AlertProps) => {
+
+  const showAlert = useCallback((props: AlertProps) => {
     setAlertContent(props);
     setIsOpen(true);
-  };
+  }, []);
 
-  const hideAlert = () => {
+  const hideAlert = useCallback(() => {
     setIsOpen(false);
     setAlertContent(null);
     requestFullScreen(document.documentElement);
     setIsFullScreen(true);
-   
-  };
+  }, [requestFullScreen, setIsFullScreen]);
 
   React.useEffect(() => {
     window.alertSystem = { showAlert, hideAlert };
     return () => {
       window.alertSystem = undefined;
     };
-  }, []);
+  }, [showAlert, hideAlert]);
 
   return (
     <AlertContext.Provider value={{ showAlert, hideAlert }}>
       {children}
       {alertContent && (<AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-          <AlertDialogContent className="max-w-md rounded-lg p-0 overflow-hidden bg-background border-border shadow-4dp">
-            <div className="flex flex-col items-center px-6 pt-8 pb-6 gap-4">
-              <AlertIcon />
+        <AlertDialogContent className="max-w-md rounded-lg p-0 overflow-hidden bg-background border-border shadow-4dp">
+          <div className="flex flex-col items-center px-6 pt-8 pb-6 gap-4">
+            <AlertIcon />
 
-              <AlertDialogTitle className="text-foreground text-xl font-semibold m-0">
-                {alertContent.title}
-              </AlertDialogTitle>
+            <AlertDialogTitle className="text-foreground text-xl font-semibold m-0">
+              {alertContent.title}
+            </AlertDialogTitle>
 
-              {alertContent.violationCount && (
-                <div className="bg-destructive/10 text-destructive border border-destructive/20 py-1 px-4 rounded-full text-sm">
-                  Violation Count: {alertContent.violationCount}
-                </div>
-              )}
-
-              <AlertDialogDescription className="text-center text-muted-foreground m-0 max-w-sm">
-                {alertContent.description}
-              </AlertDialogDescription>
-            </div>
-
-            <AlertDialogFooter className="flex justify-center p-6 pt-0 m-0">
-              <div className="flex-grow flex justify-center">
-                <Button
-                  onClick={hideAlert}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 py-2 rounded-md text-sm shadow-2dp"
-                >
-                  Return to Assessment
-                </Button>
+            {alertContent.violationCount && (
+              <div className="bg-destructive/10 text-destructive border border-destructive/20 py-1 px-4 rounded-full text-sm">
+                Violation Count: {alertContent.violationCount}
               </div>
-            </AlertDialogFooter>
+            )}
 
-          </AlertDialogContent>
-        </AlertDialog>
+            <AlertDialogDescription className="text-center text-muted-foreground m-0 max-w-sm">
+              {alertContent.description}
+            </AlertDialogDescription>
+          </div>
+
+          <AlertDialogFooter className="flex justify-center p-6 pt-0 m-0">
+            <div className="flex-grow flex justify-center">
+              <Button
+                onClick={hideAlert}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-8 py-2 rounded-md text-sm shadow-2dp"
+              >
+                Return to Assessment
+              </Button>
+            </div>
+          </AlertDialogFooter>
+
+        </AlertDialogContent>
+      </AlertDialog>
       )}
     </AlertContext.Provider>
   );

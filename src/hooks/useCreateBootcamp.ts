@@ -16,7 +16,7 @@ export function useCreateBootcamp() {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const [creating, setCreating] = useState(false)
     const [error, setError] = useState<unknown>(null)
 
@@ -32,7 +32,7 @@ export function useCreateBootcamp() {
         } finally {
             setCreating(false)
         }
-    }, [])
+    }, [orgId])
 
     return { createBootcamp, creating, error }
 }

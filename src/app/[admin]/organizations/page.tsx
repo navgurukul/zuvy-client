@@ -23,14 +23,21 @@ interface FilterOption {
     label: string
 }
 
+// Management type options
+const managementTypeOptions: FilterOption[] = [
+    { value: 'all', label: 'All Types' },
+    { value: 'self_manage', label: 'Self Managed' },
+    { value: 'zuvy_manage', label: 'Zuvy Managed' }
+]
+
 export default function OrganizationsPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    
+
     // Get page and limit from URL
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
     const limit = useMemo(() => parseInt(searchParams.get('limit') || '10'), [searchParams])
-    
+
     const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
@@ -47,18 +54,11 @@ export default function OrganizationsPage() {
     ])
     const [urlInitialized, setUrlInitialized] = useState(false)
 
-    // Management type options
-    const managementTypeOptions: FilterOption[] = [
-        { value: 'all', label: 'All Types' },
-        { value: 'self_manage', label: 'Self Managed' },
-        { value: 'zuvy_manage', label: 'Zuvy Managed' }
-    ]
-
     // Build filter query for API
-    const getFilterQuery = () => {
+    const getFilterQuery = useCallback(() => {
         const filters = managementTypeFilter.filter(f => f.value !== 'all')
         return filters.length > 0 ? filters.map(f => f.value).join(',') : ''
-    }
+    }, [managementTypeFilter])
 
     // Pass page, limit, and filter to hook
     const { organizations, loading, error, totalCount, totalPages, fetchOrganizations } = useOrganizations({
@@ -72,13 +72,13 @@ export default function OrganizationsPage() {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(newLimit || limit))
-        
+
         if (filters) {
             newParams.set('filterType', filters)
         } else {
             newParams.delete('filterType')
         }
-        
+
         router.replace(`?${newParams.toString()}`)
     }, [searchParams, router, limit])
 
@@ -87,7 +87,7 @@ export default function OrganizationsPage() {
         if (urlInitialized) return
 
         const urlFilter = searchParams.get('filterType')
-        
+
         if (urlFilter) {
             const filterValues = urlFilter.split(',')
             const matchedOptions = filterValues
@@ -125,13 +125,13 @@ export default function OrganizationsPage() {
             const queryParams = new URLSearchParams()
             queryParams.append('search', query)
             queryParams.append('limit', '10')
-            
+
             // ADD CURRENT FILTER TO SUGGESTIONS API CALL
             const currentFilter = getFilterQuery()
             if (currentFilter) {
                 queryParams.append('filterType', currentFilter)
             }
-            
+
             const response = await api.get(`/org/getAllOrgs?${queryParams.toString()}`)
             return response.data.data || []
         } catch (error) {
@@ -210,8 +210,8 @@ export default function OrganizationsPage() {
     }, [organizations])
 
     const management = [
-        {name: 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform'}, 
-        {name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform'}
+        { name: 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform' },
+        { name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform' }
     ]
 
     const handleEdit = (org: any) => {
@@ -299,19 +299,19 @@ export default function OrganizationsPage() {
                         bootcampId={0}
                         isOpen={deleteModal.isOpen}
                         onClose={handleCloseDeleteModal}
-                        setSelectedRows={() => {}}
+                        setSelectedRows={() => { }}
                     />
 
                     {/* Add Organization Dialog */}
                     <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                         <DialogTrigger asChild>
-                            <Button onClick={() => { setIsEditMode(false)}} >
+                            <Button onClick={() => { setIsEditMode(false) }} >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Organisation
                             </Button>
                         </DialogTrigger>
                         {isAddModalOpen && (
-                            <AddOrganization  
+                            <AddOrganization
                                 isEditMode={isEditMode}
                                 management={management}
                                 user={editingOrg}
@@ -339,7 +339,7 @@ export default function OrganizationsPage() {
                             inputWidth="w-full"
                         />
                     </div>
-                    
+
                     {/* MultiSelector for Management Type Filter */}
                     <div className="w-[200px] flex-shrink-0">
                         <MultiSelector
@@ -379,7 +379,7 @@ export default function OrganizationsPage() {
                             columns={columns}
                             data={transformedOrganizations}
                         />
-                        
+
                         <DataTablePagination
                             totalStudents={totalCount}
                             lastPage={totalPages}
@@ -533,17 +533,17 @@ export default function OrganizationsPage() {
 //                             </Button>
 //                         </DialogTrigger>
 //                         {isAddModalOpen && (
-//                             // <AddUserModal 
+//                             // <AddUserModal
 //                             //     isEditMode={isEditMode}
 //                             //     user={user}
 //                             //     isOpen={isAddModalOpen}
 //                             //     refetchUsers={() => {
 //                             //         refetchUsers(offset)
 //                             //         handleCloseModal()
-//                             //     }} 
+//                             //     }}
 //                             //     onClose={handleCloseModal}
 //                             // />
-//                             <AddOrganization  
+//                             <AddOrganization
 //                                 isEditMode={isEditMode}
 //                                 management={management}
 //                                 user={editingOrg} // Pass the editing organization
@@ -551,7 +551,7 @@ export default function OrganizationsPage() {
 //                                 // refetchUsers={() => {
 //                                 //     refetchUsers(offset)
 //                                 //     handleCloseModal()
-//                                 // }} 
+//                                 // }}
 //                                 onClose={handleCloseModal}
 //                             />
 //                         )}

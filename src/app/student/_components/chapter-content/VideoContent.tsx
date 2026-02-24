@@ -53,8 +53,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
         chapterDetails.links && chapterDetails.links.length > 0
             ? chapterDetails.links
             : chapterDetails.file
-            ? [chapterDetails.file]
-            : []
+                ? [chapterDetails.file]
+                : []
     const flatLinks = videoLinks.flat()
     const isYouTubeandZoom =
         flatLinks.some(
@@ -73,7 +73,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
             playerRef.current.seekTo(savedTime, 'seconds')
         }
         setPlaying(true)
-    }, [savedTime, setPlaying])
+    }, [savedTime, setPlaying, playerRef])
 
     // Throttle saving progress every 2 seconds
     const lastSaveRef = useRef<number>(0)
@@ -100,23 +100,24 @@ const VideoContent: React.FC<VideoContentProps> = ({
             }
         },
         [
-            chapterDetails.id.toString(),
+            chapterDetails.id,
             setProgress,
             completeChapter,
             isCompleted,
+            refetch,
         ]
     )
 
 
     useEffect(() => {
-      if (chapterDetails) {
-        setLoading(false)
-      }
+        if (chapterDetails) {
+            setLoading(false)
+        }
     }, [chapterDetails])
-    
+
 
     if (loading) {
-        return <VideoSkeleton/>;
+        return <VideoSkeleton />;
     }
 
 
@@ -138,11 +139,10 @@ const VideoContent: React.FC<VideoContentProps> = ({
                             </div>
                             <Badge
                                 variant="secondary"
-                                className={`${
-                                    isCompleted
+                                className={`${isCompleted
                                         ? 'bg-green-100 text-green-600 hover:bg-green-100'
                                         : 'bg-white text-slate-700 hover:bg-white border border-slate-200'
-                                } text-xs font-medium px-2 py-1 mb-5`}
+                                    } text-xs font-medium px-2 py-1 mb-5`}
                             >
                                 {isCompleted ? 'Watched' : 'Not Watched'}
                             </Badge>
@@ -163,7 +163,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                     className="mb-8 bg-card-elevated rounded-lg shadow-16dp overflow-hidden border border-border"
                                 >
                                     <div className="aspect-video bg-black flex items-center justify-center relative">
-                                        {isYouTube  ? (
+                                        {isYouTube ? (
                                             <ReactPlayer
                                                 ref={playerRef}
                                                 url={embedLink[0]}
@@ -173,9 +173,9 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 onReady={handleReady}
                                                 onProgress={handleProgress}
-                                               
 
-                                                // onEnded={() => completeChapter()}
+
+                                            // onEnded={() => completeChapter()}
                                             />
                                         ) : isDrive ? (
                                             <iframe
@@ -185,8 +185,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 allowFullScreen
                                                 className="w-full h-full border-none"
                                             />
-                                        ) : isZoom ? 
-                                        <ReactPlayer
+                                        ) : isZoom ?
+                                            <ReactPlayer
                                                 ref={playerRef}
                                                 url={embedLink[0]}
                                                 playing={playing}
@@ -195,16 +195,16 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 height="100%"
                                                 // onReady={handleReady}
                                                 onProgress={handleProgress}
-                                              
 
-                                                // onEnded={() => completeChapter()}
+
+                                            // onEnded={() => completeChapter()}
                                             />
-                                         : (
-                                            <div className="flex flex-col items-center justify-center w-full h-full text-white">
-                                                <VideoIcon className="w-16 h-16 mb-2 opacity-60" />
-                                                <p>Unsupported video format</p>
-                                            </div>
-                                        )}
+                                            : (
+                                                <div className="flex flex-col items-center justify-center w-full h-full text-white">
+                                                    <VideoIcon className="w-16 h-16 mb-2 opacity-60" />
+                                                    <p>Unsupported video format</p>
+                                                </div>
+                                            )}
                                         <div className="absolute top-4 left-4 flex items-center gap-2 bg-black/60 px-3 py-1 rounded-full">
                                             {isYouTube ? (
                                                 <Youtube className="w-4 h-4 text-red-500" />
@@ -215,8 +215,8 @@ const VideoContent: React.FC<VideoContentProps> = ({
                                                 {isYouTube
                                                     ? 'YouTube'
                                                     : isDrive
-                                                    ? 'Google Drive'
-                                                    : 'Video'}
+                                                        ? 'Google Drive'
+                                                        : 'Video'}
                                             </span>
                                         </div>
                                     </div>

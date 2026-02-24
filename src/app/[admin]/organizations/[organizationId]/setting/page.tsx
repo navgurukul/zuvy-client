@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Cloud } from 'lucide-react'
 import { toast } from '@/components/ui/use-toast'
 import { getUser } from '@/store/store'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import useOrgSettings, {
     OrgResponse,
@@ -235,16 +236,16 @@ export default function AdminSettingPage() {
             setOrgData((prev) =>
                 prev
                     ? {
-                          ...prev,
-                          title: (payload.title as string) ?? prev.title,
-                          pocName: (payload.pocName as string) ?? prev.pocName,
-                          pocEmail:
-                              (payload.pocEmail as string) ?? prev.pocEmail,
-                          logoUrl:
-                              payload.logoUrl !== undefined
-                                  ? payload.logoUrl
-                                  : prev.logoUrl,
-                      }
+                        ...prev,
+                        title: (payload.title as string) ?? prev.title,
+                        pocName: (payload.pocName as string) ?? prev.pocName,
+                        pocEmail:
+                            (payload.pocEmail as string) ?? prev.pocEmail,
+                        logoUrl:
+                            payload.logoUrl !== undefined
+                                ? payload.logoUrl
+                                : prev.logoUrl,
+                    }
                     : prev
             )
 
@@ -281,9 +282,8 @@ export default function AdminSettingPage() {
         <div className="min-h-screen bg-background flex flex-col">
             <div className="flex-1 flex">
                 <div
-                    className={`grid w-full flex-1 ${
-                        isOrgVerified ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'
-                    }`}
+                    className={`grid w-full flex-1 ${isOrgVerified ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'
+                        }`}
                 >
                     {!isOrgVerified && (
                         <>
@@ -338,174 +338,175 @@ export default function AdminSettingPage() {
                     )}
 
                     <div
-                        className={`w-full mx-auto py-8 px-6 lg:px-12 xl:px-16 ${
-                            isOrgVerified ? 'max-w-4xl' : 'lg:col-span-2'
-                        }`}
+                        className={`w-full mx-auto py-8 px-6 lg:px-12 xl:px-16 ${isOrgVerified ? 'max-w-4xl' : 'lg:col-span-2'
+                            }`}
                     >
                         <div className="space-y-6 flex flex-col w-full">
-                                    {/* Organization Section */}
-                                    <div className="space-y-4">
-                                        {/* Organization Name */}
+                            {/* Organization Section */}
+                            <div className="space-y-4">
+                                {/* Organization Name */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="orgName" className="text-sm font-semibold text-foreground text-left block">
+                                        Organization Name
+                                    </Label>
+                                    <Input
+                                        id="orgName"
+                                        type="text"
+                                        value={orgName}
+                                        onChange={(e) => setOrgName(e.target.value)}
+                                        placeholder="Enter your organization name"
+                                        className="h-11 text-base"
+                                        disabled={!isOrgVerified}
+                                    />
+                                    <p className="text-sm text-muted-foreground text-left">
+                                        This is how your organization will appear in the platform
+                                    </p>
+                                </div>
+
+                                {/* Logo Upload */}
+                                <div className="space-y-2">
+                                    <Label className="text-sm font-semibold text-foreground text-left block">
+                                        Organization Logo
+                                    </Label>
+                                    <div
+                                        onClick={() => !logoPreview && fileInputRef.current?.click()}
+                                        onDragOver={handleDragOver}
+                                        onDrop={handleDrop}
+                                        className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer gap-4 ${logoPreview
+                                            ? 'border-border bg-background'
+                                            : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        {logoPreview ? (
+                                            <div className="w-full h-full relative p-6">
+                                                <Image
+                                                    src={logoPreview}
+                                                    alt="Logo preview"
+                                                    fill
+                                                    className="object-contain rounded-lg"
+                                                />
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <Cloud className="h-12 w-12 text-slate-400" />
+                                                <div className="text-center px-4">
+                                                    <p className="text-base font-semibold text-slate-700">
+                                                        Upload your organization logo
+                                                    </p>
+                                                    <p className="text-sm text-slate-500 mt-1">
+                                                        or drag and drop (SVG, PNG, JPG up to 5MB)
+                                                    </p>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                    {logoPreview && (
+                                        <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    fileInputRef.current?.click()
+                                                }}
+                                                className="flex-1"
+                                            >
+                                                Change Logo
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={handleRemoveLogo}
+                                                className="text-destructive flex-1 hover:bg-destructive/100 hover:text-destructive-foreground"
+                                            >
+                                                Remove
+                                            </Button>
+                                        </div>
+                                    )}
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleLogoUpload}
+                                        className="hidden"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Profile Section */}
+                            <div className="space-y-4 border-t border-border pt-6">
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-2xl font-bold text-foreground text-left">Your profile</h2>
+                                </div>
+                                {!isOrgVerified && (
+                                    <p className="text-sm text-muted-foreground text-left">
+                                        Setup pending verification. Only logo and POC name can be updated.
+                                    </p>
+                                )}
+
+                                {/* Form Fields */}
+                                <div className="space-y-4">
+                                    {/* Display Name */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="displayName" className="text-sm font-semibold text-foreground text-left block">
+                                            Name
+                                        </Label>
+                                        <Input
+                                            id="displayName"
+                                            type="text"
+                                            value={displayName}
+                                            onChange={(e) => setDisplayName(e.target.value)}
+                                            placeholder="Enter your name"
+                                            className="h-11 text-base"
+                                        />
+                                    </div>
+
+                                    {/* Two Column Layout for Email and Role */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Email (Non-editable) */}
                                         <div className="space-y-2">
-                                            <Label htmlFor="orgName" className="text-sm font-semibold text-foreground text-left block">
-                                                Organization Name
-                                            </Label>
+                                            <Label className="text-sm font-semibold text-foreground text-left block">Email</Label>
                                             <Input
-                                                id="orgName"
-                                                type="text"
-                                                value={orgName}
-                                                onChange={(e) => setOrgName(e.target.value)}
-                                                placeholder="Enter your organization name"
+                                                type="email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                placeholder="Enter email"
                                                 className="h-11 text-base"
                                                 disabled={!isOrgVerified}
                                             />
-                                            <p className="text-sm text-muted-foreground text-left">
-                                                This is how your organization will appear in the platform
-                                            </p>
                                         </div>
 
-                                        {/* Logo Upload */}
+                                        {/* Role (Non-editable) */}
                                         <div className="space-y-2">
-                                            <Label className="text-sm font-semibold text-foreground text-left block">
-                                                Organization Logo
-                                            </Label>
-                                            <div
-                                                onClick={() => !logoPreview && fileInputRef.current?.click()}
-                                                onDragOver={handleDragOver}
-                                                onDrop={handleDrop}
-                                                className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer gap-4 ${
-                                                    logoPreview
-                                                        ? 'border-border bg-background'
-                                                        : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
-                                                }`}
-                                            >
-                                                {logoPreview ? (
-                                                    <img
-                                                        src={logoPreview}
-                                                        alt="Logo preview"
-                                                        className="w-full h-full object-contain rounded-lg p-6"
-                                                    />
-                                                ) : (
-                                                    <>
-                                                        <Cloud className="h-12 w-12 text-slate-400" />
-                                                        <div className="text-center px-4">
-                                                            <p className="text-base font-semibold text-slate-700">
-                                                                Upload your organization logo
-                                                            </p>
-                                                            <p className="text-sm text-slate-500 mt-1">
-                                                                or drag and drop (SVG, PNG, JPG up to 5MB)
-                                                            </p>
-                                                        </div>
-                                                    </>
-                                                )}
-                                            </div>
-                                            {logoPreview && (
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            fileInputRef.current?.click()
-                                                        }}
-                                                        className="flex-1"
-                                                    >
-                                                        Change Logo
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={handleRemoveLogo}
-                                                        className="text-destructive flex-1 hover:bg-destructive/100 hover:text-destructive-foreground"
-                                                    >
-                                                        Remove
-                                                    </Button>
-                                                </div>
-                                            )}
-                                            <input
-                                                ref={fileInputRef}
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleLogoUpload}
-                                                className="hidden"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Profile Section */}
-                                    <div className="space-y-4 border-t border-border pt-6">
-                                        <div className="flex items-center gap-2">
-                                            <h2 className="text-2xl font-bold text-foreground text-left">Your profile</h2>
-                                        </div>
-                                        {!isOrgVerified && (
-                                            <p className="text-sm text-muted-foreground text-left">
-                                                Setup pending verification. Only logo and POC name can be updated.
-                                            </p>
-                                        )}
-
-                                        {/* Form Fields */}
-                                        <div className="space-y-4">
-                                            {/* Display Name */}
-                                            <div className="space-y-2">
-                                                <Label htmlFor="displayName" className="text-sm font-semibold text-foreground text-left block">
-                                                    Name
-                                                </Label>
-                                                <Input
-                                                    id="displayName"
-                                                    type="text"
-                                                    value={displayName}
-                                                    onChange={(e) => setDisplayName(e.target.value)}
-                                                    placeholder="Enter your name"
-                                                    className="h-11 text-base"
-                                                />
-                                            </div>
-
-                                            {/* Two Column Layout for Email and Role */}
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {/* Email (Non-editable) */}
-                                                <div className="space-y-2">
-                                                    <Label className="text-sm font-semibold text-foreground text-left block">Email</Label>
-                                                    <Input
-                                                        type="email"
-                                                        value={email}
-                                                        onChange={(e) => setEmail(e.target.value)}
-                                                        placeholder="Enter email"
-                                                        className="h-11 text-base"
-                                                        disabled={!isOrgVerified}
-                                                    />
-                                                </div>
-
-                                                {/* Role (Non-editable) */}
-                                                <div className="space-y-2">
-                                                    <Label className="text-sm font-semibold text-foreground text-left block">Role</Label>
-                                                    <div className="px-3 py-3 bg-[#E8E7DC] text-base text-slate-600 rounded-lg border border-[#E8E7DC] h-11 flex items-center">
-                                                        {role}
-                                                    </div>
-                                                </div>
+                                            <Label className="text-sm font-semibold text-foreground text-left block">Role</Label>
+                                            <div className="px-3 py-3 bg-[#E8E7DC] text-base text-slate-600 rounded-lg border border-[#E8E7DC] h-11 flex items-center">
+                                                {role}
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
 
-                                    {/* Action Button */}
-                                    <div className="pt-4 flex-shrink-0 flex flex-col items-start gap-4">
-                                        <Button
-                                            onClick={handleCompleteSetup}
-                                            disabled={isSubmitting}
-                                            className="h-11 px-8 text-base font-semibold"
-                                        >
-                                            {isSubmitting
-                                                ? 'Saving...'
-                                                : isOrgVerified
-                                                  ? 'Save Changes'
-                                                  : 'Complete Profile and Proceed'}
-                                        </Button>
-                                        <p className="text-sm text-muted-foreground">
-                                            Need help?{' '}
-                                            <a href="#" className="text-foreground hover:underline font-semibold">
-                                                Contact Support
-                                            </a>
-                                        </p>
-                                    </div>
+                            {/* Action Button */}
+                            <div className="pt-4 flex-shrink-0 flex flex-col items-start gap-4">
+                                <Button
+                                    onClick={handleCompleteSetup}
+                                    disabled={isSubmitting}
+                                    className="h-11 px-8 text-base font-semibold"
+                                >
+                                    {isSubmitting
+                                        ? 'Saving...'
+                                        : isOrgVerified
+                                            ? 'Save Changes'
+                                            : 'Complete Profile and Proceed'}
+                                </Button>
+                                <p className="text-sm text-muted-foreground">
+                                    Need help?{' '}
+                                    <a href="#" className="text-foreground hover:underline font-semibold">
+                                        Contact Support
+                                    </a>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

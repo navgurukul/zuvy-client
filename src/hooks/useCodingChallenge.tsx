@@ -2,7 +2,7 @@ import { useReducer, useCallback, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { api } from '@/utils/axios.config';
 import { b64EncodeUnicode, b64DecodeUnicode } from '@/utils/base64';
-import{UseCodingChallengeProps} from '@/hooks/hookType'
+import { UseCodingChallengeProps } from '@/hooks/hookType'
 import {
     CodingChallengeState,
     CodingChallengeAction,
@@ -91,12 +91,12 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
 
     const fetchSubmissionDetails = useCallback(async () => {
         if (!questionId) return;
-        
+
         try {
             const response = await api.get<ApiResponse<SubmissionData>>(
                 `/codingPlatform/submissions/questionId=${questionId}`
             );
-            
+
             if (response.data.isSuccess && response.data.data) {
                 const submissionData = response.data.data;
 
@@ -104,12 +104,12 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
                     dispatch({ type: 'SET_ALREADY_SUBMITTED', payload: true });
                     dispatch({ type: 'SET_COMPLETED', payload: true });
                 }
-                if(submissionData.action === 'run'){
+                if (submissionData.action === 'run') {
                     dispatch({ type: 'SET_ACTION', payload: 'run' });
-                    dispatch({type: 'SET_PROGRAM_LANG_ID', payload: submissionData.programLangId});
+                    dispatch({ type: 'SET_PROGRAM_LANG_ID', payload: submissionData.programLangId });
                     dispatch({ type: 'SET_SOURCE_CODE', payload: b64DecodeUnicode(submissionData.sourceCode) });
                 }
-                
+
 
                 if (submissionData.programLangId && submissionData.sourceCode) {
                     const langId = parseInt(submissionData.programLangId);
@@ -134,14 +134,14 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
 
     const fetchQuestionDetails = useCallback(async () => {
         if (!questionId) return;
-        
+
         try {
             const response = await api.get<ApiResponse<QuestionDetails>>(
                 `/codingPlatform/get-coding-question/${questionId}`
             );
-            
+
             dispatch({ type: 'SET_QUESTION_DETAILS', payload: response.data.data });
-            
+
             const initialTemplate = response.data.data?.templates?.[state.language]?.template;
             if (initialTemplate && !state.isAlreadySubmitted) {
                 dispatch({ type: 'SET_CODE', payload: b64DecodeUnicode(initialTemplate) });
@@ -226,18 +226,18 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
             }
         } catch (error: any) {
             const apiError = error as { response?: { data?: ApiError } };
-            
+
             dispatch({ type: 'SET_CODE_RESULT', payload: apiError.response?.data?.data || [] });
-            
+
             toast({
                 title: 'Failed',
                 description: apiError.response?.data?.message || 'Network connection lost.',
                 variant: 'destructive',
             });
-            
-            const errorMessage = apiError.response?.data?.data?.[0]?.stderr || 
-                                apiError.response?.data?.data?.[0]?.stdErr ||
-                                'Error occurred during submission. Network connection lost.';
+
+            const errorMessage = apiError.response?.data?.data?.[0]?.stderr ||
+                apiError.response?.data?.data?.[0]?.stdErr ||
+                'Error occurred during submission. Network connection lost.';
             dispatch({ type: 'SET_CODE_ERROR', payload: errorMessage });
         } finally {
             dispatch({ type: 'SET_LOADING', payload: false });
@@ -273,18 +273,18 @@ export function useCodingChallenge({ questionId, onChapterComplete }: UseCodingC
     // Update code when language changes (only if not already submitted)
     useEffect(() => {
 
-        if (state.questionDetails?.templates?.[state.language]?.template && !state.isAlreadySubmitted ) {
-            if(state.action === 'run' && state.programLangId === state.languageId.toString()){
+        if (state.questionDetails?.templates?.[state.language]?.template && !state.isAlreadySubmitted) {
+            if (state.action === 'run' && state.programLangId === state.languageId.toString()) {
                 dispatch({ type: 'SET_CODE', payload: state.sourceCode });
             }
-            else{
+            else {
                 const template = state.questionDetails.templates[state.language].template;
                 dispatch({ type: 'SET_CODE', payload: b64DecodeUnicode(template) });
             }
         }
 
-       
-    }, [state.language, state.questionDetails, state.isAlreadySubmitted]);
+
+    }, [state.language, state.questionDetails, state.isAlreadySubmitted, state.action, state.programLangId, state.languageId, state.sourceCode]);
 
     return {
         state,

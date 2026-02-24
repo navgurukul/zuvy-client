@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
 import { useRouter, useParams } from 'next/navigation';
@@ -16,7 +16,7 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
   const { user } = getUser()
   const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!courseId) {
       setError('Course ID is required');
       setLoading(false);
@@ -27,7 +27,7 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
     try {
       const response = await api.get(`/bootcamp/bootcampSetting/${courseId}`);
       const settings = response.data.bootcampSetting[0];
-      
+
       setBootcampSettings({
         type: settings.type,
         isModuleLocked: settings.isModuleLocked || false
@@ -35,7 +35,7 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
       setError(null);
     } catch (err: any) {
       console.error('Error fetching bootcamp settings:', err);
-      
+
       if (axios.isAxiosError(err)) {
         if (err?.response?.data.message === 'Bootcamp not found for the provided id.') {
           router.push(`/${userRole}/organizations/${organizationId}/courses`);
@@ -46,15 +46,15 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
           return;
         }
       }
-      
+
       setError(err.response?.data?.message || 'Failed to fetch bootcamp settings');
       setBootcampSettings(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId, organizationId, router, userRole]);
 
-  const updateSettings = async (settings: BootcampSettingsData) => {
+  const updateSettings = useCallback(async (settings: BootcampSettingsData) => {
     setUpdateError(null); // Clear previous update errors
     try {
       await api.put(`/bootcamp/bootcampSetting/${courseId}`, settings);
@@ -65,7 +65,7 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
       setUpdateError(errorMessage);
       throw err;
     }
-  };
+  }, [courseId]);
 
   const refetch = async () => {
     await fetchData();
@@ -73,7 +73,7 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
 
   useEffect(() => {
     fetchData();
-  }, [courseId]);
+  }, [fetchData]);
 
   return {
     bootcampSettings,

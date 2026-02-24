@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useCallback } from 'react'
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -88,17 +88,17 @@ export function DataTable<TData, TValue>({
         manualSorting: onSortingChange ? true : undefined, // Only enable manual sorting if callback provided
     })
 
-    const logSelectedRows = () => {
+    const logSelectedRows = useCallback(() => {
         const selectedRows = table.getSelectedRowModel().rows
         return selectedRows
-    }
+    }, [table])
 
     // Pass the logSelectedRows function to parent
     useEffect(() => {
-    if (getSelectedRowsFunction) {
-        getSelectedRowsFunction(logSelectedRows, table)
-    }
-}, [getSelectedRowsFunction, table, rowSelection])
+        if (getSelectedRowsFunction) {
+            getSelectedRowsFunction(logSelectedRows)
+        }
+    }, [getSelectedRowsFunction, logSelectedRows])
 
     useEffect(() => {
         // Multiple safety checks
@@ -113,12 +113,12 @@ export function DataTable<TData, TValue>({
             // Reset selected rows on error
             setSelectedRows && setSelectedRows([])
         }
-    }, [table?.getSelectedRowModel?.()?.rows?.length]) // More specific dependency
+    }, [table, setSelectedRows]) // More specific dependency
 
     useEffect(() => {
         table.toggleAllRowsSelected(false)
         setIsRowUnSelected(false)
-    }, [isRowUnSelected])
+    }, [isRowUnSelected, table, setIsRowUnSelected])
 
     return (
         <div className="space-y-4 relative">
@@ -144,13 +144,13 @@ export function DataTable<TData, TValue>({
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
-                                                      header.column.columnDef
-                                                          .header,
-                                                      {
-                                                          ...header.getContext(),
-                                                          onSort: onSortingChange,
-                                                      }
-                                                  )}
+                                                    header.column.columnDef
+                                                        .header,
+                                                    {
+                                                        ...header.getContext(),
+                                                        onSort: onSortingChange,
+                                                    }
+                                                )}
                                         </TableHead>
                                     )
                                 })}

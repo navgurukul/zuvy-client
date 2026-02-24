@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
@@ -13,7 +13,7 @@ const useBootcampDelete = (): UseBootcampDeleteReturn => {
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
 
-    const deleteBootcamp = async (bootcampId: string): Promise<void> => {
+    const deleteBootcamp = useCallback(async (bootcampId: string): Promise<void> => {
         if (!bootcampId) {
             throw new Error('Bootcamp ID is required')
         }
@@ -23,7 +23,7 @@ const useBootcampDelete = (): UseBootcampDeleteReturn => {
 
         try {
             const response = await api.delete(`/bootcamp/${bootcampId}`)
-            
+
             toast.success({
                 title: response.data.status || 'Success',
                 description: response.data.message || 'Course deleted successfully',
@@ -33,22 +33,22 @@ const useBootcampDelete = (): UseBootcampDeleteReturn => {
             router.push(`/${userRole}/organizations/${organizationId}/courses`)
 
         } catch (error: any) {
-            const errorMessage = error.response?.data?.message || 
-                               error.data?.message || 
-                               'Failed to delete course'
-            
+            const errorMessage = error.response?.data?.message ||
+                error.data?.message ||
+                'Failed to delete course'
+
             setError(errorMessage)
-            
+
             toast.error({
                 title: error.response?.data?.status || 'Error',
                 description: errorMessage,
             })
-            
+
             throw error // Re-throw to allow component to handle if needed
         } finally {
             setIsDeleting(false)
         }
-    }
+    }, [organizationId, router, userRole])
 
     return {
         deleteBootcamp,

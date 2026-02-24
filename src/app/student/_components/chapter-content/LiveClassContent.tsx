@@ -13,7 +13,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import ReactPlayer, { ReactPlayerProps } from 'react-player'
 import { useVideoStore } from '@/store/store'
-import {LiveClassSkeleton} from "@/app/student/_components/Skeletons";
+import { LiveClassSkeleton } from "@/app/student/_components/Skeletons";
 
 const LiveClassContent: React.FC<LiveClassContentProps> = ({
     chapterDetails,
@@ -31,7 +31,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [showControls, setShowControls] = useState(true)
     const [localIsCompleted, setLocalIsCompleted] = useState(false)
-     const [loading, setLoading] = useState(true) 
+    const [loading, setLoading] = useState(true)
 
     // Get session data
     const session = chapterDetails.sessions?.[0] || null
@@ -73,7 +73,7 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
 
 
 
-    
+
 
     // Update local state when chapter status changes
     useEffect(() => {
@@ -131,21 +131,19 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
 
         if (days > 0) {
-            return `Class starts in ${days} day${days > 1 ? 's' : ''} ${hours} hour${
-                hours > 1 ? 's' : ''
-            }`
+            return `Class starts in ${days} day${days > 1 ? 's' : ''} ${hours} hour${hours > 1 ? 's' : ''
+                }`
         }
 
         if (hours > 0) {
-            return `Class starts in ${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${
-                minutes > 1 ? 's' : ''
-            }`
+            return `Class starts in ${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''
+                }`
         }
 
         return ` Class starts in ${minutes} minute${minutes > 1 ? 's' : ''}`
     }
 
-      // const youtubeId = isYouTube ? getYoutubeId(flatLinks[0]) : '';
+    // const youtubeId = isYouTube ? getYoutubeId(flatLinks[0]) : '';
     const savedTime = session?.s3link?.includes('youtube')
         ? progress[chapterDetails.id.toString()] || 0
         : 0
@@ -180,14 +178,15 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
             }
         },
         [
-            chapterDetails.id.toString(),
+            chapterDetails.id,
             setProgress,
             completeChapter,
             isCompleted,
+            refetch,
         ]
     )
 
-    
+
 
     const toggleFullScreen = () => {
         if (!document.fullscreenElement && containerRef.current) {
@@ -200,16 +199,16 @@ const LiveClassContent: React.FC<LiveClassContentProps> = ({
     }
 
 
-useEffect(() => {
-  if (chapterDetails) {
-    setLoading(false)
-  }
-}, [chapterDetails])
+    useEffect(() => {
+        if (chapterDetails) {
+            setLoading(false)
+        }
+    }, [chapterDetails])
 
 
-if (loading) {
-  return <LiveClassSkeleton type={'scheduled'} />
-}
+    if (loading) {
+        return <LiveClassSkeleton type={'scheduled'} />
+    }
 
 
     // If no session data, show empty state
@@ -350,8 +349,8 @@ if (loading) {
             const embedLink = getEmbedLink(item.s3link)
             const hasRecording = Boolean(
                 item.s3link &&
-                    item.s3link !== 'not found' &&
-                    item.s3link.trim() !== ''
+                item.s3link !== 'not found' &&
+                item.s3link.trim() !== ''
             )
 
             return (
@@ -362,7 +361,7 @@ if (loading) {
                                 {item.title}
                             </h1>
                             {chapterDetails.status === 'Completed' ||
-                            localIsCompleted ? (
+                                localIsCompleted ? (
                                 <Badge
                                     variant="outline"
                                     className="text-success border-success"
@@ -409,11 +408,10 @@ if (loading) {
                                         Attendance
                                     </p>
                                     <p
-                                        className={`font-medium ${
-                                            item.attendance === 'present'
+                                        className={`font-medium ${item.attendance === 'present'
                                                 ? 'text-success'
                                                 : 'text-destructive'
-                                        }`}
+                                            }`}
                                     >
                                         {item.attendance === 'present'
                                             ? 'Present'
@@ -455,7 +453,7 @@ if (loading) {
                                             <ReactPlayer
                                                 ref={playerRef}
                                                 url={embedLink}
-                                              
+
                                                 playing={playing}
                                                 controls={true}
                                                 width="100%"
@@ -475,9 +473,9 @@ if (loading) {
                                                         },
                                                     },
                                                 }}
-                                                // onPlay={'Play'}
+                                            // onPlay={'Play'}
                                             />
-                                            {!isCompleted && showControls &&   (
+                                            {!isCompleted && showControls && (
                                                 <div className="absolute inset-0 opacity-0 hover:opacity-100 flex gap-4 items-center justify-center bg-black/50 text-white">
                                                     <Button
                                                         onClick={() =>
@@ -502,38 +500,38 @@ if (loading) {
                                                 </div>
                                             )}
                                         </div>
-                                    ) :    <div
-                                            ref={containerRef}
-                                            className="relative w-full h-full"
-                                        >
-                                            <ReactPlayer
-                                                ref={playerRef}
-                                                url={embedLink}
-                                                modestbranding={true}
-                                                rel={false}
-                                                playing={playing}
-                                                controls={isCompleted}
-                                                width="100%"
-                                                height="100%"
-                                                onReady={handleReady}
-                                                onProgress={handleProgress}
-                                                config={{
-                                                    file: {
-                                                        attributes: {
-                                                            controlsList:
-                                                                'nodownload noremoteplayback',
-                                                            disablePictureInPicture:
-                                                                true,
-                                                            onContextMenu: (
-                                                                e: any
-                                                            ) =>
-                                                                e.preventDefault(),
-                                                        },
+                                    ) : <div
+                                        ref={containerRef}
+                                        className="relative w-full h-full"
+                                    >
+                                        <ReactPlayer
+                                            ref={playerRef}
+                                            url={embedLink}
+                                            modestbranding={true}
+                                            rel={false}
+                                            playing={playing}
+                                            controls={isCompleted}
+                                            width="100%"
+                                            height="100%"
+                                            onReady={handleReady}
+                                            onProgress={handleProgress}
+                                            config={{
+                                                file: {
+                                                    attributes: {
+                                                        controlsList:
+                                                            'nodownload noremoteplayback',
+                                                        disablePictureInPicture:
+                                                            true,
+                                                        onContextMenu: (
+                                                            e: any
+                                                        ) =>
+                                                            e.preventDefault(),
                                                     },
-                                                }}
-                                                // onPlay={'Play'}
-                                            />
-                                            {/* {!isCompleted && showControls &&   (
+                                                },
+                                            }}
+                                        // onPlay={'Play'}
+                                        />
+                                        {/* {!isCompleted && showControls &&   (
                                                 <div className="absolute inset-0 opacity-0 hover:opacity-100 flex gap-4 items-center justify-center bg-black/50 text-white">
                                                     <Button
                                                         onClick={() =>
@@ -557,7 +555,7 @@ if (loading) {
                                                     </Button>
                                                 </div>
                                             )} */}
-                                        </div>}
+                                    </div>}
                                 </div>
 
                                 {!isCompleted &&

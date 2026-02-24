@@ -1,5 +1,5 @@
 'use client';
-import { useState , useEffect ,  } from "react";
+import { useState, useEffect, } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,10 +17,10 @@ import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData } from '
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
 import { useRouter } from "next/navigation";
-import {UpcomingEvent,Bootcamp,TopicItem } from '@/app/student/_pages/pageStudentType'
+import { UpcomingEvent, Bootcamp, TopicItem } from '@/app/student/_pages/pageStudentType'
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
-import {formatUpcomingItem} from "@/utils/students"
-import {StudentDashboardSkeleton, CarouselSkeleton} from "@/app/student/_components/Skeletons";
+import { formatUpcomingItem } from "@/utils/students"
+import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -28,7 +28,7 @@ const StudentDashboard = () => {
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
   const access_token = localStorage.getItem('access_token')
   const { studentData: studentProfile } = useLazyLoadedStudentData();
-  const {isStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
+  const { isStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore()
   const router = useRouter();
   const filteredBootcamps = filter === 'enrolled'
     ? studentData?.inProgressBootcamps || []
@@ -40,7 +40,7 @@ const StudentDashboard = () => {
     if (isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
       router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}`);
     }
-  }, [isStudentEnroledInOneBootcamp]);
+  }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, studentData]);
 
   const getActionButton = (bootcamp: Bootcamp) => {
     if (filter === 'completed') {
@@ -133,16 +133,16 @@ const StudentDashboard = () => {
         </div>
 
         {/* Zoe Assistant Card */}
-        <Card  className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
+        <Card className="w-full bg-gradient-to-r from-[#E0FFF0] shadow-4dp hover:shadow-8dp transition-shadow duration-200 mb-8 overflow-hidden">
           <CardContent className="p-0 relative">
-            <div 
+            <div
               className="absolute inset-0 w-full h-full"
               style={{
                 backgroundImage: 'url(/images/Rectangle\\ 5.svg)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                
+
               }}
             />
             <div className="flex flex-col md:flex-row gap-4 md:gap-6 p-4 sm:p-5 md:p-6 relative z-10">
@@ -161,7 +161,7 @@ const StudentDashboard = () => {
               <div className="flex-1 flex flex-col justify-center text-center md:text-left">
                 <h3 className="text-lg sm:text-xl font-bold mb-2 text-gray-800 flex flex-wrap items-center justify-center md:justify-start gap-2">
                   <span>I am Zoe, your learning assistant</span>
-                  <button className="bg-[#12EA7B] px-2 sm:px-3 py-0.5 rounded font-semibold text-xs sm:text-sm inline-flex items-center justify-center" >New</button> 
+                  <button className="bg-[#12EA7B] px-2 sm:px-3 py-0.5 rounded font-semibold text-xs sm:text-sm inline-flex items-center justify-center" >New</button>
                 </h3>
                 <p className="text-sm sm:text-base text-gray-700 mb-4 md:mb-0">
                   I will help you get job ready by practicing interviews and learning activities
@@ -170,7 +170,7 @@ const StudentDashboard = () => {
 
               {/* Button */}
               <div className="flex items-center justify-center md:justify-end flex-shrink-0">
-                <Button  onClick={() => window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
+                <Button onClick={() => window.open(`https://zoe.zuvy.org?token=${access_token}`, '_blank')} className="bg-[#2C5F2D] text-white font-semibold w-full md:w-auto text-sm sm:text-base">
                   Learn with zoe
                 </Button>
               </div>
@@ -222,8 +222,8 @@ const StudentDashboard = () => {
                       src={bootcamp.coverImage || '/logo.PNG'}
                       alt={bootcamp.name}
                       width={128}
-                     height={128}
-                     className="rounded-lg object-contain"
+                      height={128}
+                      className="rounded-lg object-contain"
                     />
                   </div>
 
@@ -234,7 +234,7 @@ const StudentDashboard = () => {
                         <h3 className="text-xl font-heading font-semibold mb-2">
                           {bootcamp.name}
                         </h3>
-                        <TruncatedDescription 
+                        <TruncatedDescription
                           text={bootcamp.description || ``}
                           maxLength={150}
                           className="text-muted-foreground mb-3"
@@ -247,7 +247,7 @@ const StudentDashboard = () => {
                           <span className="text-sm  text-muted-foreground capitalize ">
                             Instructor: {bootcamp.instructorDetails.name}
                           </span>
-                     
+
                           {/* <span className="text-sm text-muted-foreground">
                             {bootcamp.batchName}
                           </span> */}
@@ -292,92 +292,92 @@ const StudentDashboard = () => {
                   <>
                     <div className="border-t border-border mt-6 mb-6"></div>
                     {/* Upcoming Items */}
-                    {eventsLoading? (
+                    {eventsLoading ? (
                       <CarouselSkeleton />
-                                         ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
-                     <div>
-                       <Carousel className="w-full group">
-                        <CarouselContent className="-ml-2">
-                          {upcomingEventsData?.events
-                            .filter((item) => item.bootcampId === bootcamp.id)
-                            .map((item) => {
-                            const eventType = mapEventType(item.type);
-                            const liveClassStatus = item.status;
-                            return (
-                              <CarouselItem key={item.id} className="pl-2 md:basis-1/3  ">
-                                <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
-                                  <div className="w-full border rounded-lg p-3 h-full">
-                                    <div className="flex items-start gap-3">
-                                      <div className="flex-shrink-0 mt-1">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType === 'Live Class'
-                                          ? 'bg-primary-light'
-                                          : eventType === 'Assessment'
-                                            ? 'bg-warning-light'
-                                            : 'bg-info-light'
-                                          }`}>
-                                          {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
-                                          {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
-                                          {eventType === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
-                                        </div>
-                                      </div>
-                                      <div className="flex-1">
-                                        <div className="flex items-start justify-between gap-2 mb-1">
-                                          <h4 className="text-sm font-medium text-left line-clamp-1">
-                                            {item.title}
-                                          </h4>
-                                          <div>
-                                            <div className="flex flex-col" >
-
-                                              <Badge
-                                                variant="outline"
-                                                className={` text-xs px-2 py-0.5 whitespace-nowrap ${eventType === 'Live Class'
-                                                  ? 'bg-primary-light text-foreground border-primary-light'
-                                                  : eventType === 'Assessment'
-                                                    ? 'bg-warning-light text-foreground border-warning-light'
-                                                    : 'bg-info-light text-foreground border-info-light'
-                                                  }`}
-                                              >
-                                                {eventType}
-                                                <span>
-                                                  {liveClassStatus === 'ongoing' && <div className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
-                                                </span>
-                                                <span>
-                                                </span>
-                                              </Badge>
-                                              <p>
-                                              </p>
+                    ) : (upcomingEventsData?.events?.filter((item) => item.bootcampId === bootcamp.id) || []).length > 0 ? (
+                      <div>
+                        <Carousel className="w-full group">
+                          <CarouselContent className="-ml-2">
+                            {upcomingEventsData?.events
+                              .filter((item) => item.bootcampId === bootcamp.id)
+                              .map((item) => {
+                                const eventType = mapEventType(item.type);
+                                const liveClassStatus = item.status;
+                                return (
+                                  <CarouselItem key={item.id} className="pl-2 md:basis-1/3  ">
+                                    <a target={liveClassStatus === 'ongoing' ? '_blank' : '_self'} href={`${liveClassStatus === 'ongoing' ? (item as any).hangoutLink : `/student/course/${item.bootcampId}/modules/${(item as any).moduleId}?chapterId=${(item as any).chapterId}`}`}>
+                                      <div className="w-full border rounded-lg p-3 h-full">
+                                        <div className="flex items-start gap-3">
+                                          <div className="flex-shrink-0 mt-1">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${eventType === 'Live Class'
+                                              ? 'bg-primary-light'
+                                              : eventType === 'Assessment'
+                                                ? 'bg-warning-light'
+                                                : 'bg-info-light'
+                                              }`}>
+                                              {eventType === 'Live Class' && <Video className="w-4 h-4 text-primary" />}
+                                              {eventType === 'Assessment' && <FileText className="w-4 h-4 text-warning" />}
+                                              {eventType === 'Assignment' && <FileText className="w-4 h-4 text-info" />}
                                             </div>
                                           </div>
+                                          <div className="flex-1">
+                                            <div className="flex items-start justify-between gap-2 mb-1">
+                                              <h4 className="text-sm font-medium text-left line-clamp-1">
+                                                {item.title}
+                                              </h4>
+                                              <div>
+                                                <div className="flex flex-col" >
 
+                                                  <Badge
+                                                    variant="outline"
+                                                    className={` text-xs px-2 py-0.5 whitespace-nowrap ${eventType === 'Live Class'
+                                                      ? 'bg-primary-light text-foreground border-primary-light'
+                                                      : eventType === 'Assessment'
+                                                        ? 'bg-warning-light text-foreground border-warning-light'
+                                                        : 'bg-info-light text-foreground border-info-light'
+                                                      }`}
+                                                  >
+                                                    {eventType}
+                                                    <span>
+                                                      {liveClassStatus === 'ongoing' && <div className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
+                                                    </span>
+                                                    <span>
+                                                    </span>
+                                                  </Badge>
+                                                  <p>
+                                                  </p>
+                                                </div>
+                                              </div>
+
+                                            </div>
+                                            <p className="text-xs text-left flex justify-between w-full text-muted-foreground mb-2">
+                                              <span>
+
+                                                {formatUpcomingItem(item)}
+                                              </span>
+                                              <span>
+
+                                                {liveClassStatus === 'ongoing' && <span className="text-primary hover:text-primary-dark text-left w-full text-[14px] font-semibold mr-8 ">Join</span>}
+                                              </span>
+                                            </p>
+                                          </div>
                                         </div>
-                                        <p className="text-xs text-left flex justify-between w-full text-muted-foreground mb-2">
-                                          <span>
-
-                                          {formatUpcomingItem(item)}
-                                          </span>
-                                          <span>
-
-                                          {liveClassStatus === 'ongoing' && <span  className="text-primary hover:text-primary-dark text-left w-full text-[14px] font-semibold mr-8 ">Join</span>}
-                                          </span>
-                                        </p>
                                       </div>
-                                    </div>
-                                  </div>
-                                </a>
-                              </CarouselItem>
-                            );
-                          })}
-                        </CarouselContent>
-                        {(upcomingEventsData?.events?.filter(
-                         (item) => item.bootcampId === bootcamp.id
+                                    </a>
+                                  </CarouselItem>
+                                );
+                              })}
+                          </CarouselContent>
+                          {(upcomingEventsData?.events?.filter(
+                            (item) => item.bootcampId === bootcamp.id
                           )?.length || 0) > 3 && (
-                      <>
-                        <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
-                        <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
-                      </>
-                    )}
-                       </Carousel>
-                     </div>                     
+                              <>
+                                <CarouselPrevious className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
+                                <CarouselNext className="opacity-0 group-hover:opacity-100 transition-opacity border hover:border-blue-500 text-blue-500" />
+                              </>
+                            )}
+                        </Carousel>
+                      </div>
                     ) : null}
                   </>
                 )}
@@ -385,7 +385,7 @@ const StudentDashboard = () => {
             </Card>
           ))}
         </div>
-        
+
         {filteredBootcamps.length === 0 && (
           <Card className="text-center py-12 shadow-4dp">
             <CardContent>

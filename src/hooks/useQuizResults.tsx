@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/utils/axios.config';
-import{UseQuizResultsParams,QuizResultsResponse} from '@/hooks/hookType'
+import { UseQuizResultsParams, QuizResultsResponse } from '@/hooks/hookType'
 
 export const useQuizResults = ({
   submissionId,
@@ -10,7 +10,7 @@ export const useQuizResults = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchQuizResults = async () => {
+  const fetchQuizResults = useCallback(async () => {
     if (!submissionId) {
       return;
     }
@@ -29,13 +29,13 @@ export const useQuizResults = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [submissionId]);
 
   useEffect(() => {
     if (enabled && submissionId) {
       fetchQuizResults();
     }
-  }, [submissionId, enabled]);
+  }, [submissionId, enabled, fetchQuizResults]);
 
   const refetch = () => {
     if (submissionId) {

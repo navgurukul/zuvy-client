@@ -5,31 +5,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Video, BookOpen, FileText, Clock, Calendar, Users, Lock, Timer } from "lucide-react";
 import Image from "next/image";
 import { useBootcampProgress } from '@/hooks/useBootcampProgress';
 import { useAllModulesForStudents } from '@/hooks/useAllModulesForStudents';
-import { useUpcomingEvents} from '@/hooks/useUpcomingEvents';
-import {UpcomingEvent} from '@/hooks/hookType';
-import { useCompletedClasses} from '@/hooks/useCompletedClasses';
-import {CompletedClass,Module} from '@/hooks/hookType';
+import { useUpcomingEvents } from '@/hooks/useUpcomingEvents';
+import { UpcomingEvent } from '@/hooks/hookType';
+import { useCompletedClasses } from '@/hooks/useCompletedClasses';
+import { CompletedClass, Module } from '@/hooks/hookType';
 import { useLatestUpdatedCourse } from '@/hooks/useLatestUpdatedCourse';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { ellipsis } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import useWindowSize from "@/hooks/useHeightWidth";
 import { useIsStudentEnrolledInOneCourseStore } from "@/store/store";
-import {ModuleContentCounts,TopicItem} from '@/app/student/_pages/pageStudentType'
-import {formatUpcomingItem} from "@/utils/students"
-import {CourseDashboardSkeleton, CourseDashboardEventsSkeleton} from '@/app/student/_components/Skeletons';
+import { ModuleContentCounts, TopicItem } from '@/app/student/_pages/pageStudentType'
+import { formatUpcomingItem } from "@/utils/students"
+import { CourseDashboardSkeleton, CourseDashboardEventsSkeleton } from '@/app/student/_components/Skeletons';
 
 
 const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
   const [showAllModules, setShowAllModules] = useState(false);
-  const {setIsStudentEnrolledInOneCourse} = useIsStudentEnrolledInOneCourseStore()
+  const { setIsStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore()
   const { progressData, loading: progressLoading, error: progressError } = useBootcampProgress(courseId);
   const { modules: apiModules, loading: modulesLoading, error: modulesError } = useAllModulesForStudents(courseId);
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents(courseId);
@@ -41,9 +41,9 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
 
 
 
-  useEffect(()=> {
+  useEffect(() => {
     setIsStudentEnrolledInOneCourse(false)
-  },[])
+  }, [setIsStudentEnrolledInOneCourse])
 
 
   // Show loading skeleton while fetching essential API data (excluding events)
@@ -204,7 +204,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     }
   }
 
-  const getModuleCTA = (module:Module , progress: number) => {
+  const getModuleCTA = (module: Module, progress: number) => {
     if (module.isLock) {
       return "Module Locked";
     } else if (progress === 0) {
@@ -216,11 +216,11 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     }
   };
 
-  const getModuleProgress = (module:Module) => {
+  const getModuleProgress = (module: Module) => {
     return module.progress || 0;
   };
 
-  const getModuleDescription = (module:Module) => {
+  const getModuleDescription = (module: Module) => {
     return module.description || "Learn essential concepts and build practical skills.";
   };
 
@@ -248,362 +248,362 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
     return counts.join(' • ');
   };
 
-    const AttendanceModal = ({ classes }: { classes: CompletedClass[] }) => (
-        <>
-            {/* Desktop Dialog */}
-            <div className="hidden lg:block">
-                <Dialog>
-                    <DialogTrigger asChild>
-                        {classes.length > 2 ? (
-                            <Button
-                                variant="link"
-                                className="p-0 h-auto text-primary mx-auto"
-                            >
-                                View Full Attendance({classes.length})
-                            </Button>
-                        ) : (
-                            // if classes length is less than 2, don't show the button
-                            <></>
-                        )}
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-x-hidden overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle className="text-xl">
-                                Full Attendance Record{' '}
-                            </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-1">
-                            {classes.map((classItem, index, array) => (
-                                <div key={classItem.id}>
-                                    <div className="flex items-center justify-between py-4">
-                                        <div className="flex-1 text-left">
-                                            {classItem.moduleId === null ||
-                                            classItem.chapterId == null ? (
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger className="text-left font-manrope text-lg  font-bold cursor-default underline-offset-[5px]">
-                                                            {classItem.title}
-                                                        </TooltipTrigger>
-                                                        <TooltipContent className=" text-left">
-                                                            The chapter isn’t
-                                                            included in the
-                                                            module yet,
-                                                            {(classItem.s3Link !==
-                                                                null ||
-                                                                classItem.s3Link !==
-                                                                    'not found') &&
-                                                                'but you can still view the recording'}
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            ) : (
-                                                <Link
-                                                    className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                                                    href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
-                                                >
-                                                    {classItem.title}
-                                                </Link>
-                                            )}
-                                            <p className="text-sm text-muted-foreground">
-                                                {formatDate(
-                                                    classItem.startTime
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-6">
-                                            <Badge
-                                                variant="outline"
-                                                className={
-                                                    classItem.s3Link === null ||
-                                                    classItem.s3Link ===
-                                                        'not found'
-                                                        ? 'text-warning border-warning'
-                                                        : classItem.s3Link &&
-                                                          classItem.attendanceStatus ===
-                                                              'absent'
-                                                        ? 'text-destructive border-destructive'
-                                                        : 'text-success border-success'
-                                                }
-                                            >
-                                                {classItem.s3Link === null ||
-                                                classItem.s3Link === 'not found'
-                                                    ? 'Processing'
-                                                    : classItem.s3Link &&
-                                                      classItem.attendanceStatus ===
-                                                          'absent'
-                                                    ? 'Absent'
-                                                    : 'Present'}
-                                            </Badge>
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger>
-                                                        {classItem.s3Link ===
-                                                            null ||
-                                                        classItem.s3Link ===
-                                                            'not found' ? (
-                                                            <button
-                                                                disabled={
-                                                                    classItem.s3Link ===
-                                                                        null ||
-                                                                    classItem.s3Link ===
-                                                                        'not found'
-                                                                }
-                                                                onClick={() =>
-                                                                    handleRecording(
-                                                                        classItem.s3Link
-                                                                    )
-                                                                }
-                                                                className="text-red-500    text-sm "
-                                                            >
-                                                                <Video className="w-4 h-4 " />
-                                                            </button>
-                                                        ) : (
-                                                            <button
-                                                                disabled={
-                                                                    classItem.s3Link ===
-                                                                        null ||
-                                                                    classItem.s3Link ===
-                                                                        'not found'
-                                                                }
-                                                                onClick={() =>
-                                                                    handleRecording(
-                                                                        classItem.s3Link
-                                                                    )
-                                                                }
-                                                                className="text-primary  text-sm "
-                                                            >
-                                                                <Video className="w-4 h-4 " />
-                                                            </button>
-                                                        )}
-                                                    </TooltipTrigger>
-                                                    <TooltipContent className="mr-24">
-                                                        {classItem.s3Link ===
-                                                            null ||
-                                                        classItem.s3Link ===
-                                                            'not found' ? (
-                                                            <p>
-                                                                Recording not
-                                                                found
-                                                            </p>
-                                                        ) : (
-                                                            <p>
-                                                                Watch Recording
-                                                            </p>
-                                                        )}
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>
-                                    </div>
-                                    {index < array.length - 1 && (
-                                        <div className="border-t border-border"></div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </DialogContent>
-                </Dialog>
-            </div>
-
-            {/* Mobile Sheet */}
-            <div className="lg:hidden">
-                <Sheet>
-                    <SheetTrigger asChild>
-                        {classes.length > 2 ? (
-                            <Button
-                                variant="link"
-                                className="p-0 h-auto text-primary mx-auto"
-                            >
-                                View Full Attendance({classes.length})
-                            </Button>
-                        ) : (
-                            // if classes length is less than 2, don't show the button
-                            <></>
-                        )}
-                    </SheetTrigger>
-                    <SheetContent side="bottom" className="h-[80vh]">
-                        <SheetHeader>
-                            <SheetTitle className="text-xl text-left">
-                                Full Attendance Record
-                            </SheetTitle>
-                        </SheetHeader>
-                        <div className="space-y-1  h-full overflow-y-scroll">
-                            {classes.map((classItem, index, array) => (
-                                <div key={classItem.id}>
-                                    <div className="flex items-center justify-between py-4">
-                                        <div className="flex-1 text-left">
-                                            {classItem.moduleId === null ||
-                                            classItem.chapterId == null ? (
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger className="text-left font-manrope text-lg  font-bold cursor-default underline-offset-[5px]">
-                                                            {classItem.title}
-                                                        </TooltipTrigger>
-                                                        <TooltipContent className=" text-left">
-                                                            The chapter isn’t
-                                                            included in the
-                                                            module yet,
-                                                            {(classItem.s3Link !==
-                                                                null ||
-                                                                classItem.s3Link !==
-                                                                    'not found') &&
-                                                                'but you can still view the recording'}
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            ) : (
-                                                <Link
-                                                    className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
-                                                    href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
-                                                >
-                                                    {classItem.title}
-                                                </Link>
-                                            )}
-                                            <p className="text-sm text-muted-foreground">
-                                                {formatDate(
-                                                    classItem.startTime
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Badge
-                                                variant="outline"
-                                                className={
-                                                    classItem.s3Link === null ||
-                                                    classItem.s3Link ===
-                                                        'not found'
-                                                        ? 'text-warning border-warning'
-                                                        : classItem.s3Link &&
-                                                          classItem.attendanceStatus ===
-                                                              'absent'
-                                                        ? 'text-destructive border-destructive'
-                                                        : 'text-success border-success'
-                                                }
-                                            >
-                                                {classItem.s3Link === null ||
-                                                classItem.s3Link === 'not found'
-                                                    ? 'Processing'
-                                                    : classItem.s3Link &&
-                                                      classItem.attendanceStatus ===
-                                                          'absent'
-                                                    ? 'Absent'
-                                                    : 'Present'}{' '}
-                                            </Badge>
-                                            <TooltipProvider>
-                                                <Tooltip>
-                                                    <TooltipTrigger>
-                                                        {classItem.s3Link ===
-                                                            null ||
-                                                        classItem.s3Link ===
-                                                            'not found' ? (
-                                                            <button
-                                                                disabled={
-                                                                    classItem.s3Link ===
-                                                                        null ||
-                                                                    classItem.s3Link ===
-                                                                        'not found'
-                                                                }
-                                                                onClick={() =>
-                                                                    handleRecording(
-                                                                        classItem.s3Link
-                                                                    )
-                                                                }
-                                                                className="text-red-500 bg-primary-light text-sm border-primary"
-                                                            >
-                                                                <Video className="w-4 h-4 " />
-                                                            </button>
-                                                        ) : (
-                                                            <button
-                                                                disabled={
-                                                                    classItem.s3Link ===
-                                                                        null ||
-                                                                    classItem.s3Link ===
-                                                                        'not found'
-                                                                }
-                                                                onClick={() =>
-                                                                    handleRecording(
-                                                                        classItem.s3Link
-                                                                    )
-                                                                }
-                                                                className="text-primary bg-primary-light text-sm border-primary"
-                                                            >
-                                                                <Video className="w-4 h-4 " />
-                                                            </button>
-                                                        )}
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        {classItem.s3Link ===
-                                                            null ||
-                                                        classItem.s3Link ===
-                                                            'not found' ? (
-                                                            <p>
-                                                                Recording not
-                                                                found
-                                                            </p>
-                                                        ) : (
-                                                            <p>
-                                                                Watch Recording
-                                                            </p>
-                                                        )}
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </TooltipProvider>
-                                        </div>
-                                    </div>
-                                    {index < array.length - 1 && (
-                                        <div className="border-t border-border"></div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </SheetContent>
-                </Sheet>
-            </div>
-        </>
-    )
-
-    const EventsModal = ({ events }: { events: UpcomingEvent[] }) => (
-        <>
-            {/* Desktop Dialog */}
-            <div className="hidden lg:block">
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button
-                            variant="link"
-                            className="p-0 h-auto text-primary mx-auto"
+  const AttendanceModal = ({ classes }: { classes: CompletedClass[] }) => (
+    <>
+      {/* Desktop Dialog */}
+      <div className="hidden lg:block">
+        <Dialog>
+          <DialogTrigger asChild>
+            {classes.length > 2 ? (
+              <Button
+                variant="link"
+                className="p-0 h-auto text-primary mx-auto"
+              >
+                View Full Attendance({classes.length})
+              </Button>
+            ) : (
+              // if classes length is less than 2, don't show the button
+              <></>
+            )}
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-x-hidden overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl">
+                Full Attendance Record{' '}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-1">
+              {classes.map((classItem, index, array) => (
+                <div key={classItem.id}>
+                  <div className="flex items-center justify-between py-4">
+                    <div className="flex-1 text-left">
+                      {classItem.moduleId === null ||
+                        classItem.chapterId == null ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="text-left font-manrope text-lg  font-bold cursor-default underline-offset-[5px]">
+                              {classItem.title}
+                            </TooltipTrigger>
+                            <TooltipContent className=" text-left">
+                              The chapter isn’t
+                              included in the
+                              module yet,
+                              {(classItem.s3Link !==
+                                null ||
+                                classItem.s3Link !==
+                                'not found') &&
+                                'but you can still view the recording'}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <Link
+                          className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
+                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
                         >
-                            View All Upcoming Events({events.length})
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle className="text-xl">
-                                All Upcoming Events
-                            </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-1">
-                            {events.map((item, index, array) => {
-                                const eventType = getEventType(item.type)
-                                const isEventReady = canStartEvent(
-                                    item.eventDate
-                                )
-                                return (
-                                    <div key={item.id}>
-                                        <div className="flex items-start gap-4 py-4">
-                                            <div className="flex-shrink-0 mt-1">
-                                                {getItemIconWithBackground(
-                                                    item.type
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-start justify-between gap-4 mb-2">
-                                                    <h4 className="font-medium text-base">
-                                                        {item.title}
-                                                    </h4>
-                                                </div>
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <p className="text-sm font-medium">
-                                                        {/* {eventType ===
+                          {classItem.title}
+                        </Link>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(
+                          classItem.startTime
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <Badge
+                        variant="outline"
+                        className={
+                          classItem.s3Link === null ||
+                            classItem.s3Link ===
+                            'not found'
+                            ? 'text-warning border-warning'
+                            : classItem.s3Link &&
+                              classItem.attendanceStatus ===
+                              'absent'
+                              ? 'text-destructive border-destructive'
+                              : 'text-success border-success'
+                        }
+                      >
+                        {classItem.s3Link === null ||
+                          classItem.s3Link === 'not found'
+                          ? 'Processing'
+                          : classItem.s3Link &&
+                            classItem.attendanceStatus ===
+                            'absent'
+                            ? 'Absent'
+                            : 'Present'}
+                      </Badge>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            {classItem.s3Link ===
+                              null ||
+                              classItem.s3Link ===
+                              'not found' ? (
+                              <button
+                                disabled={
+                                  classItem.s3Link ===
+                                  null ||
+                                  classItem.s3Link ===
+                                  'not found'
+                                }
+                                onClick={() =>
+                                  handleRecording(
+                                    classItem.s3Link
+                                  )
+                                }
+                                className="text-red-500    text-sm "
+                              >
+                                <Video className="w-4 h-4 " />
+                              </button>
+                            ) : (
+                              <button
+                                disabled={
+                                  classItem.s3Link ===
+                                  null ||
+                                  classItem.s3Link ===
+                                  'not found'
+                                }
+                                onClick={() =>
+                                  handleRecording(
+                                    classItem.s3Link
+                                  )
+                                }
+                                className="text-primary  text-sm "
+                              >
+                                <Video className="w-4 h-4 " />
+                              </button>
+                            )}
+                          </TooltipTrigger>
+                          <TooltipContent className="mr-24">
+                            {classItem.s3Link ===
+                              null ||
+                              classItem.s3Link ===
+                              'not found' ? (
+                              <p>
+                                Recording not
+                                found
+                              </p>
+                            ) : (
+                              <p>
+                                Watch Recording
+                              </p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                  {index < array.length - 1 && (
+                    <div className="border-t border-border"></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Mobile Sheet */}
+      <div className="lg:hidden">
+        <Sheet>
+          <SheetTrigger asChild>
+            {classes.length > 2 ? (
+              <Button
+                variant="link"
+                className="p-0 h-auto text-primary mx-auto"
+              >
+                View Full Attendance({classes.length})
+              </Button>
+            ) : (
+              // if classes length is less than 2, don't show the button
+              <></>
+            )}
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[80vh]">
+            <SheetHeader>
+              <SheetTitle className="text-xl text-left">
+                Full Attendance Record
+              </SheetTitle>
+            </SheetHeader>
+            <div className="space-y-1  h-full overflow-y-scroll">
+              {classes.map((classItem, index, array) => (
+                <div key={classItem.id}>
+                  <div className="flex items-center justify-between py-4">
+                    <div className="flex-1 text-left">
+                      {classItem.moduleId === null ||
+                        classItem.chapterId == null ? (
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger className="text-left font-manrope text-lg  font-bold cursor-default underline-offset-[5px]">
+                              {classItem.title}
+                            </TooltipTrigger>
+                            <TooltipContent className=" text-left">
+                              The chapter isn’t
+                              included in the
+                              module yet,
+                              {(classItem.s3Link !==
+                                null ||
+                                classItem.s3Link !==
+                                'not found') &&
+                                'but you can still view the recording'}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      ) : (
+                        <Link
+                          className="w-fit font-manrope text-lg  font-bold hover:text-primary hover:underline underline-offset-[5px]"
+                          href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                        >
+                          {classItem.title}
+                        </Link>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(
+                          classItem.startTime
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={
+                          classItem.s3Link === null ||
+                            classItem.s3Link ===
+                            'not found'
+                            ? 'text-warning border-warning'
+                            : classItem.s3Link &&
+                              classItem.attendanceStatus ===
+                              'absent'
+                              ? 'text-destructive border-destructive'
+                              : 'text-success border-success'
+                        }
+                      >
+                        {classItem.s3Link === null ||
+                          classItem.s3Link === 'not found'
+                          ? 'Processing'
+                          : classItem.s3Link &&
+                            classItem.attendanceStatus ===
+                            'absent'
+                            ? 'Absent'
+                            : 'Present'}{' '}
+                      </Badge>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            {classItem.s3Link ===
+                              null ||
+                              classItem.s3Link ===
+                              'not found' ? (
+                              <button
+                                disabled={
+                                  classItem.s3Link ===
+                                  null ||
+                                  classItem.s3Link ===
+                                  'not found'
+                                }
+                                onClick={() =>
+                                  handleRecording(
+                                    classItem.s3Link
+                                  )
+                                }
+                                className="text-red-500 bg-primary-light text-sm border-primary"
+                              >
+                                <Video className="w-4 h-4 " />
+                              </button>
+                            ) : (
+                              <button
+                                disabled={
+                                  classItem.s3Link ===
+                                  null ||
+                                  classItem.s3Link ===
+                                  'not found'
+                                }
+                                onClick={() =>
+                                  handleRecording(
+                                    classItem.s3Link
+                                  )
+                                }
+                                className="text-primary bg-primary-light text-sm border-primary"
+                              >
+                                <Video className="w-4 h-4 " />
+                              </button>
+                            )}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {classItem.s3Link ===
+                              null ||
+                              classItem.s3Link ===
+                              'not found' ? (
+                              <p>
+                                Recording not
+                                found
+                              </p>
+                            ) : (
+                              <p>
+                                Watch Recording
+                              </p>
+                            )}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                  {index < array.length - 1 && (
+                    <div className="border-t border-border"></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </>
+  )
+
+  const EventsModal = ({ events }: { events: UpcomingEvent[] }) => (
+    <>
+      {/* Desktop Dialog */}
+      <div className="hidden lg:block">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="link"
+              className="p-0 h-auto text-primary mx-auto"
+            >
+              View All Upcoming Events({events.length})
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl">
+                All Upcoming Events
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-1">
+              {events.map((item, index, array) => {
+                const eventType = getEventType(item.type)
+                const isEventReady = canStartEvent(
+                  item.eventDate
+                )
+                return (
+                  <div key={item.id}>
+                    <div className="flex items-start gap-4 py-4">
+                      <div className="flex-shrink-0 mt-1">
+                        {getItemIconWithBackground(
+                          item.type
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <h4 className="font-medium text-base">
+                            {item.title}
+                          </h4>
+                        </div>
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-sm font-medium">
+                            {/* {eventType ===
                                                             'Live Class' &&
                                                             `Scheduled on ${formatDate(
                                                                 item.eventDate
@@ -618,37 +618,37 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                             `Due on ${formatDate(
                                                                 item.eventDate
                                                             )}`} */}
-                                                            {formatUpcomingItem(item)}
-                                                    </p>
-                                                </div>
-                                                <div className="flex justify-end">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="link"
-                                                        disabled={!isEventReady}
-                                                        className="text-primary p-0 h-auto"
-                                                    >
-                                                        {isEventReady
-                                                            ? getEventActionText(
-                                                                  item.type
-                                                              )
-                                                            : getTimeRemaining(
-                                                                  item.eventDate
-                                                              )}
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {index < array.length - 1 && (
-                                            <div className="border-t border-border"></div>
-                                        )}
-                                    </div>
-                                )
-                            })}
+                            {formatUpcomingItem(item)}
+                          </p>
                         </div>
-                    </DialogContent>
-                </Dialog>
+                        <div className="flex justify-end">
+                          <Button
+                            size="sm"
+                            variant="link"
+                            disabled={!isEventReady}
+                            className="text-primary p-0 h-auto"
+                          >
+                            {isEventReady
+                              ? getEventActionText(
+                                item.type
+                              )
+                              : getTimeRemaining(
+                                item.eventDate
+                              )}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                    {index < array.length - 1 && (
+                      <div className="border-t border-border"></div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* Mobile Sheet */}
       <div className="lg:hidden">
@@ -851,7 +851,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 <h2 className="text-2xl font-heading font-semibold mb-6 text-left">Course Content</h2>
 
                 <div className="space-y-6">
-                  { modulesToShow.length > 0 ? modulesToShow.map((module: Module) => {
+                  {modulesToShow.length > 0 ? modulesToShow.map((module: Module) => {
                     const moduleProgress = getModuleProgress(module);
                     const isCurrentModule = latestCourseData?.moduleId === module.id;
                     const isCompleted = moduleProgress === 100;
@@ -980,23 +980,23 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                       </Card>
 
                     );
-                  }) : 
-                <div className="mb-6 text-left flex flex-col justify-end w-full items-center">
-                    <Image
-                      src="/emptyStates/greendog.svg"
-                      alt="No upcoming events"
-                      width={50}
-                      height={50}
-                      className="w-1/2 h-auto opacity-80"
-                    />
-                    <h3 className="text-lg text-left w-full font-semibold text-muted-foreground">
-                      No Modules Found
-                    </h3>
-                    <p className="text-sm text-left w-full text-muted-foreground leading-relaxed">
-                      No modules created for this course yet, Please check back later.
-                    </p>
-               
-                </div>}
+                  }) :
+                    <div className="mb-6 text-left flex flex-col justify-end w-full items-center">
+                      <Image
+                        src="/emptyStates/greendog.svg"
+                        alt="No upcoming events"
+                        width={50}
+                        height={50}
+                        className="w-1/2 h-auto opacity-80"
+                      />
+                      <h3 className="text-lg text-left w-full font-semibold text-muted-foreground">
+                        No Modules Found
+                      </h3>
+                      <p className="text-sm text-left w-full text-muted-foreground leading-relaxed">
+                        No modules created for this course yet, Please check back later.
+                      </p>
+
+                    </div>}
 
                   {modulesToDisplay.length > 7 && !showAllModules && (
                     <div className="flex justify-center">
@@ -1025,7 +1025,7 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                 </CardHeader>
                 <CardContent className="pt-0">
                   {eventsLoading ? (
-                    <CourseDashboardEventsSkeleton/>
+                    <CourseDashboardEventsSkeleton />
                   ) : upcomingEventsData && upcomingEventsData.events.length > 0 ? (
                     <div className="space-y-4">
                       {upcomingEventsData.events.slice(0, 3).map((item: UpcomingEvent, index: number) => {
@@ -1033,52 +1033,52 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         const isEventReady = canStartEvent(item.eventDate);
 
                         return (
-                            <div key={item.id}>
-                              <div className="flex items-start gap-4">
-                                <div className="flex-shrink-0 mt-1">
-                                  {getItemIconWithBackground(item.type)}
+                          <div key={item.id}>
+                            <div className="flex items-start gap-4">
+                              <div className="flex-shrink-0 mt-1">
+                                {getItemIconWithBackground(item.type)}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between gap-4 mb-2">
+                                  <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">
+                                    <Link
+                                      href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
+                                      target="_self"
+                                      className="hover:text-primary hover:underline underline-offset-[4px]"
+                                    >
+                                      {item.title}
+                                    </Link>
+                                  </h4>
                                 </div>
-                                <div className="flex-1">
-                                  <div className="flex items-start justify-between gap-4 mb-2">
-                                    <h4 className="font-medium text-base hover:text-primary hover:underline underline-offset-[4px]">
-                                      <Link
-                                       href={`/student/course/${courseId}/modules/${item.moduleId}?chapterId=${item.chapterId}`}
-                                       target="_self"
-                                       className="hover:text-primary hover:underline underline-offset-[4px]"
-                                      >
-                                        {item.title}
-                                      </Link>
-                                    </h4>
-                                  </div>
-                                  <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
-                                  <div className="flex items-center justify-between mb-3">
-                                    <p className="text-sm font-medium">
-                                       {formatUpcomingItem(item)}
-                                    </p>
-                                  </div>
-                                  {/* CTA - Bottom right */}
-                                  {eventType === 'Live Class' &&(
+                                <Badge className={`my-2 hover:text-white ${item.type === 'Live Class' ? 'bg-primary-light text-primary border-primary/20 ' : item.type === 'Assessment' ? 'bg-warning-light text-warning border-warning/20 hover:bg-warning' : 'bg-info-light text-info border-info/20 hover:bg-info'} `} >{item.type}</Badge>
+                                <div className="flex items-center justify-between mb-3">
+                                  <p className="text-sm font-medium">
+                                    {formatUpcomingItem(item)}
+                                  </p>
+                                </div>
+                                {/* CTA - Bottom right */}
+                                {eventType === 'Live Class' && (
                                   <div className="flex justify-end">
                                     <Button
                                       size="sm"
                                       variant="link"
                                       disabled={!isEventReady}
                                       className="text-primary p-0 h-auto"
-                                      onClick={() => window.open(item.hangoutLink , '_blank')}
+                                      onClick={() => window.open(item.hangoutLink, '_blank')}
                                     >
                                       {isEventReady ? getEventActionText(item.type) : getTimeRemaining(item.eventDate)}
 
-                                        {item.status === 'ongoing' && <span className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
-                                     
+                                      {item.status === 'ongoing' && <span className="w-2 h-2 ml-1 inline-block bg-green-500 animate-pulse rounded-full" />}
+
                                     </Button>
                                   </div>
-                                  )}
-                                </div>
+                                )}
                               </div>
-                              {index < upcomingEventsData.events.slice(0, 3).length - 1 && (
-                                <div className="border-t border-border mt-4"></div>
-                              )}
                             </div>
+                            {index < upcomingEventsData.events.slice(0, 3).length - 1 && (
+                              <div className="border-t border-border mt-4"></div>
+                            )}
+                          </div>
                         )
                       })}
 
@@ -1141,26 +1141,26 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                         </p>
                       </div>
 
-                                            <div className="space-y-4 mb-6">
-                                                <h4 className="font-medium text-sm">
-                                                    Recent Classes
-                                                </h4>
-                                                {(
-                                                    completedClassesData?.classes ||
-                                                    []
-                                                )
-                                                    .slice(0, 4)
-                                                    .map(
-                                                        (
-                                                            classItem: CompletedClass
-                                                        ) => (
-                                                            <div
-                                                                key={
-                                                                    classItem.id
-                                                                }
-                                                                className="flex items-center justify-between gap-4"
-                                                            >
-                                                                {/* <div className="flex-1 text-left">
+                      <div className="space-y-4 mb-6">
+                        <h4 className="font-medium text-sm">
+                          Recent Classes
+                        </h4>
+                        {(
+                          completedClassesData?.classes ||
+                          []
+                        )
+                          .slice(0, 4)
+                          .map(
+                            (
+                              classItem: CompletedClass
+                            ) => (
+                              <div
+                                key={
+                                  classItem.id
+                                }
+                                className="flex items-center justify-between gap-4"
+                              >
+                                {/* <div className="flex-1 text-left">
                                                                     <Link
                                                                         className=" hover:text-primary"
                                                                         href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
@@ -1178,143 +1178,143 @@ const CourseDashboard = ({ courseId }: { courseId: string }) => {
                                                                         </p>
                                                                     </Link>
                                                                 </div> */}
-                                                                <div className="flex-1 text-left">
-                                                                    {classItem.moduleId ===
-                                                                        null ||
-                                                                    classItem.chapterId ==
-                                                                        null ? (
-                                                                        <TooltipProvider>
-                                                                            <Tooltip>
-                                                                                <TooltipTrigger className="text-left font-manrope text-sm cursor-default underline-offset-[5px]">
-                                                                                    {
-                                                                                        classItem.title
-                                                                                    }
-                                                                                </TooltipTrigger>
-                                                                                <TooltipContent className="w-1/3 ml-96 text-left">
-                                                                                    The
-                                                                                    chapter
-                                                                                    isn’t
-                                                                                    included
-                                                                                    in
-                                                                                    the
-                                                                                    module
-                                                                                    yet,
-                                                                                    {(classItem.s3Link !==
-                                                                                        null ||
-                                                                                        classItem.s3Link !==
-                                                                                            'not found') &&
-                                                                                        'but you can still view the recording'}
-                                                                                </TooltipContent>
-                                                                            </Tooltip>
-                                                                        </TooltipProvider>
-                                                                    ) : (
-                                                                        <Link
-                                                                            className="w-fit font-manrope text-sm  hover:text-primary hover:underline underline-offset-[5px]"
-                                                                            href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
-                                                                        >
-                                                                            {ellipsis(
-                                                                                classItem.title,
-                                                                                35
-                                                                            )}
-                                                                        </Link>
-                                                                    )}
-                                                                    <p className="text-sm text-muted-foreground">
-                                                                        {formatDate(
-                                                                            classItem.startTime
-                                                                        )}
-                                                                    </p>
-                                                                </div>
-                                                                <Badge
-                                                                    variant="outline"
-                                                                    className={
-                                                                        classItem.s3Link ===
-                                                                            null ||
-                                                                        classItem.s3Link ===
-                                                                            'not found'
-                                                                            ? 'text-warning border-warning'
-                                                                            : classItem.s3Link &&
-                                                                              classItem.attendanceStatus ===
-                                                                                  'absent'
-                                                                            ? 'text-destructive border-destructive'
-                                                                            : 'text-success border-success'
-                                                                    }
-                                                                >
-                                                                    {classItem.s3Link ===
-                                                                        null ||
-                                                                    classItem.s3Link ===
-                                                                        'not found'
-                                                                        ? 'Processing'
-                                                                        : classItem.s3Link &&
-                                                                          classItem.attendanceStatus ===
-                                                                              'absent'
-                                                                        ? 'Absent'
-                                                                        : 'Present'}{' '}
-                                                                </Badge>
-                                                                <TooltipProvider>
-                                                                    <Tooltip>
-                                                                        <TooltipTrigger>
-                                                                            {classItem.s3Link ===
-                                                                                null ||
-                                                                            classItem.s3Link ===
-                                                                                'not found' ? (
-                                                                                <button
-                                                                                    disabled={
-                                                                                        classItem.s3Link ===
-                                                                                            null ||
-                                                                                        classItem.s3Link ===
-                                                                                            'not found'
-                                                                                    }
-                                                                                    onClick={() =>
-                                                                                        handleRecording(
-                                                                                            classItem.s3Link
-                                                                                        )
-                                                                                    }
-                                                                                    className="text-red-500  text-sm "
-                                                                                >
-                                                                                    <Video className="w-4 h-4 " />
-                                                                                </button>
-                                                                            ) : (
-                                                                                <button
-                                                                                    disabled={
-                                                                                        classItem.s3Link ===
-                                                                                            null ||
-                                                                                        classItem.s3Link ===
-                                                                                            'not found'
-                                                                                    }
-                                                                                    onClick={() =>
-                                                                                        handleRecording(
-                                                                                            classItem.s3Link
-                                                                                        )
-                                                                                    }
-                                                                                    className="text-primary  text-sm "
-                                                                                >
-                                                                                    <Video className="w-4 h-4 " />
-                                                                                </button>
-                                                                            )}
-                                                                        </TooltipTrigger>
-                                                                        <TooltipContent>
-                                                                            {classItem.s3Link ===
-                                                                                null ||
-                                                                            classItem.s3Link ===
-                                                                                'not found' ? (
-                                                                                <p>
-                                                                                    Recording
-                                                                                    not
-                                                                                    found
-                                                                                </p>
-                                                                            ) : (
-                                                                                <p>
-                                                                                    Watch
-                                                                                    Recording
-                                                                                </p>
-                                                                            )}
-                                                                        </TooltipContent>
-                                                                    </Tooltip>
-                                                                </TooltipProvider>
-                                                            </div>
-                                                        )
-                                                    )}
-                                            </div>
+                                <div className="flex-1 text-left">
+                                  {classItem.moduleId ===
+                                    null ||
+                                    classItem.chapterId ==
+                                    null ? (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger className="text-left font-manrope text-sm cursor-default underline-offset-[5px]">
+                                          {
+                                            classItem.title
+                                          }
+                                        </TooltipTrigger>
+                                        <TooltipContent className="w-1/3 ml-96 text-left">
+                                          The
+                                          chapter
+                                          isn’t
+                                          included
+                                          in
+                                          the
+                                          module
+                                          yet,
+                                          {(classItem.s3Link !==
+                                            null ||
+                                            classItem.s3Link !==
+                                            'not found') &&
+                                            'but you can still view the recording'}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  ) : (
+                                    <Link
+                                      className="w-fit font-manrope text-sm  hover:text-primary hover:underline underline-offset-[5px]"
+                                      href={`/student/course/${courseId}/modules/${classItem.moduleId}?chapterId=${classItem.chapterId}`}
+                                    >
+                                      {ellipsis(
+                                        classItem.title,
+                                        35
+                                      )}
+                                    </Link>
+                                  )}
+                                  <p className="text-sm text-muted-foreground">
+                                    {formatDate(
+                                      classItem.startTime
+                                    )}
+                                  </p>
+                                </div>
+                                <Badge
+                                  variant="outline"
+                                  className={
+                                    classItem.s3Link ===
+                                      null ||
+                                      classItem.s3Link ===
+                                      'not found'
+                                      ? 'text-warning border-warning'
+                                      : classItem.s3Link &&
+                                        classItem.attendanceStatus ===
+                                        'absent'
+                                        ? 'text-destructive border-destructive'
+                                        : 'text-success border-success'
+                                  }
+                                >
+                                  {classItem.s3Link ===
+                                    null ||
+                                    classItem.s3Link ===
+                                    'not found'
+                                    ? 'Processing'
+                                    : classItem.s3Link &&
+                                      classItem.attendanceStatus ===
+                                      'absent'
+                                      ? 'Absent'
+                                      : 'Present'}{' '}
+                                </Badge>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      {classItem.s3Link ===
+                                        null ||
+                                        classItem.s3Link ===
+                                        'not found' ? (
+                                        <button
+                                          disabled={
+                                            classItem.s3Link ===
+                                            null ||
+                                            classItem.s3Link ===
+                                            'not found'
+                                          }
+                                          onClick={() =>
+                                            handleRecording(
+                                              classItem.s3Link
+                                            )
+                                          }
+                                          className="text-red-500  text-sm "
+                                        >
+                                          <Video className="w-4 h-4 " />
+                                        </button>
+                                      ) : (
+                                        <button
+                                          disabled={
+                                            classItem.s3Link ===
+                                            null ||
+                                            classItem.s3Link ===
+                                            'not found'
+                                          }
+                                          onClick={() =>
+                                            handleRecording(
+                                              classItem.s3Link
+                                            )
+                                          }
+                                          className="text-primary  text-sm "
+                                        >
+                                          <Video className="w-4 h-4 " />
+                                        </button>
+                                      )}
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      {classItem.s3Link ===
+                                        null ||
+                                        classItem.s3Link ===
+                                        'not found' ? (
+                                        <p>
+                                          Recording
+                                          not
+                                          found
+                                        </p>
+                                      ) : (
+                                        <p>
+                                          Watch
+                                          Recording
+                                        </p>
+                                      )}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                            )
+                          )}
+                      </div>
 
                       <div className="flex justify-center">
                         <AttendanceModal classes={completedClassesData?.classes || []} />

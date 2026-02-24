@@ -27,7 +27,7 @@ import {
 } from '@remirror/react'
 import { Toolbar } from './Toolbar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import {RemirrorFormProps} from "@/components/remirror-editor/componentRemirrorType"
+import { RemirrorFormProps } from "@/components/remirror-editor/componentRemirrorType"
 
 export const RemirrorForm: React.FC<RemirrorFormProps> = ({
     description,
@@ -102,7 +102,7 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     console.warn('Failed to get HTML content:', error)
                 }
             }
-        }, [helpers, onChange])
+        }, [helpers, validateContent])
 
         return null
     }
@@ -127,9 +127,8 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
     return (
         <div className="remirror-theme">
             <div
-                className={`${
-                    bigScreen ? 'remirror-form-bigscreen' : 'border rounded'
-                }`}
+                className={`${bigScreen ? 'remirror-form-bigscreen' : 'border rounded'
+                    }`}
             >
                 <Remirror
                     manager={manager}
@@ -144,13 +143,12 @@ export const RemirrorForm: React.FC<RemirrorFormProps> = ({
                     }}
                 >
                     <div
-                        className={`${
-                            bigScreen
+                        className={`${bigScreen
                                 ? 'lg:w-[39rem] sm:w-[37rem]'
                                 : preview
-                                ? 'lg:w-[28rem] sm:w-[25rem]'
-                                : 'lg:w-[44rem] sm:w-[44rem]'
-                        }`}
+                                    ? 'lg:w-[28rem] sm:w-[25rem]'
+                                    : 'lg:w-[44rem] sm:w-[44rem]'
+                            }`}
                     >
                         {!preview && (
                             <div className="bg-white">

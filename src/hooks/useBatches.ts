@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter, usePathname, useParams } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -24,9 +24,13 @@ export default function useBatches(params: ParamsType) {
     const router = useRouter()
     const { organizationId } = useParams()
     const { user } = getUser()
+    const pathname = usePathname()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
 
     const { students } = { students: [] as StudentData[] } // placeholder if needed
+
     const { courseData, fetchCourseDetails } = getCourseData()
     const { batchData, setBatchData } = getBatchData()
     const { setStoreStudentData } = getStoreStudentData()
@@ -177,7 +181,7 @@ export default function useBatches(params: ParamsType) {
                     if (editingBatch) {
                         const parsedValue = parseInt(capEnrollment)
                         const currentStudents = editingBatch.students_enrolled || 0
-                        
+
                         if (parsedValue < currentStudents) {
                             ctx.addIssue({
                                 code: z.ZodIssueCode.custom,
@@ -223,7 +227,7 @@ export default function useBatches(params: ParamsType) {
         })
         setIsEditModalOpen(true)
         setCurrentStep(1)
-        
+
         // Trigger validation after setting the batch
         setTimeout(() => {
             form.trigger('capEnrollment')
@@ -281,7 +285,7 @@ export default function useBatches(params: ParamsType) {
     }
 
     const handleViewStudents = (batchId: string | number, batchName: string) => {
-        router.push(`/${userRole}/organizations/${organizationId}/courses/${params.courseId}/batch/${batchId}`)
+        router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/batch/${batchId}`)
     }
 
     const handleCsvFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

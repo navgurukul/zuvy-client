@@ -96,7 +96,7 @@ export function useBootcamps({
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
     const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
+    const orgId = isSuperAdmin ? organizationId : user?.orgId
     const stableLimit = useMemo(() => {
         const n = typeof limit === 'string' ? Number(limit) : limit
         return Number.isFinite(n) ? n : 10
@@ -152,7 +152,7 @@ export function useBootcamps({
                 setLoading(false)
             }
         },
-        [stableLimit, searchTerm]
+        [stableLimit, searchTerm, orgId]
     )
 
     // auto fetch on primitive inputs change

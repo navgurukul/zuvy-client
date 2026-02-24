@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
-import{LatestUpdatedCourseResponse,LatestUpdatedCourseData} from '@/hooks/hookType'
+import { LatestUpdatedCourseResponse, LatestUpdatedCourseData } from '@/hooks/hookType'
 
 export const useLatestUpdatedCourse = (courseId: string) => {
   const [latestCourseData, setLatestCourseData] = useState<LatestUpdatedCourseData | null>(null);
@@ -12,9 +12,9 @@ export const useLatestUpdatedCourse = (courseId: string) => {
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await api.get<LatestUpdatedCourseResponse>(`/tracking/latestUpdatedCourse?bootcampId=${courseId}`);
-        
+
         if (response.data.isSuccess) {
           setLatestCourseData(response.data.data);
         } else {
@@ -29,7 +29,7 @@ export const useLatestUpdatedCourse = (courseId: string) => {
     };
 
     fetchLatestUpdatedCourse();
-  }, []);
+  }, [courseId]);
 
   return {
     latestCourseData,

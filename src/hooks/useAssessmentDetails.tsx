@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/utils/axios.config';
-import{AssessmentDetails,UseAssessmentDetailsResponse} from '@/hooks/hookType'
+import { AssessmentDetails, UseAssessmentDetailsResponse } from '@/hooks/hookType'
 
 const useAssessmentDetails = (
   assessmentId: number | null,
@@ -12,7 +12,7 @@ const useAssessmentDetails = (
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAssessmentDetails = async () => {
+  const fetchAssessmentDetails = useCallback(async () => {
     if (!assessmentId || !moduleId || !bootcampId || !chapterId) {
       setAssessmentDetails(null);
       setLoading(false);
@@ -23,11 +23,11 @@ const useAssessmentDetails = (
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await api.get(
         `/Content/students/assessmentId=${assessmentId}?moduleId=${moduleId}&bootcampId=${bootcampId}&chapterId=${chapterId}`
       );
-      
+
       if (response.data.status === 'success') {
         setAssessmentDetails(response.data);
       } else {
@@ -40,11 +40,11 @@ const useAssessmentDetails = (
     } finally {
       setLoading(false);
     }
-  };
+  }, [assessmentId, moduleId, bootcampId, chapterId]);
 
   useEffect(() => {
     fetchAssessmentDetails();
-  }, [assessmentId, moduleId, bootcampId, chapterId]);
+  }, [fetchAssessmentDetails]);
 
   const refetch = () => {
     fetchAssessmentDetails();

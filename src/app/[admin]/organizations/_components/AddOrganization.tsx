@@ -213,6 +213,25 @@ import {
     Megaphone,
 } from 'lucide-react'
 
+const iconList = [
+    User,
+    Briefcase,
+    Users,
+    Code,
+    Palette,
+    Headphones,
+    CheckCircle,
+    Edit,
+    Eye,
+    UserCircle,
+    BarChart,
+    Award,
+    CalendarCheck,
+    DollarSign,
+    TrendingUp,
+    Megaphone,
+]
+
 type AddUserModalProps = {
     isEditMode: boolean;
     management: any[];
@@ -253,15 +272,15 @@ const RoleCard: React.FC<RoleCardProps> = ({
             type="button"
             onClick={() => onSelect && onSelect(id)}
             className={`w-full text-left border rounded-lg p-4 transition-colors ${selected
-                    ? 'border-primary bg-primary-light'
-                    : 'border-gray-200 hover:border-gray-300'
+                ? 'border-primary bg-primary-light'
+                : 'border-gray-200 hover:border-gray-300'
                 }`}
         >
             <div className="flex items-start gap-3">
                 <div
                     className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${selected
-                            ? 'bg-blue-100 text-primary'
-                            : 'bg-gray-100 text-foreground'
+                        ? 'bg-blue-100 text-primary'
+                        : 'bg-gray-100 text-foreground'
                         }`}
                 >
                     {icon}
@@ -375,7 +394,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                 roleId: null,
             })
         }
-    }, [isEditMode, user?.id, isOpen])
+    }, [isEditMode, user?.id, user?.name, user?.email, user?.roleId, isOpen])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -416,24 +435,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     // In add mode, button should be enabled if form is valid
     const canSubmit = isEditMode ? hasChanges : isFormValid
 
-    const iconList = [
-        User,
-        Briefcase,
-        Users,
-        Code,
-        Palette,
-        Headphones,
-        CheckCircle,
-        Edit,
-        Eye,
-        UserCircle,
-        BarChart,
-        Award,
-        CalendarCheck,
-        DollarSign,
-        TrendingUp,
-        Megaphone,
-    ]
+
 
     const getRoleIcon = useCallback((role: string) => {
         switch (role.toLowerCase()) {
