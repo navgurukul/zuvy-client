@@ -144,7 +144,7 @@ export interface UseAssessmentDetailsResponse {
 // UseAssignmentDetailsReturn
 export interface AssignmentTracking {
   id: number;
-  projectUrl: string;
+  projectUrl: string | string[];
   timeLimit: string;
   createdAt: string;
   updatedAt: string;
@@ -505,7 +505,7 @@ export interface ProjectInstruction {
 
 export interface ProjectTrackingData {
   // Add tracking data properties as needed
-  projectLink: string;
+  projectLink: string | string[];
 }
 
 export interface ProjectData {
@@ -553,7 +553,7 @@ export interface ProjectSubmissionResponse {
 }
 
 export interface UseProjectSubmissionReturn {
-  submitProject: (projectLink: string, projectId: string, moduleId: string, courseId: string) => Promise<boolean>;
+  submitProject: (projectLinks: string[], projectId: string, moduleId: string, courseId: string) => Promise<boolean>;
   isSubmitting: boolean;
   error: string | null;
 }

@@ -20,7 +20,7 @@ const SelectTrigger = React.forwardRef<
     <SelectPrimitive.Trigger
         ref={ref}
         className={cn(
-            'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
+            'flex h-10 w-full font-medium items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1',
             className
         )}
         {...props}
@@ -116,13 +116,26 @@ const SelectContentWithScrollArea = React.forwardRef<
             position={position}
             {...props}
         >
-            <ScrollArea className="h-[200px]" type="always">
+            <ScrollArea 
+                className="h-[200px]" 
+                type="always"
+                // Add these props to enable wheel and touch scrolling
+                style={{ 
+                    overflowY: 'auto',
+                    WebkitOverflowScrolling: 'touch' // For iOS smooth scrolling
+                }}
+            >
                 <SelectPrimitive.Viewport
                     className={cn(
                         'p-1',
                         position === 'popper' &&
                             'w-full min-w-[var(--radix-select-trigger-width)]'
                     )}
+                    // Add wheel event handling
+                    onWheel={(e) => {
+                        e.stopPropagation();
+                        // Let the ScrollArea handle the wheel event
+                    }}
                 >
                     {children}
                 </SelectPrimitive.Viewport>

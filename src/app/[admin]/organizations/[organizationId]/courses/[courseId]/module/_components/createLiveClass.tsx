@@ -158,10 +158,10 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
     const baseSelectClass =
         'w-full border border-input rounded-md px-3 py-2 bg-background text-gray-600 focus:outline-none focus:ring-2 focus:ring-[rgb(81,134,114)] focus:border-[rgb(81,134,114)] disabled:opacity-50 disabled:cursor-not-allowed'
 
-    // Platform options
+    // Platform options - Only Zoom
     const platformOptions = [
         { value: 'zoom', label: 'Zoom' },
-        { value: 'google-meet', label: 'Google Meet' },
+        // { value: 'google-meet', label: 'Google Meet' },
     ]
     const getHandleAllBootcampBatches = useCallback(async () => {
         if (params.courseId) {
@@ -606,6 +606,14 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                         <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
+                                        <div className={cn(
+                                            baseSelectClass,
+                                            "flex items-center"
+                                        )}>
+                                            <span>Zoom</span>
+                                        </div>
+                                    </FormControl>
+                                    {/* <FormControl>
                                         <select
                                             className={cn(
                                                 baseSelectClass,
@@ -632,7 +640,7 @@ const CreateSessionDialog: React.FC<LocalCreateSessionDialogProps> = ({
                                                 </option>
                                             ))}
                                         </select>
-                                    </FormControl>
+                                    </FormControl> */}
                                     <FormMessage />
                                 </FormItem>
                             )}

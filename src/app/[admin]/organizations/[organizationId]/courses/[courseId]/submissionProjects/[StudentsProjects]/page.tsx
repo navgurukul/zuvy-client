@@ -160,14 +160,14 @@ const Page = ({ params }: any) => {
                 { header: 'Student Name', key: 'name' },
                 { header: 'Email', key: 'email' },
                 { header: 'Batch', key: 'batchName' },
-                { header: 'Project Link', key: 'projectLink' },
+                { header: 'Project Links', key: 'projectLink' },
             ],
     
             mapData: (item: any) => ({
                 name: item.name || '',
                 email: item.email || '',
                 batchName: item.batchName || '',
-                projectLink: item.projectLink || '',
+                projectLink: formatProjectLinks(item.projectLink),
 
             }),
         })
@@ -295,3 +295,15 @@ const Page = ({ params }: any) => {
 }
 
 export default Page
+
+const formatProjectLinks = (links?: string | string[]) => {
+    if (!links) return ''
+    if (Array.isArray(links)) {
+        return links.map((link) => link.trim()).filter(Boolean).join(' | ')
+    }
+    return links
+        .split(/\r?\n+/)
+        .map((link) => link.trim())
+        .filter(Boolean)
+        .join(' | ')
+}

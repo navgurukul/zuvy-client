@@ -401,14 +401,16 @@ const EditMcqForm = ({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContentWithScrollArea>
-                                            {tags.map((tag) => (
-                                                <SelectItem
-                                                    key={tag.id}
-                                                    value={tag.tagName}
-                                                >
-                                                    {tag.tagName}
-                                                </SelectItem>
-                                            ))}
+                                            {tags
+                                                .filter((tag) => tag.id !== -1) // Filter out "All Topics"
+                                                .map((tag) => (
+                                                    <SelectItem
+                                                        key={tag.id}
+                                                        value={tag.tagName}
+                                                    >
+                                                        {tag.tagName}
+                                                    </SelectItem>
+                                                ))}
                                         </SelectContentWithScrollArea>
                                     </Select>
                                 </div>
@@ -604,11 +606,13 @@ const EditMcqForm = ({
                                 </Tooltip>
                             </TooltipProvider>
                             <DeleteConfirmationModal
+                                topicId={0}
                                 isOpen={isDeleteModalOpen}
                                 onClose={() => setDeleteModalOpen(false)}
                                 onConfirm={() =>
                                     handleRemoveVariant(activeVariantIndex)
                                 }
+                                onDeleteChapterWithSession={() => {}}
                                 modalText="Any changes to the question text or the answer choices will be lost. Are you sure?"
                                 modalText2=""
                                 input={false}

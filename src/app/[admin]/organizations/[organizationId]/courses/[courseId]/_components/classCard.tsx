@@ -257,7 +257,6 @@ function ClassCard({
                     </div>
                 )}
             </Card>
-
             <DeleteConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
@@ -267,8 +266,9 @@ function ClassCard({
                 input={false}
                 buttonText="Delete Session"
                 instructorInfo={''}
-                loading={loading}
-            />
+                loading={loading} topicId={0} onDeleteChapterWithSession={function (): void {
+                    throw new Error('Function not implemented.')
+                } }            />
         </>
     )
 }

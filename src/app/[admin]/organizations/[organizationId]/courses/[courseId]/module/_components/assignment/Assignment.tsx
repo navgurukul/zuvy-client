@@ -382,17 +382,19 @@ const AddAssignent = ({
         }
     }, [initialContent, file, defaultValue, isSaving, hasChangedAfterSave, pdfLink])
 
-    // Track editor content changes to enable Save after edit
+    // Track editor content changes based on comparison with last saved content
     useEffect(() => {
-        if (defaultValue === 'editor') {
-            const hasContent = initialContent && !isEditorContentEmpty(initialContent)
-            if (hasContent) {
-                setHasChangedAfterSave(true)
-            }
+        if (defaultValue !== 'editor') return
+
+        const hasContent = initialContent && !isEditorContentEmpty(initialContent)
+        if (!hasContent || !previousContentHash) {
+            setHasChangedAfterSave(false)
+            return
         }
-        // Do not set for PDF mode
-        // eslint-disable-next-line
-    }, [initialContent])
+
+        const currentHash = generateContentHash(initialContent)
+        setHasChangedAfterSave(currentHash !== previousContentHash)
+    }, [initialContent, previousContentHash, defaultValue])
 
     // Auto-save effect for content deletion
     useEffect(() => {
@@ -542,7 +544,7 @@ const AddAssignent = ({
     }
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-120px)]">
-            <div className="px-5">
+            <div className="max-w-4xl mx-auto py-6">
                 <>
                     {!canEdit && ( 
                         <PermissionAlert
@@ -582,7 +584,7 @@ const AddAssignent = ({
                                                             }
                                                         }}
                                                         placeholder="Untitled Assignment"
-                                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                        className="text-lg font-semibold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                                         disabled={!canEdit}
                                                         // autoFocus
                                                     />

@@ -22,7 +22,7 @@ const UnauthorizedUser = ({ userRole, roleFromPath }: { userRole?: string; roleF
                         alt="User Not Authorized"
                         width={180}
                         height={180}
-                        className="mx-auto" // Centers the image horizontally
+                        className="mx-auto" 
                     />
                     <h1 className="text-xl font-bold text-destructive mt-3">
                         Unauthorized Access

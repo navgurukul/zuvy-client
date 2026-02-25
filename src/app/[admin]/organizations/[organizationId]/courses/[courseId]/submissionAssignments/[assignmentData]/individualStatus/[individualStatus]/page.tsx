@@ -33,7 +33,7 @@ const Page = ({ params }: PageParams) => {
     const [assignmentTitle, setAssignmentTItle] = useState<string>('')
     const [initialContent, setInitialContent] = useState()
 
-    const [url, setUrl] = useState<string>('')
+    const [urls, setUrls] = useState<string[]>([])
 
     const getBootcampHandler = useCallback(async () => {
         try {
@@ -65,7 +65,7 @@ const Page = ({ params }: PageParams) => {
                             chapterTrackingDetails.user?.studentAssignmentStatus
                                 ?.projectUrl
                         if (projectUrl) {
-                            setUrl(projectUrl)
+                            setUrls(normalizeLinks(projectUrl))
                         }
 
                         setAssignmentTItle(data.title)
@@ -233,13 +233,24 @@ const Page = ({ params }: PageParams) => {
                             <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-2 uppercase tracking-wide">
                                 Assignment Link
                             </h3>
-                            <Link
-                                href={url}
-                                target="_blank"
-                                className="text-sm text-purple-900 dark:text-purple-100 hover:underline break-all font-medium"
-                            >
-                                {url}
-                            </Link>
+                            {urls.length > 0 ? (
+                                <div className="space-y-2">
+                                    {urls.map((url, index) => (
+                                        <Link
+                                            key={`${url}-${index}`}
+                                            href={url}
+                                            target="_blank"
+                                            className="block text-sm text-purple-900 dark:text-purple-100 hover:underline break-all font-medium"
+                                        >
+                                            {url}
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-purple-900 dark:text-purple-100">
+                                    N/A
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -268,3 +279,14 @@ const Page = ({ params }: PageParams) => {
 }
 
 export default Page
+
+const normalizeLinks = (links?: string | string[]): string[] => {
+    if (!links) return []
+    if (Array.isArray(links)) {
+        return links.map((link) => link.trim()).filter(Boolean)
+    }
+    return links
+        .split(/\r?\n+/)
+        .map((link) => link.trim())
+        .filter(Boolean)
+}

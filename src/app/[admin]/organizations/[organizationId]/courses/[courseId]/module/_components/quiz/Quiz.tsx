@@ -457,7 +457,7 @@ function Quiz(props: QuizProps) {
                                     <Input
                                         {...form.register('title')}
                                         placeholder="Untitled Quiz"
-                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                        className="text-lg font-semibold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                         disabled={!canEdit}
                                         onChange={(e) => {
                                             const newValue = e.target.value

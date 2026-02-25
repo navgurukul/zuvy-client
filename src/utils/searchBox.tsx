@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useSearchWithSuggestions } from "@/utils/useUniversalSearchDynamic";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Suggestion,SearchBoxProps } from "@/utils/searchType";
 
@@ -62,6 +62,7 @@ export function SearchBox(props: SearchBoxProps) {
       <Popover open={showSuggestions && filteredSuggestions.length > 0}>
         <PopoverTrigger asChild>
           <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10"/>                 
             <Input
               ref={inputRef}
               placeholder={placeholder}
@@ -76,7 +77,7 @@ export function SearchBox(props: SearchBoxProps) {
                   setShowSuggestions(true);
                 }
               }}
-              className={cn(inputWidth, "bg-background-secondary")}
+              className={cn(inputWidth, "bg-background-secondary pl-9")}
               autoComplete="off"
             />
             {searchQuery && (
@@ -101,7 +102,7 @@ export function SearchBox(props: SearchBoxProps) {
             }
           }}
         >
-       <div
+          <div
             ref={suggestionsRef}
             className="bg-white border border-border rounded-md shadow-lg overflow-hidden max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
           >
@@ -125,7 +126,7 @@ export function SearchBox(props: SearchBoxProps) {
                   suggestion.id !== "__not_found__" && setSelectedIndex(index)
                 }
               >
-                  {getSuggestionLabel(suggestion)}
+                {getSuggestionLabel(suggestion)}
               </div>
             ))}
 

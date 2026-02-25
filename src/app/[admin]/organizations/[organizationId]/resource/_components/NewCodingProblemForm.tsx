@@ -460,6 +460,22 @@ export default function NewCodingProblemForm({
     }
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+        // Check form errors
+        const formErrors = form.formState.errors;
+        const hasFormErrors = Object.keys(formErrors).length > 0;
+        
+        if (hasFormErrors) {
+            setActiveTab("details");
+            return;
+        }
+
+        // Additional manual validation
+        if (!values.title?.trim() || !values.problemStatement?.trim() || 
+            !values.constraints?.trim() || !values.difficulty || values.topics <= 0) {
+            setActiveTab("details");
+            return;
+        }
+
         // Manual test cases validation
         if (testCases.length < 2) {
             toast.error({
@@ -712,6 +728,21 @@ export default function NewCodingProblemForm({
         }
     }
 
+    // Add this function before the return statement
+    const handleButtonClick = async () => {
+        // Force form validation trigger
+        const isValid = await form.trigger();
+        
+        if (!isValid) {
+            setActiveTab("details");
+            return;
+        }
+        
+        // If form is valid, get values and call handleSubmit
+        const values = form.getValues();
+        await handleSubmit(values);
+    };
+
     return (
         <main className="flex flex-col p-3 w-full h-[600px] items-center text-foreground">
             <Form {...form}>
@@ -886,14 +917,16 @@ export default function NewCodingProblemForm({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContentWithScrollArea>
-                                                {tags.map((tag: any) => (
-                                                    <SelectItem
-                                                        key={tag.id}
-                                                        value={tag?.tagName}
-                                                    >
-                                                        {tag?.tagName}
-                                                    </SelectItem>
-                                                ))}
+                                                {tags
+                                                    .filter((tag: any) => tag.id !== -1) // Filter out "All Topics"
+                                                    .map((tag: any) => (
+                                                        <SelectItem
+                                                            key={tag.id}
+                                                            value={tag?.tagName}
+                                                        >
+                                                            {tag?.tagName}
+                                                        </SelectItem>
+                                                    ))}
                                             </SelectContentWithScrollArea>
                                         </Select>
                                         <FormMessage />
@@ -1236,9 +1269,11 @@ export default function NewCodingProblemForm({
                                         Cancel
                                     </Button>
                                     <Button
-                                        type="submit"
+                                        type="button" // Change from "submit" to "button"
+                                        onClick={handleButtonClick} // Add onClick handler
+                                        disabled={loading}
                                     >
-                                        Create Question
+                                        {loading ? 'Creating...' : 'Create Question'}
                                     </Button>
                                 </div>
                             </div>

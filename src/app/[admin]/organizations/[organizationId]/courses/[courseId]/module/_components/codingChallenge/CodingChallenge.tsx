@@ -303,7 +303,7 @@ useEffect(() => {
                                         {...form.register('title', { onChange: handleTitleChange })}
                                         value={chapterTitle}
                                         placeholder="Untitled Coding Problem"
-                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground w-full"
+                                        className="text-lg font-semibold border px-2 focus-visible:ring-0 placeholder:text-foreground w-full"
                                         disabled={!canEdit}
                                     />
                                     {!form.getValues('title') && (

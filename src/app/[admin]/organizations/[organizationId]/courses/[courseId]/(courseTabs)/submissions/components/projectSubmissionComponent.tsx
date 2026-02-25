@@ -40,12 +40,12 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
             columns: [
                 { header: 'Name', key: 'name' },
                 { header: 'Email', key: 'email' },
-                { header: 'Project Link', key: 'projectLink' },
+                { header: 'Project Links', key: 'projectLink' },
             ],
             mapData: (student: any) => ({
                 name: student.name || 'N/A',
                 email: student.email || 'N/A',
-                projectLink: student.projectLink || 'N/A',
+                projectLink: formatProjectLinks(student.projectLink),
             }),
         })
     }
@@ -159,3 +159,17 @@ const ProjectsComponent: React.FC<ProjectsComponentProps> = ({
 }
 
 export default ProjectsComponent
+
+const formatProjectLinks = (links?: string | string[]) => {
+    if (!links) return 'N/A'
+    if (Array.isArray(links)) {
+        const joined = links.map((link) => link.trim()).filter(Boolean).join(' | ')
+        return joined || 'N/A'
+    }
+    const joined = links
+        .split(/\r?\n+/)
+        .map((link) => link.trim())
+        .filter(Boolean)
+        .join(' | ')
+    return joined || 'N/A'
+}

@@ -153,14 +153,16 @@ function NewOpenEndedQuestionForm({
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContentWithScrollArea>
-                                            {tags.map((tag: Tags) => (
-                                                <SelectItem
-                                                    key={tag.id}
-                                                    value={tag?.tagName}
-                                                >
-                                                    {tag?.tagName}
-                                                </SelectItem>
-                                            ))}
+                                            {tags
+                                                .filter((tag) => tag.id !== -1) // Filter out "All Topics"
+                                                .map((tag: Tags) => (
+                                                    <SelectItem
+                                                        key={tag.id}
+                                                        value={tag?.tagName}
+                                                    >
+                                                        {tag?.tagName}
+                                                    </SelectItem>
+                                                ))}
                                         </SelectContentWithScrollArea>
                                     </Select>
                                     <FormMessage />

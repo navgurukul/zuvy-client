@@ -174,7 +174,7 @@ export async function updateProctoringData(
 
 // tab change event listener
 export async function handleVisibilityChange(
-    submitAssessment: () => void,
+    submitAssessment: (typeOfSubmission?: "studentSubmit" | "auto-submit") => void,
     isCurrentPageSubmitAssessment: () => boolean,
     assessmentSubmitId: any,
 ) {
@@ -188,7 +188,7 @@ export async function handleVisibilityChange(
 
             if (newTabChangeInstance > 3) {
                 if (isCurrentPageSubmitAssessment()) {
-                    submitAssessment();
+                    submitAssessment('auto-submit');
                     return showProctoringAlert({
                         title: 'Test Ended -> Tab will close now',
                         description: 'You have changed the tab multiple times.',
@@ -210,7 +210,7 @@ export async function handleVisibilityChange(
 // Request full screen as full screen is only allowed by user click
 
 export async function handleFullScreenChange(
-    submitAssessment: () => void,
+    submitAssessment: (typeOfSubmission?: "studentSubmit" | "auto-submit") => void,
     isCurrentPageSubmitAssessment: () => Boolean,
     setIsFullScreen: any,
     assessmentSubmitId: any,
@@ -225,7 +225,7 @@ export async function handleFullScreenChange(
           if (newFullScreenExitInstance > 3) {
             // Check if the current page is the submitAssessment page
             if (isCurrentPageSubmitAssessment()) {
-                submitAssessment()
+                submitAssessment('auto-submit')
                return showProctoringAlert({
                     title: 'Test Ended',
                     description: 'You have exited full screen multiple times.',
@@ -636,7 +636,7 @@ export const formatUpcomingItem = (item: any) => {
     const endTime = endDate.getTime();
     if (endTime > currentTime) {
       const diffTime = endTime - currentTime;
-      return formatCountdown(diffTime, "Deadline in");
+      return formatCountdown(diffTime, "Ends in");
     } else {
       return item.type?.toLowerCase() === 'assignment' ? "Past due" : "Event ended";
     }

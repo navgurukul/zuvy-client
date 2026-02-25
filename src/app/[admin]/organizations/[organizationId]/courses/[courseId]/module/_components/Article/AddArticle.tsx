@@ -526,7 +526,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
 
     return (
         <ScrollArea className="h-screen max-h-[calc(100vh-100px)]">
-            <div className="px-5 flex-1 overflow-y-auto space-y-2 pr-2">
+            <div className="max-w-4xl mx-auto py-6">
                 {!canEdit && (
                     <PermissionAlert
                         alertOpen={alertOpen}
@@ -535,10 +535,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
                 )}
                 <div className={canEdit ? '' : 'pointer-events-none opacity-60'}>
                     <div className="w-full ">
-                        {/* <div className="flex justify-between items-center"> */}
-                        {/* <div className="w-full flex justify-start align-middle items-center relative"> */}
-                        {/* <p className="text-2xl font-bold">{title}</p> */}
-                        
                         <Form {...form}>
                             <form
                                 id="myForm"
@@ -570,7 +566,7 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                                                 ? 'Untitled Article'
                                                                 : 'Untitled PDF'
                                                         }
-                                                        className="text-2xl font-bold border px-2 focus-visible:ring-0 placeholder:text-foreground"
+                                                        className="text-lg  font-semibold border px-2 focus-visible:ring-0 placeholder:text-foreground"
                                                         disabled={!canEdit}
                                                     />
                                                 </>
@@ -753,9 +749,6 @@ const AddArticle: React.FC<AddArticleProps> = ({
                                 </Form> */}
                                     {defaultValue === 'editor' && (
                                         <div className="mt-2 text-start">
-                                            {/* <p className="flex text-left text-lg mt-6 mb-2">
-                                            Description
-                                        </p> */}
                                             <RemirrorTextEditor
                                                 initialContent={initialContent}
                                                 setInitialContent={

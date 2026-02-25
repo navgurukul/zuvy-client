@@ -219,11 +219,12 @@ const CurricullumCard = (props: CurricullamCardProps) => {
                 onConfirm={() => {
                     handleDeleteModule()
                     setDeleteModalOpen(false)
-                }}
+                } }
                 modalText={DELETE_MODULE_CONFIRMATION}
                 buttonText="Delete Module"
-                input={false}
-            />
+                input={false} topicId={0} onDeleteChapterWithSession={function (): void {
+                    throw new Error('Function not implemented.')
+                } }            />
         </Reorder.Item>
     )
 }

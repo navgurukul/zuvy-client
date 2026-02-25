@@ -101,31 +101,6 @@ const CodingProblems = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isManageTopicsOpen, setIsManageTopicsOpen] = useState(false)
 
-    // // Custom hook for search with suggestions
-    // const fetchSuggestionsApi = useCallback(async (query: string) => {
-    //     const response = await api.get('/Content/allCodingQuestions', {
-    //         params: {
-    //             searchTerm: query,
-    //         },
-    //     })
-    //     let questionsData = response.data
-    //     if (response.data.data) questionsData = response.data.data
-    //     if (response.data.questions) questionsData = response.data.questions
-    //     if (!Array.isArray(questionsData)) {
-    //         console.error('Expected array but got:', typeof questionsData)
-    //         return []
-    //     }
-    //     const suggestions = questionsData.map((question: SearchSuggestion) => ({
-    //         id: question.id,
-    //         title: question.title,
-    //         difficulty: question.difficulty || 'N/A',
-    //     }))
-    //     return suggestions
-    // }, [])
-
-
-
-
     const fetchSuggestionsApi = useCallback(async (query: string) => {
     try {
         const response = await api.get('/Content/allCodingQuestions', {
@@ -162,10 +137,13 @@ const CodingProblems = () => {
         async (query: string) => {
             setIsSearchActive(!!query)
             setLastSearchQuery(query)
+            setCurrentPage(1) // ✅ Reset page when new search starts
+
+            const searchOffset = 0 // Always start from first item
 
             await filteredCodingQuestions(
                 setCodingQuestions,
-                offset,
+                searchOffset,
                 position,
                 difficulty,
                 selectedOptions,
@@ -176,8 +154,8 @@ const CodingProblems = () => {
                 ''
             )
         },
-        [offset, position, difficulty, selectedOptions]
-    )
+    [position, difficulty, selectedOptions]
+)
 
     // Modified defaultFetchApi - no automatic calls
     const defaultFetchApi = useCallback(async () => {
@@ -510,7 +488,7 @@ const CodingProblems = () => {
                             </div>
 
                             <div className="flex items-center gap-4 mb-6">
-                                <div>
+                                <div className="relative [&_input]:pl-10">
                                     <SearchBox
                                         placeholder="Search..."
                                         fetchSuggestionsApi={

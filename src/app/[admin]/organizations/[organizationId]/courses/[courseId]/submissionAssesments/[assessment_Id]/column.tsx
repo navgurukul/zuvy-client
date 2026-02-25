@@ -160,6 +160,25 @@ export const getColumns = (context: ColumnContext): ColumnDef<Task>[] => [
         },
     },
     {
+        accessorKey: 'typeOfsubmission',
+        header: () => <div className="text-center w-full">Submit Mode</div>,
+        cell: ({ row }) => {
+            const rawType =
+                (row.original as any).typeOfsubmission || (row.original as any).typeOfSubmission
+            const label =
+                rawType === 'auto-submit'
+                    ? 'Auto Submit'
+                    : rawType === 'studentSubmit'
+                    ? 'Student Submit'
+                    : 'N/A'
+            return (
+                <Badge variant="outline" className="text-black border-black">
+                    {label}
+                </Badge>
+            )
+        },
+    },
+    {
         accessorKey: 'percentage',
         header: ({ column, onSort }: any) => (
             <DataTableColumnHeader 

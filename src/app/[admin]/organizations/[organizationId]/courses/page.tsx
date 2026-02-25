@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import {
     Plus,
+    Search,
 } from 'lucide-react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
@@ -71,7 +72,7 @@ const Courses: React.FC = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
     // === Hooks ===
-    const { allCourses, refetchAllCourses } = useAllCourses(true)
+    const { allCourses, refetchAllCourses, loading: coursesLoading } = useAllCourses(true)
     const { courses, loading, totalBootcamps, totalPages, refetchBootcamps } =
         useBootcamps({
             limit: position,
@@ -220,7 +221,7 @@ const defaultFetchApi = useCallback(
             const perms = await getPermissions()
             setPermissions(perms)
         })()
-    }, [])
+    }, [coursesLoading])
 
     return (
         <>
@@ -234,7 +235,7 @@ const defaultFetchApi = useCallback(
                             {/* <div className="flex flex-col lg:flex-row justify-between items-center gap-6 w-full"> */}
                             {/* Left: Title and Subtitle */}
                             <div className="flex-1 min-w-[220px] text-start">
-                                <h1 className="font-heading  font-extrabold text-3xl text-foreground mb-2">
+                                <h1 className="font-heading text-h5 md:text-h5 text-foreground mb-0">
                                     Course Studio
                                 </h1>
                                 <p className="text-muted-foreground text-lg font-normal">
@@ -281,7 +282,7 @@ const defaultFetchApi = useCallback(
 
                         <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-start mt-5">
                             {/* Search Box with Custom Hook */}
-                            <div className="relative w-full sm:w-[500px] lg:w-[450px] mb-8">
+                            <div className="relative w-full sm:w-[500px] lg:w-[450px] mb-8 [&_input]:pl-10">
                                 <SearchBox
                                     placeholder="Search courses..."
                                     fetchSuggestionsApi={fetchSuggestionsApi}
@@ -294,8 +295,10 @@ const defaultFetchApi = useCallback(
                                     )}
                                     getSuggestionValue={(s) => s.name}
                                     inputWidth="w-full"
+                                    
                                 />
                             </div>
+
                             {/* Filter Dropdown */}
                             {/* <div className="mt-2">
                                 <Select
