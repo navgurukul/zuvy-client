@@ -24,7 +24,7 @@ export function useCreateBootcamp() {
         setCreating(true)
         setError(null)
         try {
-            const res = await api.post<CreateResponse>(`/bootcamp?organization_id=${orgId}`, courseData)
+            const res = await api.post<CreateResponse>(`/bootcamp/all/${orgId}`, courseData)
             return res.data
         } catch (err) {
             setError(err)
