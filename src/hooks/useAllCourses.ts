@@ -25,7 +25,7 @@ export function useAllCourses(initialFetch = true) {
             setLoading(true)
             const res = await api.get<CoursesResponse>(
                 // '/bootcamp?limit=10&offset=0'
-                 `/bootcamp?organization_id=${orgId}`
+                 `/bootcamp/all/${orgId}`
             )
             setAllCourses(res.data.data)
             

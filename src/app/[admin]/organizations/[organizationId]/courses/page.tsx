@@ -83,7 +83,7 @@ const Courses: React.FC = () => {
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         const response = await api.get(
-            `/bootcamp?organization_id=${orgId}&limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
+            `/bootcamp/all/${orgId}?limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
         );
         return response.data.data;
     }, []);

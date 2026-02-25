@@ -134,7 +134,7 @@ export function useBootcamps({
             const ctrl = (abortRef.current = new AbortController())
 
             try {
-                const base = `/bootcamp?organization_id=${orgId}&limit=${stableLimit}&offset=${off}`
+                const base = `/bootcamp/all/${orgId}?limit=${stableLimit}&offset=${off}`
                 const url = searchTerm
                     ? `${base}&searchTerm=${encodeURIComponent(searchTerm)}`
                     : base
