@@ -176,7 +176,7 @@ const handleGoogleSuccess = async (
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
-                    router.push('/student')
+                    router.push('/student/onboarding')
                 } else {
                     router.push(`/${userRole}/courses`)
                 }
