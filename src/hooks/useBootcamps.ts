@@ -5,7 +5,7 @@
 // import type {
 //     Course,
 //     CoursesResponse,
-// } from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+// } from '@/app/[admin]/[organization]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
 
 // type UseBootcampsArgs = {
 //     limit: number | string
@@ -75,7 +75,9 @@ import { api } from '@/utils/axios.config'
 import type {
     Course,
     CoursesResponse,
-} from '@/app/[admin]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+} from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 type UseBootcampsArgs = {
     limit: number | string
@@ -90,6 +92,11 @@ export function useBootcamps({
     offset,
     auto = true,
 }: UseBootcampsArgs) {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const stableLimit = useMemo(() => {
         const n = typeof limit === 'string' ? Number(limit) : limit
         return Number.isFinite(n) ? n : 10
@@ -127,7 +134,7 @@ export function useBootcamps({
             const ctrl = (abortRef.current = new AbortController())
 
             try {
-                const base = `/bootcamp?limit=${stableLimit}&offset=${off}`
+                const base = `/bootcamp/all/${orgId}?limit=${stableLimit}&offset=${off}`
                 const url = searchTerm
                     ? `${base}&searchTerm=${encodeURIComponent(searchTerm)}`
                     : base

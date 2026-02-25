@@ -6,7 +6,7 @@ declare global {
     }
 }
 import React, { useEffect, useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { setCookie } from 'cookies-next'
 import {
     GoogleLogin,
@@ -171,14 +171,23 @@ const handleGoogleSuccess = async (
                 const redirectedUrl = localStorage.getItem('redirectedUrl')
 
                 const userRole = response.data.user.rolesList[0]
+                const organizationId = response.data.user.orgId || null
+                const hasFilled = response.data.user.hasfilled
+
                 setCookie('secure_typeuser', JSON.stringify(btoa(userRole)))
 
                 if (redirectedUrl) {
                     router.push(redirectedUrl)
                 } else if (userRole === 'student') {
                     router.push('/student')
+                } else if ((userRole === 'admin' || userRole === 'poc') && hasFilled === false) {
+                    // Redirect admin/poc to settings if hasfilled is false
+                    router.push(`/${userRole}/organizations/${organizationId}/setting`)
+                } else if (userRole === 'super_admin') {
+                     router.push(`/${userRole}/organizations`)
                 } else {
-                    router.push(`/${userRole}/courses`)
+                    // Default redirect for other roles or when hasfilled is true
+                    router.push(`/${userRole}/organizations/${organizationId}/courses`) 
                 }
             }
         } catch (err: any) {
@@ -204,14 +213,21 @@ const handleGoogleSuccess = async (
         })
     }
 
+
     useEffect(() => {
         // Handle existing token logic and redirects
         const urlParams = new URLSearchParams(window.location.search)
         let redirectedUrl = localStorage.getItem('redirectedUrl')
 
+        console.log('Initial redirectedUrl from localStorage:', redirectedUrl)
+        console.log('Current URL:', window.location.href)
         if (window.location.href.includes('route')) {
+        // if (window.location.href) {
+            console.log('URL has route param')
             const route = urlParams.get('route')
+            console.log('Route param from URL:', route)
             redirectedUrl = route ?? ''
+            console.log('redirectedUrl from route param:', redirectedUrl)
             localStorage.setItem('redirectedUrl', redirectedUrl)
             setCookie('redirectedUrl', JSON.stringify(btoa(redirectedUrl)))
         }

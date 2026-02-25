@@ -3,11 +3,15 @@
 import { buttonVariants } from '@/components/ui/button'
 import { getUser } from '@/store/store';
 import Link from 'next/link'
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 
 const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
+        const { organizationId } = useParams()
         const { user } = getUser()
         const role = user.rolesList[0]
+        const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+        const isSuperAdmin = userRole === 'super_admin';
+        const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     return (
         <main className="grid min-h-screen place-items-center px-6 py-20 sm:py-32 lg:px-6 ">
@@ -23,7 +27,7 @@ const Notfound = ({ error, reset }: { error: Error; reset: () => void }) => {
                 </p>
                 <div className="mt-10 flex items-center justify-center gap-x-6">
                     <Link
-                        href={role === 'student' ? '/student':`/${role}/courses`}
+                        href={role === 'student' ? '/student':`/${role}/organizations/${orgId}/courses`}
                         className={buttonVariants({ variant: 'outline' })}
                     >
                         Home

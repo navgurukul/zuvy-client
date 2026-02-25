@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/utils/axios.config';
 import { toast } from '@/components/ui/use-toast';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
 import { BootcampSettingsData, UseBootcampSettingsReturn } from './hookType';
+import { getUser } from '@/store/store';
 
 const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
   const [bootcampSettings, setBootcampSettings] = useState<BootcampSettingsData | null>(null);
@@ -11,6 +12,11 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
   const [error, setError] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const router = useRouter();
+  const { organizationId } = useParams()
+  const { user } = getUser()
+  const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+  const isSuperAdmin = userRole === 'super_admin';
+  const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
   const fetchData = async () => {
     if (!courseId) {
@@ -34,7 +40,7 @@ const useBootcampSettings = (courseId: string): UseBootcampSettingsReturn => {
       
       if (axios.isAxiosError(err)) {
         if (err?.response?.data.message === 'Bootcamp not found for the provided id.') {
-          router.push('/admin/courses');
+          router.push(`/${userRole}/organizations/${orgId}/courses`);
           toast.info({
             title: 'Caution',
             description: 'The Course has been deleted by another Admin',

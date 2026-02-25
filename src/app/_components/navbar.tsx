@@ -10,7 +10,7 @@ import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { useLazyLoadedStudentData } from '@/store/store'
+import { getUser, useLazyLoadedStudentData } from '@/store/store'
 import { Button } from '@/components/ui/button'
 import { Logout } from '@/utils/logout'
 import { useThemeStore } from '@/store/store'
@@ -19,13 +19,19 @@ import ProfileDropDown from '@/components/ProfileDropDown'
 import QuestionBankDropdown from '@/app/_components/QuestionBankDropdown'
 import { getPermissions } from '@/lib/GetPermissions'
 import { Spinner } from '@/components/ui/spinner'
+import OrganizationDropdown from './organizationDropdown'
+import { Badge } from '@/components/ui/badge'
 
 //Test
 const Navbar = () => {
     const { studentData } = useLazyLoadedStudentData()
     const pathname = usePathname()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
     const role = pathname.split('/')[1]
-    // const role = user.rolesList[0]
+    const orgId = pathname.split('/')[3]
+    const inOrg = pathname.split('/').length > 3
     const [permissions, setPermissions] = useState<Record<string, boolean>>({})
     const { isDark, toggleTheme } = useThemeStore()
     const [showLogoutDialog, setShowLogoutDialog] = useState(false)
@@ -40,13 +46,23 @@ const Navbar = () => {
         await Logout()
     }
 
-    const routes = [
+    const superAdminRoutes = [
         {
-            name: 'Course Studio',
-            href: `/${role}/courses`,
+            name: 'Organizations',
+            href: `/${role}/organizations`,
             icon: Layers,
             active: (pathname: string) =>
-                pathname === `/${role}/courses` || pathname.startsWith(`/${role}/courses/`),
+                pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
+        },
+    ]
+
+    const adminRoutes = [
+        {
+            name: 'Course Studio',
+            href: `/${role}/organizations/${orgId}/courses`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/organizations/${orgId}/courses` || pathname.startsWith(`/${role}/organizations/${orgId}/courses/`),
         },
         {
             name: 'Question Bank',
@@ -56,11 +72,20 @@ const Navbar = () => {
         },
         {
             name: 'Roles and Permissions',
-            href: `/${role}/settings`,
+            href: `/${role}/organizations/${orgId}/settings`,
             icon: Settings,
-            active: `/${role}/settings`,
+            active: `/${role}/organizations/${orgId}/settings`,
+        },
+        {
+            name: 'All Organizations',
+            href: `/${role}/organizations`,
+            icon: Layers,
+            active: (pathname: string) =>
+                pathname === `/${role}/organizations`,
         },
     ]
+
+    const routes = inOrg ? adminRoutes : superAdminRoutes;
 
     useEffect(() => {
         let isMounted = true;
@@ -93,11 +118,13 @@ const Navbar = () => {
     return (
         <nav className="bg-background fixed top-0 left-0 right-0 z-40 border-b shadow-sm">
             <div className="flex h-16 items-center justify-between px-6">
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
                     <Link href={`/${role}/courses`} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
+
+                    <OrganizationDropdown orgId={orgId} />
 
                     {/* Navigation Items */}
                     <nav className="flex items-center space-x-1">
@@ -119,7 +146,7 @@ const Navbar = () => {
 
                             return (
                                 <>
-                                    {item.name !== 'Question Bank' && (
+                                    {(!isSuperAdmin  && item.name === 'All Organizations' ) || item.name !== 'Question Bank' && (
                                         <Link
                                             key={item.name}
                                             href={item.href}
@@ -145,6 +172,37 @@ const Navbar = () => {
 
                 {/* Right - Theme Switch and Avatar with Dropdown */}
                 <div className="flex items-center gap-2 sm:gap-3 text-left">
+
+                    {/* Role Badge */}
+                    {/* {studentData?.rolesList?.[0] && (
+                        <div className="hidden sm:flex items-center px-4 py-1 bg-violet-50 text-violet-700 border-violet-200 rounded-full text-sm font-medium border border-primary/20">
+                            <span className="capitalize">{studentData.rolesList[0]}</span>
+                        </div>
+                    )} */}
+                    <Badge
+                        // variant="yellow"
+                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200"
+                    >
+                        {role}
+                    </Badge>
+
+                    {/* Setting Tab - Only for Admin and POC */}
+                    {/* {studentData?.rolesList?.[0] === 'poc' && ( */}
+                    {inOrg && (studentData?.rolesList?.[0] === 'admin' || studentData?.rolesList?.[0] === 'poc') && (
+                        <Link
+                            href={`/${role}/organizations/${orgId}/setting`}
+                            className={cn(
+                                'flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200',
+                                pathname === `/${role}/organizations/${orgId}/setting`
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                            )}
+                        >
+                            <Settings className="h-4 w-4" />
+                            <span>Setting</span>
+                        </Link>
+                    )}
+                    
                     {/* <Button
                         variant="ghost"
                         size="sm"

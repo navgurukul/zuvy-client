@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import axios from 'axios'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -11,18 +11,20 @@ import { getUser, getDeleteStudentStore, getStoreStudentData } from '@/store/sto
 import { toast } from '@/components/ui/use-toast'
 import useDebounce from '@/hooks/useDebounce'
 import { POSITION } from '@/utils/constant'
-import { useStudentData } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
-import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
-import type { StudentDataPage } from '@/app/[admin]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
-import { PermissionsType } from '@/app/[admin]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
-import { createColumns } from '@/app/[admin]/courses/[courseId]/batch/[batchId]/columns'
+import { useStudentData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/useStudentData'
+import type { StudentDataState, BatchOption, SelecteItem } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/CourseBatchesType'
+import type { StudentDataPage } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/studentComponentTypes'
+import { PermissionsType } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/batches/courseBatchesType'
+import { createColumns } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/batch/[batchId]/columns'
 
 export default function useBatchDetail(params: { courseId: string; batchId: string }) {
     const router = useRouter()
     const searchParams = useSearchParams()
+    const { organizationId } = useParams()
     const { user } = getUser()
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const location = usePathname()
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
 
     const { students, setStudents } = useStudentData(params.courseId)
     const { studentsData, setStoreStudentData } = getStoreStudentData()
@@ -102,14 +104,14 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
             } catch (error: any) {
                 if (axios.isAxiosError(error)) {
                     if (error?.response?.data.message === 'Bootcamp not found!') {
-                        router.push(`/${userRole}/courses`)
+                        router.push(`/${userRole}/organizations/${orgId}/courses`)
                         toast.info({ title: 'Caution', description: 'The Course has been deleted by another Admin' })
                     }
                 }
                 console.error('Error fetching batches', error)
             }
         },
-        [router, userRole]
+        [router, userRole, orgId]
     )
 
     useEffect(() => {
@@ -147,7 +149,7 @@ export default function useBatchDetail(params: { courseId: string; batchId: stri
             await api.delete(`/batch/${params.batchId}`)
             toast.success({ title: 'Batch Deleted Successfully' })
             setDeleteModalOpen(false)
-            router.push(`/${userRole}/courses/${params.courseId}/batches`)
+            router.push(`/${userRole}/organizations/${orgId}/courses/${params.courseId}/batches`)
         } catch (error) {
             toast.error({ title: 'Batch not Deleted' })
         }
