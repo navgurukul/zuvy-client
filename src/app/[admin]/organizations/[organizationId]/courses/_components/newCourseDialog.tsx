@@ -26,6 +26,8 @@ import {
     CourseData,
 } from '@/app/[admin]/organizations/[organizationId]/courses/_components/courseComponentType'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 const courseSchema = z.object({
     name: z.string().min(1, 'Course name is required').max(50, 'Course name cannot exceed 50 characters'),
@@ -46,6 +48,11 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
     handleCreateCourse,
     isDialogOpen,
 }) => {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({})
 
     const [collaborator, setCollaborator] = useState('')
@@ -276,7 +283,8 @@ const NewCourseDialog: React.FC<newCourseDialogProps> = ({
             const payload: any = {
                 name: newCourseName.trim(),
                 description: newCourseDescription.trim(),
-                duration: parseInt(newCourseDuration.trim())
+                duration: parseInt(newCourseDuration.trim()),
+                organizationId: orgId,
             }
 
             await handleCreateCourse(payload)
