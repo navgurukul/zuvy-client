@@ -1,27 +1,14 @@
+'use client';
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { AlertCircle, Clock, Moon, Sun, LogOut } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import OnboardingStep1Component from '@/app/student/_components/onboarding/OnboardingStep1';
-import OnboardingStep2Component from '@/app/student/_components/onboarding/OnboardingStep2';
-import OnboardingStep3Component from '@/app/student/_components/onboarding/OnboardingStep3';
-import OnboardingStep4Component from '@/app/student/_components/onboarding/OnboardingStep4';
+import OnboardingStep1Component from '@/app/student/onboarding/OnboardingStep1';
+import OnboardingStep2Component from '@/app/student/onboarding/OnboardingStep2';
+import OnboardingStep3Component from '@/app/student/onboarding/OnboardingStep3';
+import OnboardingStep4Component from '@/app/student/onboarding/OnboardingStep4';
 import { useOnboardingStorage } from '@/hooks/use-onboarding';
 import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, OnboardingStep3 as Step3Type, OnboardingStep4 as Step4Type } from '@/lib/onboarding.types';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '@/lib/ThemeProvider';
-import { mockStudent } from '@/lib/mockData';
+import { useRouter } from 'next/navigation';
 
 interface OnboardingPageProps {
   userEmail?: string;
@@ -29,12 +16,7 @@ interface OnboardingPageProps {
 }
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', userFullName = '' }) => {
-  const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
-  
-  const handleLogout = () => {
-    navigate('/');
-  };
+  const router = useRouter();
 
   const {
     onboardingData,
@@ -49,24 +31,16 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
 
   const [timeRemaining, setTimeRemaining] = useState(120); // 2 minutes in seconds
   const [showAlert, setShowAlert] = useState(false);
-  const [showAutoSaved, setShowAutoSaved] = useState(false);
   const [autofillMethod, setAutofillMethod] = useState<'resume' | 'linkedin'>('resume');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   
   // Track current step data to auto-save
   const [currentStepData, setCurrentStepData] = useState<any>(null);
 
-  // Function to trigger auto-saved indicator
-  const triggerAutoSaved = () => {
-    setShowAutoSaved(true);
-    setTimeout(() => setShowAutoSaved(false), 2000);
-  };
-  
   // Auto-save current step data
   const handleAutoSave = (stepNumber: number, data: any) => {
     setCurrentStepData(data);
     updateStepData(stepNumber, data);
-    triggerAutoSaved();
   };
 
   // Timer effect
@@ -110,7 +84,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     completeOnboarding();
     // Redirect to dashboard after a short delay
     setTimeout(() => {
-      navigate('/dashboard');
+      router.push('/student');
     }, 500);
   };
 
@@ -121,7 +95,7 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
     } else {
       // On final step, mark as skipped and go to dashboard
       skipOnboarding();
-      navigate('/dashboard');
+      router.push('/student');
     }
   };
 
@@ -168,72 +142,8 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ userEmail = '', 
   const progressPercentage = (currentStep / 4) * 100;
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-muted">
-      {/* Header */}
-      <header className="w-full h-16 px-6 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/50 shadow-4dp z-50 flex-shrink-0">
-        {/* Left - Logo */}
-        <div className="flex items-center">
-          <img
-            src={theme === 'dark'
-              ? "/zuvy-logo-horizontal-dark.png"
-              : "/zuvy-logo-horizontal.png"
-            }
-            alt="Zuvy"
-            className="h-10"
-          />
-        </div>
-
-        {/* Right - Auto Saved, Theme Switch and Avatar */}
-        <div className="flex items-center gap-4">
-          {showAutoSaved && (
-            <span className="text-sm text-muted-foreground italic">Auto Saved</span>
-          )}
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleTheme}
-            className="w-9 h-9 p-0"
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-          </Button>
-
-          {/* User Menu Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="w-9 h-9 p-0 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                    {(userFullName || mockStudent.name)
-                      .split(' ')
-                      .map(n => n[0])
-                      .join('')
-                      .toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="px-2 py-1.5 text-sm">
-                <p className="font-semibold text-foreground">{userFullName || mockStudent.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{userEmail || mockStudent.email}</p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-
-      <div className="flex-1 overflow-y-auto">
+    <div className="min-h-full flex flex-col bg-gradient-to-br from-background via-background to-muted">
+      <div className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-8">
