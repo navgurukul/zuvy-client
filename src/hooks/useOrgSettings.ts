@@ -28,8 +28,8 @@ export type OrgUpdatePayload = Partial<{
     pocName: string
     pocEmail: string
     isManagedByZuvy: boolean
-    zuvyPocEmail: string
-    zuvyPocName: string
+    zuvyPocEmail: string | null
+    zuvyPocName: string | null
 }>
 
 const useOrgSettings = () => {
