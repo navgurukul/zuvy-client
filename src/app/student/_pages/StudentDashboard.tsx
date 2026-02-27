@@ -16,6 +16,9 @@ import Image from "next/image";
 import { useIsStudentEnrolledInOneCourseStore, useLazyLoadedStudentData, useThemeStore } from '@/store/store';
 import TruncatedDescription from "@/app/student/_components/TruncatedDescription";
 import { useStudentData } from "@/hooks/useStudentData";
+import { useFetchGlobalCourses } from "@/hooks/useFetchGlobalCourses";
+import useEnrollCourse from "@/hooks/useEnrollCourse";
+import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
 import {UpcomingEvent,Bootcamp,TopicItem } from '@/app/student/_pages/pageStudentType'
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
@@ -25,6 +28,8 @@ import {StudentDashboardSkeleton, CarouselSkeleton} from "@/app/student/_compone
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
   const { studentData, loading, error, refetch } = useStudentData();
+  const { globalCourse, loading: globalLoading, error: globalError, refetch: refetchGlobalCourses } = useFetchGlobalCourses();
+  const { enrollCourse, isEnrolling } = useEnrollCourse();
   const { isDark } = useThemeStore()
   
   const { upcomingEventsData, loading: eventsLoading, error: eventsError } = useUpcomingEvents();
@@ -43,6 +48,24 @@ const StudentDashboard = () => {
       router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}`);
     }
   }, [isStudentEnroledInOneBootcamp]);
+
+  const handleEnrollCourse = async (courseId: number) => {
+    const success = await enrollCourse(courseId);
+    if (success) {
+      toast({
+        title: "Enrollment Successful!",
+        description: "You have successfully enrolled in the course.",
+      });
+      refetchGlobalCourses();
+      refetch();
+    } else {
+      toast({
+        title: "Enrollment Failed",
+        description: "Failed to enroll in the course. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getActionButton = (bootcamp: Bootcamp) => {
     if (filter === 'completed') {
@@ -119,7 +142,6 @@ const StudentDashboard = () => {
     );
   }
 
-  console.log('studentData:', studentProfile);
 
   return (
     <div className="mb-12">
@@ -179,6 +201,89 @@ const StudentDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+
+        {/* Global Courses Section */}
+        {globalCourse && Object.keys(globalCourse).length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-heading text-left font-semibold mb-6">Global Courses</h2>
+          
+          {/* Global Course Cards */}
+          {globalLoading ? (
+            <CarouselSkeleton />
+          ) : globalError ? (
+            <Card className="w-full shadow-4dp">
+              <CardContent className="p-6 text-center">
+                <p className="text-destructive mb-4">{globalError}</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              <Card key={globalCourse.id} className="w-full shadow-4dp hover:shadow-8dp transition-shadow duration-200 dark:bg-card-light bg-card">
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row gap-6">
+                    {/* Course Image */}
+                    <div className="mt-2">
+                      <Image
+                        src={globalCourse.coverImage || (isDark ? '/zuvy-logo-horizontal-dark (1).png' : '/zuvy-logo-horizontal (1).png')}
+                        alt={globalCourse.name}
+                        width={128}
+                        height={128}
+                        className="rounded-lg object-contain"
+                      />
+                    </div>
+
+                    {/* Course Info */}
+                    <div className="flex-1">
+                      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div className="flex-1 text-left">
+                          <h3 className="text-xl font-heading font-semibold mb-2">
+                            {globalCourse.name}
+                          </h3>
+                          <TruncatedDescription 
+                            text={globalCourse.description || ''}
+                            maxLength={150}
+                            className="text-muted-foreground mb-3"
+                          />
+                          <div className="flex items-center gap-2 mb-4">
+                            <span className="text-sm text-muted-foreground capitalize">
+                              Instructor: {globalCourse.instructorDetails?.name || 'N/A'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action Button - Desktop */}
+                        <div className="hidden md:flex flex-shrink-0">
+                          <Button 
+                            className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                            onClick={() => handleEnrollCourse(globalCourse.id)}
+                            disabled={isEnrolling}
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Action Button - Mobile */}
+                      <div className="md:hidden mt-4">
+                        <Button 
+                          className="w-full md:w-auto bg-primary text-primary-foreground hover:bg-primary-dark" 
+                          onClick={() => handleEnrollCourse(globalCourse.id)}
+                          disabled={isEnrolling}
+                        >
+                          <Play className="w-4 h-4 mr-2" />
+                          {isEnrolling ? 'Enrolling...' : 'Enroll Now'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+        )}
 
         {/* My Courses Section */}
         <div className="mb-6">
