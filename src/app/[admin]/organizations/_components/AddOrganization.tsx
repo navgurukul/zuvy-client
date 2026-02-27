@@ -188,7 +188,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useRoles } from '@/hooks/useRoles'
 import { api } from '@/utils/axios.config'
 import { toast } from '@/components/ui/use-toast'
 import {
@@ -212,6 +211,7 @@ import {
     TrendingUp,
     Megaphone,
 } from 'lucide-react'
+import useOrgSettings from '@/hooks/useOrgSettings'
 
 type AddUserModalProps = {
     isEditMode: boolean;
@@ -253,15 +253,15 @@ const RoleCard: React.FC<RoleCardProps> = ({
             type="button"
             onClick={() => onSelect && onSelect(id)}
             className={`w-full text-left border rounded-lg p-4 transition-colors ${selected
-                    ? 'border-primary bg-primary-light'
-                    : 'border-gray-200 hover:border-gray-300'
+                ? 'border-primary bg-primary-light'
+                : 'border-gray-200 hover:border-gray-300'
                 }`}
         >
             <div className="flex items-start gap-3">
                 <div
                     className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${selected
-                            ? 'bg-blue-100 text-primary'
-                            : 'bg-gray-100 text-foreground'
+                        ? 'bg-blue-100 text-primary'
+                        : 'bg-gray-100 text-foreground'
                         }`}
                 >
                     {icon}
@@ -286,7 +286,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
     onClose,
     isOpen = false,
 }) => {
-    const { roles, loading: rolesLoading } = useRoles()
+    const { fetchOrgById, uploadOrgLogo, completeOrgSetup, updateOrgById } = useOrgSettings()
     const [pendingUserRole, setPendingUserRole] = useState<number | null>(null)
     const [freshUserData, setFreshUserData] = useState<any>(null)
     const [isFetchingFreshData, setIsFetchingFreshData] = useState(false)
@@ -304,52 +304,57 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
         roleId: null,
     })
 
-    // Fetch fresh user data when entering edit mode
+    // Fetch fresh organization data when entering edit mode
     useEffect(() => {
         if (isEditMode && user?.id && isOpen) {
-            const fetchFreshUserData = async () => {
+            const fetchFreshOrgData = async () => {
                 setIsFetchingFreshData(true)
                 try {
-                    const response = await api.get(`/users/getUser/${user.id}`)
-                    setFreshUserData(response.data)
-                    const fetchedName = response.data.name || ''
-                    const fetchedEmail = response.data.email || ''
-                    const fetchedRoleId = response.data.roleId || null
+                    const data = await fetchOrgById(user.id)
+                    setFreshUserData(data)
+                    const fetchedOrgName = data.title || ''
+                    const fetchedPocName = data.pocName || ''
+                    const fetchedPocEmail = data.pocEmail || ''
+                    const fetchedAssigneeName = data.zuvyPocName || ''
+                    const fetchedAssigneeEmail = data.zuvyPocEmail || ''
+                    // Mapping isManagedByZuvy to role id (1: Self, 2: Zuvy)
+                    const fetchedRoleId = data.isManagedByZuvy ? 2 : 1
 
                     setNewUser({
-                        orgName: '',
-                        name: fetchedName,
-                        email: fetchedEmail,
-                        assigneeName: '',
-                        assigneeEmail: '',
+                        orgName: fetchedOrgName,
+                        name: fetchedPocName,
+                        email: fetchedPocEmail,
+                        assigneeName: fetchedAssigneeName,
+                        assigneeEmail: fetchedAssigneeEmail,
                     })
                     setPendingUserRole(fetchedRoleId)
-                    // Store original values
+                    // Store original values for change detection
                     setOriginalUser({
-                        name: fetchedName,
-                        email: fetchedEmail,
+                        name: fetchedPocName,
+                        email: fetchedPocEmail,
                         roleId: fetchedRoleId,
                     })
                 } catch (error) {
-                    // Fallback to passed user data if fetch fails
-                    console.error('Error fetching fresh user data:', error)
-                    const fallbackName = user.name || ''
-                    const fallbackEmail = user.email || ''
-                    const fallbackRoleId = user.roleId || null
+                    console.error('Error fetching fresh organization data:', error)
+                    const fallbackOrgName = user.name || ''
+                    const fallbackPocName = user.poc?.name || ''
+                    const fallbackPocEmail = user.poc?.email || ''
+                    const fallbackAssigneeName = user.assignee?.name || ''
+                    const fallbackAssigneeEmail = user.assignee?.email || ''
+                    const fallbackRoleId = user.managementType === 'Zuvy Managed' ? 2 : 1
 
                     setNewUser({
-                        orgName: '',
-                        name: fallbackName,
-                        email: fallbackEmail,
-                        assigneeName: '',
-                        assigneeEmail: '',
+                        orgName: fallbackOrgName,
+                        name: fallbackPocName,
+                        email: fallbackPocEmail,
+                        assigneeName: fallbackAssigneeName,
+                        assigneeEmail: fallbackAssigneeEmail,
                     })
 
                     setPendingUserRole(fallbackRoleId)
-                    // Store original values
                     setOriginalUser({
-                        name: fallbackName,
-                        email: fallbackEmail,
+                        name: fallbackPocName,
+                        email: fallbackPocEmail,
                         roleId: fallbackRoleId,
                     })
                 } finally {
@@ -357,7 +362,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                 }
             }
 
-            fetchFreshUserData()
+            fetchFreshOrgData()
         } else if (!isEditMode && isOpen) {
             // Reset form for add mode
             setNewUser({
@@ -375,7 +380,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                 roleId: null,
             })
         }
-    }, [isEditMode, user?.id, isOpen])
+    }, [isEditMode, user?.id, isOpen, fetchOrgById])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -384,7 +389,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
     // Check if form is valid (for add mode)
     const isZuvyManaged =
-        management.find((m) => m.id === pendingUserRole)?.name === 'Zuvy Managed'
+        pendingUserRole === 2 // Zuvy Managed has ID 2 in the management list in page.tsx
 
     useEffect(() => {
         if (!isZuvyManaged) {
@@ -407,9 +412,12 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
     // Check if there are changes (for edit mode)
     const hasChanges = isEditMode && (
+        newUser.orgName.trim() !== (freshUserData?.title?.trim() || '') ||
         newUser.name.trim() !== originalUser.name.trim() ||
         newUser.email.trim() !== originalUser.email.trim() ||
-        pendingUserRole !== originalUser.roleId
+        pendingUserRole !== originalUser.roleId ||
+        newUser.assigneeName.trim() !== (freshUserData?.zuvyPocName?.trim() || '') ||
+        newUser.assigneeEmail.trim() !== (freshUserData?.zuvyPocEmail?.trim() || '')
     )
 
     // In edit mode, button should be enabled only if there are changes
@@ -455,11 +463,6 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
     const handleAddUser = async () => {
         if (!canSubmit) return
-        const selectedManagement = management.find(
-            (m) => m.id === pendingUserRole
-        )
-
-        const isManagedByZuvy = selectedManagement?.name === 'Zuvy Managed'
 
         const payload = {
             title: newUser.orgName.trim(),
@@ -467,9 +470,9 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
             logoUrl: '',
             pocName: newUser.name.trim(),
             pocEmail: newUser.email.trim(),
-            isManagedByZuvy,
-            zuvyPocName: isManagedByZuvy ? newUser.assigneeName.trim() : null,
-            zuvyPocEmail: isManagedByZuvy ? newUser.assigneeEmail.trim() : null,
+            isManagedByZuvy: isZuvyManaged,
+            zuvyPocName: isZuvyManaged ? newUser.assigneeName.trim() : null,
+            zuvyPocEmail: isZuvyManaged ? newUser.assigneeEmail.trim() : null,
         }
 
         try {
@@ -508,16 +511,19 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
 
 
     const handleEditUser = async () => {
-        if (!canSubmit) return
+        if (!canSubmit || !user?.id) return
 
         const payload = {
-            name: newUser.name.trim(),
-            email: newUser.email.trim(),
-            roleId: pendingUserRole,
+            title: newUser.orgName.trim(),
+            pocName: newUser.name.trim(),
+            pocEmail: newUser.email.trim(),
+            isManagedByZuvy: isZuvyManaged,
+            zuvyPocName: isZuvyManaged ? newUser.assigneeName.trim() : null,
+            zuvyPocEmail: isZuvyManaged ? newUser.assigneeEmail.trim() : null,
         }
 
         try {
-            const response = await api.put(`/users/updateUser/${user.id}`, payload)
+            const response = await updateOrgById(user.id, payload)
             if (response.status === 200) {
                 // Update the cached fresh data immediately
                 setFreshUserData({
@@ -526,21 +532,21 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                 })
                 // Update original values after successful save
                 setOriginalUser({
-                    name: payload.name,
-                    email: payload.email,
-                    roleId: payload.roleId,
+                    name: payload.pocName,
+                    email: payload.pocEmail,
+                    roleId: isZuvyManaged ? 2 : 1,
                 })
                 toast.success({
-                    title: 'User updated successfully',
-                    description: 'The user details have been updated.',
+                    title: 'Organisation updated successfully',
+                    description: 'The organisation details have been updated.',
                 })
             }
         } catch (error: any) {
             toast.error({
-                title: 'Error updating user',
-                description: error?.response?.data?.message || 'There was an issue updating the user details.',
+                title: 'Error updating organisation',
+                description: error?.response?.data?.message || 'There was an issue updating the organisation details.',
             })
-            console.error('Error updating user:', error)
+            console.error('Error updating organisation:', error)
             return
         }
         refetchUsers && refetchUsers()

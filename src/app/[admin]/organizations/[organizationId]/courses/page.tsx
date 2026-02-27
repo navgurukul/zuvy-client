@@ -83,6 +83,7 @@ const Courses: React.FC = () => {
     const { createBootcamp, creating } = useCreateBootcamp()
 
     const fetchSuggestionsApi = useCallback(async (query: string) => {
+        if(orgId === undefined) return []
         const response = await api.get(
             `/bootcamp/all/${orgId}?limit=10&offset=0&searchTerm=${encodeURIComponent(query)}`
         );

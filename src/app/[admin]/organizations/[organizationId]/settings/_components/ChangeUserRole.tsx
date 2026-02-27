@@ -10,6 +10,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/components/ui/use-toast';
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 // Role Cell Component
 
@@ -21,6 +23,11 @@ type roleCellProps = {
 };
 
 export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId, onRoleUpdate }: roleCellProps & { userId: number; roleId: number }) => {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [isUpdating, setIsUpdating] = useState(false)
     const [originalRole, setOriginalRole] = useState(role)
 
@@ -43,7 +50,8 @@ export const ChangeUserRole = ({ role, roles, rolesLoading, userId, roleId, onRo
 
             await api.post('/users/users/assign-role', {
                 userId: userId,
-                roleId: selectedRole.id
+                roleId: selectedRole.id,
+                orgId: orgId
             })
 
             // Update original role after successful save

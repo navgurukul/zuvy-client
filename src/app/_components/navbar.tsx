@@ -21,6 +21,7 @@ import { getPermissions } from '@/lib/GetPermissions'
 import { Spinner } from '@/components/ui/spinner'
 import OrganizationDropdown from './organizationDropdown'
 import { Badge } from '@/components/ui/badge'
+import { formattedRole } from '@/lib/utils'
 
 //Test
 const Navbar = () => {
@@ -183,7 +184,7 @@ const Navbar = () => {
                         // variant="yellow"
                         className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200"
                     >
-                        {role}
+                        {formattedRole(role)}
                     </Badge>
 
                     {/* Setting Tab - Only for Admin and POC */}

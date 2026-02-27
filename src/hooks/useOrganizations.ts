@@ -64,9 +64,9 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
             if (filterType) queryParams.append('filterType', filterType) // Add filter parameter
 
             const url = `/org/getAllOrgs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-            
+
             const response = await api.get<ApiResponse>(url)
-            
+
             if (response.data.status === 'success') {
                 setOrganizations(response.data.data)
                 setTotalCount(response.data.meta.total)
