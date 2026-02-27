@@ -121,7 +121,7 @@ const Navbar = () => {
             <div className="flex h-16 items-center justify-between px-6">
                 <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
-                    <Link href={`/${role}/courses`} className="flex items-center space-x-3">
+                    <Link href={`/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
 

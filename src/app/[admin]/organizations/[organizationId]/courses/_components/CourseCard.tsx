@@ -43,7 +43,7 @@ const CourseCard = ({
                     {/* Organization Code Badge */}
                     {/* {(course as any).organizationCode && ( */}
                         <div className="flex items-center px-2 bg-primary/10 text-primary rounded-full font-medium border border-primary/20 shrink-0">
-                            <span className='text-[14px]'>AFE</span>
+                            <span className='text-[14px]'>{course.code}</span>
                         </div>
                     {/* )} */}
                 </div>
