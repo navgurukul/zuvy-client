@@ -775,3 +775,59 @@ export interface UseCreateOpenEndedQuestionReturn {
   loading: boolean;
   error: string | null;
 }
+
+
+// useFetchGlobalCourses
+export interface GlobalCourseInstructorDetails {
+  id: number;
+  name: string;
+  profilePicture: string | null;
+}
+
+export interface GlobalCourseData {
+  id: number;
+  name: string;
+  description: string;
+  collaborator: string;
+  coverImage: string;
+  bootcampTopic: string;
+  startTime: string;
+  duration: number;
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+  version: string | null;
+  batchId: number;
+  batchName: string;
+  progress: number;
+  instructorDetails: GlobalCourseInstructorDetails;
+}
+
+export interface GlobalCourseResponse {
+  message: string;
+  code: number;
+  isSuccess: boolean;
+  data: GlobalCourseData;
+}
+
+export interface UseFetchGlobalCoursesReturn {
+  globalCourse: GlobalCourseData | null;
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+// useEnrollCourse
+export interface EnrollCourseResponse {
+  message: string;
+  code: number;
+  isSuccess: boolean;
+  data?: any;
+}
+
+export interface UseEnrollCourseReturn {
+  enrollCourse: (courseId: number) => Promise<boolean>;
+  isEnrolling: boolean;
+  error: string | null;
+}
