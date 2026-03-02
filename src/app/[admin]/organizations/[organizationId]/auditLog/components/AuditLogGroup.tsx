@@ -48,12 +48,12 @@ export default function AuditLogGroup({ title, logs, groupKey, count }: AuditLog
                             // Helper to check if inside quotes
                             let inQuotes = false;
                             // Split on quotes to handle quoted and unquoted segments
-                            const quoteSplit = log.target.split(/(")/g);
+                            const quoteSplit = log.target.split(/(\")/g); // ✅ Escaped quote
                             let afterPrep = false;
                             return quoteSplit.map((segment, i) => {
                               if (segment === '"') {
                                 inQuotes = !inQuotes;
-                                return <span key={i}>"</span>;
+                                return <span key={i}>&quot;</span>; {/* ✅ Used HTML entity */}
                               }
                               if (inQuotes) {
                                 // Everything inside quotes: bold, same color
