@@ -12,6 +12,7 @@ import { Slider } from '@/components/ui/slider';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useGenerateMcqQuestions } from '@/hooks/useGenerateMcqQuestions';
 import {
   Form,
   FormControl,
@@ -120,6 +121,7 @@ const availableDomains = [
 export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedDifficulty] = useState<Difficulty>('Medium');
+  const { generateQuestions, isLoading, error } = useGenerateMcqQuestions();
   
   // Initialize form with react-hook-form and zod
   const form = useForm<FormValues>({
@@ -191,47 +193,42 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   };
 
   const onSubmit = async (values: FormValues) => {
-    // console.log('Form Submitted! Values:', values);
-    // console.log('Difficulty Distribution:', difficultyDistribution);
-    // console.log('Question Counts:', questionCounts);
-    
-    const finalPaylod = {
-      ...values,
+    const payload = {
+      domainName: values.domainName,
+      topicName: values.topicName,
+      topicDescription: values.topicDescription || '',
+      numberOfQuestions: values.numberOfQuestions,
+      learningObjectives: values.learningObjectives,
+      targetAudience: values.targetAudience || '',
+      focusAreas: values.focusAreas || '',
+      bloomsLevel: values.bloomsLevel,
+      questionStyle: values.questionStyle,
       difficultyDistribution,
       questionCounts,
-    }
-    console.log('Final Payload for AI API:', finalPaylod);
+      topics: {
+        [values.topicName]: values.numberOfQuestions,
+      },
+      levelId: null,
+    };
+    
+    console.log('Final Payload for AI API:', payload);
     setIsGenerating(true);
+
     
     try {
-      // TODO: Replace with actual AI API call
-      // Simulate AI generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const response = await generateQuestions(payload);
+      console.log('Generated Questions Response:', response);
       
-      // Mock generated questions
-      const generatedQuestions: Omit<MCQQuestion, 'id'>[] = Array.from(
-        { length: values.numberOfQuestions },
-        (_, i) => ({
-          questionText: `AI-Generated Question ${i + 1} for ${values.topicName}`,
-          options: {
-            A: 'Option A',
-            B: 'Option B',
-            C: 'Option C',
-            D: 'Option D',
-          },
-          correctAnswer: 'A' as const,
-          domain: values.domainName,
-          topic: values.topicName,
-          difficulty: selectedDifficulty,
-        })
-      );
-
-      onSaveQuestions(generatedQuestions);
+      // TODO: Transform the API response to match MCQQuestion format if needed
+      // For now, assuming the API returns questions in the correct format
+      if (response?.questions) {
+        onSaveQuestions(response.questions);
+      }
+      
       handleCancel();
-      console.log('Generated Questions:', generatedQuestions);
     } catch (error) {
       console.error('Error generating questions:', error);
-      alert('Failed to generate questions. Please try again.');
+      alert(`Failed to generate questions: ${error instanceof Error ? error.message : 'Please try again.'}`);
     } finally {
       setIsGenerating(false);
     }
