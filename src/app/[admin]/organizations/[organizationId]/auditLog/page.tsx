@@ -42,7 +42,7 @@ export default function AuditLogPage() {
 
   // Use the tracking log hook with current filter values - using actual search term
   const { trackingLogs, loading, error, totalRows, refetch } = useTrackingLog({
-    limit: 100,
+    limit: 1000,
     offset: 0,
     role: selectedRole !== 'all' ? selectedRole : undefined,
     action: selectedAction !== 'all' ? selectedAction : undefined,
@@ -345,9 +345,9 @@ export default function AuditLogPage() {
       timeRange: selectedTimeRange,
       search: actualSearchTerm || undefined,
       offset: 0,
-      limit: 100
+      limit: totalRows || 1000
     });
-  }, [selectedRole, selectedAction, selectedStatus, selectedTimeRange, actualSearchTerm, refetch]);
+  }, [selectedRole, selectedAction, selectedStatus, selectedTimeRange, actualSearchTerm, totalRows, refetch]);
 
   // Only show full loading screen on initial load
   if (isInitialLoad && loading) {
