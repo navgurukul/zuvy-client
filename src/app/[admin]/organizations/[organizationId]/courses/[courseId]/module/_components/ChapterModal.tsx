@@ -7,6 +7,7 @@ import {
     BookOpenCheck,
     Newspaper,
     Play,
+    LibraryBig,
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
@@ -138,6 +139,7 @@ function ChapterModal({
                         <Play className="mr-2 h-6 w-6" />
                         <span>Live Classes</span>
                     </div>
+                   
                 </div>
 
                 {/* Dialog for users WITH CREATE access */}

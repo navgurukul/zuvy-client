@@ -46,7 +46,7 @@ import { PageOption, PageSearchSuggestion } from './adminResourceMcqType'
 import ManageTopics from '../_components/ManageTopics'
 import McqDeleteVaiarntComp from '../_components/McqDeleteComponent'
 
-const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm'), {
+const NewMcqProblemForm = dynamic(() => import('../_components/NewMcqProblemForm').then(mod => ({ default: mod.CreateProblemForm })), {
     ssr: false,
     loading: () => <div className="flex justify-center"><Spinner /></div>
 })
@@ -519,12 +519,17 @@ const Mcqs = (props: Props) => {
                 return (
                     <div className="flex items-start justify-center w-full">
                         <NewMcqProblemForm
-                            tags={tags}
-                            closeModal={() => setIsCreateMcqDialogOpen(false)}
-                            setStoreQuizData={setStoreQuizData}
-                            getAllQuizQuesiton={filteredQuizQuestions}
-                            setIsMcqModalOpen={setIsMcqModalOpen}
-                            setMcqType={setMcqType}
+                            onClose={() => setIsCreateMcqDialogOpen(false)}
+                            onSaveQuestions={(questions) => {
+                                // Handle the generated questions
+                                console.log('Received generated questions:', questions)
+                                // Refresh the quiz data after AI generation
+                                fetchCodingQuestions(offset)
+                                toast.success({
+                                    title: 'Questions Generated',
+                                    description: `Successfully generated ${questions.length} MCQ questions`,
+                                })
+                            }}
                         />
                     </div>
                 )

@@ -26,6 +26,7 @@ import LiveClass from '../../../_components/liveClass/LiveClass'
 import { useRouter } from 'next/navigation'
 import { ChaptersQuizQuestionDetails } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/module/[moduleId]/chapters/chaptersCodingIdPageType'
 import { useModuleChapters } from '@/hooks/useModuleChapters';
+import AdaptiveAssessment from '../[chapterID]/AdaptiveAssessment'
 export default function Page({
     params,
 }: {
@@ -230,6 +231,7 @@ export default function Page({
                             topicId={topicId}
                         />
                     )
+                    
                 default:
                     return <h1>Create New Chapter</h1>
             }
