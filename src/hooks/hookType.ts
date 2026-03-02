@@ -775,3 +775,60 @@ export interface UseCreateOpenEndedQuestionReturn {
   loading: boolean;
   error: string | null;
 }
+
+// Tracking Log Types
+export interface TrackingLogEntry {
+  id: number
+  orgId: number
+  actorUserId: number
+  actorName: string
+  actorEmail: string
+  permissionId: number
+  resourceId: number
+  action: string
+  resourceType: string
+  description: string
+  createdAt: string
+  status: string
+  actorRoles: string[]
+}
+
+export interface TrackingLogPagination {
+  offset: number
+  limit: number
+  total: number
+}
+
+export interface TrackingLogData {
+  logs: TrackingLogEntry[]
+  pagination: TrackingLogPagination
+}
+
+export interface TrackingLogResponse {
+  success: boolean
+  message: string
+  data: TrackingLogData
+}
+
+export interface UseTrackingLogArgs {
+  orgId?: number
+  actorUserId?: number | string
+  action?: string
+  role?: string
+  status?: string
+  offset?: number
+  limit?: number
+  timeRange?: string
+  search?: string
+  initialFetch?: boolean
+}
+
+export interface UseTrackingLogReturn {
+  trackingLogs: TrackingLogEntry[]
+  loading: boolean
+  error: unknown
+  totalRows: number
+  pagination: TrackingLogPagination
+  refetch: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
+  fetchTrackingLog: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
+}
