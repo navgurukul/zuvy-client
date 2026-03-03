@@ -239,6 +239,25 @@ const EditMcqForm = ({
 
                 setIsVariantAdded(false)
                 await refetch()
+                
+                // ✅ ADD THIS - Refresh main table data
+                try {
+                    await getAllQuizQuesiton(
+                        setStoreQuizData,
+                        0, // Reset offset  
+                        10, // Limit
+                        [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
+                        [{ value: '-1', label: 'All Topics' }], // Reset topic filter
+                        () => {}, // setTotalMCQQuestion placeholder
+                        () => {}, // setLastPage placeholder
+                        () => {}, // setTotalPages placeholder
+                        '' // No search term
+                    )
+                } catch (fetchError) {
+                    console.error('Error refreshing data after variant addition:', fetchError)
+                }
+                
+                closeModal()
             } catch (error: any) {
                 toast.error({
                     title: 'Error',
@@ -271,12 +290,29 @@ const EditMcqForm = ({
                         toast.success({
                             title: 'Success',
                             description: res?.data.message,
-                            className:
-                                'fixed bottom-4 right-4 text-start capitalize border border-secondary max-w-sm px-6 py-5 box-border z-50',
                         })
                         closeModal() // Close modal after success
                     })
                 await refetch()
+                
+                // ✅ ADD THIS - Refresh main table data  
+                try {
+                    await getAllQuizQuesiton(
+                        setStoreQuizData,
+                        0, // Reset offset
+                        10, // Limit  
+                        [{ value: 'None', label: 'All Difficulty' }], // Reset difficulty filter
+                        [{ value: '-1', label: 'All Topics' }], // Reset topic filter
+                        () => {}, // setTotalMCQQuestion placeholder
+                        () => {}, // setLastPage placeholder
+                        () => {}, // setTotalPages placeholder
+                        '' // No search term
+                    )
+                } catch (fetchError) {
+                    console.error('Error refreshing data after question edit:', fetchError)
+                }
+                
+                closeModal()
             } catch (error: any) {
                 toast.error({
                     title: 'Error',

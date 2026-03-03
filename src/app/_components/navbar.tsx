@@ -5,6 +5,7 @@ import {
     Layers,
     Settings,
     Database,
+    Bell,
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -203,6 +204,20 @@ const Navbar = () => {
                             <span>Setting</span>
                         </Link>
                     )}
+
+                    {/* Audit Log Header */}
+                    <Link
+                        href={`/${role}/organizations/${orgId}/auditLog`}
+                        className={cn(
+                            'flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                            pathname === `/${role}/organizations/${orgId}/auditLog`
+                                ? 'bg-primary text-primary-foreground shadow-sm'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                        )}
+                    >
+                        <Bell className="h-4 w-4" />
+                        <span>Audit Log</span>
+                    </Link>
                     
                     {/* <Button
                         variant="ghost"
