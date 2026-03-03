@@ -115,7 +115,7 @@ export function UserManagementTable<TData extends User, TValue>({
     const fetchSuggestionsApi = useCallback(async (query: string) => {
         try {
             const response = await api.get(
-                `/users/get/all/users?orgId=${orgId}&searchTerm=${encodeURIComponent(query)}`
+                `/users/get/all/users/${orgId}?searchTerm=${encodeURIComponent(query)}`
             )
             const suggestions = (response.data.data || []).map((user: User) => ({
                 ...user,
@@ -137,7 +137,7 @@ export function UserManagementTable<TData extends User, TValue>({
         
         try {
             const response = await api.get(
-                `/users/get/all/users?orgId=${orgId}&searchTerm=${encodeURIComponent(query)}`
+                `/users/get/all/users/${orgId}?searchTerm=${encodeURIComponent(query)}`
             )
 
             setSearchData(response.data.data || [])

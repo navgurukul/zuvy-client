@@ -30,7 +30,7 @@ export function useRoles(initialFetch = true) {
         try {
             setLoading(true)
             if(orgId === undefined) return []
-            const res = await api.get<RolesResponse>(`/users/get/all/roles?orgId=${orgId}`)
+            const res = await api.get<RolesResponse>(`/users/get/all/roles/${orgId}`)
             setRoles(res.data.data || [])
             setError(null)
         } catch (err) {
