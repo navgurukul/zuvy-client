@@ -16,6 +16,7 @@ import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { api } from '@/utils/axios.config'
 import { useSearchParams, useRouter } from 'next/navigation'
 import MultiSelector from '@/components/ui/multi-selector'
+import { OFFSET, POSITION } from '@/utils/constant'
 
 // Add interface for filter options
 interface FilterOption {
@@ -29,7 +30,7 @@ export default function OrganizationsPage() {
 
     // Get page and limit from URL
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
-    const limit = useMemo(() => parseInt(searchParams.get('limit') || '10'), [searchParams])
+    const limit = useMemo(() => parseInt(searchParams.get('limit') ?? POSITION), [searchParams])
 
     const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
