@@ -31,8 +31,8 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const [searchTerm, setSearchTerm] = useState('');
 
     // Always call both hooks (Rules of Hooks), pick result based on role
-    const byUser = useOrganizationsByUser(isSuperAdmin ? null : userId, searchTerm);
-    const allOrgs = useOrganizations({ auto: isSuperAdmin, search: searchTerm });
+    const byUser = useOrganizationsByUser(isSuperAdmin ? null : userId, searchTerm, true);
+    const allOrgs = useOrganizations({ auto: isSuperAdmin, search: searchTerm, all: true });
 
     const { organizations, loading, error } = isSuperAdmin ? allOrgs : byUser;
 

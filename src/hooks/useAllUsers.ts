@@ -72,7 +72,7 @@ export function useAllUsers({
                 setError(null)
                 const roleIdParam = filterRoleId || roleId
                 const roleQuery = roleIdParam ? `&roleId=${roleIdParam}` : ''
-                const res = await api.get<UsersResponse>(`/users/get/all/users?orgId=${orgId}&limit=${stableLimit}&offset=${offset}${roleQuery}`)
+                const res = await api.get<UsersResponse>(`/users/get/all/users/${orgId}?limit=${stableLimit}&offset=${offset}${roleQuery}`)
                 const allUsers = res.data || []
 
                 setUsers(allUsers.data)
