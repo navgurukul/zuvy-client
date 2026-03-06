@@ -31,9 +31,8 @@ interface CreateProblemFormProps {
 // Zod schema for form validation
 const formSchema = z.object({
   domainName: z.string().min(1, 'Domain is required'),
-  topicName: z.string().min(1, 'Topic is required'),
+  topicNames: z.array(z.string()).min(1, 'At least one topic is required'),
   topicDescription: z.string().optional(),
-  numberOfQuestions: z.number().min(1, 'At least 1 question required').max(50, 'Maximum 50 questions allowed'),
   learningObjectives: z.string().min(10, 'Learning objectives are required (minimum 10 characters)'),
   targetAudience: z.string().optional(),
   focusAreas: z.string().optional(),
@@ -123,15 +122,17 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   const [selectedDifficulty] = useState<Difficulty>('Medium');
   const { generateQuestions, isLoading, error } = useGenerateMcqQuestions();
   
+  // State to track question count for each topic
+  const [topicQuestionCounts, setTopicQuestionCounts] = useState<{ [key: string]: number }>({});
+  
   // Initialize form with react-hook-form and zod
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     mode: 'onChange',
     defaultValues: {
       domainName: '',
-      topicName: '',
+      topicNames: [],
       topicDescription: '',
-      numberOfQuestions: 5,
       learningObjectives: '',
       targetAudience: '',
       focusAreas: '',
@@ -142,16 +143,47 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
 
   // Watch form values
   const watchedDomain = form.watch('domainName');
-  const watchedNumberOfQuestions = form.watch('numberOfQuestions');
+  const watchedTopics = form.watch('topicNames');
+  
+  // Calculate total number of questions from all topics
+  const totalQuestions = Object.values(topicQuestionCounts).reduce((sum, count) => sum + count, 0);
 
   // Get topics for selected domain
   const selectedDomain = availableDomains.find(d => d.name === watchedDomain);
   const availableTopics = selectedDomain?.topics || [];
 
-  // Reset topic when domain changes
+  // Reset topics when domain changes
   const handleDomainChange = (domainName: string) => {
-    form.setValue('topicName', '');
+    form.setValue('topicNames', []);
+    setTopicQuestionCounts({});
     return domainName;
+  };
+  
+  // Handle topic question count change
+  const handleTopicQuestionChange = (topic: string, count: number) => {
+    setTopicQuestionCounts(prev => ({
+      ...prev,
+      [topic]: Math.max(0, Math.min(50, count || 0))
+    }));
+  };
+  
+  // Handle topic removal
+  const handleTopicRemove = (topic: string, currentTopics: string[]) => {
+    const newTopics = currentTopics.filter((t) => t !== topic);
+    const newCounts = { ...topicQuestionCounts };
+    delete newCounts[topic];
+    setTopicQuestionCounts(newCounts);
+    return newTopics;
+  };
+  
+  // Handle topic addition
+  const handleTopicAdd = (topic: string, currentTopics: string[]) => {
+    const newTopics = [...currentTopics, topic];
+    setTopicQuestionCounts(prev => ({
+      ...prev,
+      [topic]: 5
+    }));
+    return newTopics;
   };
 
   // Difficulty distribution state (percentages)
@@ -163,9 +195,9 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
 
   // Calculate actual question counts based on percentages
   const questionCounts = {
-    easy: Math.round((difficultyDistribution.easy / 100) * (watchedNumberOfQuestions || 0)),
-    medium: Math.round((difficultyDistribution.medium / 100) * (watchedNumberOfQuestions || 0)),
-    hard: Math.round((difficultyDistribution.hard / 100) * (watchedNumberOfQuestions || 0)),
+    easy: Math.round((difficultyDistribution.easy / 100) * totalQuestions),
+    medium: Math.round((difficultyDistribution.medium / 100) * totalQuestions),
+    hard: Math.round((difficultyDistribution.hard / 100) * totalQuestions),
   };
 
   // Adjust one difficulty when another changes to maintain 100% total
@@ -193,11 +225,28 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   };
 
   const onSubmit = async (values: FormValues) => {
+    // Validate that all topics have question counts
+    const hasAllCounts = values.topicNames.every(topic => topicQuestionCounts[topic] > 0);
+    if (!hasAllCounts) {
+      alert('Please specify the number of questions for each topic (minimum 1).');
+      return;
+    }
+    
+    if (totalQuestions === 0) {
+      alert('Total number of questions must be at least 1.');
+      return;
+    }
+    
+    if (totalQuestions > 50) {
+      alert('Total number of questions cannot exceed 50.');
+      return;
+    }
+    
     const payload = {
       domainName: values.domainName,
-      topicName: values.topicName,
+      topicNames: values.topicNames,
       topicDescription: values.topicDescription || '',
-      numberOfQuestions: values.numberOfQuestions,
+      numberOfQuestions: totalQuestions,
       learningObjectives: values.learningObjectives,
       targetAudience: values.targetAudience || '',
       focusAreas: values.focusAreas || '',
@@ -205,9 +254,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       questionStyle: values.questionStyle,
       difficultyDistribution,
       questionCounts,
-      topics: {
-        [values.topicName]: values.numberOfQuestions,
-      },
+      topics: topicQuestionCounts,
       levelId: null,
     };
     
@@ -237,15 +284,15 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   const handleCancel = () => {
     form.reset({
       domainName: '',
-      topicName: '',
+      topicNames: [],
       topicDescription: '',
-      numberOfQuestions: 5,
       learningObjectives: '',
       targetAudience: '',
       focusAreas: '',
       bloomsLevel: 'understand',
       questionStyle: 'mixed',
     });
+    setTopicQuestionCounts({});
     setDifficultyDistribution({ easy: 10, medium: 40, hard: 50 });
     onClose();
   };
@@ -305,34 +352,93 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
 
               <FormField
                 control={form.control}
-                name="topicName"
+                name="topicNames"
                 render={({ field }) => (
                   <FormItem>
                    <FormLabel className='flex items-center ' >
-                      <span className="">Topic Name</span> <span className="text-destructive">*</span>
+                      <span className="">Topics</span> <span className="text-destructive">*</span>
                     </FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!watchedDomain}>
-                      <FormControl>
-                        <SelectTrigger className="bg-background/50 border-border/50 rounded-xl h-11">
-                          <SelectValue placeholder={watchedDomain ? "Select topic..." : "Select domain first..."} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl">
-                        {availableTopics.length > 0 ? (
-                          availableTopics.map((topic) => (
-                            <SelectItem key={topic} value={topic} className="rounded-lg">
-                              {topic}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="px-2 py-6 text-sm text-left text-muted-foreground">
-                            No topics available
+                    <div className="space-y-3">
+                      {/* Display selected topics with question count inputs */}
+                      {field.value && field.value.length > 0 && (
+                        <div className="space-y-2 p-3 bg-background/50 border border-border/50 rounded-xl">
+                          {field.value.map((topic) => (
+                            <div key={topic} className="flex items-center gap-2 p-2 bg-background rounded-lg border border-border/30">
+                              <Badge
+                                variant="secondary"
+                                className="flex-1 px-3 py-1.5 bg-primary/10 text-primary border-primary/30 text-left justify-start"
+                              >
+                                {topic}
+                              </Badge>
+                              <Input
+                                type="number"
+                                min={1}
+                                max={50}
+                                value={topicQuestionCounts[topic] || ''}
+                                onChange={(e) => handleTopicQuestionChange(topic, parseInt(e.target.value) || 0)}
+                                placeholder="Qs"
+                                className="w-20 h-9 text-center bg-background/50 border-border/50 rounded-lg"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => {
+                                  field.onChange(handleTopicRemove(topic, field.value));
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ))}
+                          <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                            <span className="text-sm font-medium text-muted-foreground">Total Questions:</span>
+                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 font-semibold text-base px-3 py-1">
+                              {totalQuestions}
+                            </Badge>
                           </div>
-                        )}
-                      </SelectContent>
-                    </Select>
+                        </div>
+                      )}
+                      
+                      {/* Topic selection dropdown */}
+                      <Select 
+                        onValueChange={(value) => {
+                          if (!field.value.includes(value)) {
+                            field.onChange(handleTopicAdd(value, field.value));
+                          }
+                        }} 
+                        disabled={!watchedDomain}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-background/50 border-border/50 rounded-xl h-11">
+                            <SelectValue placeholder={watchedDomain ? "Select topics..." : "Select domain first..."} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl">
+                          {availableTopics.length > 0 ? (
+                            availableTopics
+                              .filter((topic) => !field.value.includes(topic))
+                              .map((topic) => (
+                                <SelectItem key={topic} value={topic} className="rounded-lg">
+                                  {topic}
+                                </SelectItem>
+                              ))
+                          ) : (
+                            <div className="px-2 py-6 text-sm text-left text-muted-foreground">
+                              No topics available
+                            </div>
+                          )}
+                          {availableTopics.length > 0 && availableTopics.every((topic) => field.value.includes(topic)) && (
+                            <div className="px-2 py-6 text-sm text-left text-muted-foreground">
+                              All topics selected
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
                     <FormDescription>
-                      Select a topic from {watchedDomain || 'the selected domain'}
+                      Select multiple topics from {watchedDomain || 'the selected domain'}. Specify the number of questions for each topic.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -364,32 +470,6 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
               )}
             />
           </div>
-
-          {/* Question Configuration */}
-          <FormField
-            control={form.control}
-            name="numberOfQuestions"
-            render={({ field }) => (
-              <FormItem>
-               <FormLabel className='flex items-center ' >
-                      <span className="">Number of Questions</span> <span className="text-destructive">*</span>
-                    </FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={50}
-                    {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    placeholder="e.g., 10"
-                    className="bg-background/50 border-border/50 rounded-xl h-11"
-                  />
-                </FormControl>
-                <FormDescription>Maximum 50 questions</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
             {/* Difficulty Distribution Sliders */}
             <div className="p-4 bg-muted/30 border border-border/50 rounded-xl space-y-4">
@@ -612,7 +692,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
             ) : (
               <>
                 <Sparkles className="h-4 w-4 mr-2" />
-                Generate {watchedNumberOfQuestions} Questions
+                Generate {totalQuestions} Questions
               </>
             )}
           </Button>

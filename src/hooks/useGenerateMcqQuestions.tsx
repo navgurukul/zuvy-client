@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 interface GenerateMcqPayload {
   domainName: string;
-  topicName: string;
+  topicNames: string[];
   topicDescription?: string;
   numberOfQuestions: number;
   learningObjectives: string;
