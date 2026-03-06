@@ -159,28 +159,46 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   
   // Handle topic question count change
   const handleTopicQuestionChange = (topic: string, count: number) => {
+    // Clamp value between 1 and 50, or 0 if empty/invalid
+    const clampedCount = count > 0 ? Math.max(1, Math.min(50, count)) : 0;
     setTopicQuestionCounts(prev => ({
       ...prev,
-      [topic]: Math.max(0, Math.min(50, count || 0))
+      [topic]: clampedCount
     }));
   };
   
   // Handle topic removal
-  const handleTopicRemove = (topic: string, currentTopics: string[]) => {
+  const handleTopicRemove = (topic: string) => {
+    // Remove from form array
+    const currentTopics = form.getValues('topicNames');
     const newTopics = currentTopics.filter((t) => t !== topic);
-    const newCounts = { ...topicQuestionCounts };
-    delete newCounts[topic];
-    setTopicQuestionCounts(newCounts);
-    return newTopics;
+    
+    // Remove from question counts
+    setTopicQuestionCounts(prev => {
+      const newCounts = { ...prev };
+      delete newCounts[topic];
+      return newCounts;
+    });
+    
+    // Update form with validation
+    form.setValue('topicNames', newTopics, { shouldValidate: true, shouldDirty: true });
   };
   
   // Handle topic addition
   const handleTopicAdd = (topic: string, currentTopics: string[]) => {
+    // Prevent duplicates
+    if (currentTopics.includes(topic)) {
+      return currentTopics;
+    }
+    
     const newTopics = [...currentTopics, topic];
+    
+    // Set default count of 5 questions
     setTopicQuestionCounts(prev => ({
       ...prev,
       [topic]: 5
     }));
+    
     return newTopics;
   };
 
@@ -223,22 +241,35 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   };
 
   const onSubmit = async (values: FormValues) => {
-    // Validate that all topics have question counts
-    const hasAllCounts = values.topicNames.every(topic => topicQuestionCounts[topic] > 0);
-    if (!hasAllCounts) {
-      alert('Please specify the number of questions for each topic (minimum 1).');
+    // Validate that all topics have question counts > 0
+    const topicsWithoutCounts = values.topicNames.filter(topic => !topicQuestionCounts[topic] || topicQuestionCounts[topic] === 0);
+    if (topicsWithoutCounts.length > 0) {
+      form.setError('topicNames', {
+        type: 'manual',
+        message: `Please specify questions for: ${topicsWithoutCounts.join(', ')}`
+      });
       return;
     }
     
+    // Validate total questions
     if (totalQuestions === 0) {
-      alert('Total number of questions must be at least 1.');
+      form.setError('topicNames', {
+        type: 'manual',
+        message: 'Total questions must be at least 1'
+      });
       return;
     }
     
     if (totalQuestions > 50) {
-      alert('Total number of questions cannot exceed 50.');
+      form.setError('topicNames', {
+        type: 'manual',
+        message: 'Total questions cannot exceed 50 (current: ' + totalQuestions + ')'
+      });
       return;
     }
+    
+    // Clear any previous errors
+    form.clearErrors('topicNames');
     
     const payload = {
       domainName: values.domainName,
@@ -374,11 +405,16 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                         Add Topics
                       </FormLabel>
                       <Select 
+                        key={`topic-select-${field.value.length}`}
                         onValueChange={(value) => {
                           if (!field.value.includes(value)) {
-                            field.onChange(handleTopicAdd(value, field.value));
+                            const newTopics = handleTopicAdd(value, field.value);
+                            field.onChange(newTopics);
+                            // Clear any errors when adding topics
+                            form.clearErrors('topicNames');
                           }
                         }} 
+                        value=""
                         disabled={!watchedDomain}
                       >
                         <FormControl>
@@ -418,9 +454,20 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                 <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="flex items-center justify-between px-1">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Selected Topics</p>
-                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/5 border border-primary/10">
+                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${
+                      totalQuestions > 50 
+                        ? 'bg-destructive/10 border-destructive/30 ring-1 ring-destructive/20' 
+                        : totalQuestions > 0 
+                        ? 'bg-primary/5 border-primary/10' 
+                        : 'bg-muted/20 border-border/40'
+                    }`}>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Total</span>
-                      <span className="text-sm font-bold text-primary tabular-nums">{totalQuestions}</span>
+                      <span className={`text-sm font-bold tabular-nums ${
+                        totalQuestions > 50 ? 'text-destructive' : 'text-primary'
+                      }`}>{totalQuestions}</span>
+                      {totalQuestions > 50 && (
+                        <span className="text-[9px] text-destructive/80">/50 max</span>
+                      )}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -437,18 +484,31 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                             min={1}
                             max={50}
                             value={topicQuestionCounts[topic] || ''}
-                            onChange={(e) => handleTopicQuestionChange(topic, parseInt(e.target.value) || 0)}
-                            placeholder="0"
-                            className="h-7 w-12 px-1.5 text-xs text-center border-0 bg-muted/40 hover:bg-muted/60 focus:bg-muted/80 rounded-md font-semibold tabular-nums transition-all duration-200"
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              const numValue = value === '' ? 0 : parseInt(value);
+                              handleTopicQuestionChange(topic, numValue);
+                            }}
+                            onBlur={(e) => {
+                              // Set minimum of 1 if field is empty or 0 on blur
+                              const value = parseInt(e.target.value);
+                              if (!value || value === 0) {
+                                handleTopicQuestionChange(topic, 1);
+                              }
+                            }}
+                            placeholder="1"
+                            className={`h-7 w-12 px-1.5 text-xs text-center border rounded-md font-semibold tabular-nums transition-all duration-200 ${
+                              !topicQuestionCounts[topic] || topicQuestionCounts[topic] === 0
+                                ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10 focus:bg-destructive/10'
+                                : 'border-0 bg-muted/40 hover:bg-muted/60 focus:bg-muted/80'
+                            }`}
                           />
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
                             className="h-6 w-6 p-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => {
-                              form.setValue('topicNames', handleTopicRemove(topic, watchedTopics));
-                            }}
+                            onClick={() => handleTopicRemove(topic)}
                           >
                             <X className="h-3 w-3" />
                           </Button>
