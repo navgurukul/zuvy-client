@@ -70,7 +70,7 @@ export default function MultiSelector({
                                     ? selectedOptions[0].label
                                     : `${selectedCount} ${type} Selected`
                                 : type === 'Topic' || type === 'Topics'
-                                ? 'All Topics'
+                                ? 'All Topics' : type === 'managementType' ? 'Management Types'
                                 : 'All Difficulty'}
                         </span>
                         <ChevronDown className="h-4 w-4 text-muted-foreground" />
