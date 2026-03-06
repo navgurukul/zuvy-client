@@ -215,21 +215,26 @@ export default function OrganizationsPage() {
         { name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform' }
     ]
 
-    const handleEdit = (org: any) => {
+    const handleEdit = useCallback((org: any) => {
         setEditingOrg(org)
         setIsEditMode(true)
         setIsAddModalOpen(true)
-    }
+    }, [])
 
-    const handleDelete = (org: any) => {
+    const handleDelete = useCallback((org: any) => {
         setDeleteModal({
             isOpen: true,
             organizationId: org.id,
             organizationName: org.name
         })
-    }
+    }, [])
 
-    const columns = useMemo(() => createColumns(management, handleEdit, handleDelete), [management])
+    const handleUpdateSuccess = useCallback(() => {
+        const filterQuery = getFilterQuery()
+        fetchOrganizations(currentSearchQuery, currentPage, limit, filterQuery)
+    }, [currentSearchQuery, currentPage, limit, fetchOrganizations])
+
+    const columns = useMemo(() => createColumns(management, handleEdit, handleDelete, handleUpdateSuccess), [management, handleEdit, handleDelete, handleUpdateSuccess])
 
     const handleCloseModal = () => {
         setIsAddModalOpen(false)
