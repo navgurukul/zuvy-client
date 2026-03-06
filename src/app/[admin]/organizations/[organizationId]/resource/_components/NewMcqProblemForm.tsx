@@ -288,26 +288,26 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     };
     
     console.log('Final Payload for AI API:', payload);
-    // setIsGenerating(true);
+    setIsGenerating(true);
 
     
-    // try {
-    //   const response = await generateQuestions(payload);
-    //   console.log('Generated Questions Response:', response);
+    try {
+      const response = await generateQuestions(payload);
+      console.log('Generated Questions Response:', response);
       
-    //   // TODO: Transform the API response to match MCQQuestion format if needed
-    //   // For now, assuming the API returns questions in the correct format
-    //   if (response?.questions) {
-    //     onSaveQuestions(response.questions);
-    //   }
+      // TODO: Transform the API response to match MCQQuestion format if needed
+      // For now, assuming the API returns questions in the correct format
+      if (response?.questions) {
+        onSaveQuestions(response.questions);
+      }
       
-    //   handleCancel();
-    // } catch (error) {
-    //   console.error('Error generating questions:', error);
-    //   alert(`Failed to generate questions: ${error instanceof Error ? error.message : 'Please try again.'}`);
-    // } finally {
-    //   setIsGenerating(false);
-    // }
+      handleCancel();
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      alert(`Failed to generate questions: ${error instanceof Error ? error.message : 'Please try again.'}`);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleCancel = () => {
