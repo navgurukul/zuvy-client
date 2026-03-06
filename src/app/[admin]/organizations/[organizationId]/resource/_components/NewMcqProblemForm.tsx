@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { X, Sparkles, Loader2, Wand2, FileText } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { X, Loader2, Sparkles, Brain, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Difficulty, MCQQuestion } from './adminResourceComponentType';
 import { Badge } from '@/components/ui/badge';
@@ -259,26 +257,26 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     };
     
     console.log('Final Payload for AI API:', payload);
-    setIsGenerating(true);
+    // setIsGenerating(true);
 
     
-    try {
-      const response = await generateQuestions(payload);
-      console.log('Generated Questions Response:', response);
+    // try {
+    //   const response = await generateQuestions(payload);
+    //   console.log('Generated Questions Response:', response);
       
-      // TODO: Transform the API response to match MCQQuestion format if needed
-      // For now, assuming the API returns questions in the correct format
-      if (response?.questions) {
-        onSaveQuestions(response.questions);
-      }
+    //   // TODO: Transform the API response to match MCQQuestion format if needed
+    //   // For now, assuming the API returns questions in the correct format
+    //   if (response?.questions) {
+    //     onSaveQuestions(response.questions);
+    //   }
       
-      handleCancel();
-    } catch (error) {
-      console.error('Error generating questions:', error);
-      alert(`Failed to generate questions: ${error instanceof Error ? error.message : 'Please try again.'}`);
-    } finally {
-      setIsGenerating(false);
-    }
+    //   handleCancel();
+    // } catch (error) {
+    //   console.error('Error generating questions:', error);
+    //   alert(`Failed to generate questions: ${error instanceof Error ? error.message : 'Please try again.'}`);
+    // } finally {
+    //   setIsGenerating(false);
+    // }
   };
 
   const handleCancel = () => {
@@ -298,49 +296,346 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   };
 
   return (
-    <div className="w-full">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center shadow-lg shadow-green-600/25">
-          <Wand2 className="h-5 w-5 text-white" />
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl animate-pulse"></div>
+            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary-dark flex items-center justify-center shadow-lg">
+              <Brain className="h-7 w-7 text-white" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-3xl font-semibold tracking-tight">AI Question Generator</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-0 text-xs font-medium px-2 py-0.5">
+                <Sparkles className="h-3 w-3 mr-1" />
+                Powered by LLM
+              </Badge>
+              <Badge variant="secondary" className="bg-accent/10 text-accent border-0 text-xs font-medium px-2 py-0.5">
+                <Zap className="h-3 w-3 mr-1" />
+                Adaptive Assessment
+              </Badge>
+            </div>
+          </div>
         </div>
-        <div className="text-left">
-          <div className="text-xl font-bold">Generate MCQ Questions with AI</div>
-          <p className="text-sm text-muted-foreground font-normal mt-0.5">
-            Create high-quality multiple choice questions using AI
-          </p>
-        </div>
+        <p className="text-base text-muted-foreground font-normal mt-4 flex">
+          Create intelligent, personalized assessments that adapt to student performance
+        </p>
       </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
           {/* Domain & Topic Section */}
-          <div className="p-4 bg-primary/5 border border-primary/30 rounded-xl space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center">
-                <FileText className="h-3.5 w-3.5 text-primary" />
-              </div>
-              <h6 className="font-semibold text-foreground">Domain & Topic Information</h6>
+          <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/40 transition-all hover:shadow-medium animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold">Domain & Topics</h3>
+              <Badge variant="outline" className="text-xs text-muted-foreground border-border/60">
+                Step 1 of 3
+              </Badge>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="domainName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                        Domain
+                      </FormLabel>
+                      <Select onValueChange={(value) => field.onChange(handleDomainChange(value))} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl">
+                            <SelectValue placeholder="Choose a domain" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
+                          {availableDomains.map((domain) => (
+                            <SelectItem key={domain.id} value={domain.name} className="rounded-lg">
+                              {domain.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="topicNames"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                        Add Topics
+                      </FormLabel>
+                      <Select 
+                        onValueChange={(value) => {
+                          if (!field.value.includes(value)) {
+                            field.onChange(handleTopicAdd(value, field.value));
+                          }
+                        }} 
+                        disabled={!watchedDomain}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl disabled:opacity-50">
+                            <SelectValue placeholder={watchedDomain ? "Select topics" : "Select domain first"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
+                          {availableTopics.length > 0 ? (
+                            availableTopics
+                              .filter((topic) => !field.value.includes(topic))
+                              .map((topic) => (
+                                <SelectItem key={topic} value={topic} className="rounded-lg">
+                                  {topic}
+                                </SelectItem>
+                              ))
+                          ) : (
+                            <div className="px-2 py-8 text-sm text-center text-muted-foreground">
+                              No topics available
+                            </div>
+                          )}
+                          {availableTopics.length > 0 && availableTopics.every((topic) => field.value.includes(topic)) && (
+                            <div className="px-2 py-8 text-sm text-center text-muted-foreground">
+                              All topics selected
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Selected Topics with Question Counts */}
+              {watchedTopics.length > 0 && (
+                <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="flex items-center justify-between px-1">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Selected Topics</p>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/5 border border-primary/10">
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Total</span>
+                      <span className="text-sm font-bold text-primary tabular-nums">{totalQuestions}</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {watchedTopics.map((topic, index) => (
+                      <div 
+                        key={topic} 
+                        className="group relative flex items-center justify-between gap-3 px-3.5 py-3 border border-border/40 hover:border-primary/30 hover:shadow-sm bg-card hover:bg-primary/[0.02] rounded-lg transition-all duration-200 animate-in fade-in zoom-in-95"
+                        style={{ animationDelay: `${index * 40}ms` }}
+                      >
+                        <span className="text-xs font-medium text-foreground/70 leading-snug line-clamp-1 flex-1 pr-2">{topic}</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Input
+                            type="number"
+                            min={1}
+                            max={50}
+                            value={topicQuestionCounts[topic] || ''}
+                            onChange={(e) => handleTopicQuestionChange(topic, parseInt(e.target.value) || 0)}
+                            placeholder="0"
+                            className="h-7 w-12 px-1.5 text-xs text-center border-0 bg-muted/40 hover:bg-muted/60 focus:bg-muted/80 rounded-md font-semibold tabular-nums transition-all duration-200"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => {
+                              form.setValue('topicNames', handleTopicRemove(topic, watchedTopics));
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <FormField
                 control={form.control}
-                name="domainName"
+                name="topicDescription"
+                render={({ field }) => (
+                  <FormItem className="pt-2">
+                    <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder="Provide additional context about these topics..."
+                        className="min-h-[90px] resize-none border-0 bg-muted/50 hover:bg-muted/80 focus:bg-muted/80 transition-all duration-200 rounded-xl"
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs text-muted-foreground mt-2">
+                      Optional
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Difficulty Distribution */}
+          {totalQuestions > 0 && (
+            <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/40 transition-all hover:shadow-medium animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-lg font-semibold flex">Difficulty Distribution</h3>
+                  <p className="text-xs text-muted-foreground mt-1">AI will adjust complexity for adaptive learning</p>
+                </div>
+                <Badge variant="outline" className="text-xs text-muted-foreground border-border/60">
+                  Step 2 of 3
+                </Badge>
+              </div>
+
+              <div className="space-y-8">
+                <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-300" style={{ animationDelay: '0ms' }}>
+                  <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-success/80 animate-pulse" style={{ animationDuration: '3s' }}></div>
+                      <span className="text-sm font-medium">Easy</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs text-muted-foreground font-medium w-12 text-right">{difficultyDistribution.easy}%</span>
+                      <span className="text-base font-semibold text-success w-10 text-right transition-all duration-300">{questionCounts.easy}</span>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[difficultyDistribution.easy]}
+                    onValueChange={([value]) => handleDifficultyChange('easy', value)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    className="[&_[role=slider]]:bg-success [&_[role=slider]]:border-0 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_[role=slider]]:transition-all [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:hover:shadow-lg"
+                  />
+                </div>
+
+                <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-300" style={{ animationDelay: '100ms' }}>
+                  <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-warning/80 animate-pulse" style={{ animationDuration: '3s', animationDelay: '1s' }}></div>
+                      <span className="text-sm font-medium">Medium</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs text-muted-foreground font-medium w-12 text-right">{difficultyDistribution.medium}%</span>
+                      <span className="text-base font-semibold text-warning w-10 text-right transition-all duration-300">{questionCounts.medium}</span>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[difficultyDistribution.medium]}
+                    onValueChange={([value]) => handleDifficultyChange('medium', value)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    className="[&_[role=slider]]:bg-warning [&_[role=slider]]:border-0 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_[role=slider]]:transition-all [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:hover:shadow-lg"
+                  />
+                </div>
+
+                <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-300" style={{ animationDelay: '200ms' }}>
+                  <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 rounded-full bg-destructive/80 animate-pulse" style={{ animationDuration: '3s', animationDelay: '2s' }}></div>
+                      <span className="text-sm font-medium">Hard</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs text-muted-foreground font-medium w-12 text-right">{difficultyDistribution.hard}%</span>
+                      <span className="text-base font-semibold text-destructive w-10 text-right transition-all duration-300">{questionCounts.hard}</span>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[difficultyDistribution.hard]}
+                    onValueChange={([value]) => handleDifficultyChange('hard', value)}
+                    min={0}
+                    max={100}
+                    step={5}
+                    className="[&_[role=slider]]:bg-destructive [&_[role=slider]]:border-0 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_[role=slider]]:transition-all [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:hover:shadow-lg"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Learning Configuration */}
+          <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/40 space-y-8 transition-all hover:shadow-medium animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold flex">Learning Configuration</h3>
+                <p className="text-xs text-muted-foreground mt-1">Fine-tune the AI generation parameters</p>
+              </div>
+              <Badge variant="outline" className="text-xs text-muted-foreground border-border/60">
+                Step 3 of 3
+              </Badge>
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="learningObjectives"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                    Learning Objectives
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="What should students be able to demonstrate?"
+                      className="min-h-[100px] resize-none border-0 bg-muted/50 hover:bg-muted/80 focus:bg-muted/80 transition-all duration-200 rounded-xl"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="targetAudience"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                    Target Audience
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Describe the knowledge level and background..."
+                      className="min-h-[90px] resize-none border-0 bg-muted/50 hover:bg-muted/80 focus:bg-muted/80 transition-all duration-200 rounded-xl"
+                    />
+                  </FormControl>
+                  <FormDescription className="text-xs text-muted-foreground mt-2">
+                    Optional
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="bloomsLevel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex items-center ' >
-                      <span className="">Domain Name</span> <span className="text-destructive">*</span>
+                    <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                      Cognitive Level
                     </FormLabel>
-                    <Select onValueChange={(value) => field.onChange(handleDomainChange(value))} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
-                        <SelectTrigger className="bg-background/50 border-border/50 rounded-xl h-11">
-                          <SelectValue placeholder="Select domain..." />
+                        <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl">
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl">
-                        {availableDomains.map((domain) => (
-                          <SelectItem key={domain.id} value={domain.name} className="rounded-lg">
-                            {domain.name}
+                      <SelectContent className="rounded-xl border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {bloomsLevels.map((level) => (
+                          <SelectItem key={level.value} value={level.value} className="rounded-lg">
+                            {level.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -352,94 +647,26 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
 
               <FormField
                 control={form.control}
-                name="topicNames"
+                name="questionStyle"
                 render={({ field }) => (
                   <FormItem>
-                   <FormLabel className='flex items-center ' >
-                      <span className="">Topics</span> <span className="text-destructive">*</span>
+                    <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                      Question Style
                     </FormLabel>
-                    <div className="space-y-3">
-                      {/* Display selected topics with question count inputs */}
-                      {field.value && field.value.length > 0 && (
-                        <div className="space-y-2 p-3 bg-background/50 border border-border/50 rounded-xl">
-                          {field.value.map((topic) => (
-                            <div key={topic} className="flex items-center gap-2 p-2 bg-background rounded-lg border border-border/30">
-                              <Badge
-                                variant="secondary"
-                                className="flex-1 px-3 py-1.5 bg-primary/10 text-primary border-primary/30 text-left justify-start"
-                              >
-                                {topic}
-                              </Badge>
-                              <Input
-                                type="number"
-                                min={1}
-                                max={50}
-                                value={topicQuestionCounts[topic] || ''}
-                                onChange={(e) => handleTopicQuestionChange(topic, parseInt(e.target.value) || 0)}
-                                placeholder="Qs"
-                                className="w-20 h-9 text-center bg-background/50 border-border/50 rounded-lg"
-                              />
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive"
-                                onClick={() => {
-                                  field.onChange(handleTopicRemove(topic, field.value));
-                                }}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ))}
-                          <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                            <span className="text-sm font-medium text-muted-foreground">Total Questions:</span>
-                            <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 font-semibold text-base px-3 py-1">
-                              {totalQuestions}
-                            </Badge>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Topic selection dropdown */}
-                      <Select 
-                        onValueChange={(value) => {
-                          if (!field.value.includes(value)) {
-                            field.onChange(handleTopicAdd(value, field.value));
-                          }
-                        }} 
-                        disabled={!watchedDomain}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="bg-background/50 border-border/50 rounded-xl h-11">
-                            <SelectValue placeholder={watchedDomain ? "Select topics..." : "Select domain first..."} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl">
-                          {availableTopics.length > 0 ? (
-                            availableTopics
-                              .filter((topic) => !field.value.includes(topic))
-                              .map((topic) => (
-                                <SelectItem key={topic} value={topic} className="rounded-lg">
-                                  {topic}
-                                </SelectItem>
-                              ))
-                          ) : (
-                            <div className="px-2 py-6 text-sm text-left text-muted-foreground">
-                              No topics available
-                            </div>
-                          )}
-                          {availableTopics.length > 0 && availableTopics.every((topic) => field.value.includes(topic)) && (
-                            <div className="px-2 py-6 text-sm text-left text-muted-foreground">
-                              All topics selected
-                            </div>
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <FormDescription>
-                      Select multiple topics from {watchedDomain || 'the selected domain'}. Specify the number of questions for each topic.
-                    </FormDescription>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-12 border-0 bg-muted/50 hover:bg-muted/80 transition-all duration-200 rounded-xl">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="rounded-xl border-border/40 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {questionStyles.map((style) => (
+                          <SelectItem key={style.value} value={style.value} className="rounded-lg">
+                            {style.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -448,22 +675,21 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
 
             <FormField
               control={form.control}
-              name="topicDescription"
+              name="focusAreas"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className='flex items-center ' >
-                      <span className="">Topic Description</span> <span className="text-destructive">*</span>
-                    </FormLabel>
-                  
+                  <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">
+                    Focus Areas
+                  </FormLabel>
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder="e.g., Covers useState, useEffect, useContext, and custom hooks..."
-                      className="min-h-[80px] bg-background/50 border-border/50 rounded-xl resize-none"
+                      placeholder="Specific concepts or areas to emphasize..."
+                      className="min-h-[90px] resize-none border-0 bg-muted/50 hover:bg-muted/80 focus:bg-muted/80 transition-all duration-200 rounded-xl"
                     />
                   </FormControl>
-                  <FormDescription>
-                    Optional: Describe what this topic covers
+                  <FormDescription className="text-xs text-muted-foreground mt-2">
+                    Optional
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -471,231 +697,43 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
             />
           </div>
 
-            {/* Difficulty Distribution Sliders */}
-            <div className="p-4 bg-muted/30 border border-border/50 rounded-xl space-y-4">
-              <div className="flex items-center justify-between">
-                <h6 className="font-semibold text-foreground">Difficulty Distribution</h6>
-                <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                  Total: {questionCounts.easy + questionCounts.medium + questionCounts.hard} questions
-                </Badge>
-              </div>
-
-              {/* Easy Slider */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Badge className="bg-success/20 text-success border-success/30 border text-xs">Easy</Badge>
-                    <span className="text-text-secondary">{difficultyDistribution.easy}%</span>
-                  </Label>
-                  <span className="text-sm font-semibold text-success">{questionCounts.easy} questions</span>
-                </div>
-                <Slider
-                  value={[difficultyDistribution.easy]}
-                  onValueChange={([value]) => handleDifficultyChange('easy', value)}
-                  min={0}
-                  max={100}
-                  step={5}
-                  className="[&_[role=slider]]:bg-success [&_[role=slider]]:border-success"
-                />
-              </div>
-
-              {/* Medium Slider */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Badge className="bg-warning/20 text-warning border-warning/30 border text-xs">Medium</Badge>
-                    <span className="text-text-secondary">{difficultyDistribution.medium}%</span>
-                  </Label>
-                  <span className="text-sm font-semibold text-warning">{questionCounts.medium} questions</span>
-                </div>
-                <Slider
-                  value={[difficultyDistribution.medium]}
-                  onValueChange={([value]) => handleDifficultyChange('medium', value)}
-                  min={0}
-                  max={100}
-                  step={5}
-                  className="[&_[role=slider]]:bg-warning [&_[role=slider]]:border-warning"
-                />
-              </div>
-
-              {/* Hard Slider */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium flex items-center gap-2">
-                    <Badge className="bg-destructive/20 text-destructive border-destructive/30 border text-xs">Hard</Badge>
-                    <span className="text-text-secondary">{difficultyDistribution.hard}%</span>
-                  </Label>
-                  <span className="text-sm font-semibold text-destructive">{questionCounts.hard} questions</span>
-                </div>
-                <Slider
-                  value={[difficultyDistribution.hard]}
-                  onValueChange={([value]) => handleDifficultyChange('hard', value)}
-                  min={0}
-                  max={100}
-                  step={5}
-                  className="[&_[role=slider]]:bg-destructive [&_[role=slider]]:border-destructive"
-                />
-              </div>
-            </div>
-
-          {/* Learning Objectives */}
-          <FormField
-            control={form.control}
-            name="learningObjectives"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='flex items-center ' >
-                      <span className="">Learning Objectives</span> <span className="text-destructive">*</span>
-                    </FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="e.g., Students should be able to understand React hooks, implement state management..."
-                    className="min-h-[100px] bg-background/50 border-border/50 rounded-xl resize-none"
-                  />
-                </FormControl>
-                <FormDescription>
-                  What should students learn or demonstrate? Be specific.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Target Audience */}
-          <FormField
-            control={form.control}
-            name="targetAudience"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='flex items-center ' >
-                      <span className="">Target Audience</span> <span className="text-destructive">*</span>
-                    </FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="e.g., Intermediate developers with 1-2 years of JavaScript experience..."
-                    className="min-h-[80px] bg-background/50 border-border/50 rounded-xl resize-none"
-                  />
-                </FormControl>
-                <FormDescription>
-                  Describe the knowledge level and background of your audience
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Bloom's Taxonomy & Question Style */}
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="bloomsLevel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className='flex items-center ' >
-                      <span className="">Cognitive Level (Bloom&apos;s)</span> <span className="text-destructive">*</span>
-                    </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="bg-background/50 border-border/50 rounded-xl h-11">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl">
-                      {bloomsLevels.map((level) => (
-                        <SelectItem key={level.value} value={level.value} className="rounded-lg">
-                          {level.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="questionStyle"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className='flex items-center ' >
-                      <span className="">Question Style</span> <span className="text-destructive">*</span>
-                    </FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="bg-background/50 border-border/50 rounded-xl h-11">
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="bg-popover/95 backdrop-blur-xl border-border/50 rounded-xl">
-                      {questionStyles.map((style) => (
-                        <SelectItem key={style.value} value={style.value} className="rounded-lg">
-                          {style.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Focus Areas */}
-          <FormField
-            control={form.control}
-            name="focusAreas"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className='flex items-center ' >
-                      <span className="">Specific Focus Areas</span> <span className="text-destructive">*</span>
-                    </FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="e.g., Focus on useState, useEffect hooks. Include common pitfalls..."
-                    className="min-h-[80px] bg-background/50 border-border/50 rounded-xl resize-none"
-                  />
-                </FormControl>
-                <FormDescription>
-                  Any specific topics, concepts, or areas to emphasize
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
         {/* Footer Actions */}
-        <div className="flex items-center justify-end gap-3 pt-4 mt-6 border-t border-border/50">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleCancel}
-            disabled={isGenerating}
-            className="rounded-xl"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={isGenerating}
-            className="rounded-xl bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-600/20 min-w-[180px]"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Sparkles className="h-4 w-4 mr-2" />
-                Generate {totalQuestions} Questions
-              </>
-            )}
-          </Button>
+        <div className="flex items-center justify-between pt-8 animate-in fade-in duration-500">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>AI will generate personalized, adaptive questions</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleCancel}
+              disabled={isGenerating}
+              className="h-12 px-6 rounded-xl font-medium transition-all duration-200 hover:scale-105"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isGenerating || totalQuestions === 0}
+              className="h-12 px-8 bg-primary hover:bg-primary-dark disabled:opacity-40 rounded-xl font-medium shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md group relative overflow-hidden"
+            >
+              {isGenerating && (
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></span>
+              )}
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating with AI...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2 transition-transform group-hover:rotate-12" />
+                  Generate {totalQuestions > 0 ? totalQuestions : ''} {totalQuestions === 1 ? 'Question' : 'Questions'}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
           </form>
         </Form>
