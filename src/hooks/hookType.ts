@@ -630,6 +630,7 @@ export interface Bootcamp {
   progress: number;
   instructorDetails: InstructorDetails;
   upcomingEvents: UpcomingEvent[];
+  courseOrgName?: string;
 }
 
 export interface StudentData {
@@ -831,4 +832,88 @@ export interface UseTrackingLogReturn {
   pagination: TrackingLogPagination
   refetch: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
   fetchTrackingLog: (params?: Partial<UseTrackingLogArgs>) => Promise<void>
+}
+
+
+
+// useFetchGlobalCourses
+export interface GlobalCourseInstructorDetails {
+  name: string;
+  profilePicture: string | null;
+}
+
+export interface GlobalCourseBatchInfo {
+  id: number;
+  name: string;
+  bootcampId: number;
+  instructorId: number;
+  startDate: string | null;
+  endDate: string | null;
+  status: string;
+  capEnrollment: number;
+  createdAt: string;
+  updatedAt: string;
+  instructorDetails: GlobalCourseInstructorDetails;
+}
+
+export interface GlobalCourseEnrolledInfo {
+  students_in_bootcamp: number;
+  unassigned_students: number;
+}
+
+export interface GlobalCourseData {
+  id: number;
+  name: string;
+  description: string;
+  collaborator: string;
+  coverImage: string;
+  bootcampTopic: string;
+  startTime: string;
+  duration: number;
+  language: string;
+  organizationId: number;
+  createdAt: string;
+  updatedAt: string;
+  version: string | null;
+  bootcampId: number;
+  type: string;
+  isModuleLocked: boolean;
+  batchInfo: GlobalCourseBatchInfo;
+  enrolledInfo: GlobalCourseEnrolledInfo;
+  courseOrgName?: string;
+}
+
+export interface GlobalCourseResponse {
+  message?: string;
+  code?: number;
+  isSuccess?: boolean;
+  data?: GlobalCourseData[]; // Array of courses
+}
+
+export interface UseFetchGlobalCoursesReturn {
+  globalCourses: GlobalCourseData[]; // Changed to array
+  loading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+
+// useEnrollCourse
+export interface EnrollCourseResponse {
+  isSuccess?: boolean;
+  status?: 'success' | 'error';
+  message?: string;
+  code?: number;
+}
+
+export interface EnrollCourseResult {
+  success: boolean;
+  message: string;
+  code?: number;
+}
+
+export interface UseEnrollCourseReturn {
+  enrollCourse: (bootcampId: number) => Promise<EnrollCourseResult>;
+  isEnrolling: boolean;
+  error: string | null;
 }
