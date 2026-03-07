@@ -21,6 +21,7 @@ import { getUser } from '@/store/store';
 export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const pathname = usePathname();
     const role = pathname.split('/')[1]; // Extract role from pathname
+    const inOrg = pathname.split('/').length > 3
     const { user } = getUser();
     const userId = user?.id ? parseInt(user.id) : null;
     const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
@@ -38,11 +39,11 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
 
     useEffect(() => {
         const found = organizations.find(org => org.id === parseInt(orgId));
-        if (found) {
+        if(!inOrg){
+            setSelected(null);
+        }else if (found) {
             setSelected(found);
-        } else if (!selected && organizations.length > 0 && !searchTerm) {
-            setSelected(organizations[0]);
-        }
+        } 
     }, [loading, organizations, orgId]);
 
     const handleSelect = (org: Organization) => {
@@ -82,7 +83,9 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                                     </span>
                                 </>
                             ) : (
-                                <span className="text-gray-500">Loading...</span>
+                                <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                                    Switch Organization
+                                </p>
                             )}
                         </div>
                     </Button>
@@ -105,7 +108,9 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                                             </span>
                                         </>
                                     ) : (
-                                        <span className="text-gray-500">Loading...</span>
+                                        <p className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase">
+                                            Switch Organization
+                                        </p>
                                     )}
                                 </div>
                                 <ChevronDown size={20} className="text-gray-400 ml-1" />
@@ -175,17 +180,19 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                             <DropdownMenuSeparator className="m-0" />
 
                             {/* Back to all orgs - Fixed at bottom */}
-                            <div className="flex-none p-1">
-                                <DropdownMenuItem className="px-0 py-0 focus:bg-gray-50 cursor-pointer rounded-md">
-                                    <Link
-                                        href={`/${role}/organizations`}
-                                        onClick={() => setIsOpen(false)}
-                                        className="w-full px-4 py-3 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium"
-                                    >
-                                        ← Back to all orgs
-                                    </Link>
-                                </DropdownMenuItem>
-                            </div>
+                            {isSuperAdmin && (
+                                <div className="flex-none p-1">
+                                    <DropdownMenuItem className="px-0 py-0 focus:bg-gray-50 cursor-pointer rounded-md">
+                                        <Link
+                                            href={`/${role}/organizations`}
+                                            onClick={() => setIsOpen(false)}
+                                            className="w-full px-4 py-3 text-left text-gray-600 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium"
+                                        >
+                                            ← Back to all orgs
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </div>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )

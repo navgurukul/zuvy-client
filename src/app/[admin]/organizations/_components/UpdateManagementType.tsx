@@ -10,15 +10,19 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { toast } from '@/components/ui/use-toast';
+import useOrgSettings from '@/hooks/useOrgSettings'
 
 // Management Type Cell Component
 
 type roleCellProps = {
-  managementType: string;
-  management: any; 
+    org: any;
+    managementType: string;
+    management: any;
+    onUpdateSuccess?: () => void;
 };
 
-export const UpdateManagementType = ({ managementType, management }: roleCellProps) => {
+export const UpdateManagementType = ({ org, managementType, management, onUpdateSuccess }: roleCellProps) => {
+    const { updateOrgById } = useOrgSettings()
     const [isUpdating, setIsUpdating] = useState(false)
     const [originalRole, setOriginalRole] = useState(managementType)
 
@@ -35,28 +39,33 @@ export const UpdateManagementType = ({ managementType, management }: roleCellPro
 
         try {
             setIsUpdating(true)
-            // Find the roleId from the roles array based on the selected managementType name
+
             const selectedRole = management.find((r: any) => r.name.toLowerCase() === newRoleName.toLowerCase())
             if (!selectedRole) return
 
-            // await api.post('/users/users/assign-role', {
-            //     userId: userId,
-            //     roleId: selectedRole.id
-            // })
+            const isZuvyManaged = selectedRole.id === 2 
 
-            // Update original management type after successful save
-            setOriginalRole(newRoleName)
-            // onRoleUpdate?.()
+            const payload = {
+                isManagedByZuvy: isZuvyManaged,
+            }
 
-            toast.success({
-                title: 'Management Type Updated',
-                description: `User management type has been updated to ${selectedRole.name}.`,
-            })
+            const response = await updateOrgById(org.id, payload)
+
+            if (response.status === 200) {
+                // Update original management type after successful save
+                setOriginalRole(newRoleName)
+                onUpdateSuccess?.()
+
+                toast.success({
+                    title: 'Management Type Updated',
+                    description: `Organisation management type has been updated to ${selectedRole.name}.`,
+                })
+            }
         } catch (error) {
-            console.error('Error updating user management type:', error)
+            console.error('Error updating organisation management type:', error)
             toast.error({
                 title: 'Error Updating Management Type',
-                description: 'There was an error updating the user management type. Please try again later.',
+                description: 'There was an error updating the organisation management type. Please try again later.',
             })
         } finally {
             setIsUpdating(false)
@@ -64,30 +73,24 @@ export const UpdateManagementType = ({ managementType, management }: roleCellPro
     }
 
     return (
-        <Select 
-            value={managementType} 
-            onValueChange={handleRoleChange} 
+        <Select
+            value={managementType}
+            onValueChange={handleRoleChange}
             disabled={isUpdating}
         >
             <SelectTrigger className="w-auto min-w-28 bg-white border-gray-200 h-8 text-sm capitalize">
                 <SelectValue />
             </SelectTrigger>
             <SelectContent>
-                {/* {rolesLoading ? (
-                    <SelectItem value="loading" disabled>
-                        Loading...
+                {management.map((roleOption: any) => (
+                    <SelectItem
+                        key={roleOption.id}
+                        value={roleOption.name}
+                        className="capitalize"
+                    >
+                        {roleOption.name}
                     </SelectItem>
-                ) : ( */}
-                    {management.map((roleOption: any) => (
-                        <SelectItem
-                            key={roleOption.id}
-                            value={roleOption.name}
-                            className="capitalize"
-                        >
-                            {roleOption.name}
-                        </SelectItem>
-                    ))}
-                {/* )} */}
+                ))}
             </SelectContent>
         </Select>
     )
