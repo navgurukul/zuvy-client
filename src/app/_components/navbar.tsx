@@ -183,7 +183,7 @@ const Navbar = () => {
                     )} */}
                     <Badge
                         // variant="yellow"
-                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200"
+                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100"
                     >
                         {formattedRole(role)}
                     </Badge>

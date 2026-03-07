@@ -97,11 +97,8 @@ export function useTrackingLog({
                 }
 
                 const queryString = buildQueryString(finalParams)
-                console.log('API URL:', `/trackinglog?${queryString}`)
                 
                 const res = await api.get<TrackingLogResponse>(`/trackinglog?${queryString}`)
-                
-                console.log('Full API Response:', res.data)
                 
                 if (res.data?.success && res.data?.data) {
                     const { logs, pagination } = res.data.data
@@ -143,7 +140,6 @@ export function useTrackingLog({
 
     useEffect(() => {
         if (initialFetch && orgId) {
-            console.log('Initial fetch with orgId:', orgId)
             fetchTrackingLog()
         }
     }, [initialFetch, fetchTrackingLog, orgId])

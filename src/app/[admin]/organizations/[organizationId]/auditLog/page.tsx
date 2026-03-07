@@ -73,41 +73,59 @@ export default function AuditLogPage() {
     search: actualSearchTerm || undefined
   }), [selectedRole, selectedAction, selectedStatus, selectedTimeRange, actualSearchTerm]);
 
+  const ROLE_OPTIONS = ['admin', 'super_admin', 'instructor'] as const;
+
+  const ACTION_OPTIONS = [
+    'create',
+    'edit',
+    'update',
+    'delete',
+    'view',
+    'login',
+    'logout',
+    'export',
+    'import',
+    'assign',
+    'publish',
+    'archive',
+    'enroll',
+    'unenroll',
+    'mark',
+    'reassign',
+  ] as const;
+
+  const STATUS_OPTIONS = ['success', 'failed', 'pending'] as const;
+
+  const normalizeRole = (role: string) => role.trim().toLowerCase().replace(/\s+/g, '_');
+  const formatRoleLabel = (role: string) =>
+    role.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
   // Extract unique values from API data for dropdowns
   const filterOptions = useMemo(() => {
-    if (!Array.isArray(allLogs) || allLogs.length === 0) {
-      return {
-        roles: [],
-        actions: [],
-        statuses: [],
-        timeRanges: ['all', 'today', 'past7Days', 'past30Days']
-      };
+    const rolesSet = new Set<string>(ROLE_OPTIONS);
+
+    // derive roles from logs + merge with static roles
+    if (Array.isArray(allLogs) && allLogs.length > 0) {
+      allLogs.forEach((log) => {
+        if (Array.isArray(log.actorRoles)) {
+          log.actorRoles.forEach((role) => {
+            if (role) rolesSet.add(normalizeRole(role));
+          });
+        }
+      });
     }
 
-    // Extract unique roles from actorRoles arrays
-    const rolesSet = new Set<string>();
-    allLogs.forEach(log => {
-      if (log.actorRoles && Array.isArray(log.actorRoles)) {
-        log.actorRoles.forEach(role => rolesSet.add(role));
-      }
-    });
-
-    // Extract unique actions
-    const actionsSet = new Set<string>();
-    allLogs.forEach(log => {
-      if (log.action) actionsSet.add(log.action);
-    });
-
-    // Extract unique statuses
-    const statusesSet = new Set<string>();
-    allLogs.forEach(log => {
-      if (log.status) statusesSet.add(log.status);
-    });
+    const actionsSet = new Set<string>(ACTION_OPTIONS);
+    if (Array.isArray(allLogs) && allLogs.length > 0) {
+      allLogs.forEach((log) => {
+        if (log.action) actionsSet.add(log.action);
+      });
+    }
 
     return {
       roles: Array.from(rolesSet).sort(),
       actions: Array.from(actionsSet).sort(),
-      statuses: Array.from(statusesSet).sort(),
+      statuses: [...STATUS_OPTIONS],
       timeRanges: ['all', 'today', 'past7Days', 'past30Days']
     };
   }, [allLogs]);
@@ -118,14 +136,11 @@ export default function AuditLogPage() {
     if (!query || query.length < 2) return [];
     
     try {
-      console.log('FETCHING AUDIT LOG SUGGESTIONS FOR:', query);
       
       // Call tracking log API with search query
       const response = await api.get(
         `/trackinglog?orgId=${orgId}&limit=10&offset=0&search=${encodeURIComponent(query)}&timeRange=all`
       );
-      
-      console.log('Audit Log Suggestions API Response:', response.data);
       
       if (response.data?.success && response.data?.data?.logs) {
         const logs = response.data.data.logs;
@@ -165,7 +180,6 @@ export default function AuditLogPage() {
   }, [orgId]);
 
   const fetchSearchResultsApi = useCallback(async (query: string) => {
-    console.log("AUDIT LOG SEARCH API CALLED", { query });
     
     // This will trigger the actual search
     setActualSearchTerm(query);
@@ -174,7 +188,6 @@ export default function AuditLogPage() {
   }, []);
 
   const defaultFetchApi = useCallback(async () => {
-    console.log("AUDIT LOG DEFAULT FETCH API CALLED");
     
     // Clear search and reset to default view
     setActualSearchTerm('');
@@ -423,7 +436,7 @@ export default function AuditLogPage() {
             <SelectItem value="all">All Roles</SelectItem>
             {filterOptions.roles.map((role) => (
               <SelectItem key={role} value={role}>
-                {role.charAt(0).toUpperCase() + role.slice(1)}
+                {formatRoleLabel(role)}
               </SelectItem>
             ))}
           </SelectContent>
