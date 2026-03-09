@@ -1,8 +1,50 @@
 import { useCallback, useState, useEffect } from 'react';
-import { OnboardingData } from '../lib/onboarding.types';
+import { CompetitiveProfile, OnboardingData } from '../lib/profile.types';
 
 const ONBOARDING_STORAGE_KEY = 'zuvy_onboarding_data';
 const FIRST_TIME_LOGIN_KEY = 'zuvy_first_time_login';
+
+export const calculateProfileStrength = (onboardingData: OnboardingData | null): number => {
+  if (!onboardingData) return 0;
+
+  let strength = 0;
+
+  if (onboardingData.step1) {
+    strength += 20;
+  }
+
+  const hasSkills =
+    (onboardingData.step2?.autoDetectedSkills?.length || 0) > 0 ||
+    (onboardingData.step2?.additionalSkills?.length || 0) > 0;
+  if (hasSkills) {
+    strength += 20;
+  }
+
+  const hasProjects = (onboardingData.step2?.externalProjects?.length || 0) > 0;
+  if (hasProjects) {
+    strength += 20;
+  }
+
+  const hasEducationOrExperience =
+    Boolean(onboardingData.step3?.academicPerformance) ||
+    (onboardingData.step3?.workExperiences?.length || 0) > 0 ||
+    (onboardingData.step3?.competitiveProfiles?.some(
+      (profile: CompetitiveProfile) => Boolean(profile?.username)
+    ) ?? false);
+  if (hasEducationOrExperience) {
+    strength += 20;
+  }
+
+  const hasCareerGoals =
+    (onboardingData.step4?.targetRoles?.length || 0) > 0 ||
+    onboardingData.step4?.locationPreferences?.remote ||
+    (onboardingData.step4?.locationPreferences?.cities?.length || 0) > 0;
+  if (hasCareerGoals) {
+    strength += 20;
+  }
+
+  return Math.min(strength, 100);
+};
 
 /**
  * Hook to manage onboarding data in localStorage
@@ -269,6 +311,6 @@ export const useOnboardingStatus = () => {
     isCompleted: onboardingData?.isCompleted || false,
     hasSkipped: onboardingData?.hasSkipped || false,
     currentStep: onboardingData?.currentStep || 1,
-    progress: onboardingData?.currentStep ? (onboardingData.currentStep / 4) * 100 : 0,
+    progress: calculateProfileStrength(onboardingData),
   };
 };

@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +44,7 @@ import {
   ChevronLeft
 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useOnboardingStorage } from '@/hooks/use-onboarding';
+import { useOnboardingStorage } from '@/hooks/use-profile';
 import { SKILLS_BY_CATEGORY, COLLEGES, CAREER_ROLES, INDIAN_CITIES } from '@/lib/profile.mockData';
 import type { CompetitiveProfile } from '@/lib/profile.types';
 import { ProjectModal } from '@/app/student/profile/ProfileStep2';
@@ -398,7 +399,9 @@ export const EditProfilePage: React.FC = () => {
             <p className="text-muted-foreground mb-6">
               Please complete your onboarding to create a profile.
             </p>
-            <Button onClick={() => router.push('/student')}>Go to Dashboard</Button>
+            <Button asChild>
+              <Link href="/student?stay=dashboard">Go to Dashboard</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -407,11 +410,15 @@ export const EditProfilePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-12">
-      <div className="container mx-auto px-4 md:px-6 pt-6 max-w-4xl">
-        <Button variant="ghost" onClick={() => router.push('/student')} className="gap-1 text-muted-foreground hover:text-foreground -ml-2">
-          <ChevronLeft className="w-4 h-4" />
-          Back to Dashboard
-        </Button>
+      <div className="w-full pt-6">
+        <div className="flex justify-start px-4 md:px-6">
+          <Button variant="ghost" asChild className="gap-1 text-muted-foreground hover:text-foreground ml-0">
+            <Link href="/student?stay=dashboard">
+              <ChevronLeft className="w-4 h-4" />
+              Back to Dashboard
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Project Modal */}

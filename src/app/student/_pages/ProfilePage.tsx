@@ -6,7 +6,7 @@ import ProfileStep1Component from '@/app/student/profile/ProfileStep1';
 import ProfileStep2Component from '@/app/student/profile/ProfileStep2';
 import ProfileStep3Component from '@/app/student/profile/ProfileStep3';
 import ProfileStep4Component from '@/app/student/profile/ProfileStep4';
-import { useOnboardingStorage } from '@/hooks/use-onboarding';
+import { useOnboardingStorage } from '@/hooks/use-profile';
 import type { OnboardingStep1 as Step1Type, OnboardingStep2 as Step2Type, OnboardingStep3 as Step3Type, OnboardingStep4 as Step4Type } from '@/lib/profile.types';
 import { useRouter } from 'next/navigation';
 

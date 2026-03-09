@@ -21,12 +21,12 @@ import { useStudentData } from "@/hooks/useStudentData";
 import { useFetchGlobalCourses } from "@/hooks/useFetchGlobalCourses";
 import useEnrollCourse from "@/hooks/useEnrollCourse";
 import { toast } from "@/components/ui/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bootcamp } from '@/app/student/_pages/pageStudentType';
 import { useUpcomingEvents } from "@/hooks/useUpcomingEvents";
 import { formatUpcomingItem } from "@/utils/students";
 import { StudentDashboardSkeleton, CarouselSkeleton } from "@/app/student/_components/Skeletons";
-import { useOnboardingStatus } from "@/hooks/use-onboarding";
+import { useOnboardingStatus } from "@/hooks/use-profile";
 
 const StudentDashboard = () => {
   const [filter, setFilter] = useState<'enrolled' | 'completed'>('enrolled');
@@ -44,6 +44,8 @@ const StudentDashboard = () => {
   const { studentData: studentProfile } = useLazyLoadedStudentData();
   const { isStudentEnrolledInOneCourse } = useIsStudentEnrolledInOneCourseStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const stayOnDashboard = searchParams.get('stay') === 'dashboard';
 
   const filteredBootcamps = filter === 'enrolled'
     ? studentData?.inProgressBootcamps || []
@@ -53,10 +55,10 @@ const StudentDashboard = () => {
   const displayProgress = simulationProgress ? parseInt(simulationProgress, 10) : Math.round(progress);
 
   useEffect(() => {
-    if (isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
+    if (!stayOnDashboard && isStudentEnroledInOneBootcamp && isStudentEnrolledInOneCourse) {
       router.push(`/student/course/${studentData?.inProgressBootcamps[0].id}`);
     }
-  }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, studentData?.inProgressBootcamps]);
+  }, [isStudentEnroledInOneBootcamp, isStudentEnrolledInOneCourse, router, stayOnDashboard, studentData?.inProgressBootcamps]);
 
   const handleEnrollCourse = async (bootcampId: number) => {
     if (!bootcampId || isEnrolling) return;
