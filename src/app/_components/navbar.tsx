@@ -5,6 +5,7 @@ import {
     Layers,
     Settings,
     Database,
+    Bell,
 } from 'lucide-react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -47,15 +48,15 @@ const Navbar = () => {
         await Logout()
     }
 
-    const superAdminRoutes = [
-        {
-            name: 'Organizations',
-            href: `/${role}/organizations`,
-            icon: Layers,
-            active: (pathname: string) =>
-                pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
-        },
-    ]
+    // const superAdminRoutes: any[] = [
+    //     {
+    //         name: 'Organizations',
+    //         href: `/${role}/organizations`,
+    //         icon: Layers,
+    //         active: (pathname: string) =>
+    //             pathname === `/${role}/organizations` || pathname.startsWith(`/${role}/organizations/`),
+    //     },
+    // ]
 
     const adminRoutes = [
         {
@@ -86,7 +87,7 @@ const Navbar = () => {
         },
     ]
 
-    const routes = inOrg ? adminRoutes : superAdminRoutes;
+    const routes = inOrg ? adminRoutes : [];
 
     useEffect(() => {
         let isMounted = true;
@@ -121,7 +122,7 @@ const Navbar = () => {
             <div className="flex h-16 items-center justify-between px-6">
                 <div className="flex items-center gap-2">
                     {/* Logo and Brand */}
-                    <Link href={`/${role}/courses`} className="flex items-center space-x-3">
+                    <Link href={isSuperAdmin ? `/${role}/organizations` : `/${role}/organizations/${orgId}/courses`} className="flex items-center space-x-3">
                           <Image src={'/zuvy-logo-horizontal.png'} height={100} width={100} alt='zuvylogo'/>
                     </Link>
 
@@ -182,7 +183,7 @@ const Navbar = () => {
                     )} */}
                     <Badge
                         // variant="yellow"
-                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200"
+                        className="py-1 px-4 text-sm font-medium bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100"
                     >
                         {formattedRole(role)}
                     </Badge>
@@ -201,6 +202,22 @@ const Navbar = () => {
                         >
                             <Settings className="h-4 w-4" />
                             <span>Setting</span>
+                        </Link>
+                    )}
+
+                    {/* Audit Log Header */}
+                    {inOrg && (
+                        <Link
+                            href={`/${role}/organizations/${orgId}/auditLog`}
+                            className={cn(
+                                'flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
+                                pathname === `/${role}/organizations/${orgId}/auditLog`
+                                    ? 'bg-primary text-primary-foreground shadow-sm'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-gray-100'
+                            )}
+                        >
+                            <Bell className="h-4 w-4" />
+                            <span>Audit Log</span>
                         </Link>
                     )}
                     

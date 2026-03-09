@@ -401,14 +401,23 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
         }
     }, [isZuvyManaged])
 
+    const MAX_NAME_LENGTH = 30
+
+    const validateEmail = (email: string) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return re.test(email.toLowerCase())
+    }
+
     const isFormValid =
         newUser.orgName.trim().length > 0 &&
         newUser.name.trim().length > 0 &&
-        newUser.email.trim().length > 0 &&
+        newUser.name.trim().length <= MAX_NAME_LENGTH &&
+        validateEmail(newUser.email.trim()) &&
         !!pendingUserRole &&
         (!isZuvyManaged ||
             (newUser.assigneeName.trim().length > 0 &&
-                newUser.assigneeEmail.trim().length > 0))
+                newUser.assigneeName.trim().length <= MAX_NAME_LENGTH &&
+                validateEmail(newUser.assigneeEmail.trim())))
 
     // Check if there are changes (for edit mode)
     const hasChanges = isEditMode && (
@@ -420,9 +429,9 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
         newUser.assigneeEmail.trim() !== (freshUserData?.zuvyPocEmail?.trim() || '')
     )
 
-    // In edit mode, button should be enabled only if there are changes
+    // In edit mode, button should be enabled only if there are changes AND the form is valid
     // In add mode, button should be enabled if form is valid
-    const canSubmit = isEditMode ? hasChanges : isFormValid
+    const canSubmit = isFormValid && (isEditMode ? hasChanges : true)
 
     const iconList = [
         User,
@@ -624,8 +633,11 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                     value={newUser.name}
                                     onChange={handleInputChange}
                                     placeholder="Enter full name"
-                                    className="mt-2"
+                                    className={`mt-2 ${newUser.name.trim().length > MAX_NAME_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                                 />
+                                {newUser.name.trim().length > MAX_NAME_LENGTH && (
+                                    <p className="text-red-500 text-xs mt-1">Name cannot exceed {MAX_NAME_LENGTH} characters</p>
+                                )}
                             </div>
                             <div className="text-left">
                                 <p className="text-[14px]">
@@ -634,6 +646,7 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                 <Input
                                     id="email"
                                     name="email"
+                                    type="email"
                                     value={newUser.email}
                                     onChange={handleInputChange}
                                     placeholder="Enter email address"
@@ -655,14 +668,18 @@ const AddOrganization: React.FC<AddUserModalProps> = ({
                                             value={newUser.assigneeName}
                                             onChange={handleInputChange}
                                             placeholder="Enter full name"
-                                            className="mt-2"
+                                            className={`mt-2 ${newUser.assigneeName.trim().length > MAX_NAME_LENGTH ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
                                         />
+                                        {newUser.assigneeName.trim().length > MAX_NAME_LENGTH && (
+                                            <p className="text-red-500 text-xs mt-1">Name cannot exceed {MAX_NAME_LENGTH} characters</p>
+                                        )}
                                     </div>
 
                                     <div className="text-left">
                                         <p className="text-[14px]">Email Id *</p>
                                         <Input
                                             name="assigneeEmail"
+                                            type="email"
                                             value={newUser.assigneeEmail}
                                             onChange={handleInputChange}
                                             placeholder="Enter email address"

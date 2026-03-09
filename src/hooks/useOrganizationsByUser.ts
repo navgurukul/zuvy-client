@@ -33,7 +33,7 @@ export interface OrganizationsResponse {
     data: Organization[]
 }
 
-export function useOrganizationsByUser(userId: number | null, search?: string) {
+export function useOrganizationsByUser(userId: number | null, search?: string, all?: boolean) {
     const [organizations, setOrganizations] = useState<Organization[]>([])
     const [loading, setLoading] = useState<boolean>(false)
     const [error, setError] = useState<unknown>(null)
@@ -47,6 +47,7 @@ export function useOrganizationsByUser(userId: number | null, search?: string) {
             setError(null)
             const queryParams = new URLSearchParams()
             if (searchTerm) queryParams.append('search', searchTerm)
+
             const url = `/org/getOrgByUserId/${userId}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
             const res = await api.get<OrganizationsResponse>(url)
 

@@ -35,6 +35,8 @@ import {
     TrendingUp,
     Megaphone,
 } from 'lucide-react'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 type AddUserModalProps = {
   isEditMode: boolean;
@@ -98,11 +100,21 @@ const RoleCard: React.FC<RoleCardProps> = ({
 const AddUserModal: React.FC<AddUserModalProps> = ({ 
     isEditMode, 
     user, 
-    orgId,
+    orgId: propOrgId,
     refetchUsers, 
     onClose,
     isOpen = false,
 }) => {
+    const { organizationId } = useParams()
+    const { user: currentUser } = getUser()
+    const currentUserRole = currentUser?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = currentUserRole === 'super_admin'
+
+    const orgId =
+        isSuperAdmin
+            ? Number(organizationId ?? propOrgId)
+            : currentUser?.orgId
+
     const { roles, loading: rolesLoading } = useRoles()
     const [pendingUserRole, setPendingUserRole] = useState<number | null>(null)
     const [freshUserData, setFreshUserData] = useState<any>(null)
@@ -247,7 +259,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             name: newUser.name.trim(),
             email: newUser.email.trim(),
             roleId: pendingUserRole,
-            orgId: user?.orgId,
+            orgId,
         }
 
         try {
@@ -285,7 +297,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
             name: newUser.name.trim(),
             email: newUser.email.trim(),
             roleId: pendingUserRole,
-            orgId: orgId,
+            orgId,
         }
 
         try {
