@@ -85,6 +85,7 @@ export interface Course {
     coverImage: string 
     id: number
     students_in_bootcamp: number
+    code: string
 }
 export interface CourseData {
     name: string

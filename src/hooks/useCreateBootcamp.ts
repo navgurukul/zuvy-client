@@ -2,8 +2,6 @@
 import { useCallback, useState } from 'react'
 import { api } from '@/utils/axios.config'
 import type { CourseData } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/submissionVideo/submissionVideoIdPageType'
-import { getUser } from '@/store/store'
-import { useParams } from 'next/navigation'
 
 type CreateResponse = {
     status: string
@@ -12,11 +10,6 @@ type CreateResponse = {
 }
 
 export function useCreateBootcamp() {
-    const { organizationId } = useParams()
-    const { user } = getUser()
-    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
-    const isSuperAdmin = userRole === 'super_admin';
-    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [creating, setCreating] = useState(false)
     const [error, setError] = useState<unknown>(null)
 
@@ -24,7 +17,7 @@ export function useCreateBootcamp() {
         setCreating(true)
         setError(null)
         try {
-            const res = await api.post<CreateResponse>(`/bootcamp/all/${orgId}`, courseData)
+            const res = await api.post<CreateResponse>(`/bootcamp`, courseData)
             return res.data
         } catch (err) {
             setError(err)

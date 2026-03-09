@@ -16,6 +16,7 @@ import { useSearchWithSuggestions } from '@/utils/useUniversalSearchDynamic'
 import { api } from '@/utils/axios.config'
 import { useSearchParams, useRouter } from 'next/navigation'
 import MultiSelector from '@/components/ui/multi-selector'
+import { OFFSET, POSITION } from '@/utils/constant'
 
 // Add interface for filter options
 interface FilterOption {
@@ -26,11 +27,11 @@ interface FilterOption {
 export default function OrganizationsPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    
+
     // Get page and limit from URL
     const currentPage = useMemo(() => parseInt(searchParams.get('page') || '1'), [searchParams])
-    const limit = useMemo(() => parseInt(searchParams.get('limit') || '10'), [searchParams])
-    
+    const limit = useMemo(() => parseInt(searchParams.get('limit') ?? POSITION), [searchParams])
+
     const [currentSearchQuery, setCurrentSearchQuery] = useState<string>('')
     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
     const [isEditMode, setIsEditMode] = useState(false)
@@ -72,13 +73,13 @@ export default function OrganizationsPage() {
         const newParams = new URLSearchParams(searchParams.toString())
         newParams.set('page', String(page))
         newParams.set('limit', String(newLimit || limit))
-        
+
         if (filters) {
             newParams.set('filterType', filters)
         } else {
             newParams.delete('filterType')
         }
-        
+
         router.replace(`?${newParams.toString()}`)
     }, [searchParams, router, limit])
 
@@ -87,7 +88,7 @@ export default function OrganizationsPage() {
         if (urlInitialized) return
 
         const urlFilter = searchParams.get('filterType')
-        
+
         if (urlFilter) {
             const filterValues = urlFilter.split(',')
             const matchedOptions = filterValues
@@ -125,13 +126,13 @@ export default function OrganizationsPage() {
             const queryParams = new URLSearchParams()
             queryParams.append('search', query)
             queryParams.append('limit', '10')
-            
+
             // ADD CURRENT FILTER TO SUGGESTIONS API CALL
             const currentFilter = getFilterQuery()
             if (currentFilter) {
                 queryParams.append('filterType', currentFilter)
             }
-            
+
             const response = await api.get(`/org/getAllOrgs?${queryParams.toString()}`)
             return response.data.data || []
         } catch (error) {
@@ -210,25 +211,30 @@ export default function OrganizationsPage() {
     }, [organizations])
 
     const management = [
-        {name: 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform'}, 
-        {name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform'}
+        { name: 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform' },
+        { name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform' }
     ]
 
-    const handleEdit = (org: any) => {
+    const handleEdit = useCallback((org: any) => {
         setEditingOrg(org)
         setIsEditMode(true)
         setIsAddModalOpen(true)
-    }
+    }, [])
 
-    const handleDelete = (org: any) => {
+    const handleDelete = useCallback((org: any) => {
         setDeleteModal({
             isOpen: true,
             organizationId: org.id,
             organizationName: org.name
         })
-    }
+    }, [])
 
-    const columns = useMemo(() => createColumns(management, handleEdit, handleDelete), [management])
+    const handleUpdateSuccess = useCallback(() => {
+        const filterQuery = getFilterQuery()
+        fetchOrganizations(currentSearchQuery, currentPage, limit, filterQuery)
+    }, [currentSearchQuery, currentPage, limit, fetchOrganizations])
+
+    const columns = useMemo(() => createColumns(management, handleEdit, handleDelete, handleUpdateSuccess), [management, handleEdit, handleDelete, handleUpdateSuccess])
 
     const handleCloseModal = () => {
         setIsAddModalOpen(false)
@@ -299,19 +305,19 @@ export default function OrganizationsPage() {
                         bootcampId={0}
                         isOpen={deleteModal.isOpen}
                         onClose={handleCloseDeleteModal}
-                        setSelectedRows={() => {}}
+                        setSelectedRows={() => { }}
                     />
 
                     {/* Add Organization Dialog */}
                     <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
                         <DialogTrigger asChild>
-                            <Button onClick={() => { setIsEditMode(false)}} >
+                            <Button onClick={() => { setIsEditMode(false) }} >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Add Organisation
                             </Button>
                         </DialogTrigger>
                         {isAddModalOpen && (
-                            <AddOrganization  
+                            <AddOrganization
                                 isEditMode={isEditMode}
                                 management={management}
                                 user={editingOrg}
@@ -339,7 +345,7 @@ export default function OrganizationsPage() {
                             inputWidth="w-full"
                         />
                     </div>
-                    
+
                     {/* MultiSelector for Management Type Filter */}
                     <div className="w-[200px] flex-shrink-0">
                         <MultiSelector
@@ -349,7 +355,7 @@ export default function OrganizationsPage() {
                             options={managementTypeOptions}
                             selectedOptions={managementTypeFilter}
                             handleOptionClick={handleManagementTypeFilter}
-                            type="Management Type"
+                            type="managementType"
                         />
                     </div>
                 </div>
@@ -379,7 +385,7 @@ export default function OrganizationsPage() {
                             columns={columns}
                             data={transformedOrganizations}
                         />
-                        
+
                         <DataTablePagination
                             totalStudents={totalCount}
                             lastPage={totalPages}
@@ -392,199 +398,3 @@ export default function OrganizationsPage() {
         </div>
     );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// 'use client';
-
-// import React, { useState, useMemo } from 'react';
-// import { Search, Plus, Edit2, Trash2 } from 'lucide-react';
-// import { DataTable } from '@/app/_components/datatable/data-table';
-// // import type { User } from './columns'
-// import { createColumns } from './columns'
-// import { Dialog, DialogTrigger } from '@/components/ui/dialog'
-// import { Button } from '@/components/ui/button'
-// import AddOrganization from './_components/AddOrganization';
-// import { Description } from '@radix-ui/react-toast';
-
-
-// interface Organization {
-//     id: string;
-//     name: string;
-//     code: string;
-//     managementType: 'Self Managed' | 'Zuvy Managed';
-//     poc: {
-//         name: string;
-//         email: string;
-//     };
-//     assignee?: {
-//         name: string;
-//         email: string;
-//     };
-//     createdAt: string;
-// }
-
-// const mockOrganizations: Organization[] = [
-//     {
-//         id: '1',
-//         name: 'Amazon Future Engineer',
-//         code: 'AF',
-//         managementType: 'Self Managed',
-//         poc: { name: 'John Doe', email: 'john.doe@amazon.com' },
-//         assignee: { name: 'Alex Kumar', email: 'alex.kumar@zuvy.com' },
-//         createdAt: '2024-01-15',
-//     },
-//     {
-//         id: '2',
-//         name: 'Microsoft',
-//         code: 'M',
-//         managementType: 'Zuvy Managed',
-//         poc: { name: 'Sarah Smith', email: 'sarah.smith@microsoft.com' },
-//         assignee: { name: 'Alex Kumar', email: 'alex.kumar@zuvy.com' },
-//         createdAt: '2024-02-20',
-//     },
-//     {
-//         id: '3',
-//         name: 'Global Solutions Inc',
-//         code: 'GS',
-//         managementType: 'Self Managed',
-//         poc: { name: 'Michael Johnson', email: 'michael@globalsolutions.com' },
-//         assignee: { name: 'Priya Sharma', email: 'priya.sharma@zuvy.com' },
-//         createdAt: '2024-03-10',
-//     },
-//     {
-//         id: '4',
-//         name: 'Enterprise Solutions',
-//         code: 'ES',
-//         managementType: 'Self Managed',
-//         poc: { name: 'David Wilson', email: 'david.wilson@enterprisesol.com' },
-//         assignee: { name: 'Priya Sharma', email: 'priya.sharma@zuvy.com' },
-//         createdAt: '2024-05-12',
-//     },
-// ];
-
-// export default function OrganizationsPage() {
-//     const [searchTerm, setSearchTerm] = useState('');
-//     const [filterType, setFilterType] = useState('All Types');
-//     const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-//     const [isEditMode, setIsEditMode] = useState(false)
-//     const [editingOrg, setEditingOrg] = useState<any>(null) // Add this state
-
-//     const filtered = mockOrganizations.filter((org) =>
-//         org.name.toLowerCase().includes(searchTerm.toLowerCase())
-//     );
-
-//     const management = [{name : 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform'}, {name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform'}]
-
-//     const handleEdit = (org: any) => {
-//         setEditingOrg(org)
-//         setIsEditMode(true)
-//         setIsAddModalOpen(true)
-//     }
-
-//     const columns = useMemo(() => createColumns(management, handleEdit), [management]) // Pass handleEdit
-
-//     const handleCloseModal = () => {
-//         setIsAddModalOpen(false)
-//         setEditingOrg(null) // Reset editing org
-//         setIsEditMode(false)
-//     }
-
-//     // const columns = createColumns(
-//     //     roles,
-//     //     rolesLoading,
-//     //     handleRoleChange,
-//     //     handleEdit,
-//     //     handleDelete,
-//     //     refreshData
-//     // )
-
-//     return (
-//         <div className="p-8">
-//             <div className="mx-auto">
-//                 <div className="flex justify-between items-start mb-8">
-//                     <div>
-//                         <h1 className="text-3xl font-bold text-gray-900 mb-2 text-start">
-//                             Organisations ({mockOrganizations.length})
-//                         </h1>
-//                         <p className="text-gray-600">Manage organisations onboarded on the platform</p>
-//                     </div>
-//                     <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-//                         <DialogTrigger asChild>
-//                             <Button onClick={() => { setIsEditMode(false)}} >
-//                                 <Plus className="w-4 h-4 mr-2" />
-//                                 Add Organisation
-//                             </Button>
-//                         </DialogTrigger>
-//                         {isAddModalOpen && (
-//                             // <AddUserModal 
-//                             //     isEditMode={isEditMode}
-//                             //     user={user}
-//                             //     isOpen={isAddModalOpen}
-//                             //     refetchUsers={() => {
-//                             //         refetchUsers(offset)
-//                             //         handleCloseModal()
-//                             //     }} 
-//                             //     onClose={handleCloseModal}
-//                             // />
-//                             <AddOrganization  
-//                                 isEditMode={isEditMode}
-//                                 management={management}
-//                                 user={editingOrg} // Pass the editing organization
-//                                 isOpen={isAddModalOpen}
-//                                 // refetchUsers={() => {
-//                                 //     refetchUsers(offset)
-//                                 //     handleCloseModal()
-//                                 // }} 
-//                                 onClose={handleCloseModal}
-//                             />
-//                         )}
-//                     </Dialog>
-//                 </div>
-
-//                 <div className="flex gap-4 mb-6">
-//                     <div className="flex-1 relative">
-//                         <Search className="absolute left-3 top-3 text-gray-400" size={20} />
-//                         <input
-//                             type="text"
-//                             placeholder="Search organisations..."
-//                             value={searchTerm}
-//                             onChange={(e) => setSearchTerm(e.target.value)}
-//                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
-//                         />
-//                     </div>
-//                     <select
-//                         value={filterType}
-//                         onChange={(e) => setFilterType(e.target.value)}
-//                         className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 bg-white"
-//                     >
-//                         <option>All Types</option>
-//                         <option>Self Managed</option>
-//                         <option>Zuvy Managed</option>
-//                     </select>
-//                 </div>
-
-//                 <DataTable
-//                     columns={columns}
-//                     data={mockOrganizations}
-//                 />
-//             </div>
-//         </div>
-//     );
-// }

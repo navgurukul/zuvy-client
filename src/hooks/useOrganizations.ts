@@ -39,6 +39,7 @@ interface UseOrganizationsParams {
     limit?: number
     page?: number
     auto?: boolean
+    all?: boolean
 }
 
 export const useOrganizations = (params: UseOrganizationsParams = {}) => {
@@ -59,14 +60,16 @@ export const useOrganizations = (params: UseOrganizationsParams = {}) => {
 
             const queryParams = new URLSearchParams()
             if (searchTerm) queryParams.append('search', searchTerm)
-            if (limit) queryParams.append('limit', limit.toString())
-            if (page) queryParams.append('page', page.toString())
+            if (!params.all) {
+                if (limit) queryParams.append('limit', limit.toString())
+                if (page) queryParams.append('page', page.toString())
+            }
             if (filterType) queryParams.append('filterType', filterType) // Add filter parameter
 
             const url = `/org/getAllOrgs${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-            
+
             const response = await api.get<ApiResponse>(url)
-            
+
             if (response.data.status === 'success') {
                 setOrganizations(response.data.data)
                 setTotalCount(response.data.meta.total)

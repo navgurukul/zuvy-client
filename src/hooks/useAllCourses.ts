@@ -23,6 +23,7 @@ export function useAllCourses(initialFetch = true) {
     const getAllCourses = useCallback(async () => {
         try {
             setLoading(true)
+            if(orgId === undefined) return []
             const res = await api.get<CoursesResponse>(
                 // '/bootcamp?limit=10&offset=0'
                  `/bootcamp/all/${orgId}`

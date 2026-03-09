@@ -39,8 +39,9 @@ import {
 // ): ColumnDef<User>[] => [
 export const createColumns = (
     management: any[],
-    onEdit?: (org: any) => void,  // Add this parameter
-    onDelete?: (org: any) => void // Add this parameter
+    onEdit?: (org: any) => void,
+    onDelete?: (org: any) => void,
+    onUpdateSuccess?: () => void
 ): ColumnDef<Org>[] => [
     {
       accessorKey: 'organisation',
@@ -81,11 +82,15 @@ export const createColumns = (
         accessorKey: 'managementType',
         header: 'Management Type',
         cell: ({ row }) => {
-            // const managementType = row.getValue('managementType') as string
             const managementType = row.original.managementType
-            // const roleId = row.original.roleId
-            return <UpdateManagementType managementType={managementType} management={management} />
-            // <ChangeUserRole role={role} roles={roles} rolesLoading={rolesLoading} userId={userId} roleId={roleId} onRoleUpdate={refreshData} />
+            return (
+                <UpdateManagementType 
+                    org={row.original} 
+                    managementType={managementType} 
+                    management={management} 
+                    onUpdateSuccess={onUpdateSuccess}
+                />
+            )
         },
     },
     {

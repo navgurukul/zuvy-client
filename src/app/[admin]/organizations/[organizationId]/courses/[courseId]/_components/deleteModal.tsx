@@ -74,7 +74,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                 >
-                    <div className="fixed inset-0 bg-white/30 backdrop-blur-sm transition-opacity" />
+                    <div className="fixed inset-0 bg-black/5  transition-opacity" />
 
                 </Transition.Child>
 
@@ -89,7 +89,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left   shadow-[0_10px_25px_rgba(0,0,0,0.08),0_4px_10px_rgba(0,0,0,0.05)] transition-all">
+                            <Dialog.Panel className="relative w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 text-left transition-all">
                                 {/* Close button */}
                                 <button
                                     onClick={onClose}

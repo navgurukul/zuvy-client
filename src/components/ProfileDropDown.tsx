@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getUserInitials } from '@/utils/common'
+import { formattedRole } from '@/lib/utils'
 
 interface ProfileDropDownProps {
     studentData: any
@@ -66,7 +67,8 @@ const ProfileDropDown = ({
                                 Role
                             </p>
                             <p className="text-sm capitalize">
-                                {studentData?.rolesList?.join(', ')}
+                                {/* {studentData?.rolesList?.join(', ')} */}
+                                {formattedRole(studentData?.rolesList?.[0] || '')}
                             </p>
                         </div>
                     </DropdownMenuLabel>

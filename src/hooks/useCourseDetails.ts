@@ -7,8 +7,15 @@ import {
     UpdateCourseResponse,
     ImageUploadResponse,
 } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/details/courseDetailType'
+import { getUser } from '@/store/store'
+import { useParams } from 'next/navigation'
 
 export const useCourseDetails = () => {
+    const { organizationId } = useParams()
+    const { user } = getUser()
+    const userRole = user?.rolesList?.[0]?.toLowerCase() || ''
+    const isSuperAdmin = userRole === 'super_admin';
+    const orgId = isSuperAdmin ? organizationId : user?.orgId 
     const [isLoading, setIsLoading] = useState(false)
     const [isImageUploading, setIsImageUploading] = useState(false)
     const { Permissions, courseData, setCourseData } = getCourseData()
@@ -93,7 +100,7 @@ export const useCourseDetails = () => {
             }
 
             const response = await api.patch<UpdateCourseResponse>(
-                `/bootcamp/${courseData?.id}`,
+                `/bootcamp/${courseData?.id}/${orgId}`,
                 {
                     ...data,
                     coverImage,
