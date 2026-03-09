@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 interface CreateProblemFormProps {
   onClose: () => void;
@@ -118,7 +119,9 @@ const availableDomains = [
 export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedDifficulty] = useState<Difficulty>('Medium');
-  const { generateQuestions, isLoading, error } = useGenerateMcqQuestions();
+  const searchParams = usePathname();
+  const organizationId = +searchParams.split('/')[3] || 0;
+  const { generateQuestions, isLoading, error  } = useGenerateMcqQuestions(organizationId);
   
   // State to track question count for each topic
   const [topicQuestionCounts, setTopicQuestionCounts] = useState<{ [key: string]: number }>({});

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { use, useState } from 'react';
 
 interface GenerateMcqPayload {
   domainName: string;
@@ -30,9 +31,10 @@ interface UseGenerateMcqQuestionsReturn {
   generateQuestions: (payload: GenerateMcqPayload) => Promise<any>;
   isLoading: boolean;
   error: string | null;
+  organizationId: number;
 }
 
-export const useGenerateMcqQuestions = (): UseGenerateMcqQuestionsReturn => {
+export const useGenerateMcqQuestions = (organizationId: number): UseGenerateMcqQuestionsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,7 +43,7 @@ export const useGenerateMcqQuestions = (): UseGenerateMcqQuestionsReturn => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:5000/questions/generate', {
+      const response = await fetch(`http://localhost:5000/questions/generate?orgId=${organizationId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,6 +70,6 @@ export const useGenerateMcqQuestions = (): UseGenerateMcqQuestionsReturn => {
   return {
     generateQuestions,
     isLoading,
-    error,
+    error,  organizationId,
   };
 };
