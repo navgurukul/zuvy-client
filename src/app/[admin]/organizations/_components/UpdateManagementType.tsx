@@ -19,9 +19,10 @@ type roleCellProps = {
     managementType: string;
     management: any;
     onUpdateSuccess?: () => void;
+    onEdit?: (org: any) => void;
 };
 
-export const UpdateManagementType = ({ org, managementType, management, onUpdateSuccess }: roleCellProps) => {
+export const UpdateManagementType = ({ org, managementType, management, onUpdateSuccess, onEdit }: roleCellProps) => {
     const { updateOrgById } = useOrgSettings()
     const [isUpdating, setIsUpdating] = useState(false)
     const [originalRole, setOriginalRole] = useState(managementType)
@@ -50,6 +51,7 @@ export const UpdateManagementType = ({ org, managementType, management, onUpdate
             }
 
             const response = await updateOrgById(org.id, payload)
+            isZuvyManaged && onEdit?.(selectedRole)
 
             if (response.status === 200) {
                 // Update original management type after successful save

@@ -8,7 +8,6 @@ import { createColumns } from './columns'
 import { Dialog, DialogTrigger } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import AddOrganization from './_components/AddOrganization';
-import { DeleteModalDialog } from '@/app/[admin]/organizations/[organizationId]/courses/[courseId]/(courseTabs)/students/components/deleteModal'
 import { useOrganizations, Organization } from '@/hooks/useOrganizations'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SearchBox } from '@/utils/searchBox'
@@ -44,13 +43,13 @@ export default function OrganizationsPage() {
 
     // Add filter state for management type
     const [managementTypeFilter, setManagementTypeFilter] = useState<FilterOption[]>([
-        { value: 'all', label: 'All Types' }
+        { value: 'all', label: 'All Organisations' }
     ])
     const [urlInitialized, setUrlInitialized] = useState(false)
 
     // Management type options
     const managementTypeOptions: FilterOption[] = [
-        { value: 'all', label: 'All Types' },
+        { value: 'all', label: 'All Organisations' },
         { value: 'self_manage', label: 'Self Managed' },
         { value: 'zuvy_manage', label: 'Zuvy Managed' }
     ]
@@ -96,12 +95,13 @@ export default function OrganizationsPage() {
                 .filter(Boolean) as FilterOption[]
 
             if (matchedOptions.length > 0) {
-                setManagementTypeFilter(matchedOptions)
+                // Ensure single selection from URL as well
+                setManagementTypeFilter([matchedOptions[0]])
             } else {
-                setManagementTypeFilter([{ value: 'all', label: 'All Types' }])
+                setManagementTypeFilter([{ value: 'all', label: 'All Organisations' }])
             }
         } else {
-            setManagementTypeFilter([{ value: 'all', label: 'All Types' }])
+            setManagementTypeFilter([{ value: 'all', label: 'All Organisations' }])
         }
 
         setUrlInitialized(true)
@@ -162,18 +162,13 @@ export default function OrganizationsPage() {
         defaultFetchApi,
     })
 
-    // Handle management type filter
+    // Handle management type filter - Enforce single selection
     const handleManagementTypeFilter = (option: FilterOption) => {
         if (option.value === 'all') {
             setManagementTypeFilter([option])
         } else {
-            if (managementTypeFilter.some(item => item.value === 'all')) {
-                setManagementTypeFilter([option])
-            } else if (managementTypeFilter.some(item => item.value === option.value)) {
-                setManagementTypeFilter(managementTypeFilter.filter(item => item.value !== option.value))
-            } else {
-                setManagementTypeFilter([...managementTypeFilter, option])
-            }
+            // If selecting a specific type, replace any existing selection
+            setManagementTypeFilter([option])
         }
     }
 
@@ -210,10 +205,10 @@ export default function OrganizationsPage() {
         }))
     }, [organizations])
 
-    const management = [
+    const management = useMemo(() => [
         { name: 'Self Managed', id: 1, description: 'Organisations who manage all functions on the platform' },
         { name: 'Zuvy Managed', id: 2, description: 'Organisations for whom Zuvy manages all functions on the platform' }
-    ]
+    ], [])
 
     const handleEdit = useCallback((org: any) => {
         setEditingOrg(org)
@@ -296,17 +291,6 @@ export default function OrganizationsPage() {
                         </h1>
                         <p className="text-gray-600">Manage organisations onboarded on the platform</p>
                     </div>
-
-                    {/* Delete Modal */}
-                    <DeleteModalDialog
-                        title="Confirm Delete"
-                        description={`Are you sure you want to delete the organisation "${deleteModal.organizationName}"? This action cannot be undone.`}
-                        userId={deleteModal.organizationId ? [Number(deleteModal.organizationId)] : []}
-                        bootcampId={0}
-                        isOpen={deleteModal.isOpen}
-                        onClose={handleCloseDeleteModal}
-                        setSelectedRows={() => { }}
-                    />
 
                     {/* Add Organization Dialog */}
                     <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
