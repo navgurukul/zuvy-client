@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Loader2, Sparkles, Brain, Zap } from 'lucide-react';
+import { X, Loader2, Sparkles, Brain, Zap, ChevronDown, ChevronRight, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -126,6 +126,14 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   // State to track question count for each topic
   const [topicQuestionCounts, setTopicQuestionCounts] = useState<{ [key: string]: number }>({});
   
+  // State to track difficulty distribution for each topic
+  const [topicDifficultyDistributions, setTopicDifficultyDistributions] = useState<{ 
+    [key: string]: { easy: number; medium: number; hard: number } 
+  }>({});
+  
+  // State to track which topics have expanded difficulty configuration
+  const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
+  
   // Initialize form with react-hook-form and zod
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -170,6 +178,151 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     }));
   };
   
+  // Initialize default difficulty distribution for a topic
+  const initializeTopicDifficulty = (topic: string) => {
+    setTopicDifficultyDistributions(prev => {
+      if (!prev[topic]) {
+        return {
+          ...prev,
+          [topic]: { easy: 10, medium: 40, hard: 50 }
+        };
+      }
+      return prev;
+    });
+  };
+  
+  // Toggle topic difficulty configuration expansion
+  const toggleTopicExpansion = (topic: string) => {
+    setExpandedTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topic)) {
+        newSet.delete(topic);
+      } else {
+        newSet.add(topic);
+        // Ensure the topic has a difficulty distribution
+        if (!topicDifficultyDistributions[topic]) {
+          initializeTopicDifficulty(topic);
+        }
+      }
+      return newSet;
+    });
+  };
+  
+  // Handle per-topic difficulty change
+  const handleTopicDifficultyChange = (
+    topic: string,
+    difficulty: 'easy' | 'medium' | 'hard',
+    value: number
+  ) => {
+    const clampedValue = Math.max(0, Math.min(100, value));
+    
+    setTopicDifficultyDistributions(prev => {
+      const currentDist = prev[topic] || { easy: 10, medium: 40, hard: 50 };
+      const newDistribution = { ...currentDist };
+      
+      // Set the new value
+      newDistribution[difficulty] = clampedValue;
+      
+      // Calculate remaining percentage for other difficulties
+      const remaining = 100 - clampedValue;
+      
+      // Get other difficulties
+      const otherDifficulties = ['easy', 'medium', 'hard'].filter(d => d !== difficulty) as ('easy' | 'medium' | 'hard')[];
+      
+      if (remaining < 0) {
+        newDistribution[difficulty] = 100;
+        if (difficulty !== 'easy') newDistribution.easy = 0;
+        if (difficulty !== 'medium') newDistribution.medium = 0;
+        if (difficulty !== 'hard') newDistribution.hard = 0;
+      } else if (remaining === 0) {
+        if (difficulty !== 'easy') newDistribution.easy = 0;
+        if (difficulty !== 'medium') newDistribution.medium = 0;
+        if (difficulty !== 'hard') newDistribution.hard = 0;
+      } else {
+        const otherTotal = otherDifficulties.reduce((sum, d) => sum + newDistribution[d], 0);
+        
+        if (otherTotal === 0) {
+          const equalShare = Math.floor(remaining / otherDifficulties.length);
+          const remainder = remaining - (equalShare * otherDifficulties.length);
+          
+          otherDifficulties.forEach((d, index) => {
+            newDistribution[d] = equalShare + (index === 0 ? remainder : 0);
+          });
+        } else {
+          let distributed = 0;
+          otherDifficulties.forEach((d, index) => {
+            if (index === otherDifficulties.length - 1) {
+              newDistribution[d] = remaining - distributed;
+            } else {
+              const proportion = newDistribution[d] / otherTotal;
+              const newValue = Math.round(remaining * proportion);
+              newDistribution[d] = newValue;
+              distributed += newValue;
+            }
+          });
+        }
+      }
+      
+      // Final validation
+      const sum = newDistribution.easy + newDistribution.medium + newDistribution.hard;
+      if (sum !== 100) {
+        const adjustment = 100 - sum;
+        newDistribution[otherDifficulties[0]] = Math.max(0, newDistribution[otherDifficulties[0]] + adjustment);
+      }
+      
+      return {
+        ...prev,
+        [topic]: newDistribution
+      };
+    });
+  };
+  
+  // Get difficulty distribution for a topic (use global as fallback)
+  const getTopicDifficulty = (topic: string) => {
+    return topicDifficultyDistributions[topic] || difficultyDistribution;
+  };
+  
+  // Calculate question counts for a specific topic
+  const getTopicQuestionCounts = (topic: string) => {
+    const topicTotal = topicQuestionCounts[topic] || 0;
+    const dist = getTopicDifficulty(topic);
+    
+    if (topicTotal === 0) {
+      return { easy: 0, medium: 0, hard: 0 };
+    }
+    
+    const easyRaw = (dist.easy / 100) * topicTotal;
+    const mediumRaw = (dist.medium / 100) * topicTotal;
+    const hardRaw = (dist.hard / 100) * topicTotal;
+    
+    let easy = Math.round(easyRaw);
+    let medium = Math.round(mediumRaw);
+    let hard = Math.round(hardRaw);
+    
+    const sum = easy + medium + hard;
+    const diff = topicTotal - sum;
+    
+    if (diff !== 0) {
+      const fractions = [
+        { type: 'easy', value: easyRaw - easy, count: easy },
+        { type: 'medium', value: mediumRaw - medium, count: medium },
+        { type: 'hard', value: hardRaw - hard, count: hard }
+      ];
+      
+      fractions.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+      
+      if (fractions[0].type === 'easy') easy += diff;
+      else if (fractions[0].type === 'medium') medium += diff;
+      else hard += diff;
+    }
+    
+    return { 
+      easy: Math.max(0, easy), 
+      medium: Math.max(0, medium), 
+      hard: Math.max(0, hard) 
+    };
+  };
+  
   // Handle topic removal
   const handleTopicRemove = (topic: string) => {
     // Remove from form array
@@ -181,6 +334,13 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       const newCounts = { ...prev };
       delete newCounts[topic];
       return newCounts;
+    });
+    
+    // Remove from difficulty distributions
+    setTopicDifficultyDistributions(prev => {
+      const newDistributions = { ...prev };
+      delete newDistributions[topic];
+      return newDistributions;
     });
     
     // Update form with validation
@@ -202,46 +362,18 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       [topic]: 5
     }));
     
+    // Initialize difficulty distribution for this topic
+    initializeTopicDifficulty(topic);
+    
     return newTopics;
   };
 
-  // Difficulty distribution state (percentages)
+  // Global difficulty distribution state (percentages) - used as default for new topics
   const [difficultyDistribution, setDifficultyDistribution] = useState({
     easy: 10,
     medium: 40,
     hard: 50,
   });
-
-  // Calculate actual question counts based on percentages
-  const questionCounts = {
-    easy: Math.round((difficultyDistribution.easy / 100) * totalQuestions),
-    medium: Math.round((difficultyDistribution.medium / 100) * totalQuestions),
-    hard: Math.round((difficultyDistribution.hard / 100) * totalQuestions),
-  };
-
-  // Adjust one difficulty when another changes to maintain 100% total
-  const handleDifficultyChange = (difficulty: 'easy' | 'medium' | 'hard', value: number) => {
-    const newDistribution = { ...difficultyDistribution };
-    const oldValue = newDistribution[difficulty];
-    const diff = value - oldValue;
-    newDistribution[difficulty] = value;
-
-    // Distribute the difference across other difficulties
-    if (difficulty !== 'easy' && difficulty !== 'medium') {
-      const remaining = 100 - value;
-      const ratio = newDistribution.easy / (newDistribution.easy + newDistribution.medium);
-      newDistribution.easy = Math.round(remaining * ratio);
-      newDistribution.medium = remaining - newDistribution.easy;
-    } else if (difficulty !== 'easy') {
-      const remaining = 100 - value - newDistribution.easy;
-      newDistribution.hard = Math.max(0, remaining);
-    } else {
-      const remaining = 100 - value - newDistribution.medium;
-      newDistribution.hard = Math.max(0, remaining);
-    }
-
-    setDifficultyDistribution(newDistribution);
-  };
 
   const onSubmit = async (values: FormValues) => {
     // Validate that all topics have question counts > 0
@@ -274,6 +406,48 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     // Clear any previous errors
     form.clearErrors('topicNames');
     
+    // Prepare topic-specific configuration
+    const topicConfigurations = values.topicNames.map(topic => {
+      const count = topicQuestionCounts[topic] || 0;
+      const distribution = topicDifficultyDistributions[topic] || difficultyDistribution;
+      
+      // Calculate question counts for this topic
+      const easyRaw = (distribution.easy / 100) * count;
+      const mediumRaw = (distribution.medium / 100) * count;
+      const hardRaw = (distribution.hard / 100) * count;
+      
+      let easy = Math.round(easyRaw);
+      let medium = Math.round(mediumRaw);
+      let hard = Math.round(hardRaw);
+      
+      // Adjust for rounding errors
+      const sum = easy + medium + hard;
+      const diff = count - sum;
+      if (diff !== 0) {
+        const fractions = [
+          { type: 'easy', value: easyRaw - easy },
+          { type: 'medium', value: mediumRaw - medium },
+          { type: 'hard', value: hardRaw - hard }
+        ];
+        fractions.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+        
+        if (fractions[0].type === 'easy') easy += diff;
+        else if (fractions[0].type === 'medium') medium += diff;
+        else hard += diff;
+      }
+      
+      return {
+        name: topic,
+        totalQuestions: count,
+        difficultyDistribution: distribution,
+        questionCounts: {
+          easy: Math.max(0, easy),
+          medium: Math.max(0, medium),
+          hard: Math.max(0, hard)
+        }
+      };
+    });
+    
     const payload = {
       domainName: values.domainName,
       topicNames: values.topicNames,
@@ -284,9 +458,8 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       focusAreas: values.focusAreas || '',
       bloomsLevel: values.bloomsLevel,
       questionStyle: values.questionStyle,
-      difficultyDistribution,
-      questionCounts,
       topics: topicQuestionCounts,
+      topicConfigurations, // Per-topic difficulty configuration
       levelId: null,
     };
     
@@ -325,6 +498,8 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       questionStyle: 'mixed',
     });
     setTopicQuestionCounts({});
+    setTopicDifficultyDistributions({});
+    setExpandedTopics(new Set());
     setDifficultyDistribution({ easy: 10, medium: 40, hard: 50 });
     onClose();
   };
@@ -366,7 +541,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Domain & Topics</h3>
               <Badge variant="outline" className="text-xs text-muted-foreground border-border/60">
-                Step 1 of 3
+                Step 1 of 2
               </Badge>
             </div>
             
@@ -456,7 +631,13 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
               {watchedTopics.length > 0 && (
                 <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <div className="flex items-center justify-between px-1">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Selected Topics</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Selected Topics</p>
+                      <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
+                        <Settings2 className="h-3 w-3" />
+                        <span>Click to configure difficulty per topic</span>
+                      </div>
+                    </div>
                     <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border transition-all ${
                       totalQuestions > 50 
                         ? 'bg-destructive/10 border-destructive/30 ring-1 ring-destructive/20' 
@@ -473,51 +654,160 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                       )}
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {watchedTopics.map((topic, index) => (
-                      <div 
-                        key={topic} 
-                        className="group relative flex items-center justify-between gap-3 px-3.5 py-3 border border-border/40 hover:border-primary/30 hover:shadow-sm bg-card hover:bg-primary/[0.02] rounded-lg transition-all duration-200 animate-in fade-in zoom-in-95"
-                        style={{ animationDelay: `${index * 40}ms` }}
-                      >
-                        <span className="text-xs font-medium text-foreground/70 leading-snug line-clamp-1 flex-1 pr-2">{topic}</span>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Input
-                            type="number"
-                            min={1}
-                            max={50}
-                            value={topicQuestionCounts[topic] || ''}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              const numValue = value === '' ? 0 : parseInt(value);
-                              handleTopicQuestionChange(topic, numValue);
-                            }}
-                            onBlur={(e) => {
-                              // Set minimum of 1 if field is empty or 0 on blur
-                              const value = parseInt(e.target.value);
-                              if (!value || value === 0) {
-                                handleTopicQuestionChange(topic, 1);
-                              }
-                            }}
-                            placeholder="1"
-                            className={`h-7 w-12 px-1.5 text-xs text-center border rounded-md font-semibold tabular-nums transition-all duration-200 ${
-                              !topicQuestionCounts[topic] || topicQuestionCounts[topic] === 0
-                                ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10 focus:bg-destructive/10'
-                                : 'border-0 bg-muted/40 hover:bg-muted/60 focus:bg-muted/80'
-                            }`}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() => handleTopicRemove(topic)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
+                  <div className="space-y-3">
+                    {watchedTopics.map((topic, index) => {
+                      const isExpanded = expandedTopics.has(topic);
+                      const topicDist = getTopicDifficulty(topic);
+                      const topicCounts = getTopicQuestionCounts(topic);
+                      
+                      return (
+                        <div 
+                          key={topic} 
+                          className="border border-border/40 hover:border-primary/30 bg-card rounded-lg transition-all duration-200 animate-in fade-in zoom-in-95 overflow-hidden"
+                          style={{ animationDelay: `${index * 40}ms` }}
+                        >
+                          {/* Topic Header */}
+                          <div className="group flex items-center justify-between gap-3 px-3.5 py-3 hover:bg-primary/[0.02]">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <button
+                                type="button"
+                                onClick={() => toggleTopicExpansion(topic)}
+                                className="shrink-0 p-1 hover:bg-primary/10 rounded transition-colors"
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown className="h-3.5 w-3.5 text-primary" />
+                                ) : (
+                                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                                )}
+                              </button>
+                              <span className="text-xs font-medium text-foreground/70 leading-snug truncate flex-1">
+                                {topic}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <Input
+                                type="number"
+                                min={1}
+                                max={50}
+                                value={topicQuestionCounts[topic] || ''}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  const numValue = value === '' ? 0 : parseInt(value);
+                                  handleTopicQuestionChange(topic, numValue);
+                                }}
+                                onBlur={(e) => {
+                                  const value = parseInt(e.target.value);
+                                  if (!value || value === 0) {
+                                    handleTopicQuestionChange(topic, 1);
+                                  }
+                                }}
+                                placeholder="1"
+                                className={`h-7 w-12 px-1.5 text-xs text-center border rounded-md font-semibold tabular-nums transition-all duration-200 ${
+                                  !topicQuestionCounts[topic] || topicQuestionCounts[topic] === 0
+                                    ? 'border-destructive/40 bg-destructive/5 hover:bg-destructive/10 focus:bg-destructive/10'
+                                    : 'border-0 bg-muted/40 hover:bg-muted/60 focus:bg-muted/80'
+                                }`}
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleTopicExpansion(topic)}
+                                className="h-6 w-6 p-0 rounded-md opacity-60 group-hover:opacity-100 transition-opacity hover:bg-primary/10"
+                                title="Configure difficulty"
+                              >
+                                <Settings2 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 rounded-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => handleTopicRemove(topic)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Expanded Difficulty Configuration */}
+                          {isExpanded && (
+                            <div className="px-4 pb-4 pt-2 bg-muted/20 border-t border-border/30 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
+                                <Settings2 className="h-3 w-3" />
+                                <span>Difficulty distribution for this topic</span>
+                              </div>
+                              
+                              {/* Easy */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between px-1">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-success/80"></div>
+                                    <span className="text-xs font-medium">Easy</span>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[10px] text-muted-foreground font-medium w-8 text-right">{topicDist.easy}%</span>
+                                    <span className="text-sm font-semibold text-success w-6 text-right">{topicCounts.easy}</span>
+                                  </div>
+                                </div>
+                                <Slider
+                                  value={[topicDist.easy]}
+                                  onValueChange={([value]) => handleTopicDifficultyChange(topic, 'easy', value)}
+                                  min={0}
+                                  max={100}
+                                  step={5}
+                                  className="[&_[role=slider]]:bg-success [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow"
+                                />
+                              </div>
+                              
+                              {/* Medium */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between px-1">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-warning/80"></div>
+                                    <span className="text-xs font-medium">Medium</span>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[10px] text-muted-foreground font-medium w-8 text-right">{topicDist.medium}%</span>
+                                    <span className="text-sm font-semibold text-warning w-6 text-right">{topicCounts.medium}</span>
+                                  </div>
+                                </div>
+                                <Slider
+                                  value={[topicDist.medium]}
+                                  onValueChange={([value]) => handleTopicDifficultyChange(topic, 'medium', value)}
+                                  min={0}
+                                  max={100}
+                                  step={5}
+                                  className="[&_[role=slider]]:bg-warning [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow"
+                                />
+                              </div>
+                              
+                              {/* Hard */}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between px-1">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-destructive/80"></div>
+                                    <span className="text-xs font-medium">Hard</span>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[10px] text-muted-foreground font-medium w-8 text-right">{topicDist.hard}%</span>
+                                    <span className="text-sm font-semibold text-destructive w-6 text-right">{topicCounts.hard}</span>
+                                  </div>
+                                </div>
+                                <Slider
+                                  value={[topicDist.hard]}
+                                  onValueChange={([value]) => handleTopicDifficultyChange(topic, 'hard', value)}
+                                  min={0}
+                                  max={100}
+                                  step={5}
+                                  className="[&_[role=slider]]:bg-destructive [&_[role=slider]]:border-0 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:shadow"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -545,86 +835,6 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
             </div>
           </div>
 
-          {/* Difficulty Distribution */}
-          {totalQuestions > 0 && (
-            <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/40 transition-all hover:shadow-medium animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="text-lg font-semibold flex">Difficulty Distribution</h3>
-                  <p className="text-xs text-muted-foreground mt-1">AI will adjust complexity for adaptive learning</p>
-                </div>
-                <Badge variant="outline" className="text-xs text-muted-foreground border-border/60">
-                  Step 2 of 3
-                </Badge>
-              </div>
-
-              <div className="space-y-8">
-                <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-300" style={{ animationDelay: '0ms' }}>
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-success/80 animate-pulse" style={{ animationDuration: '3s' }}></div>
-                      <span className="text-sm font-medium">Easy</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs text-muted-foreground font-medium w-12 text-right">{difficultyDistribution.easy}%</span>
-                      <span className="text-base font-semibold text-success w-10 text-right transition-all duration-300">{questionCounts.easy}</span>
-                    </div>
-                  </div>
-                  <Slider
-                    value={[difficultyDistribution.easy]}
-                    onValueChange={([value]) => handleDifficultyChange('easy', value)}
-                    min={0}
-                    max={100}
-                    step={5}
-                    className="[&_[role=slider]]:bg-success [&_[role=slider]]:border-0 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_[role=slider]]:transition-all [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:hover:shadow-lg"
-                  />
-                </div>
-
-                <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-300" style={{ animationDelay: '100ms' }}>
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-warning/80 animate-pulse" style={{ animationDuration: '3s', animationDelay: '1s' }}></div>
-                      <span className="text-sm font-medium">Medium</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs text-muted-foreground font-medium w-12 text-right">{difficultyDistribution.medium}%</span>
-                      <span className="text-base font-semibold text-warning w-10 text-right transition-all duration-300">{questionCounts.medium}</span>
-                    </div>
-                  </div>
-                  <Slider
-                    value={[difficultyDistribution.medium]}
-                    onValueChange={([value]) => handleDifficultyChange('medium', value)}
-                    min={0}
-                    max={100}
-                    step={5}
-                    className="[&_[role=slider]]:bg-warning [&_[role=slider]]:border-0 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_[role=slider]]:transition-all [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:hover:shadow-lg"
-                  />
-                </div>
-
-                <div className="space-y-3 animate-in fade-in slide-in-from-left-2 duration-300" style={{ animationDelay: '200ms' }}>
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 rounded-full bg-destructive/80 animate-pulse" style={{ animationDuration: '3s', animationDelay: '2s' }}></div>
-                      <span className="text-sm font-medium">Hard</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs text-muted-foreground font-medium w-12 text-right">{difficultyDistribution.hard}%</span>
-                      <span className="text-base font-semibold text-destructive w-10 text-right transition-all duration-300">{questionCounts.hard}</span>
-                    </div>
-                  </div>
-                  <Slider
-                    value={[difficultyDistribution.hard]}
-                    onValueChange={([value]) => handleDifficultyChange('hard', value)}
-                    min={0}
-                    max={100}
-                    step={5}
-                    className="[&_[role=slider]]:bg-destructive [&_[role=slider]]:border-0 [&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:shadow-md [&_[role=slider]]:transition-all [&_[role=slider]]:hover:scale-110 [&_[role=slider]]:hover:shadow-lg"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Learning Configuration */}
           <div className="bg-card rounded-2xl p-8 shadow-soft border border-border/40 space-y-8 transition-all hover:shadow-medium animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between">
@@ -633,7 +843,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                 <p className="text-xs text-muted-foreground mt-1">Fine-tune the AI generation parameters</p>
               </div>
               <Badge variant="outline" className="text-xs text-muted-foreground border-border/60">
-                Step 3 of 3
+                Step 2 of 2
               </Badge>
             </div>
             

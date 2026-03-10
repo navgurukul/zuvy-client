@@ -11,12 +11,12 @@ interface GenerateMcqPayload {
   focusAreas?: string;
   bloomsLevel: string;
   questionStyle: string;
-  difficultyDistribution: {
+  difficultyDistribution?: {
     easy: number;
     medium: number;
     hard: number;
   };
-  questionCounts: {
+  questionCounts?: {
     easy: number;
     medium: number;
     hard: number;
@@ -24,6 +24,20 @@ interface GenerateMcqPayload {
   topics: {
     [key: string]: number;
   };
+  topicConfigurations?: Array<{
+    name: string;
+    totalQuestions: number;
+    difficultyDistribution: {
+      easy: number;
+      medium: number;
+      hard: number;
+    };
+    questionCounts: {
+      easy: number;
+      medium: number;
+      hard: number;
+    };
+  }>;
   levelId: null;
 }
 
