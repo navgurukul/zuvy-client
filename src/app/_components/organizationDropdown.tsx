@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useOrganizationsByUser } from '@/hooks/useOrganizationsByUser';
 import { useOrganizations, Organization } from '@/hooks/useOrganizations';
 import { getUser } from '@/store/store';
+import useSwitchOrg from '@/hooks/useSwitchOrg';
 
 export default function OrganizationDropdown({ orgId }: { orgId: string }) {
     const pathname = usePathname();
@@ -39,18 +40,36 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
 
     useEffect(() => {
         const found = organizations.find(org => org.id === parseInt(orgId));
-        if(!inOrg){
+        if (!inOrg) {
             setSelected(null);
-        }else if (found) {
+        } else if (found) {
             setSelected(found);
-        } 
+        }
     }, [loading, organizations, orgId]);
+
+    const { switchOrg, isSwitching } = useSwitchOrg();
 
     const handleSelect = (org: Organization) => {
         setSelected(org);
         setIsOpen(false);
         setSearchTerm('');
     };
+
+    const switchOrganization = async (org: Organization) => {
+        console.log('Switching to org:', org);
+        const refresh_token = localStorage.getItem('refresh_token');
+        if (!refresh_token) return;
+
+        const result = await switchOrg({
+            orgId: org.id,
+            refresh_token: refresh_token
+        });
+
+        if (result.success) {
+            setIsOpen(false);
+            window.location.reload();
+        }
+    }
 
     const getInitials = (org: Organization) => {
         const name = org.title || org.code || '';
@@ -152,26 +171,53 @@ export default function OrganizationDropdown({ orgId }: { orgId: string }) {
                                     organizations
                                         .map(org => (
                                             <DropdownMenuItem key={org.id} className="px-0 py-0 focus:bg-gray-50 cursor-pointer">
-                                                <Link
-                                                    key={org.id}
-                                                    href={`/${role}/organizations/${org.id}/courses`}
-                                                    onClick={() => handleSelect(org)}
-                                                    className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
-                                                            {/* {getInitials(org)} */}
-                                                            {org.code}
+                                                {
+                                                    isSuperAdmin ? (
+                                                        <Link
+                                                            key={org.id}
+                                                            href={`/${role}/organizations/${org.id}/courses`}
+                                                            onClick={() => handleSelect(org)}
+                                                            className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                                                    {/* {getInitials(org)} */}
+                                                                    {org.code}
+                                                                </div>
+                                                                <span className={`text-sm ${selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
+                                                                    {org.title}
+                                                                </span>
+                                                            </div>
+                                                            {selected?.id === org.id && (
+                                                                <Check size={16} className="text-green-600 ml-2" />
+                                                            )}
+                                                        </Link>
+                                                    ) : (
+                                                        <div
+                                                            key={org.id}
+                                                            // href={`/${role}/organizations/${org.id}/courses`}
+                                                            // onClick={() => handleSelect(org)}
+                                                            onClick={() => switchOrganization(org)}
+                                                            className={`w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 ${selected?.id === org.id ? 'bg-green-50' : ''
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                                                    {/* {getInitials(org)} */}
+                                                                    {org.code}
+                                                                </div>
+                                                                <span className={`text-sm ${selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
+                                                                    {org.title}
+                                                                </span>
+                                                            </div>
+                                                            {selected?.id === org.id && (
+                                                                <Check size={16} className="text-green-600 ml-2" />
+                                                            )}
                                                         </div>
-                                                        <span className={`text-sm ${selected?.id === org.id ? 'text-gray-900 font-medium' : 'text-gray-700'}`}>
-                                                            {org.title}
-                                                        </span>
-                                                    </div>
-                                                    {selected?.id === org.id && (
-                                                        <Check size={16} className="text-green-600 ml-2" />
-                                                    )}
-                                                </Link>
+                                                    )
+                                                }
+
                                             </DropdownMenuItem>
                                         ))
                                 )}

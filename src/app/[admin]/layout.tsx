@@ -1,7 +1,7 @@
 'use client'
 
 import MaxWidthWrapper from '@/components/MaxWidthWrapper'
-import { usePathname, useRouter} from 'next/navigation'
+import { usePathname, useRouter, useParams} from 'next/navigation'
 import UnauthorizedUser from '@/components/UnauthorizedUser'
 import { getUser } from '@/store/store'
 // import { Spinner } from '@/components/ui/spinner'
@@ -18,6 +18,7 @@ export default function RootLayout({
 }) {
     const { refetchAllCourses } = useAllCourses(true)
     const pathname = usePathname()
+    const { organizationId } = useParams()
     const { roles, loading } = useRoles()
     const { user } = getUser()
     const router = useRouter()
@@ -42,6 +43,11 @@ export default function RootLayout({
                 reset={() => console.error('URL Not Found')}
             />
         )
+    }
+    
+    // 🏢 Organization validation check
+    if (organizationId && userRole !== 'super_admin' && user.orgId !== Number(organizationId)) {
+        return <UnauthorizedUser userRole={userRole} roleFromPath={roleFromPath} />
     }
 
     if(roleFromPath === userRole) {

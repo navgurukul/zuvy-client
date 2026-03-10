@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Karla } from 'next/font/google'
 // import Navbar from "@/app/_components/Navbar";
-import { SessionExpiredModal } from '@/components/SessionExpiredModal'
 
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
