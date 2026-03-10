@@ -4,7 +4,6 @@ import { use, useState } from 'react';
 interface GenerateMcqPayload {
   domainName: string;
   topicNames: string[];
-  topicDescription?: string;
   numberOfQuestions: number;
   learningObjectives: string;
   targetAudience?: string;
@@ -26,6 +25,7 @@ interface GenerateMcqPayload {
   };
   topicConfigurations?: Array<{
     name: string;
+    description: string;
     totalQuestions: number;
     difficultyDistribution: {
       easy: number;

@@ -31,7 +31,6 @@ interface CreateProblemFormProps {
 const formSchema = z.object({
   domainName: z.string().min(1, 'Domain is required'),
   topicNames: z.array(z.string()).min(1, 'At least one topic is required'),
-  topicDescription: z.string().optional(),
   learningObjectives: z.string().min(10, 'Learning objectives are required (minimum 10 characters)'),
   targetAudience: z.string().optional(),
   focusAreas: z.string().optional(),
@@ -134,6 +133,9 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
   // State to track which topics have expanded difficulty configuration
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
   
+  // State to track description for each topic
+  const [topicDescriptions, setTopicDescriptions] = useState<{ [key: string]: string }>({});
+  
   // Initialize form with react-hook-form and zod
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -141,7 +143,6 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     defaultValues: {
       domainName: '',
       topicNames: [],
-      topicDescription: '',
       learningObjectives: '',
       targetAudience: '',
       focusAreas: '',
@@ -343,6 +344,13 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       return newDistributions;
     });
     
+    // Remove from descriptions
+    setTopicDescriptions(prev => {
+      const newDescriptions = { ...prev };
+      delete newDescriptions[topic];
+      return newDescriptions;
+    });
+    
     // Update form with validation
     form.setValue('topicNames', newTopics, { shouldValidate: true, shouldDirty: true });
   };
@@ -438,6 +446,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       
       return {
         name: topic,
+        description: topicDescriptions[topic] || '',
         totalQuestions: count,
         difficultyDistribution: distribution,
         questionCounts: {
@@ -451,7 +460,6 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     const payload = {
       domainName: values.domainName,
       topicNames: values.topicNames,
-      topicDescription: values.topicDescription || '',
       numberOfQuestions: totalQuestions,
       learningObjectives: values.learningObjectives,
       targetAudience: values.targetAudience || '',
@@ -459,7 +467,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       bloomsLevel: values.bloomsLevel,
       questionStyle: values.questionStyle,
       topics: topicQuestionCounts,
-      topicConfigurations, // Per-topic difficulty configuration
+      topicConfigurations, // Per-topic difficulty and description configuration
       levelId: null,
     };
     
@@ -490,7 +498,6 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     form.reset({
       domainName: '',
       topicNames: [],
-      topicDescription: '',
       learningObjectives: '',
       targetAudience: '',
       focusAreas: '',
@@ -499,6 +506,7 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
     });
     setTopicQuestionCounts({});
     setTopicDifficultyDistributions({});
+    setTopicDescriptions({});
     setExpandedTopics(new Set());
     setDifficultyDistribution({ easy: 10, medium: 40, hard: 50 });
     onClose();
@@ -735,7 +743,28 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                             <div className="px-4 pb-4 pt-2 bg-muted/20 border-t border-border/30 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
                                 <Settings2 className="h-3 w-3" />
-                                <span>Difficulty distribution for this topic</span>
+                                <span>Configuration for this topic</span>
+                              </div>
+                              
+                              {/* Topic Description */}
+                              <div className="space-y-2">
+                                <label className="text-xs font-medium text-foreground/70">Description</label>
+                                <Textarea
+                                  value={topicDescriptions[topic] || ''}
+                                  onChange={(e) => {
+                                    setTopicDescriptions(prev => ({
+                                      ...prev,
+                                      [topic]: e.target.value
+                                    }));
+                                  }}
+                                  placeholder="Provide context about this topic..."
+                                  className="min-h-[70px] text-xs resize-none border-0 bg-background/50 hover:bg-background/80 focus:bg-background/80 transition-all duration-200 rounded-lg"
+                                />
+                              </div>
+                              
+                              {/* Difficulty Distribution */}
+                              <div className="pt-2">
+                                <p className="text-xs font-medium text-foreground/70 mb-3">Difficulty Distribution</p>
                               </div>
                               
                               {/* Easy */}
@@ -811,27 +840,6 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
                   </div>
                 </div>
               )}
-
-              <FormField
-                control={form.control}
-                name="topicDescription"
-                render={({ field }) => (
-                  <FormItem className="pt-2">
-                    <FormLabel className="text-sm font-medium text-foreground/80 mb-2 flex">Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Provide additional context about these topics..."
-                        className="min-h-[90px] resize-none border-0 bg-muted/50 hover:bg-muted/80 focus:bg-muted/80 transition-all duration-200 rounded-xl"
-                      />
-                    </FormControl>
-                    <FormDescription className="text-xs text-muted-foreground mt-2">
-                      Optional
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
           </div>
 
