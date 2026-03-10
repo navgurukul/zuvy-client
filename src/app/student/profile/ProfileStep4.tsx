@@ -169,7 +169,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
             {/* Target Roles */}
             <div className="space-y-4">
               <div>
-                <Label className="font-medium text-sm tracking-wide">Target roles <span className="text-destructive">*</span></Label>
+                <Label className="font-medium text-sm tracking-wide text-left block">Target roles <span className="text-destructive">*</span></Label>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {CAREER_ROLES.map((role) => (
@@ -262,7 +262,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
           <div className="grid md:grid-cols-2 gap-6">
             {/* Internship Stipend */}
             <div className="space-y-2">
-              <Label className="font-medium text-sm tracking-wide">Internship stipend</Label>
+              <Label className="font-medium text-sm tracking-wide text-left block">Internship stipend</Label>
               <Select value={internshipSalary} onValueChange={setInternshipSalary}>
                 <SelectTrigger className="bg-muted/30">
                   <SelectValue placeholder="Select Range" />
@@ -279,7 +279,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
 
             {/* Full-Time CTC */}
             <div className="space-y-2">
-              <Label className="font-medium text-sm tracking-wide">Full-time CTC</Label>
+              <Label className="font-medium text-sm tracking-wide text-left block">Full-time CTC</Label>
               <Select value={fullTimeSalary} onValueChange={setFullTimeSalary}>
                 <SelectTrigger className="bg-muted/30">
                   <SelectValue placeholder="Select Range" />
@@ -307,7 +307,7 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
           <div className="space-y-6">
             {/* Preferred Contact Methods */}
             <div className="space-y-4">
-              <Label className="font-medium text-sm tracking-wide">Preferred contact methods</Label>
+              <Label className="font-medium text-sm tracking-wide text-left block">Preferred contact methods</Label>
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
                   <Checkbox
@@ -345,8 +345,8 @@ export const ProfileStep4Component: React.FC<ProfileStep4Props> = ({
             {/* Profile Visibility */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <Label className="font-medium text-sm tracking-wide">Profile visibility</Label>
+                <div className="text-left">
+                  <Label className="font-medium text-sm tracking-wide text-left block">Profile visibility</Label>
                   <p className="text-sm text-muted-foreground mt-1">
                     Allow hiring partners to view your profile and contact you for jobs.
                   </p>

@@ -317,7 +317,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
               <div className="grid gap-4 md:grid-cols-2">
             {/* Full Name */}
             <div className="space-y-2">
-              <Label htmlFor="fullName" className="font-medium">
+              <Label htmlFor="fullName" className="font-medium text-left block">
                 Full Name <span className="text-destructive">*</span>
               </Label>
               <div className="relative">
@@ -341,7 +341,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
             {/* Phone Number */}
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber" className="font-medium">
+              <Label htmlFor="phoneNumber" className="font-medium text-left block">
                 Phone Number <span className="text-destructive">*</span>
               </Label>
               <div className="flex">
@@ -375,7 +375,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
           {/* Row 2: Email Address - Full Width */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="font-medium">
+            <Label htmlFor="email" className="font-medium text-left block">
               Email Address <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
@@ -394,7 +394,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
           {/* Row 3: LinkedIn Profile - Full Width */}
           <div className="space-y-2">
-            <Label htmlFor="linkedin" className="font-medium">
+            <Label htmlFor="linkedin" className="font-medium text-left block">
               LinkedIn Profile <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
@@ -429,7 +429,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
             </div>
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="college" className="font-medium">
+                <Label htmlFor="college" className="font-medium text-left block">
                   College Name <span className="text-destructive">*</span>
                 </Label>
                 <div className="relative" ref={collegeDropdownRef}>
@@ -496,7 +496,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
               <div className="grid gap-4 md:grid-cols-2">
                 {/* Degree */}
                 <div className="space-y-2">
-                  <Label htmlFor="degree" className="font-medium">
+                  <Label htmlFor="degree" className="font-medium text-left block">
                     Degree
                   </Label>
                   <Select value={formData.degree || ''} onValueChange={(value) => handleSelectChange('degree', value)}>
@@ -515,7 +515,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
                 {/* Branch */}
                 <div className="space-y-2">
-                  <Label htmlFor="branch" className="font-medium">
+                  <Label htmlFor="branch" className="font-medium text-left block">
                     Branch <span className="text-destructive">*</span>
                   </Label>
                   <Select value={formData.branch || ''} onValueChange={(value) => handleSelectChange('branch', value)}>
@@ -549,7 +549,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
               <div className="grid gap-4 md:grid-cols-2">
                 {/* Year of Study */}
                 <div className="space-y-2">
-                  <Label className="font-medium">
+                  <Label className="font-medium text-left block">
                     Year of Study <span className="text-destructive">*</span>
                   </Label>
                   <div className="grid grid-cols-4 gap-2">
@@ -572,7 +572,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
                 {/* Graduation Date */}
                 <div className="space-y-2">
-                  <Label className="font-medium">
+                  <Label className="font-medium text-left block">
                     Graduation Date <span className="text-destructive">*</span>
                   </Label>
                   <div className="grid grid-cols-2 gap-4">
@@ -635,7 +635,7 @@ export const ProfileStep1Component: React.FC<ProfileStep1Props> = ({
 
               {/* Current Status */}
               <div className="space-y-2">
-                <Label className="font-medium">
+                <Label className="font-medium text-left block">
                   Current Status <span className="text-destructive">*</span>
                 </Label>
                 <div className="grid grid-cols-3 gap-2">

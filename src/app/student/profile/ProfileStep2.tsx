@@ -107,7 +107,7 @@ export const ProjectModal: React.FC<{
         <div className="space-y-6 overflow-y-auto flex-1 px-6">
           {/* Project Title */}
           <div className="space-y-2">
-            <Label htmlFor="title" className="font-medium">
+            <Label htmlFor="title" className="font-medium text-left block">
               Project Title <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -129,7 +129,7 @@ export const ProjectModal: React.FC<{
 
           {/* One-line Description */}
           <div className="space-y-2">
-            <Label htmlFor="oneLineDescription" className="font-medium">
+            <Label htmlFor="oneLineDescription" className="font-medium text-left block">
               One-line Description <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -152,7 +152,7 @@ export const ProjectModal: React.FC<{
 
           {/* Tech Stack */}
           <div className="space-y-2">
-            <Label className="font-medium">
+            <Label className="font-medium text-left block">
               Tech Stack (Multi-select)
             </Label>
             <Select>
@@ -199,7 +199,7 @@ export const ProjectModal: React.FC<{
 
           {/* Project Type */}
           <div className="space-y-2">
-            <Label className="font-medium">
+            <Label className="font-medium text-left block">
               Project Type
             </Label>
             <div className="grid grid-cols-2 gap-3">
@@ -249,7 +249,7 @@ export const ProjectModal: React.FC<{
           {/* Start Date and End Date */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="startDate" className="font-medium">
+              <Label htmlFor="startDate" className="font-medium text-left block">
                 Start Date
               </Label>
               <div className="relative">
@@ -278,7 +278,7 @@ export const ProjectModal: React.FC<{
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate" className="font-medium">
+              <Label htmlFor="endDate" className="font-medium text-left block">
                 End Date
               </Label>
               <div className="relative">
@@ -311,7 +311,7 @@ export const ProjectModal: React.FC<{
           {/* GitHub URL and Demo URL */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="githubUrl" className="font-medium">
+              <Label htmlFor="githubUrl" className="font-medium text-left block">
                 GitHub URL
               </Label>
               <div className="relative">
@@ -334,7 +334,7 @@ export const ProjectModal: React.FC<{
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="demoUrl" className="font-medium">
+              <Label htmlFor="demoUrl" className="font-medium text-left block">
                 Demo URL
               </Label>
               <div className="relative">
@@ -360,7 +360,7 @@ export const ProjectModal: React.FC<{
 
           {/* Detailed Description */}
           <div className="space-y-2">
-            <Label htmlFor="detailedDescription" className="font-medium">
+            <Label htmlFor="detailedDescription" className="font-medium text-left block">
               Detailed Description (Optional)
             </Label>
             <Textarea

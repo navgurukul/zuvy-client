@@ -187,12 +187,12 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
           <div className="space-y-6">
               {/* College Marks Section */}
               <div className="space-y-4">
-                <Label className="font-medium">College Marks</Label>
+                <Label className="font-medium text-left block">College Marks</Label>
                 
                 {/* Stream and Score in same row */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="stream" className="font-medium">Stream</Label>
+                    <Label htmlFor="stream" className="font-medium text-left block">Stream</Label>
                     <Input
                       id="stream"
                       value={initialData?.stream || ''}
@@ -203,7 +203,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="collegeScore" className="font-medium">Score</Label>
+                    <Label htmlFor="collegeScore" className="font-medium text-left block">Score</Label>
                     <div className="flex gap-2">
                       <Input
                         id="collegeScore"
@@ -272,12 +272,12 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
 
               {/* Class 12 Section */}
               <div className="space-y-4">
-                <Label className="font-medium">Class 12</Label>
+                <Label className="font-medium text-left block">Class 12</Label>
                 
                 {/* Board and Score in same row */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="class12Board" className="font-medium">Board</Label>
+                    <Label htmlFor="class12Board" className="font-medium text-left block">Board</Label>
                     <Select
                       value={academicData.class12Board || ''}
                       onValueChange={(value) =>
@@ -298,7 +298,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="class12Score" className="font-medium">Score</Label>
+                    <Label htmlFor="class12Score" className="font-medium text-left block">Score</Label>
                     <div className="flex gap-2">
                       <Input
                         id="class12Score"
@@ -361,12 +361,12 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
 
               {/* Class 10 Section */}
               <div className="space-y-4">
-                <Label className="font-medium">Class 10</Label>
+                <Label className="font-medium text-left block">Class 10</Label>
                 
                 {/* Board and Score in same row */}
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="class10Board" className="font-medium">Board</Label>
+                    <Label htmlFor="class10Board" className="font-medium text-left block">Board</Label>
                     <Select
                       value={academicData.class10Board || ''}
                       onValueChange={(value) =>
@@ -387,7 +387,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="class10Marks" className="font-medium">Score</Label>
+                    <Label htmlFor="class10Marks" className="font-medium text-left block">Score</Label>
                     <div className="flex gap-2">
                       <Input
                         id="class10Marks"
@@ -461,7 +461,7 @@ export const ProfileStep3Component: React.FC<ProfileStep3Props> = ({
           <div className="space-y-4">
               {/* Have Internship Toggle */}
               <div className="space-y-4">
-                <Label className="font-medium">Have you done any internships or jobs?</Label>
+                <Label className="font-medium text-left block">Have you done any internships or jobs?</Label>
                 <div className="grid grid-cols-2 gap-4">
                   <Button
                     type="button"

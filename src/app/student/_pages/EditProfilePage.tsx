@@ -1784,7 +1784,7 @@ export const EditProfilePage: React.FC = () => {
                     {/* Target Roles */}
                     <div className="space-y-4">
                       <div>
-                        <Label className="font-medium text-sm tracking-wide">Target roles <span className="text-destructive">*</span></Label>
+                        <Label className="font-medium text-sm tracking-wide text-left block">Target roles <span className="text-destructive">*</span></Label>
                       </div>
                       <div className="grid grid-cols-3 gap-3">
                         {CAREER_ROLES.map((role) => (
@@ -1867,7 +1867,7 @@ export const EditProfilePage: React.FC = () => {
                       <div className="grid md:grid-cols-2 gap-6">
                         {/* Internship Stipend */}
                         <div className="space-y-2">
-                          <Label className="font-medium text-sm tracking-wide">Internship stipend</Label>
+                          <Label className="font-medium text-sm tracking-wide text-left block">Internship stipend</Label>
                           <Select value={internshipSalary} onValueChange={setInternshipSalary}>
                             <SelectTrigger className="bg-muted/30">
                               <SelectValue placeholder="Select Range" />
@@ -1884,7 +1884,7 @@ export const EditProfilePage: React.FC = () => {
 
                         {/* Full-Time CTC */}
                         <div className="space-y-2">
-                          <Label className="font-medium text-sm tracking-wide">Full-time CTC</Label>
+                          <Label className="font-medium text-sm tracking-wide text-left block">Full-time CTC</Label>
                           <Select value={fullTimeSalary} onValueChange={setFullTimeSalary}>
                             <SelectTrigger className="bg-muted/30">
                               <SelectValue placeholder="Select Range" />
@@ -1903,7 +1903,7 @@ export const EditProfilePage: React.FC = () => {
 
                     {/* Communication Preferences */}
                     <div className="space-y-4">
-                      <Label className="font-medium text-sm tracking-wide">Preferred contact methods</Label>
+                      <Label className="font-medium text-sm tracking-wide text-left block">Preferred contact methods</Label>
                       <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
                           <Checkbox
