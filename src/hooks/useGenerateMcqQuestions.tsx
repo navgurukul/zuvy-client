@@ -24,8 +24,8 @@ interface GenerateMcqPayload {
     [key: string]: number;
   };
   topicConfigurations?: Array<{
-    name: string;
-    description: string;
+    topicName: string;
+    topicDescription: string;
     totalQuestions: number;
     difficultyDistribution: {
       easy: number;

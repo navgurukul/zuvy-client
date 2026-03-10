@@ -445,8 +445,8 @@ export function CreateProblemForm({ onClose, onSaveQuestions }: CreateProblemFor
       }
       
       return {
-        name: topic,
-        description: topicDescriptions[topic] || '',
+        topicName: topic,
+        topicDescription: topicDescriptions[topic] || '',
         totalQuestions: count,
         difficultyDistribution: distribution,
         questionCounts: {
